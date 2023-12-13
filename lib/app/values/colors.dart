@@ -47,6 +47,7 @@ class AppColors {
 
   //Pink
   static const Color pink300 = Color(0xFFDC5687);
+  static const Color pink600 = Color(0xFFAB1F8C);
 
   //Grey
   static const Color grey50 = Color(0xFFF2F1F1);

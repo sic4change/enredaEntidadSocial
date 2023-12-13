@@ -64,10 +64,27 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                       ),
                       // TODO: Gamification Bar
                       Slider(value: 0.5, onChanged: null),
+                      widget.user.photo != null && widget.user.photo!.isNotEmpty?
                       PrecacheAvatarCard(
-                        imageUrl: widget.user.photo?? ImagePath.USER_DEFAULT,
+                        imageUrl: widget.user.photo!,
                         height: 80,
                         width: 80,
+                      ):
+                      ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(60)),
+                        child: Container(
+                          height: 80,
+                          width: 80,
+                          color: AppColors.pink600,
+                          child: Center(child: Text(
+                            '${(widget.user.firstName??'-').substring(0, 1)} '
+                            '${(widget.user.lastName??'-').substring(0, 1)}',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.white,
+                            ),
+                          ),),
+                        ),
                       ),
                       Text(
                         '${widget.user.firstName!} ${widget.user.lastName!}',
