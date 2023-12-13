@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/my_cv_page.dart';
+import 'package:enreda_empresas/app/home/participants/participants_item_builder.dart';
 import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
 import 'package:enreda_empresas/app/home/participants/resources_participants.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
@@ -13,7 +14,6 @@ import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
-import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -88,16 +88,18 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
               stream: database.getParticipantsBySocialEntityStream(resourceIdList),
               builder: (context, snapshot) {
                 if(snapshot.hasData) {
-                  return ListItemBuilderGrid(
-                      snapshot: snapshot,
-                      fitSmallerLayout: false,
-                      itemBuilder: (context, user) {
-                        return ParticipantsListTile(user: user,
-                            onTap: () => setState(() {
-                              _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
-                            })
-                        );
-                      }
+                  return SingleChildScrollView(
+                    child: ParticipantsItemBuilder(
+                        snapshot: snapshot,
+                        fitSmallerLayout: false,
+                        itemBuilder: (context, user) {
+                          return ParticipantsListTile(user: user,
+                              onTap: () => setState(() {
+                                _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
+                              })
+                          );
+                        }
+                    ),
                   );
                 }
                 return const Center(child: CircularProgressIndicator());

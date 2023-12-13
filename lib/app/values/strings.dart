@@ -475,7 +475,7 @@ class StringConst {
   static const String PERSONAL_DATA = 'Datos personales';
   static const String ABOUT_ME = "Un poco más sobre mí...";
   static const String PROFILE = "Carrera";
-  static const String INVITE_RESOURCE = 'Invitar a un nuevo recurso';
+  static const String INVITE_RESOURCE = 'Invitar a un recurso';
   static const String CREATE_RESOURCE = 'Crear un recurso nuevo';
 
   // Companies
@@ -488,4 +488,9 @@ class StringConst {
 
   static const String LOREM_IMPSUM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Auctor neque, tortor amet, adipiscing felis nullam. Aliquet commodo est pretium vitae hendrerit fames vitae. Orci, feugiat consectetur aliquet sodales mus sodales a urna.\n\n'
       'Rhoncus id volutpat, diam adipiscing risus, enim cursus ac. Amet nunc nec eu diam. Tincidunt at vulputate arcu dis justo. Ut egestas ac rhoncus, sapien.';
+
+  // Participants
+  static const String GAMIFICATION = "Gamificación";
+  static const String GO_PROFILE = "Ver perfil";
+  static const String CALL = "Llamar";
 }
