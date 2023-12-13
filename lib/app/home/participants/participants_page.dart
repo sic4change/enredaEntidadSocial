@@ -9,6 +9,7 @@ import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.da
 import 'package:enreda_empresas/app/home/resources/list_item_builder_grid.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
+import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -79,27 +80,38 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         organizationUser = snapshot.data!;
         return StreamBuilder<List<Resource>>(
           stream: database.myResourcesStream(organizationUser.socialEntityId!),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
+          builder: (context, resourcesSnapshot) {
+            if (!resourcesSnapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
-            final resourceIdList = snapshot.data!.map((e) => e.resourceId).toList();
+            final resourceIdList = resourcesSnapshot.data!.map((e) => e.resourceId).toList();
             return StreamBuilder<List<UserEnreda>>(
               stream: database.getParticipantsBySocialEntityStream(resourceIdList),
-              builder: (context, snapshot) {
-                if(snapshot.hasData) {
-                  return SingleChildScrollView(
-                    child: ParticipantsItemBuilder(
-                        snapshot: snapshot,
-                        fitSmallerLayout: false,
-                        itemBuilder: (context, user) {
-                          return ParticipantsListTile(user: user,
-                              onTap: () => setState(() {
-                                _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
-                              })
-                          );
-                        }
-                    ),
+              builder: (context, userSnapshot) {
+                if(userSnapshot.hasData) {
+                  return StreamBuilder<List<GamificationFlag>>(
+                    stream: database.gamificationFlagsStream(),
+                    builder: (context, gamificationSnapshot) {
+                      if (gamificationSnapshot.hasData) {
+                        return SingleChildScrollView(
+                          child: ParticipantsItemBuilder(
+                              snapshot: userSnapshot,
+                              fitSmallerLayout: false,
+                              itemBuilder: (context, user) {
+                                return ParticipantsListTile(
+                                    user: user,
+                                    totalGamificationFlags: gamificationSnapshot.data!.length - 1,
+                                    onTap: () => setState(() {
+                                      _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
+                                    })
+                                );
+                              }
+                          ),
+                        );
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    }
                   );
                 }
                 return const Center(child: CircularProgressIndicator());

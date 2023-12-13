@@ -43,7 +43,7 @@ class AppColors {
   static const Color blueAlt = Color(0xFF5F7ED9);
 
   //Yellow
-  static const Color yellow = Color(0xFFFDE934);
+  static const Color yellow = Color(0xFFFFCB77);
 
   //Pink
   static const Color pink300 = Color(0xFFDC5687);

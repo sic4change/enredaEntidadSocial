@@ -10,6 +10,7 @@ import 'package:enreda_empresas/app/models/contact.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
+import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/socialEntityUser.dart';
@@ -80,6 +81,7 @@ abstract class Database {
      Future<void> addResource(Resource resource);
      Future<void> addResourceInvitation(ResourceInvitation resourceInvitation);
      Future<void> updateCertificationRequest(CertificationRequest certificationRequest, bool certified, bool referenced );
+     Stream<List<GamificationFlag>> gamificationFlagsStream();
 }
 
 class FirestoreDatabase implements Database {
@@ -528,6 +530,14 @@ class FirestoreDatabase implements Database {
     builder: (data, documentId) => Competency.fromMap(data, documentId),
     queryBuilder: (query) => query,
     sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
+
+  @override
+  Stream<List<GamificationFlag>> gamificationFlagsStream() => _service.collectionStream(
+    path: APIPath.gamificationFlags(),
+    queryBuilder: (query) => query.where('id', isNotEqualTo: null),
+    builder: (data, documentId) => GamificationFlag.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
 }

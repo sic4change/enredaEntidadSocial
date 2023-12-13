@@ -1,18 +1,21 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
-import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ParticipantsListTile extends StatefulWidget {
-  const ParticipantsListTile({Key? key, required this.user, this.onTap})
+  const ParticipantsListTile({
+    Key? key,
+    required this.user,
+    required this.totalGamificationFlags,
+    this.onTap})
       : super(key: key);
   final UserEnreda user;
+  final int totalGamificationFlags;
   final VoidCallback? onTap;
 
   @override
@@ -28,6 +31,7 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
+    final gamificationFlagsCount = widget.user.gamificationFlags.length;
 
     return Container(
         width: 240.0,
@@ -62,8 +66,21 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                           color: AppColors.seaBlue,
                         ),
                       ),
-                      // TODO: Gamification Bar
-                      Slider(value: 0.5, onChanged: null),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          disabledActiveTrackColor: AppColors.turquoise,
+                          disabledInactiveTrackColor: AppColors.lightTurquoise,
+                          trackShape: RoundedRectSliderTrackShape(),
+                          trackHeight: 6.0,
+                          disabledThumbColor: AppColors.yellow,
+                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
+                          overlayShape: RoundSliderOverlayShape(overlayRadius: 0.0),),
+                        child: Slider(
+                          value: gamificationFlagsCount / widget.totalGamificationFlags,
+                          onChanged: null,
+                        ),
+                      ),
+                      SpaceH8(),
                       widget.user.photo != null && widget.user.photo!.isNotEmpty?
                       PrecacheAvatarCard(
                         imageUrl: widget.user.photo!,
