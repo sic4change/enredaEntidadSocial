@@ -93,19 +93,22 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     stream: database.gamificationFlagsStream(),
                     builder: (context, gamificationSnapshot) {
                       if (gamificationSnapshot.hasData) {
-                        return SingleChildScrollView(
-                          child: ParticipantsItemBuilder(
-                              snapshot: userSnapshot,
-                              fitSmallerLayout: false,
-                              itemBuilder: (context, user) {
-                                return ParticipantsListTile(
-                                    user: user,
-                                    totalGamificationFlags: gamificationSnapshot.data!.length - 1,
-                                    onTap: () => setState(() {
-                                      _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
-                                    })
-                                );
-                              }
+                        return Align(
+                          alignment: Alignment.topCenter,
+                          child: SingleChildScrollView(
+                            child: ParticipantsItemBuilder(
+                                snapshot: userSnapshot,
+                                fitSmallerLayout: false,
+                                itemBuilder: (context, user) {
+                                  return ParticipantsListTile(
+                                      user: user,
+                                      totalGamificationFlags: gamificationSnapshot.data!.length - 1,
+                                      onTap: () => setState(() {
+                                        _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
+                                      })
+                                  );
+                                }
+                            ),
                           ),
                         );
                       } else {
