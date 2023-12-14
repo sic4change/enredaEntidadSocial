@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ParticipantsListTile extends StatefulWidget {
   const ParticipantsListTile({
@@ -150,48 +151,87 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
   }
 
   Widget _buildContactRow(TextTheme textTheme) {
+    bool hasPhone = widget.user.phone != null && widget.user.phone!.isNotEmpty;
+    bool hasEmail = widget.user.email.isNotEmpty;
+
     return IntrinsicHeight(
       child: Row(
         children: [
           Expanded(child: InkWell(
-            onTap: () {
-              // TODO
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.mail_outline_outlined, color: AppColors.greyBlue,),
-                SpaceW8(),
-                Text(
-                  StringConst.EMAIL,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: AppColors.darkGray,
+            onTap: hasEmail? () => _sendEmail(widget.user.email): null,
+            child: Container(
+              decoration: hasEmail? BoxDecoration(
+                border: Border.all(
+                    color: AppColors.greyBlue, width: 1),
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+              ): null,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.mail_outline_outlined, color: hasEmail? AppColors.turquoiseBlue: AppColors.greyBlue,),
+                  SpaceW8(),
+                  Text(
+                    StringConst.EMAIL,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: hasEmail? AppColors.turquoiseBlue: AppColors.darkGray,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           )),
           const VerticalDivider(color: AppColors.greyBlue,),
           Expanded(child: InkWell(
-            onTap: () {
-              // TODO
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.phone, color: AppColors.greyBlue,),
-                SpaceW8(),
-                Text(
-                  StringConst.CALL,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: AppColors.darkGray,
+            onTap: hasPhone? () => _call(widget.user.phone??""): null,
+            child: Container(
+              decoration: hasPhone? BoxDecoration(
+                border: Border.all(
+                    color: AppColors.greyBlue, width: 1),
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+              ): null,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.phone, color: hasPhone? AppColors.turquoiseBlue: AppColors.greyBlue,),
+                  SpaceW8(),
+                  Text(
+                    StringConst.CALL,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: hasPhone? AppColors.turquoiseBlue: AppColors.darkGray,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           )),
         ],
       ),
     );
+  }
+
+  void _sendEmail(String email) {
+    String? encodeQueryParameters(Map<String, String> params) {
+      return params.entries
+          .map((MapEntry<String, String> e) =>
+      '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+          .join('&');
+    }
+
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      query: encodeQueryParameters(<String, String>{
+        'subject': 'Asunto',
+      }),
+    );
+    launchUrl(emailLaunchUri);
+  }
+
+  void _call(String phone) {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'tel',
+      path: phone,
+    );
+    launchUrl(emailLaunchUri);
   }
 }
