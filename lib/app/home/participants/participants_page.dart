@@ -51,19 +51,21 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         border: Border.all(color: AppColors.greyLight2.withOpacity(0.3), width: 1),
         borderRadius: BorderRadius.circular(15.0),
       ),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Text(StringConst.PARTICIPANTS_BY,
-              style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.greyDark2),),
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(StringConst.PARTICIPANTS_BY,
+                style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.greyDark2),),
+              SpaceH40(),
+              _currentPage!,
+            ],
           ),
-          Container(
-              margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
-              child: _currentPage),
-        ],
+        ),
       ),
     );
   }
@@ -94,7 +96,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     builder: (context, gamificationSnapshot) {
                       if (gamificationSnapshot.hasData) {
                         return Align(
-                          alignment: Alignment.topCenter,
+                          alignment: Alignment.topLeft,
                           child: SingleChildScrollView(
                             child: ParticipantsItemBuilder(
                                 snapshot: userSnapshot,

@@ -38,17 +38,14 @@ class ParticipantsItemBuilder<T> extends StatelessWidget {
 
   Widget _build(BuildContext context, List<T> items) {
 
-    final padding = Responsive.isDesktop(context)? 12.0: 0.0;
+    final alignment = Responsive.isDesktop(context)? Alignment.topLeft: Alignment.topCenter;
     return Align(
-      alignment: Alignment.topCenter,
-      child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: padding),
-              child: Wrap(
-                children: items.map((c) => itemBuilder(context, c)).toList(),
-                spacing: 15.0,
-                runSpacing: 15.0,
-              ),
-            ),
+      alignment: alignment,
+      child: Wrap(
+        children: items.map((c) => itemBuilder(context, c)).toList(),
+        spacing: 15.0,
+        runSpacing: 15.0,
+      ),
     );
   }
 }
