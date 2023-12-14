@@ -4,6 +4,7 @@ import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/account/personal_data.dart';
+import 'package:enreda_empresas/app/home/entity_directory/entity_directory_page.dart';
 import 'package:enreda_empresas/app/home/social_entity/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
@@ -160,6 +161,8 @@ class _WebHomeState extends State<WebHome> {
                       return const MyResourcesListPage();
                       case 3: _key.currentState?.closeDrawer();
                       return const PersonalData();
+                      case 4: _key.currentState?.closeDrawer();
+                      return  EntityDirectoryPage();
                       default:
                         return const MyResourcesListPage();
                     }
@@ -329,6 +332,7 @@ class SideBarWidget extends StatelessWidget {
         SidebarXItem(icon: Icons.supervisor_account, label: 'Participantes'),
         SidebarXItem(icon: Icons.card_travel, label: 'Mis recursos'),
         SidebarXItem(icon: Icons.account_circle_sharp, label: 'Mi perfil'),
+        SidebarXItem(icon: Icons.calendar_month, label: 'Directorio Entidades')
       ],
     );
   }

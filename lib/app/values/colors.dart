@@ -39,6 +39,7 @@ class AppColors {
   static const Color blueLight = Color(0xFF5876D2);
   static const Color blueDark = Color(0xFF002185);
   static const Color blueAlt = Color(0xFF5F7ED9);
+  static const Color bluePetrol = Color(0xFF054D5E);
 
   //Yellow
   static const Color yellow = Color(0xFFFDE934);
@@ -62,6 +63,10 @@ class AppColors {
   static const Color greyTxtAlt = Color(0xFF535A5F);
   static const Color greyLight2 = Color(0xFF181945);
   static const Color greyDark2 = Color(0xFF44494B);
+  static const Color greyBorder = Color(0xFFCBCBCB);
+  static const Color greyLetter = Color(0xFF4E657E);
+  static const Color greyChip = Color(0xFFF5F5F5);
+  static const Color greySearch = Color(0xFFEBF1F2);
 
   //Violet
   static const Color darkViolet = Color(0xFFA0A5D2);
@@ -87,6 +92,7 @@ class AppColors {
   static const Color onHoverTurquoise = Color(0xFFEFFDFA);
   static const Color turquoiseAlt = Color(0xFF00CCCC);
   static const Color turquoiseButton = Color(0xFF00D0CE);
+  static const Color turquoiseButton2 = Color(0xFF18C5C1);
 
   //Red
   static const Color red = Color(0xFFF1291A);
