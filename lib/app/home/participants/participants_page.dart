@@ -6,12 +6,10 @@ import 'package:enreda_empresas/app/home/participants/participants_item_builder.
 import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
 import 'package:enreda_empresas/app/home/participants/resources_participants.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
-import 'package:enreda_empresas/app/home/resources/list_item_builder_grid.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/province.dart';
-import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -35,16 +33,14 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
 
   @override
   void initState() {
-    _currentPage = _buildResourcesList(context);
+    _currentPage = _buildParticipantsList(context);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Container(
-      padding: EdgeInsets.all(Sizes.mainPadding),
-      margin: EdgeInsets.all(Sizes.mainPadding),
+      padding: EdgeInsets.all(Sizes.mainPadding * 2),
       decoration: BoxDecoration(
         color: AppColors.altWhite,
         shape: BoxShape.rectangle,
@@ -54,25 +50,16 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
       child: Align(
         alignment: Alignment.topLeft,
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(StringConst.PARTICIPANTS_BY,
-                style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.greyDark2),),
-              SpaceH40(),
-              _currentPage!,
-            ],
-          ),
+          child: _currentPage!,
         ),
       ),
     );
   }
 
-  Widget _buildResourcesList(BuildContext context) {
+  Widget _buildParticipantsList(BuildContext context) {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final database = Provider.of<Database>(context, listen: false);
+
     return StreamBuilder<UserEnreda>(
       stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
       builder: (context, snapshot) {
@@ -88,12 +75,31 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                 stream: database.gamificationFlagsStream(),
                 builder: (context, gamificationSnapshot) {
                   if (gamificationSnapshot.hasData) {
-                    return Align(
-                      alignment: Alignment.topLeft,
-                      child: SingleChildScrollView(
-                        child: ParticipantsItemBuilder(
-                            snapshot: userSnapshot,
-                            fitSmallerLayout: false,
+                    final textTheme = Theme.of(context).textTheme;
+                    final users = userSnapshot.data!;
+                    final myParticipants = users.where((u) =>
+                      u.assignedEntityId == socialEntityUser.socialEntityId!
+                      && u.assignedById == socialEntityUser.userId).toList();
+                    final allOtherParticipants = users.where((u) =>
+                    u.assignedEntityId == socialEntityUser.socialEntityId!
+                        && u.assignedById != socialEntityUser.userId).toList();
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(StringConst.PARTICIPANTS,
+                          style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.turquoiseBlue),),
+                        SpaceH40(),
+                        Text(StringConst.MY_PARTICIPANTS,
+                          style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.turquoiseBlue),),
+                        SpaceH20(),
+                        ParticipantsItemBuilder(
+                            usersList: myParticipants,
+                            emptyMessage: 'No hay participantes gestionados por ti',
                             itemBuilder: (context, user) {
                               return ParticipantsListTile(
                                   user: user,
@@ -104,7 +110,27 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                               );
                             }
                         ),
-                      ),
+                        SpaceH40(),
+                        // TODO: Traer el nombre de la entidad
+                        Text(StringConst.allParticipants("tu entidad"),
+                          style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.turquoiseBlue,),),
+                        SpaceH20(),
+                        ParticipantsItemBuilder(
+                            usersList: allOtherParticipants,
+                            emptyMessage: 'No hay participantes gestionados por tu entidad',
+                            itemBuilder: (context, user) {
+                              return ParticipantsListTile(
+                                  user: user,
+                                  totalGamificationFlags: gamificationSnapshot.data!.length - 1,
+                                  onTap: () => setState(() {
+                                    _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
+                                  })
+                              );
+                            }
+                        ),
+                      ],
                     );
                   } else {
                     return const Center(child: CircularProgressIndicator());
@@ -142,7 +168,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                         color: AppColors.greyDark,
                       ),
                       onPressed: () => setState(() {
-                        _currentPage = _buildResourcesList(context);
+                        _currentPage = _buildParticipantsList(context);
                       }),
                     ),
                     Column(
@@ -298,7 +324,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                   color: AppColors.greyDark,
                 ),
                 onPressed: () => setState(() {
-                  _currentPage = _buildResourcesList(context);
+                  _currentPage = _buildParticipantsList(context);
                 }),
               ),
               Column(
