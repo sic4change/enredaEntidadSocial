@@ -31,7 +31,7 @@ class ParticipantsListPage extends StatefulWidget {
 
 class _ParticipantsListPageState extends State<ParticipantsListPage> {
   Widget? _currentPage;
-  late UserEnreda organizationUser;
+  late UserEnreda socialEntityUser;
 
   @override
   void initState() {
@@ -79,48 +79,40 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        organizationUser = snapshot.data!;
-        return StreamBuilder<List<Resource>>(
-          stream: database.myResourcesStream(organizationUser.socialEntityId!),
-          builder: (context, resourcesSnapshot) {
-            if (!resourcesSnapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final resourceIdList = resourcesSnapshot.data!.map((e) => e.resourceId).toList();
-            return StreamBuilder<List<UserEnreda>>(
-              stream: database.getParticipantsBySocialEntityStream(resourceIdList),
-              builder: (context, userSnapshot) {
-                if(userSnapshot.hasData) {
-                  return StreamBuilder<List<GamificationFlag>>(
-                    stream: database.gamificationFlagsStream(),
-                    builder: (context, gamificationSnapshot) {
-                      if (gamificationSnapshot.hasData) {
-                        return Align(
-                          alignment: Alignment.topLeft,
-                          child: SingleChildScrollView(
-                            child: ParticipantsItemBuilder(
-                                snapshot: userSnapshot,
-                                fitSmallerLayout: false,
-                                itemBuilder: (context, user) {
-                                  return ParticipantsListTile(
-                                      user: user,
-                                      totalGamificationFlags: gamificationSnapshot.data!.length - 1,
-                                      onTap: () => setState(() {
-                                        _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
-                                      })
-                                  );
-                                }
-                            ),
-                          ),
-                        );
-                      } else {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                    }
-                  );
+        socialEntityUser = snapshot.data!;
+        return StreamBuilder<List<UserEnreda>>(
+          stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
+          builder: (context, userSnapshot) {
+            if(userSnapshot.hasData) {
+              return StreamBuilder<List<GamificationFlag>>(
+                stream: database.gamificationFlagsStream(),
+                builder: (context, gamificationSnapshot) {
+                  if (gamificationSnapshot.hasData) {
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: SingleChildScrollView(
+                        child: ParticipantsItemBuilder(
+                            snapshot: userSnapshot,
+                            fitSmallerLayout: false,
+                            itemBuilder: (context, user) {
+                              return ParticipantsListTile(
+                                  user: user,
+                                  totalGamificationFlags: gamificationSnapshot.data!.length - 1,
+                                  onTap: () => setState(() {
+                                    _currentPage = Responsive.isMobile(context) || Responsive.isTablet(context)  ? _buildParticipantProfileMobile(user) : _buildParticipantProfileWeb(user);
+                                  })
+                              );
+                            }
+                        ),
+                      ),
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                 }
-                return const Center(child: CircularProgressIndicator());
-            });
+              );
+            }
+            return const Center(child: CircularProgressIndicator());
         });
     });
   }
@@ -239,7 +231,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     ElevatedButton(
                       onPressed: () => showDialog(
                           context: context,
-                          builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: organizationUser.organization!,)),
+                          builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.organization!,)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.violet, // Background color
                       ),
@@ -396,7 +388,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
               ElevatedButton(
                 onPressed: () => showDialog(
                     context: context,
-                    builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: organizationUser.organization!,)),
+                    builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.organization!,)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.violet, // Background color
                 ),
@@ -561,7 +553,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             ),
           ),
           const SizedBox(height: 10,),
-          ParticipantResourcesList(participantId: user.userId!, organizerId: organizationUser.organization!,),
+          ParticipantResourcesList(participantId: user.userId!, organizerId: socialEntityUser.organization!,),
         ],
       ),
     );

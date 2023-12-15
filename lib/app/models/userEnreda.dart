@@ -36,6 +36,8 @@ class UserEnreda {
     this.socialEntityId,
     required this.resources,
     this.gamificationFlags = const {},
+    this.assignedById,
+    this.assignedEntityId,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -159,6 +161,9 @@ class UserEnreda {
       });
     }
 
+    final String? assignedById = data['assignedById']?? "";
+    final String? assignedEntityId = data['assignedEntityId']?? "";
+
     return UserEnreda(
       email: email,
       firstName: firstName,
@@ -191,6 +196,8 @@ class UserEnreda {
       socialEntityId: socialEntityId,
       resources: resources,
       gamificationFlags: gamificationFlags,
+      assignedById: assignedById,
+      assignedEntityId: assignedEntityId,
     );
   }
 
@@ -225,6 +232,8 @@ class UserEnreda {
   final String? socialEntityId;
   final List<String> resources;
   final Map<String, bool> gamificationFlags;
+  final String? assignedById;
+  final String? assignedEntityId;
 
   @override
   bool operator ==(Object other){
@@ -263,6 +272,8 @@ class UserEnreda {
       'socialEntityId': socialEntityId,
       'resources': resources,
       'gamificationFlags': gamificationFlags,
+      'assignedById': assignedById,
+      'assignedEntityId': assignedEntityId,
     };
   }
 
@@ -300,6 +311,8 @@ class UserEnreda {
     String? organization,
     String? socialEntityId,
     Map<String, bool>? gamificationFlags,
+    String? assignedById,
+    String? assignedEntityId,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -331,6 +344,8 @@ class UserEnreda {
       socialEntityId: socialEntityId ?? this.socialEntityId,
       resources: resources ?? this.resources,
       gamificationFlags: gamificationFlags ?? this.gamificationFlags,
+      assignedById: assignedById,
+      assignedEntityId: assignedEntityId,
     );
   }
 

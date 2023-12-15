@@ -32,7 +32,7 @@ abstract class Database {
      Stream<Resource> resourceStream(String? resourceId);
      Stream<List<Resource>> myResourcesStream(String socialEntityId);
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
-     Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(List<String?> ids);
+     Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId);
      Stream<List<SocialEntity>> socialEntitiesStream();
      Stream<List<SocialEntity>> filterSocialEntityStream(String socialEntityId);
      Stream<SocialEntity> socialEntityStream(String? socialEntityId);
@@ -276,21 +276,13 @@ class FirestoreDatabase implements Database {
     }
 
   @override
-  Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(List<String?> resourceIdList) async* {
-    final collectionPath = FirebaseFirestore.instance.collection(APIPath.users());
-    final batches = <Future<List<UserEnreda>>>[];
-
-    for (var i = 0; i < resourceIdList.length; i += 10) {
-      final batch = resourceIdList.sublist(i, i + 10 < resourceIdList.length ? i + 10 : resourceIdList.length);
-      final futureBatch = collectionPath
-          .where('resources', arrayContainsAny: batch)
-          .get()
-          .then((results) => results.docs.map<UserEnreda>((result) => UserEnreda.fromMap(result.data(), result.id)).toList());
-      batches.add(futureBatch);
-    }
-    final results = await Future.wait(batches);
-    var combinedResults = results.expand((i) => i).toSet().toList();
-    yield combinedResults;
+  Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId) {
+    return _service.collectionStream<UserEnreda>(
+      path: APIPath.users(),
+      queryBuilder: (query) => query.where('assignedEntityId', isEqualTo: socialEntityId),
+      builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+      sort: (lhs, rhs) => (lhs.firstName??"").compareTo(rhs.firstName??""),
+    );
   }
 
 
