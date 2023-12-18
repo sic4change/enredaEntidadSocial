@@ -257,7 +257,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     ElevatedButton(
                       onPressed: () => showDialog(
                           context: context,
-                          builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.organization!,)),
+                          builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.violet, // Background color
                       ),
@@ -414,7 +414,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
               ElevatedButton(
                 onPressed: () => showDialog(
                     context: context,
-                    builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.organization!,)),
+                    builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.violet, // Background color
                 ),
@@ -579,7 +579,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             ),
           ),
           const SizedBox(height: 10,),
-          ParticipantResourcesList(participantId: user.userId!, organizerId: socialEntityUser.organization!,),
+          ParticipantResourcesList(participantId: user.userId!, organizerId: socialEntityUser.socialEntityId!,),
         ],
       ),
     );

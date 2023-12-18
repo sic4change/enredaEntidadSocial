@@ -129,9 +129,7 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                    // TODO
-                  },
+                  onTap: widget.onTap,
                   child: Container(
                     height: 50.0,
                     width: double.infinity,
