@@ -62,82 +62,89 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
           stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
           builder: (context, userSnapshot) {
             if(userSnapshot.hasData) {
-              return StreamBuilder<List<GamificationFlag>>(
-                stream: database.gamificationFlagsStream(),
-                builder: (context, gamificationSnapshot) {
-                  if (gamificationSnapshot.hasData) {
-                    final textTheme = Theme.of(context).textTheme;
-                    final users = userSnapshot.data!;
-                    final myParticipants = users.where((u) =>
-                      u.assignedEntityId == socialEntityUser.socialEntityId!
-                      && u.assignedById == socialEntityUser.userId).toList();
-                    final allOtherParticipants = users.where((u) =>
-                    u.assignedEntityId == socialEntityUser.socialEntityId!
-                        && u.assignedById != socialEntityUser.userId).toList();
+              return StreamBuilder(
+                stream: database.socialEntityStreamById(socialEntityUser.socialEntityId!),
+                builder: (context, socialEntitySnapshot) {
+                  if (socialEntitySnapshot.hasData) {
+                    return StreamBuilder<List<GamificationFlag>>(
+                        stream: database.gamificationFlagsStream(),
+                        builder: (context, gamificationSnapshot) {
+                          if (gamificationSnapshot.hasData) {
+                            final textTheme = Theme.of(context).textTheme;
+                            final users = userSnapshot.data!;
+                            final myParticipants = users.where((u) =>
+                            u.assignedEntityId == socialEntityUser.socialEntityId!
+                                && u.assignedById == socialEntityUser.userId).toList();
+                            final allOtherParticipants = users.where((u) =>
+                            u.assignedEntityId == socialEntityUser.socialEntityId!
+                                && u.assignedById != socialEntityUser.userId).toList();
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(StringConst.PARTICIPANTS,
-                          style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.turquoiseBlue),),
-                        SpaceH40(),
-                        Text(StringConst.MY_PARTICIPANTS,
-                          style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.turquoiseBlue),),
-                        SpaceH20(),
-                        ParticipantsItemBuilder(
-                            usersList: myParticipants,
-                            emptyMessage: 'No hay participantes gestionados por ti',
-                            itemBuilder: (context, user) {
-                              return ParticipantsListTile(
-                                  user: user,
-                                  totalGamificationFlags: gamificationSnapshot.data!.length - 1,
-                                  onTap: () => setState(() {
-                                    _currentPage =  ParticipantDetailPage(
-                                      user: user,
-                                      socialEntityUser: socialEntityUser,
-                                      onBack: () => setState(() {
-                                        _currentPage = _buildParticipantsList();
-                                      }),
-                                    );
-                                  })
-                              );
-                            }
-                        ),
-                        SpaceH40(),
-                        // TODO: Traer el nombre de la entidad
-                        Text(StringConst.allParticipants("tu entidad"),
-                          style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.turquoiseBlue,),),
-                        SpaceH20(),
-                        ParticipantsItemBuilder(
-                            usersList: allOtherParticipants,
-                            emptyMessage: 'No hay participantes gestionados por tu entidad',
-                            itemBuilder: (context, user) {
-                              return ParticipantsListTile(
-                                  user: user,
-                                  totalGamificationFlags: gamificationSnapshot.data!.length - 1,
-                                  onTap: () => setState(() {
-                                    _currentPage =  ParticipantDetailPage(
-                                      user: user,
-                                      socialEntityUser: socialEntityUser,
-                                      onBack: () => setState(() {
-                                        _currentPage = _buildParticipantsList();
-                                      }),
-                                    );
-                                  })
-                              );
-                            }
-                        ),
-                      ],
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(StringConst.PARTICIPANTS,
+                                  style: textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.turquoiseBlue),),
+                                SpaceH40(),
+                                Text(StringConst.MY_PARTICIPANTS,
+                                  style: textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.turquoiseBlue),),
+                                SpaceH20(),
+                                ParticipantsItemBuilder(
+                                    usersList: myParticipants,
+                                    emptyMessage: 'No hay participantes gestionados por ti',
+                                    itemBuilder: (context, user) {
+                                      return ParticipantsListTile(
+                                          user: user,
+                                          totalGamificationFlags: gamificationSnapshot.data!.length - 1,
+                                          onTap: () => setState(() {
+                                            _currentPage =  ParticipantDetailPage(
+                                              user: user,
+                                              socialEntityUser: socialEntityUser,
+                                              onBack: () => setState(() {
+                                                _currentPage = _buildParticipantsList();
+                                              }),
+                                            );
+                                          })
+                                      );
+                                    }
+                                ),
+                                SpaceH40(),
+                                Text(StringConst.allParticipants(socialEntitySnapshot.data!.name),
+                                  style: textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.turquoiseBlue,),),
+                                SpaceH20(),
+                                ParticipantsItemBuilder(
+                                    usersList: allOtherParticipants,
+                                    emptyMessage: 'No hay participantes gestionados por tu entidad',
+                                    itemBuilder: (context, user) {
+                                      return ParticipantsListTile(
+                                          user: user,
+                                          totalGamificationFlags: gamificationSnapshot.data!.length - 1,
+                                          onTap: () => setState(() {
+                                            _currentPage =  ParticipantDetailPage(
+                                              user: user,
+                                              socialEntityUser: socialEntityUser,
+                                              onBack: () => setState(() {
+                                                _currentPage = _buildParticipantsList();
+                                              }),
+                                            );
+                                          })
+                                      );
+                                    }
+                                ),
+                              ],
+                            );
+                          } else {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                        }
                     );
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
                   }
+                  return const Center(child: CircularProgressIndicator());
                 }
               );
             }
