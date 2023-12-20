@@ -22,6 +22,7 @@ import 'package:enreda_empresas/app/home/participants/create_participant/validat
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_timeSearching.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_timeSpentWeekly.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/unemployed_revision_form.dart';
+import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
@@ -38,6 +39,7 @@ import 'package:enreda_empresas/app/models/timeSearching.dart';
 import 'package:enreda_empresas/app/models/timeSpentWeekly.dart';
 import 'package:enreda_empresas/app/models/unemployedUser.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
@@ -64,7 +66,6 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   final _formKeyMotivations = GlobalKey<FormState>();
   final _formKeyInterests = GlobalKey<FormState>();
   final _checkFieldKey = GlobalKey<FormState>();
-  bool isLoading = false;
 
   String? _email, _firstName, _lastName, _phone;
   DateTime? _birthday;
@@ -212,7 +213,6 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                           onPressed: onStepCancel,
                         ),
                       SizedBox(width: Sizes.kDefaultPaddingDouble),
-                      isLoading ? Center(child: CircularProgressIndicator(color: AppColors.primary300,)) :
                       EnredaButton(
                         buttonTitle: isLastStep ? StringConst.FORM_CONFIRM : StringConst.FORM_NEXT,
                         width: contactBtnWidth,
@@ -648,6 +648,11 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   Future<void> _submit() async {
     if (_validateCheckField()) {
 
+      final database = Provider.of<Database>(context, listen: false);
+      final auth = Provider.of<AuthBase>(context, listen: false);
+      final user = await database.userEnredaStreamByUserId(auth.currentUser!.uid).first;
+
+
       final address = Address(
         country: _country,
         province: _province,
@@ -718,27 +723,22 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           address: address,
           role: 'Desempleado',
           unemployedType: unemployedType,
-          belongOrganization: _belongOrganization
+          belongOrganization: _belongOrganization,
+          assignedById: user.userId,
+          assignedEntityId: user.socialEntityId,
       );
       try {
         final database = Provider.of<Database>(context, listen: false);
-        setState(() => isLoading = true);
         await database.addUnemployedUser(unemployedUser);
-        setState(() => isLoading = false);
-        showAlertDialog(
+        await showAlertDialog(
           context,
           title: StringConst.CREATE_PARTICIPANT_SUCCESS,
           content: "",
           defaultActionText: StringConst.FORM_ACCEPT,
-        ).then((value) => {
-          // TODO:
-          /*Navigator.of(this.context).push(
-            MaterialPageRoute<void>(
-              builder: ((context) => WebHome()),
-            ),
-          )*/
-        },
         );
+        // TODO: Go back to Control Panel Tab not working
+        WebHome.selectedIndex.value = 1;
+        //
       } on FirebaseException catch (e) {
         showExceptionAlertDialog(context,
             title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));
