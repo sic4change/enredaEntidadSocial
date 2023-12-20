@@ -494,6 +494,7 @@ class StringConst {
   // Participants
   static const String GAMIFICATION = "Gamificación";
   static const String GO_PROFILE = "Ver perfil";
+  static const String NEW_PROFILE = "Crear nuevo perfil";
   static const String CALL = "Llamar";
   static const String CREATE_PARTICIPANT_SUCCESS = "¡El perfil ha sido creado con éxito!";
   static const String FORM_UNEMPLOYED = "Busco trabajo";
@@ -505,4 +506,6 @@ class StringConst {
   static const String FORM_GENDER = "Género";
   static const String FORM_GENDER_ERROR = "El género no puede estar vacío";
   static const String FORM_DEDICATION = "¿Tienes claro a lo que te gustaría dedicarte?";
+  static const String FORM_BELONG_ORGANIZATION = "Organización o entidad a la que pertenece";
+  static const String FORM_BELONG_ORGANIZATION_ERROR = "La organización no puede estar vacía";
 }

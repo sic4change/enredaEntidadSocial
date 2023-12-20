@@ -3,9 +3,11 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_padding.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_text_form_field.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/checkbox_form.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_abilities.dart';
@@ -67,6 +69,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   String? _email, _firstName, _lastName, _phone;
   DateTime? _birthday;
   String? _country, _province, _city, _postalCode;
+  String? _belongOrganization;
 
   int? isRegistered;
   int usersIds = 0;
@@ -123,6 +126,8 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
 
   int sum = 0;
 
+  late TextTheme textTheme;
+
   @override
   void initState() {
     super.initState();
@@ -136,6 +141,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     _province = "";
     _city = "";
     _postalCode = "";
+    _belongOrganization = "";
     countryName = "";
     provinceName = "";
     cityName = "";
@@ -153,6 +159,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   @override
   Widget build(BuildContext context) {
     // sendBasicAnalyticsEvent(context, "enreda_app_visit_sign_in_page");
+    textTheme = Theme.of(context).textTheme;
     final isLastStep = currentStep == getSteps().length-1;
     double contactBtnWidth = responsiveSize(
       context,
@@ -170,41 +177,56 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
         borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble),
         border: Border.all(color: AppColors.greyLight, width: 2.0,),
       ),
-      child: Stepper(
-        elevation: 0.0,
-        type: Responsive.isMobile(context) ? StepperType.vertical : StepperType.horizontal,
-        steps: getSteps(),
-        currentStep: currentStep,
-        onStepContinue: onStepContinue,
-        onStepTapped: (step) => goToStep(step),
-        onStepCancel: onStepCancel,
-        controlsBuilder: (context, _) {
-          return Container(
-            height: Sizes.kDefaultPaddingDouble * 2,
-            margin: EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
-            padding: const EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble / 2),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                if(currentStep !=0)
-                  EnredaButton(
-                    buttonTitle: StringConst.FORM_BACK,
-                    width: contactBtnWidth,
-                    onPressed: onStepCancel,
-                  ),
-                SizedBox(width: Sizes.kDefaultPaddingDouble),
-                isLoading ? Center(child: CircularProgressIndicator(color: AppColors.primary300,)) :
-                EnredaButton(
-                  buttonTitle: isLastStep ? StringConst.FORM_CONFIRM : StringConst.FORM_NEXT,
-                  width: contactBtnWidth,
-                  buttonColor: AppColors.primaryColor,
-                  titleColor: AppColors.white,
-                  onPressed: onStepContinue,
-                ),
-              ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+            child: Text(
+              StringConst.NEW_PROFILE,
+              style: textTheme.titleMedium!.copyWith(
+                color: AppColors.turquoiseBlue
+              ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: Stepper(
+              elevation: 0.0,
+              type: Responsive.isMobile(context) ? StepperType.vertical : StepperType.horizontal,
+              steps: getSteps(),
+              currentStep: currentStep,
+              onStepContinue: onStepContinue,
+              onStepTapped: (step) => goToStep(step),
+              onStepCancel: onStepCancel,
+              controlsBuilder: (context, _) {
+                return Container(
+                  height: Sizes.kDefaultPaddingDouble * 2,
+                  margin: EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      if(currentStep !=0)
+                        EnredaButton(
+                          buttonTitle: StringConst.FORM_BACK,
+                          width: contactBtnWidth,
+                          onPressed: onStepCancel,
+                        ),
+                      SizedBox(width: Sizes.kDefaultPaddingDouble),
+                      isLoading ? Center(child: CircularProgressIndicator(color: AppColors.primary300,)) :
+                      EnredaButton(
+                        buttonTitle: isLastStep ? StringConst.FORM_CONFIRM : StringConst.FORM_NEXT,
+                        width: contactBtnWidth,
+                        buttonColor: AppColors.primaryColor,
+                        titleColor: AppColors.white,
+                        onPressed: onStepContinue,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -213,33 +235,82 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     final database = Provider.of<Database>(context, listen: false);
     TextTheme textTheme = Theme.of(context).textTheme;
     double fontSize = responsiveSize(context, 14, 16, md: 15);
-    return
-      Form(
-        key: _formKey,
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget> [
-              CustomFlexRowColumn(
-                childLeft: customTextFormFieldName(context, _firstName!, StringConst.FORM_NAME, StringConst.NAME_ERROR, _name_setState),
-                childRight: customTextFormFieldName(context, _lastName!, StringConst.FORM_LASTNAME, StringConst.FORM_LASTNAME_ERROR, _surname_setState),
-              ),
+    return Form(
+      key: _formKey,
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget> [
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.all(0.0),
+              separatorSize: Sizes.kDefaultPaddingDouble,
+              childLeft: customTextFormFieldName(context, _firstName!, StringConst.FORM_NAME, StringConst.NAME_ERROR, _name_setState),
+              childRight: customTextFormFieldName(context, _lastName!, StringConst.FORM_LASTNAME, StringConst.FORM_LASTNAME_ERROR, _surname_setState),
+            ),
+              SpaceH20(),
               Flex(
                 direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                 children: [
                   Expanded(
                     flex: Responsive.isMobile(context) ? 0 : 1,
-                    child: Padding(
-                      padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          labelText: StringConst.FORM_PHONE,
-                          prefixIcon:CountryCodePicker(
-                            onChanged: _onCountryChange,
-                            initialSelection: 'ES',
-                            countryFilter: ['ES', 'PE', 'GT'],
-                            showFlagDialog: true,
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: StringConst.FORM_PHONE,
+                        prefixIcon:CountryCodePicker(
+                          onChanged: _onCountryChange,
+                          initialSelection: 'ES',
+                          countryFilter: ['ES', 'PE', 'GT'],
+                          showFlagDialog: true,
+                        ),
+                        focusColor: AppColors.turquoise,
+                        labelStyle: textTheme.button?.copyWith(
+                          height: 1.5,
+                          color: AppColors.greyDark,
+                          fontWeight: FontWeight.w400,
+                          fontSize: fontSize,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(
+                            color: AppColors.greyUltraLight,
                           ),
-                          focusColor: AppColors.turquoise,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(
+                            color: AppColors.greyUltraLight,
+                            width: 1.0,
+                          ),
+                        ),
+                      ),
+                      initialValue: _phone,
+                      validator: (value) =>
+                      value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
+                      onSaved: (value) => this._phone = phoneCode +' '+ value!,
+                      textCapitalization: TextCapitalization.sentences,
+                      keyboardType: TextInputType.phone,
+                      style: textTheme.button?.copyWith(
+                        height: 1.5,
+                        color: AppColors.greyDark,
+                        fontWeight: FontWeight.w400,
+                        fontSize: fontSize,
+                      ),
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                      ],
+                    ),
+                  ),
+                  if (Responsive.isMobile(context))
+                    SpaceH20(),
+                  if (!Responsive.isMobile(context))
+                    SpaceW20(),
+                  Expanded(
+                      flex: Responsive.isMobile(context) ? 0 : 1,
+                      child: TextFormField(
+                        controller: textEditingControllerDateInput, //editing controller of this TextField
+                        validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_BIRTHDAY_ERROR,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.calendar_today), //icon of text field
+                          labelText: StringConst.FORM_BIRTHDAY, //label text of field
                           labelStyle: textTheme.button?.copyWith(
                             height: 1.5,
                             color: AppColors.greyDark,
@@ -260,162 +331,100 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                             ),
                           ),
                         ),
-                        initialValue: _phone,
-                        validator: (value) =>
-                        value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
-                        onSaved: (value) => this._phone = phoneCode +' '+ value!,
-                        textCapitalization: TextCapitalization.sentences,
-                        keyboardType: TextInputType.phone,
+                        readOnly: true,  //set it true, so that user will not able to edit text
                         style: textTheme.button?.copyWith(
                           height: 1.5,
                           color: AppColors.greyDark,
                           fontWeight: FontWeight.w400,
                           fontSize: fontSize,
                         ),
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                      flex: Responsive.isMobile(context) ? 0 : 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
-                        child: TextFormField(
-                          controller: textEditingControllerDateInput, //editing controller of this TextField
-                          validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_BIRTHDAY_ERROR,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.calendar_today), //icon of text field
-                            labelText: StringConst.FORM_BIRTHDAY, //label text of field
-                            labelStyle: textTheme.button?.copyWith(
-                              height: 1.5,
-                              color: AppColors.greyDark,
-                              fontWeight: FontWeight.w400,
-                              fontSize: fontSize,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              borderSide: BorderSide(
-                                color: AppColors.greyUltraLight,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              borderSide: BorderSide(
-                                color: AppColors.greyUltraLight,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          readOnly: true,  //set it true, so that user will not able to edit text
-                          style: textTheme.button?.copyWith(
-                            height: 1.5,
-                            color: AppColors.greyDark,
-                            fontWeight: FontWeight.w400,
-                            fontSize: fontSize,
-                          ),
-                          onTap: () async {
-                            DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: new DateTime(DateTime.now().year - 16, DateTime.now().month, DateTime.now().day),
-                              firstDate: new DateTime(DateTime.now().year - 100, DateTime.now().month, DateTime.now().day),
-                              lastDate: new DateTime(DateTime.now().year - 16, DateTime.now().month, DateTime.now().day),
-                              initialEntryMode: DatePickerEntryMode.calendarOnly,
-                            );
-                            if(pickedDate != null ){
-                              print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
-                              _formattedBirthdayDate = DateFormat('dd-MM-yyyy').format(pickedDate);
-                              print(_formattedBirthdayDate); //formatted date output using intl package =>  2021-03-16
-                              setState(() {
-                                textEditingControllerDateInput.text = _formattedBirthdayDate; //set output date to TextField value.
-                                _birthday = pickedDate;
-                              });
-                            }
-                          },
-                        ),
+                        onTap: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: new DateTime(DateTime.now().year - 16, DateTime.now().month, DateTime.now().day),
+                            firstDate: new DateTime(DateTime.now().year - 100, DateTime.now().month, DateTime.now().day),
+                            lastDate: new DateTime(DateTime.now().year - 16, DateTime.now().month, DateTime.now().day),
+                            initialEntryMode: DatePickerEntryMode.calendarOnly,
+                          );
+                          if(pickedDate != null ){
+                            print(pickedDate);  //pickedDate output format => 2021-03-10 00:00:00.000
+                            _formattedBirthdayDate = DateFormat('dd-MM-yyyy').format(pickedDate);
+                            print(_formattedBirthdayDate); //formatted date output using intl package =>  2021-03-16
+                            setState(() {
+                              textEditingControllerDateInput.text = _formattedBirthdayDate; //set output date to TextField value.
+                              _birthday = pickedDate;
+                            });
+                          }
+                        },
                       )
                   ),
                 ],
               ),
+              SpaceH20(),
               Flex(
                 direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                 children: [
                   Expanded(
                     flex: Responsive.isMobile(context) ? 0 : 1,
-                    child: Padding(
-                      padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
-                      child: StreamBuilder <List<UserEnreda>>(
-                          stream:
-                          // Empty stream (no call to firestore) if email not valid
-                          !EmailValidator.validate(writtenEmail)
-                              ? Stream<List<UserEnreda>>.empty()
-                              : database.checkIfUserEmailRegistered(writtenEmail),
-                          builder:  (context, snapshotUsers) {
+                    child: StreamBuilder <List<UserEnreda>>(
+                        stream:
+                        // Empty stream (no call to firestore) if email not valid
+                        !EmailValidator.validate(writtenEmail)
+                            ? Stream<List<UserEnreda>>.empty()
+                            : database.checkIfUserEmailRegistered(writtenEmail),
+                        builder:  (context, snapshotUsers) {
 
-                            var usersListLength = snapshotUsers.data != null ? snapshotUsers.data?.length : 0;
-                            isRegistered = usersListLength! > 0 ? 1 : 0;
+                          var usersListLength = snapshotUsers.data != null ? snapshotUsers.data?.length : 0;
+                          isRegistered = usersListLength! > 0 ? 1 : 0;
 
-                            final validationMessage = (value) => EmailValidator.validate(value!)
-                                ? (isRegistered == 0 ? null : StringConst.EMAIL_REGISTERED)
-                                : StringConst.EMAIL_ERROR;
+                          final validationMessage = (value) => EmailValidator.validate(value!)
+                              ? (isRegistered == 0 ? null : StringConst.EMAIL_REGISTERED)
+                              : StringConst.EMAIL_ERROR;
 
-                            return
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: StringConst.FORM_EMAIL,
-                                  labelStyle: textTheme.button?.copyWith(
-                                    height: 1.5,
-                                    color: AppColors.greyDark,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: fontSize,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(5.0),
-                                    borderSide: BorderSide(
-                                      color: AppColors.greyUltraLight,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(5.0),
-                                    borderSide: BorderSide(
-                                      color: AppColors.greyUltraLight,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                ),
-                                initialValue: _email,
-                                validator: validationMessage,
-                                onSaved: (value) => _email = value,
-                                keyboardType: TextInputType.emailAddress,
-                                onChanged: (value) => setState(() => this.writtenEmail = value),
-                                style: textTheme.button?.copyWith(
-                                  height: 1.5,
-                                  color: AppColors.greyDark,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: fontSize,
-                                ),
-                              );
-                          }
-                      ),
+                          return CustomTextFormField(
+                            labelText: StringConst.FORM_EMAIL,
+                            initialValue: _email,
+                            validator: validationMessage,
+                            onSaved: (value) => _email = value,
+                            keyboardType: TextInputType.emailAddress,
+                            onChanged: (value) => setState(() => this.writtenEmail = value),
+                          );
+                        }
                     ),
                   ),
+                  if (Responsive.isMobile(context))
+                    SpaceH20(),
+                  if (!Responsive.isMobile(context))
+                    SpaceW20(),
                   Expanded(
                     flex: Responsive.isMobile(context) ? 0 : 1,
-                    child: Padding(
-                        padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
-                        child: streamBuilder_Dropdown_Genders(context, selectedGender, _buildGenderStreamBuilder_setState)
-                    ),
+                    child: streamBuilder_Dropdown_Genders(context, selectedGender, _buildGenderStreamBuilder_setState),
                   ),
                 ],
               ),
+              SpaceH20(),
               CustomFlexRowColumn(
+                contentPadding: EdgeInsets.all(0.0),
+                separatorSize: Sizes.kDefaultPaddingDouble,
                 childLeft: streamBuilderForCountry(context, selectedCountry, _buildCountryStreamBuilder_setState),
                 childRight: streamBuilderForProvince(context, selectedCountry, selectedProvince, _buildProvinceStreamBuilder_setState),
               ),
+              SpaceH20(),
               CustomFlexRowColumn(
+                contentPadding: EdgeInsets.all(0.0),
+                separatorSize: Sizes.kDefaultPaddingDouble,
                 childLeft: streamBuilderForCity(context, selectedCountry, selectedProvince, selectedCity, _buildCityStreamBuilder_setState),
                 childRight: customTextFormFieldName(context, _postalCode!, StringConst.FORM_POSTAL_CODE, StringConst.POSTAL_CODE_ERROR, _postalCode_setState),
+              ),
+              SpaceH20(),
+              CustomTextFormField(
+                labelText: StringConst.FORM_BELONG_ORGANIZATION,
+                hintText: "Escribe el nombre de la entidad o especifica si no pertenece a ninguna",
+                initialValue: _belongOrganization,
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_BELONG_ORGANIZATION_ERROR,
+                onSaved: (value) => _belongOrganization = value,
+                fontSize: fontSize,
+                onChanged: (value) => setState(() => _belongOrganization = value),
               ),
             ]),
       );
@@ -708,7 +717,8 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           education: education,
           address: address,
           role: 'Desempleado',
-          unemployedType: unemployedType
+          unemployedType: unemployedType,
+          belongOrganization: _belongOrganization
       );
       try {
         final database = Provider.of<Database>(context, listen: false);
@@ -922,7 +932,12 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble*2),
           border: Border.all(color: AppColors.greyLight, width: 2.0,),
         ),
-        child: Text(StringConst.FORM_GENERAL_INFO.toUpperCase()),
+        child: Text(
+          StringConst.FORM_GENERAL_INFO,
+          style: textTheme.titleSmall!.copyWith(
+            color: AppColors.turquoiseBlue
+          ),
+        ),
       ),
       content: _buildForm(context),
     ),
@@ -936,7 +951,12 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble*2),
           border: Border.all(color: AppColors.greyLight, width: 2.0,),
         ),
-        child: Text(StringConst.FORM_MOTIVATION.toUpperCase()),
+        child: Text(
+          StringConst.FORM_MOTIVATION,
+          style: textTheme.titleSmall!.copyWith(
+              color: AppColors.turquoiseBlue
+          ),
+        ),
       ),
       content: _buildFormMotivations(context),
     ),
@@ -950,12 +970,18 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble*2),
           border: Border.all(color: AppColors.greyLight, width: 2.0,),
         ),
-        child: Text(StringConst.FORM_INTERESTS.toUpperCase()),
+        child: Text(
+          StringConst.FORM_INTERESTS,
+          style: textTheme.titleSmall!.copyWith(
+              color: AppColors.turquoiseBlue
+          ),
+        ),
       ),
       content: _buildFormInterests(context),
     ),
     Step(
       isActive: currentStep >= 3,
+      state: currentStep > 3 ? StepState.complete : StepState.disabled,
       title: Container(
         padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble/2),
         decoration: BoxDecoration(
@@ -963,7 +989,12 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble*2),
           border: Border.all(color: AppColors.greyLight, width: 2.0,),
         ),
-        child: Text(StringConst.FORM_REVISION.toUpperCase()),
+        child: Text(
+          StringConst.FORM_REVISION,
+          style: textTheme.titleSmall!.copyWith(
+              color: AppColors.turquoiseBlue
+          ),
+        ),
       ),
       content: _revisionForm(context),
     ),
