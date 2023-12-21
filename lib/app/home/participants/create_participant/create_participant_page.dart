@@ -3,6 +3,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_padding.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_stepper.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
@@ -190,9 +191,9 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return Stepper(
+                return CustomStepper(
                   elevation: 0.0,
-                  type: constraints.maxWidth <= 650 ? StepperType.vertical : StepperType.horizontal,
+                  type: constraints.maxWidth <= 650 ? CustomStepperType.vertical : CustomStepperType.horizontal,
                   steps: getSteps(),
                   currentStep: currentStep,
                   onStepContinue: onStepContinue,
@@ -920,10 +921,10 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     print(specificInterestsIds);
   }
 
-  List<Step> getSteps() => [
-    Step(
+  List<CustomStep> getSteps() => [
+    CustomStep(
       isActive: currentStep >= 0,
-      state: currentStep > 0 ? StepState.complete : StepState.indexed,
+      state: currentStep > 0 ? CustomStepState.complete : CustomStepState.indexed,
       title: Container(
         padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble/2),
         decoration: BoxDecoration(
@@ -940,9 +941,9 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       ),
       content: _buildForm(context),
     ),
-    Step(
+    CustomStep(
       isActive: currentStep >= 1,
-      state: currentStep > 1 ? StepState.complete : StepState.disabled,
+      state: currentStep > 1 ? CustomStepState.complete : CustomStepState.disabled,
       title: Container(
         padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble/2),
         decoration: BoxDecoration(
@@ -959,9 +960,9 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       ),
       content: _buildFormMotivations(context),
     ),
-    Step(
+    CustomStep(
       isActive: currentStep >= 2,
-      state: currentStep > 2 ? StepState.complete : StepState.disabled,
+      state: currentStep > 2 ? CustomStepState.complete : CustomStepState.disabled,
       title: Container(
         padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble/2),
         decoration: BoxDecoration(
@@ -978,9 +979,9 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       ),
       content: _buildFormInterests(context),
     ),
-    Step(
+    CustomStep(
       isActive: currentStep >= 3,
-      state: currentStep > 3 ? StepState.complete : StepState.disabled,
+      state: currentStep > 3 ? CustomStepState.complete : CustomStepState.disabled,
       title: Container(
         padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble/2),
         decoration: BoxDecoration(
