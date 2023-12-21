@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/common_widgets/custom_padding.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
+import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
@@ -47,6 +48,7 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -169,16 +171,8 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       md: contactBtnWidthMd,
     );
 
-    return Container(
-      padding: EdgeInsets.only(top: Sizes.kDefaultPaddingDouble),
-      height: Responsive.isMobile(context) || Responsive.isTablet(context) ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.height * 0.70,
-      width: Responsive.isMobile(context) || Responsive.isTablet(context) ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width * 0.70,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble),
-        border: Border.all(color: AppColors.greyLight, width: 2.0,),
-      ),
-      child: Column(
+    return RoundedContainer(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
@@ -186,44 +180,51 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
             child: Text(
               StringConst.NEW_PROFILE,
               style: textTheme.titleMedium!.copyWith(
-                color: AppColors.turquoiseBlue
+                color: AppColors.turquoiseBlue,
+                fontWeight: FontWeight.w300,
+                // Fix the bug with Google Fonts that doesn't allow change the fontWeight with copyWith method
+                fontFamily: GoogleFonts.poppins().fontFamily,
               ),
             ),
           ),
           Expanded(
-            child: Stepper(
-              elevation: 0.0,
-              type: Responsive.isMobile(context) ? StepperType.vertical : StepperType.horizontal,
-              steps: getSteps(),
-              currentStep: currentStep,
-              onStepContinue: onStepContinue,
-              onStepTapped: (step) => goToStep(step),
-              onStepCancel: onStepCancel,
-              controlsBuilder: (context, _) {
-                return Container(
-                  height: Sizes.kDefaultPaddingDouble * 2,
-                  margin: EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      if(currentStep !=0)
-                        EnredaButton(
-                          buttonTitle: StringConst.FORM_BACK,
-                          width: contactBtnWidth,
-                          onPressed: onStepCancel,
-                        ),
-                      SizedBox(width: Sizes.kDefaultPaddingDouble),
-                      EnredaButton(
-                        buttonTitle: isLastStep ? StringConst.FORM_CONFIRM : StringConst.FORM_NEXT,
-                        width: contactBtnWidth,
-                        buttonColor: AppColors.primaryColor,
-                        titleColor: AppColors.white,
-                        onPressed: onStepContinue,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Stepper(
+                  elevation: 0.0,
+                  type: constraints.maxWidth <= 650 ? StepperType.vertical : StepperType.horizontal,
+                  steps: getSteps(),
+                  currentStep: currentStep,
+                  onStepContinue: onStepContinue,
+                  onStepTapped: (step) => goToStep(step),
+                  onStepCancel: onStepCancel,
+                  controlsBuilder: (context, _) {
+                    return Container(
+                      height: Sizes.kDefaultPaddingDouble * 2,
+                      margin: EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          if(currentStep !=0)
+                            EnredaButton(
+                              buttonTitle: StringConst.FORM_BACK,
+                              width: contactBtnWidth,
+                              onPressed: onStepCancel,
+                            ),
+                          SizedBox(width: Sizes.kDefaultPaddingDouble),
+                          EnredaButton(
+                            buttonTitle: isLastStep ? StringConst.FORM_CONFIRM : StringConst.FORM_NEXT,
+                            width: contactBtnWidth,
+                            buttonColor: AppColors.primaryColor,
+                            titleColor: AppColors.white,
+                            onPressed: onStepContinue,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 );
-              },
+              }
             ),
           ),
         ],

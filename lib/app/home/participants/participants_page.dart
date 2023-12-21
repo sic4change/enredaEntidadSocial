@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_item_builder.dart';
@@ -30,15 +31,8 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(Sizes.mainPadding * 2),
-      decoration: BoxDecoration(
-        color: AppColors.altWhite,
-        shape: BoxShape.rectangle,
-        border: Border.all(color: AppColors.greyLight2.withOpacity(0.3), width: 1),
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      child: Align(
+    return RoundedContainer(
+        child: Align(
         alignment: Alignment.topLeft,
         child: SingleChildScrollView(
           child: _currentPage!,
