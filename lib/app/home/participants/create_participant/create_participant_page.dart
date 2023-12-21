@@ -736,9 +736,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           content: "",
           defaultActionText: StringConst.FORM_ACCEPT,
         );
-        // TODO: Go back to Control Panel Tab not working
-        WebHome.selectedIndex.value = 1;
-        //
+        WebHome.goToControlPanel();
       } on FirebaseException catch (e) {
         showExceptionAlertDialog(context,
             title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));

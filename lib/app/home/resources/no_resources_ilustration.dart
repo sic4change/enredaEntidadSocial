@@ -34,7 +34,7 @@ class NoResourcesIlustration extends StatelessWidget {
           TextButton(
             onPressed: () {
               Responsive.isDesktop(context)
-                  ? WebHome.selectedIndex.value = 1
+                  ? WebHome.goToControlPanel()
                   //: CupertinoScaffold.controller.index = 0;
               : Container();
             },
