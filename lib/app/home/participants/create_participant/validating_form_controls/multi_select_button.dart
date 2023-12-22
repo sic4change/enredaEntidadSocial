@@ -63,6 +63,7 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
       ),
       actions: <Widget>[
         ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.turquoise),
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Text(StringConst.FORM_ACCEPT, style: TextStyle(
