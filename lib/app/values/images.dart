@@ -12,6 +12,7 @@ class ImagePath {
   static const String LOGO_WHITE = "$imageDir/logo-enreda-blanco.png";
   static const String LOGO_MDPI = "$imageDir/enreda-mdpi.png";
   static const String LOGO_IC = "$imageDir/ic_enreda.png";
+  static const String LOGO_LINES = "$imageDir/enreda-lines-logo.png";
 
   // Stores
   static const String APP_STORE_BUTTON = "$imageDir/app_store_900x503.png";

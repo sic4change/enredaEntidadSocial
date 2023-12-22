@@ -132,6 +132,7 @@ flutter:
     - assets/icon-descargar.png
     - assets/icon-editar.png
     - assets/icon-eliminar.png
+    - assets/enreda-lines-logo.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

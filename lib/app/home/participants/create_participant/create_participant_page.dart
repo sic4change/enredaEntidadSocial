@@ -583,28 +583,40 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   }
 
   Widget _revisionForm(BuildContext context) {
-    return Column(
-      children: [
-        UnemployedRevisionForm(
-          context,
-          _firstName!,
-          _lastName!,
-          _email!,
-          genderName,
-          countryName,
-          provinceName,
-          cityName,
-          _postalCode!,
-          abilitesNames,
-          dedicationName,
-          timeSearchingName,
-          timeSpentWeeklyName,
-          educationName,
-          specificInterestsNames,
-          interestsNames,
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(ImagePath.LOGO_LINES),
+          //fit: BoxFit.cover,
         ),
-        checkboxForm(context, _checkFieldKey, _isChecked, functionSetState)
-      ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          RoundedContainer(
+            width: MediaQuery.of(context).size.width * 0.6,
+            child: UnemployedRevisionForm(
+              context,
+              _firstName!,
+              _lastName!,
+              _email!,
+              genderName,
+              countryName,
+              provinceName,
+              cityName,
+              _postalCode!,
+              abilitesNames,
+              dedicationName,
+              timeSearchingName,
+              timeSpentWeeklyName,
+              educationName,
+              specificInterestsNames,
+              interestsNames,
+            ),
+          ),
+          checkboxForm(context, _checkFieldKey, _isChecked, functionSetState)
+        ],
+      ),
     );
   }
 
