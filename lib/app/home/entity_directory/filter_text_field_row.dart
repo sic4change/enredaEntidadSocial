@@ -19,7 +19,7 @@ class FilterTextFieldRow extends StatefulWidget {
       : super(key: key);
 
   final TextEditingController searchTextController;
-  final void Function(String) onFieldSubmitted;
+  final void Function(String)? onFieldSubmitted;
   final void Function() onPressed;
   final void Function() clearFilter;
   late String hintText;

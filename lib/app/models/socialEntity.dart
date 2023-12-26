@@ -1,5 +1,6 @@
 import 'package:enreda_empresas/app/models/scope.dart';
 import 'package:enreda_empresas/app/models/size.dart';
+import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'addressUser.dart';
 
 class SocialEntity {
@@ -16,7 +17,8 @@ class SocialEntity {
     this.website,
     this.scope,
     this.size,
-    this.photo
+    this.photo,
+    this.types,
   });
 
   final String? socialEntityId;
@@ -32,6 +34,7 @@ class SocialEntity {
   final Scope? scope;
   final SizeOrg? size;
   final String? photo;
+  final List<String>? types;
 
   factory SocialEntity.fromMap(Map<String, dynamic> data, String documentId) {
 
@@ -56,6 +59,11 @@ class SocialEntity {
 
     final String website = data['website']??"";
 
+    final List<String> types = [];
+    if (data['types'] != null) {
+      data['types'].forEach((type) {types.add(type.toString());});
+    }
+
     return SocialEntity(
         socialEntityId: socialEntityId,
         name: name,
@@ -63,7 +71,8 @@ class SocialEntity {
         phone: phone,
         address: address,
         website: website,
-        photo: photo
+        photo: photo,
+        types: types,
     );
   }
 
@@ -83,6 +92,7 @@ class SocialEntity {
       'phone': phone,
       'address': address?.toMap(),
       'website': website,
+      'types': types,
     };
   }
 

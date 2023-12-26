@@ -11,6 +11,7 @@ import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/socialEntityUser.dart';
 import 'package:enreda_empresas/app/models/province.dart';
@@ -69,6 +70,7 @@ abstract class Database {
      Stream<List<Experience>> myExperiencesStream(String userId);
      Stream<List<Competency>> competenciesStream();
      Stream<List<CertificationRequest>> myCertificationRequestStream(String userId);
+     Stream<List<SocialEntitiesType>> socialEntitiesTypeStream();
      Future<void> setUserEnreda(UserEnreda userEnreda);
      Future<void> deleteUser(UserEnreda userEnreda);
      Future<void> uploadUserAvatar(String userId, Uint8List data);
@@ -365,6 +367,14 @@ class FirestoreDatabase implements Database {
           builder: (data, documentId) => CertificationRequest.fromMap(data, documentId),
           sort: (lhs, rhs) => lhs.certifierName.compareTo(rhs.certifierName),
         );
+
+    @override
+    Stream<List<SocialEntitiesType>> socialEntitiesTypeStream() => _service.collectionStream(
+      path: APIPath.socialEntitiesType(),
+      queryBuilder: (query) => query.where('id', isNotEqualTo: null),
+      builder: (data, documentId) => SocialEntitiesType.fromMap(data, documentId),
+      sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+    );
 
     @override
     Future<void> setUserEnreda(UserEnreda userEnreda) {
