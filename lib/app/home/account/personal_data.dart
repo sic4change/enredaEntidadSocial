@@ -3,6 +3,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_raised_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
+import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
@@ -84,17 +85,7 @@ class _PersonalDataState extends State<PersonalData> {
                       '${userEnreda?.phone?[0]}${userEnreda?.phone?[1]}${userEnreda?.phone?[2]}';
                   _birthday = _birthday ?? userEnreda?.birthday;
                   _postalCode = userEnreda?.address?.postalCode ?? '';
-                  return Container(
-                      padding: EdgeInsets.all(Sizes.mainPadding),
-                      margin: EdgeInsets.all(Sizes.mainPadding),
-                      decoration: BoxDecoration(
-                        color: AppColors.altWhite,
-                        shape: BoxShape.rectangle,
-                        border: Border.all(
-                            color: AppColors.greyLight2.withOpacity(0.3),
-                            width: 1),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                  return RoundedContainer(
                       child: SingleChildScrollView(
                         child: Column(
                           children: [

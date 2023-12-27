@@ -33,6 +33,8 @@ class AppColors {
   static const Color greenLight = Color(0xFFA4F5F6);
 
   //Blue
+  static const Color seaBlue = Color(0xFF4E657E);
+  static const Color turquoiseBlue = Color(0xFF054D5E);
   static const Color blue300 = Color(0xFF2867F0);
   static const Color blueDarker = Color(0xFF2C5F73);
   static const Color blueViolet = Color(0xFFB5C2EB);
@@ -42,10 +44,11 @@ class AppColors {
   static const Color bluePetrol = Color(0xFF054D5E);
 
   //Yellow
-  static const Color yellow = Color(0xFFFDE934);
+  static const Color yellow = Color(0xFFFFCB77);
 
   //Pink
   static const Color pink300 = Color(0xFFDC5687);
+  static const Color pink600 = Color(0xFFAB1F8C);
 
   //Grey
   static const Color grey50 = Color(0xFFF2F1F1);
@@ -55,6 +58,7 @@ class AppColors {
   static const Color grey250 = Color(0xFFBBBBBB);
   static const Color grey300 = Color(0xFFBABABA);
   static const Color grey350 = Color(0xFFADADAD);
+  static const Color greyBlue = Color(0xFFC2D1D5);
   static const Color greyLight = Color(0xFFF4F5FB);
   static const Color greyViolet = Color(0xFF6768AB);
   static const Color greyAlt = Color(0xFF44494B);

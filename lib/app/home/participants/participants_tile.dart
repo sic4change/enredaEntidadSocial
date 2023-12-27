@@ -1,17 +1,22 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
-import 'package:enreda_empresas/app/utils/adaptative.dart';
-import 'package:enreda_empresas/app/utils/responsive.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ParticipantsListTile extends StatefulWidget {
-  const ParticipantsListTile({Key? key, required this.user, this.onTap})
+  const ParticipantsListTile({
+    Key? key,
+    required this.user,
+    required this.totalGamificationFlags,
+    this.onTap})
       : super(key: key);
   final UserEnreda user;
+  final int totalGamificationFlags;
   final VoidCallback? onTap;
 
   @override
@@ -27,18 +32,14 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
-    double sidePadding = responsiveSize(context, 15, 20, md: 17);
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        margin: const EdgeInsets.all(5.0),
-        child: InkWell(
-          mouseCursor: MaterialStateMouseCursor.clickable,
-          onTap: widget.onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                  color: AppColors.greyLight2.withOpacity(0.3), width: 1),
+    final gamificationFlagsCount = widget.user.gamificationFlags.length;
+
+    return Container(
+        width: 240.0,
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          border: Border.all(
+              color: AppColors.greyLight2.withOpacity(0.3), width: 1),
               borderRadius: const BorderRadius.all(Radius.circular(10)),
               color: Colors.white,
               boxShadow: [
@@ -51,104 +52,184 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
               ],
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                !kIsWeb
-                    ? Expanded(
-                        flex: 3,
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                          ),
-                          child: widget.user.photo == null ||
-                                  widget.user.photo == ""
-                              ? Container(
-                                  color: Colors.transparent,
-                                  height: 120,
-                                  width: 120,
-                                  child: Image.asset(ImagePath.USER_DEFAULT),
-                                )
-                              : CachedNetworkImage(
-                                  width: 400,
-                                  fit: BoxFit.cover,
-                                  progressIndicatorBuilder:
-                                      (context, url, downloadProgress) =>
-                                          Container(
-                                            child: Image.asset(
-                                                ImagePath.IMAGE_DEFAULT),
-                                          ),
-                                  alignment: Alignment.center,
-                                  imageUrl: widget.user.photo!),
-                        ),
-                      )
-                    : Expanded(
-                        flex: 3,
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                          ),
-                          child: widget.user.photo == null ||
-                                  widget.user.photo == ""
-                              ? Container(
-                                  color: Colors.transparent,
-                                  height: 120,
-                                  width: 120,
-                                  child: Image.asset(ImagePath.USER_DEFAULT),
-                                )
-                              : PrecacheResourceCard(
-                                  imageUrl: widget.user.photo!,
-                                ),
-                        ),
-                      ),
-                Expanded(
-                  flex: 3,
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      vertical: Sizes.kDefaultPaddingDouble,
+                      horizontal: Sizes.kDefaultPaddingDouble/2
+                  ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: sidePadding, right: sidePadding),
-                            child: Text(
-                              '${widget.user.firstName!} ${widget.user.lastName!}',
-                              textAlign: TextAlign.left,
-                              maxLines: 1,
-                              style: textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.greyDark2,
-                              ),
-                            ),
-                          ),
-                          const SpaceH4(),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                right: sidePadding, left: sidePadding),
-                            child: Text(
-                              widget.user.educationName?.toUpperCase() ?? '',
-                              textAlign: TextAlign.left,
-                              maxLines: 2,
-                              style: textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.penBlue),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        StringConst.GAMIFICATION,
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.seaBlue,
+                        ),
                       ),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          disabledActiveTrackColor: AppColors.turquoise,
+                          disabledInactiveTrackColor: AppColors.lightTurquoise,
+                          trackShape: RoundedRectSliderTrackShape(),
+                          trackHeight: 6.0,
+                          disabledThumbColor: AppColors.yellow,
+                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
+                          overlayShape: RoundSliderOverlayShape(overlayRadius: 0.0),),
+                        child: Slider(
+                          value: gamificationFlagsCount / widget.totalGamificationFlags,
+                          onChanged: null,
+                        ),
+                      ),
+                      SpaceH8(),
+                      widget.user.photo != null && widget.user.photo!.isNotEmpty?
+                      PrecacheAvatarCard(
+                        imageUrl: widget.user.photo!,
+                        height: 80,
+                        width: 80,
+                      ):
+                      ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(60)),
+                        child: Container(
+                          height: 80,
+                          width: 80,
+                          color: AppColors.pink600,
+                          child: Center(child: Text(
+                            '${(widget.user.firstName??'-').substring(0, 1)} '
+                            '${(widget.user.lastName??'-').substring(0, 1)}',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.white,
+                            ),
+                          ),),
+                        ),
+                      ),
+                      Text(
+                        '${widget.user.firstName!} ${widget.user.lastName!}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.greyDark2,
+                        ),
+                      ),
+                      SpaceH20(),
+                      // TODO: Improve button style
+                      EnredaButton(
+                        buttonColor: AppColors.turquoise,
+                        buttonTitle: StringConst.INVITE_RESOURCE,
+                        titleColor: Colors.white,
+                        height: 40.0,
+                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                        onPressed: () {},
+                      ),
+                      SpaceH20(),
+                      _buildContactRow(textTheme),
                     ],
                   ),
                 ),
+                InkWell(
+                  onTap: widget.onTap,
+                  child: Container(
+                    height: 50.0,
+                    width: double.infinity,
+                    color: AppColors.turquoiseBlue,
+                    child: Center(
+                      child: Text(StringConst.GO_PROFILE,
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.white,
+                        ),),
+                    ),
+                    ),
+                )
               ],
             ),
-          ),
-        ),
+        );
+  }
+
+  Widget _buildContactRow(TextTheme textTheme) {
+    bool hasPhone = widget.user.phone != null && widget.user.phone!.isNotEmpty;
+    bool hasEmail = widget.user.email.isNotEmpty;
+
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          Expanded(child: InkWell(
+            onTap: hasEmail? () => _sendEmail(widget.user.email): null,
+            child: Container(
+              decoration: hasEmail? BoxDecoration(
+                border: Border.all(
+                    color: AppColors.greyBlue, width: 1),
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+              ): null,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.mail_outline_outlined, color: hasEmail? AppColors.turquoiseBlue: AppColors.greyBlue,),
+                  SpaceW8(),
+                  Text(
+                    StringConst.EMAIL,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: hasEmail? AppColors.turquoiseBlue: AppColors.darkGray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )),
+          const VerticalDivider(color: AppColors.greyBlue,),
+          Expanded(child: InkWell(
+            onTap: hasPhone? () => _call(widget.user.phone??""): null,
+            child: Container(
+              decoration: hasPhone? BoxDecoration(
+                border: Border.all(
+                    color: AppColors.greyBlue, width: 1),
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+              ): null,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.phone, color: hasPhone? AppColors.turquoiseBlue: AppColors.greyBlue,),
+                  SpaceW8(),
+                  Text(
+                    StringConst.CALL,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: hasPhone? AppColors.turquoiseBlue: AppColors.darkGray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )),
+        ],
       ),
     );
+  }
+
+  void _sendEmail(String email) {
+    String? encodeQueryParameters(Map<String, String> params) {
+      return params.entries
+          .map((MapEntry<String, String> e) =>
+      '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+          .join('&');
+    }
+
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      query: encodeQueryParameters(<String, String>{
+        'subject': 'Asunto',
+      }),
+    );
+    launchUrl(emailLaunchUri);
+  }
+
+  void _call(String phone) {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'tel',
+      path: phone,
+    );
+    launchUrl(emailLaunchUri);
   }
 }

@@ -5,6 +5,7 @@ import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/account/personal_data.dart';
 import 'package:enreda_empresas/app/home/entity_directory/entity_directory_page.dart';
+import 'package:enreda_empresas/app/home/participants/create_participant/create_participant_page.dart';
 import 'package:enreda_empresas/app/home/social_entity/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
@@ -30,10 +31,14 @@ class WebHome extends StatefulWidget {
   const WebHome({Key? key})
       : super(key: key);
 
-  static ValueNotifier<int> selectedIndex = ValueNotifier(0);
+  static final controller = SidebarXController(selectedIndex: 1, extended: true);
 
   static goToResources() {
-    selectedIndex.value = 1;
+    controller.selectIndex(2);
+  }
+
+  static goToControlPanel() {
+    controller.selectIndex(1);
   }
 
   @override
@@ -42,7 +47,6 @@ class WebHome extends StatefulWidget {
 
 class _WebHomeState extends State<WebHome> {
   var bodyWidget = [];
-  final _controller = SidebarXController(selectedIndex: 0, extended: true);
   final _key = GlobalKey<ScaffoldState>();
 
   @override
@@ -55,10 +59,7 @@ class _WebHomeState extends State<WebHome> {
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final database = Provider.of<Database>(context, listen: false);
-    return ValueListenableBuilder<int>(
-        valueListenable: WebHome.selectedIndex,
-        builder: (context, selectedIndex, child) {
-          return StreamBuilder<User?>(
+    return StreamBuilder<User?>(
               stream: Provider.of<AuthBase>(context).authStateChanges(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const AccessPage();
@@ -90,7 +91,6 @@ class _WebHomeState extends State<WebHome> {
                       }
                   );
                 } return const Center(child: CircularProgressIndicator());
-              });
         });
   }
 
@@ -143,23 +143,25 @@ class _WebHomeState extends State<WebHome> {
               const SizedBox(width: 50,)
             ],
           ),
-          drawer: SideBarWidget(controller: _controller,),
+          drawer: SideBarWidget(controller: WebHome.controller,),
           body: Padding(
             padding: Responsive.isMobile(context) ? const EdgeInsets.all(0.0) : const EdgeInsets.only(left: 20.0),
             child: Row(
               children: [
-                if(!isSmallScreen) SideBarWidget(controller: _controller),
+                if(!isSmallScreen) SideBarWidget(controller: WebHome.controller),
                 Expanded(child: Center(child: AnimatedBuilder(
-                  animation: _controller,
+                  animation: WebHome.controller,
                   builder: (context,child){
-                    switch(_controller.selectedIndex){
+                    switch(WebHome.controller.selectedIndex){
                       case 0: _key.currentState?.closeDrawer();
-                      return ControlPanelPage(socialEntity: socialEntity, user: user,);
+                      return CreateParticipantPage();
                       case 1: _key.currentState?.closeDrawer();
-                      return const ParticipantsListPage();
+                      return ControlPanelPage(socialEntity: socialEntity, user: user,);
                       case 2: _key.currentState?.closeDrawer();
-                      return const MyResourcesListPage();
+                      return const ParticipantsListPage();
                       case 3: _key.currentState?.closeDrawer();
+                      return const MyResourcesListPage();
+                      case 4: _key.currentState?.closeDrawer();
                       return const PersonalData();
                       case 4: _key.currentState?.closeDrawer();
                       return  EntityDirectoryPage();
@@ -328,6 +330,7 @@ class SideBarWidget extends StatelessWidget {
         ) : const SizedBox(height: 10,);
       },
       items: const [
+        SidebarXItem(icon: Icons.add_circle_outlined, label: StringConst.NEW_PROFILE),
         SidebarXItem(icon: Icons.view_quilt, label: 'Panel de control'),
         SidebarXItem(icon: Icons.supervisor_account, label: 'Participantes'),
         SidebarXItem(icon: Icons.card_travel, label: 'Mis recursos'),

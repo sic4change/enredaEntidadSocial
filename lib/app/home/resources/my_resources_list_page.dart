@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/build_share_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_title.dart';
+import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/resources/create_resource/create_resource.dart';
 import 'package:enreda_empresas/app/home/resources/edit_resource/edit_resource.dart';
@@ -56,15 +57,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Container(
-      padding: EdgeInsets.all(Sizes.mainPadding),
-      margin: EdgeInsets.all(Sizes.mainPadding),
-      decoration: BoxDecoration(
-        color: AppColors.altWhite,
-        shape: BoxShape.rectangle,
-        border: Border.all(color: AppColors.greyLight2.withOpacity(0.3), width: 1),
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+    return RoundedContainer(
       child: Stack(
         children: [
           InkWell(

@@ -28,6 +28,7 @@ class AppTheme {
 
   static ThemeData themeData(ColorScheme colorScheme, Color focusColor) {
     return ThemeData(
+      dialogTheme: DialogTheme().copyWith(surfaceTintColor: Colors.white,),
       primarySwatch: white,
       textTheme: _textTheme,
       iconTheme: IconThemeData(color: AppColors.white),
@@ -61,73 +62,73 @@ class AppTheme {
   static const _light = FontWeight.w300;
 
   static final TextTheme _textTheme = TextTheme(
-    displayLarge: GoogleFonts.inter(
+    displayLarge: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_96,
       color: AppColors.black,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    displayMedium: GoogleFonts.inter(
+    displayMedium: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_60,
       color: AppColors.black,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    displaySmall: GoogleFonts.inter(
+    displaySmall: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_48,
       color: AppColors.black,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    headlineMedium: GoogleFonts.inter(
+    headlineMedium: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_34,
       color: AppColors.black,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    headlineSmall: GoogleFonts.inter(
+    headlineSmall: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_24,
       color: AppColors.black,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    titleLarge: GoogleFonts.inter(
+    titleLarge: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_20,
       color: AppColors.black,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    titleMedium: GoogleFonts.inter(
+    titleMedium: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_18,
       color: AppColors.black,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    titleSmall: GoogleFonts.inter(
+    titleSmall: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_14,
       color: AppColors.black,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    bodyLarge: GoogleFonts.inter(
+    bodyLarge: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_16,
       color: AppColors.primaryText2,
       fontWeight: _bold,
       fontStyle: FontStyle.normal,
     ),
-    bodyMedium: GoogleFonts.inter(
+    bodyMedium: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_15,
       color: AppColors.black,
       fontWeight: _light,
       fontStyle: FontStyle.normal,
     ),
-    labelLarge: GoogleFonts.inter(
+    labelLarge: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_16,
       color: AppColors.black,
       fontStyle: FontStyle.normal,
       fontWeight: _regular,
     ),
-    bodySmall: GoogleFonts.inter(
+    bodySmall: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_12,
       color: AppColors.primaryText1,
       fontWeight: _regular,

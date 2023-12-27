@@ -475,17 +475,37 @@ class StringConst {
   static const String PERSONAL_DATA = 'Datos personales';
   static const String ABOUT_ME = "Un poco más sobre mí...";
   static const String PROFILE = "Carrera";
-  static const String INVITE_RESOURCE = 'Invitar a un nuevo recurso';
+  static const String INVITE_RESOURCE = 'Invitar a un recurso';
   static const String CREATE_RESOURCE = 'Crear un recurso nuevo';
 
   // Companies
   static const String CONTROL_PANEL = "Panel de control";
   static const String PARTICIPANTS = "Participantes";
+  static const String MY_PARTICIPANTS = "Mis Participantes";
+  static String allParticipants(String socialEntityName) => "Todos los participantes inscritos en $socialEntityName";
   static const String WELCOME_COMPANY = "Bienvenido a la aplicación,";
   static const String WELCOME_TEXT = "Esta es tu ventana de administración. Según tu rol, puedes visualizar, editar y eliminar todos los recursos disponibles en esta web. Por favor, procede con precaución.";
   static const String RESOURCES_CREATED_BY = "Recursos creados";
-  static const String PARTICIPANTS_BY = "Participantes inscritos";
+
 
   static const String LOREM_IMPSUM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Auctor neque, tortor amet, adipiscing felis nullam. Aliquet commodo est pretium vitae hendrerit fames vitae. Orci, feugiat consectetur aliquet sodales mus sodales a urna.\n\n'
       'Rhoncus id volutpat, diam adipiscing risus, enim cursus ac. Amet nunc nec eu diam. Tincidunt at vulputate arcu dis justo. Ut egestas ac rhoncus, sapien.';
+
+  // Participants
+  static const String GAMIFICATION = "Gamificación";
+  static const String GO_PROFILE = "Ver perfil";
+  static const String NEW_PROFILE = "Crear nuevo perfil";
+  static const String CALL = "Llamar";
+  static const String CREATE_PARTICIPANT_SUCCESS = "¡El perfil ha sido creado con éxito!";
+  static const String FORM_UNEMPLOYED = "Busco trabajo";
+  static const String FORM_MOTIVATION = "Motivaciones";
+  static const String FORM_ABILITIES = "¿Qué aspectos crees que tienes que reforzar?";
+  static const String FORM_BIRTHDAY = "Fecha de nacimiento";
+  static const String FORM_BIRTHDAY_ERROR = "La fecha no puede estar vacío";
+  static const String FORM_NAME = "Nombre";
+  static const String FORM_GENDER = "Género";
+  static const String FORM_GENDER_ERROR = "El género no puede estar vacío";
+  static const String FORM_DEDICATION = "¿Tienes claro a lo que te gustaría dedicarte?";
+  static const String FORM_BELONG_ORGANIZATION = "Organización o entidad a la que pertenece";
+  static const String FORM_BELONG_ORGANIZATION_ERROR = "La organización no puede estar vacía";
 }

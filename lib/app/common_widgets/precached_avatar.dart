@@ -40,20 +40,11 @@ class _PrecacheAvatarCardState extends State<PrecacheAvatarCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: defaultChild(),
+    return ClipRRect(
+      borderRadius: BorderRadius.all(Radius.circular(60)),
+      child: profileImage,
     );
   }
-
-  Widget defaultChild() {
-      return ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(60)),
-        child: Center(
-          child: profileImage,
-        ),
-      );
-  }
-
 }
 
 class PrecacheResourceCard extends StatefulWidget {

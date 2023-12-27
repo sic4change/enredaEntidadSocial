@@ -8,8 +8,11 @@ import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/contact.dart';
 import 'package:enreda_empresas/app/models/country.dart';
+import 'package:enreda_empresas/app/models/dedication.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
+import 'package:enreda_empresas/app/models/gamificationFlags.dart';
+import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -22,6 +25,9 @@ import 'package:enreda_empresas/app/models/resourcetype.dart';
 import 'package:enreda_empresas/app/models/scope.dart';
 import 'package:enreda_empresas/app/models/size.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
+import 'package:enreda_empresas/app/models/timeSearching.dart';
+import 'package:enreda_empresas/app/models/timeSpentWeekly.dart';
+import 'package:enreda_empresas/app/models/unemployedUser.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/api_path.dart';
 import 'package:enreda_empresas/app/services/firestore_service.dart';
@@ -32,7 +38,7 @@ abstract class Database {
      Stream<Resource> resourceStream(String? resourceId);
      Stream<List<Resource>> myResourcesStream(String socialEntityId);
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
-     Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(List<String?> ids);
+     Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId);
      Stream<List<SocialEntity>> socialEntitiesStream();
      Stream<List<SocialEntity>> filterSocialEntityStream(String socialEntityId);
      Stream<SocialEntity> socialEntityStream(String? socialEntityId);
@@ -82,6 +88,12 @@ abstract class Database {
      Future<void> addResource(Resource resource);
      Future<void> addResourceInvitation(ResourceInvitation resourceInvitation);
      Future<void> updateCertificationRequest(CertificationRequest certificationRequest, bool certified, bool referenced );
+     Stream<List<GamificationFlag>> gamificationFlagsStream();
+     Future<void> addUnemployedUser(UnemployedUser unemployedUser);
+     Stream<List<Dedication>> dedicationStream();
+     Stream<List<Gender>> genderStream();
+     Stream<List<TimeSpentWeekly>> timeSpentWeeklyStream();
+     Stream<List<TimeSearching>> timeSearchingStream();
 }
 
 class FirestoreDatabase implements Database {
@@ -276,21 +288,13 @@ class FirestoreDatabase implements Database {
     }
 
   @override
-  Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(List<String?> resourceIdList) async* {
-    final collectionPath = FirebaseFirestore.instance.collection(APIPath.users());
-    final batches = <Future<List<UserEnreda>>>[];
-
-    for (var i = 0; i < resourceIdList.length; i += 10) {
-      final batch = resourceIdList.sublist(i, i + 10 < resourceIdList.length ? i + 10 : resourceIdList.length);
-      final futureBatch = collectionPath
-          .where('resources', arrayContainsAny: batch)
-          .get()
-          .then((results) => results.docs.map<UserEnreda>((result) => UserEnreda.fromMap(result.data(), result.id)).toList());
-      batches.add(futureBatch);
-    }
-    final results = await Future.wait(batches);
-    var combinedResults = results.expand((i) => i).toSet().toList();
-    yield combinedResults;
+  Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId) {
+    return _service.collectionStream<UserEnreda>(
+      path: APIPath.users(),
+      queryBuilder: (query) => query.where('assignedEntityId', isEqualTo: socialEntityId),
+      builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+      sort: (lhs, rhs) => (lhs.firstName??"").compareTo(rhs.firstName??""),
+    );
   }
 
 
@@ -540,6 +544,52 @@ class FirestoreDatabase implements Database {
     sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
   );
 
+  @override
+  Stream<List<GamificationFlag>> gamificationFlagsStream() => _service.collectionStream(
+    path: APIPath.gamificationFlags(),
+    queryBuilder: (query) => query.where('id', isNotEqualTo: null),
+    builder: (data, documentId) => GamificationFlag.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Future<void> addUnemployedUser(UnemployedUser unemployedUser) =>
+      _service.addData(path: APIPath.users(), data: unemployedUser.toMap());
+
+  @override
+  Stream<List<Dedication>> dedicationStream() => _service.collectionStream(
+    path: APIPath.dedications(),
+    queryBuilder: (query) => query.where('label', isNotEqualTo: null),
+    builder: (data, documentId) => Dedication.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.value.compareTo(rhs.value),
+  );
+
+  @override
+  Stream<List<Gender>> genderStream() => _service.collectionStream(
+    path: APIPath.genders(),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null),
+    builder: (data, documentId) => Gender.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
+
+  @override
+  Stream<List<TimeSpentWeekly>> timeSpentWeeklyStream() =>
+      _service.collectionStream(
+        path: APIPath.timeSpentWeekly(),
+        queryBuilder: (query) => query.where('label', isNotEqualTo: null),
+        builder: (data, documentId) =>
+            TimeSpentWeekly.fromMap(data, documentId),
+        sort: (lhs, rhs) => lhs.value.compareTo(rhs.value),
+      );
+
+  @override
+  Stream<List<TimeSearching>> timeSearchingStream() =>
+      _service.collectionStream(
+        path: APIPath.timeSearching(),
+        queryBuilder: (query) => query.where('label', isNotEqualTo: null),
+        builder: (data, documentId) => TimeSearching.fromMap(data, documentId),
+        sort: (lhs, rhs) => lhs.value.compareTo(rhs.value),
+      );
 }
 
 

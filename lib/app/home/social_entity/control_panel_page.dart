@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
@@ -26,16 +27,8 @@ class ControlPanelPage extends StatelessWidget {
     String dayOfWeek = DateFormat.EEEE(locale).format(now);
     String dayMonth = DateFormat.MMMM(locale).format(now);
 
-    return Container(
-      padding: EdgeInsets.all(Sizes.mainPadding),
-      margin: EdgeInsets.all(Sizes.mainPadding),
-      decoration: BoxDecoration(
-        color: AppColors.altWhite,
-        shape: BoxShape.rectangle,
-        border: Border.all(color: AppColors.greyLight2.withOpacity(0.3), width: 1),
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      child: Column(
+    return RoundedContainer(
+        child: Column(
         children: [
           Flex(
             direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,

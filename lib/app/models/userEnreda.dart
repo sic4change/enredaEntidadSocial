@@ -35,6 +35,9 @@ class UserEnreda {
     this.organization,
     this.socialEntityId,
     required this.resources,
+    this.gamificationFlags = const {},
+    this.assignedById,
+    this.assignedEntityId,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -151,6 +154,16 @@ class UserEnreda {
 
     final String? aboutMe = data['aboutMe'];
 
+    Map<String, bool> gamificationFlags = {};
+    if (data['gamificationFlags'] != null) {
+      (data['gamificationFlags'] as Map<String, dynamic>).forEach((key, value) {
+        gamificationFlags[key] = value as bool;
+      });
+    }
+
+    final String? assignedById = data['assignedById']?? "";
+    final String? assignedEntityId = data['assignedEntityId']?? "";
+
     return UserEnreda(
       email: email,
       firstName: firstName,
@@ -182,6 +195,9 @@ class UserEnreda {
       organization: organization,
       socialEntityId: socialEntityId,
       resources: resources,
+      gamificationFlags: gamificationFlags,
+      assignedById: assignedById,
+      assignedEntityId: assignedEntityId,
     );
   }
 
@@ -215,6 +231,9 @@ class UserEnreda {
   final String? organization;
   final String? socialEntityId;
   final List<String> resources;
+  final Map<String, bool> gamificationFlags;
+  final String? assignedById;
+  final String? assignedEntityId;
 
   @override
   bool operator ==(Object other){
@@ -252,6 +271,9 @@ class UserEnreda {
       'organization': organization,
       'socialEntityId': socialEntityId,
       'resources': resources,
+      'gamificationFlags': gamificationFlags,
+      'assignedById': assignedById,
+      'assignedEntityId': assignedEntityId,
     };
   }
 
@@ -288,6 +310,9 @@ class UserEnreda {
     String? aboutMe,
     String? organization,
     String? socialEntityId,
+    Map<String, bool>? gamificationFlags,
+    String? assignedById,
+    String? assignedEntityId,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -318,6 +343,9 @@ class UserEnreda {
       organization: organization ?? this.organization,
       socialEntityId: socialEntityId ?? this.socialEntityId,
       resources: resources ?? this.resources,
+      gamificationFlags: gamificationFlags ?? this.gamificationFlags,
+      assignedById: assignedById,
+      assignedEntityId: assignedEntityId,
     );
   }
 

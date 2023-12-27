@@ -24,6 +24,9 @@ class UnemployedUser {
     this.interests,
     this.education,
     this.unemployedType,
+    this.belongOrganization,
+    this.assignedById,
+    this.assignedEntityId,
   });
 
   String? email;
@@ -45,6 +48,9 @@ class UnemployedUser {
   final Interests? interests;
   final Education? education;
   final String? unemployedType;
+  final String? belongOrganization;
+  final String? assignedById;
+  final String? assignedEntityId;
 
   factory UnemployedUser.fromMap(Map<String, dynamic> data, String documentId) {
 
@@ -107,8 +113,10 @@ class UnemployedUser {
         motivation: motivation,
         interests: interestsUser,
         education: education,
-        unemployedType: data['unemployedType']
-
+        unemployedType: data['unemployedType'],
+        belongOrganization: data['belongOrganization'],
+        assignedById: data['assignedById'],
+        assignedEntityId: data['assignedEntityId'],
     );
   }
 
@@ -126,6 +134,9 @@ class UnemployedUser {
       'interests': interests?.toMap(),
       'education': education?.toMap(),
       'unemployedType': unemployedType,
+      'belongOrganization': belongOrganization,
+      'assignedById': assignedById,
+      'assignedEntityId': assignedEntityId,
     };
   }
 }

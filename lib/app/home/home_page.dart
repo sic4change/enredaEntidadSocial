@@ -12,16 +12,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-        stream: Provider.of<AuthBase>(context).authStateChanges(),
-        builder: (context, snapshot) {
-          return LayoutBuilder(builder: (context, constraints) {
-            final isBigScreen = constraints.maxWidth >= 900;
-            return const WebHome();
-            // return Stack(
-            //   children: [snapshot.hasData && kIsWeb && isBigScreen ? const WebHome() : Container()],
-            // );
-          });
-        });
+    return const WebHome();
   }
 }
