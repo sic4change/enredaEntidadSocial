@@ -163,7 +163,7 @@ class _WebHomeState extends State<WebHome> {
                       return const MyResourcesListPage();
                       case 4: _key.currentState?.closeDrawer();
                       return const PersonalData();
-                      case 4: _key.currentState?.closeDrawer();
+                      case 5: _key.currentState?.closeDrawer();
                       return  EntityDirectoryPage();
                       default:
                         return const MyResourcesListPage();
