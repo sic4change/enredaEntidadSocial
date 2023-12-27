@@ -1,8 +1,8 @@
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
-class RoundedContainer extends StatelessWidget {
-  const RoundedContainer(
+class SearchRoundedContainer extends StatelessWidget {
+  const SearchRoundedContainer(
       {Key? key,
       required this.child,
       this.height,
