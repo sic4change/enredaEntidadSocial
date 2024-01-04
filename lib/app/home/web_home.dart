@@ -9,6 +9,7 @@ import 'package:enreda_empresas/app/home/participants/create_participant/create_
 import 'package:enreda_empresas/app/home/social_entity/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
+import 'package:enreda_empresas/app/home/social_entity/create_social_entity_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
@@ -154,7 +155,7 @@ class _WebHomeState extends State<WebHome> {
                   builder: (context,child){
                     switch(WebHome.controller.selectedIndex){
                       case 0: _key.currentState?.closeDrawer();
-                      return CreateParticipantPage();
+                      return CreateSocialEntityPage();
                       case 1: _key.currentState?.closeDrawer();
                       return ControlPanelPage(socialEntity: socialEntity, user: user,);
                       case 2: _key.currentState?.closeDrawer();
@@ -285,8 +286,8 @@ class SideBarWidget extends StatelessWidget {
         hoverTextStyle: const TextStyle(color: AppColors.greyDark, fontWeight: FontWeight.w600),
         textStyle: const TextStyle(color: AppColors.penBlue, fontWeight: FontWeight.w800),
         selectedTextStyle: const TextStyle(color: AppColors.penBlue, fontWeight: FontWeight.w800),
-        itemTextPadding: const EdgeInsets.only(left: 30),
-        selectedItemTextPadding: const EdgeInsets.only(left: 30),
+        itemTextPadding: const EdgeInsets.only(left: 10),
+        selectedItemTextPadding: const EdgeInsets.only(left: 10),
         itemDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
         ),
