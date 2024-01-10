@@ -1,12 +1,18 @@
 import 'package:chips_choice/chips_choice.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_chip.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_phone_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
+import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
+import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
+import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
@@ -26,7 +32,6 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
   final _formKey = GlobalKey<FormState>();
   final _formKeyContactPerson = GlobalKey<FormState>();
 
-  //New values
   String? _entityName, _actionScope;
   late List<String> _entityTypes;
   String? _category, _subCategory;
@@ -160,31 +165,63 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
           ),
         ),
         _buildFormContactPerson(context),
-        SpaceH24(),
-        ElevatedButton(
-          onPressed: () {
-            // Validate returns true if the form is valid, or false otherwise.
-            if (_formKey.currentState!.validate() && _formKeyContactPerson.currentState!.validate()) {
-              _formKey.currentState!.save();
-              _formKeyContactPerson.currentState!.save();
-              // If the form is valid, display a snackbar. In the real world,
-              // you'd often call a server or save the information in a database.
-              print('Nombre de la entidad: $_entityName');
-              print('Ambito de actuación: $_actionScope');
-              print('Tipos de entidad: $_entityTypes');
-              print('Categoría: $_category');
-              print('Subcategoria: $_subCategory');
-              print('Zona geo: $_geographicZone');
-              print('Zona subgeo: $_subGeographicZone');
-              print('Url: $_url');
-              print('Telefono fijo: $_entityPhone');
-              print('Telefono movil: $_entityMobilePhone');
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Processing Data')),
-              );
-            }
-          },
-          child: const Text('Submit'),
+        SpaceH50(),
+        Center(
+          child: EnredaButton(
+            buttonTitle: 'Guardar',
+            buttonColor: AppColors.turquoise,
+            titleColor: Colors.white,
+            height: 50.0,
+            width: 160,
+            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            onPressed: () async {
+              // Validate returns true if the form is valid, or false otherwise.
+              if (_formKey.currentState!.validate() && _formKeyContactPerson.currentState!.validate()) {
+                _formKey.currentState!.save();
+                _formKeyContactPerson.currentState!.save();
+
+                SocialEntity finalSocialEntity = SocialEntity(
+                  name: _entityName!,
+                  actionScope: _actionScope,
+                  types: _entityTypes,
+                  category: _category,
+                  subCategory: _subCategory,
+                  entityPhone: _entityPhone,
+                  entityMobilePhone: _entityMobilePhone,
+                  geographicZone: _geographicZone,
+                  subGeographicZone: _subGeographicZone,
+                  website: _url,
+                  email: _email,
+                  linkedin: _linkedin,
+                  twitter: _twitter,
+                  otherSocialMedia: _otherSocialMedia,
+                  contactName: _contactName,
+                  contactEmail: _contactEmail,
+                  contactPhone: _contactPhone,
+                  contactMobilePhone: _contactMobilePhone,
+                  contactPosition: _contactPosition,
+                  contactChoiceGrade: _contactChoiceGrade,
+                  contactKOL: _contactKOL,
+                  contactProject: _contactProject,
+                );
+
+                try {
+                  final database = Provider.of<Database>(context, listen: false);
+                  await database.addSocialEntity(finalSocialEntity);
+                  await showAlertDialog(
+                  context,
+                  title: StringConst.CREATE_PARTICIPANT_SUCCESS,
+                  content: "",
+                  defaultActionText: StringConst.FORM_ACCEPT,
+                  );
+                  WebHome.goToControlPanel();
+                } on FirebaseException catch (e) {
+                  showExceptionAlertDialog(context,
+                      title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));
+                }
+              }
+            },
+          ),
         ),
       ],
     );

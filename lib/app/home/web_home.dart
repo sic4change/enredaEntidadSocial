@@ -155,7 +155,7 @@ class _WebHomeState extends State<WebHome> {
                   builder: (context,child){
                     switch(WebHome.controller.selectedIndex){
                       case 0: _key.currentState?.closeDrawer();
-                      return CreateSocialEntityPage();
+                      return CreateParticipantPage();
                       case 1: _key.currentState?.closeDrawer();
                       return ControlPanelPage(socialEntity: socialEntity, user: user,);
                       case 2: _key.currentState?.closeDrawer();

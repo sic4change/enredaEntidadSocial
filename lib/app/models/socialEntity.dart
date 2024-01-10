@@ -19,8 +19,27 @@ class SocialEntity {
     this.size,
     this.photo,
     this.types,
+    this.actionScope,
+    this.category,
+    this.subCategory,
+    this.entityPhone,
+    this.entityMobilePhone,
+    this.contactPhone,
+    this.contactMobilePhone,
+    this.geographicZone,
+    this.subGeographicZone,
+    this.linkedin,
+    this.twitter,
+    this.otherSocialMedia,
+    this.contactName,
+    this.contactEmail,
+    this.contactPosition,
+    this.contactChoiceGrade,
+    this.contactKOL,
+    this.contactProject,
   });
 
+  //Old fields
   final String? socialEntityId;
   final String name;
   final String? email;
@@ -35,6 +54,26 @@ class SocialEntity {
   final SizeOrg? size;
   final String? photo;
   final List<String>? types;
+  //New fields
+  final String? actionScope;
+  final String? category;
+  final String? subCategory;
+  final String? entityPhone;
+  final String? entityMobilePhone;
+  final String? contactPhone;
+  final String? contactMobilePhone;
+  final String? geographicZone;
+  final String? subGeographicZone;
+  final String? linkedin;
+  final String? twitter;
+  final String? otherSocialMedia;
+  final String? contactName;
+  final String? contactEmail;
+  final String? contactPosition;
+  final String? contactChoiceGrade;
+  final String? contactKOL;
+  final String? contactProject;
+
 
   factory SocialEntity.fromMap(Map<String, dynamic> data, String documentId) {
 
@@ -64,6 +103,25 @@ class SocialEntity {
       data['types'].forEach((type) {types.add(type.toString());});
     }
 
+    final String actionScope = data['actionScope'] ?? '';
+    final String category = data['category'] ?? '';
+    final String subCategory = data['subCategory'] ?? '';
+    final String entityPhone = data['entityPhone'] ?? '';
+    final String entityMobilePhone = data['entityMobilePhone'] ?? '';
+    final String contactPhone = data['contactPhone'] ?? '';
+    final String contactMobilePhone = data['contactPhone'] ?? '';
+    final String geographicZone = data['geographicZone'] ?? '';
+    final String subGeographicZone = data['subGeographicZone'] ?? '';
+    final String linkedin = data['linkedin'] ?? '';
+    final String twitter = data['twitter'] ?? '';
+    final String otherSocialMedia = data['otherSocialMedia'] ?? '';
+    final String contactName = data['contactName'] ?? '';
+    final String contactEmail = data['contactEmail'] ?? '';
+    final contactPosition = data['contactPosition'] ?? '';
+    final contactChoiceGrade = data['contactChoiceGrade'] ?? '';
+    final contactKOL = data['contactKOL'] ?? '';
+    final contactProject = data['contactProject'] ?? '';
+
     return SocialEntity(
         socialEntityId: socialEntityId,
         name: name,
@@ -73,6 +131,24 @@ class SocialEntity {
         website: website,
         photo: photo,
         types: types,
+        actionScope: actionScope,
+        category: category,
+        subCategory: subCategory,
+        entityPhone: entityPhone,
+        entityMobilePhone: entityMobilePhone,
+        contactPhone: contactPhone,
+        contactMobilePhone: contactMobilePhone,
+        geographicZone: geographicZone,
+        subGeographicZone: subGeographicZone,
+        linkedin: linkedin,
+        twitter: twitter,
+        otherSocialMedia: otherSocialMedia,
+        contactName: contactName,
+        contactEmail: contactEmail,
+        contactPosition: contactPosition,
+        contactChoiceGrade: contactChoiceGrade,
+        contactKOL: contactKOL,
+        contactProject: contactProject,
     );
   }
 
@@ -93,6 +169,24 @@ class SocialEntity {
       'address': address?.toMap(),
       'website': website,
       'types': types,
+      'actionScope': actionScope,
+      'category' : category,
+      'subCategory': subCategory,
+      'entityPhone': entityPhone,
+      'entityMobilePhone': entityMobilePhone,
+      'contactPhone': contactPhone,
+      'contactMobilePhone': contactMobilePhone,
+      'geographicZone': geographicZone,
+      'subGeographicZone': subGeographicZone,
+      'linkedin': linkedin,
+      'twitter': twitter,
+      'otherSocialMedia': otherSocialMedia,
+      'contactName': contactName,
+      'contactEmail': contactEmail,
+      'contactPosition': contactPosition,
+      'contactChoiceGrade': contactChoiceGrade,
+      'contactKOL': contactKOL,
+      'contactProject': contactProject,
     };
   }
 
