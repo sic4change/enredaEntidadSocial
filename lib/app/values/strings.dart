@@ -508,4 +508,8 @@ class StringConst {
   static const String FORM_DEDICATION = "¿Tienes claro a lo que te gustaría dedicarte?";
   static const String FORM_BELONG_ORGANIZATION = "Organización o entidad a la que pertenece";
   static const String FORM_BELONG_ORGANIZATION_ERROR = "La organización no puede estar vacía";
+
+  //Create entity errors
+  static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';
+
 }

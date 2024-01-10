@@ -8,7 +8,9 @@ import 'package:enreda_empresas/app/common_widgets/custom_chip.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/entity_directory/filter_text_field_row.dart';
 import 'package:enreda_empresas/app/home/entity_directory/search_bar.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
 import 'package:enreda_empresas/app/home/resources/list_item_builder_grid.dart';
+import 'package:enreda_empresas/app/home/social_entity/create_social_entity_page.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
@@ -35,6 +37,9 @@ class EntityDirectoryPage extends StatefulWidget {
 }
 
 class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
+  Widget? _currentPage;
+  late UserEnreda socialEntityUser;
+
   bool? isVisible = true;
   List<UserEnreda>? myParticipantsList = [];
   List<String>? interestsIdsList = [];
@@ -70,81 +75,100 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _currentPage = _buildEntitiesList();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return SingleChildScrollView(
       controller: ScrollController(),
-      child: Container(
-          padding: EdgeInsets.all(Sizes.mainPadding),
-          margin: EdgeInsets.all(Sizes.mainPadding),
-          decoration: BoxDecoration(
-            color: AppColors.altWhite,
-            shape: BoxShape.rectangle,
-            border: Border.all(color: AppColors.greyLight2.withOpacity(0.3), width: 1),
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 45, bottom: 35),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Text('Directorio de entidades',
-                        style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.greyDark2),),
-                    ),
-                    Expanded(
-                      child: SizedBox(),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 5.0),
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: AddYellowButton(text: 'Crear nueva entidad')
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              FilterTextFieldRow(
-                searchTextController: _queryController,
-                onPressed: () async {
-                  var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
-                  setState((){
-                    finalSocialEntities = fetchUsers;
-                  });
-
-                },
-                onFieldSubmitted: (value) => setStateIfMounted(() async {
-                  filterResource.searchText = _queryController.text;
-                  var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
-                  setState((){
-                    finalSocialEntities = fetchUsers;
-                  });
-                }),
-                clearFilter: (){
-                  setState(() {
-                    _queryController.clear();
-                    finalSocialEntities.clear();
-                    _clearFilter();
-                  });
-
-                },
-                hintText: '',
-              ),
-
-              chipFilter(),
-
-              Container(
-                  margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
-                  child: _buildResourcesList(context, tags)),
-            ],
-          ),),
+      child: _currentPage,
     );
+  }
+
+  Widget _buildEntitiesList(){
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      padding: EdgeInsets.all(Sizes.mainPadding),
+      margin: EdgeInsets.all(Sizes.mainPadding),
+      decoration: BoxDecoration(
+        color: AppColors.altWhite,
+        shape: BoxShape.rectangle,
+        border: Border.all(color: AppColors.greyLight2.withOpacity(0.3), width: 1),
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 45, bottom: 35),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Text('Directorio de entidades',
+                    style: textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.greyDark2),),
+                ),
+                Expanded(
+                  child: SizedBox(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 5.0),
+                  child: Align(
+                      alignment: Alignment.topRight,
+                      child: AddYellowButton(
+                        text: 'Crear nueva entidad',
+                        onPressed: () => setState(() {
+                          _currentPage =  CreateSocialEntityPage(
+                           /* onBack: () => setState(() {
+                              _currentPage = _buildEntitiesList();
+                            }),*/
+                          );
+                        }),
+                      )
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          FilterTextFieldRow(
+            searchTextController: _queryController,
+            onPressed: () async {
+              var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
+              setState((){
+                finalSocialEntities = fetchUsers;
+              });
+
+            },
+            onFieldSubmitted: (value) => setStateIfMounted(() async {
+              filterResource.searchText = _queryController.text;
+              var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
+              setState((){
+                finalSocialEntities = fetchUsers;
+              });
+            }),
+            clearFilter: (){
+              setState(() {
+                _queryController.clear();
+                finalSocialEntities.clear();
+                _clearFilter();
+              });
+
+            },
+            hintText: '',
+          ),
+
+          chipFilter(),
+
+          Container(
+              margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
+              child: _buildResourcesList(context, tags)),
+        ],
+      ),);
   }
 
   Widget entityContainer(SocialEntity currentSocialEntity, List<String> filter){
