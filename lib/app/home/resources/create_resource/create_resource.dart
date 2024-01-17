@@ -4,6 +4,7 @@ import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
+import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_category_create.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_interests_create.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_social_entities.dart';
@@ -1021,127 +1022,98 @@ class _CreateResourceState extends State<CreateResource> {
       contactBtnWidthLg,
       md: contactBtnWidthMd,
     );
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.of(context).pop();
-        return true;
-      },
-      child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: AppColors.white,
-            toolbarHeight: Responsive.isMobile(context) ? 50 : 74,
-            iconTheme: const IconThemeData(
-              color: AppColors.greyDark, //change your color here
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Responsive.isMobile(context)
-                    ? Container()
-                    : Padding(
-                        padding: EdgeInsets.all(Sizes.mainPadding),
-                        child: Image.asset(
-                          ImagePath.LOGO,
-                          height: Sizes.HEIGHT_24,
-                        ),
-                      ),
-                Responsive.isMobile(context)
-                    ? Container()
-                    : SizedBox(width: Sizes.mainPadding),
-                Container(
-                  padding:
-                      const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
-                  child: Text(StringConst.FORM_CREATE.toUpperCase(),
-                      style: const TextStyle(color: AppColors.greyDark)),
-                )
-              ],
-            ),
-          ),
-          body: Stack(
+    return Column(
+      children: [
+        IconButton(
+          onPressed: () {
+            setState(() {
+              MyResourcesListPage.selectedIndex.value = 0;
+            });
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+        Center(
+          child: Stack(
             children: [
-              Center(
+              Container(
+                height: Responsive.isMobile(context) ||
+                    Responsive.isTablet(context)
+                    ? MediaQuery.of(context).size.height
+                    : MediaQuery.of(context).size.height * 0.70,
+                width: Responsive.isMobile(context) ||
+                    Responsive.isTablet(context)
+                    ? MediaQuery.of(context).size.width
+                    : MediaQuery.of(context).size.width * 0.70,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(
+                      Sizes.kDefaultPaddingDouble / 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 2,
+                      offset: const Offset(
+                          0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
                 child: Stack(
                   children: [
-                    Container(
-                      height: Responsive.isMobile(context) ||
-                              Responsive.isTablet(context)
-                          ? MediaQuery.of(context).size.height
-                          : MediaQuery.of(context).size.height * 0.70,
-                      width: Responsive.isMobile(context) ||
-                              Responsive.isTablet(context)
-                          ? MediaQuery.of(context).size.width
-                          : MediaQuery.of(context).size.width * 0.70,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                            Sizes.kDefaultPaddingDouble / 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            spreadRadius: 2,
-                            blurRadius: 2,
-                            offset: const Offset(
-                                0, 2), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          Stepper(
-                            type: Responsive.isMobile(context)
-                                ? StepperType.vertical
-                                : StepperType.horizontal,
-                            steps: getSteps(),
-                            currentStep: currentStep,
-                            onStepContinue: onStepContinue,
-                            onStepTapped: (step) => goToStep(step),
-                            onStepCancel: onStepCancel,
-                            controlsBuilder: (context, _) {
-                              return Container(
-                                height: Sizes.kDefaultPaddingDouble * 2,
-                                margin: const EdgeInsets.only(
-                                    top: Sizes.kDefaultPaddingDouble * 2),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal:
-                                        Sizes.kDefaultPaddingDouble / 2),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: <Widget>[
-                                    if (currentStep != 0)
-                                      EnredaButton(
-                                        buttonTitle: StringConst.FORM_BACK,
-                                        width: contactBtnWidth,
-                                        onPressed: onStepCancel,
-                                      ),
-                                    const SizedBox(
-                                        width: Sizes.kDefaultPaddingDouble),
-                                    isLoading
-                                        ? const Center(
-                                            child: CircularProgressIndicator(
-                                            color: AppColors.primary300,
-                                          ))
-                                        : EnredaButton(
-                                            buttonTitle: isLastStep
-                                                ? StringConst.FORM_CONFIRM
-                                                : StringConst.FORM_NEXT,
-                                            width: contactBtnWidth,
-                                            buttonColor: AppColors.primaryColor,
-                                            titleColor: AppColors.white,
-                                            onPressed: onStepContinue,
-                                          ),
-                                  ],
+                    Stepper(
+                      type: Responsive.isMobile(context)
+                          ? StepperType.vertical
+                          : StepperType.horizontal,
+                      steps: getSteps(),
+                      currentStep: currentStep,
+                      onStepContinue: onStepContinue,
+                      onStepTapped: (step) => goToStep(step),
+                      onStepCancel: onStepCancel,
+                      controlsBuilder: (context, _) {
+                        return Container(
+                          height: Sizes.kDefaultPaddingDouble * 2,
+                          margin: const EdgeInsets.only(
+                              top: Sizes.kDefaultPaddingDouble * 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal:
+                              Sizes.kDefaultPaddingDouble / 2),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              if (currentStep != 0)
+                                EnredaButton(
+                                  buttonTitle: StringConst.FORM_BACK,
+                                  width: contactBtnWidth,
+                                  onPressed: onStepCancel,
                                 ),
-                              );
-                            },
+                              const SizedBox(
+                                  width: Sizes.kDefaultPaddingDouble),
+                              isLoading
+                                  ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primary300,
+                                  ))
+                                  : EnredaButton(
+                                buttonTitle: isLastStep
+                                    ? StringConst.FORM_CONFIRM
+                                    : StringConst.FORM_NEXT,
+                                width: contactBtnWidth,
+                                buttonColor: AppColors.primaryColor,
+                                titleColor: AppColors.white,
+                                onPressed: onStepContinue,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
             ],
-          )),
+          ),
+        ),
+      ],
     );
   }
 }
