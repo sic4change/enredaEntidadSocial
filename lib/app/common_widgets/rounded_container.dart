@@ -22,7 +22,7 @@ class RoundedContainer extends StatelessWidget {
         height: height,
         width: width,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.altWhite,
           borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble),
           border: Border.all(color: AppColors.greyLight, width: 2.0,),
         ),

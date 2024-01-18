@@ -28,6 +28,32 @@ class CustomTextTitle extends StatelessWidget {
   }
 }
 
+class CustomTextBoldTitle extends StatelessWidget {
+
+  const CustomTextBoldTitle({super.key,  required this.title });
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 15, 30, md: 25);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: Text(
+        title,
+        style: textTheme.bodyLarge?.copyWith(
+          color: AppColors.turquoiseBlue,
+          height: 1.5,
+          //fontWeight: FontWeight.w600,
+          fontSize: fontSize,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
 class CustomTextBody extends StatelessWidget {
 
   const CustomTextBody({super.key,  required this.text });
@@ -69,8 +95,10 @@ class CustomText extends StatelessWidget {
 
 class CustomTextBold extends StatelessWidget {
 
-  const CustomTextBold({super.key,  required this.title });
+  const CustomTextBold({super.key,  required this.title, this.color = AppColors.greyAlt, this.height = 1.5});
   final String title;
+  final Color color;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +107,8 @@ class CustomTextBold extends StatelessWidget {
     return Text(
       title,
       style: textTheme.bodySmall?.copyWith(
-          color: AppColors.greyAlt,
-          height: 1.5,
+          color: color,
+          height: height,
           fontSize: fontSize,
           fontWeight: FontWeight.bold
       ),

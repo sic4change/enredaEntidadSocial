@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
@@ -235,14 +236,18 @@ class _CreateResourceState extends State<CreateResource> {
           defaultActionText: StringConst.FORM_ACCEPT,
         ).then(
           (value) {
-            Navigator.of(context).pop();
-            return true;
+            setState(() {
+              MyResourcesListPage.selectedIndex.value = 0;
+            });
           },
         );
       } on FirebaseException catch (e) {
-        showExceptionAlertDialog(context,
-                title: StringConst.FORM_ERROR, exception: e)
-            .then((value) => Navigator.pop(context));
+        showExceptionAlertDialog(context, title: StringConst.FORM_ERROR, exception: e)
+            .then((value) {
+              setState(() {
+                MyResourcesListPage.selectedIndex.value = 0;
+              });
+        });
       }
   }
 
@@ -301,6 +306,8 @@ class _CreateResourceState extends State<CreateResource> {
                   iconDisabledColor: AppColors.greyDark,
                   iconEnabledColor: AppColors.primaryColor,
                   decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
                     labelStyle: textTheme.bodySmall?.copyWith(
                       height: 1.5,
                       color: AppColors.greyDark,
@@ -355,6 +362,8 @@ class _CreateResourceState extends State<CreateResource> {
           childLeft: TextFormField(
             controller: textEditingControllerInterests,
             decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
               labelText: StringConst.FORM_INTERESTS_QUESTION,
               focusColor: AppColors.lilac,
               labelStyle: textTheme.bodyLarge?.copyWith(
@@ -427,6 +436,8 @@ class _CreateResourceState extends State<CreateResource> {
                               ? null
                               : StringConst.FORM_COMPANY_ERROR,
                           decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
                             prefixIcon: const Icon(Icons.calendar_today),
                             labelText: StringConst.FORM_START,
                             labelStyle: textTheme.bodyLarge?.copyWith(
@@ -477,6 +488,8 @@ class _CreateResourceState extends State<CreateResource> {
                               ? null
                               : StringConst.FORM_COMPANY_ERROR,
                           decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
                             prefixIcon: const Icon(Icons.calendar_today),
                             labelText: StringConst.FORM_END,
                             labelStyle: textTheme.bodyLarge?.copyWith(
@@ -528,6 +541,8 @@ class _CreateResourceState extends State<CreateResource> {
                               ? null
                               : StringConst.FORM_COMPANY_ERROR,
                           decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
                             prefixIcon: const Icon(Icons.calendar_today),
                             labelText: StringConst.FORM_MAX,
                             labelStyle: textTheme.bodyLarge?.copyWith(
@@ -615,6 +630,8 @@ class _CreateResourceState extends State<CreateResource> {
                 iconDisabledColor: AppColors.greyDark,
                 iconEnabledColor: AppColors.primaryColor,
                 decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
                   labelStyle: textTheme.bodySmall?.copyWith(
                     height: 1.5,
                     color: AppColors.greyDark,
@@ -707,6 +724,8 @@ class _CreateResourceState extends State<CreateResource> {
                   buildSocialEntityStreamBuilderSetState),
               childRight: TextFormField(
                 decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
                   labelText: StringConst.FORM_ORGANIZER_TEXT,
                   focusColor: AppColors.lilac,
                   labelStyle: textTheme.bodySmall?.copyWith(
@@ -967,18 +986,18 @@ class _CreateResourceState extends State<CreateResource> {
         Step(
           isActive: currentStep >= 0,
           state: currentStep > 0 ? StepState.complete : StepState.indexed,
-          title: Text(StringConst.FORM_GENERAL_INFO.toUpperCase()),
+          title: CustomTextBold(title: StringConst.FORM_GENERAL_INFO, color: AppColors.turquoiseBlue,),
           content: _buildForm(context),
         ),
         Step(
           isActive: currentStep >= 1,
           state: currentStep > 1 ? StepState.complete : StepState.disabled,
-          title: Text(StringConst.FORM_ORGANIZER.toUpperCase()),
+          title: CustomTextBold(title: StringConst.FORM_ORGANIZER, color: AppColors.turquoiseBlue,),
           content: _buildFormOrganizer(context),
         ),
         Step(
           isActive: currentStep >= 2,
-          title: Text(StringConst.FORM_REVISION.toUpperCase()),
+          title: CustomTextBold(title: StringConst.FORM_REVISION, color: AppColors.turquoiseBlue,),
           content: _revisionForm(context),
           //content: Container(),
         ),
@@ -1022,98 +1041,75 @@ class _CreateResourceState extends State<CreateResource> {
       contactBtnWidthLg,
       md: contactBtnWidthMd,
     );
-    return Column(
-      children: [
-        IconButton(
-          onPressed: () {
-            setState(() {
-              MyResourcesListPage.selectedIndex.value = 0;
-            });
-          },
-          icon: Icon(Icons.arrow_back),
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.only(top: Sizes.kDefaultPaddingDouble),
+        height: Responsive.isMobile(context) ||
+            Responsive.isTablet(context)
+            ? MediaQuery.of(context).size.height
+            : MediaQuery.of(context).size.height * 0.80,
+        width: Responsive.isMobile(context) ||
+            Responsive.isTablet(context)
+            ? MediaQuery.of(context).size.width
+            : MediaQuery.of(context).size.width * 0.80,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(
+              Sizes.kDefaultPaddingDouble / 2),
         ),
-        Center(
-          child: Stack(
-            children: [
-              Container(
-                height: Responsive.isMobile(context) ||
-                    Responsive.isTablet(context)
-                    ? MediaQuery.of(context).size.height
-                    : MediaQuery.of(context).size.height * 0.70,
-                width: Responsive.isMobile(context) ||
-                    Responsive.isTablet(context)
-                    ? MediaQuery.of(context).size.width
-                    : MediaQuery.of(context).size.width * 0.70,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(
+        child: Stack(
+          children: [
+            Stepper(
+              type: Responsive.isMobile(context)
+                  ? StepperType.vertical
+                  : StepperType.horizontal,
+              steps: getSteps(),
+              currentStep: currentStep,
+              onStepContinue: onStepContinue,
+              onStepTapped: (step) => goToStep(step),
+              onStepCancel: onStepCancel,
+              elevation: 0,
+              controlsBuilder: (context, _) {
+                return Container(
+                  height: Sizes.kDefaultPaddingDouble * 2,
+                  margin: const EdgeInsets.only(
+                      top: Sizes.kDefaultPaddingDouble * 2),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal:
                       Sizes.kDefaultPaddingDouble / 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 2,
-                      offset: const Offset(
-                          0, 2), // changes position of shadow
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    Stepper(
-                      type: Responsive.isMobile(context)
-                          ? StepperType.vertical
-                          : StepperType.horizontal,
-                      steps: getSteps(),
-                      currentStep: currentStep,
-                      onStepContinue: onStepContinue,
-                      onStepTapped: (step) => goToStep(step),
-                      onStepCancel: onStepCancel,
-                      controlsBuilder: (context, _) {
-                        return Container(
-                          height: Sizes.kDefaultPaddingDouble * 2,
-                          margin: const EdgeInsets.only(
-                              top: Sizes.kDefaultPaddingDouble * 2),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal:
-                              Sizes.kDefaultPaddingDouble / 2),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: <Widget>[
-                              if (currentStep != 0)
-                                EnredaButton(
-                                  buttonTitle: StringConst.FORM_BACK,
-                                  width: contactBtnWidth,
-                                  onPressed: onStepCancel,
-                                ),
-                              const SizedBox(
-                                  width: Sizes.kDefaultPaddingDouble),
-                              isLoading
-                                  ? const Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primary300,
-                                  ))
-                                  : EnredaButton(
-                                buttonTitle: isLastStep
-                                    ? StringConst.FORM_CONFIRM
-                                    : StringConst.FORM_NEXT,
-                                width: contactBtnWidth,
-                                buttonColor: AppColors.primaryColor,
-                                titleColor: AppColors.white,
-                                onPressed: onStepContinue,
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      if (currentStep != 0)
+                        EnredaButton(
+                          buttonTitle: StringConst.FORM_BACK,
+                          width: contactBtnWidth,
+                          onPressed: onStepCancel,
+                        ),
+                      const SizedBox(
+                          width: Sizes.kDefaultPaddingDouble),
+                      isLoading
+                          ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary300,
+                          ))
+                          : EnredaButton(
+                        buttonTitle: isLastStep
+                            ? StringConst.FORM_CONFIRM
+                            : StringConst.FORM_NEXT,
+                        width: contactBtnWidth,
+                        buttonColor: AppColors.primaryColor,
+                        titleColor: AppColors.white,
+                        onPressed: onStepContinue,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

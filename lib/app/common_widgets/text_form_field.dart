@@ -10,6 +10,8 @@ Widget customTextFormField(BuildContext context, String formValue, String labelT
   TextTheme textTheme = Theme.of(context).textTheme;
   return TextFormField(
       decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
         labelText: labelText,
         focusColor: AppColors.lilac,
         labelStyle: textTheme.bodyLarge?.copyWith(
@@ -45,6 +47,8 @@ Widget customTextFormFieldNotValidator(BuildContext context, String formValue, S
   TextTheme textTheme = Theme.of(context).textTheme;
   return TextFormField(
     decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
       labelText: labelText,
       focusColor: AppColors.lilac,
       labelStyle: textTheme.bodyLarge?.copyWith(
@@ -80,6 +84,8 @@ Widget customTextFormMultiline(BuildContext context, String formValue, String la
     maxLines: null, // Set this
     keyboardType: TextInputType.multiline,
     decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
       labelText: labelText,
       focusColor: AppColors.lilac,
       labelStyle: textTheme.bodyLarge?.copyWith(
@@ -114,6 +120,8 @@ Widget customTextFormFieldNum(BuildContext context, String formValue, String lab
   TextTheme textTheme = Theme.of(context).textTheme;
   return TextFormField(
     decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
       labelText: labelText,
       focusColor: AppColors.lilac,
       labelStyle: textTheme.bodyLarge?.copyWith(
@@ -154,6 +162,8 @@ Widget customTextFormMultilineNotValidator(BuildContext context, String formValu
     maxLines: null, // Set this
     keyboardType: TextInputType.multiline,
     decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
       labelText: labelText,
       focusColor: AppColors.lilac,
       labelStyle: textTheme.bodyLarge?.copyWith(
@@ -188,6 +198,8 @@ Widget customDatePicker(BuildContext context, DateTime time, String labelText, S
     initialValue: time,
     format: DateFormat('dd/MM/yyyy'),
     decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
       prefixIcon: const Icon(Icons.calendar_today),
       labelText: labelText,
       labelStyle: textTheme.bodyLarge?.copyWith(
@@ -233,6 +245,8 @@ Widget customTextFormFieldName(BuildContext context, String formValue, String la
   double fontSize = responsiveSize(context, 14, 16, md: 15);
   return TextFormField(
     decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
       labelText: labelText,
       focusColor: AppColors.primaryColor,
       labelStyle: textTheme.button?.copyWith(

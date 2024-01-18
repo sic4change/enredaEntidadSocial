@@ -37,6 +37,8 @@ Widget streamBuilderDropdownResourceCategoryCreate (BuildContext context, Resour
           iconDisabledColor: AppColors.greyDark,
           iconEnabledColor: AppColors.primaryColor,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
             labelStyle: textTheme.button?.copyWith(
               height: 1.5,
               color: AppColors.greyDark,

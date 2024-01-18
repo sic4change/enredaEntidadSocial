@@ -365,10 +365,10 @@ class StringConst {
   static const String FORM_GENERAL_INFO = "Información general";
   static const String FORM_ORGANIZER = "Lugar y organizador";
   static const String FORM_REVISION = "Revisión";
-  static const String FORM_CONFIRM = "ACEPTAR";
-  static const String FORM_UPDATE = "ACTUALIZAR";
-  static const String FORM_NEXT = "SIGUIENTE";
-  static const String FORM_BACK = "ATRÁS";
+  static const String FORM_CONFIRM = "Aceptar";
+  static const String FORM_UPDATE = "Actualizar";
+  static const String FORM_NEXT = "Siguiente";
+  static const String FORM_BACK = "Atrás";
   static const String FORM_ACCEPTANCE = "Si es conforme, pulse en 'ACEPTAR'. Puede volver 'ATRÁS' y modificar la información.";
   static const String FORM_ACCEPTANCE_ERROR = "Debe aceptar las Políticas y Condiciones";
   static const String FORM_ACCEPT_SENTENCE = "Acepto las";

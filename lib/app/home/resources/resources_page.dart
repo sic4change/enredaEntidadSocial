@@ -41,9 +41,12 @@ class ResourcesListPage extends StatefulWidget {
 
 class _ResourcesListPageState extends State<ResourcesListPage> {
   String? socialEntityId;
+  String? resourceSocialEntityId;
   SocialEntity? organizer;
   List<Resource>? myResourcesCount;
+  SocialEntity? resourceOrganizer;
   String? organizerName;
+  String? resourceOrganizerName;
 
   @override
   void initState() {
@@ -58,142 +61,187 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
   Widget _buildResourcesList(BuildContext context) {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final database = Provider.of<Database>(context, listen: false);
-    return Stack(
+    return Flex(
+      direction: Axis.vertical,
       children: [
-        StreamBuilder<UserEnreda>(
-            stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasData) {
-                var user = snapshot.data!;
-                return StreamBuilder<List<Resource>>(
-                    stream: database.myResourcesStream(user.socialEntityId!),
-                    builder: (context, snapshot) {
-                      socialEntityId = user.socialEntityId!;
-                      if (!snapshot.hasData) {
-                        return const Center(
-                            child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasData) {
-                        myResourcesCount = snapshot.data;
-                        return ListItemBuilderGrid<Resource>(
-                          snapshot: snapshot,
-                          fitSmallerLayout: false,
-                          itemBuilder: (context, resource) {
+        Expanded(
+          flex: 2,
+          child: Stack(
+            children: [
+              StreamBuilder<UserEnreda>(
+                  stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasData) {
+                      var user = snapshot.data!;
+                      return StreamBuilder<List<Resource>>(
+                          stream: database.myResourcesStream(user.socialEntityId!),
+                          builder: (context, snapshot) {
+                            socialEntityId = user.socialEntityId!;
                             if (!snapshot.hasData) {
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
                             if (snapshot.hasData) {
-                              globals.resourceDetail = resource;
-                              return StreamBuilder<SocialEntity>(
-                                stream: database.socialEntityStreamById(user.socialEntityId!),
-                                builder: (context, snapshot) {
+                              myResourcesCount = snapshot.data;
+                              return ListItemBuilderGrid<Resource>(
+                                snapshot: snapshot,
+                                fitSmallerLayout: false,
+                                itemBuilder: (context, resource) {
                                   if (!snapshot.hasData) {
                                     return const Center(
                                         child: CircularProgressIndicator());
                                   }
-                                  final organization = snapshot.data;
-                                  organizer = organization;
-                                  socialEntityId = organization?.socialEntityId;
-                                  resource.organizerName =
-                                  organization == null ? '' : organization.name;
-                                  organizerName = resource.organizerName;
-                                  resource.organizerImage =
-                                  organization == null ? '' : organization.photo;
-                                  organization?.address?.country ?? "";
-                                  organization?.address?.province ?? "";
-                                  organization?.address?.city ?? "";
-                                  resource.province ?? "";
-                                  resource.city ?? "";
-                                  resource.country ?? "";
-                                  resource.province ?? "";
-                                  resource.city ?? "";
-                                  resource.setResourceTypeName();
-                                  resource.setResourceCategoryName();
-                                  return StreamBuilder<Country>(
-                                      stream: database.countryStream(resource.country),
+                                  if (snapshot.hasData) {
+                                    globals.currentResource = resource;
+                                    return StreamBuilder<SocialEntity>(
+                                      stream: database.socialEntityStreamById(user.socialEntityId!),
                                       builder: (context, snapshot) {
-                                        final country = snapshot.data;
-                                        resource.countryName =
-                                        country == null ? '' : country.name;
-                                        return StreamBuilder<Province>(
-                                          stream: database.provinceStream(resource.province),
-                                          builder: (context, snapshot) {
-                                            final province = snapshot.data;
-                                            resource.provinceName =
-                                            province == null ? '' : province.name;
-                                            return StreamBuilder<City>(
-                                                stream: database
-                                                    .cityStream(resource.city),
-                                                builder: (context, snapshot) {
-                                                  final city = snapshot.data;
-                                                  resource.cityName =
-                                                  city == null ? '' : city.name;
-                                                  return StreamBuilder<
-                                                      ResourcePicture>(
-                                                      stream: database
-                                                          .resourcePictureStream(
-                                                          resource
-                                                              .resourcePictureId),
-                                                      builder: (context,
-                                                          snapshot) {
-                                                        final resourcePicture =
-                                                            snapshot.data;
-                                                        resource.resourcePhoto =
-                                                            resourcePicture
-                                                                ?.resourcePhoto;
-                                                        return Stack(
-                                                          children: [
-                                                            Container(
-                                                              margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
-                                                              key: Key('resource-${resource.resourceId}'),
-                                                              child: ResourceListTile(
-                                                                resource: resource,
-                                                                onTap: () =>
-                                                                    setState(() {
-                                                                      MyResourcesListPage.selectedIndex.value = 2;
-                                                                    }),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      });
-                                                });
-                                          },
+                                        if (!snapshot.hasData) {
+                                          return const Center(
+                                              child: CircularProgressIndicator());
+                                        }
+                                        final organization = snapshot.data;
+                                        organizer = organization;
+                                        socialEntityId = organization?.socialEntityId;
+                                        resource.organizerName =
+                                        organization == null ? '' : organization.name;
+                                        organizerName = resource.organizerName;
+                                        resource.organizerImage =
+                                        organization == null ? '' : organization.photo;
+                                        organization?.address?.country ?? "";
+                                        organization?.address?.province ?? "";
+                                        organization?.address?.city ?? "";
+                                        resource.province ?? "";
+                                        resource.city ?? "";
+                                        resource.country ?? "";
+                                        resource.province ?? "";
+                                        resource.city ?? "";
+                                        resource.setResourceTypeName();
+                                        resource.setResourceCategoryName();
+                                        return Stack(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
+                                              key: Key('resource-${resource.resourceId}'),
+                                              child: ResourceListTile(
+                                                resource: resource,
+                                                onTap: () =>
+                                                    setState(() {
+                                                      MyResourcesListPage.selectedIndex.value = 2;
+                                                    }),
+                                              ),
+                                            ),
+                                          ],
                                         );
-                                      });
+                                      },
+                                    );
+                                  }
+                                  return const Center(child: CircularProgressIndicator());
                                 },
+                                emptyTitle: 'Sin recursos',
+                                emptyMessage: 'Aún no has creado ningún recurso',
                               );
                             }
                             return const Center(child: CircularProgressIndicator());
-                          },
-                          emptyTitle: 'Sin recursos',
-                          emptyMessage: 'Aún no has creado ningún recurso',
-                        );
-                      }
-                      return const Center(child: CircularProgressIndicator());
-                    });
-              }
-              return const Center(child: CircularProgressIndicator());
-            }),
-        Container(
-          child: Row(
+                          });
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  }),
+              Container(
+                child: Row(
+                  children: [
+                    //Text('${myResourcesCount?.length} Recursos creados por $organizerName'),
+                    CustomTextBoldTitle(title: 'Recursos creados'),
+                    Spacer(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Stack(
             children: [
-              //Text('${myResourcesCount?.length} Recursos creados por $organizerName'),
-              Text('Recursos creados'),
-              Spacer(),
-              EnredaButton(
-                  buttonTitle: 'Crear recurso',
-                  //iconSize: Responsive.isMobile(context) ? 20 : 40,
-                  //icon: Image.asset(ImagePath.CREATE_RESOURCE),
-                  onPressed: () => {
-                    setState(() {
-                      MyResourcesListPage.selectedIndex.value = 1;
-                    })
-                  }
+              StreamBuilder<List<Resource>>(
+                  stream: database.resourcesStream(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                          child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasData) {
+                      return ListItemBuilderGrid<Resource>(
+                        snapshot: snapshot,
+                        fitSmallerLayout: false,
+                        itemBuilder: (context, resource) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasData) {
+                            globals.currentResource = resource;
+                            return StreamBuilder<SocialEntity>(
+                              stream: database.socialEntityStreamById(resource.organizer),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+                                final organization = snapshot.data;
+                                organizer = organization;
+                                socialEntityId = organization?.socialEntityId;
+                                resource.organizerName =
+                                organization == null ? '' : organization.name;
+                                organizerName = resource.organizerName;
+                                resource.organizerImage =
+                                organization == null ? '' : organization.photo;
+                                organization?.address?.country ?? "";
+                                organization?.address?.province ?? "";
+                                organization?.address?.city ?? "";
+                                resource.province ?? "";
+                                resource.city ?? "";
+                                resource.country ?? "";
+                                resource.province ?? "";
+                                resource.city ?? "";
+                                resource.setResourceTypeName();
+                                resource.setResourceCategoryName();
+                                return Stack(
+                                  children: [
+                                    Container(
+                                      margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
+                                      key: Key('resource-${resource.resourceId}'),
+                                      child: ResourceListTile(
+                                        resource: resource,
+                                        onTap: () =>
+                                            setState(() {
+                                              MyResourcesListPage.selectedIndex.value = 2;
+                                            }),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                          return const Center(child: CircularProgressIndicator());
+                        },
+                        emptyTitle: 'Sin recursos',
+                        emptyMessage: 'Aún no has creado ningún recurso',
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  }),
+              Container(
+                child: Row(
+                  children: [
+                    CustomTextBoldTitle(title: 'Todos los recursos'),
+                    Spacer(),
+                  ],
+                ),
               ),
             ],
           ),

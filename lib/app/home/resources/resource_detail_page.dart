@@ -24,7 +24,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'global.dart' as globals;
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'my_resources_list_page.dart';
 
 class ResourceDetailPage extends StatefulWidget {
@@ -40,7 +40,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildResourcePage(context, globals.resourceDetail! );
+    return _buildResourcePage(context, globals.currentResource! );
   }
 
   Widget _buildResourcePage(BuildContext context, Resource resource) {
@@ -75,12 +75,14 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                 }
                 final organization = snapshot.data;
                 organizer = organization;
+                globals.organizerCurrentResource = organization;
                 socialEntityId = resource.organizer;
                 resource.organizerName =
                 organization == null ? '' : organization.name;
                 resource.organizerImage =
                 organization == null ? '' : organization.photo;
                 interestsLocal = resource.interests ?? [];
+                globals.interestsCurrentResource = resource.interests ?? [];
                 resource.setResourceTypeName();
                 resource.setResourceCategoryName();
                 return StreamBuilder<Country>(
@@ -106,11 +108,13 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                     builder: (context, snapshotInterest) {
                                       if (snapshotInterest.hasData) {
                                         selectedInterests = snapshotInterest.data!.toSet();
+                                        globals.selectedInterestsCurrentResource = snapshotInterest.data!.toSet();
                                         var concatenate = StringBuffer();
                                         for (var item in selectedInterests) {
                                           concatenate.write('${item.name} / ');
                                         }
                                         interestsNames = concatenate.toString();
+                                        globals.interestsNamesCurrentResource = concatenate.toString();
                                         return SingleChildScrollView(
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.start,
@@ -268,18 +272,9 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                               iconSize: 40,
                                                               icon: Image.asset(ImagePath.EDIT_RESOURCE),
                                                               onPressed: () => {
-                                                                Navigator.of(context).push(
-                                                                  MaterialPageRoute<void>(
-                                                                    fullscreenDialog: true,
-                                                                    builder: ((context) => EditResource(
-                                                                      resource: resource,
-                                                                      organizer: organizer!,
-                                                                      interestsNames: interestsNames!,
-                                                                      selectedInterests: selectedInterests,
-                                                                      initialInterests: interestsLocal,
-                                                                    )),
-                                                                  ),
-                                                                )
+                                                                setState(() {
+                                                                  MyResourcesListPage.selectedIndex.value = 3;
+                                                                })
                                                               },
                                                             ),
                                                           ),

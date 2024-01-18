@@ -1,6 +1,8 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/home/resources/create_resource/create_resource.dart';
+import 'package:enreda_empresas/app/home/resources/edit_resource/edit_resource.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_page.dart';
 import 'package:enreda_empresas/app/home/resources/resources_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -33,6 +35,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
       ResourcesListPage(),
       CreateResource(socialEntityId: widget.socialEntity?.socialEntityId!),
       ResourceDetailPage(),
+      EditResource()
     ];
     super.initState();
   }
@@ -45,24 +48,51 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
           return RoundedContainer(
             child: Stack(
               children: [
-                Container(
-                  height: 50,
-                  child: Row(
-                    children: [
-                      InkWell(
-                          onTap: () => {
-                            setState(() {
-                              MyResourcesListPage.selectedIndex.value = 0;
-                            })
-                          },
-                          child: CustomTextSmall(text: 'Recursos > ')),
-                      selectedIndex == 1 ? CustomTextBold(title: 'Crear recurso',) :
-                      selectedIndex == 2 ? CustomTextBold(title:'Detalle del recurso') : Container()
-                    ],
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 50,
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: () => {
+                              setState(() {
+                                MyResourcesListPage.selectedIndex.value = 0;
+                              })
+                            },
+                            child: selectedIndex != 0 ? CustomTextSmall(text: 'Recursos ') : CustomTextBold(title: 'Recursos ') ),
+                          selectedIndex == 1 ? CustomTextBold(title: '> Crear recurso',) :
+                          selectedIndex == 2 ? CustomTextBold(title:'> Detalle del recurso') :
+                          selectedIndex == 3 ? Row(
+                            children: [
+                              InkWell(
+                                  onTap: () => {
+                                    setState(() {
+                                      MyResourcesListPage.selectedIndex.value = 2;
+                                    })
+                                  },
+                                  child: CustomTextSmall(text:'> Detalle del recurso ')),
+                              CustomTextBold(title:'> Editar recurso'),
+                            ],
+                          ) : Container()
+                        ],
+                      ),
+                    ),
+                    Spacer(),
+                    selectedIndex == 0 ? EnredaButtonIcon(
+                        buttonTitle: 'Crear nuevo recurso',
+                        onPressed: () => {
+                          setState(() {
+                            MyResourcesListPage.selectedIndex.value = 1;
+                          })
+                        }
+                    ) : Container(),
+                  ],
                 ),
                 Container(
-                    margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
+                    margin: EdgeInsets.only(top: Sizes.mainPadding * 2.5),
                     child: bodyWidget[selectedIndex]),
               ],
             ),

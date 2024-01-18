@@ -13,6 +13,7 @@ class Sizes {
   static const double SIZE_36 = 36.0;
   static const double SIZE_32 = 32.0;
   static const double SIZE_24 = 24.0;
+  static const double SIZE_25 = 25.0;
   static const double SIZE_20 = 20.0;
   static const double SIZE_16 = 16.0;
   static const double SIZE_12 = 12.0;
@@ -203,11 +204,14 @@ class Sizes {
   static const double RADIUS_80 = 80.0;
   static const double RADIUS_70 = 70.0;
   static const double RADIUS_60 = 60.0;
+  static const double RADIUS_50 = 50.0;
+  static const double RADIUS_45 = 45.0;
   static const double RADIUS_40 = 40.0;
   static const double RADIUS_32 = 32.0;
   static const double RADIUS_30 = 30.0;
   static const double RADIUS_28 = 28.0;
   static const double RADIUS_24 = 24.0;
+  static const double RADIUS_25 = 25.0;
   static const double RADIUS_22 = 22.0;
   static const double RADIUS_20 = 20.0;
   static const double RADIUS_18 = 18.0;
