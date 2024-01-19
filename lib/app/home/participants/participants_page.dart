@@ -92,7 +92,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                                     itemBuilder: (context, user) {
                                       return ParticipantsListTile(
                                           user: user,
-                                          totalGamificationFlags: gamificationSnapshot.data!.length - 2,
+                                          totalGamificationFlags: gamificationSnapshot.data!.length - 3,
                                           onTap: () => setState(() {
                                             _currentPage =  ParticipantDetailPage(
                                               user: user,
@@ -117,7 +117,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                                     itemBuilder: (context, user) {
                                       return ParticipantsListTile(
                                           user: user,
-                                          totalGamificationFlags: gamificationSnapshot.data!.length - 2,
+                                          totalGamificationFlags: gamificationSnapshot.data!.length - 3,
                                           onTap: () => setState(() {
                                             _currentPage =  ParticipantDetailPage(
                                               user: user,
