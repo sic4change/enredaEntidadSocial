@@ -142,7 +142,7 @@ class FirestoreDatabase implements Database {
     @override
     Stream<List<Resource>> resourcesStream() => _service.collectionStream(
       path: APIPath.resources(),
-      queryBuilder: (query) => query.where('updatedby', isEqualTo: "yoga.toward.balance@gmail.com"),
+      queryBuilder: (query) => query.where('organizerType', isEqualTo: "Entidad Social"),
       builder: (data, documentId) => Resource.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.createdate.compareTo(rhs.createdate),
     );

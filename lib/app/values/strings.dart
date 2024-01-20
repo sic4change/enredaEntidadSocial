@@ -361,6 +361,7 @@ class StringConst {
   static const String FORM_EMAIL_CERTIFIER = "Correo electrónico";
   static const String FORM_PHONE_CERTIFIER = "Teléfono";
   static const String FORM_POSITION_CERTIFIER = "Cargo";
+  static const String FORM_DESCRIPTION = "Descripción del puesto";
 
   static const String FORM_GENERAL_INFO = "Información general";
   static const String FORM_ORGANIZER = "Lugar y organizador";
@@ -480,7 +481,7 @@ class StringConst {
 
   // Companies
   static const String CONTROL_PANEL = "Panel de control";
-  static const String PARTICIPANTS = "Participantes";
+  static const String PARTICIPANTS = "Participantes inscritos";
   static const String MY_PARTICIPANTS = "Mis Participantes";
   static String allParticipants(String socialEntityName) => "Todos los participantes inscritos en $socialEntityName";
   static const String WELCOME_COMPANY = "Bienvenido a la aplicación,";

@@ -76,11 +76,10 @@ class EnredaButton extends StatelessWidget {
 }
 
 
-
 class EnredaButtonIcon extends StatelessWidget {
   const EnredaButtonIcon({
     super.key,
-    required this.buttonTitle,
+    this.buttonTitle = "",
     this.width = Sizes.WIDTH_150,
     this.height = Sizes.HEIGHT_60,
     this.titleStyle,
@@ -148,8 +147,10 @@ class EnredaButtonIcon extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        SizedBox(width: 10,),
-        Image.asset(ImagePath.CREATE_RESOURCE, width: 40, height: 40),
+        if(buttonTitle != "") SizedBox(width: 10,),
+        Container(
+            height: 30,
+            child: widget ?? Container()),
       ],
     );
     // }

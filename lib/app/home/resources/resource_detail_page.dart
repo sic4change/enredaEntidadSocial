@@ -2,10 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/build_share_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
-import 'package:enreda_empresas/app/home/resources/edit_resource/edit_resource.dart';
 import 'package:enreda_empresas/app/home/resources/list_item_builder.dart';
+import 'package:enreda_empresas/app/home/resources/resource_detail/box_item_data.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_dialog.dart';
 import 'package:enreda_empresas/app/home/resources/resource_interests_stream.dart';
 import 'package:enreda_empresas/app/models/city.dart';
@@ -137,145 +138,166 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                           : 6,
                                                       child: Stack(
                                                         children: [
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(vertical: 40.0),
-                                                            child: Container(
-                                                              decoration: BoxDecoration(
-                                                                color: Colors.white,
-                                                                shape: BoxShape.rectangle,
-                                                                border: Border.all(
-                                                                    color: AppColors.greyLight2.withOpacity(0.2),
-                                                                    width: 1),
-                                                                borderRadius: BorderRadius.circular(Consts.padding),
-                                                              ),
-                                                              child: Column(
-                                                                children: [
-                                                                  Responsive.isMobile(context)
-                                                                      ? const SpaceH20()
-                                                                      : const SpaceH60(),
-                                                                  Padding(
-                                                                    padding: const EdgeInsets.only(
-                                                                        right: 30.0, left: 30.0),
-                                                                    child: Text(
-                                                                      resource.title,
-                                                                      textAlign: TextAlign.center,
-                                                                      maxLines:
-                                                                      Responsive.isMobile(context) ? 2 : 1,
-                                                                      style: textTheme.bodySmall?.copyWith(
-                                                                        letterSpacing: 1.2,
-                                                                        color: AppColors.greyTxtAlt,
-                                                                        height: 1.5,
-                                                                        fontWeight: FontWeight.w300,
-                                                                        fontSize: fontSizeTitle,
-                                                                      ),
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                              shape: BoxShape.rectangle,
+                                                              border: Border.all(
+                                                                  color: AppColors.greyLight2.withOpacity(0.2),
+                                                                  width: 1),
+                                                              borderRadius: BorderRadius.circular(Consts.padding),
+                                                            ),
+                                                            child: Column(
+                                                              children: [
+                                                                Container(
+                                                                  decoration: BoxDecoration(
+                                                                    image: DecorationImage(
+                                                                      image: AssetImage(ImagePath.RECTANGLE_RESOURCE),
+                                                                      fit: BoxFit.cover,
                                                                     ),
+                                                                    borderRadius: BorderRadius.only(
+                                                                        bottomRight: Radius.circular(Consts.padding),
+                                                                        bottomLeft: Radius.circular(Consts.padding)),
                                                                   ),
-                                                                  const SpaceH4(),
-                                                                  Column(
-                                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                  margin: const EdgeInsets.symmetric(horizontal: 20.0),
+                                                                  child: Column(
                                                                     children: [
-                                                                      Text(
-                                                                        resource.promotor != null
-                                                                            ? resource.promotor != ""
-                                                                            ? resource.promotor!
-                                                                            : resource.organizerName!
-                                                                            : resource.organizerName!,
-                                                                        maxLines: 1,
-                                                                        overflow: TextOverflow.ellipsis,
-                                                                        style: TextStyle(
-                                                                          letterSpacing: 1.2,
-                                                                          fontSize: fontSizePromotor,
-                                                                          fontWeight: FontWeight.bold,
-                                                                          color: AppColors.penBlue,
+                                                                      Responsive.isMobile(context)
+                                                                          ? const SpaceH8()
+                                                                          : const SpaceH20(),
+                                                                      resource.organizerImage == null ||
+                                                                          resource.organizerImage!.isEmpty
+                                                                          ? Container()
+                                                                          : Align(
+                                                                        alignment: Alignment.topCenter,
+                                                                        child: Container(
+                                                                          decoration: BoxDecoration(
+                                                                              border: Border.all(
+                                                                                  width: 1.0, color: AppColors.greyLight),
+                                                                              borderRadius: BorderRadius.circular(
+                                                                                100,
+                                                                              ),
+                                                                              color: AppColors.greyLight),
+                                                                          child: CircleAvatar(
+                                                                            radius:
+                                                                            Responsive.isMobile(context) ? 28 : 40,
+                                                                            backgroundColor: AppColors.white,
+                                                                            backgroundImage:
+                                                                            NetworkImage(resource.organizerImage!),
+                                                                          ),
                                                                         ),
                                                                       ),
-                                                                    ],
-                                                                  ),
-                                                                  const Padding(
-                                                                    padding: EdgeInsets.all(10.0),
-                                                                    child: Divider(
-                                                                      color: AppColors.grey150,
-                                                                      thickness: 1,
-                                                                    ),
-                                                                  ),
-                                                                  Flex(
-                                                                    direction: Responsive.isMobile(context) ||
-                                                                        Responsive.isTablet(context) ||
-                                                                        Responsive.isDesktopS(context)
-                                                                        ? Axis.vertical
-                                                                        : Axis.horizontal,
-                                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    children: [
-                                                                      Expanded(
-                                                                          flex: Responsive.isMobile(context) ||
-                                                                              Responsive.isTablet(context) ||
-                                                                              Responsive.isDesktopS(context)
-                                                                              ? 0
-                                                                              : 4,
-                                                                          child: _buildDetailResource(
-                                                                              context, resource)),
-                                                                      SizedBox(
-                                                                        height: 600,
-                                                                        child: Column(
-                                                                          mainAxisAlignment: MainAxisAlignment.start,
-                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                          children: [
-                                                                            Expanded(
-                                                                                flex:
-                                                                                Responsive.isMobile(context) || Responsive.isTablet(context) ||
-                                                                                    Responsive.isDesktopS(context) ? 0 : 2,
-                                                                                child: _buildDetailCard(context, resource)),
-                                                                          ],
+                                                                      Padding(
+                                                                        padding: const EdgeInsets.only(top: 10, right: 30.0, left: 30.0),
+                                                                        child: Text(
+                                                                          resource.title,
+                                                                          textAlign: TextAlign.center,
+                                                                          maxLines:
+                                                                          Responsive.isMobile(context) ? 2 : 1,
+                                                                          style: textTheme.bodySmall?.copyWith(
+                                                                            letterSpacing: 1.2,
+                                                                            color: AppColors.white,
+                                                                            height: 1.5,
+                                                                            fontWeight: FontWeight.w300,
+                                                                            fontSize: fontSizeTitle,
+                                                                          ),
                                                                         ),
                                                                       ),
-                                                                    ],
+                                                                      const SpaceH4(),
+                                                                      Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Text(
+                                                                            resource.promotor != null
+                                                                                ? resource.promotor != ""
+                                                                                ? resource.promotor!
+                                                                                : resource.organizerName!
+                                                                                : resource.organizerName!,
+                                                                            maxLines: 1,
+                                                                            overflow: TextOverflow.ellipsis,
+                                                                            style: TextStyle(
+                                                                              letterSpacing: 1.2,
+                                                                              fontSize: fontSizePromotor,
+                                                                              fontWeight: FontWeight.bold,
+                                                                              color: AppColors.white,
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      Row(
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        children: [
+                                                                          Padding(
+                                                                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                                                            child: EnredaButtonIcon(
+                                                                              onPressed: () => {
+                                                                                setState(() {
+                                                                                  MyResourcesListPage.selectedIndex.value = 3;
+                                                                                })
+                                                                              },
+                                                                              buttonColor: Colors.white,
+                                                                              padding: const EdgeInsets.all(0),
+                                                                              width: 80,
+                                                                              height: 10,
+                                                                              widget: Icon(
+                                                                                Icons.edit_outlined,
+                                                                                color: AppColors.greyTxtAlt,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          Padding(
+                                                                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                                                            child: EnredaButtonIcon(
+                                                                              onPressed: () => _confirmDeleteResource(context, resource),
+                                                                              buttonColor: Colors.white,
+                                                                              padding: const EdgeInsets.all(0),
+                                                                              width: 80,
+                                                                              height: 10,
+                                                                              widget: Icon(
+                                                                                Icons.delete_outline,
+                                                                                color: AppColors.greyTxtAlt,
+                                                                              ),
+
+                                                                            ),
+                                                                          ),
+                                                                          buildShareButton(context, resource, AppColors.darkGray),
+                                                                          SizedBox(width: 10),
+                                                                        ],
+                                                                      ),
+                                                                    ]
                                                                   ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          resource.organizerImage == null ||
-                                                              resource.organizerImage!.isEmpty
-                                                              ? Container()
-                                                              : Align(
-                                                            alignment: Alignment.topCenter,
-                                                            child: Container(
-                                                              decoration: BoxDecoration(
-                                                                  border: Border.all(
-                                                                      width: 1.0, color: AppColors.greyLight),
-                                                                  borderRadius: BorderRadius.circular(
-                                                                    100,
+                                                                ),
+                                                                Container(
+                                                                  padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                                                  constraints: BoxConstraints(
+                                                                    maxHeight: 150,
+                                                                    maxWidth:
+                                                                    Responsive.isMobile(context) || Responsive.isDesktopS(context)
+                                                                        ? MediaQuery.of(context).size.width
+                                                                        : MediaQuery.of(context).size.width / 1.5,
                                                                   ),
-                                                                  color: AppColors.greyLight),
-                                                              child: CircleAvatar(
-                                                                radius:
-                                                                Responsive.isMobile(context) ? 28 : 40,
-                                                                backgroundColor: AppColors.white,
-                                                                backgroundImage:
-                                                                NetworkImage(resource.organizerImage!),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          Positioned(
-                                                            right: 0,
-                                                            child: IconButton(
-                                                              iconSize: 40,
-                                                              icon: Image.asset(ImagePath.DELETE_RESOURCE),
-                                                              onPressed: () => _confirmDeleteResource(context, resource),
-                                                            ),
-                                                          ),
-                                                          Positioned(
-                                                            right: 50,
-                                                            child: IconButton(
-                                                              iconSize: 40,
-                                                              icon: Image.asset(ImagePath.EDIT_RESOURCE),
-                                                              onPressed: () => {
-                                                                setState(() {
-                                                                  MyResourcesListPage.selectedIndex.value = 3;
-                                                                })
-                                                              },
+                                                                  child: _buildBoxes(resource),
+                                                                ),
+                                                                Flex(
+                                                                  direction: Responsive.isMobile(context) ||
+                                                                      Responsive.isTablet(context) ||
+                                                                      Responsive.isDesktopS(context)
+                                                                      ? Axis.vertical
+                                                                      : Axis.horizontal,
+                                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                  children: [
+                                                                    Expanded(
+                                                                        flex: Responsive.isMobile(context) ||
+                                                                            Responsive.isTablet(context) ||
+                                                                            Responsive.isDesktopS(context)
+                                                                            ? 0
+                                                                            : 4,
+                                                                        child: _buildDetailResource(
+                                                                            context, resource)),
+                                                                  ],
+                                                                ),
+                                                              ],
                                                             ),
                                                           ),
                                                         ],
@@ -288,19 +310,23 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                           : 3,
                                                       child: Container(
                                                         decoration: BoxDecoration(
-                                                          color: Colors.white,
                                                           border: Border.all(
                                                               color: AppColors.greyLight2.withOpacity(0.2),
                                                               width: 1),
                                                           borderRadius: BorderRadius.circular(Consts.padding),
                                                         ),
                                                         alignment: Alignment.center,
-                                                        margin: const EdgeInsets.only(top: 40.0, left: 10),
+                                                        margin: Responsive.isMobile(context) ?  EdgeInsets.only(top: 10) : EdgeInsets.only(left: 10),
                                                         padding: const EdgeInsets.all(20.0),
                                                         child: SingleChildScrollView(
                                                             child: Stack(
                                                               children: [
-                                                                CustomTextTitle(title: StringConst.PARTICIPANTS.toUpperCase()),
+                                                                Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  children: [
+                                                                    CustomTextTitle(title: '${resource.participants?.length.toString()} ${StringConst.PARTICIPANTS.toUpperCase()}', color: AppColors.turquoiseBlue),
+                                                                  ],
+                                                                ),
                                                                 Padding(
                                                                   padding: const EdgeInsets.only(top: 30.0),
                                                                   child: _buildParticipantsList(context, resource.resourceId!),
@@ -325,7 +351,6 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
           }
           return const Center(child: CircularProgressIndicator());
         });
-
   }
 
   Widget _buildDetailResource(BuildContext context, Resource resource) {
@@ -336,6 +361,14 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            StringConst.FORM_DESCRIPTION.toUpperCase(),
+            style: textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.turquoiseBlue,
+            ),
+          ),
+          const SizedBox(height: 10,),
           Padding(
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Text(
@@ -363,7 +396,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
           StringConst.FORM_INTERESTS.toUpperCase(),
           style: textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w600,
-            color: AppColors.penBlue,
+            color: AppColors.turquoiseBlue,
           ),
         ),
         const SizedBox(height: 10,),
@@ -376,7 +409,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
           StringConst.AVAILABLE.toUpperCase(),
           style: textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w600,
-            color: AppColors.penBlue,
+            color: AppColors.turquoiseBlue,
           ),
         ),
         Container(
@@ -408,79 +441,136 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
               ],
             )),
         const SizedBox(height: 30,),
-        buildShareButton(context, resource, AppColors.darkGray),
-        const SizedBox(
-          height: 30,
-        ),
       ],
     );
   }
 
-  Widget _buildDetailCard(BuildContext context, Resource resource) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.greyDark, width: 1),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
+  Widget _buildBoxes(Resource resource) {
+    List<BoxItemData> boxItemData = [
+      BoxItemData(
+          icon: Icons.card_travel,
+          title: StringConst.RESOURCE_TYPE,
+          contact: '${resource.resourceTypeName}'
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomTextTitle(title: StringConst.RESOURCE_TYPE.toUpperCase()),
-          CustomTextBody(text: '${resource.resourceTypeName}'),
-          const SpaceH16(),
-          CustomTextTitle(title: StringConst.LOCATION.toUpperCase()),
-          Row(
-            children: [
-              CustomTextBody(text: '${resource.cityName}'),
-              resource.address?.province == "undefined" ? Container() : CustomTextBody(text: ', '),
-              CustomTextBody(text: '${resource.provinceName}'),
-              resource.address?.country == "undefined" ? Container() : CustomTextBody(text: ', '),
-              CustomTextBody(text: '${resource.countryName}'),
-            ],
-          ),
-          const SpaceH16(),
-          CustomTextTitle(title: StringConst.MODALITY.toUpperCase()),
-          CustomTextBody(text: resource.modality!),
-          const SpaceH16(),
-          CustomTextTitle(title: StringConst.CAPACITY.toUpperCase()),
-          CustomTextBody(text: '${resource.capacity}'),
-          const SpaceH16(),
-          CustomTextTitle(title: StringConst.DATE.toUpperCase()),
-          DateFormat('dd/MM/yyyy').format(resource.start!) == '31/12/2050'
-              ? const CustomTextBody(
-            text: StringConst.ALWAYS_AVAILABLE,
-          )
-              : Row(
-            children: [
-              CustomTextBody(
-                  text: DateFormat('dd/MM/yyyy').format(resource.start!)),
-              const SpaceW4(),
-              const CustomTextBody(text: '-'),
-              const SpaceW4(),
-              CustomTextBody(
-                  text: DateFormat('dd/MM/yyyy').format(resource.end!))
-            ],
-          ),
-          const SpaceH16(),
-          CustomTextTitle(title: StringConst.CONTRACT_TYPE.toUpperCase()),
-          CustomTextBody(text: resource.contractType != null && resource.contractType != ''  ? '${resource.contractType}' : 'Sin especificar' ),
-          const SpaceH16(),
-          CustomTextTitle(title: StringConst.DURATION.toUpperCase()),
-          CustomTextBody(text: resource.duration!),
-          const SpaceH16(),
-          CustomTextTitle(title: StringConst.SALARY.toUpperCase()),
-          CustomTextBody(text: resource.salary != null && resource.salary != ''  ? '${resource.salary}' :  'Sin especificar'),
-          const SpaceH16(),
-          CustomTextTitle(title: StringConst.FORM_SCHEDULE.toUpperCase()),
-          CustomTextBody(text: resource.temporality != null && resource.temporality != ''  ? '${resource.temporality}' :  'Sin especificar'),
-          const SpaceH16(),
-        ],
+      BoxItemData(
+        icon: Icons.location_on_outlined,
+        title: StringConst.LOCATION,
+        contact: '${resource.countryName}',
       ),
-    );
+      BoxItemData(
+        icon: Icons.card_travel,
+        title: StringConst.MODALITY,
+        contact: '${resource.modality}',
+      ),
+      BoxItemData(
+        icon: Icons.people,
+        title: StringConst.CAPACITY,
+        contact: '${resource.capacity}',
+      ),
+      BoxItemData(
+        icon: Icons.calendar_month_outlined,
+        title: StringConst.DATE,
+        contact: '${DateFormat('dd/MM/yyyy').format(resource.start!)} - ${DateFormat('dd/MM/yyyy').format(resource.end!)}',
+      ),
+      BoxItemData(
+        icon: Icons.list_alt,
+        title: StringConst.CONTRACT_TYPE,
+        contact: resource.contractType != null && resource.contractType != ''  ? '${resource.contractType}' : 'Sin especificar',
+      ),
+      BoxItemData(
+        icon: Icons.alarm,
+        title: StringConst.FORM_SCHEDULE,
+        contact: resource.temporality != null && resource.temporality != ''  ? '${resource.temporality}' :  'Sin especificar',
+      ),
+      BoxItemData(
+        icon: Icons.currency_exchange,
+        title: StringConst.SALARY,
+        contact: resource.salary != null && resource.salary != ''  ? '${resource.salary}' :  'Sin especificar',
+      ),
+    ];
+    return GridView.builder(
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 250,
+            mainAxisExtent: 60,
+            childAspectRatio: 6 / 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10),
+        itemCount: boxItemData.length,
+        itemBuilder: (BuildContext context, index) {
+          return BoxItem(
+            icon: boxItemData[index].icon,
+            title: boxItemData[index].title,
+            contact: boxItemData[index].contact,
+          );
+        });
   }
+
+  // Widget _buildDetailCard(BuildContext context, Resource resource) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(20),
+  //     margin: const EdgeInsets.all(20),
+  //     decoration: BoxDecoration(
+  //       border: Border.all(color: AppColors.greyDark, width: 1),
+  //       borderRadius: const BorderRadius.all(Radius.circular(10)),
+  //     ),
+  //     child: Column(
+  //       mainAxisAlignment: MainAxisAlignment.start,
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         CustomTextTitle(title: StringConst.RESOURCE_TYPE.toUpperCase()),
+  //         CustomTextBody(text: '${resource.resourceTypeName}'),
+  //         const SpaceH16(),
+  //         CustomTextTitle(title: StringConst.LOCATION.toUpperCase()),
+  //         Row(
+  //           children: [
+  //             CustomTextBody(text: '${resource.cityName}'),
+  //             resource.address?.province == "undefined" ? Container() : CustomTextBody(text: ', '),
+  //             CustomTextBody(text: '${resource.provinceName}'),
+  //             resource.address?.country == "undefined" ? Container() : CustomTextBody(text: ', '),
+  //             CustomTextBody(text: '${resource.countryName}'),
+  //           ],
+  //         ),
+  //         const SpaceH16(),
+  //         CustomTextTitle(title: StringConst.MODALITY.toUpperCase()),
+  //         CustomTextBody(text: resource.modality!),
+  //         const SpaceH16(),
+  //         CustomTextTitle(title: StringConst.CAPACITY.toUpperCase()),
+  //         CustomTextBody(text: '${resource.capacity}'),
+  //         const SpaceH16(),
+  //         CustomTextTitle(title: StringConst.DATE.toUpperCase()),
+  //         DateFormat('dd/MM/yyyy').format(resource.start!) == '31/12/2050'
+  //             ? const CustomTextBody(
+  //           text: StringConst.ALWAYS_AVAILABLE,
+  //         )
+  //             : Row(
+  //           children: [
+  //             CustomTextBody(
+  //                 text: DateFormat('dd/MM/yyyy').format(resource.start!)),
+  //             const SpaceW4(),
+  //             const CustomTextBody(text: '-'),
+  //             const SpaceW4(),
+  //             CustomTextBody(
+  //                 text: DateFormat('dd/MM/yyyy').format(resource.end!))
+  //           ],
+  //         ),
+  //         const SpaceH16(),
+  //         CustomTextTitle(title: StringConst.CONTRACT_TYPE.toUpperCase()),
+  //         CustomTextBody(text: resource.contractType != null && resource.contractType != ''  ? '${resource.contractType}' : 'Sin especificar' ),
+  //         const SpaceH16(),
+  //         CustomTextTitle(title: StringConst.DURATION.toUpperCase()),
+  //         CustomTextBody(text: resource.duration!),
+  //         const SpaceH16(),
+  //         CustomTextTitle(title: StringConst.SALARY.toUpperCase()),
+  //         CustomTextBody(text: resource.salary != null && resource.salary != ''  ? '${resource.salary}' :  'Sin especificar'),
+  //         const SpaceH16(),
+  //         CustomTextTitle(title: StringConst.FORM_SCHEDULE.toUpperCase()),
+  //         CustomTextBody(text: resource.temporality != null && resource.temporality != ''  ? '${resource.temporality}' :  'Sin especificar'),
+  //         const SpaceH16(),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildParticipantsList(BuildContext context, String resourceId) {
     final database = Provider.of<Database>(context, listen: false);

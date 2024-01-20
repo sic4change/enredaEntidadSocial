@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class CustomTextTitle extends StatelessWidget {
 
-  const CustomTextTitle({super.key,  required this.title });
+  const CustomTextTitle({super.key,  required this.title, this.color = AppColors.greyViolet});
   final String title;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class CustomTextTitle extends StatelessWidget {
       child: Text(
         title,
         style: textTheme.bodySmall?.copyWith(
-          color: AppColors.greyViolet,
+          color: color,
           height: 1.5,
           fontWeight: FontWeight.w600,
           fontSize: fontSize,
@@ -153,6 +154,47 @@ class CustomTextChip extends StatelessWidget {
         height: 1.5,
         fontWeight: FontWeight.w800,
         fontSize: fontSize,
+      ),
+    );
+  }
+}
+
+class CustomTextMedium extends StatelessWidget {
+
+  const CustomTextMedium({super.key,  required this.text });
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 15, 18, md: 16);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Text(
+      text,
+      style: textTheme.bodyMedium?.copyWith(
+        color: AppColors.turquoiseBlue,
+        height: 1.5,
+        fontSize: fontSize,
+      ),
+    );
+  }
+}
+
+class CustomTextMediumBold extends StatelessWidget {
+
+  const CustomTextMediumBold({super.key,  required this.text });
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 15, 18, md: 16);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Text(
+      text,
+      style: textTheme.bodyMedium?.copyWith(
+        color: AppColors.turquoiseBlue,
+        height: 1.5,
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold
       ),
     );
   }

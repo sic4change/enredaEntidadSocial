@@ -62,10 +62,11 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                                 MyResourcesListPage.selectedIndex.value = 0;
                               })
                             },
-                            child: selectedIndex != 0 ? CustomTextSmall(text: 'Recursos ') : CustomTextBold(title: 'Recursos ') ),
-                          selectedIndex == 1 ? CustomTextBold(title: '> Crear recurso',) :
-                          selectedIndex == 2 ? CustomTextBold(title:'> Detalle del recurso') :
-                          selectedIndex == 3 ? Row(
+                            child: selectedIndex != 0 ? CustomTextMedium(text: 'Recursos ') :
+                              CustomTextMediumBold(text: 'Recursos ') ),
+                              selectedIndex == 1 ? CustomTextMediumBold(text: '> Crear recurso',) :
+                              selectedIndex == 2 ? CustomTextMediumBold(text:'> Detalle del recurso') :
+                              selectedIndex == 3 ? Row(
                             children: [
                               InkWell(
                                   onTap: () => {
@@ -73,8 +74,8 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                                       MyResourcesListPage.selectedIndex.value = 2;
                                     })
                                   },
-                                  child: CustomTextSmall(text:'> Detalle del recurso ')),
-                              CustomTextBold(title:'> Editar recurso'),
+                                  child: CustomTextMedium(text:'> Detalle del recurso ')),
+                              CustomTextMediumBold(text:'> Editar recurso'),
                             ],
                           ) : Container()
                         ],
@@ -83,6 +84,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                     Spacer(),
                     selectedIndex == 0 ? EnredaButtonIcon(
                         buttonTitle: 'Crear nuevo recurso',
+                        widget: Image.asset(ImagePath.CREATE_RESOURCE, width: 40, height: 40),
                         onPressed: () => {
                           setState(() {
                             MyResourcesListPage.selectedIndex.value = 1;
@@ -92,7 +94,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                   ],
                 ),
                 Container(
-                    margin: EdgeInsets.only(top: Sizes.mainPadding * 2.5),
+                    margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
                     child: bodyWidget[selectedIndex]),
               ],
             ),

@@ -1,11 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ResourceListTile extends StatefulWidget {
@@ -196,28 +193,6 @@ class _ResourceListTileState extends State<ResourceListTile> {
                       ],
                     ),
                   ),
-                  !kIsWeb ? Expanded(
-                    child: widget.resource.resourcePhoto == null ||
-                        widget.resource.resourcePhoto == ""
-                        ? Container()
-                        : CachedNetworkImage(
-                            width: 400,
-                            fit: BoxFit.cover,
-                            progressIndicatorBuilder:
-                                (context, url, downloadProgress) => Container(
-                                  child: Image.asset(ImagePath.IMAGE_DEFAULT),
-                            ),
-                            alignment: Alignment.center,
-                            imageUrl: widget.resource.resourcePhoto!),
-                  ):
-                  Expanded(
-                    child: widget.resource.resourcePhoto == null ||
-                        widget.resource.resourcePhoto == ""
-                        ? Container()
-                        : PrecacheResourceCard(
-                            imageUrl: widget.resource.resourcePhoto!,
-                          )
-                  ),
                   Container(
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(
@@ -225,7 +200,7 @@ class _ResourceListTileState extends State<ResourceListTile> {
                           bottomLeft: Radius.circular(10)),
                       color: AppColors.white,
                     ),
-                    height: 45,
+                    height: 63,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
