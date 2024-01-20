@@ -161,13 +161,13 @@ class _WebHomeState extends State<WebHome> {
                       case 2: _key.currentState?.closeDrawer();
                       return const ParticipantsListPage();
                       case 3: _key.currentState?.closeDrawer();
-                      return const MyResourcesListPage();
+                      return MyResourcesListPage(socialEntity: socialEntity);
                       case 4: _key.currentState?.closeDrawer();
                       return const PersonalData();
                       case 5: _key.currentState?.closeDrawer();
                       return  EntityDirectoryPage();
                       default:
-                        return const MyResourcesListPage();
+                        return MyResourcesListPage(socialEntity: socialEntity);
                     }
                   },
                 ),))

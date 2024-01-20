@@ -169,7 +169,7 @@ class _CompanyPageState extends State<CompanyPage> {
             text: StringConst.RESOURCES,
             imagePath: ImagePath.ICON_COMPETENCIES,
             onTap: () => setState(() {
-              _currentPage = const MyResourcesListPage();
+              _currentPage = MyResourcesListPage(socialEntity: socialEntity);
               _currentPageTitle = StringConst.RESOURCES;
               _selectedPageName = StringConst.RESOURCES;
             }),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'empty_content.dart';
 
 typedef ItemWidgetBuilder<T> = Widget Function(BuildContext context, T item);
@@ -7,17 +6,21 @@ typedef ItemWidgetBuilder<T> = Widget Function(BuildContext context, T item);
 class ListItemBuilderGrid<T> extends StatelessWidget {
   const ListItemBuilderGrid(
       {Key? key,
-      required this.snapshot,
-      required this.itemBuilder,
-      this.emptyTitle,
-      this.emptyMessage,
-      this.fitSmallerLayout = false})
+        required this.snapshot,
+        required this.itemBuilder,
+        this.emptyTitle,
+        this.emptyMessage,
+        this.maxCrossAxisExtentValue = 520,
+        this.mainAxisExtentValue = 190,
+        this.fitSmallerLayout = false})
       : super(key: key);
   final AsyncSnapshot<List<T>> snapshot;
   final ItemWidgetBuilder<T> itemBuilder;
   final String? emptyTitle;
   final String? emptyMessage;
   final bool? fitSmallerLayout;
+  final double? maxCrossAxisExtentValue;
+  final double? mainAxisExtentValue;
 
   @override
   Widget build(BuildContext context) {
@@ -30,40 +33,28 @@ class ListItemBuilderGrid<T> extends StatelessWidget {
             title: emptyTitle ?? '', message: emptyMessage ?? '');
       }
     } else if (snapshot.hasError) {
-      return const EmptyContent(
+      return EmptyContent(
           title: 'Algo fue mal', message: 'No se pudo cargar los datos');
     }
-    return const Center(child: CircularProgressIndicator());
+    return Center(child: CircularProgressIndicator());
   }
 
   Widget _build(BuildContext context, List<T> items) {
     return LayoutBuilder(builder: (context, constraints) {
-      var crossAxisCount =
-      constraints.maxWidth < 550 ? 1
-          : constraints.maxWidth > 550 && constraints.maxWidth < 650 ? 2
-          : constraints.maxWidth >= 650 && constraints.maxWidth < 900 ? 3
-              : constraints.maxWidth >= 900 && constraints.maxWidth < 1321 ? 4
-                  : 5;
-      if (fitSmallerLayout ?? false) {
-        crossAxisCount =
-        constraints.maxWidth < 650 ? 1
-            : constraints.maxWidth > 650 && constraints.maxWidth < 900 ? 3
-                  : 4;
-      }
-
-      final tileWidth = (constraints.maxWidth / crossAxisCount) + 60;
-
-      return MasonryGridView.count(
+      return GridView.builder(
         controller: ScrollController(),
         shrinkWrap: constraints.maxWidth < 550 ? true : false,
-        padding: const EdgeInsets.all(4.0),
+        padding: EdgeInsets.all(4.0),
         itemCount: items.length,
-        crossAxisCount: crossAxisCount,
-        mainAxisSpacing: 15,
-        crossAxisSpacing: 15,
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: maxCrossAxisExtentValue!,
+            mainAxisExtent: mainAxisExtentValue!,
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20
+        ),
         itemBuilder: (context, index) {
-          return SizedBox(
-              height: tileWidth / 1.1,
+          return Container(
+              key: Key('resource-${items[index]}'),
               child: itemBuilder(context, items[index]));
         },
       );

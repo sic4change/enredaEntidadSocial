@@ -29,6 +29,7 @@ class ImagePath {
   static const String DOWNLOAD_RESOURCE = '$imageDir/icon-descargar.png';
   static const String EDIT_RESOURCE = '$imageDir/icon-editar.png';
   static const String DELETE_RESOURCE = '$imageDir/icon-eliminar.png';
+  static const String RECTANGLE_RESOURCE = '$imageDir/rectangle-1595.png';
 
   //Competencies
   static const String EMPTY_BADGE_SAMPLE = '$imageDir/empty_900x503.png';

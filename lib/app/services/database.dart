@@ -35,6 +35,7 @@ import 'package:enreda_empresas/app/models/resourcePicture.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 abstract class Database {
+     Stream<List<Resource>> resourcesStream();
      Stream<Resource> resourceStream(String? resourceId);
      Stream<List<Resource>> myResourcesStream(String socialEntityId);
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
@@ -137,6 +138,14 @@ class FirestoreDatabase implements Database {
           path: APIPath.resource(resourceId!),
           builder: (data, documentId) => Resource.fromMap(data, documentId),
         );
+
+    @override
+    Stream<List<Resource>> resourcesStream() => _service.collectionStream(
+      path: APIPath.resources(),
+      queryBuilder: (query) => query.where('organizerType', isEqualTo: "Entidad Social"),
+      builder: (data, documentId) => Resource.fromMap(data, documentId),
+      sort: (lhs, rhs) => lhs.createdate.compareTo(rhs.createdate),
+    );
 
     @override
     Stream<List<SocialEntity>> socialEntitiesStream() => _service.collectionStream(

@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/resources/resource_actions.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
@@ -90,23 +91,41 @@ Widget buildShareButton(BuildContext context, Resource resource, Color color) {
         )
       ];
     },
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Icon(
-          FontAwesomeIcons.share,
-          color: color,
-          size: widthOfScreen(context) >= 1024 ? 15.0 : 15.0,
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(45.0),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 4.0),
+      child: EnredaButtonIcon(
+        buttonColor: Colors.white,
+        padding: const EdgeInsets.all(0),
+        width: 80,
+        height: 10,
+        widget: Icon(
+          Icons.share_outlined,
+          color: AppColors.greyTxtAlt,
         ),
-        const SizedBox(width: 10),
-        Text('Compartir',
-          style: textTheme.bodySmall?.copyWith(
-            color: AppColors.greyDark,
-            height: 1.5,
-            fontWeight: FontWeight.w400,
-            fontSize: fontSize,
-          ),),
-      ],
+
+      ),
     ),
+    // Row(
+    //   mainAxisAlignment: MainAxisAlignment.start,
+    //   children: [
+    //     Icon(
+    //       FontAwesomeIcons.share,
+    //       color: color,
+    //       size: widthOfScreen(context) >= 1024 ? 15.0 : 15.0,
+    //     ),
+    //     const SizedBox(width: 10),
+    //     Text('Compartir',
+    //       style: textTheme.bodySmall?.copyWith(
+    //         color: AppColors.greyDark,
+    //         height: 1.5,
+    //         fontWeight: FontWeight.w400,
+    //         fontSize: fontSize,
+    //       ),),
+    //   ],
+    // ),
   );
 }
