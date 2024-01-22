@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_stepper.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_stepper_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
@@ -264,6 +266,14 @@ class _CreateResourceState extends State<CreateResource> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <
           Widget>[
         CustomFlexRowColumn(
+          childLeft: streamBuilderDropdownResourceCategoryCreate(
+              context,
+              selectedResourceCategory,
+              buildResourceCategoryStreamBuilderSetState),
+          childRight: streamBuilderDropdownResourceTypeCreate(context,
+              selectedResourceType, buildResourceTypeStreamBuilderSetState),
+        ),
+        CustomFlexRowColumn(
           childLeft: customTextFormField(context, _resourceTitle!,
               StringConst.FORM_TITLE, StringConst.NAME_ERROR, nameSetState),
           childRight: customTextFormMultiline(
@@ -272,14 +282,6 @@ class _CreateResourceState extends State<CreateResource> {
               StringConst.DESCRIPTION,
               StringConst.FORM_LASTNAME_ERROR,
               descriptionSetState),
-        ),
-        CustomFlexRowColumn(
-          childLeft: streamBuilderDropdownResourceTypeCreate(context,
-              selectedResourceType, buildResourceTypeStreamBuilderSetState),
-          childRight: streamBuilderDropdownResourceCategoryCreate(
-              context,
-              selectedResourceCategory,
-              buildResourceCategoryStreamBuilderSetState),
         ),
         CustomFlexRowColumn(
           childLeft: resourceTypeName == "Formación"
@@ -983,22 +985,25 @@ class _CreateResourceState extends State<CreateResource> {
     });
   }
 
-  List<Step> getSteps() => [
-        Step(
+  List<CustomStep> getSteps() => [
+        CustomStep(
           isActive: currentStep >= 0,
-          state: currentStep > 0 ? StepState.complete : StepState.indexed,
-          title: CustomTextBold(title: StringConst.FORM_GENERAL_INFO, color: AppColors.turquoiseBlue,),
+          state: currentStep > 0 ? CustomStepState.complete : CustomStepState.indexed,
+          title: CustomStepperButton(color: currentStep >= 0 ? AppColors.yellow: AppColors.white,
+              child: CustomTextBold(title: StringConst.FORM_GENERAL_INFO, color: AppColors.turquoiseBlue,),),
           content: _buildForm(context),
         ),
-        Step(
+        CustomStep(
           isActive: currentStep >= 1,
-          state: currentStep > 1 ? StepState.complete : StepState.disabled,
-          title: CustomTextBold(title: StringConst.FORM_ORGANIZER, color: AppColors.turquoiseBlue,),
+          state: currentStep > 1 ? CustomStepState.complete : CustomStepState.disabled,
+          title: CustomStepperButton(color: currentStep >= 1 ? AppColors.yellow: AppColors.white,
+            child: CustomTextBold(title: StringConst.FORM_ORGANIZER, color: AppColors.turquoiseBlue,),),
           content: _buildFormOrganizer(context),
         ),
-        Step(
+        CustomStep(
           isActive: currentStep >= 2,
-          title: CustomTextBold(title: StringConst.FORM_REVISION, color: AppColors.turquoiseBlue,),
+          title: CustomStepperButton(color: currentStep >= 2 ? AppColors.yellow: AppColors.white,
+            child: CustomTextBold(title: StringConst.FORM_REVISION, color: AppColors.turquoiseBlue,),),
           content: _revisionForm(context),
           //content: Container(),
         ),
@@ -1060,49 +1065,37 @@ class _CreateResourceState extends State<CreateResource> {
         ),
         child: Stack(
           children: [
-            Stepper(
-              type: Responsive.isMobile(context)
-                  ? StepperType.vertical
-                  : StepperType.horizontal,
+            CustomStepper(
+              elevation: 0.0,
+              type: Responsive.isMobile(context) ? CustomStepperType.vertical : CustomStepperType.horizontal,
               steps: getSteps(),
               currentStep: currentStep,
               onStepContinue: onStepContinue,
               onStepTapped: (step) => goToStep(step),
               onStepCancel: onStepCancel,
-              elevation: 0,
               controlsBuilder: (context, _) {
                 return Container(
                   height: Sizes.kDefaultPaddingDouble * 2,
-                  margin: const EdgeInsets.only(
-                      top: Sizes.kDefaultPaddingDouble * 2),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal:
-                      Sizes.kDefaultPaddingDouble / 2),
+                  margin: EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      if (currentStep != 0)
+                      if(currentStep != 0)
                         EnredaButton(
                           buttonTitle: StringConst.FORM_BACK,
                           width: contactBtnWidth,
                           onPressed: onStepCancel,
                         ),
-                      const SizedBox(
-                          width: Sizes.kDefaultPaddingDouble),
-                      isLoading
-                          ? const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary300,
-                          ))
+                      SizedBox(width: Sizes.kDefaultPaddingDouble),
+                      isLoading ?
+                      const Center(child: CircularProgressIndicator(color: AppColors.primary300,))
                           : EnredaButton(
-                        buttonTitle: isLastStep
-                            ? StringConst.FORM_CONFIRM
-                            : StringConst.FORM_NEXT,
-                        width: contactBtnWidth,
-                        buttonColor: AppColors.primaryColor,
-                        titleColor: AppColors.white,
-                        onPressed: onStepContinue,
-                      ),
+                                buttonTitle: isLastStep ? StringConst.FORM_CONFIRM : StringConst.FORM_NEXT,
+                                width: contactBtnWidth,
+                                buttonColor: AppColors.primaryColor,
+                                titleColor: AppColors.white,
+                                onPressed: onStepContinue,
+                              ),
                     ],
                   ),
                 );

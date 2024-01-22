@@ -128,6 +128,12 @@ class AppTheme {
       fontStyle: FontStyle.normal,
       fontWeight: _regular,
     ),
+    labelMedium: GoogleFonts.ibmPlexMono(
+      fontSize: Sizes.TEXT_SIZE_16,
+      color: AppColors.black,
+      fontStyle: FontStyle.normal,
+      fontWeight: _regular,
+    ),
     bodySmall: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_12,
       color: AppColors.primaryText1,

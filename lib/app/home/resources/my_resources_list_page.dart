@@ -1,5 +1,5 @@
+import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
-import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/home/resources/create_resource/create_resource.dart';
 import 'package:enreda_empresas/app/home/resources/edit_resource/edit_resource.dart';
@@ -34,7 +34,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
     bodyWidget = [
       ResourcesListPage(),
       CreateResource(socialEntityId: widget.socialEntity?.socialEntityId!),
-      ResourceDetailPage(),
+      ResourceDetailPage(socialEntityId: widget.socialEntity?.socialEntityId!),
       EditResource()
     ];
     super.initState();
@@ -82,14 +82,20 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                       ),
                     ),
                     Spacer(),
-                    selectedIndex == 0 ? EnredaButtonIcon(
-                        buttonTitle: 'Crear nuevo recurso',
-                        widget: Image.asset(ImagePath.CREATE_RESOURCE, width: 40, height: 40),
-                        onPressed: () => {
-                          setState(() {
-                            MyResourcesListPage.selectedIndex.value = 1;
-                          })
-                        }
+                    selectedIndex == 0 ?
+                    Padding(
+                      padding: const EdgeInsets.only(right: 5.0),
+                      child: Align(
+                          alignment: Alignment.topRight,
+                          child: AddYellowButton(
+                            text: 'Crear nuevo recurso',
+                            onPressed: () => setState(() {
+                              setState(() {
+                                MyResourcesListPage.selectedIndex.value = 1;
+                              });
+                            }),
+                          )
+                      ),
                     ) : Container(),
                   ],
                 ),

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/build_share_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
@@ -29,15 +30,16 @@ import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'my_resources_list_page.dart';
 
 class ResourceDetailPage extends StatefulWidget {
-  const ResourceDetailPage({Key? key}) : super(key: key);
+  const ResourceDetailPage({Key? key, required this.socialEntityId}) : super(key: key);
+  final String? socialEntityId;
 
   @override
   State<ResourceDetailPage> createState() => _ResourceDetailPageState();
 }
 
 class _ResourceDetailPageState extends State<ResourceDetailPage> {
-  String? socialEntityId;
-  SocialEntity? organizer;
+  //String? socialEntityId;
+  //SocialEntity? organizer;
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +77,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                       child: CircularProgressIndicator());
                 }
                 final organization = snapshot.data;
-                organizer = organization;
                 globals.organizerCurrentResource = organization;
-                socialEntityId = resource.organizer;
                 resource.organizerName =
                 organization == null ? '' : organization.name;
                 resource.organizerImage =
@@ -139,6 +139,10 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                       child: Stack(
                                                         children: [
                                                           Container(
+                                                            constraints: BoxConstraints(
+                                                              maxWidth: resource.organizer == widget.socialEntityId ? MediaQuery.of(context).size.width
+                                                                  : MediaQuery.of(context).size.width * 0.6,
+                                                            ),
                                                             decoration: BoxDecoration(
                                                               shape: BoxShape.rectangle,
                                                               border: Border.all(
@@ -224,7 +228,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                                           ),
                                                                         ],
                                                                       ),
-                                                                      Row(
+                                                                      resource.organizer == widget.socialEntityId ? Row(
                                                                         mainAxisAlignment: MainAxisAlignment.end,
                                                                         children: [
                                                                           Padding(
@@ -263,7 +267,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                                           buildShareButton(context, resource, AppColors.darkGray),
                                                                           SizedBox(width: 10),
                                                                         ],
-                                                                      ),
+                                                                      ) : SizedBox(height: 30,),
                                                                     ]
                                                                   ),
                                                                 ),
@@ -302,7 +306,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                           ),
                                                         ],
                                                       )),
-                                                  Expanded(
+                                                  resource.organizer == widget.socialEntityId ? Expanded(
                                                       flex: Responsive.isMobile(context) ||
                                                           Responsive.isTablet(context) ||
                                                           Responsive.isDesktopS(context)
@@ -333,7 +337,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                                 ),
                                                               ],
                                                             )),
-                                                      ))
+                                                      )) : Container(),
                                                 ],
                                               ),
                                             ],
@@ -506,106 +510,57 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
         });
   }
 
-  // Widget _buildDetailCard(BuildContext context, Resource resource) {
-  //   return Container(
-  //     padding: const EdgeInsets.all(20),
-  //     margin: const EdgeInsets.all(20),
-  //     decoration: BoxDecoration(
-  //       border: Border.all(color: AppColors.greyDark, width: 1),
-  //       borderRadius: const BorderRadius.all(Radius.circular(10)),
-  //     ),
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.start,
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         CustomTextTitle(title: StringConst.RESOURCE_TYPE.toUpperCase()),
-  //         CustomTextBody(text: '${resource.resourceTypeName}'),
-  //         const SpaceH16(),
-  //         CustomTextTitle(title: StringConst.LOCATION.toUpperCase()),
-  //         Row(
-  //           children: [
-  //             CustomTextBody(text: '${resource.cityName}'),
-  //             resource.address?.province == "undefined" ? Container() : CustomTextBody(text: ', '),
-  //             CustomTextBody(text: '${resource.provinceName}'),
-  //             resource.address?.country == "undefined" ? Container() : CustomTextBody(text: ', '),
-  //             CustomTextBody(text: '${resource.countryName}'),
-  //           ],
-  //         ),
-  //         const SpaceH16(),
-  //         CustomTextTitle(title: StringConst.MODALITY.toUpperCase()),
-  //         CustomTextBody(text: resource.modality!),
-  //         const SpaceH16(),
-  //         CustomTextTitle(title: StringConst.CAPACITY.toUpperCase()),
-  //         CustomTextBody(text: '${resource.capacity}'),
-  //         const SpaceH16(),
-  //         CustomTextTitle(title: StringConst.DATE.toUpperCase()),
-  //         DateFormat('dd/MM/yyyy').format(resource.start!) == '31/12/2050'
-  //             ? const CustomTextBody(
-  //           text: StringConst.ALWAYS_AVAILABLE,
-  //         )
-  //             : Row(
-  //           children: [
-  //             CustomTextBody(
-  //                 text: DateFormat('dd/MM/yyyy').format(resource.start!)),
-  //             const SpaceW4(),
-  //             const CustomTextBody(text: '-'),
-  //             const SpaceW4(),
-  //             CustomTextBody(
-  //                 text: DateFormat('dd/MM/yyyy').format(resource.end!))
-  //           ],
-  //         ),
-  //         const SpaceH16(),
-  //         CustomTextTitle(title: StringConst.CONTRACT_TYPE.toUpperCase()),
-  //         CustomTextBody(text: resource.contractType != null && resource.contractType != ''  ? '${resource.contractType}' : 'Sin especificar' ),
-  //         const SpaceH16(),
-  //         CustomTextTitle(title: StringConst.DURATION.toUpperCase()),
-  //         CustomTextBody(text: resource.duration!),
-  //         const SpaceH16(),
-  //         CustomTextTitle(title: StringConst.SALARY.toUpperCase()),
-  //         CustomTextBody(text: resource.salary != null && resource.salary != ''  ? '${resource.salary}' :  'Sin especificar'),
-  //         const SpaceH16(),
-  //         CustomTextTitle(title: StringConst.FORM_SCHEDULE.toUpperCase()),
-  //         CustomTextBody(text: resource.temporality != null && resource.temporality != ''  ? '${resource.temporality}' :  'Sin especificar'),
-  //         const SpaceH16(),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildParticipantsList(BuildContext context, String resourceId) {
     final database = Provider.of<Database>(context, listen: false);
-    return StreamBuilder<List<UserEnreda>>(
-      stream: database.participantsByResourceStream(resourceId),
-      builder: (context, snapshot) {
-        return ListItemBuilder(
-            snapshot: snapshot,
-            emptyTitle: 'Sin participantes',
-            emptyMessage: 'Aún no se ha registrado ningún participante',
-            itemBuilder: (context, user) {
-              return  Container(
-                margin: const EdgeInsets.symmetric(vertical: 10.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                      color: AppColors.greyLight2.withOpacity(0.2),
-                      width: 1),
-                  borderRadius: BorderRadius.circular(Consts.padding * 2),
-                ),
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      _buildMyUserPhoto(context, user.photo!),
-                      const SpaceW20(),
-                      Text('${user.firstName!} ${user.lastName!}'),
-                    ],
-                  ),
-                ),
-              );
-            }
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        StreamBuilder<List<UserEnreda>>(
+          stream: database.participantsByResourceStream(resourceId),
+          builder: (context, snapshot) {
+            return ListItemBuilder(
+                snapshot: snapshot,
+                emptyTitle: 'Sin participantes',
+                emptyMessage: 'Aún no se ha registrado ningún participante',
+                itemBuilder: (context, user) {
+                  return  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                          color: AppColors.greyLight2.withOpacity(0.2),
+                          width: 1),
+                      borderRadius: BorderRadius.circular(Consts.padding * 2),
+                    ),
+                    alignment: Alignment.center,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          _buildMyUserPhoto(context, user.photo!),
+                          const SpaceW20(),
+                          Text('${user.firstName!} ${user.lastName!}'),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+            );
+          },
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: AddYellowButton(
+                text: 'Invitar a este recurso',
+                onPressed: () => {},
+              ),),
+          ],
+        ),
+      ],
     );
   }
 

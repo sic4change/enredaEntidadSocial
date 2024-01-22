@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datetime_picker_formfield_new/datetime_picker_formfield.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_stepper.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_stepper_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
@@ -41,19 +43,7 @@ const double contactBtnWidthMd = 140.0;
 
 class EditResource extends StatefulWidget {
   EditResource(
-      {Key? key,
-        // required this.resource,
-        // required this.organizer,
-        // required this.interestsNames,
-        // required this.selectedInterests,
-        // required this.initialInterests,
-      })
-      : super(key: key);
-  // final Resource resource;
-  // final String interestsNames;
-  // final Set<Interest> selectedInterests;
-  // final SocialEntity organizer;
-  // final List<String> initialInterests;
+      {Key? key}) : super(key: key);
 
   @override
   State<EditResource> createState() => _EditResourceState();
@@ -203,11 +193,11 @@ class _EditResourceState extends State<EditResource> {
         ),
         child: Stack(
           children: [
-            Stepper(
+            CustomStepper(
               elevation: 0,
               type: Responsive.isMobile(context)
-                  ? StepperType.vertical
-                  : StepperType.horizontal,
+                  ? CustomStepperType.vertical
+                  : CustomStepperType.horizontal,
               steps: getSteps(),
               currentStep: currentStep,
               onStepContinue: onStepContinue,
@@ -271,6 +261,18 @@ class _EditResourceState extends State<EditResource> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             CustomFlexRowColumn(
+              childLeft: streamBuilderDropdownResourceCategory(
+                  context,
+                  selectedResourceCategory,
+                  buildResourceCategoryStreamBuilderSetState,
+                  resource),
+              childRight: streamBuilderDropdownResourceType(
+                  context,
+                  selectedResourceType,
+                  buildResourceTypeStreamBuilderSetState,
+                  resource),
+            ),
+            CustomFlexRowColumn(
               childLeft: customTextFormField(context, _resourceTitle!,
                   StringConst.FORM_TITLE, StringConst.NAME_ERROR, nameSetState),
               childRight: customTextFormMultiline(
@@ -279,18 +281,6 @@ class _EditResourceState extends State<EditResource> {
                   StringConst.DESCRIPTION,
                   StringConst.FORM_LASTNAME_ERROR,
                   descriptionSetState),
-            ),
-            CustomFlexRowColumn(
-              childLeft: streamBuilderDropdownResourceType(
-                  context,
-                  selectedResourceType,
-                  buildResourceTypeStreamBuilderSetState,
-                  resource),
-              childRight: streamBuilderDropdownResourceCategory(
-                  context,
-                  selectedResourceCategory,
-                  buildResourceCategoryStreamBuilderSetState,
-                  resource),
             ),
             CustomFlexRowColumn(
               childLeft: _resourceTypeId == "N9KdlBYmxUp82gOv8oJC"
@@ -955,11 +945,12 @@ class _EditResourceState extends State<EditResource> {
     });
   }
 
-  List<Step> getSteps() => [
-        Step(
+  List<CustomStep> getSteps() => [
+        CustomStep(
           isActive: currentStep == 0,
-          state: currentStep == 0 ? StepState.complete : StepState.indexed,
-          title: CustomTextBold(title: StringConst.FORM_EDIT, color: AppColors.turquoiseBlue,),
+          state: currentStep == 0 ? CustomStepState.complete : CustomStepState.indexed,
+          title: CustomStepperButton(color: currentStep >= 0 ? AppColors.yellow: AppColors.white,
+            child: CustomTextBold(title: StringConst.FORM_EDIT, color: AppColors.turquoiseBlue,),),
           content: _buildForm(context),
         ),
       ];
