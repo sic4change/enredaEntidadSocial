@@ -11,7 +11,7 @@ class ListItemBuilderGrid<T> extends StatelessWidget {
         this.emptyTitle,
         this.emptyMessage,
         this.maxCrossAxisExtentValue = 520,
-        this.mainAxisExtentValue = 190,
+        this.mainAxisExtentValue = 240,
         this.fitSmallerLayout = false})
       : super(key: key);
   final AsyncSnapshot<List<T>> snapshot;

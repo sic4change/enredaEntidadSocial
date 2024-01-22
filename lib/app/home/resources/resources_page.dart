@@ -128,7 +128,6 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
               ),
               Row(
                 children: [
-                  //Text('${myResourcesCount?.length} Recursos creados por $organizerName'),
                   CustomTextBoldTitle(title: 'Recursos creados'),
                   Spacer(),
                 ],

@@ -27,7 +27,6 @@ Widget streamBuilderDropdownResourceCategoryCreate (BuildContext context, Resour
               .toList();
         }
 
-
         return DropdownButtonFormField<ResourceCategory>(
           hint: const Text(StringConst.FORM_RESOURCE_CATEGORY),
           value: selectedResourceCategory,

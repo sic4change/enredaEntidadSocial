@@ -90,4 +90,5 @@ class ImagePath {
   static const String ARROW_UP = '$imageDir/arrow_up.png';
   static const String DOWNLOAD = '$imageDir/icon-download.png';
   static const String LOGOUT = '$imageDir/icon-logout.png';
+  static const String ICON_SHARE = '$imageDir/icon-share.png';
 }
