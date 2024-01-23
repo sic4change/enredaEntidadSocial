@@ -14,6 +14,7 @@ import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/socialEntityUser.dart';
@@ -95,6 +96,11 @@ abstract class Database {
      Stream<List<Gender>> genderStream();
      Stream<List<TimeSpentWeekly>> timeSpentWeeklyStream();
      Stream<List<TimeSearching>> timeSearchingStream();
+     Stream<List<IpilEntry>> getIpilEntriesByUserStream(String userId);
+     Future<void> addIpilEntry(IpilEntry ipilEntry);
+     Future<void> updateIpilEntryContent(IpilEntry ipilEntry, String content);
+     Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date);
+     Future<void> deleteIpilEntry(IpilEntry ipilEntry);
 }
 
 class FirestoreDatabase implements Database {
@@ -599,6 +605,38 @@ class FirestoreDatabase implements Database {
         builder: (data, documentId) => TimeSearching.fromMap(data, documentId),
         sort: (lhs, rhs) => lhs.value.compareTo(rhs.value),
       );
+
+  @override
+  Stream<List<IpilEntry>> getIpilEntriesByUserStream(String userId) {
+    return _service.collectionStream<IpilEntry>(
+      path: APIPath.ipilEntry(),
+      queryBuilder: (query) => query.where('userId', isEqualTo: userId),
+      builder: (data, documentId) => IpilEntry.fromMap(data, documentId),
+      sort: (lhs, rhs) => (rhs.date).compareTo(lhs.date),
+    );
+  }
+
+  @override
+  Future<void> addIpilEntry(IpilEntry ipilEntry) =>
+      _service.addData(path: APIPath.ipilEntry(), data: ipilEntry.toMap());
+
+  @override
+  Future<void> updateIpilEntryContent(IpilEntry ipilEntry, String content) {
+    return _service.updateData(
+        path: APIPath.ipilEntryById(ipilEntry.ipilId!), data: {
+      "content": content});
+  }
+
+  @override
+  Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date) {
+    return _service.updateData(
+        path: APIPath.ipilEntryById(ipilEntry.ipilId!), data: {
+      'date': date});
+  }
+
+  @override
+  Future<void> deleteIpilEntry(IpilEntry ipilEntry) =>
+      _service.deleteData(path: APIPath.ipilEntryById(ipilEntry.ipilId!));
 }
 
 
