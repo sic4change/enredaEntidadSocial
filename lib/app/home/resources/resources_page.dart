@@ -26,6 +26,7 @@ import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -47,103 +48,51 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _buildResourcesList(context);
   }
 
   Widget _buildResourcesList(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildMyResources(context),
+          _buildAllResources(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMyResources(BuildContext context) {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final database = Provider.of<Database>(context, listen: false);
-    return Flex(
-      direction: Axis.vertical,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Stack(
-            children: [
-              Container(
-                margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
-                child: StreamBuilder<UserEnreda>(
-                    stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasData) {
-                        var user = snapshot.data!;
-                        return StreamBuilder<List<Resource>>(
-                            stream: database.myResourcesStream(user.socialEntityId!),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              }
-                              if (snapshot.hasData) {
-                                return ListItemBuilderGrid<Resource>(
-                                  snapshot: snapshot,
-                                  fitSmallerLayout: false,
-                                  itemBuilder: (context, resource) {
-                                    if (!snapshot.hasData) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    }
-                                    if (snapshot.hasData) {
-                                      return StreamBuilder<SocialEntity>(
-                                        stream: database.socialEntityStreamById(user.socialEntityId!),
-                                        builder: (context, snapshot) {
-                                          if (!snapshot.hasData) {
-                                            return const Center(
-                                                child: CircularProgressIndicator());
-                                          }
-                                          final SocialEntity? socialEntity = snapshot.data;
-                                          resource.organizerName = socialEntity == null ? '' : socialEntity.name;
-                                          resource.organizerImage = socialEntity == null ? '' : socialEntity.photo;
-                                          resource.setResourceTypeName();
-                                          resource.setResourceCategoryName();
-                                          return Container(
-                                            key: Key('resource-${resource.resourceId}'),
-                                            child: ResourceListTile(
-                                              resource: resource,
-                                              onTap: () =>
-                                                  setState(() {
-                                                    globals.currentResource = resource;
-                                                    MyResourcesListPage.selectedIndex.value = 2;
-                                                  }),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    }
-                                    return const Center(child: CircularProgressIndicator());
-                                  },
-                                  emptyTitle: 'Sin recursos',
-                                  emptyMessage: 'Aún no has creado ningún recurso',
-                                );
-                              }
-                              return const Center(child: CircularProgressIndicator());
-                            });
-                      }
-                      return const Center(child: CircularProgressIndicator());
-                    }),
-              ),
-              Row(
-                children: [
-                  CustomTextBoldTitle(title: 'Recursos creados'),
-                  Spacer(),
-                ],
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: Sizes.mainPadding),
-        Expanded(
-          flex: 2,
-          child: Stack(
-            children: [
-              Container(
-                margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
-                child: StreamBuilder<List<Resource>>(
-                    stream: database.resourcesStream(),
+
+    buildCollapsed1() {
+      return Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: CustomTextBoldTitle(title: 'Recursos creados'),
+      );
+    }
+
+    buildCollapsed2() {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.28,
+        padding: const EdgeInsets.all(8.0),
+        child: StreamBuilder<UserEnreda>(
+            stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasData) {
+                var user = snapshot.data!;
+                return StreamBuilder<List<Resource>>(
+                    stream: database.myLimitResourcesStream(user.socialEntityId!, 3),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(
@@ -160,7 +109,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                             }
                             if (snapshot.hasData) {
                               return StreamBuilder<SocialEntity>(
-                                stream: database.socialEntityStreamById(resource.organizer),
+                                stream: database.socialEntityStreamById(user.socialEntityId!),
                                 builder: (context, snapshot) {
                                   if (!snapshot.hasData) {
                                     return const Center(
@@ -171,20 +120,16 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                                   resource.organizerImage = socialEntity == null ? '' : socialEntity.photo;
                                   resource.setResourceTypeName();
                                   resource.setResourceCategoryName();
-                                  return Stack(
-                                    children: [
-                                      Container(
-                                        key: Key('resource-${resource.resourceId}'),
-                                        child: ResourceListTile(
-                                          resource: resource,
-                                          onTap: () =>
-                                              setState(() {
-                                                globals.currentResource = resource;
-                                                MyResourcesListPage.selectedIndex.value = 2;
-                                              }),
-                                        ),
-                                      ),
-                                    ],
+                                  return Container(
+                                    key: Key('resource-${resource.resourceId}'),
+                                    child: ResourceListTile(
+                                      resource: resource,
+                                      onTap: () =>
+                                          setState(() {
+                                            globals.currentResource = resource;
+                                            MyResourcesListPage.selectedIndex.value = 2;
+                                          }),
+                                    ),
                                   );
                                 },
                               );
@@ -196,19 +141,349 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                         );
                       }
                       return const Center(child: CircularProgressIndicator());
-                    }),
-              ),
-              Row(
-                children: [
-                  CustomTextBoldTitle(title: 'Todos los recursos'),
-                  Spacer(),
+                    });
+              }
+              return const Center(child: CircularProgressIndicator());
+            }),
+      );
+    }
+
+    buildExpanded1() {
+      return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: CustomTextBoldTitle(title: 'Recursos creados'),
+                  ),
                 ],
               ),
-            ],
+            ),
+          ]);
+    }
+
+    buildExpanded2() {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.55,
+        padding: const EdgeInsets.all(8.0),
+        child: StreamBuilder<UserEnreda>(
+            stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasData) {
+                var user = snapshot.data!;
+                return StreamBuilder<List<Resource>>(
+                    stream: database.myResourcesStream(user.socialEntityId!),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                            child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasData) {
+                        return ListItemBuilderGrid<Resource>(
+                          snapshot: snapshot,
+                          fitSmallerLayout: false,
+                          itemBuilder: (context, resource) {
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                            if (snapshot.hasData) {
+                              return StreamBuilder<SocialEntity>(
+                                stream: database.socialEntityStreamById(user.socialEntityId!),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) {
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  }
+                                  final SocialEntity? socialEntity = snapshot.data;
+                                  resource.organizerName = socialEntity == null ? '' : socialEntity.name;
+                                  resource.organizerImage = socialEntity == null ? '' : socialEntity.photo;
+                                  resource.setResourceTypeName();
+                                  resource.setResourceCategoryName();
+                                  return Container(
+                                    key: Key('resource-${resource.resourceId}'),
+                                    child: ResourceListTile(
+                                      resource: resource,
+                                      onTap: () =>
+                                          setState(() {
+                                            globals.currentResource = resource;
+                                            MyResourcesListPage.selectedIndex.value = 2;
+                                          }),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+                            return const Center(child: CircularProgressIndicator());
+                          },
+                          emptyTitle: 'Sin recursos',
+                          emptyMessage: 'Aún no has creado ningún recurso',
+                        );
+                      }
+                      return const Center(child: CircularProgressIndicator());
+                    });
+              }
+              return const Center(child: CircularProgressIndicator());
+            }),
+      );
+    }
+
+    return ExpandableNotifier(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+          child: ScrollOnExpand(
+            child: Card(
+              elevation: 0,
+              color: Colors.transparent,
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expandable(
+                    collapsed: buildCollapsed1(),
+                    expanded: buildExpanded1(),
+                  ),
+                  Expandable(
+                    collapsed: buildCollapsed2(),
+                    expanded: buildExpanded2(),
+                  ),
+                  Divider(
+                    height: 1,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Builder(
+                        builder: (context) {
+                          var controller =
+                          ExpandableController.of(context, required: true)!;
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: EnredaButton(
+                              buttonTitle: controller.expanded ? "Ver menos recursos" : "Ver más recursos",
+                              onPressed: () {
+                                controller.toggle();
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
-    );
+        ));
+  }
+
+  Widget _buildAllResources(BuildContext context) {
+    final database = Provider.of<Database>(context, listen: false);
+    buildCollapsed1() {
+      return Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: CustomTextBoldTitle(title: 'Todos los recursos'),
+      );
+    }
+
+    buildCollapsed2() {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.28,
+        padding: const EdgeInsets.all(8.0),
+        child: StreamBuilder<List<Resource>>(
+            stream: database.limitResourcesStream(3),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                    child: CircularProgressIndicator());
+              }
+              if (snapshot.hasData) {
+                return ListItemBuilderGrid<Resource>(
+                  snapshot: snapshot,
+                  fitSmallerLayout: false,
+                  itemBuilder: (context, resource) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                          child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasData) {
+                      return StreamBuilder<SocialEntity>(
+                        stream: database.socialEntityStreamById(resource.organizer),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          final SocialEntity? socialEntity = snapshot.data;
+                          resource.organizerName = socialEntity == null ? '' : socialEntity.name;
+                          resource.organizerImage = socialEntity == null ? '' : socialEntity.photo;
+                          resource.setResourceTypeName();
+                          resource.setResourceCategoryName();
+                          return Stack(
+                            children: [
+                              Container(
+                                key: Key('resource-${resource.resourceId}'),
+                                child: ResourceListTile(
+                                  resource: resource,
+                                  onTap: () =>
+                                      setState(() {
+                                        globals.currentResource = resource;
+                                        MyResourcesListPage.selectedIndex.value = 2;
+                                      }),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  emptyTitle: 'Sin recursos',
+                  emptyMessage: 'Aún no has creado ningún recurso',
+                );
+              }
+              return const Center(child: CircularProgressIndicator());
+            }),
+      );
+    }
+
+    buildExpanded1() {
+      return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: CustomTextBoldTitle(title: 'Recursos creados'),
+                  ),
+                ],
+              ),
+            ),
+          ]);
+    }
+
+    buildExpanded2() {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.55,
+        padding: const EdgeInsets.all(8.0),
+        child: StreamBuilder<List<Resource>>(
+            stream: database.resourcesStream(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                    child: CircularProgressIndicator());
+              }
+              if (snapshot.hasData) {
+                return ListItemBuilderGrid<Resource>(
+                  snapshot: snapshot,
+                  fitSmallerLayout: false,
+                  itemBuilder: (context, resource) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                          child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasData) {
+                      return StreamBuilder<SocialEntity>(
+                        stream: database.socialEntityStreamById(resource.organizer),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          final SocialEntity? socialEntity = snapshot.data;
+                          resource.organizerName = socialEntity == null ? '' : socialEntity.name;
+                          resource.organizerImage = socialEntity == null ? '' : socialEntity.photo;
+                          resource.setResourceTypeName();
+                          resource.setResourceCategoryName();
+                          return Stack(
+                            children: [
+                              Container(
+                                key: Key('resource-${resource.resourceId}'),
+                                child: ResourceListTile(
+                                  resource: resource,
+                                  onTap: () =>
+                                      setState(() {
+                                        globals.currentResource = resource;
+                                        MyResourcesListPage.selectedIndex.value = 2;
+                                      }),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  emptyTitle: 'Sin recursos',
+                  emptyMessage: 'Aún no has creado ningún recurso',
+                );
+              }
+              return const Center(child: CircularProgressIndicator());
+            }),
+      );
+    }
+
+    return ExpandableNotifier(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+          child: ScrollOnExpand(
+            child: Card(
+              elevation: 0,
+              color: Colors.transparent,
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expandable(
+                    collapsed: buildCollapsed1(),
+                    expanded: buildExpanded1(),
+                  ),
+                  Expandable(
+                    collapsed: buildCollapsed2(),
+                    expanded: buildExpanded2(),
+                  ),
+                  Divider(
+                    height: 1,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Builder(
+                        builder: (context) {
+                          var controller =
+                          ExpandableController.of(context, required: true)!;
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: EnredaButton(
+                              buttonTitle: controller.expanded ? "Ver menos recursos" : "Ver más recursos",
+                              onPressed: () {
+                                controller.toggle();
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
   }
 
 }

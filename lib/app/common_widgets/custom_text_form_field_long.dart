@@ -91,3 +91,28 @@ class CustomTextFormFieldLong extends StatelessWidget {
     );
   }
 }
+
+
+InputDecoration customTextFormFieldDialog(BuildContext context, String label) {
+  TextTheme textTheme = Theme.of(context).textTheme;
+  return InputDecoration(
+    labelText: label,
+    focusColor: AppColors.primaryColor,
+    labelStyle: textTheme.bodyLarge?.copyWith(
+      color: AppColors.greyTxtAlt,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5.0),
+      borderSide: const BorderSide(
+          color: AppColors.greyLight
+      ),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5.0),
+      borderSide: const BorderSide(
+        color: AppColors.greyLight,
+        width: 1.0,
+      ),
+    ),
+  );
+}

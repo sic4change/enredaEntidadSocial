@@ -38,7 +38,7 @@ class InterestsByResource extends StatelessWidget {
                       key: Key(
                           'resource-${interest.interestId}'),
                       child: Container(
-                          margin: const EdgeInsets.all(5),
+                          margin: const EdgeInsets.only(left: 0, right: 4, top: 4, bottom: 4),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(

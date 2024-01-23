@@ -8,7 +8,6 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 Widget buildShareButton(BuildContext context, Resource resource, Color color) {
   showToast() {
@@ -75,7 +74,7 @@ Widget buildShareButton(BuildContext context, Resource resource, Color color) {
           child: Row(
             children: [
               const Icon(
-                Icons.share,
+                Icons.share_outlined,
                 color: AppColors.greyDark,
               ),
               const SpaceW16(),
@@ -109,24 +108,6 @@ Widget buildShareButton(BuildContext context, Resource resource, Color color) {
 
       ),
     ),
-    // Row(
-    //   mainAxisAlignment: MainAxisAlignment.start,
-    //   children: [
-    //     Icon(
-    //       FontAwesomeIcons.share,
-    //       color: color,
-    //       size: widthOfScreen(context) >= 1024 ? 15.0 : 15.0,
-    //     ),
-    //     const SizedBox(width: 10),
-    //     Text('Compartir',
-    //       style: textTheme.bodySmall?.copyWith(
-    //         color: AppColors.greyDark,
-    //         height: 1.5,
-    //         fontWeight: FontWeight.w400,
-    //         fontSize: fontSize,
-    //       ),),
-    //   ],
-    // ),
   );
 }
 
@@ -195,7 +176,7 @@ Widget buildShare(BuildContext context, Resource resource, Color color) {
           child: Row(
             children: [
               Icon(
-                Icons.share,
+                Icons.share_outlined,
                 color: AppColors.greyAlt,
               ),
               SpaceW16(),
@@ -214,7 +195,10 @@ Widget buildShare(BuildContext context, Resource resource, Color color) {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset(ImagePath.ICON_SHARE, height: 20),
+        Icon(
+          Icons.share_outlined,
+          color: AppColors.greyAlt,
+        ),
         SizedBox(width: 10),
       ],
     ),

@@ -275,6 +275,14 @@ class StringConst {
   static const String NOT_ALLOWED = '¿Te gusta este recurso?';
   static const String REGISTER = 'Registrarse';
   static String RESOURCE_LINK(String resourceId) => 'https://enredawebapp.web.app/resources/$resourceId';
+  static const String THE_USER = 'El usuario';
+  static const String ALREADY_ADDED = 'ya está añadido';
+  static const String ADD_USER = 'Añadir usuario';
+  static const String INVITE_USERS = 'Invitar usuarios';
+  static const String WRONG_EMAIL = 'Correo electrónico inválido';
+  static const String DUPLICATED_USER = 'Usuario duplicado';
+  static const String USER_TO_INVITE_ERROR = 'Debe invitar al menos a un usuario';
+  static const String ENTER_TO_ADD = 'Pulsar "ENTER" para añadir';
 
 
   //Resource modalities

@@ -247,33 +247,6 @@ class _ResourceListTileState extends State<ResourceListTile> {
                               margin: const EdgeInsets.only(left: 15.0),
                               child: buildShare(context, widget.resource, AppColors.greyAlt)
                           ),
-                          auth.currentUser == null
-                            ? IconButton(
-                                icon: FaIcon(FontAwesomeIcons.heart),
-                                tooltip: 'Me gusta',
-                                color: AppColors.darkGray,
-                                iconSize: 20,
-                                onPressed: () => showAlertNullUser(context),
-                              )
-                                  : widget.resource.likes!.contains(auth.currentUser!.uid)
-                                  ? IconButton(
-                                    icon: FaIcon(FontAwesomeIcons.solidHeart),
-                                    tooltip: 'Me gusta',
-                                    color: AppColors.red,
-                                    iconSize: 20,
-                                    onPressed: () {
-                                      // _removeUserToLike(widget.resource,
-                                      //     auth.currentUser!.uid);
-                                    },
-                                  )
-                                      : IconButton(
-                                        icon: FaIcon(FontAwesomeIcons.heart),
-                                        tooltip: 'Me gusta',
-                                        color: AppColors.darkGray,
-                                        onPressed: () {
-                                          // _addUserToLike(widget.resource);
-                                        },
-                                      ),
                           SizedBox(width: 15,)
                         ],
                       ),

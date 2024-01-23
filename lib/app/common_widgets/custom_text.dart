@@ -77,16 +77,18 @@ class CustomTextBody extends StatelessWidget {
 
 class CustomText extends StatelessWidget {
 
-  const CustomText({super.key,  required this.title });
+  CustomText({super.key,  required this.title });
   final String title;
 
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
+    double fontSize = responsiveSize(context, 14, 15, md: 14);
     return Text(
       title,
       style: textTheme.bodySmall?.copyWith(
         color: AppColors.greyAlt,
+        fontSize: fontSize,
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
