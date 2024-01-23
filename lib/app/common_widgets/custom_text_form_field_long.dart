@@ -1,8 +1,8 @@
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
-class CustomTextFormFieldTitle extends StatelessWidget {
-  const CustomTextFormFieldTitle({
+class CustomTextFormFieldLong extends StatelessWidget {
+  const CustomTextFormFieldLong({
     super.key,
     required this.labelText,
     this.initialValue,
@@ -13,7 +13,6 @@ class CustomTextFormFieldTitle extends StatelessWidget {
     this.validator,
     this.keyboardType = TextInputType.text,
     this.enabled = true,
-    this.height,
   });
 
   final String labelText;
@@ -24,7 +23,6 @@ class CustomTextFormFieldTitle extends StatelessWidget {
   final String ?Function(String?)? validator;
   final TextInputType? keyboardType;
   final bool enabled;
-  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -44,39 +42,36 @@ class CustomTextFormFieldTitle extends StatelessWidget {
             ),
           ),
         ),
-        height != null ? 
-        Container(
-          height: 45,
-          child: textField(context)
-        ) :
         textField(context),
       ],
     );
   }
-  
+
   Widget textField(BuildContext context){
     final textTheme = Theme.of(context).textTheme;
     return TextFormField(
+      maxLines: 12,
+      minLines: 1,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.all(5),
         hintText: hintText,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: BorderSide(
-            color: AppColors.greyUltraLight,
+            color: Colors.transparent,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: BorderSide(
-            color: AppColors.greyUltraLight,
+            color: Colors.transparent,
             width: 1.0,
           ),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: BorderSide(
-            color: AppColors.greyUltraLight,
+            color: Colors.transparent,
             width: 1.0,
           ),
         ),

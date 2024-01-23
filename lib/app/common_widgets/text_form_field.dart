@@ -1,4 +1,5 @@
 import 'package:datetime_picker_formfield_new/datetime_picker_formfield.dart';
+import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -225,6 +226,83 @@ Widget customDatePicker(BuildContext context, DateTime time, String labelText, S
     },
     onChanged: (dateTime) => functionSetState(dateTime),
     validator: (value) => value != null ? null : errorText,
+  );
+}
+
+Widget customDatePickerTitle(BuildContext context, DateTime time, String labelText, String errorText, functionSetState, enabled) {
+  TextTheme textTheme = Theme.of(context).textTheme;
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Row(
+          children: [
+            Icon(
+              Icons.calendar_today_outlined,
+              size: 15,
+              color: Colors.black,
+            ),
+            SpaceW12(),
+            Text(
+              labelText,
+              style: textTheme.button?.copyWith(
+                height: 1.5,
+                color: AppColors.greyDark,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+      Container(
+        height: 45,
+        child: DateTimeField(
+          initialValue: time,
+          format: DateFormat('dd/MM/yyyy'),
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.all(7),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5.0),
+              borderSide: const BorderSide(
+                color: AppColors.greyUltraLight,
+              ),
+            ),
+            suffixIcon: Container(),
+            suffixIconConstraints: BoxConstraints(
+              maxWidth: 0,
+              maxHeight: 0,
+            ),
+
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5.0),
+              borderSide: const BorderSide(
+                color: AppColors.greyUltraLight,
+                width: 1.0,
+              ),
+            ),
+          ),
+          style: textTheme.bodyMedium?.copyWith(
+            height: 1.5,
+            color: AppColors.greyDark,
+            fontWeight: FontWeight.w400,
+          ),
+          onShowPicker: (context, currentValue) {
+            return showDatePicker(
+              context: context,
+              locale: Locale('es', 'ES'),
+              firstDate: DateTime(DateTime.now().year - 100, DateTime.now().month, DateTime.now().day),
+              initialDate: currentValue ?? DateTime.now(),
+              lastDate: DateTime(DateTime.now().year + 100, DateTime.now().month, DateTime.now().day),
+            );
+          },
+          onSaved: (dateTime) => functionSetState(dateTime),
+          validator: (value) => value != null ? null : errorText,
+          enabled: enabled,
+        ),
+      ),
+    ],
   );
 }
 
