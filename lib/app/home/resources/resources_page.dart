@@ -72,14 +72,59 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final database = Provider.of<Database>(context, listen: false);
 
-    buildCollapsed1() {
-      return Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: CustomTextBoldTitle(title: 'Recursos creados'),
-      );
+    buildTitle() {
+      return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: StreamBuilder<UserEnreda>(
+                        stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasData) {
+                            var user = snapshot.data!;
+                            return StreamBuilder<List<Resource>>(
+                                stream: database.myResourcesStream(user.socialEntityId!),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) {
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  }
+                                  if (snapshot.hasData) {
+                                    List<Resource> resource = snapshot.data!;
+                                    return StreamBuilder<SocialEntity>(
+                                      stream: database.socialEntityStreamById(user.socialEntityId!),
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) {
+                                          return const Center(
+                                              child: CircularProgressIndicator());
+                                        }
+                                        final SocialEntity? socialEntity = snapshot.data;
+                                        return CustomTextBoldTitle(title: '${resource.length.toString()} recursos creados por ${socialEntity == null ? '' : socialEntity.name}');
+                                      },
+                                    );
+                                  }
+                                  return const Center(child: CircularProgressIndicator());
+                                });
+                          }
+                          return const Center(child: CircularProgressIndicator());
+                        }),
+                  ),
+                ],
+              ),
+            ),
+          ]);
     }
 
-    buildCollapsed2() {
+    buildCollapsedResourcesList() {
       return Container(
         height: MediaQuery.of(context).size.height * 0.28,
         padding: const EdgeInsets.all(8.0),
@@ -148,26 +193,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
       );
     }
 
-    buildExpanded1() {
-      return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: CustomTextBoldTitle(title: 'Recursos creados'),
-                  ),
-                ],
-              ),
-            ),
-          ]);
-    }
-
-    buildExpanded2() {
+    buildExpandedResourcesList() {
       return Container(
         height: MediaQuery.of(context).size.height * 0.55,
         padding: const EdgeInsets.all(8.0),
@@ -248,12 +274,12 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expandable(
-                    collapsed: buildCollapsed1(),
-                    expanded: buildExpanded1(),
+                    collapsed: buildTitle(),
+                    expanded: buildTitle(),
                   ),
                   Expandable(
-                    collapsed: buildCollapsed2(),
-                    expanded: buildExpanded2(),
+                    collapsed: buildCollapsedResourcesList(),
+                    expanded: buildExpandedResourcesList(),
                   ),
                   Divider(
                     height: 1,

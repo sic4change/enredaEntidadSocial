@@ -48,6 +48,7 @@ abstract class Database {
      Stream<List<SocialEntity>> filterSocialEntityStream(String socialEntityId);
      Stream<SocialEntity> socialEntityStream(String? socialEntityId);
      Stream<UserEnreda> mentorStream(String mentorId);
+     Stream<UserEnreda?> userStreamByEmail(String? email);
      Stream<List<Country>> countriesStream();
      Stream<List<Country>> countryFormatedStream();
      Stream<Country> countryStream(String? countryId);
@@ -211,6 +212,14 @@ class FirestoreDatabase implements Database {
           builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
         );
 
+    Stream<UserEnreda?> userStreamByEmail(String? email) {
+      return _service.nullableDocumentStreamByField(
+        path: APIPath.users(),
+        builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+        queryBuilder: (query) => query.where('email', isEqualTo: email),
+      );
+    }
+
     @override
     Stream<List<Country>> countriesStream() => _service.collectionStream(
       path: APIPath.countries(),
@@ -340,7 +349,7 @@ class FirestoreDatabase implements Database {
 
 
   @override
-  Stream<List<UserEnreda>> participantsByResourceStream(String resourceId) {
+  Stream<List<UserEnreda>> participantsByResourceStream(String? resourceId) {
     return _service.collectionStream<UserEnreda>(
       path: APIPath.users(),
       queryBuilder: (query) => query.where('resources', arrayContains: resourceId),

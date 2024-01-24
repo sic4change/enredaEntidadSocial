@@ -98,8 +98,9 @@ InputDecoration customTextFormFieldDialog(BuildContext context, String label) {
   return InputDecoration(
     labelText: label,
     focusColor: AppColors.primaryColor,
-    labelStyle: textTheme.bodyLarge?.copyWith(
+    labelStyle: textTheme.bodyMedium?.copyWith(
       color: AppColors.greyTxtAlt,
+      fontWeight: FontWeight.w600,
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(5.0),

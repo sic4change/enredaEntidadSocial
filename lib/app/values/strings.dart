@@ -277,12 +277,19 @@ class StringConst {
   static String RESOURCE_LINK(String resourceId) => 'https://enredawebapp.web.app/resources/$resourceId';
   static const String THE_USER = 'El usuario';
   static const String ALREADY_ADDED = 'ya está añadido';
-  static const String ADD_USER = 'Añadir usuario';
-  static const String INVITE_USERS = 'Invitar usuarios';
+  static const String INVITE_TO_RESOURCE = 'Invitar a recurso';
+  static const String INVITE_USERS = 'Invitar a usuarios';
   static const String WRONG_EMAIL = 'Correo electrónico inválido';
   static const String DUPLICATED_USER = 'Usuario duplicado';
   static const String USER_TO_INVITE_ERROR = 'Debe invitar al menos a un usuario';
-  static const String ENTER_TO_ADD = 'Pulsar "ENTER" para añadir';
+  static const String VALID_EMAIL = 'Ingrese un correo electrónico valido';
+  static const String ENTER_TO_ADD = 'Pulsar "ENTER" para añadir a la lista';
+  static const String NO_YOUNG_ROLE = 'no tiene perfil de Joven';
+  static const String INVITE_THIS_RESOURCE = 'Invitar este recurso';
+  static const String INVITE_SUCCESS = '¡Invitación exitosa!';
+  static const String INVITE_SUCCESS_DESCRIPTION = 'Se han enviado las invitaciones a los correo electrónicos de los usuarios.';
+  static const String INVITE_ERROR = 'Se ha producido un error';
+  static const String INVITE_ERROR_DESCRIPTION = 'Revise los campos.';
 
 
   //Resource modalities
@@ -345,7 +352,7 @@ class StringConst {
   static const String FORM_NATURE_ERROR = "La naturaleza no puede estar vacío";
   static const String FORM_SCOPE_ERROR = "El ámbito territorial no puede estar vacío";
   static const String FORM_SIZE_ERROR = "El tamaño no puede estar vacío";
-  static const String FORM_INTERESTS_QUESTION = "¿Cuáles son los intereses del recurso?";
+  static const String FORM_INTERESTS_QUESTION = "¿Cuál es el ámbito de actuación?";
   static const String FORM_INTERESTS = "Intereses";
   static const String FORM_SPECIFIC_INTERESTS = "Intereses específicos";
   static const String FORM_INTEREST_EMPTY = "Selecciona primero tus intereses";
