@@ -48,6 +48,7 @@ class Resource {
     this.notExpire,
     this.interests,
     this.degree,
+    this.invitationsList,
   });
 
   factory Resource.fromMap(Map<String, dynamic> data, String documentId) {
@@ -90,6 +91,10 @@ class Resource {
     List<String>? interests = [];
     if (data['interests'] != null) {
       data['interests'].forEach((interest) {interests.add(interest.toString());});
+    }
+    List<String>? invitationsList = [];
+    if (data['invitationsList'] != null) {
+      data['invitationsList'].forEach((invitation) {invitationsList.add(invitation.toString());});
     }
     final String assistants = data['assistants'].toString();
     List<String>? likes = [];
@@ -157,6 +162,7 @@ class Resource {
       address: address,
       degree: degree,
       street: street,
+      invitationsList: invitationsList
     );
   }
 
@@ -205,6 +211,7 @@ class Resource {
   final bool? notExpire;
   final DateTime createdate;
   final Address? address;
+  final List<String>? invitationsList;
 
 
   @override
@@ -246,8 +253,82 @@ class Resource {
       'address': address?.toMap(),
       'createdate': createdate,
       'street': street,
+      'invitationsList': invitationsList
     };
   }
+
+  Resource copyWith({
+    String? resourceId,
+    String? title,
+    String? description,
+    String? organizer,
+    String? organizerType,
+    String? promotor,
+    String? resourceType,
+    String? resourceCategory,
+    String? assistants,
+    int? capacity,
+    String? duration,
+    String? modality,
+    DateTime? maximumDate,
+    DateTime? start,
+    DateTime? end,
+    String? temporality,
+    String? resourceLink,
+    List<String>? participants,
+    List<String>? interests,
+    String? contractType,
+    String? salary,
+    String? contactEmail,
+    String? contactPhone,
+    String? resourcePictureId,
+    String? link,
+    String? degree,
+    bool? notExpire,
+    DateTime? createdate,
+    Address? address,
+    List<String>? invitationsList,
+    String? searchText,
+    String? resourcePhoto,
+    String? place
+  }) {
+    return Resource(
+      resourceId: resourceId?? this.resourceId,
+      title: title?? this.title,
+      description: description?? this.description,
+      organizer: organizer?? this.organizer,
+      organizerType: organizerType?? this.organizerType,
+      promotor: promotor?? this.promotor,
+      resourceType: resourceType?? this.resourceType,
+      resourceCategory: resourceCategory?? this.resourceCategory,
+      assistants: assistants?? this.assistants,
+      capacity: capacity?? this.capacity,
+      duration: duration?? this.duration,
+      modality: modality?? this.modality,
+      maximumDate: maximumDate?? this.maximumDate,
+      start: start?? this.start,
+      end: end?? this.end,
+      temporality: temporality?? this.temporality,
+      resourceLink: resourceLink?? this.resourceLink,
+      participants: participants?? this.participants,
+      interests: interests?? this.interests,
+      contractType: contractType?? this.contractType,
+      salary: salary?? this.salary,
+      contactEmail: contactEmail?? this.contactEmail,
+      contactPhone: contactPhone?? this.contactPhone,
+      resourcePictureId: resourcePictureId?? this.resourcePictureId,
+      link: link?? this.link,
+      degree: degree?? this.degree,
+      notExpire: notExpire?? this.notExpire,
+      address: address?? this.address,
+      createdate: createdate?? this.createdate,
+      invitationsList: invitationsList?? this.invitationsList,
+      searchText: searchText ?? this.searchText,
+      resourcePhoto: resourcePhoto ?? this.resourcePhoto,
+      place: place ?? this.place,
+    );
+  }
+
 
   void setResourceTypeName() {
     switch(this.resourceType) {

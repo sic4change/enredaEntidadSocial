@@ -6,6 +6,7 @@ class APIPath {
   static String resourceType(String resourceType) => 'resourcesTypes/$resourceType';
   static String resourceCategory(String resourceCategory) => 'resourcesCategories/$resourceCategory';
   static String socialEntity(String socialEntityId) => 'socialEntities/$socialEntityId';
+  static String organization(String organizationId) => 'organizations/$organizationId';
   static String socialEntities() => 'socialEntities';
   static String country(String? countryId) => 'countries/$countryId';
   static String countries() => 'countries';

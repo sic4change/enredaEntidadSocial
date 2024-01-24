@@ -261,6 +261,9 @@ class _CreateResourceState extends State<CreateResource> {
       'Sin titulación',
       'Con titulación no oficial',
       'Con titulación oficial'];
+    List<String> contractTypes = <String>[
+      'Contrato indefinido',
+      'Contrato temporal',];
     return Form(
       key: _formKey,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <
@@ -270,8 +273,7 @@ class _CreateResourceState extends State<CreateResource> {
               context,
               selectedResourceCategory,
               buildResourceCategoryStreamBuilderSetState),
-          childRight: streamBuilderDropdownResourceTypeCreate(context,
-              selectedResourceType, buildResourceTypeStreamBuilderSetState),
+          childRight: Container(),
         ),
         CustomFlexRowColumn(
           childLeft: customTextFormField(context, _resourceTitle!,
@@ -284,7 +286,7 @@ class _CreateResourceState extends State<CreateResource> {
               descriptionSetState),
         ),
         CustomFlexRowColumn(
-          childLeft: resourceTypeName == "Formación"
+          childLeft: resourceCategoryName == "Formación"
               ? DropdownButtonFormField<String>(
                   hint: const Text(StringConst.FORM_DEGREE),
                   value: _degree == "" ? null : _degree,
@@ -342,35 +344,37 @@ class _CreateResourceState extends State<CreateResource> {
           childRight: Container(),
         ),
         CustomFlexRowColumn(
-          childLeft: resourceTypeName == "Bolsa de empleo" ||
-                  resourceTypeName == "Oferta de empleo"
-              ? customTextFormField(
-                  context,
-                  _contractType!,
-                  StringConst.FORM_CONTRACT,
-                  StringConst.FORM_COMPANY_ERROR,
-                  buildContractStreamBuilderSetState)
-              : Container(),
-          childRight: resourceTypeName == "Bolsa de empleo" ||
-                  resourceTypeName == "Oferta de empleo"
-              ? customTextFormField(
-                  context,
-                  _salary!,
-                  StringConst.FORM_SALARY,
-                  StringConst.FORM_COMPANY_ERROR,
-                  buildSalaryStreamBuilderSetState)
-              : Container(),
-        ),
-        CustomFlexRowColumn(
-          childLeft: TextFormField(
-            controller: textEditingControllerInterests,
+          childLeft: resourceCategoryName == "Empleo" ? DropdownButtonFormField<String>(
+            hint: const Text(StringConst.FORM_CONTRACT),
+            value: _contractType == "" ? null : _contractType,
+            items: contractTypes.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: textTheme.bodySmall?.copyWith(
+                    height: 1.5,
+                    color: AppColors.greyDark,
+                    fontWeight: FontWeight.w400,
+                    fontSize: fontSize,
+                  ),
+                ),
+              );
+            }).toList(),
+            validator: (value) => _contractType != null
+                ? null
+                : StringConst.FORM_COMPANY_ERROR,
+            onChanged: (value) => buildContractStreamBuilderSetState(value),
+            iconDisabledColor: AppColors.greyDark,
+            iconEnabledColor: AppColors.primaryColor,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
-              labelText: StringConst.FORM_INTERESTS_QUESTION,
-              focusColor: AppColors.lilac,
-              labelStyle: textTheme.bodyLarge?.copyWith(
+              labelStyle: textTheme.bodySmall?.copyWith(
+                height: 1.5,
                 color: AppColors.greyDark,
+                fontWeight: FontWeight.w400,
+                fontSize: fontSize,
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(5.0),
@@ -386,18 +390,57 @@ class _CreateResourceState extends State<CreateResource> {
                 ),
               ),
             ),
-            onTap: () => {_showMultiSelectInterests(context)},
-            validator: (value) =>
-            value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
-            onSaved: (value) => value = _interestId,
-            readOnly: true,
-            style: textTheme.bodyMedium?.copyWith(
+            style: textTheme.bodySmall?.copyWith(
+              height: 1.5,
               color: AppColors.greyDark,
+              fontWeight: FontWeight.w400,
+              fontSize: fontSize,
             ),
-          ),
-          childRight: streamBuilderDropdownResourcePictureCreate(context,
-              selectedResourcePicture, buildResourcePictureStreamBuilderSetState),
+          ) : Container(),
+          childRight: resourceCategoryName == "Empleo"
+              ? customTextFormField(
+                  context,
+                  _salary!,
+                  StringConst.FORM_SALARY,
+                  StringConst.FORM_COMPANY_ERROR,
+                  buildSalaryStreamBuilderSetState)
+              : Container(),
         ),
+        CustomFlexRowColumn(
+            childLeft: TextFormField(
+              controller: textEditingControllerInterests,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                labelText: StringConst.FORM_INTERESTS_QUESTION,
+                focusColor: AppColors.lilac,
+                labelStyle: textTheme.bodyLarge?.copyWith(
+                  color: AppColors.greyDark,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  borderSide: const BorderSide(
+                    color: AppColors.greyUltraLight,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  borderSide: const BorderSide(
+                    color: AppColors.greyUltraLight,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              onTap: () => {_showMultiSelectInterests(context)},
+              validator: (value) =>
+              value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
+              onSaved: (value) => value = _interestId,
+              readOnly: true,
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.greyDark,
+              ),
+            ),
+            childRight: Container()),
         CustomFlexRowColumn(
           childLeft: customTextFormField(
               context,
@@ -608,9 +651,6 @@ class _CreateResourceState extends State<CreateResource> {
                 items: <String>[
                   'Presencial',
                   'Semipresencial',
-                  'Online para residentes en país',
-                  'Online para residentes en provincia',
-                  'Online para residentes en ciudad',
                   'Online'
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
@@ -682,41 +722,26 @@ class _CreateResourceState extends State<CreateResource> {
                 ? CustomFlexRowColumn(
                     childLeft: streamBuilderForCountryCreate(context, selectedCountry,
                         buildCountryStreamBuilderSetState),
-                    childRight:
-                        _modality != 'Online para residentes en país'
-                            ? streamBuilderForProvinceCreate(
+                    childRight:streamBuilderForProvinceCreate(
                                 context,
                                 selectedCountry,
                                 selectedProvince,
-                                buildProvinceStreamBuilderSetState)
-                            : Container())
+                                buildProvinceStreamBuilderSetState))
                 : Container(),
             _modality != "Online"
                 ? CustomFlexRowColumn(
-                    childLeft:
-                        _modality != 'Online para residentes en país' &&
-                                _modality !=
-                                    'Online para residentes en provincia'
-                            ? streamBuilderForCityCreate(
+                    childLeft: streamBuilderForCityCreate(
                                 context,
                                 selectedCountry,
                                 selectedProvince,
                                 selectedCity,
-                                buildCityStreamBuilderSetState)
-                            : Container(),
-                    childRight:
-                        _modality != 'Online para residentes en país' &&
-                                _modality !=
-                                    'Online para residentes en provincia' &&
-                                _modality !=
-                                    'Online para residentes en ciudad'
-                            ? customTextFormField(
+                                buildCityStreamBuilderSetState),
+                    childRight: customTextFormField(
                                 context,
                                 _street!,
                                 StringConst.FORM_ADDRESS,
                                 StringConst.FORM_COMPANY_ERROR,
-                                addressSetState)
-                            : Container(),
+                                addressSetState),
                   )
                 : Container(),
             CustomFlexRowColumn(
@@ -804,7 +829,6 @@ class _CreateResourceState extends State<CreateResource> {
           context,
           _resourceTitle!,
           _resourceDescription!,
-          resourceTypeName,
           resourceCategoryName,
           _degree!,
           _contractType!,
@@ -827,7 +851,6 @@ class _CreateResourceState extends State<CreateResource> {
           //_trust,
           _phone!,
           _email!,
-          resourcePictureName
         ),
       ],
     );

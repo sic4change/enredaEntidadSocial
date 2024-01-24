@@ -15,6 +15,7 @@ import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/organization.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/socialEntityUser.dart';
@@ -37,14 +38,17 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 abstract class Database {
      Stream<List<Resource>> resourcesStream();
+     Stream<List<Resource>> limitResourcesStream(int i);
      Stream<Resource> resourceStream(String? resourceId);
      Stream<List<Resource>> myResourcesStream(String socialEntityId);
+     Stream<List<Resource>> myLimitResourcesStream(String socialEntityId, int i);
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
      Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId);
      Stream<List<SocialEntity>> socialEntitiesStream();
      Stream<List<SocialEntity>> filterSocialEntityStream(String socialEntityId);
      Stream<SocialEntity> socialEntityStream(String? socialEntityId);
      Stream<UserEnreda> mentorStream(String mentorId);
+     Stream<UserEnreda?> userStreamByEmail(String? email);
      Stream<List<Country>> countriesStream();
      Stream<List<Country>> countryFormatedStream();
      Stream<Country> countryStream(String? countryId);
@@ -62,6 +66,7 @@ abstract class Database {
      Stream<List<Interest>> resourcesInterestsStream(List<String?> interestsIdList);
      Stream<List<UserEnreda>> participantsByResourceStream(String resourceId);
      Stream<SocialEntity> socialEntityStreamById(String? socialEntityId);
+     Stream<Organization> organizationStreamById(String organizationId);
      Stream<UserEnreda> userEnredaStreamByUserId(String? userId);
      Stream<ResourceType> resourceTypeStreamById(String? resourceTypeId);
      Stream<ResourceCategory> resourceCategoryStreamById(String? resourceCategoryId);
@@ -127,6 +132,17 @@ class FirestoreDatabase implements Database {
         );
 
     @override
+    Stream<List<Resource>> myLimitResourcesStream(String socialEntityId, int limit) =>
+      _service.collectionStream(
+        path: APIPath.resources(),
+        queryBuilder: (query) => query
+            .where('organizer', isEqualTo: socialEntityId)
+            .limit(limit),
+        builder: (data, documentId) => Resource.fromMap(data, documentId),
+        sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+      );
+
+    @override
     Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId) =>
       _service.collectionStream(
         path: APIPath.resources(),
@@ -152,6 +168,17 @@ class FirestoreDatabase implements Database {
       builder: (data, documentId) => Resource.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.createdate.compareTo(rhs.createdate),
     );
+
+  @override
+  Stream<List<Resource>> limitResourcesStream(int limit) =>
+      _service.collectionStream(
+        path: APIPath.resources(),
+        queryBuilder: (query) => query
+            .where('organizerType', isEqualTo: "Entidad Social")
+            .limit(limit),
+        builder: (data, documentId) => Resource.fromMap(data, documentId),
+        sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+      );
 
     @override
     Stream<List<SocialEntity>> socialEntitiesStream() => _service.collectionStream(
@@ -184,6 +211,14 @@ class FirestoreDatabase implements Database {
           path: APIPath.user(mentorId),
           builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
         );
+
+    Stream<UserEnreda?> userStreamByEmail(String? email) {
+      return _service.nullableDocumentStreamByField(
+        path: APIPath.users(),
+        builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+        queryBuilder: (query) => query.where('email', isEqualTo: email),
+      );
+    }
 
     @override
     Stream<List<Country>> countriesStream() => _service.collectionStream(
@@ -314,7 +349,7 @@ class FirestoreDatabase implements Database {
 
 
   @override
-  Stream<List<UserEnreda>> participantsByResourceStream(String resourceId) {
+  Stream<List<UserEnreda>> participantsByResourceStream(String? resourceId) {
     return _service.collectionStream<UserEnreda>(
       path: APIPath.users(),
       queryBuilder: (query) => query.where('resources', arrayContains: resourceId),
@@ -352,6 +387,13 @@ class FirestoreDatabase implements Database {
             SocialEntity.fromMap(data, documentId),
       );
 
+  @override
+  Stream<Organization> organizationStreamById(String? organizationId) =>
+      _service.documentStream<Organization>(
+        path: APIPath.organization(organizationId!),
+        builder: (data, documentId) =>
+            Organization.fromMap(data, documentId),
+      );
 
   @override
   Stream<ResourceType> resourceTypeStreamById(String? resourceTypeId) =>

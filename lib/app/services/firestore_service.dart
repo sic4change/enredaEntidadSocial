@@ -98,4 +98,24 @@ class FirestoreService {
     final snapshots = reference.snapshots();
     return snapshots.map((snapshot) => builder(snapshot.data()!, snapshot.id));
   }
+
+  Stream<T?> nullableDocumentStreamByField<T>({
+    required String path,
+    required T Function(Map<String, dynamic> data, String documentId) builder,
+    Query Function(Query query)? queryBuilder,
+  }) {
+    Query query = FirebaseFirestore.instance.collection(path);
+
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
+    }
+    final snapshots = query.snapshots();
+    return snapshots.map((snapshot) {
+      final List<T?> result = snapshot.docs
+          .map((snapshot) => builder(snapshot.data() as Map<String, dynamic>, snapshot.id))
+          .toList();
+
+      return result.isNotEmpty? result.first: null;
+    });
+  }
 }

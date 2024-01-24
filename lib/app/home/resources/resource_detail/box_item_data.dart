@@ -34,6 +34,7 @@ class BoxItem extends StatelessWidget {
     TextTheme textTheme = Theme.of(context).textTheme;
     return Container(
       decoration: BoxDecoration(
+        color: Colors.white,
         shape: BoxShape.rectangle,
         border: Border.all(
             color: AppColors.greyLight2.withOpacity(0.2),

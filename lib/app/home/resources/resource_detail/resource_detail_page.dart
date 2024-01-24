@@ -2,12 +2,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/build_share_button.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/common_widgets/user_avatar.dart';
 import 'package:enreda_empresas/app/home/resources/list_item_builder.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail/box_item_data.dart';
+import 'package:enreda_empresas/app/home/resources/resource_detail/invite_users_page.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_dialog.dart';
 import 'package:enreda_empresas/app/home/resources/resource_interests_stream.dart';
 import 'package:enreda_empresas/app/models/city.dart';
@@ -27,7 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
-import 'my_resources_list_page.dart';
+import '../my_resources_list_page.dart';
 
 class ResourceDetailPage extends StatefulWidget {
   const ResourceDetailPage({Key? key, required this.socialEntityId}) : super(key: key);
@@ -38,8 +41,6 @@ class ResourceDetailPage extends StatefulWidget {
 }
 
 class _ResourceDetailPageState extends State<ResourceDetailPage> {
-  //String? socialEntityId;
-  //SocialEntity? organizer;
 
   @override
   Widget build(BuildContext context) {
@@ -271,15 +272,8 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                                     ]
                                                                   ),
                                                                 ),
-                                                                Container(
+                                                                Padding(
                                                                   padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                                                                  constraints: BoxConstraints(
-                                                                    maxHeight: 150,
-                                                                    maxWidth:
-                                                                    Responsive.isMobile(context) || Responsive.isDesktopS(context)
-                                                                        ? MediaQuery.of(context).size.width
-                                                                        : MediaQuery.of(context).size.width / 1.5,
-                                                                  ),
                                                                   child: _buildBoxes(resource),
                                                                 ),
                                                                 Flex(
@@ -320,7 +314,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                           borderRadius: BorderRadius.circular(Consts.padding),
                                                         ),
                                                         alignment: Alignment.center,
-                                                        margin: Responsive.isMobile(context) ?  EdgeInsets.only(top: 10) : EdgeInsets.only(left: 10),
+                                                        margin: Responsive.isMobile(context) || Responsive.isDesktopS(context)  ?  EdgeInsets.only(top: 10) : EdgeInsets.only(left: 10),
                                                         padding: const EdgeInsets.all(20.0),
                                                         child: SingleChildScrollView(
                                                             child: Stack(
@@ -333,7 +327,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                                 ),
                                                                 Padding(
                                                                   padding: const EdgeInsets.only(top: 30.0),
-                                                                  child: _buildParticipantsList(context, resource.resourceId!),
+                                                                  child: _buildParticipantsList(context, resource),
                                                                 ),
                                                               ],
                                                             )),
@@ -492,129 +486,100 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
         contact: resource.salary != null && resource.salary != ''  ? '${resource.salary}' :  'Sin especificar',
       ),
     ];
-    return GridView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 250,
-            mainAxisExtent: 60,
-            childAspectRatio: 6 / 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10),
-        itemCount: boxItemData.length,
-        itemBuilder: (BuildContext context, index) {
-          return BoxItem(
-            icon: boxItemData[index].icon,
-            title: boxItemData[index].title,
-            contact: boxItemData[index].contact,
-          );
-        });
-  }
-
-
-  Widget _buildParticipantsList(BuildContext context, String resourceId) {
-    final database = Provider.of<Database>(context, listen: false);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        StreamBuilder<List<UserEnreda>>(
-          stream: database.participantsByResourceStream(resourceId),
-          builder: (context, snapshot) {
-            return ListItemBuilder(
-                snapshot: snapshot,
-                emptyTitle: 'Sin participantes',
-                emptyMessage: 'Aún no se ha registrado ningún participante',
-                itemBuilder: (context, user) {
-                  return  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 10.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                          color: AppColors.greyLight2.withOpacity(0.2),
-                          width: 1),
-                      borderRadius: BorderRadius.circular(Consts.padding * 2),
-                    ),
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          _buildMyUserPhoto(context, user.photo!),
-                          const SpaceW20(),
-                          Text('${user.firstName!} ${user.lastName!}'),
-                        ],
-                      ),
-                    ),
-                  );
-                }
+    const int crossAxisCount = 2; // The number of columns in the grid
+    const double maxCrossAxisExtent = 250;
+    const double mainAxisExtent = 60;
+    const double childAspectRatio = 6 / 2;
+    const double crossAxisSpacing = 10;
+    const double mainAxisSpacing = 10;
+    int rowCount = (boxItemData.length / crossAxisCount).ceil();
+    double gridHeight = rowCount * mainAxisExtent + (rowCount - 1) * mainAxisSpacing;
+    double gridHeightD = rowCount * mainAxisExtent + (rowCount - 15) * mainAxisSpacing;
+    return SizedBox(
+      height: Responsive.isDesktop(context) ? gridHeightD : gridHeight,
+      child: GridView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: maxCrossAxisExtent,
+              mainAxisExtent: mainAxisExtent,
+              childAspectRatio: childAspectRatio,
+              crossAxisSpacing: crossAxisSpacing,
+              mainAxisSpacing: mainAxisSpacing),
+          itemCount: boxItemData.length,
+          itemBuilder: (BuildContext context, index) {
+            return BoxItem(
+              icon: boxItemData[index].icon,
+              title: boxItemData[index].title,
+              contact: boxItemData[index].contact,
             );
-          },
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: AddYellowButton(
-                text: 'Invitar a este recurso',
-                onPressed: () => {},
-              ),),
-          ],
-        ),
-      ],
+          }),
+    );
+  }
+  
+  Widget _buildParticipantsList(BuildContext context, Resource resource) {
+    final database = Provider.of<Database>(context, listen: false);
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StreamBuilder<List<UserEnreda>>(
+            stream: database.participantsByResourceStream(resource.resourceId!),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
+              return ListItemBuilder(
+                  snapshot: snapshot,
+                  emptyTitle: 'Sin participantes',
+                  emptyMessage: 'Aún no se ha registrado ningún participante',
+                  itemBuilder: (context, user) {
+                    return  Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                            color: AppColors.greyLight2.withOpacity(0.2),
+                            width: 1),
+                        borderRadius: BorderRadius.circular(Consts.padding * 2),
+                      ),
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            userAvatar(context, user.photo!),
+                            const SpaceW20(),
+                            Text('${user.firstName!} ${user.lastName!}'),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+              );
+            },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: AddYellowButton(
+                  text: 'Invitar a este recurso',
+                  onPressed: () => showDialog(context: context, builder: (_) {
+                    return CustomDialog(
+                        width: Responsive.isMobile(context)? widthOfScreen(context) : widthOfScreen(context)/2,
+                        child: InviteUsersToResourcePage(resource: resource,)
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildMyUserPhoto(BuildContext context, String profilePic) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            !kIsWeb ?
-            ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(60)),
-              child:
-              Center(
-                child:
-                profilePic == "" ?
-                Container(
-                  color:  Colors.transparent,
-                  height: 40,
-                  width: 40,
-                  child: Image.asset(ImagePath.USER_DEFAULT),
-                ):
-                CachedNetworkImage(
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                    imageUrl: profilePic),
-              ),
-            ):
-            ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(60)),
-              child:
-              profilePic == "" ?
-              Container(
-                color:  Colors.transparent,
-                height: 40,
-                width: 40,
-                child: Image.asset(ImagePath.USER_DEFAULT),
-              ):
-              PrecacheAvatarCard(
-                imageUrl: profilePic,
-                width: 35,
-                height: 35,
-              ),
-            )
-          ],
-        ),
-      ],
-    );
-  }
 
   Future<void> _deleteResource(BuildContext context, Resource resource) async {
     try {
