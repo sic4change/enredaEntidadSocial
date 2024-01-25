@@ -2,7 +2,7 @@ part of values;
 
 class ImagePath {
   //assets route
-  static const String imageDir = "assets";
+  static const String imageDir = "assets/images";
   static const String screenshotsDir = "assets/screenshots";
   static const String resourcesDir = "assets/resources";
 
@@ -91,4 +91,7 @@ class ImagePath {
   static const String DOWNLOAD = '$imageDir/icon-download.png';
   static const String LOGOUT = '$imageDir/icon-logout.png';
   static const String ICON_SHARE = '$imageDir/icon-share.png';
+
+  // Participant details
+  static const String GAMIFICATION_LOGO = '$imageDir/gamification_logo.png';
 }

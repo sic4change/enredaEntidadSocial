@@ -104,40 +104,7 @@ flutter:
   #   - assets/a_dot_ham.jpeg
 
   assets:
-    - assets/form-empresa-turquesa.png
-    - assets/enreda-logo.png
-    - assets/ic_enreda_bn.png
-    - assets/ic_enreda.png
-    - assets/enreda-mdpi.png
-    - assets/icon-chat.png
-    - assets/arrow_down.png
-    - assets/arrow_up.png
-    - assets/icon-resources-blue.png
-    - assets/icon-resources-gray.png
-    - assets/icon-cv.png
-    - assets/icon-profile-blue.png
-    - assets/icon-competencies-blue.png
-    - assets/icon-fav-blue.png
-    - assets/favorites-illustration.png
-    - assets/enreda-logo-alone.png
-    - assets/enreda-logo-text.png
-    - assets/icon-download.png
-    - assets/icon-logout.png
-    - assets/logo-enreda-blanco.png
-    - assets/icon-competencias.png
-    - assets/placeholder-image.png
-    - assets/play_store_900x503.png
-    - assets/app_store_900x503.png
-    - assets/user_default.jpg
-    - assets/chica-lateral-formulario.png
-    - assets/photo-button.jpg
-    - assets/icon-crear-recurso.png
-    - assets/icon-descargar.png
-    - assets/icon-editar.png
-    - assets/icon-eliminar.png
-    - assets/enreda-lines-logo.png
-    - assets/rectangle-1595.png
-    - assets/icon-share.png
+    - assets/images/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

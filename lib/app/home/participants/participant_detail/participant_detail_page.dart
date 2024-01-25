@@ -6,6 +6,8 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
+import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
+import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/my_cv_page.dart';
@@ -50,15 +52,17 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
   @override
   void initState() {
-    _currentPage =  Container();//_IPILPage(context, widget.user);
-    _value = _menuOptions[2]; //For IPIL
+    _value = _menuOptions[0];
     super.initState();
-
   }
 
 
   @override
   Widget build(BuildContext context) {
+    if (_currentPage == null) {
+      _currentPage =  _buildControlPanel(context, widget.user);
+    }
+
     return Responsive.isMobile(context) || Responsive.isTablet(context)?
       _buildParticipantProfileMobile(context, widget.user)
         :_buildParticipantWeb(context, widget.user);
@@ -129,8 +133,24 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               showCheckmark: false,
               onSelected: (bool selected) {
                 setState(() {
-                  _value = _menuOptions[index]; //: null;
-                  _currentPage = _IPILPage(context, user);
+                  _value = _menuOptions[index];
+                  switch (index) {
+                    case 0:
+                      _currentPage = _buildControlPanel(context, user);
+                      break;
+                    case 1:
+                      _currentPage = _IPILPage(context, user);
+                      break;
+                    case 2:
+                      _currentPage = _IPILPage(context, user);
+                      break;
+                    case 3:
+                      _currentPage = _IPILPage(context, user);
+                      break;
+                    case 4:
+                      _currentPage = _IPILPage(context, user);
+                      break;
+                  }
                 });
               },
             ),
@@ -143,6 +163,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   Widget _IPILPage(BuildContext context, UserEnreda user){
     final database = Provider.of<Database>(context, listen: false);
     final auth = Provider.of<AuthBase>(context, listen: false);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
       child: Container(
@@ -424,6 +445,41 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               return Container();
             }
           }
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControlPanel(BuildContext context, UserEnreda user){
+    final database = Provider.of<Database>(context, listen: false);
+    final auth = Provider.of<AuthBase>(context, listen: false);
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
+      child: RoundedContainer(
+        child: Column(
+          children: [
+            CustomTextBoldTitle(title: StringConst.GAMIFICATION),
+            SpaceH8(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Image.asset(ImagePath.GAMIFICATION_LOGO, height: 160.0,),
+                SpaceW8(),
+                Expanded(
+                  child: Column(
+                    children: [
+                      GamificationSlider(
+                        height: 20.0,
+                        value: widget.user.gamificationFlags.length,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
