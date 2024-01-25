@@ -1,5 +1,5 @@
 import 'package:enreda_empresas/app/models/country.dart';
-import 'package:enreda_empresas/app/models/province.dart';
+import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
@@ -8,32 +8,31 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 
-Widget streamBuilderForProvince (BuildContext context, Country? selectedCountry, Province? selectedProvince,  functionToWriteBackThings ) {
+Widget streamBuilderForProvince (BuildContext context, Country? selectedCountry, Region? selectedProvince,  functionToWriteBackThings ) {
   final database = Provider.of<Database>(context, listen: false);
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
-  return StreamBuilder<List<Province>>(
-      stream: database.provincesCountryStream(selectedCountry?.countryId),
+  return StreamBuilder<List<Region>>(
+      stream: selectedCountry != null ? database.regionStreamByCountry(selectedCountry.countryId) : null,
       builder: (context, snapshotProvinces) {
 
-        List<DropdownMenuItem<Province>> provinceItems = [];
-        if (snapshotProvinces.hasData && selectedCountry != null) {
-          provinceItems = snapshotProvinces.data!.map((Province p) =>
-              DropdownMenuItem<Province>(
+        List<DropdownMenuItem<Region>> provinceItems = [];
+        if (snapshotProvinces.hasData) {
+          provinceItems = snapshotProvinces.data!.map((Region p) =>
+              DropdownMenuItem<Region>(
                 value: p,
                 child: Text(p.name),
               )
           ).toList();
         }
 
-        return DropdownButtonFormField<Province>(
+        return DropdownButtonFormField<Region>(
           hint: Text(StringConst.FORM_PROVINCE),
           isExpanded: true,
           value: selectedProvince,
           items: provinceItems,
-          validator: (value) => selectedProvince != null ?
-          null : StringConst.PROVINCE_ERROR,
-          onChanged: (value) => functionToWriteBackThings(value),
+          validator: (value) => selectedProvince != null ? null : StringConst.PROVINCE_ERROR,
+          onChanged: selectedCountry != null ? (value) => functionToWriteBackThings(value) : null,
           iconDisabledColor: AppColors.greyDark,
           iconEnabledColor: AppColors.primaryColor,
           decoration: InputDecoration(

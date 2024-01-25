@@ -19,6 +19,7 @@ import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/resourceCategory.dart';
@@ -99,7 +100,7 @@ class _EditResourceState extends State<EditResource> {
 
   ResourceType? selectedResourceType;
   Country? selectedCountry;
-  Province? selectedProvince;
+  Region? selectedProvince;
   City? selectedCity;
 
   int? resourceCategoryValue;
@@ -697,7 +698,7 @@ class _EditResourceState extends State<EditResource> {
                     childLeft: streamBuilderForCountry(context, selectedCountry,
                         buildCountryStreamBuilderSetState, resource),
                     childRight: _modality != 'Online para residentes en país'
-                        ? streamBuilderForProvince(
+                        ? streamBuilderForRegion(
                             context,
                             selectedCountry == null
                                 ? resource.address?.country
@@ -718,7 +719,7 @@ class _EditResourceState extends State<EditResource> {
                                 : selectedCountry?.countryId,
                             selectedProvince == null
                                 ? resource.address?.province
-                                : selectedProvince?.provinceId,
+                                : selectedProvince?.regionId,
                             selectedCity,
                             buildCityStreamBuilderSetState,
                             resource)
@@ -853,12 +854,12 @@ class _EditResourceState extends State<EditResource> {
     _countryId = country?.countryId;
   }
 
-  void buildProvinceStreamBuilderSetState(Province? province) {
+  void buildProvinceStreamBuilderSetState(Region? province) {
     setState(() {
       selectedCity = null;
       selectedProvince = province;
     });
-    _provinceId = province?.provinceId;
+    _provinceId = province?.regionId;
   }
 
   void buildCityStreamBuilderSetState(City? city) {

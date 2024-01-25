@@ -16,6 +16,7 @@ import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/organization.dart';
+import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/socialEntityUser.dart';
@@ -50,6 +51,7 @@ abstract class Database {
      Stream<UserEnreda> mentorStream(String mentorId);
      Stream<UserEnreda?> userStreamByEmail(String? email);
      Stream<List<Country>> countriesStream();
+     Stream<List<Region>> regionStreamByCountry(String countryId);
      Stream<List<Country>> countryFormatedStream();
      Stream<Country> countryStream(String? countryId);
      Stream<List<Province>> provincesStream();
@@ -223,7 +225,6 @@ class FirestoreDatabase implements Database {
     @override
     Stream<List<Country>> countriesStream() => _service.collectionStream(
       path: APIPath.countries(),
-      queryBuilder: (query) => query.where('coutryId', isNotEqualTo: null),
       builder: (data, documentId) => Country.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
     );
@@ -244,9 +245,40 @@ class FirestoreDatabase implements Database {
           );
 
     @override
+    Stream<List<Region>> regionStreamByCountry(String? countryId) {
+      // int countryIdInt = 0;
+      // if (countryId != '') {
+      //   countryIdInt = int.parse(countryId!);
+      // }
+      // return _service.collectionStream<Region>(
+      //   path: APIPath.regions(),
+      //   builder: (data, documentId) => Region.fromMap(data, documentId),
+      //   queryBuilder: (query) => query.where('country_id', isEqualTo:countryIdInt),
+      //   sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+      // );
+      int? countryIdInt; // Make it nullable since it can be null
+
+      // This checks for both non-null and non-empty countryId before parsing
+      if (countryId != null && countryId.isNotEmpty) {
+        countryIdInt = int.tryParse(countryId);
+
+        // Handle the case when parsing fails (e.g., if countryId is not a valid integer)
+        if (countryIdInt == null) {
+          throw FormatException('Invalid countryId: $countryId is not an integer');
+        }
+      }
+
+      return _service.collectionStream<Region>(
+        path: APIPath.regions(),
+        builder: (data, documentId) => Region.fromMap(data, documentId),
+        queryBuilder: (query) => query.where('country_id', isEqualTo: countryIdInt),
+        sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+      );
+    }
+
+    @override
     Stream<List<Province>> provincesStream() => _service.collectionStream(
       path: APIPath.provinces(),
-      queryBuilder: (query) => query.where('provinceId', isNotEqualTo: null),
       builder: (data, documentId) => Province.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
     );
@@ -268,7 +300,7 @@ class FirestoreDatabase implements Database {
       return _service.collectionStream(
         path: APIPath.provinces(),
         builder: (data, documentId) => Province.fromMap(data, documentId),
-        queryBuilder: (query) => query.where('countryId', isEqualTo: countryId),
+        queryBuilder: (query) => query.where('id', isEqualTo: countryId),
         sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
       );
     }

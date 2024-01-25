@@ -7,9 +7,11 @@ import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
+import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_province.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_category_create.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_interests_create.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_province.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_social_entities.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_resourcePicture_create.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_type_create.dart';
@@ -17,6 +19,7 @@ import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/resourceCategory.dart';
@@ -98,7 +101,7 @@ class _CreateResourceState extends State<CreateResource> {
   String? _salary;
 
   Country? selectedCountry;
-  Province? selectedProvince;
+  Region? selectedProvince;
   City? selectedCity;
 
 
@@ -722,7 +725,7 @@ class _CreateResourceState extends State<CreateResource> {
                 ? CustomFlexRowColumn(
                     childLeft: streamBuilderForCountryCreate(context, selectedCountry,
                         buildCountryStreamBuilderSetState),
-                    childRight:streamBuilderForProvinceCreate(
+                    childRight:streamBuilderForProvince(
                                 context,
                                 selectedCountry,
                                 selectedProvince,
@@ -730,12 +733,13 @@ class _CreateResourceState extends State<CreateResource> {
                 : Container(),
             _modality != "Online"
                 ? CustomFlexRowColumn(
-                    childLeft: streamBuilderForCityCreate(
-                                context,
-                                selectedCountry,
-                                selectedProvince,
-                                selectedCity,
-                                buildCityStreamBuilderSetState),
+                    // childLeft: streamBuilderForCityCreate(
+                    //             context,
+                    //             selectedCountry,
+                    //             selectedProvince,
+                    //             selectedCity,
+                    //             buildCityStreamBuilderSetState),
+                    childLeft: Container(),
                     childRight: customTextFormField(
                                 context,
                                 _street!,
@@ -866,13 +870,13 @@ class _CreateResourceState extends State<CreateResource> {
     _countryId = country?.countryId;
   }
 
-  void buildProvinceStreamBuilderSetState(Province? province) {
+  void buildProvinceStreamBuilderSetState(Region? province) {
     setState(() {
       selectedCity = null;
       selectedProvince = province;
       provinceName = province != null ? province.name : "";
     });
-    _provinceId = province?.provinceId;
+    _provinceId = province?.regionId;
   }
 
   void buildCityStreamBuilderSetState(City? city) {

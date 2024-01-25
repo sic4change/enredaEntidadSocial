@@ -15,6 +15,7 @@ import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/contact.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/province.dart';
+import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -56,7 +57,7 @@ class _PersonalDataState extends State<PersonalData> {
   String _phoneCode = '+34';
   UserEnreda? userEnreda;
   Country? selectedCountry;
-  Province? selectedProvince;
+  Region? selectedProvince;
   City? selectedCity;
 
   @override
@@ -242,7 +243,7 @@ class _PersonalDataState extends State<PersonalData> {
               buildCountryStreamBuilderSetState, userEnreda),
         ),
         CustomFlexRowColumn(
-          childLeft: streamBuilderForProvince(
+          childLeft: streamBuilderForRegion(
               context,
               selectedCountry == null ? userEnreda.address?.country : selectedCountry?.countryId,
               selectedProvince,
@@ -250,7 +251,7 @@ class _PersonalDataState extends State<PersonalData> {
           childRight: streamBuilderForCity(
               context,
               selectedCountry == null ? userEnreda.address?.country : selectedCountry?.countryId,
-              selectedProvince == null ? userEnreda.address?.province : selectedProvince?.provinceId,
+              selectedProvince == null ? userEnreda.address?.province : selectedProvince?.regionId,
               selectedCity,
               buildCityStreamBuilderSetState,
               userEnreda),
@@ -325,7 +326,7 @@ class _PersonalDataState extends State<PersonalData> {
 
       final newAddress = Address(
         country: selectedCountry == null ? userEnreda.address?.country : selectedCountry?.countryId,
-        province: selectedProvince == null ? userEnreda.address?.province : selectedProvince?.provinceId,
+        province: selectedProvince == null ? userEnreda.address?.province : selectedProvince?.regionId,
         city: selectedCity?.cityId ?? userEnreda.address?.city,
         postalCode: _postalCode,
       );
@@ -375,7 +376,7 @@ class _PersonalDataState extends State<PersonalData> {
     });
   }
 
-  void buildProvinceStreamBuilderSetState(Province? province) {
+  void buildProvinceStreamBuilderSetState(Region? province) {
     setState(() {
       selectedCity = null;
       selectedProvince = province;
