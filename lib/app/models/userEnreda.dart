@@ -38,6 +38,7 @@ class UserEnreda {
     this.gamificationFlags = const {},
     this.assignedById,
     this.assignedEntityId,
+    this.resourcesAccessCount,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -163,6 +164,7 @@ class UserEnreda {
 
     final String? assignedById = data['assignedById']?? "";
     final String? assignedEntityId = data['assignedEntityId']?? "";
+    final int resourcesAccessCount = data['resourcesAccessCount']?? 0;
 
     return UserEnreda(
       email: email,
@@ -198,6 +200,7 @@ class UserEnreda {
       gamificationFlags: gamificationFlags,
       assignedById: assignedById,
       assignedEntityId: assignedEntityId,
+      resourcesAccessCount: resourcesAccessCount,
     );
   }
 
@@ -234,6 +237,7 @@ class UserEnreda {
   final Map<String, bool> gamificationFlags;
   final String? assignedById;
   final String? assignedEntityId;
+  final int? resourcesAccessCount;
 
   @override
   bool operator ==(Object other){
@@ -274,6 +278,7 @@ class UserEnreda {
       'gamificationFlags': gamificationFlags,
       'assignedById': assignedById,
       'assignedEntityId': assignedEntityId,
+      'resourcesAccessCount': resourcesAccessCount,
     };
   }
 
@@ -313,6 +318,7 @@ class UserEnreda {
     Map<String, bool>? gamificationFlags,
     String? assignedById,
     String? assignedEntityId,
+    int? resourcesAccessCount,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -346,11 +352,29 @@ class UserEnreda {
       gamificationFlags: gamificationFlags ?? this.gamificationFlags,
       assignedById: assignedById,
       assignedEntityId: assignedEntityId,
+      resourcesAccessCount: resourcesAccessCount,
     );
   }
 
   @override
   // TODO: implement hashCode
   int get hashCode => userId.hashCode;
+
+  static const String FLAG_SIGN_UP = "iIcnoLQfpVs7MmDzRGg7";
+  static const String FLAG_PILL_WHAT_IS_ENREDA = "9tnftkYhk6xNUzokdi88";
+  static const String FLAG_PILL_TRAVEL_BEGINS = "X1Lzl17lvipjLRfXkXyB";
+  static const String FLAG_PILL_COMPETENCIES = "08IEuCZq5ZpSihRHolTw";
+  static const String FLAG_CHAT = "sfEkAorz3lEPflUwmfKv";
+  static const String FLAG_EVALUATE_COMPETENCY = "7pFCCgX4X67ps2K3Mx0o";
+  static const String FLAG_PILL_CV_COMPETENCIES = "0OSUTbLQWbQav69HBBPa";
+  static const String FLAG_PILL_HOW_TO_DO_CV = "jw5RlKNEbCMeSZIwhrfo";
+  static const String FLAG_CV_FORMATION = "jKZDpf8eb9iLsruDJr2H";
+  static const String FLAG_CV_COMPLEMENTARY_FORMATION = "FIzQqM0tXwZoIH1V9CSP";
+  static const String FLAG_CV_PERSONAL = "EDZWlWGf1IbAmQfB1TBU";
+  static const String FLAG_CV_PROFESSIONAL = "PMpPOn5hMZCJR1qdU4sW";
+  static const String FLAG_CV_ABOUT_ME = "KhDJqMIR6du9t4zOjKTx";
+  static const String FLAG_CV_DATA_OF_INTEREST = "c6h0owyqz66P6MqbrSB6";
+  static const String FLAG_CV_PHOTO = "fjr17WGx5vegzNHc9RWY";
+  static const String FLAG_JOIN_RESOURCE = "oreFRQYdp5TNusvu3ubK";
 
 }

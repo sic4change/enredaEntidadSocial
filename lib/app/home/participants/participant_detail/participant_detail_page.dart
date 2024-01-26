@@ -1,11 +1,13 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
+import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
@@ -15,7 +17,9 @@ import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_ipil_pre
 import 'package:enreda_empresas/app/home/participants/resources_participants.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
 import 'package:enreda_empresas/app/models/city.dart';
+import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/country.dart';
+import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -455,10 +459,14 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
 
+    final totalGamificationPills = 5;
+    final cvTotalSteps = 7;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
       child: RoundedContainer(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CustomTextBoldTitle(title: StringConst.GAMIFICATION),
             SpaceH8(),
@@ -474,6 +482,62 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                         height: 20.0,
                         value: widget.user.gamificationFlags.length,
                       ),
+                      SpaceH20(),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Wrap(
+                              spacing: 12.0,
+                              runSpacing: 12.0,
+                              alignment: WrapAlignment.spaceEvenly,
+                              children: [
+                                GamificationItem(
+                                  imagePath: ImagePath.GAMIFICATION_CHAT_ICON,
+                                  progress: (widget.user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? 100:0,
+                                  title: (widget.user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? "CHAT INICIADO": "CHAT NO INICIADO",
+                                ),
+                                GamificationItem(
+                                  imagePath: ImagePath.GAMIFICATION_PILL_ICON,
+                                  progress: (_getUserPillsConsumed()/totalGamificationPills) * 100,
+                                  progressText: "${_getUserPillsConsumed()}",
+                                  title: "PÍLDORAS CONSUMIDAS",
+                                ),
+                                StreamBuilder<List<Competency>>(
+                                  stream: database.competenciesStream(),
+                                  builder: (context, competenciesStream) {
+                                    double competenciesProgress = 0;
+                                    Map<String, String> certifiedCompetencies = {};
+                                    if (competenciesStream.hasData) {
+                                      certifiedCompetencies = Map.from(widget.user.competencies);
+                                      certifiedCompetencies.removeWhere((key, value) => value != "certified");
+                                      competenciesProgress = (certifiedCompetencies.length / competenciesStream.data!.length) * 100;
+                                    }
+
+                                    return GamificationItem(
+                                      imagePath: ImagePath.GAMIFICATION_COMPETENCIES_ICON,
+                                      progress: competenciesProgress,
+                                      progressText: "${certifiedCompetencies.length}",
+                                      title: "COMPETENCIAS CERTIFICADAS",
+                                    );
+                                  }
+                                ),
+                                GamificationItem(
+                                  imagePath: ImagePath.GAMIFICATION_RESOURCES_ICON,
+                                  progress: ((widget.user.resourcesAccessCount?? 0) / 15) * 100,
+                                  progressText: "${widget.user.resourcesAccessCount}",
+                                  title: "RECURSOS INSCRITOS",
+                                ),
+                                GamificationItem(
+                                  imagePath: ImagePath.GAMIFICATION_CV_ICON,
+                                  progress: (_getUserCvStepsCompleted()/cvTotalSteps) * 100,
+                                  progressText: "${(_getUserCvStepsCompleted()/cvTotalSteps) * 100}%",
+                                  title: "CV COMPLETADO",
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),
@@ -1244,5 +1308,47 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
         ],
       ),
     );
+  }
+
+  int _getUserPillsConsumed() {
+    int userPillsConsumed = 2; // 2 first pills are always consumed
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_PILL_COMPETENCIES]?? false) {
+      userPillsConsumed++;
+    }
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_PILL_CV_COMPETENCIES]?? false) {
+      userPillsConsumed++;
+    }
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_PILL_HOW_TO_DO_CV]?? false) {
+      userPillsConsumed++;
+    }
+    return userPillsConsumed;
+  }
+
+  int _getUserCvStepsCompleted() {
+    int userCvStepsCompleted = 0;
+
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_PHOTO]?? false) {
+      userCvStepsCompleted++;
+    }
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_ABOUT_ME]?? false) {
+      userCvStepsCompleted++;
+    }
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_DATA_OF_INTEREST]?? false) {
+      userCvStepsCompleted++;
+    }
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_FORMATION]?? false) {
+      userCvStepsCompleted++;
+    }
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_COMPLEMENTARY_FORMATION]?? false) {
+      userCvStepsCompleted++;
+    }
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_PERSONAL]?? false) {
+      userCvStepsCompleted++;
+    }
+    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_PROFESSIONAL]?? false) {
+      userCvStepsCompleted++;
+    }
+
+    return userCvStepsCompleted;
   }
 }
