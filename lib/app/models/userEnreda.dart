@@ -1,6 +1,7 @@
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interestsUserEnreda.dart';
+import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
 
 class UserEnreda {
@@ -27,7 +28,6 @@ class UserEnreda {
     this.role,
     // this.showChatWelcome,
     this.competencies = const {},
-    //this.education,
     this.educationName,
     this.dataOfInterest = const [],
     this.languages = const [],
@@ -39,6 +39,8 @@ class UserEnreda {
     this.assignedById,
     this.assignedEntityId,
     this.resourcesAccessCount,
+    this.motivation,
+    this.education,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -120,12 +122,19 @@ class UserEnreda {
         city: city,
         postalCode: postalCode);
 
-    // final Education education = Education(
-    //   label: data['education']['label'],
-    //   value: data['education']['value'],
-    //   order: data['education']['order'],
-    // );
-    //
+    Education? education = new Education(
+        label: "",
+        value: "",
+        order: 1
+    );
+    if (data['education'] != null) {
+      education = new Education(
+          label: data['education']?['label'],
+          value: data['education']?['value'],
+          order: data['education']?['order']
+      );
+    }
+
     // final bool? showChatWelcome = data['showChatWelcome'];
 
     Map<String, String> competencies = {};
@@ -166,6 +175,13 @@ class UserEnreda {
     final String? assignedEntityId = data['assignedEntityId']?? "";
     final int resourcesAccessCount = data['resourcesAccessCount']?? 0;
 
+    final Motivation? motivation = new Motivation(
+        abilities: abilities,
+        dedication: data['dedication'],
+        timeSearching: data['timeSearching'],
+        timeSpentWeekly: data['timeSpentWeekly']
+    );
+
     return UserEnreda(
       email: email,
       firstName: firstName,
@@ -189,7 +205,7 @@ class UserEnreda {
       certifications: certifications,
       // showChatWelcome: showChatWelcome,
       competencies: competencies,
-      //education: education,
+      education: education,
       educationName: educationName,
       dataOfInterest: dataOfInterest,
       languages: languages,
@@ -201,6 +217,7 @@ class UserEnreda {
       assignedById: assignedById,
       assignedEntityId: assignedEntityId,
       resourcesAccessCount: resourcesAccessCount,
+      motivation: motivation,
     );
   }
 
@@ -212,7 +229,7 @@ class UserEnreda {
   String? photo;
   String? educationName;
   final ProfilePic? profilePic;
-  // final Education? education;
+  final Education? education;
   final String? phone;
   final DateTime? birthday;
   final String? country;
@@ -238,6 +255,7 @@ class UserEnreda {
   final String? assignedById;
   final String? assignedEntityId;
   final int? resourcesAccessCount;
+  final Motivation? motivation;
 
   @override
   bool operator ==(Object other){
@@ -271,7 +289,7 @@ class UserEnreda {
       'dataOfInterest': dataOfInterest,
       'languages': languages,
       'aboutMe': aboutMe,
-      //'education': education?.toMap(),
+      'education': education?.toMap(),
       'organization': organization,
       'socialEntityId': socialEntityId,
       'resources': resources,
@@ -279,6 +297,7 @@ class UserEnreda {
       'assignedById': assignedById,
       'assignedEntityId': assignedEntityId,
       'resourcesAccessCount': resourcesAccessCount,
+      'motivation': motivation?.toMap(),
     };
   }
 
@@ -319,6 +338,7 @@ class UserEnreda {
     String? assignedById,
     String? assignedEntityId,
     int? resourcesAccessCount,
+    Motivation? motivation,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -342,7 +362,7 @@ class UserEnreda {
       role: role ?? this.role,
       // showChatWelcome: showChatWelcome ?? this.showChatWelcome,
       competencies: competencies ?? this.competencies,
-      //education: education ?? this.education,
+      education: education ?? this.education,
       dataOfInterest: dataOfInterest ?? this.dataOfInterest,
       languages: languages ?? this.languages,
       aboutMe: aboutMe ?? this.aboutMe,
@@ -353,6 +373,7 @@ class UserEnreda {
       assignedById: assignedById,
       assignedEntityId: assignedEntityId,
       resourcesAccessCount: resourcesAccessCount,
+      motivation: motivation,
     );
   }
 

@@ -16,12 +16,15 @@ import 'package:enreda_empresas/app/home/participants/my_cv_page.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_ipil_preview.dart';
 import 'package:enreda_empresas/app/home/participants/resources_participants.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
+import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/gamificationFlags.dart';
+import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/province.dart';
+import 'package:enreda_empresas/app/models/specificinterest.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -463,88 +466,203 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     final cvTotalSteps = 7;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-      child: RoundedContainer(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomTextBoldTitle(title: StringConst.GAMIFICATION),
-            SpaceH8(),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.asset(ImagePath.GAMIFICATION_LOGO, height: 160.0,),
-                SpaceW8(),
-                Expanded(
-                  child: Column(
-                    children: [
-                      GamificationSlider(
-                        height: 20.0,
-                        value: widget.user.gamificationFlags.length,
-                      ),
-                      SpaceH20(),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Wrap(
-                              spacing: 12.0,
-                              runSpacing: 12.0,
-                              alignment: WrapAlignment.spaceEvenly,
-                              children: [
-                                GamificationItem(
-                                  imagePath: ImagePath.GAMIFICATION_CHAT_ICON,
-                                  progress: (widget.user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? 100:0,
-                                  title: (widget.user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? "CHAT INICIADO": "CHAT NO INICIADO",
-                                ),
-                                GamificationItem(
-                                  imagePath: ImagePath.GAMIFICATION_PILL_ICON,
-                                  progress: (_getUserPillsConsumed()/totalGamificationPills) * 100,
-                                  progressText: "${_getUserPillsConsumed()}",
-                                  title: "PÍLDORAS CONSUMIDAS",
-                                ),
-                                StreamBuilder<List<Competency>>(
-                                  stream: database.competenciesStream(),
-                                  builder: (context, competenciesStream) {
-                                    double competenciesProgress = 0;
-                                    Map<String, String> certifiedCompetencies = {};
-                                    if (competenciesStream.hasData) {
-                                      certifiedCompetencies = Map.from(widget.user.competencies);
-                                      certifiedCompetencies.removeWhere((key, value) => value != "certified");
-                                      competenciesProgress = (certifiedCompetencies.length / competenciesStream.data!.length) * 100;
-                                    }
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomTextBoldTitle(title: StringConst.GAMIFICATION),
+          SpaceH8(),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.asset(ImagePath.GAMIFICATION_LOGO, height: 160.0,),
+              SpaceW8(),
+              Expanded(
+                child: Column(
+                  children: [
+                    GamificationSlider(
+                      height: 20.0,
+                      value: widget.user.gamificationFlags.length,
+                    ),
+                    SpaceH20(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Wrap(
+                            spacing: 12.0,
+                            runSpacing: 12.0,
+                            alignment: WrapAlignment.spaceEvenly,
+                            children: [
+                              GamificationItem(
+                                imagePath: ImagePath.GAMIFICATION_CHAT_ICON,
+                                progress: (widget.user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? 100:0,
+                                title: (widget.user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? "CHAT INICIADO": "CHAT NO INICIADO",
+                              ),
+                              GamificationItem(
+                                imagePath: ImagePath.GAMIFICATION_PILL_ICON,
+                                progress: (_getUserPillsConsumed()/totalGamificationPills) * 100,
+                                progressText: "${_getUserPillsConsumed()}",
+                                title: "PÍLDORAS CONSUMIDAS",
+                              ),
+                              StreamBuilder<List<Competency>>(
+                                stream: database.competenciesStream(),
+                                builder: (context, competenciesStream) {
+                                  double competenciesProgress = 0;
+                                  Map<String, String> certifiedCompetencies = {};
+                                  if (competenciesStream.hasData) {
+                                    certifiedCompetencies = Map.from(widget.user.competencies);
+                                    certifiedCompetencies.removeWhere((key, value) => value != "certified");
+                                    competenciesProgress = (certifiedCompetencies.length / competenciesStream.data!.length) * 100;
+                                  }
 
-                                    return GamificationItem(
-                                      imagePath: ImagePath.GAMIFICATION_COMPETENCIES_ICON,
-                                      progress: competenciesProgress,
-                                      progressText: "${certifiedCompetencies.length}",
-                                      title: "COMPETENCIAS CERTIFICADAS",
-                                    );
+                                  return GamificationItem(
+                                    imagePath: ImagePath.GAMIFICATION_COMPETENCIES_ICON,
+                                    progress: competenciesProgress,
+                                    progressText: "${certifiedCompetencies.length}",
+                                    title: "COMPETENCIAS CERTIFICADAS",
+                                  );
+                                }
+                              ),
+                              GamificationItem(
+                                imagePath: ImagePath.GAMIFICATION_RESOURCES_ICON,
+                                progress: ((widget.user.resourcesAccessCount?? 0) / 15) * 100,
+                                progressText: "${widget.user.resourcesAccessCount}",
+                                title: "RECURSOS INSCRITOS",
+                              ),
+                              GamificationItem(
+                                imagePath: ImagePath.GAMIFICATION_CV_ICON,
+                                progress: (_getUserCvStepsCompleted()/cvTotalSteps) * 100,
+                                progressText: "${(_getUserCvStepsCompleted()/cvTotalSteps) * 100}%",
+                                title: "CV COMPLETADO",
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SpaceH20(),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomTextBoldTitle(title: StringConst.INITIAL_FORM),
+                    SpaceH16(),
+                    RoundedContainer(
+                      margin: EdgeInsets.all(0.0),
+                      contentPadding: EdgeInsets.all(0.0),
+                      height: 600,
+                      borderColor: AppColors.greyAlt.withOpacity(0.15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+                            child: CustomTextMediumBold(text: StringConst.INITIAL_FORM_DATA),
+                          ),
+                          Divider(color: AppColors.greyAlt.withOpacity(0.15),),
+                          Padding(
+                            padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomTextMedium(text: StringConst.FORM_ABILITIES_REV),
+                                StreamBuilder<List<Ability>>(
+                                  stream: database.abilityStream(),
+                                  builder: (context, snapshot) {
+                                    String abilitiesString = "";
+                                    if (snapshot.hasData) {
+                                      widget.user.abilities!.forEach((abilityId) {
+                                        final abilityName = snapshot.data!.firstWhere((a) => abilityId == a.abilityId).name;
+                                        abilitiesString = "$abilitiesString$abilityName, ";
+                                      });
+                                      if (abilitiesString.isNotEmpty) {
+                                          abilitiesString = abilitiesString.substring(0, abilitiesString.lastIndexOf(","));
+                                        }
+                                      }
+                                    return Text(abilitiesString);
                                   }
                                 ),
-                                GamificationItem(
-                                  imagePath: ImagePath.GAMIFICATION_RESOURCES_ICON,
-                                  progress: ((widget.user.resourcesAccessCount?? 0) / 15) * 100,
-                                  progressText: "${widget.user.resourcesAccessCount}",
-                                  title: "RECURSOS INSCRITOS",
+                                SpaceH12(),
+                                CustomTextMedium(text: StringConst.FORM_DEDICATION_REV),
+                                Text(widget.user.motivation?.dedication?.label??""),
+                                SpaceH12(),
+                                CustomTextMedium(text: StringConst.FORM_TIME_SEARCHING_REV),
+                                Text(widget.user.motivation?.timeSearching?.label??""),
+                                SpaceH12(),
+                                CustomTextMedium(text: StringConst.FORM_TIME_SPENT_WEEKLY_REV),
+                                Text(widget.user.motivation?.timeSpentWeekly?.label??""),
+                                SpaceH12(),
+                                CustomTextMedium(text: StringConst.FORM_EDUCATION_REV),
+                                Text(widget.user.education?.label??""),
+                                SpaceH12(),
+                                CustomTextMedium(text: StringConst.FORM_INTERESTS),
+                                StreamBuilder<List<Interest>>(
+                                  stream: database.interestStream(),
+                                  builder: (context, snapshot) {
+                                    String interestsString = "";
+                                    if (snapshot.hasData) {
+                                      widget.user.interests.forEach((interestId) {
+                                        final interestName = snapshot.data!.firstWhere((i) => interestId == i.interestId).name;
+                                        interestsString = "$interestsString$interestName, ";
+                                      });
+                                      if (interestsString.isNotEmpty) {
+                                        interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
+                                      }
+                                    }
+                                    return Text(interestsString);
+                                  }
                                 ),
-                                GamificationItem(
-                                  imagePath: ImagePath.GAMIFICATION_CV_ICON,
-                                  progress: (_getUserCvStepsCompleted()/cvTotalSteps) * 100,
-                                  progressText: "${(_getUserCvStepsCompleted()/cvTotalSteps) * 100}%",
-                                  title: "CV COMPLETADO",
+                                SpaceH12(),
+                                CustomTextMedium(text: StringConst.FORM_SPECIFIC_INTERESTS),
+                                StreamBuilder<List<SpecificInterest>>(
+                                  stream: database.specificInterestsStream(),
+                                  builder: (context, snapshot) {
+                                    String specificInterestsString = "";
+                                    if (snapshot.hasData) {
+                                      widget.user.specificInterests.forEach((specificInterestId) {
+                                        final specificInterestName = snapshot.data!.firstWhere((s) => specificInterestId == s.specificInterestId).name;
+                                        specificInterestsString = "$specificInterestsString$specificInterestName, ";
+                                      });
+                                      if (specificInterestsString.isNotEmpty) {
+                                        specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
+                                      }
+                                    }
+                                    return Text(specificInterestsString);
+                                  }
                                 ),
+                                SpaceH12(),
                               ],
                             ),
                           ),
-                        ],
-                      )
-                    ],
-                  ),
+                      ],),
+                    )
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              SpaceW20(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomTextBoldTitle(title: StringConst.CV),
+                  SpaceH8(),
+                  RoundedContainer(
+                    height: 600.0,
+                    width: 250.0,
+                    borderColor: AppColors.greyAlt.withOpacity(0.15),
+                    margin: EdgeInsets.all(0.0),
+                    child: Container(),)
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
