@@ -434,9 +434,14 @@ class FirestoreDatabase implements Database {
 
   @override
   Stream<List<Competency>> resourcesCompetenciesStream(List<String>? competenciesIdList) {
+      if (competenciesIdList == null || competenciesIdList.isEmpty) {
+        return const Stream<List<Competency>>.empty();
+      }
     return _service.collectionStream<Competency>(
       path: APIPath.competencies(),
-      queryBuilder: (query) => query.where('id', whereIn: competenciesIdList),
+      queryBuilder: (query) {
+        return query.where('id', whereIn: competenciesIdList);
+      },
       builder: (data, documentId) => Competency.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
     );
