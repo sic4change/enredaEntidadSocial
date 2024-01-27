@@ -69,4 +69,18 @@ class Competency {
       'trickQuestion': trickQuestion,
     };
   }
+
+  @override
+  bool operator == (Object other){
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is Competency &&
+            other.id == id);
+  }
+
+  @override
+  // TODO: implement hashCode
+  int get hashCode => id.hashCode;
+
+
 }

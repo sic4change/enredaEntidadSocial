@@ -9,6 +9,9 @@ import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_competencies.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_competencies_categories.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_competencies_sub_categories.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_interests.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_social_entities.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_province.dart';
@@ -17,6 +20,9 @@ import 'package:enreda_empresas/app/home/resources/validating_form_controls/stre
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_resource_type.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
+import 'package:enreda_empresas/app/models/competency.dart';
+import 'package:enreda_empresas/app/models/competencyCategory.dart';
+import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/region.dart';
@@ -89,24 +95,36 @@ class _EditResourceState extends State<EditResource> {
   String? _assistants;
   String? _status;
   String? interestsNamesString;
+  String? competenciesNames;
+  String? competenciesCategoriesNames;
+  String? competenciesSubCategoriesNames;
 
   List<String> interests = [];
   List<String> _interests = [];
+  List<String> _competencies = [];
+  List<String> _competenciesCategories = [];
+  List<String> _competenciesSubCategories = [];
   List<String> _participants = [];
   Set<Interest> selectedInterestsSet = {};
+  Set<Competency> selectedCompetenciesSet = {};
+  Set<CompetencyCategory> selectedCompetenciesCategoriesSet = {};
+  Set<CompetencySubCategory> selectedCompetenciesSubCategoriesSet = {};
   ResourceCategory? selectedResourceCategory;
   ResourcePicture? selectedResourcePicture;
   SocialEntity? selectedSocialEntity;
 
   ResourceType? selectedResourceType;
   Country? selectedCountry;
-  Region? selectedProvince;
+  Province? selectedProvince;
   City? selectedCity;
 
   int? resourceCategoryValue;
   String? organizationId;
 
-  TextEditingController? textEditingControllerInterests;
+  TextEditingController? textEditingControllerInterests = TextEditingController();
+  TextEditingController textEditingControllerCompetencies = TextEditingController();
+  TextEditingController textEditingControllerCompetenciesCategories = TextEditingController();
+  TextEditingController textEditingControllerCompetenciesSubCategories = TextEditingController();
 
   @override
   void initState() {
@@ -114,6 +132,7 @@ class _EditResourceState extends State<EditResource> {
     resource = globals.currentResource!;
     _resourceId = globals.currentResource?.resourceId;
     _interests = globals.currentResource?.interests ?? [];
+    _competencies = globals.currentResource?.competencies ?? [];
     _resourceTitle = globals.currentResource?.title;
     _duration = globals.currentResource?.duration ?? '';
     _temporality = globals.currentResource?.temporality ?? '';
@@ -149,8 +168,13 @@ class _EditResourceState extends State<EditResource> {
     _status = globals.currentResource?.status ?? '';
     interestsNamesString = globals.interestsNamesCurrentResource!;
     selectedInterestsSet = globals.selectedInterestsCurrentResource;
+    competenciesNames = globals.competenciesNamesCurrentResource!;
+    selectedCompetenciesSet = globals.selectedCompetenciesCurrentResource;
     selectedSocialEntity = globals.organizerCurrentResource;
     textEditingControllerInterests = TextEditingController(text: globals.interestsNamesCurrentResource!);
+    textEditingControllerCompetencies = TextEditingController(text: globals.competenciesNamesCurrentResource!);
+    textEditingControllerCompetenciesCategories = TextEditingController();
+    textEditingControllerCompetenciesSubCategories = TextEditingController();
   }
 
   bool _validateAndSaveForm() {
@@ -251,11 +275,15 @@ class _EditResourceState extends State<EditResource> {
 
   Widget _buildForm(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
+    double fontSize = responsiveSize(context, 14, 16, md: 15);
     List<String> strings = <String>[
       'Sin titulación',
       'Con titulación no oficial',
       'Con titulación oficial'
     ];
+    List<String> contractTypes = <String>[
+      'Contrato indefinido',
+      'Contrato temporal',];
     return Form(
       key: _formKey,
       child: Column(
@@ -267,11 +295,7 @@ class _EditResourceState extends State<EditResource> {
                   selectedResourceCategory,
                   buildResourceCategoryStreamBuilderSetState,
                   resource),
-              childRight: streamBuilderDropdownResourceType(
-                  context,
-                  selectedResourceType,
-                  buildResourceTypeStreamBuilderSetState,
-                  resource),
+              childRight: Container(),
             ),
             CustomFlexRowColumn(
               childLeft: customTextFormField(context, _resourceTitle!,
@@ -284,7 +308,7 @@ class _EditResourceState extends State<EditResource> {
                   descriptionSetState),
             ),
             CustomFlexRowColumn(
-              childLeft: _resourceTypeId == "N9KdlBYmxUp82gOv8oJC"
+              childLeft: _resourceCategoryId == "6ag9Px7zkFpHgRe17PQk"
                   ? DropdownButtonFormField<String>(
                       hint: const Text(StringConst.FORM_DEGREE),
                       value: _degree == "" ? null : _degree,
@@ -341,17 +365,62 @@ class _EditResourceState extends State<EditResource> {
               childRight: Container(),
             ),
             CustomFlexRowColumn(
-              childLeft: _resourceTypeId == "kUM5r4lSikIPLMZlQ7FD" ||
-                      _resourceTypeId == "QBTbYYx9EUwNtKB68Xfz"
-                  ? customTextFormField(
-                      context,
-                      _contractType!,
-                      StringConst.FORM_CONTRACT,
-                      StringConst.FORM_COMPANY_ERROR,
-                      buildContractStreamBuilderSetState)
+              childLeft: _resourceCategoryId == "POUBGFk5gU6c5X1DKo1b"
+                  ? DropdownButtonFormField<String>(
+                    hint: const Text(StringConst.FORM_CONTRACT),
+                    value: _contractType == "" ? null : _contractType,
+                    items: contractTypes.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style: textTheme.bodySmall?.copyWith(
+                            height: 1.5,
+                            color: AppColors.greyDark,
+                            fontWeight: FontWeight.w400,
+                            fontSize: fontSize,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    validator: (value) => _contractType != null
+                        ? null
+                        : StringConst.FORM_COMPANY_ERROR,
+                    onChanged: (value) => buildContractStreamBuilderSetState(value),
+                    iconDisabledColor: AppColors.greyDark,
+                    iconEnabledColor: AppColors.primaryColor,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      labelStyle: textTheme.bodySmall?.copyWith(
+                        height: 1.5,
+                        color: AppColors.greyDark,
+                        fontWeight: FontWeight.w400,
+                        fontSize: fontSize,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: const BorderSide(
+                          color: AppColors.greyUltraLight,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: const BorderSide(
+                          color: AppColors.greyUltraLight,
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                    style: textTheme.bodySmall?.copyWith(
+                      height: 1.5,
+                      color: AppColors.greyDark,
+                      fontWeight: FontWeight.w400,
+                      fontSize: fontSize,
+                    ),
+                  )
                   : Container(),
-              childRight: _resourceTypeId == "kUM5r4lSikIPLMZlQ7FD" ||
-                      _resourceTypeId == "QBTbYYx9EUwNtKB68Xfz"
+              childRight: _resourceCategoryId == "POUBGFk5gU6c5X1DKo1b"
                   ? customTextFormField(
                       context,
                       _salary!,
@@ -396,11 +465,126 @@ class _EditResourceState extends State<EditResource> {
                   fontWeight: FontWeight.w400,
                 ),
               ),
-              childRight: streamBuilderDropdownResourcePicture(
-                  context,
-                  selectedResourcePicture,
-                  buildResourcePictureStreamBuilderSetState,
-                  resource),
+              childRight: Container(),
+            ),
+            CustomFlexRowColumn(
+                childLeft: TextFormField(
+                  controller: textEditingControllerCompetenciesCategories,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelText: StringConst.FORM_COMPETENCIES_CATEGORIES,
+                    hintText: StringConst.FORM_COMPETENCIES_CATEGORIES,
+                    hintMaxLines: 2,
+                    labelStyle: textTheme.bodyText1?.copyWith(
+                      color: AppColors.greyDark,
+                      height: 1.5,
+                      fontWeight: FontWeight.w400,
+                      fontSize: fontSize,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: BorderSide(
+                        color: AppColors.greyUltraLight,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: BorderSide(
+                        color: AppColors.greyUltraLight,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  onTap: () => {_showMultiSelectCompetenciesCategories(context) },
+                  validator: (value) => value!.isNotEmpty ?
+                  null : StringConst.FORM_MOTIVATION_ERROR,
+                  maxLines: 2,
+                  readOnly: true,
+                  style: textTheme.button?.copyWith(
+                    height: 1.5,
+                    color: AppColors.greyDark,
+                    fontWeight: FontWeight.w400,
+                    fontSize: fontSize,
+                  ),
+                ),
+                childRight: TextFormField(
+                  controller: textEditingControllerCompetenciesSubCategories,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
+                    hintText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
+                    labelStyle: textTheme.bodyText1?.copyWith(
+                      color: AppColors.greyDark,
+                      height: 1.5,
+                      fontWeight: FontWeight.w400,
+                      fontSize: fontSize,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: BorderSide(
+                        color: AppColors.greyUltraLight,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: BorderSide(
+                        color: AppColors.greyUltraLight,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  onTap: () => {_showMultiSelectCompetenciesSubCategories(context) },
+                  validator: (value) => value!.isNotEmpty ?
+                  null : StringConst.FORM_MOTIVATION_ERROR,
+                  maxLines: 2,
+                  readOnly: true,
+                  style: textTheme.button?.copyWith(
+                    height: 1.5,
+                    color: AppColors.greyDark,
+                    fontWeight: FontWeight.w400,
+                    fontSize: fontSize,
+                  ),
+                )),
+            Padding(
+              padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
+              child: TextFormField(
+                controller: textEditingControllerCompetencies,
+                decoration: InputDecoration(
+                  labelText: StringConst.FORM_COMPETENCIES,
+                  labelStyle: textTheme.bodyText1?.copyWith(
+                    color: AppColors.greyDark,
+                    height: 1.5,
+                    fontWeight: FontWeight.w400,
+                    fontSize: fontSize,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: BorderSide(
+                      color: AppColors.greyUltraLight,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: BorderSide(
+                      color: AppColors.greyUltraLight,
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+                onTap: () => {_showMultiSelectCompetencies(context) },
+                validator: (value) => value!.isNotEmpty ?
+                null : StringConst.FORM_MOTIVATION_ERROR,
+                maxLines: 2,
+                readOnly: true,
+                style: textTheme.button?.copyWith(
+                  height: 1.5,
+                  color: AppColors.greyDark,
+                  fontWeight: FontWeight.w400,
+                  fontSize: fontSize,
+                ),
+              ),
             ),
             CustomFlexRowColumn(
               childLeft: customTextFormField(
@@ -625,9 +809,6 @@ class _EditResourceState extends State<EditResource> {
                 items: <String>[
                   'Presencial',
                   'Semipresencial',
-                  'Online para residentes en país',
-                  'Online para residentes en provincia',
-                  'Online para residentes en ciudad',
                   'Online'
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
@@ -697,40 +878,30 @@ class _EditResourceState extends State<EditResource> {
                 ? CustomFlexRowColumn(
                     childLeft: streamBuilderForCountry(context, selectedCountry,
                         buildCountryStreamBuilderSetState, resource),
-                    childRight: _modality != 'Online para residentes en país'
-                        ? streamBuilderForRegion(
+                    childRight: streamBuilderForProvince(
                             context,
                             selectedCountry == null
                                 ? resource.address?.country
                                 : selectedCountry?.countryId,
                             selectedProvince,
                             buildProvinceStreamBuilderSetState,
-                            resource)
-                        : Container())
+                            resource))
                 : Container(),
             _modality != "Online"
                 ? CustomFlexRowColumn(
-                    childLeft: _modality != 'Online para residentes en país' &&
-                            _modality != 'Online para residentes en provincia'
-                        ? streamBuilderForCity(
+                    childLeft: streamBuilderForCity(
                             context,
                             selectedCountry == null
                                 ? resource.address?.country
                                 : selectedCountry?.countryId,
                             selectedProvince == null
                                 ? resource.address?.province
-                                : selectedProvince?.regionId,
+                                : selectedProvince?.provinceId,
                             selectedCity,
                             buildCityStreamBuilderSetState,
-                            resource)
-                        : Container(),
-                    childRight: _modality != 'Online para residentes en país' &&
-                            _modality !=
-                                'Online para residentes en provincia' &&
-                            _modality != 'Online para residentes en ciudad'
-                        ? customTextFormFieldNotValidator(context, _street!,
-                            StringConst.FORM_ADDRESS, addressSetState)
-                        : Container(),
+                            resource),
+                    childRight: customTextFormFieldNotValidator(context, _street!,
+                            StringConst.FORM_ADDRESS, addressSetState),
                   )
                 : Container(),
             CustomFlexRowColumn(
@@ -854,12 +1025,12 @@ class _EditResourceState extends State<EditResource> {
     _countryId = country?.countryId;
   }
 
-  void buildProvinceStreamBuilderSetState(Region? province) {
+  void buildProvinceStreamBuilderSetState(Province? province) {
     setState(() {
       selectedCity = null;
       selectedProvince = province;
     });
-    _provinceId = province?.regionId;
+    _provinceId = province?.provinceId;
   }
 
   void buildCityStreamBuilderSetState(City? city) {
@@ -946,6 +1117,86 @@ class _EditResourceState extends State<EditResource> {
     });
   }
 
+  void _showMultiSelectCompetenciesCategories(BuildContext context) async {
+    final selectedValues = await showDialog<Set<CompetencyCategory>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetenciesCategoriesCreate(context, selectedCompetenciesCategoriesSet);
+      },
+    );
+    getValuesFromKeyCompetenciesCategories(selectedValues);
+  }
+
+  void getValuesFromKeyCompetenciesCategories(selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesCategoriesIds = [];
+    selectedValues.forEach((item) {
+      concatenate.write(item.name + ' / ');
+      competenciesCategoriesIds.add(item.competencyCategoryId);
+    });
+    setState(() {
+      competenciesCategoriesNames = concatenate.toString();
+      textEditingControllerCompetenciesCategories.text = concatenate.toString();
+      _competenciesCategories = competenciesCategoriesIds;
+      selectedCompetenciesCategoriesSet = selectedValues;
+    });
+  }
+
+  void _showMultiSelectCompetenciesSubCategories(BuildContext context) async {
+    final selectedValues = await showDialog<Set<CompetencySubCategory>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetenciesSubCategories(context, selectedCompetenciesCategoriesSet, selectedCompetenciesSubCategoriesSet);
+      },
+    );
+    print(selectedValues);
+    getValuesFromKeyCompetenciesSubCategories(selectedValues);
+  }
+
+  void getValuesFromKeyCompetenciesSubCategories (selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesSubCategoriesIds = [];
+    selectedValues.forEach((item){
+      concatenate.write(item.name +' / ');
+      competenciesSubCategoriesIds.add(item.competencySubCategoryId);
+    });
+    setState(() {
+      competenciesSubCategoriesNames = concatenate.toString();
+      textEditingControllerCompetenciesSubCategories.text = concatenate.toString();
+      _competenciesSubCategories = competenciesSubCategoriesIds;
+      selectedCompetenciesSubCategoriesSet = selectedValues;
+    });
+    print(competenciesSubCategoriesIds);
+  }
+
+  void _showMultiSelectCompetencies(BuildContext context) async {
+    final selectedValues = await showDialog<Set<Competency>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetencies(context, selectedCompetenciesSubCategoriesSet, selectedCompetenciesSet);
+      },
+    );
+    print(selectedValues);
+    getValuesFromKeyCompetencies(selectedValues);
+  }
+
+  void getValuesFromKeyCompetencies (selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesIds = [];
+    selectedValues.forEach((item){
+      concatenate.write(item.name +' / ');
+      competenciesIds.add(item.id);
+    });
+    setState(() {
+      competenciesNames = concatenate.toString();
+      textEditingControllerCompetencies.text = concatenate.toString();
+      _competencies = competenciesIds;
+      selectedCompetenciesSet = selectedValues;
+    });
+    print(competenciesNames);
+    print(competenciesIds);
+  }
+
   List<CustomStep> getSteps() => [
         CustomStep(
           isActive: currentStep == 0,
@@ -983,6 +1234,7 @@ class _EditResourceState extends State<EditResource> {
       resourceType: _resourceTypeId,
       resourceCategory: _resourceCategoryId,
       interests: _interests,
+      competencies: _competencies,
       duration: _duration!,
       temporality: _temporality,
       notExpire: _notExpire,

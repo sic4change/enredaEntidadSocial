@@ -93,7 +93,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
 
   String writtenEmail = '';
   Country? selectedCountry;
-  Region? selectedProvince;
+  Province? selectedProvince;
   City? selectedCity;
   Ability? selectedAbility;
   Dedication? selectedDedication;
@@ -780,13 +780,13 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     _country = country?.countryId;
   }
 
-  void _buildProvinceStreamBuilder_setState(Region? province) {
+  void _buildProvinceStreamBuilder_setState(Province? province) {
     setState(() {
       this.selectedCity = null;
       this.selectedProvince = province;
       provinceName = province != null ? province.name : "";
     });
-    _province = province?.regionId;
+    _province = province?.provinceId;
   }
 
   void _buildCityStreamBuilder_setState(City? city) {

@@ -57,7 +57,7 @@ class _PersonalDataState extends State<PersonalData> {
   String _phoneCode = '+34';
   UserEnreda? userEnreda;
   Country? selectedCountry;
-  Region? selectedProvince;
+  Province? selectedProvince;
   City? selectedCity;
 
   @override
@@ -243,7 +243,7 @@ class _PersonalDataState extends State<PersonalData> {
               buildCountryStreamBuilderSetState, userEnreda),
         ),
         CustomFlexRowColumn(
-          childLeft: streamBuilderForRegion(
+          childLeft: streamBuilderForProvince(
               context,
               selectedCountry == null ? userEnreda.address?.country : selectedCountry?.countryId,
               selectedProvince,
@@ -251,7 +251,7 @@ class _PersonalDataState extends State<PersonalData> {
           childRight: streamBuilderForCity(
               context,
               selectedCountry == null ? userEnreda.address?.country : selectedCountry?.countryId,
-              selectedProvince == null ? userEnreda.address?.province : selectedProvince?.regionId,
+              selectedProvince == null ? userEnreda.address?.province : selectedProvince?.provinceId,
               selectedCity,
               buildCityStreamBuilderSetState,
               userEnreda),
@@ -326,7 +326,7 @@ class _PersonalDataState extends State<PersonalData> {
 
       final newAddress = Address(
         country: selectedCountry == null ? userEnreda.address?.country : selectedCountry?.countryId,
-        province: selectedProvince == null ? userEnreda.address?.province : selectedProvince?.regionId,
+        province: selectedProvince == null ? userEnreda.address?.province : selectedProvince?.provinceId,
         city: selectedCity?.cityId ?? userEnreda.address?.city,
         postalCode: _postalCode,
       );
@@ -376,7 +376,7 @@ class _PersonalDataState extends State<PersonalData> {
     });
   }
 
-  void buildProvinceStreamBuilderSetState(Region? province) {
+  void buildProvinceStreamBuilderSetState(Province? province) {
     setState(() {
       selectedCity = null;
       selectedProvince = province;

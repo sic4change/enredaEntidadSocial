@@ -11,7 +11,7 @@ Widget streamBuilderForCountryCreate (BuildContext context, Country? selectedCou
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
   return StreamBuilder<List<Country>>(
-      stream: database.countriesStream(),
+      stream: database.countryFormatedStream(),
       builder: (context, snapshotCountries){
 
         List<DropdownMenuItem<Country>> countryItems = [];

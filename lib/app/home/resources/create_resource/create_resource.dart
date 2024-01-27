@@ -10,6 +10,8 @@ import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_province.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_category_create.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_competencies.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_competencies_sub_categories.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_interests_create.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_province.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_social_entities.dart';
@@ -17,6 +19,9 @@ import 'package:enreda_empresas/app/home/resources/validating_form_controls/stre
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_type_create.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
+import 'package:enreda_empresas/app/models/competency.dart';
+import 'package:enreda_empresas/app/models/competencyCategory.dart';
+import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/region.dart';
@@ -39,6 +44,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../validating_form_controls/stream_builder_competencies_categories.dart';
 import 'create_revision_form.dart';
 
 const double contactBtnWidthLg = 200.0;
@@ -88,7 +94,13 @@ class _CreateResourceState extends State<CreateResource> {
   List<String> provinces = [];
   List<String> cities = [];
   List<String> interests = [];
+  List<String> competencies = [];
+  List<String> competenciesCategories = [];
+  List<String> competenciesSubCategories = [];
   Set<Interest> selectedInterests = {};
+  Set<Competency> selectedCompetencies = {};
+  Set<CompetencyCategory> selectedCompetenciesCategories = {};
+  Set<CompetencySubCategory> selectedCompetenciesSubCategories = {};
 
   String writtenEmail = '';
   ResourceCategory? selectedResourceCategory;
@@ -101,7 +113,7 @@ class _CreateResourceState extends State<CreateResource> {
   String? _salary;
 
   Country? selectedCountry;
-  Region? selectedProvince;
+  Province? selectedProvince;
   City? selectedCity;
 
 
@@ -117,6 +129,9 @@ class _CreateResourceState extends State<CreateResource> {
   late String resourceTypeName;
   late String resourcePictureName;
   late String interestsNames;
+  late String competenciesNames;
+  late String competenciesCategoriesNames;
+  late String competenciesSubCategoriesNames;
   late String socialEntityName;
   String? _interestId;
   int? resourceCategoryValue;
@@ -127,7 +142,9 @@ class _CreateResourceState extends State<CreateResource> {
   TextEditingController textEditingControllerDateMaxInput = TextEditingController();
   TextEditingController textEditingControllerAbilities = TextEditingController();
   TextEditingController textEditingControllerInterests = TextEditingController();
-  TextEditingController textEditingControllerSpecificInterests = TextEditingController();
+  TextEditingController textEditingControllerCompetencies = TextEditingController();
+  TextEditingController textEditingControllerCompetenciesCategories = TextEditingController();
+  TextEditingController textEditingControllerCompetenciesSubCategories = TextEditingController();
 
   @override
   void initState() {
@@ -147,6 +164,9 @@ class _CreateResourceState extends State<CreateResource> {
     resourcePictureName = "";
     resourceTypeId = "";
     interestsNames = "";
+    competenciesNames = "";
+    competenciesCategoriesNames = "";
+    competenciesSubCategoriesNames = "";
     socialEntityName = "";
     _contractType = "";
     _salary = "";
@@ -225,6 +245,7 @@ class _CreateResourceState extends State<CreateResource> {
         temporality: _temporality,
         participants: [],
         interests: interests,
+        competencies: competencies,
         organizerType: "Entidad Social",
         likes: [],
         street: _street,
@@ -444,6 +465,125 @@ class _CreateResourceState extends State<CreateResource> {
               ),
             ),
             childRight: Container()),
+        CustomFlexRowColumn(
+            childLeft: TextFormField(
+              controller: textEditingControllerCompetenciesCategories,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                labelText: StringConst.FORM_COMPETENCIES_CATEGORIES,
+                hintText: StringConst.FORM_COMPETENCIES_CATEGORIES,
+                hintMaxLines: 2,
+                labelStyle: textTheme.bodyText1?.copyWith(
+                  color: AppColors.greyDark,
+                  height: 1.5,
+                  fontWeight: FontWeight.w400,
+                  fontSize: fontSize,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  borderSide: BorderSide(
+                    color: AppColors.greyUltraLight,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  borderSide: BorderSide(
+                    color: AppColors.greyUltraLight,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              onTap: () => {_showMultiSelectCompetenciesCategories(context) },
+              validator: (value) => value!.isNotEmpty ?
+              null : StringConst.FORM_MOTIVATION_ERROR,
+              maxLines: 2,
+              readOnly: true,
+              style: textTheme.button?.copyWith(
+                height: 1.5,
+                color: AppColors.greyDark,
+                fontWeight: FontWeight.w400,
+                fontSize: fontSize,
+              ),
+            ),
+            childRight: TextFormField(
+              controller: textEditingControllerCompetenciesSubCategories,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                labelText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
+                hintText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
+                labelStyle: textTheme.bodyText1?.copyWith(
+                  color: AppColors.greyDark,
+                  height: 1.5,
+                  fontWeight: FontWeight.w400,
+                  fontSize: fontSize,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  borderSide: BorderSide(
+                    color: AppColors.greyUltraLight,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  borderSide: BorderSide(
+                    color: AppColors.greyUltraLight,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              onTap: () => {_showMultiSelectCompetenciesSubCategories(context) },
+              validator: (value) => value!.isNotEmpty ?
+              null : StringConst.FORM_MOTIVATION_ERROR,
+              maxLines: 2,
+              readOnly: true,
+              style: textTheme.button?.copyWith(
+                height: 1.5,
+                color: AppColors.greyDark,
+                fontWeight: FontWeight.w400,
+                fontSize: fontSize,
+              ),
+            )),
+        Padding(
+          padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
+          child: TextFormField(
+            controller: textEditingControllerCompetencies,
+            decoration: InputDecoration(
+              labelText: StringConst.FORM_COMPETENCIES,
+              labelStyle: textTheme.bodyText1?.copyWith(
+                color: AppColors.greyDark,
+                height: 1.5,
+                fontWeight: FontWeight.w400,
+                fontSize: fontSize,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                  width: 1.0,
+                ),
+              ),
+            ),
+            onTap: () => {_showMultiSelectCompetencies(context) },
+            validator: (value) => value!.isNotEmpty ?
+            null : StringConst.FORM_MOTIVATION_ERROR,
+            maxLines: 2,
+            readOnly: true,
+            style: textTheme.button?.copyWith(
+              height: 1.5,
+              color: AppColors.greyDark,
+              fontWeight: FontWeight.w400,
+              fontSize: fontSize,
+            ),
+          ),
+        ),
         CustomFlexRowColumn(
           childLeft: customTextFormField(
               context,
@@ -725,7 +865,7 @@ class _CreateResourceState extends State<CreateResource> {
                 ? CustomFlexRowColumn(
                     childLeft: streamBuilderForCountryCreate(context, selectedCountry,
                         buildCountryStreamBuilderSetState),
-                    childRight:streamBuilderForProvince(
+                    childRight:streamBuilderForProvinceCreate(
                                 context,
                                 selectedCountry,
                                 selectedProvince,
@@ -733,13 +873,12 @@ class _CreateResourceState extends State<CreateResource> {
                 : Container(),
             _modality != "Online"
                 ? CustomFlexRowColumn(
-                    // childLeft: streamBuilderForCityCreate(
-                    //             context,
-                    //             selectedCountry,
-                    //             selectedProvince,
-                    //             selectedCity,
-                    //             buildCityStreamBuilderSetState),
-                    childLeft: Container(),
+                    childLeft: streamBuilderForCityCreate(
+                                context,
+                                selectedCountry,
+                                selectedProvince,
+                                selectedCity,
+                                buildCityStreamBuilderSetState),
                     childRight: customTextFormField(
                                 context,
                                 _street!,
@@ -838,6 +977,9 @@ class _CreateResourceState extends State<CreateResource> {
           _contractType!,
           _salary!,
           interestsNames,
+          competenciesNames,
+          competenciesCategoriesNames,
+          competenciesSubCategoriesNames,
           _formattedStartDate,
           _formattedEndDate,
           _formattedMaxDate,
@@ -870,13 +1012,13 @@ class _CreateResourceState extends State<CreateResource> {
     _countryId = country?.countryId;
   }
 
-  void buildProvinceStreamBuilderSetState(Region? province) {
+  void buildProvinceStreamBuilderSetState(Province? province) {
     setState(() {
       selectedCity = null;
       selectedProvince = province;
       provinceName = province != null ? province.name : "";
     });
-    _provinceId = province?.regionId;
+    _provinceId = province?.provinceId;
   }
 
   void buildCityStreamBuilderSetState(City? city) {
@@ -1011,6 +1153,88 @@ class _CreateResourceState extends State<CreateResource> {
       selectedInterests = selectedValues;
     });
   }
+
+  void _showMultiSelectCompetenciesCategories(BuildContext context) async {
+    final selectedValues = await showDialog<Set<CompetencyCategory>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetenciesCategoriesCreate(context, selectedCompetenciesCategories);
+      },
+    );
+    getValuesFromKeyCompetenciesCategories(selectedValues);
+  }
+
+  void getValuesFromKeyCompetenciesCategories(selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesCategoriesIds = [];
+    selectedValues.forEach((item) {
+      concatenate.write(item.name + ' / ');
+      competenciesCategoriesIds.add(item.competencyCategoryId);
+    });
+    setState(() {
+      competenciesCategoriesNames = concatenate.toString();
+      textEditingControllerCompetenciesCategories.text = concatenate.toString();
+      competenciesCategories = competenciesCategoriesIds;
+      selectedCompetenciesCategories = selectedValues;
+    });
+  }
+
+  void _showMultiSelectCompetenciesSubCategories(BuildContext context) async {
+    final selectedValues = await showDialog<Set<CompetencySubCategory>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetenciesSubCategories(context, selectedCompetenciesCategories, selectedCompetenciesSubCategories);
+      },
+    );
+    print(selectedValues);
+    getValuesFromKeyCompetenciesSubCategories(selectedValues);
+  }
+
+  void getValuesFromKeyCompetenciesSubCategories (selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesSubCategoriesIds = [];
+    selectedValues.forEach((item){
+      concatenate.write(item.name +' / ');
+      competenciesSubCategoriesIds.add(item.competencySubCategoryId);
+    });
+    setState(() {
+      competenciesSubCategoriesNames = concatenate.toString();
+      textEditingControllerCompetenciesSubCategories.text = concatenate.toString();
+      competenciesSubCategories = competenciesSubCategoriesIds;
+      selectedCompetenciesSubCategories = selectedValues;
+    });
+    print(interestsNames);
+    print(competenciesSubCategoriesIds);
+  }
+
+  void _showMultiSelectCompetencies(BuildContext context) async {
+    final selectedValues = await showDialog<Set<Competency>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetencies(context, selectedCompetenciesSubCategories, selectedCompetencies);
+      },
+    );
+    print(selectedValues);
+    getValuesFromKeyCompetencies(selectedValues);
+  }
+
+  void getValuesFromKeyCompetencies (selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesIds = [];
+    selectedValues.forEach((item){
+      concatenate.write(item.name +' / ');
+      competenciesIds.add(item.id);
+    });
+    setState(() {
+      competenciesNames = concatenate.toString();
+      textEditingControllerCompetencies.text = concatenate.toString();
+      competencies = competenciesIds;
+      selectedCompetencies = selectedValues;
+    });
+    print(competenciesNames);
+    print(competenciesIds);
+  }
+
 
   List<CustomStep> getSteps() => [
         CustomStep(

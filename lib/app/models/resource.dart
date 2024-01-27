@@ -47,6 +47,7 @@ class Resource {
     this.link,
     this.notExpire,
     this.interests,
+    this.competencies,
     this.degree,
     this.invitationsList,
   });
@@ -91,6 +92,10 @@ class Resource {
     List<String>? interests = [];
     if (data['interests'] != null) {
       data['interests'].forEach((interest) {interests.add(interest.toString());});
+    }
+    List<String>? competencies = [];
+    if (data['competencies'] != null) {
+      data['competencies'].forEach((competency) {competencies.add(competency.toString());});
     }
     List<String>? invitationsList = [];
     if (data['invitationsList'] != null) {
@@ -148,6 +153,7 @@ class Resource {
       participants: participants,
       assistants: assistants,
       interests: interests,
+      competencies: competencies,
       likes: likes,
       salary: salary,
       contractType: contractType,
@@ -197,6 +203,7 @@ class Resource {
   final String? status;
   final List<String>? participants;
   final List<String>? interests;
+  final List<String>? competencies;
   String? assistants;
   final List<String>? likes;
   final String? contractType;
@@ -242,6 +249,7 @@ class Resource {
       'resourceLink' : resourceLink,
       'participants' : participants,
       'interests' : interests,
+      'competencies' : competencies,
       'contractType' : contractType,
       'salary' : salary,
       'contactEmail' : contactEmail,
@@ -253,7 +261,8 @@ class Resource {
       'address': address?.toMap(),
       'createdate': createdate,
       'street': street,
-      'invitationsList': invitationsList
+      'invitationsList': invitationsList,
+      'status': status
     };
   }
 
@@ -277,6 +286,7 @@ class Resource {
     String? resourceLink,
     List<String>? participants,
     List<String>? interests,
+    List<String>? competencies,
     String? contractType,
     String? salary,
     String? contactEmail,
@@ -312,6 +322,7 @@ class Resource {
       resourceLink: resourceLink?? this.resourceLink,
       participants: participants?? this.participants,
       interests: interests?? this.interests,
+      competencies: competencies?? this.competencies,
       contractType: contractType?? this.contractType,
       salary: salary?? this.salary,
       contactEmail: contactEmail?? this.contactEmail,

@@ -8,8 +8,8 @@ class APIPath {
   static String socialEntity(String socialEntityId) => 'socialEntities/$socialEntityId';
   static String organization(String organizationId) => 'organizations/$organizationId';
   static String socialEntities() => 'socialEntities';
-  static String country(String? countryId) => 'nations/$countryId';
-  static String countries() => 'nations';
+  static String country(String? countryId) => 'countries/$countryId';
+  static String countries() => 'countries';
   static String region(String? regionId) => 'states/$regionId';
   static String regions() => 'states';
   static String province(String? provinceId) => 'provinces/$provinceId';
@@ -44,6 +44,8 @@ class APIPath {
   static String experiences() => 'experiences';
   static String competency(String id) => 'competencies/$id';
   static String competencies() => 'competencies';
+  static String competenciesCategories() => 'competenciesCategories';
+  static String competenciesSubCategories() => 'competenciesSubCategories';
   static String activity(String id) => 'activities/$id';
   static String activities() => 'activities';
   static String experienceTypes() => 'experienceTypes';

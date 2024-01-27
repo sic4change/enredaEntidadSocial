@@ -35,6 +35,7 @@ class WrapBuilderList<T> extends StatelessWidget {
 
   Widget _build(List<T> items, context) {
     return Wrap(
+        direction: Axis.horizontal,
         spacing: 5,
         children: List.generate(
             items.length + 2, (index) {

@@ -11,7 +11,7 @@ Widget streamBuilderForCountry (BuildContext context, Country? selectedCountry, 
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
   return StreamBuilder<List<Country>>(
-      stream: database.countriesStream(),
+      stream: database.countryFormatedStream(),
       builder: (context, snapshotCountries){
 
         List<DropdownMenuItem<Country>> countryItems = [];
@@ -39,6 +39,8 @@ Widget streamBuilderForCountry (BuildContext context, Country? selectedCountry, 
           iconDisabledColor: AppColors.greyDark,
           iconEnabledColor: AppColors.primaryColor,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.white,
             labelStyle: textTheme.button?.copyWith(
               height: 1.5,
               color: AppColors.greyDark,
