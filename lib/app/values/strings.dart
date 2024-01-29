@@ -526,8 +526,15 @@ class StringConst {
   static const String FORM_BELONG_ORGANIZATION_ERROR = "La organización no puede estar vacía";
   static const String INITIAL_FORM = "Ficha de ingreso";
   static const String INITIAL_FORM_DATA = "Datos del formulario inicial";
+  static const String RESOURCES_JOINED = "Se ha inscrito en los siguientes recursos:";
+  static const String NO_COMPETENCIES = "Aquí aparecerán las competencias evaluadas a través de los microtests";
+  static const String NO_RESOURCES = "Aquí aparecerán los recursos a los que está inscrito este participante";
+
 
   //Create entity errors
   static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';
+
+  static const String SOMETHING_WRONG = 'Algo fue mal';
+  static const String CANNOT_LOAD_DATA = 'No se pudo cargar los datos';
 
 }

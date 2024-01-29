@@ -1,18 +1,15 @@
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
-import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/my_cv_page.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/competency_tile.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_ipil_preview.dart';
 import 'package:enreda_empresas/app/home/participants/resources_participants.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
@@ -20,14 +17,16 @@ import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/country.dart';
-import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/province.dart';
+import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/utils/adaptative.dart';
+import 'package:enreda_empresas/app/utils/my_custom_scroll_behavior.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -461,6 +460,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     final database = Provider.of<Database>(context, listen: false);
     final auth = Provider.of<AuthBase>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
+    double fontSize = responsiveSize(context, 15, 18, md: 16);
 
     final totalGamificationPills = 5;
     final cvTotalSteps = 7;
@@ -547,17 +547,17 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
           ),
           SpaceH20(),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomTextBoldTitle(title: StringConst.INITIAL_FORM),
-                    SpaceH16(),
+                    SpaceH20(),
                     RoundedContainer(
                       margin: EdgeInsets.all(0.0),
                       contentPadding: EdgeInsets.all(0.0),
-                      height: 600,
                       borderColor: AppColors.greyAlt.withOpacity(0.15),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -572,7 +572,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                CustomTextMedium(text: StringConst.FORM_ABILITIES_REV),
                                 StreamBuilder<List<Ability>>(
                                   stream: database.abilityStream(),
                                   builder: (context, snapshot) {
@@ -586,23 +585,103 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                           abilitiesString = abilitiesString.substring(0, abilitiesString.lastIndexOf(","));
                                         }
                                       }
-                                    return Text(abilitiesString);
+                                    return RichText(
+                                        text: TextSpan(
+                                            text: "${StringConst.FORM_ABILITIES_REV}: ",
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.turquoiseBlue,
+                                            height: 1.5,
+                                            fontSize: fontSize,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                                text: abilitiesString,
+                                                style: textTheme.bodyMedium?.copyWith(
+                                                  fontSize: fontSize,
+                                                ),)
+                                          ],
+                                        ),
+                                    );
                                   }
                                 ),
                                 SpaceH12(),
-                                CustomTextMedium(text: StringConst.FORM_DEDICATION_REV),
-                                Text(widget.user.motivation?.dedication?.label??""),
+                                RichText(
+                                  text: TextSpan(
+                                    text: "${StringConst.FORM_DEDICATION_REV}: ",
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.turquoiseBlue,
+                                      height: 1.5,
+                                      fontSize: fontSize,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: widget.user.motivation?.dedication?.label??"",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          fontSize: fontSize,
+                                        ),)
+                                    ],
+                                  ),
+                                ),
                                 SpaceH12(),
-                                CustomTextMedium(text: StringConst.FORM_TIME_SEARCHING_REV),
-                                Text(widget.user.motivation?.timeSearching?.label??""),
+                                RichText(
+                                  text: TextSpan(
+                                    text: "${StringConst.FORM_TIME_SEARCHING_REV}: ",
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.turquoiseBlue,
+                                      height: 1.5,
+                                      fontSize: fontSize,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: widget.user.motivation?.timeSearching?.label??"",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          fontSize: fontSize,
+                                        ),)
+                                    ],
+                                  ),
+                                ),
                                 SpaceH12(),
-                                CustomTextMedium(text: StringConst.FORM_TIME_SPENT_WEEKLY_REV),
-                                Text(widget.user.motivation?.timeSpentWeekly?.label??""),
+                                RichText(
+                                  text: TextSpan(
+                                    text: "${StringConst.FORM_TIME_SPENT_WEEKLY_REV}: ",
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.turquoiseBlue,
+                                      height: 1.5,
+                                      fontSize: fontSize,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: widget.user.motivation?.timeSpentWeekly?.label??"",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          fontSize: fontSize,
+                                        ),)
+                                    ],
+                                  ),
+                                ),
                                 SpaceH12(),
-                                CustomTextMedium(text: StringConst.FORM_EDUCATION_REV),
-                                Text(widget.user.education?.label??""),
+                                RichText(
+                                  text: TextSpan(
+                                    text: "${StringConst.FORM_EDUCATION_REV}: ",
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.turquoiseBlue,
+                                      height: 1.5,
+                                      fontSize: fontSize,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: widget.user.education?.label??"",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          fontSize: fontSize,
+                                        ),)
+                                    ],
+                                  ),
+                                ),
                                 SpaceH12(),
-                                CustomTextMedium(text: StringConst.FORM_INTERESTS),
                                 StreamBuilder<List<Interest>>(
                                   stream: database.interestStream(),
                                   builder: (context, snapshot) {
@@ -616,11 +695,27 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                         interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
                                       }
                                     }
-                                    return Text(interestsString);
+                                    return RichText(
+                                      text: TextSpan(
+                                        text: "${StringConst.FORM_INTERESTS}: ",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.turquoiseBlue,
+                                          height: 1.5,
+                                          fontSize: fontSize,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: interestsString,
+                                            style: textTheme.bodyMedium?.copyWith(
+                                              fontSize: fontSize,
+                                            ),)
+                                        ],
+                                      ),
+                                    );
                                   }
                                 ),
                                 SpaceH12(),
-                                CustomTextMedium(text: StringConst.FORM_SPECIFIC_INTERESTS),
                                 StreamBuilder<List<SpecificInterest>>(
                                   stream: database.specificInterestsStream(),
                                   builder: (context, snapshot) {
@@ -634,7 +729,24 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                         specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
                                       }
                                     }
-                                    return Text(specificInterestsString);
+                                    return RichText(
+                                      text: TextSpan(
+                                        text: "${StringConst.FORM_SPECIFIC_INTERESTS}: ",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.turquoiseBlue,
+                                          height: 1.5,
+                                          fontSize: fontSize,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: specificInterestsString,
+                                            style: textTheme.bodyMedium?.copyWith(
+                                              fontSize: fontSize,
+                                            ),)
+                                        ],
+                                      ),
+                                    );
                                   }
                                 ),
                                 SpaceH12(),
@@ -642,7 +754,151 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                             ),
                           ),
                       ],),
-                    )
+                    ),
+                    SpaceH40(),
+                    RoundedContainer(
+                      margin: EdgeInsets.all(0.0),
+                      borderColor: AppColors.greyAlt.withOpacity(0.15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomTextBoldTitle(title: StringConst.COMPETENCIES),
+                          SpaceH20(),
+                          StreamBuilder<List<Competency>>(
+                              stream: database.competenciesStream(),
+                              builder: (context, snapshotCompetencies) {
+                                if (snapshotCompetencies.hasData) {
+                                  final controller = ScrollController();
+                                  var scrollJump = Responsive.isDesktopS(context) ? 350 : 410;
+                                  List<Competency> myCompetencies = snapshotCompetencies.data!;
+                                  final competenciesIds = user.competencies.keys.toList();
+                                  myCompetencies = myCompetencies
+                                      .where((competency) => competenciesIds.any((id) => competency.id == id))
+                                      .toList();
+                                  return myCompetencies.isEmpty? Padding(
+                                    padding: const EdgeInsets.only(bottom: 20.0),
+                                    child: Center(
+                                        child: Text(
+                                          StringConst.NO_COMPETENCIES,
+                                          style: textTheme.bodyMedium,
+                                        )),
+                                  ): Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        height: 270.0,
+                                        child: ScrollConfiguration(
+                                          behavior: MyCustomScrollBehavior(),
+                                          child: ListView(
+                                              controller: controller,
+                                              scrollDirection: Axis.horizontal,
+                                              children: myCompetencies.map((competency) {
+                                                final status =
+                                                    user.competencies[competency.id] ??
+                                                        StringConst.BADGE_EMPTY;
+                                                return Column(
+                                                  children: [
+                                                    Stack(
+                                                      alignment: Alignment.center,
+                                                      children: [
+                                                        CompetencyTile(
+                                                          competency: competency,
+                                                          status: status,
+                                                          //mini: true,
+                                                        ),
+                                                        Positioned(
+                                                          bottom: 5,
+                                                          child: Text(
+                                                              status ==
+                                                                  StringConst
+                                                                      .BADGE_VALIDATED
+                                                                  ? 'EVALUADA'
+                                                                  : 'CERTIFICADA',
+                                                              style: textTheme.bodyText1
+                                                                  ?.copyWith(
+                                                                  fontSize: 12.0,
+                                                                  fontWeight: FontWeight.w500)),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                );
+                                              }).toList(),
+                                          ),
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          InkWell(
+                                            onTap: () {
+                                              if (controller.position.pixels >=
+                                                  controller.position.minScrollExtent)
+                                                controller.animateTo(
+                                                    controller.position.pixels - scrollJump,
+                                                    duration: Duration(milliseconds: 500),
+                                                    curve: Curves.ease);
+                                            },
+                                            child: Image.asset(
+                                              ImagePath.ARROW_BACK,
+                                              width: 36.0,
+                                            ),
+                                          ),
+                                          SpaceW12(),
+                                          InkWell(
+                                            onTap: () {
+                                              if (controller.position.pixels <=
+                                                  controller.position.maxScrollExtent)
+                                                controller.animateTo(
+                                                    controller.position.pixels + scrollJump,
+                                                    duration: Duration(milliseconds: 500),
+                                                    curve: Curves.ease);
+                                            },
+                                            child: Image.asset(
+                                              ImagePath.ARROW_FORWARD,
+                                              width: 36.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return Center(child: CircularProgressIndicator());
+                                }
+                              }),
+                        ],),
+                    ),
+                    SpaceH40(),
+                    CustomTextBoldTitle(title: StringConst.RESOURCES_JOINED),
+                    SpaceH20(),
+                    StreamBuilder<List<Resource>>(
+                      stream: database.resourcesStream(),
+                      builder: (context, snapshot) {
+                        List<Resource> myResources = [];
+                        if (snapshot.hasData) {
+                          myResources = snapshot.data!.where((resource) =>
+                              user.resources.any((id) => resource.resourceId == id))
+                              .toList();
+                        }
+
+                        return myResources.isEmpty? Text(
+                          StringConst.NO_RESOURCES,
+                          style: textTheme.bodyMedium,
+                        ): Wrap(
+                          spacing: 10.0,
+                          runSpacing: 10.0,
+                          children: myResources.map((r) => Container(
+                            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              color: AppColors.altWhite,
+                              borderRadius: BorderRadius.circular(50),
+                              border: Border.all(color: AppColors.greyAlt.withOpacity(0.15), width: 2.0,),
+                            ),
+                            child: Text(r.title),)).toList(),
+                        );
+                      }
+                    ),
                   ],
                 ),
               ),
