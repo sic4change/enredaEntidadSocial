@@ -6,6 +6,8 @@ import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
+import 'package:enreda_empresas/app/models/competencyCategory.dart';
+import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/contact.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/dedication.dart';
@@ -16,6 +18,7 @@ import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/organization.dart';
+import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/socialEntityUser.dart';
@@ -50,6 +53,7 @@ abstract class Database {
      Stream<UserEnreda> mentorStream(String mentorId);
      Stream<UserEnreda?> userStreamByEmail(String? email);
      Stream<List<Country>> countriesStream();
+     Stream<List<Region>> regionStreamByCountry(String countryId);
      Stream<List<Country>> countryFormatedStream();
      Stream<Country> countryStream(String? countryId);
      Stream<List<Province>> provincesStream();
@@ -64,6 +68,7 @@ abstract class Database {
      Stream<List<UserEnreda>> userParticipantsStream(List<String?> resourceIdList);
      Stream<List<Resource>> resourcesParticipantsStream(List<String?> participantsIdList);
      Stream<List<Interest>> resourcesInterestsStream(List<String?> interestsIdList);
+     Stream<List<Competency>> resourcesCompetenciesStream(List<String>? competenciesIdList);
      Stream<List<UserEnreda>> participantsByResourceStream(String resourceId);
      Stream<SocialEntity> socialEntityStreamById(String? socialEntityId);
      Stream<Organization> organizationStreamById(String organizationId);
@@ -79,9 +84,13 @@ abstract class Database {
      Stream<List<Interest>> interestStream();
      Stream<List<Interest>> interestsStream(String? interestId);
      Stream<List<SpecificInterest>> specificInterestStream(String? interestId);
+     Stream<List<CompetencySubCategory>> subCategoriesCompetenciesById(String? competencyId);
+     Stream<List<Competency>> competenciesBySubCategoryId(String? competencySubCategoryId);
      Stream<List<UserEnreda>> checkIfUserEmailRegistered(String email);
      Stream<List<Experience>> myExperiencesStream(String userId);
      Stream<List<Competency>> competenciesStream();
+     Stream<List<CompetencyCategory>> competenciesCategoriesStream();
+     Stream<List<CompetencySubCategory>> competenciesSubCategoriesStream();
      Stream<List<CertificationRequest>> myCertificationRequestStream(String userId);
      Stream<List<SocialEntitiesType>> socialEntitiesTypeStream();
      Future<void> setUserEnreda(UserEnreda userEnreda);
@@ -223,7 +232,6 @@ class FirestoreDatabase implements Database {
     @override
     Stream<List<Country>> countriesStream() => _service.collectionStream(
       path: APIPath.countries(),
-      queryBuilder: (query) => query.where('coutryId', isNotEqualTo: null),
       builder: (data, documentId) => Country.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
     );
@@ -244,9 +252,40 @@ class FirestoreDatabase implements Database {
           );
 
     @override
+    Stream<List<Region>> regionStreamByCountry(String? countryId) {
+      // int countryIdInt = 0;
+      // if (countryId != '') {
+      //   countryIdInt = int.parse(countryId!);
+      // }
+      // return _service.collectionStream<Region>(
+      //   path: APIPath.regions(),
+      //   builder: (data, documentId) => Region.fromMap(data, documentId),
+      //   queryBuilder: (query) => query.where('country_id', isEqualTo:countryIdInt),
+      //   sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+      // );
+      int? countryIdInt; // Make it nullable since it can be null
+
+      // This checks for both non-null and non-empty countryId before parsing
+      if (countryId != null && countryId.isNotEmpty) {
+        countryIdInt = int.tryParse(countryId);
+
+        // Handle the case when parsing fails (e.g., if countryId is not a valid integer)
+        if (countryIdInt == null) {
+          throw FormatException('Invalid countryId: $countryId is not an integer');
+        }
+      }
+
+      return _service.collectionStream<Region>(
+        path: APIPath.regions(),
+        builder: (data, documentId) => Region.fromMap(data, documentId),
+        queryBuilder: (query) => query.where('country_id', isEqualTo: countryIdInt),
+        sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+      );
+    }
+
+    @override
     Stream<List<Province>> provincesStream() => _service.collectionStream(
       path: APIPath.provinces(),
-      queryBuilder: (query) => query.where('provinceId', isNotEqualTo: null),
       builder: (data, documentId) => Province.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
     );
@@ -257,6 +296,21 @@ class FirestoreDatabase implements Database {
           path: APIPath.province(provinceId),
           builder: (data, documentId) => Province.fromMap(data, documentId),
         );
+
+    // @override
+    // Stream<List<Province>> provincesCountryStream(String? countryId) {
+    //
+    //   if (countryId == null) {
+    //     return const Stream<List<Province>>.empty();
+    //   }
+    //
+    //   return _service.collectionStream(
+    //     path: APIPath.provinces(),
+    //     builder: (data, documentId) => Province.fromMap(data, documentId),
+    //     queryBuilder: (query) => query.where('id', isEqualTo: countryId),
+    //     sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+    //   );
+    // }
 
     @override
     Stream<List<Province>> provincesCountryStream(String? countryId) {
@@ -378,6 +432,20 @@ class FirestoreDatabase implements Database {
     );
   }
 
+  @override
+  Stream<List<Competency>> resourcesCompetenciesStream(List<String>? competenciesIdList) {
+      if (competenciesIdList == null || competenciesIdList.isEmpty) {
+        return const Stream<List<Competency>>.empty();
+      }
+    return _service.collectionStream<Competency>(
+      path: APIPath.competencies(),
+      queryBuilder: (query) {
+        return query.where('id', whereIn: competenciesIdList);
+      },
+      builder: (data, documentId) => Competency.fromMap(data, documentId),
+      sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+    );
+  }
 
   @override
   Stream<SocialEntity> socialEntityStreamById(String? socialEntityId) =>
@@ -462,6 +530,7 @@ class FirestoreDatabase implements Database {
       builder: (data, documentId) => Interest.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
     );
+
 
   @override
   Stream<List<Interest>> interestsStream(String? interestId) =>
@@ -597,9 +666,47 @@ class FirestoreDatabase implements Database {
   Stream<List<Competency>> competenciesStream() => _service.collectionStream(
     path: APIPath.competencies(),
     builder: (data, documentId) => Competency.fromMap(data, documentId),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null),
+    sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
+
+  @override
+  Stream<List<CompetencyCategory>> competenciesCategoriesStream() => _service.collectionStream(
+    path: APIPath.competenciesCategories(),
+    builder: (data, documentId) => CompetencyCategory.fromMap(data, documentId),
     queryBuilder: (query) => query,
     sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
   );
+
+  @override
+  Stream<List<CompetencySubCategory>> competenciesSubCategoriesStream() => _service.collectionStream(
+    path: APIPath.competenciesSubCategories(),
+    builder: (data, documentId) => CompetencySubCategory.fromMap(data, documentId),
+    queryBuilder: (query) => query,
+    sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
+
+  @override
+  Stream<List<CompetencySubCategory>> subCategoriesCompetenciesById(String? competencyCategoryId) =>
+      _service.collectionStream(
+        path: APIPath.competenciesSubCategories(),
+        queryBuilder: (query) =>
+            query.where('competencyCategoryId', isEqualTo: competencyCategoryId),
+        builder: (data, documentId) =>
+            CompetencySubCategory.fromMap(data, documentId),
+        sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+      );
+
+  @override
+  Stream<List<Competency>> competenciesBySubCategoryId(String? competencySubCategoryId) =>
+      _service.collectionStream(
+        path: APIPath.competencies(),
+        queryBuilder: (query) =>
+            query.where('competencySubCategoryId', isEqualTo: competencySubCategoryId),
+        builder: (data, documentId) =>
+            Competency.fromMap(data, documentId),
+        sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+      );
 
   @override
   Stream<List<GamificationFlag>> gamificationFlagsStream() => _service.collectionStream(
