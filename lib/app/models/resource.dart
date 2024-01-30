@@ -300,7 +300,8 @@ class Resource {
     List<String>? invitationsList,
     String? searchText,
     String? resourcePhoto,
-    String? place
+    String? place,
+    String? status
   }) {
     return Resource(
       resourceId: resourceId?? this.resourceId,
@@ -337,6 +338,7 @@ class Resource {
       searchText: searchText ?? this.searchText,
       resourcePhoto: resourcePhoto ?? this.resourcePhoto,
       place: place ?? this.place,
+      status: status ?? this.status
     );
   }
 

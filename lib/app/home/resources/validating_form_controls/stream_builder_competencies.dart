@@ -46,6 +46,9 @@ Widget streamBuilderDropdownCompetencies (BuildContext context, Set<CompetencySu
     actions: <Widget>[
       ElevatedButton(
           onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary, // Use primary color
+          ),
           child: Text(StringConst.FORM_ACCEPT, style: TextStyle(
               color: AppColors.white,
               fontWeight: FontWeight.bold))

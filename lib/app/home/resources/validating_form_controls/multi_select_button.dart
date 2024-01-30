@@ -70,6 +70,9 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
                 color: AppColors.white,
                 fontWeight: FontWeight.bold)),
           ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary, // Use primary color
+          ),
           onPressed: _onSubmitTap,
         )
       ],
