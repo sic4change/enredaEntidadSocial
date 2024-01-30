@@ -23,51 +23,51 @@ class CompetenciesByResource extends StatelessWidget {
     return StreamBuilder<List<Competency>>(
         stream: database.competenciesStream(),
         builder: (context, snapshot) {
-          return snapshot.hasData && snapshot.data!.isNotEmpty
-              ? WrapBuilderList<Competency>(
-            emptyTitle: 'Sin competencias',
-            emptyMessage: 'El recurso no tiene competencias',
-            snapshot: snapshot,
-            itemBuilder: (context, competency) {
-              for (var competencyId in competenciesIdList) {
-                if (competency.id == competencyId) {
-                  return Container(
-                      key: Key(
-                          'resource-${competency.id}'),
-                      child: Container(
-                          margin: const EdgeInsets.only(left: 0, right: 4, top: 4, bottom: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                                color: AppColors
-                                    .greyLight2
-                                    .withOpacity(0.2),
-                                width: 1),
-                            borderRadius:
-                            BorderRadius.circular(
-                                Consts.padding),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets
-                                .symmetric(
-                                vertical: 4.0,
-                                horizontal: 8),
-                            child: CustomText(
-                                title: competency.name),
-                          )));
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            return WrapBuilderList<Competency>(
+              emptyTitle: 'Sin competencias',
+              emptyMessage: 'El recurso no tiene competencias',
+              snapshot: snapshot,
+              itemBuilder: (context, competency) {
+                for (var competencyId in competenciesIdList) {
+                  if (competency.id == competencyId) {
+                    return Container(
+                        key: Key(
+                            'resource-${competency.id}'),
+                        child: Container(
+                            margin: const EdgeInsets.only(left: 0, right: 4, top: 4, bottom: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                  color: AppColors
+                                      .greyLight2
+                                      .withOpacity(0.2),
+                                  width: 1),
+                              borderRadius:
+                              BorderRadius.circular(
+                                  Consts.padding),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets
+                                  .symmetric(
+                                  vertical: 4.0,
+                                  horizontal: 8),
+                              child: CustomText(
+                                  title: competency.name),
+                            )));
+                  }
                 }
-
-              }
-              return Container();
-            },
-
-          )
-              : snapshot.connectionState == ConnectionState.active
-              ? const CustomTextTitle(
-              title: '¡El recurso aun no tiene intereses!')
-              : const Center(child: CircularProgressIndicator());
-          ;
-        });
-  }
-
+                return Container();
+              },
+            );
+          }
+          return CustomTextTitle(
+              title: '¡El recurso aun no tiene competencias!');
+            });
+      }
 }

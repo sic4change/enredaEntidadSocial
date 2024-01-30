@@ -65,6 +65,9 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
       actions: <Widget>[
         ElevatedButton(
           onPressed: _onSubmitTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary, // Use primary color
+          ),
           child: const Padding(
             padding: EdgeInsets.all(10.0),
             child: Text(StringConst.FORM_ACCEPT, style: TextStyle(

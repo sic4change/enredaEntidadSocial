@@ -3,6 +3,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -74,7 +75,7 @@ class _ResourceListTileState extends State<ResourceListTile> {
                               Padding(
                                 padding: EdgeInsets.only(left: sidePadding, right: sidePadding, top: sidePadding),
                                 child: Text(
-                                  widget.resource.resourceTypeName!.toUpperCase(),
+                                  widget.resource.resourceCategoryName!.toUpperCase(),
                                   textAlign: TextAlign.left,
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
@@ -147,17 +148,20 @@ class _ResourceListTileState extends State<ResourceListTile> {
                                             color: AppColors.greyDark,
                                             size: 12,
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8.0),
-                                            child: Text(
-                                              getLocationText(widget.resource),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style:
-                                                  textTheme.bodySmall?.copyWith(
-                                                color: AppColors.greyDark,
-                                                height: 1.5,
+                                          Container(
+                                            width: Responsive.isDesktop(context) ? 300 : 250,
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 8.0),
+                                              child: Text(
+                                                getLocationText(widget.resource),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style:
+                                                    textTheme.bodySmall?.copyWith(
+                                                  color: AppColors.greyDark,
+                                                  height: 1.5,
+                                                ),
                                               ),
                                             ),
                                           ),
