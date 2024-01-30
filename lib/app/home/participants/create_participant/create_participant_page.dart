@@ -36,6 +36,7 @@ import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/interests.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/province.dart';
+import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
 import 'package:enreda_empresas/app/models/timeSearching.dart';
 import 'package:enreda_empresas/app/models/timeSpentWeekly.dart';
@@ -415,7 +416,8 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
               CustomFlexRowColumn(
                 contentPadding: EdgeInsets.all(0.0),
                 separatorSize: Sizes.kDefaultPaddingDouble,
-                childLeft: streamBuilderForCity(context, selectedCountry, selectedProvince, selectedCity, _buildCityStreamBuilder_setState),
+                //childLeft: streamBuilderForCity(context, selectedCountry, selectedProvince, selectedCity, _buildCityStreamBuilder_setState),
+                childLeft: Container(),
                 childRight: customTextFormFieldName(context, _postalCode!, StringConst.FORM_POSTAL_CODE, StringConst.POSTAL_CODE_ERROR, _postalCode_setState),
               ),
               SpaceH20(),

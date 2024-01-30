@@ -353,9 +353,15 @@ class StringConst {
   static const String FORM_SCOPE_ERROR = "El ámbito territorial no puede estar vacío";
   static const String FORM_SIZE_ERROR = "El tamaño no puede estar vacío";
   static const String FORM_INTERESTS_QUESTION = "¿Cuál es el ámbito de actuación?";
+  static const String FORM_COMPETENCIES = "Competencias";
+  static const String FORM_COMPETENCIES_CATEGORIES = "Categoría de Competencias";
+  static const String FORM_COMPETENCIES_SUB_CATEGORIES = "Sub categoría de Competencias";
+  static const String FORM_SPECIFIC_COMPETENCIES = "Competencias específicas";
   static const String FORM_INTERESTS = "Intereses";
   static const String FORM_SPECIFIC_INTERESTS = "Intereses específicos";
   static const String FORM_INTEREST_EMPTY = "Selecciona primero tus intereses";
+  static const String FORM_CATEGORIES_EMPTY = "Selecciona primero las categorías de las competencias";
+  static const String FORM_SUB_CATEGORIES_EMPTY = "Selecciona primero las sub categorías de las competencias";
   static const String FORM_ACTIVITIES_EMPTY = "Selecciona primero la actividad";
   static const String FORM_ABILITIES_REV = "Aspectos a reforzar";
   static const String FORM_MOTIVATION_ERROR = "Este campo no puede estar vacío";

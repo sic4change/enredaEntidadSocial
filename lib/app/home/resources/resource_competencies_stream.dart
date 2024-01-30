@@ -1,16 +1,17 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_dialog.dart';
 import 'package:enreda_empresas/app/home/resources/wrap_builder_list.dart';
+import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class InterestsByResource extends StatelessWidget {
-  const InterestsByResource({super.key, required this.interestsIdList});
+class CompetenciesByResource extends StatelessWidget {
+  const CompetenciesByResource({super.key, required this.competenciesIdList});
 
-  final List<String?> interestsIdList;
+  final List<String?> competenciesIdList;
 
   @override
   Widget build(BuildContext context) {
@@ -19,20 +20,20 @@ class InterestsByResource extends StatelessWidget {
 
   Widget _buildContents(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
-    return StreamBuilder<List<Interest>>(
-        stream: database.interestStream(),
+    return StreamBuilder<List<Competency>>(
+        stream: database.competenciesStream(),
         builder: (context, snapshot) {
           return snapshot.hasData && snapshot.data!.isNotEmpty
-              ? WrapBuilderList<Interest>(
-            emptyTitle: 'Sin intereses',
-            emptyMessage: 'El recurso no tiene intereses',
+              ? WrapBuilderList<Competency>(
+            emptyTitle: 'Sin competencias',
+            emptyMessage: 'El recurso no tiene competencias',
             snapshot: snapshot,
-            itemBuilder: (context, interest) {
-              for (var interestId in interestsIdList) {
-                if (interest.interestId == interestId) {
+            itemBuilder: (context, competency) {
+              for (var competencyId in competenciesIdList) {
+                if (competency.id == competencyId) {
                   return Container(
                       key: Key(
-                          'resource-${interest.interestId}'),
+                          'resource-${competency.id}'),
                       child: Container(
                           margin: const EdgeInsets.only(left: 0, right: 4, top: 4, bottom: 4),
                           decoration: BoxDecoration(
@@ -52,7 +53,7 @@ class InterestsByResource extends StatelessWidget {
                                 vertical: 4.0,
                                 horizontal: 8),
                             child: CustomText(
-                                title: interest.name),
+                                title: competency.name),
                           )));
                 }
 
