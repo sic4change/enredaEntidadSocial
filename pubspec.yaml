@@ -61,6 +61,7 @@ dependencies:
   algolia: ^1.1.2
   expandable: ^5.0.1
   dashed_circular_progress_bar: ^0.0.6
+  smooth_star_rating_null_safety: ^1.0.4+2
 
 dev_dependencies:
   flutter_test:

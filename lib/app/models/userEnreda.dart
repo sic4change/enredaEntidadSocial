@@ -1,6 +1,7 @@
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interestsUserEnreda.dart';
+import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
 
@@ -30,7 +31,7 @@ class UserEnreda {
     this.competencies = const {},
     this.educationName,
     this.dataOfInterest = const [],
-    this.languages = const [],
+    this.languagesLevels = const [],
     this.aboutMe,
     this.organization,
     this.socialEntityId,
@@ -40,7 +41,8 @@ class UserEnreda {
     this.assignedEntityId,
     this.resourcesAccessCount,
     this.motivation,
-    this.education,
+    this.educationId,
+    this.checkAgreeCV,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -122,18 +124,7 @@ class UserEnreda {
         city: city,
         postalCode: postalCode);
 
-    Education? education = new Education(
-        label: "",
-        value: "",
-        order: 1
-    );
-    if (data['education'] != null) {
-      education = new Education(
-          label: data['education']?['label'],
-          value: data['education']?['value'],
-          order: data['education']?['order']
-      );
-    }
+    final String educationId = data['educationId']?? "";
 
     // final bool? showChatWelcome = data['showChatWelcome'];
 
@@ -153,13 +144,18 @@ class UserEnreda {
       print('user does not have data of interest');
     }
 
-    List<String> languages = [];
-    try {
-      data['languages'].forEach((language) {
-        languages.add(language.toString());
+    List<Language> languagesLevels = [];
+    if (data['languagesLevels'] != null) {
+      data['languagesLevels'].forEach((languageLevel) {
+        final languageLevelFirestore = languageLevel as Map<String, dynamic>;
+        languagesLevels.add(
+            Language(
+              name: languageLevelFirestore['name']?? "",
+              speakingLevel: languageLevelFirestore['speakingLevel']?? 1,
+              writingLevel: languageLevelFirestore['writingLevel']?? 1,
+            )
+        );
       });
-    } catch (e) {
-      print('user does not have languages');
     }
 
     final String? aboutMe = data['aboutMe'];
@@ -181,6 +177,7 @@ class UserEnreda {
         timeSearching: data['timeSearching'],
         timeSpentWeekly: data['timeSpentWeekly']
     );
+    final bool? checkAgreeCV = data['checkAgreeCV'];
 
     return UserEnreda(
       email: email,
@@ -205,10 +202,10 @@ class UserEnreda {
       certifications: certifications,
       // showChatWelcome: showChatWelcome,
       competencies: competencies,
-      education: education,
+      educationId: educationId,
       educationName: educationName,
       dataOfInterest: dataOfInterest,
-      languages: languages,
+      languagesLevels: languagesLevels,
       aboutMe: aboutMe,
       organization: organization,
       socialEntityId: socialEntityId,
@@ -218,6 +215,7 @@ class UserEnreda {
       assignedEntityId: assignedEntityId,
       resourcesAccessCount: resourcesAccessCount,
       motivation: motivation,
+      checkAgreeCV: checkAgreeCV,
     );
   }
 
@@ -229,7 +227,7 @@ class UserEnreda {
   String? photo;
   String? educationName;
   final ProfilePic? profilePic;
-  final Education? education;
+  final String? educationId;
   final String? phone;
   final DateTime? birthday;
   final String? country;
@@ -246,7 +244,7 @@ class UserEnreda {
   // bool? showChatWelcome;
   final Map<String, String> competencies;
   final List<String> dataOfInterest;
-  final List<String> languages;
+  final List<Language> languagesLevels;
   final String? aboutMe;
   final String? organization;
   final String? socialEntityId;
@@ -256,6 +254,7 @@ class UserEnreda {
   final String? assignedEntityId;
   final int? resourcesAccessCount;
   final Motivation? motivation;
+  final bool? checkAgreeCV;
 
   @override
   bool operator ==(Object other){
@@ -287,9 +286,9 @@ class UserEnreda {
       // 'showChatWelcome': showChatWelcome,
       'competencies': competencies,
       'dataOfInterest': dataOfInterest,
-      'languages': languages,
+      'languagesLevels': languagesLevels.map((e) => e.toMap()).toList(),
       'aboutMe': aboutMe,
-      'education': education?.toMap(),
+      'educationId': educationId,
       'organization': organization,
       'socialEntityId': socialEntityId,
       'resources': resources,
@@ -298,6 +297,7 @@ class UserEnreda {
       'assignedEntityId': assignedEntityId,
       'resourcesAccessCount': resourcesAccessCount,
       'motivation': motivation?.toMap(),
+      'checkAgreeCV': checkAgreeCV,
     };
   }
 
@@ -328,9 +328,9 @@ class UserEnreda {
     String? role,
     // bool? showChatWelcome,
     Map<String, String>? competencies,
-    Education? education,
+    String? educationId,
     List<String>? dataOfInterest,
-    List<String>? languages,
+    List<Language>? languagesLevels,
     String? aboutMe,
     String? organization,
     String? socialEntityId,
@@ -339,6 +339,7 @@ class UserEnreda {
     String? assignedEntityId,
     int? resourcesAccessCount,
     Motivation? motivation,
+    bool? checkAgreeCV,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -362,9 +363,9 @@ class UserEnreda {
       role: role ?? this.role,
       // showChatWelcome: showChatWelcome ?? this.showChatWelcome,
       competencies: competencies ?? this.competencies,
-      education: education ?? this.education,
+      educationId: educationId ?? this.educationId,
       dataOfInterest: dataOfInterest ?? this.dataOfInterest,
-      languages: languages ?? this.languages,
+      languagesLevels: languagesLevels ?? this.languagesLevels,
       aboutMe: aboutMe ?? this.aboutMe,
       organization: organization ?? this.organization,
       socialEntityId: socialEntityId ?? this.socialEntityId,
@@ -374,6 +375,7 @@ class UserEnreda {
       assignedEntityId: assignedEntityId,
       resourcesAccessCount: resourcesAccessCount,
       motivation: motivation,
+      checkAgreeCV: checkAgreeCV ?? this.checkAgreeCV,
     );
   }
 

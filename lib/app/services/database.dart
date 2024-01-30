@@ -668,7 +668,8 @@ class FirestoreDatabase implements Database {
         queryBuilder: (query) =>
             query.where('userId', isEqualTo: userId),
         builder: (data, documentId) => Experience.fromMap(data, documentId),
-        sort: (lhs, rhs) => rhs.startDate.compareTo(lhs.startDate),
+        sort: (lhs, rhs) => (rhs.startDate?? Timestamp.fromMicrosecondsSinceEpoch(0))
+            .compareTo(lhs.startDate?? Timestamp.fromMicrosecondsSinceEpoch(0)),
       );
 
   @override

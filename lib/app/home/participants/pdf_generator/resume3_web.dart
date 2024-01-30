@@ -13,7 +13,6 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:http/http.dart';
 
-
 const PdfColor lilac = PdfColor.fromInt(0xF8A6A83);
 const PdfColor lightLilac = PdfColor.fromInt(0xFFF4F5FB);
 const PdfColor blue = PdfColor.fromInt(0xFF002185);
@@ -32,7 +31,13 @@ Future<Uint8List> generateResume3(
     String? province,
     String? country,
     List<Experience>? myExperiences,
+    List<Experience>? myPersonalExperiences,
     List<Experience>? myEducation,
+    List<Experience>? mySecondaryEducation,
+    List<String>? idSelectedDateEducation,
+    List<String>? idSelectedDateSecondaryEducation,
+    List<String>? idSelectedDateExperience,
+    List<String>? idSelectedDatePersonalExperience,
     List<String>? competenciesNames,
     List<String>? languagesNames,
     String? aboutMe,
@@ -41,6 +46,7 @@ Future<Uint8List> generateResume3(
     String myCustomPhone,
     bool myPhoto,
     List<CertificationRequest>? myReferences,
+    String myMaxEducation,
     ) async {
   final doc = pw.Document(title: 'Mi Currículum');
 
@@ -109,7 +115,7 @@ Future<Uint8List> generateResume3(
                                         .defaultTextStyle
                                         .copyWith(fontWeight: pw.FontWeight.bold, color: white)),
                                 pw.SizedBox(height: 5),
-                                pw.Text(user?.educationName?.toUpperCase() ?? '',
+                                pw.Text(myMaxEducation ?? '',
                                     textScaleFactor: 1,
                                     textAlign: pw.TextAlign.center,
                                     style: pw.Theme.of(context)
@@ -232,37 +238,78 @@ Future<Uint8List> generateResume3(
                     padding: const pw.EdgeInsets.only(left: 50, right: 30),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      mainAxisAlignment: pw.MainAxisAlignment.start,
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: <pw.Widget>[
-                        myExperiences != null && myExperiences.isNotEmpty ? _Category(title: StringConst.MY_EXPERIENCES, color: green) : pw.Container(),
+                        myExperiences != null && myExperiences.isNotEmpty ? _Category(title: StringConst.MY_PROFESIONAL_EXPERIENCES, color: green) : pw.Container(),
                         for (var experience in myExperiences!)
                           _Block(
                             title: experience.activityRole != null &&
                                 experience.activity != null
                                 ? '${experience.activityRole} - ${experience.activity}'
-                                : experience.position == ""
+                                : (experience.position == null || experience.position == "")
                                 ? experience.activity
-                                : experience.organization == ""
+                                : (experience.organization == null || experience.organization == "")
                                 ? experience.position
                                 : '${experience.position} - ${experience.organization}',
-                            descriptionDate:'${formatter.format(experience.startDate.toDate())} / ${experience.endDate != null
+                            showDescriptionDate: idSelectedDateExperience!.contains(experience.id),
+                            descriptionDate:'${experience.startDate != null ? formatter.format(experience.startDate!.toDate()) : 'Desconocida'} / '
+                                '${experience.subtype == 'Responsabilidades familiares'? 'Desconocida':experience.endDate != null
                                 ? formatter.format(experience.endDate!.toDate())
                                 : 'Actualmente'}',
                             descriptionPlace: '${experience.location}',
                           ),
                         pw.SizedBox(height: 5),
+
+                        myPersonalExperiences != null && myPersonalExperiences.isNotEmpty ? _Category(title: StringConst.MY_PERSONAL_EXPERIENCES, color: green) : pw.Container(),
+                        for (var experience in myPersonalExperiences!)
+                          _Block(
+                            title: experience.activityRole != null &&
+                                experience.activity != null
+                                ? '${experience.activityRole} - ${experience.activity}'
+                                : (experience.position == null || experience.position == "")
+                                ? experience.activity
+                                : (experience.organization == null || experience.organization == "")
+                                ? experience.position
+                                : '${experience.position} - ${experience.organization}',
+                            showDescriptionDate: idSelectedDatePersonalExperience!.contains(experience.id),
+                            descriptionDate:'${experience.startDate != null ? formatter.format(experience.startDate!.toDate()) : 'Desconocida'} / '
+                                '${experience.subtype == 'Responsabilidades familiares'? 'Desconocida':experience.endDate != null
+                                ? formatter.format(experience.endDate!.toDate())
+                                : 'Actualmente'}',
+                            descriptionPlace: '${experience.location}',
+                          ),
+                        pw.SizedBox(height: 5),
+
                         myEducation!.isNotEmpty ? _Category(title: StringConst.EDUCATION, color: green) : pw.Container(),
                         for (var education in myEducation)
                           _Block(
-                            title: education.activityRole == null
-                                ? education.activity
-                                : '${education.activityRole} - ${education.activity}',
-                            descriptionDate:'${formatter.format(education.startDate.toDate())} / ${education.endDate != null
+                            title: education.activity == null || education.activity == ''
+                                ? education.nameFormation
+                                : education.activity,
+                            showDescriptionDate: idSelectedDateEducation!.contains(education.id),
+                            descriptionDate:'${education.startDate != null ? formatter.format(education.startDate!.toDate()) : 'Desconocida'} / '
+                                '${education.subtype == 'Responsabilidades familiares'? 'Desconocida':education.endDate != null
+                                ? formatter.format(education.endDate!.toDate())
+                                : 'Actualmente'}',
+                            descriptionPlace: '${education.location}',
+                          ),
+                        pw.SizedBox(height: 5),
+
+                        mySecondaryEducation!.isNotEmpty ? _Category(title: StringConst.SECONDARY_EDUCATION, color: green) : pw.Container(),
+                        for (var education in mySecondaryEducation)
+                          _Block(
+                            title: education.activity == null || education.activity == ''
+                                ? education.nameFormation
+                                : education.activity,
+                            showDescriptionDate: idSelectedDateSecondaryEducation!.contains(education.id),
+                            descriptionDate:'${education.startDate != null ? formatter.format(education.startDate!.toDate()) : 'Desconocida'} / '
+                                '${education.subtype == 'Responsabilidades familiares'? 'Desconocida':education.endDate != null
                                 ? formatter.format(education.endDate!.toDate())
                                 : 'Actualmente'}',
                             descriptionPlace: '${education.location}',
                           ),
                         pw.SizedBox(height: 15),
+
                         pw.Partitions(
                           children: [
                             pw.Partition(
@@ -359,11 +406,13 @@ class _Block extends pw.StatelessWidget {
     this.title,
     this.descriptionDate,
     this.descriptionPlace,
+    this.showDescriptionDate,
   });
 
   final String? title;
   final String? descriptionDate;
   final String? descriptionPlace;
+  final bool? showDescriptionDate;
 
   @override
   pw.Widget build(pw.Context context) {
@@ -388,13 +437,14 @@ class _Block extends pw.StatelessWidget {
             child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: <pw.Widget>[
-                  pw.Text(descriptionDate!,
+                  (showDescriptionDate ?? true) ? pw.Text(descriptionDate!,
                       textScaleFactor: 0.8,
                       style: pw.Theme.of(context)
                           .defaultTextStyle
                           .copyWith(
                           fontWeight: pw.FontWeight.normal,
-                          color: grey)),
+                          color: grey))
+                      : pw.Container(),
                 ]),
           ),
           pw.Container(

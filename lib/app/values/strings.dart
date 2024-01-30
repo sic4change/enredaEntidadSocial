@@ -458,6 +458,10 @@ class StringConst {
   static const String BADGE_CERTIFIED = 'certified';
   static const String BADGE_PROCESSING = 'processing';
   // CV
+  static const String MY_PERSONAL_EXPERIENCES = "Mis experiencias personales";
+  static const String MY_PROFESIONAL_EXPERIENCES = "Mis experiencias profesionales";
+  static const String SECONDARY_EDUCATION = "Formación complementaria";
+  static const String EDUCATIONAL_LEVEL = "Nivel educativo";
   static const String DELETE = 'Eliminar';
   static const String NO_DATA_OF_INTEREST = 'Todavía no has añadido ningún dato de interés adicional';
   static const String NEW_DATA_OF_INTEREST = 'Introduce el nuevo dato de interés:';

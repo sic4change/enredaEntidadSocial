@@ -6,10 +6,11 @@ import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.
 import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
+import 'package:enreda_empresas/app/common_widgets/show_custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
-import 'package:enreda_empresas/app/home/participants/my_cv_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/competency_tile.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/my_curriculum_page.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_ipil_preview.dart';
 import 'package:enreda_empresas/app/home/participants/resources_participants.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
@@ -17,6 +18,7 @@ import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/country.dart';
+import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/province.dart';
@@ -663,24 +665,84 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                   ),
                                 ),
                                 SpaceH12(),
-                                RichText(
-                                  text: TextSpan(
-                                    text: "${StringConst.FORM_EDUCATION_REV}: ",
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.turquoiseBlue,
-                                      height: 1.5,
-                                      fontSize: fontSize,
-                                    ),
-                                    children: [
-                                      TextSpan(
-                                        text: widget.user.education?.label??"",
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          fontSize: fontSize,
-                                        ),)
-                                    ],
-                                  ),
-                                ),
+                                StreamBuilder(
+                                    stream: database.educationStream(),
+                                    builder: (context, snapshotEducations) {
+                                      Education? myMaxEducation;
+                                      if (snapshotEducations.hasData) {
+                                        final educations = snapshotEducations.data!;
+
+                                        if (user.educationId!.isNotEmpty) {
+                                          myMaxEducation = educations.firstWhere((e) => e.educationId == user.educationId, orElse: () => Education(label: "", value: "", order: 0));
+                                          return RichText(
+                                            text: TextSpan(
+                                              text: "${StringConst.FORM_EDUCATION_REV}: ",
+                                              style: textTheme.bodyMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.turquoiseBlue,
+                                                height: 1.5,
+                                                fontSize: fontSize,
+                                              ),
+                                              children: [
+                                                TextSpan(
+                                                  text: myMaxEducation.label??"",
+                                                  style: textTheme.bodyMedium?.copyWith(
+                                                    fontSize: fontSize,
+                                                  ),)
+                                              ],
+                                            ),
+                                          );
+                                        } else {
+                                          return StreamBuilder(
+                                              stream: database.myExperiencesStream(user.userId ?? ''),
+                                              builder: (context, snapshotExperiences) {
+                                                if (snapshotEducations.hasData && snapshotExperiences.hasData) {
+                                                  final myEducationalExperiencies = snapshotExperiences.data!
+                                                      .where((experience) => experience.type == 'Formativa')
+                                                      .toList();
+                                                  if (myEducationalExperiencies.isNotEmpty) {
+                                                    final areEduactions = myEducationalExperiencies.any((exp) => exp.education != null && exp.education!.isNotEmpty);
+                                                    if (areEduactions) {
+                                                      final myEducations = educations.where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label)).toList();
+                                                      myEducations.sort((a, b) => a.order.compareTo(b.order));
+                                                      if(myEducations.isNotEmpty){
+                                                        myMaxEducation = myEducations.first;
+                                                      } else {
+                                                        myMaxEducation = Education(label: "", value: "", order: 0);
+                                                      }
+                                                    } else {
+                                                      myMaxEducation = Education(label: "", value: "", order: 0);
+                                                    }
+                                                    return RichText(
+                                                      text: TextSpan(
+                                                        text: "${StringConst.FORM_EDUCATION_REV}: ",
+                                                        style: textTheme.bodyMedium?.copyWith(
+                                                          fontWeight: FontWeight.bold,
+                                                          color: AppColors.turquoiseBlue,
+                                                          height: 1.5,
+                                                          fontSize: fontSize,
+                                                        ),
+                                                        children: [
+                                                          TextSpan(
+                                                            text: myMaxEducation?.label??"",
+                                                            style: textTheme.bodyMedium?.copyWith(
+                                                              fontSize: fontSize,
+                                                            ),)
+                                                        ],
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    return Container();
+                                                  }
+                                                } else {
+                                                  return Container();
+                                                }
+                                              });
+                                        }
+                                      } else {
+                                        return Container();
+                                      }
+                                    }),
                                 SpaceH12(),
                                 StreamBuilder<List<Interest>>(
                                   stream: database.interestStream(),
@@ -907,13 +969,41 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomTextBoldTitle(title: StringConst.CV),
-                  SpaceH8(),
+                  SpaceH20(),
                   RoundedContainer(
-                    height: 600.0,
+                    height: 400.0,
                     width: 250.0,
                     borderColor: AppColors.greyAlt.withOpacity(0.15),
                     margin: EdgeInsets.all(0.0),
-                    child: Container(),)
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          StringConst.MY_CV,
+                          style: textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: Responsive.isDesktop(context) ? 18 : 14.0,
+                            color: AppColors.penBlue,
+                          ),
+                        ),
+                        const SizedBox(height: 10,),
+                        IconButton(
+                          iconSize: 40,
+                          icon: const Icon(
+                            Icons.pages,
+                            color: AppColors.penBlue,
+                          ),
+                          onPressed: () => showCustomDialog(
+                            context,
+                            content: Container(
+                                height: MediaQuery.sizeOf(context).height * 0.85,
+                                width: MediaQuery.sizeOf(context).width * 0.6,
+                                child: MyCurriculumPage(user: user)),
+                          ),
+                        ),
+                      ],
+                    ),)
                 ],
               ),
             ],
@@ -1670,14 +1760,13 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               Icons.pages,
               color: AppColors.penBlue,
             ),
-            onPressed: () => {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  fullscreenDialog: true,
-                  builder: ((context) => MyCurriculumPage(user: user)),
-                ),
-              )
-            },
+            onPressed: () => showCustomDialog(
+              context,
+              content: Container(
+                  height: MediaQuery.sizeOf(context).height * 0.90,
+                  width: MediaQuery.sizeOf(context).width * 0.90,
+                  child: MyCurriculumPage(user: user)
+              ),),
           ),
         ],
       ),
