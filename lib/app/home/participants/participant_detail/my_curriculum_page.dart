@@ -27,7 +27,14 @@ import '../../../common_widgets/precached_avatar.dart';
 import '../../../values/values.dart';
 
 class MyCurriculumPage extends StatelessWidget {
-  MyCurriculumPage({Key? key, required this.user}): super(key: key);
+  MyCurriculumPage({
+    Key? key,
+    required this.user,
+    this.mini = false,
+  }): super(key: key);
+
+  bool mini;
+
   UserEnreda? user;
 
   String? myLocation;
@@ -147,9 +154,13 @@ class MyCurriculumPage extends StatelessWidget {
               myCustomLanguages = myLanguages.map((element) => element.name).toList();
               mySelectedLanguages = List.generate(myCustomLanguages.length, (i) => i);
 
-              return Responsive.isDesktop(context)
-                  ? _myCurriculumWeb(context, user, profilePic, competenciesNames )
-                  : _myCurriculumMobile(context, user, profilePic, competenciesNames);
+              if (mini)
+                return _myCurriculumMini(context, user, profilePic, competenciesNames );
+              else {
+                return Responsive.isDesktop(context)
+                    ? _myCurriculumWeb(context, user, profilePic, competenciesNames )
+                    : _myCurriculumMobile(context, user, profilePic, competenciesNames);
+              }
             });
   }
 
@@ -483,6 +494,115 @@ class MyCurriculumPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _myCurriculumMini(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames){
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+            padding: EdgeInsets.only(
+                top: 20.0, bottom: 20, right: 5, left: 20),
+            width: 330,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              shape: BoxShape.rectangle,
+              border: Border.all(color: AppColors.lilac, width: 1),
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(right: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        !kIsWeb ?
+                        ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(60)),
+                          child:
+                          Center(
+                            child:
+                            profilePic == "" ?
+                            Container(
+                              color:  Colors.transparent,
+                              height: 120,
+                              width: 120,
+                              child: Image.asset(ImagePath.USER_DEFAULT),
+                            ):
+                            CachedNetworkImage(
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center,
+                                imageUrl: profilePic),
+                          ),
+                        ):
+                        ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(60)),
+                          child:
+                          profilePic == "" ?
+                          Container(
+                            color:  Colors.transparent,
+                            height: 120,
+                            width: 120,
+                            child: Image.asset(ImagePath.USER_DEFAULT),
+                          ):
+                          PrecacheAvatarCard(
+                            imageUrl: profilePic,
+                            height: 120,
+                            width: 120,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  SpaceH20(),
+                  _buildPersonalData(context),
+                  SpaceH20(),
+                  _buildAboutMe(context),
+                  SpaceH20(),
+                  _buildMyDataOfInterest(context),
+                  SpaceH20(),
+                  _buildMyLanguages(context),
+                  SpaceH20(),
+                  _buildMyReferences(context, user),
+                ],
+              ),
+            )),
+        SpaceW40(),
+        Container(
+          width: 600,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${user?.firstName} ${user?.lastName}',
+                style: textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: Responsive.isDesktop(context) ? 45.0 : 32.0,
+                    color: AppColors.penBlue),
+              ),
+              SpaceH30(),
+              _buildMyEducation(context, user),
+              SpaceH30(),
+              _buildMySecondaryEducation(context, user),
+              SpaceH30(),
+              _buildMyExperiences(context, user),
+              SpaceH30(),
+              _buildMyCompetencies(context, user),
+            ],
+          ),
+        )
+      ],
     );
   }
 

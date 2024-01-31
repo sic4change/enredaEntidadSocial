@@ -79,7 +79,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   Widget _buildParticipantWeb(BuildContext context, UserEnreda user){
     return SingleChildScrollView(
       controller: ScrollController(),
-
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -971,38 +970,43 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                   CustomTextBoldTitle(title: StringConst.CV),
                   SpaceH20(),
                   RoundedContainer(
-                    height: 400.0,
-                    width: 250.0,
-                    borderColor: AppColors.greyAlt.withOpacity(0.15),
                     margin: EdgeInsets.all(0.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          StringConst.MY_CV,
-                          style: textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            fontSize: Responsive.isDesktop(context) ? 18 : 14.0,
-                            color: AppColors.penBlue,
+                    height: 450.0,
+                    width: 340.0,
+                    borderColor: AppColors.greyAlt.withOpacity(0.15),
+                    child: SingleChildScrollView(
+                      physics: NeverScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            StringConst.MY_CV,
+                            style: textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: Responsive.isDesktop(context) ? 18 : 14.0,
+                              color: AppColors.penBlue,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 10,),
-                        IconButton(
-                          iconSize: 40,
-                          icon: const Icon(
-                            Icons.pages,
-                            color: AppColors.penBlue,
+                          SpaceH20(),
+                          InkWell(
+                            onTap: () => showCustomDialog(
+                              context,
+                              content: Container(
+                                  height: MediaQuery.sizeOf(context).height * 0.85,
+                                  width: MediaQuery.sizeOf(context).width * 0.6,
+                                  child: MyCurriculumPage(user: user)),
+                            ),
+                            child: Transform.scale(
+                                      scale:0.3,
+                                      child: MyCurriculumPage(
+                                        user: widget.user,
+                                        mini: true,
+                                      ),
+                                      alignment: Alignment.topLeft,),
                           ),
-                          onPressed: () => showCustomDialog(
-                            context,
-                            content: Container(
-                                height: MediaQuery.sizeOf(context).height * 0.85,
-                                width: MediaQuery.sizeOf(context).width * 0.6,
-                                child: MyCurriculumPage(user: user)),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),)
                 ],
               ),
