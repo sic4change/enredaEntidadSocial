@@ -1,10 +1,12 @@
 {
-  "projects": {},
+  "projects": {
+    "default": "enreda-d3b41"
+  },
   "targets": {
     "enreda-d3b41": {
       "hosting": {
-        "enredaentidadsocial": [
-          "enredaentidadsocial"
+        "entidadsocial": [
+          "enredadentidadsocial"
         ]
       }
     }
