@@ -458,6 +458,10 @@ class StringConst {
   static const String BADGE_CERTIFIED = 'certified';
   static const String BADGE_PROCESSING = 'processing';
   // CV
+  static const String MY_PERSONAL_EXPERIENCES = "Mis experiencias personales";
+  static const String MY_PROFESIONAL_EXPERIENCES = "Mis experiencias profesionales";
+  static const String SECONDARY_EDUCATION = "Formación complementaria";
+  static const String EDUCATIONAL_LEVEL = "Nivel educativo";
   static const String DELETE = 'Eliminar';
   static const String NO_DATA_OF_INTEREST = 'Todavía no has añadido ningún dato de interés adicional';
   static const String NEW_DATA_OF_INTEREST = 'Introduce el nuevo dato de interés:';
@@ -530,8 +534,17 @@ class StringConst {
   static const String FORM_DEDICATION = "¿Tienes claro a lo que te gustaría dedicarte?";
   static const String FORM_BELONG_ORGANIZATION = "Organización o entidad a la que pertenece";
   static const String FORM_BELONG_ORGANIZATION_ERROR = "La organización no puede estar vacía";
+  static const String INITIAL_FORM = "Ficha de ingreso";
+  static const String INITIAL_FORM_DATA = "Datos del formulario inicial";
+  static const String RESOURCES_JOINED = "Se ha inscrito en los siguientes recursos:";
+  static const String NO_COMPETENCIES = "Aquí aparecerán las competencias evaluadas a través de los microtests";
+  static const String NO_RESOURCES = "Aquí aparecerán los recursos a los que está inscrito este participante";
+
 
   //Create entity errors
   static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';
+
+  static const String SOMETHING_WRONG = 'Algo fue mal';
+  static const String CANNOT_LOAD_DATA = 'No se pudo cargar los datos';
 
 }

@@ -143,6 +143,52 @@ class _PrecacheResourcePictureState extends State<PrecacheResourcePicture> {
       ),
     );
   }
+}
+
+class PrecacheCompetencyCard extends StatefulWidget {
+  PrecacheCompetencyCard({
+    this.imageUrl = "",
+    this.imageWidth = 0.0,
+  });
+
+  final String imageUrl;
+  final double imageWidth;
+
+  @override
+  _PrecacheCompetencyCardState createState() => _PrecacheCompetencyCardState();
+}
+
+class _PrecacheCompetencyCardState extends State<PrecacheCompetencyCard> {
+
+  late FadeInImage profileImage;
+
+  @override
+  void initState() {
+    super.initState();
+    profileImage = FadeInImage.assetNetwork(
+      width: widget.imageWidth,
+      placeholder: ImagePath.IMAGE_DEFAULT,
+      alignment: Alignment.center,
+      image: widget.imageUrl,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    precacheImage(profileImage.image, context);
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: defaultChild(),
+    );
+  }
+
+  Widget defaultChild() {
+    return profileImage;
+  }
 
 }
 

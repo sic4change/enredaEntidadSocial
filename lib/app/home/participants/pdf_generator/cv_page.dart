@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -8,11 +7,20 @@ import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'data.dart';
 
+import 'package:enreda_empresas/app/home/participants/pdf_generator/resume1_mobile.dart'
+if (dart.library.html) 'package:enreda_empresas/app/home/participants/pdf_generator/resume1_web.dart' as my_worker;
+
+import 'package:enreda_empresas/app/home/participants/pdf_generator/resume2_mobile.dart'
+if (dart.library.html) 'package:enreda_empresas/app/home/participants/pdf_generator/resume2_web.dart' as my_worker;
+
 import 'package:enreda_empresas/app/home/participants/pdf_generator/resume3_mobile.dart'
 if (dart.library.html) 'package:enreda_empresas/app/home/participants/pdf_generator/resume3_web.dart' as my_worker;
 
 const examples = <Example>[
-  !kIsWeb ? Example('CV', 'resume3_mobile.dart', my_worker.generateResume3) : Example('CV', 'resume3_web.dart', my_worker.generateResume3),
+  !kIsWeb ? Example('Modelo 1', 'resume1_mobile.dart', my_worker.generateResume1) : Example('Modelo 1', 'resume1_web.dart', my_worker.generateResume1),
+  !kIsWeb ? Example('Modelo 2', 'resume2_mobile.dart', my_worker.generateResume2) : Example('Modelo 2', 'resume2_web.dart', my_worker.generateResume2),
+  !kIsWeb ? Example('Modelo 3', 'resume3_mobile.dart', my_worker.generateResume3) : Example('Modelo 3', 'resume3_web.dart', my_worker.generateResume3),
+  //!kIsWeb ? Example('Modelo 3', 'resume_mobile.dart', my_worker.generateResume) : Example('Modelo 3', 'resume_web.dart', my_worker.generateResume),
 ];
 
 typedef LayoutCallbackWithData = Future<Uint8List> Function(
@@ -23,7 +31,13 @@ typedef LayoutCallbackWithData = Future<Uint8List> Function(
     String? province,
     String? country,
     List<Experience>? myExperiences,
+    List<Experience>? myPersonalExperiences,
     List<Experience>? myEducation,
+    List<Experience>? mySecondaryEducation,
+    List<String>? idSelectedDateEducation,
+    List<String>? idSelectedDateSecondaryEducation,
+    List<String>? idSelectedDateExperience,
+    List<String>? idSelectedDatePersonalExperience,
     List<String> competenciesNames,
     List<String> languagesNames,
     String? aboutMe,
@@ -32,6 +46,7 @@ typedef LayoutCallbackWithData = Future<Uint8List> Function(
     String myCustomPhone,
     bool myPhoto,
     List<CertificationRequest>? myCustomReferences,
+    String myMaxEducation,
     );
 
 class Example {

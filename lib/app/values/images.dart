@@ -2,7 +2,7 @@ part of values;
 
 class ImagePath {
   //assets route
-  static const String imageDir = "assets";
+  static const String imageDir = "assets/images";
   static const String screenshotsDir = "assets/screenshots";
   static const String resourcesDir = "assets/resources";
 
@@ -88,7 +88,17 @@ class ImagePath {
   static const String ICON_FAV_BLUE = '$imageDir/icon-fav-blue.png';
   static const String ARROW_DOWN = '$imageDir/arrow_down.png';
   static const String ARROW_UP = '$imageDir/arrow_up.png';
+  static const String ARROW_BACK = '$imageDir/arrow_back.png';
+  static const String ARROW_FORWARD = '$imageDir/arrow_forward.png';
   static const String DOWNLOAD = '$imageDir/icon-download.png';
   static const String LOGOUT = '$imageDir/icon-logout.png';
   static const String ICON_SHARE = '$imageDir/icon-share.png';
+
+  // Participant details
+  static const String GAMIFICATION_LOGO = '$imageDir/gamification_logo.png';
+  static const String GAMIFICATION_CHAT_ICON = '$imageDir/gamification_chat_icon.png';
+  static const String GAMIFICATION_COMPETENCIES_ICON = '$imageDir/gamification_competencies_icon.png';
+  static const String GAMIFICATION_PILL_ICON = '$imageDir/gamification_pill_icon.png';
+  static const String GAMIFICATION_RESOURCES_ICON = '$imageDir/gamification_resources_icon.png';
+  static const String GAMIFICATION_CV_ICON = '$imageDir/gamification_cv_icon.png';
 }

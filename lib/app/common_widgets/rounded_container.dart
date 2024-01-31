@@ -6,25 +6,28 @@ class RoundedContainer extends StatelessWidget {
     super.key,
     this.child,
     this.contentPadding = const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+    this.margin = const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
     this.width,
     this.height,
+    this.borderColor = AppColors.greyLight,
   });
 
   final Widget? child;
-  final EdgeInsets? contentPadding;
+  final EdgeInsets? contentPadding, margin;
   final double? width, height;
+  final Color borderColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
         padding: contentPadding,
-        margin: EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+        margin: margin,
         height: height,
         width: width,
         decoration: BoxDecoration(
           color: AppColors.altWhite,
           borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble),
-          border: Border.all(color: AppColors.greyLight, width: 2.0,),
+          border: Border.all(color: borderColor, width: 2.0,),
         ),
         child: child);
   }

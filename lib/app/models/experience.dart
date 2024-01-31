@@ -14,12 +14,17 @@ class Experience {
     this.organization,
     this.position,
     this.professionActivitiesText,
-    required this.startDate,
+    this.startDate,
     this.endDate,
     required this.location,
     required this.workType,
     required this.context,
     required this.contextPlace,
+    this.nameFormation,
+    this.education,
+    this.institution,
+    this.extraData,
+    this.otherProfessionActivityString,
   });
 
   final String? id;
@@ -34,12 +39,17 @@ class Experience {
   final String? organization;
   final String? position;
   final String? professionActivitiesText;
-  final Timestamp startDate;
+  final Timestamp? startDate;
   final Timestamp? endDate;
   final String location;
   final String workType;
   final String context;
   final String contextPlace;
+  final String? nameFormation;
+  final String? education;
+  final String? institution;
+  final String? extraData;
+  final String? otherProfessionActivityString;
 
   Map<String, dynamic> toMap() {
     return {
@@ -61,6 +71,11 @@ class Experience {
       'workType': workType,
       'context': context,
       'contextPlace': contextPlace,
+      'nameFormation' : nameFormation,
+      'education' : education,
+      'institution' : institution,
+      'extraData' : extraData,
+      'otherProfessionActivityString': otherProfessionActivityString,
     };
   }
 
@@ -76,12 +91,17 @@ class Experience {
     final String? organization = data['organization'];
     final String? position = data['position'];
     final String? professionActivitiesText = data['professionActivitiesText'];
-    final Timestamp startDate = data['startDate'];
+    final Timestamp? startDate = data['startDate'];
     final Timestamp? endDate = data['endDate'];
     final String location = data['location'];
     final String workType = data['workType'];
     final String context = data['context'];
     final String contextPlace = data['contextPlace'];
+    final String nameFormation = data['nameFormation'] ?? '';
+    final String education = data['education'] ?? '';
+    final String institution = data['institution'] ?? '';
+    final String extraData = data['extraData'] ?? '';
+    final String otherProfessionActivityString = data['otherProfessionActivityString'] ?? '';
 
     List<String> professionActivities = [];
     if (data['professionActivities'] != null) {
@@ -110,6 +130,11 @@ class Experience {
       workType: workType,
       context: context,
       contextPlace: contextPlace,
+      nameFormation: nameFormation,
+      education: education,
+      institution: institution,
+      extraData: extraData,
+      otherProfessionActivityString: otherProfessionActivityString,
     );
   }
 }
