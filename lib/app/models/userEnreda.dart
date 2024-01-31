@@ -1,6 +1,8 @@
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interestsUserEnreda.dart';
+import 'package:enreda_empresas/app/models/language.dart';
+import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
 
 class UserEnreda {
@@ -27,10 +29,9 @@ class UserEnreda {
     this.role,
     // this.showChatWelcome,
     this.competencies = const {},
-    //this.education,
     this.educationName,
     this.dataOfInterest = const [],
-    this.languages = const [],
+    this.languagesLevels = const [],
     this.aboutMe,
     this.organization,
     this.socialEntityId,
@@ -38,6 +39,10 @@ class UserEnreda {
     this.gamificationFlags = const {},
     this.assignedById,
     this.assignedEntityId,
+    this.resourcesAccessCount,
+    this.motivation,
+    this.educationId,
+    this.checkAgreeCV,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -119,12 +124,8 @@ class UserEnreda {
         city: city,
         postalCode: postalCode);
 
-    // final Education education = Education(
-    //   label: data['education']['label'],
-    //   value: data['education']['value'],
-    //   order: data['education']['order'],
-    // );
-    //
+    final String educationId = data['educationId']?? "";
+
     // final bool? showChatWelcome = data['showChatWelcome'];
 
     Map<String, String> competencies = {};
@@ -143,13 +144,18 @@ class UserEnreda {
       print('user does not have data of interest');
     }
 
-    List<String> languages = [];
-    try {
-      data['languages'].forEach((language) {
-        languages.add(language.toString());
+    List<Language> languagesLevels = [];
+    if (data['languagesLevels'] != null) {
+      data['languagesLevels'].forEach((languageLevel) {
+        final languageLevelFirestore = languageLevel as Map<String, dynamic>;
+        languagesLevels.add(
+            Language(
+              name: languageLevelFirestore['name']?? "",
+              speakingLevel: languageLevelFirestore['speakingLevel']?? 1,
+              writingLevel: languageLevelFirestore['writingLevel']?? 1,
+            )
+        );
       });
-    } catch (e) {
-      print('user does not have languages');
     }
 
     final String? aboutMe = data['aboutMe'];
@@ -163,6 +169,15 @@ class UserEnreda {
 
     final String? assignedById = data['assignedById']?? "";
     final String? assignedEntityId = data['assignedEntityId']?? "";
+    final int resourcesAccessCount = data['resourcesAccessCount']?? 0;
+
+    final Motivation? motivation = new Motivation(
+        abilities: abilities,
+        dedication: data['dedication'],
+        timeSearching: data['timeSearching'],
+        timeSpentWeekly: data['timeSpentWeekly']
+    );
+    final bool? checkAgreeCV = data['checkAgreeCV'];
 
     return UserEnreda(
       email: email,
@@ -187,10 +202,10 @@ class UserEnreda {
       certifications: certifications,
       // showChatWelcome: showChatWelcome,
       competencies: competencies,
-      //education: education,
+      educationId: educationId,
       educationName: educationName,
       dataOfInterest: dataOfInterest,
-      languages: languages,
+      languagesLevels: languagesLevels,
       aboutMe: aboutMe,
       organization: organization,
       socialEntityId: socialEntityId,
@@ -198,6 +213,9 @@ class UserEnreda {
       gamificationFlags: gamificationFlags,
       assignedById: assignedById,
       assignedEntityId: assignedEntityId,
+      resourcesAccessCount: resourcesAccessCount,
+      motivation: motivation,
+      checkAgreeCV: checkAgreeCV,
     );
   }
 
@@ -209,7 +227,7 @@ class UserEnreda {
   String? photo;
   String? educationName;
   final ProfilePic? profilePic;
-  // final Education? education;
+  final String? educationId;
   final String? phone;
   final DateTime? birthday;
   final String? country;
@@ -226,7 +244,7 @@ class UserEnreda {
   // bool? showChatWelcome;
   final Map<String, String> competencies;
   final List<String> dataOfInterest;
-  final List<String> languages;
+  final List<Language> languagesLevels;
   final String? aboutMe;
   final String? organization;
   final String? socialEntityId;
@@ -234,6 +252,9 @@ class UserEnreda {
   final Map<String, bool> gamificationFlags;
   final String? assignedById;
   final String? assignedEntityId;
+  final int? resourcesAccessCount;
+  final Motivation? motivation;
+  final bool? checkAgreeCV;
 
   @override
   bool operator ==(Object other){
@@ -265,15 +286,18 @@ class UserEnreda {
       // 'showChatWelcome': showChatWelcome,
       'competencies': competencies,
       'dataOfInterest': dataOfInterest,
-      'languages': languages,
+      'languagesLevels': languagesLevels.map((e) => e.toMap()).toList(),
       'aboutMe': aboutMe,
-      //'education': education?.toMap(),
+      'educationId': educationId,
       'organization': organization,
       'socialEntityId': socialEntityId,
       'resources': resources,
       'gamificationFlags': gamificationFlags,
       'assignedById': assignedById,
       'assignedEntityId': assignedEntityId,
+      'resourcesAccessCount': resourcesAccessCount,
+      'motivation': motivation?.toMap(),
+      'checkAgreeCV': checkAgreeCV,
     };
   }
 
@@ -304,15 +328,18 @@ class UserEnreda {
     String? role,
     // bool? showChatWelcome,
     Map<String, String>? competencies,
-    Education? education,
+    String? educationId,
     List<String>? dataOfInterest,
-    List<String>? languages,
+    List<Language>? languagesLevels,
     String? aboutMe,
     String? organization,
     String? socialEntityId,
     Map<String, bool>? gamificationFlags,
     String? assignedById,
     String? assignedEntityId,
+    int? resourcesAccessCount,
+    Motivation? motivation,
+    bool? checkAgreeCV,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -336,9 +363,9 @@ class UserEnreda {
       role: role ?? this.role,
       // showChatWelcome: showChatWelcome ?? this.showChatWelcome,
       competencies: competencies ?? this.competencies,
-      //education: education ?? this.education,
+      educationId: educationId ?? this.educationId,
       dataOfInterest: dataOfInterest ?? this.dataOfInterest,
-      languages: languages ?? this.languages,
+      languagesLevels: languagesLevels ?? this.languagesLevels,
       aboutMe: aboutMe ?? this.aboutMe,
       organization: organization ?? this.organization,
       socialEntityId: socialEntityId ?? this.socialEntityId,
@@ -346,11 +373,31 @@ class UserEnreda {
       gamificationFlags: gamificationFlags ?? this.gamificationFlags,
       assignedById: assignedById,
       assignedEntityId: assignedEntityId,
+      resourcesAccessCount: resourcesAccessCount,
+      motivation: motivation,
+      checkAgreeCV: checkAgreeCV ?? this.checkAgreeCV,
     );
   }
 
   @override
   // TODO: implement hashCode
   int get hashCode => userId.hashCode;
+
+  static const String FLAG_SIGN_UP = "iIcnoLQfpVs7MmDzRGg7";
+  static const String FLAG_PILL_WHAT_IS_ENREDA = "9tnftkYhk6xNUzokdi88";
+  static const String FLAG_PILL_TRAVEL_BEGINS = "X1Lzl17lvipjLRfXkXyB";
+  static const String FLAG_PILL_COMPETENCIES = "08IEuCZq5ZpSihRHolTw";
+  static const String FLAG_CHAT = "sfEkAorz3lEPflUwmfKv";
+  static const String FLAG_EVALUATE_COMPETENCY = "7pFCCgX4X67ps2K3Mx0o";
+  static const String FLAG_PILL_CV_COMPETENCIES = "0OSUTbLQWbQav69HBBPa";
+  static const String FLAG_PILL_HOW_TO_DO_CV = "jw5RlKNEbCMeSZIwhrfo";
+  static const String FLAG_CV_FORMATION = "jKZDpf8eb9iLsruDJr2H";
+  static const String FLAG_CV_COMPLEMENTARY_FORMATION = "FIzQqM0tXwZoIH1V9CSP";
+  static const String FLAG_CV_PERSONAL = "EDZWlWGf1IbAmQfB1TBU";
+  static const String FLAG_CV_PROFESSIONAL = "PMpPOn5hMZCJR1qdU4sW";
+  static const String FLAG_CV_ABOUT_ME = "KhDJqMIR6du9t4zOjKTx";
+  static const String FLAG_CV_DATA_OF_INTEREST = "c6h0owyqz66P6MqbrSB6";
+  static const String FLAG_CV_PHOTO = "fjr17WGx5vegzNHc9RWY";
+  static const String FLAG_JOIN_RESOURCE = "oreFRQYdp5TNusvu3ubK";
 
 }

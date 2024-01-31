@@ -15,7 +15,6 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'data.dart';
 
-
 class MyCv extends StatefulWidget {
   const MyCv({
     Key? key,
@@ -24,7 +23,13 @@ class MyCv extends StatefulWidget {
     required this.province,
     required this.country,
     required this.myExperiences,
+    required this.myPersonalExperiences,
     required this.myEducation,
+    required this.mySecondaryEducation,
+    required this.idSelectedDateEducation,
+    required this.idSelectedDateSecondaryEducation,
+    required this.idSelectedDateExperience,
+    required this.idSelectedDatePersonalExperience,
     required this.competenciesNames,
     required this.languagesNames,
     required this.aboutMe,
@@ -33,6 +38,7 @@ class MyCv extends StatefulWidget {
     required this.myCustomPhone,
     required this.myPhoto,
     required this.myCustomReferences,
+    required this.myMaxEducation,
   }) : super(key: key);
 
   final UserEnreda? user;
@@ -40,13 +46,20 @@ class MyCv extends StatefulWidget {
   final String? province;
   final String? country;
   final List<Experience>? myExperiences;
+  final List<Experience>? myPersonalExperiences;
   final List<Experience>? myEducation;
+  final List<Experience>? mySecondaryEducation;
+  final List<String>? idSelectedDateEducation;
+  final List<String>? idSelectedDateSecondaryEducation;
+  final List<String>? idSelectedDateExperience;
+  final List<String>? idSelectedDatePersonalExperience;
   final List<String> competenciesNames;
   final List<String> languagesNames;
   final String? aboutMe;
   final List<String> myDataOfInterest;
   final String myCustomEmail;
   final String myCustomPhone;
+  final String myMaxEducation;
   final bool myPhoto;
   final List<CertificationRequest>? myCustomReferences;
 
@@ -138,11 +151,11 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
     }
 
     final actions = <PdfPreviewAction>[
-      if (!kIsWeb)
+      /*if (!kIsWeb)
         PdfPreviewAction(
           icon: const Icon(Icons.save),
           onPressed: _saveAsFile,
-        )
+        )*/
     ];
 
     return Scaffold(
@@ -171,7 +184,13 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
             widget.province!,
             widget.country!,
             widget.myExperiences!,
+            widget.myPersonalExperiences,
             widget.myEducation!,
+            widget.mySecondaryEducation,
+            widget.idSelectedDateEducation,
+            widget.idSelectedDateSecondaryEducation,
+            widget.idSelectedDateExperience,
+            widget.idSelectedDatePersonalExperience,
             widget.competenciesNames,
             widget.languagesNames,
             widget.aboutMe,
@@ -180,11 +199,13 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
             widget.myCustomPhone,
             widget.myPhoto,
             widget.myCustomReferences,
+            widget.myMaxEducation,
         ),
         actions: actions,
         canDebug: false,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
+        canChangeOrientation: false,
       ),
     );
   }

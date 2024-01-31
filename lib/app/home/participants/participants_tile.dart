@@ -1,10 +1,10 @@
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
+import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -12,11 +12,9 @@ class ParticipantsListTile extends StatefulWidget {
   const ParticipantsListTile({
     Key? key,
     required this.user,
-    required this.totalGamificationFlags,
     this.onTap})
       : super(key: key);
   final UserEnreda user;
-  final int totalGamificationFlags;
   final VoidCallback? onTap;
 
   @override
@@ -67,19 +65,8 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                           color: AppColors.seaBlue,
                         ),
                       ),
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          disabledActiveTrackColor: AppColors.turquoise,
-                          disabledInactiveTrackColor: AppColors.lightTurquoise,
-                          trackShape: RoundedRectSliderTrackShape(),
-                          trackHeight: 6.0,
-                          disabledThumbColor: AppColors.yellow,
-                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
-                          overlayShape: RoundSliderOverlayShape(overlayRadius: 0.0),),
-                        child: Slider(
-                          value: gamificationFlagsCount / widget.totalGamificationFlags,
-                          onChanged: null,
-                        ),
+                      GamificationSlider(
+                          value: gamificationFlagsCount,
                       ),
                       SpaceH8(),
                       widget.user.photo != null && widget.user.photo!.isNotEmpty?

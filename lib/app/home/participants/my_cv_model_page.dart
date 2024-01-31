@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
@@ -15,7 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class MyCvModelsPage extends StatelessWidget {
+class MyCvModelsPage extends StatefulWidget {
   MyCvModelsPage({
     Key? key,
     required this.user,
@@ -28,9 +29,15 @@ class MyCvModelsPage extends StatelessWidget {
     required this.myExperiences,
     required this.myCustomExperiences,
     required this.mySelectedExperiences,
+    required this.myPersonalExperiences,
+    required this.myPersonalCustomExperiences,
+    required this.myPersonalSelectedExperiences,
     required this.myEducation,
     required this.myCustomEducation,
     required this.mySelectedEducation,
+    required this.mySecondaryEducation,
+    required this.mySecondaryCustomEducation,
+    required this.mySecondarySelectedEducation,
     required this.competenciesNames,
     required this.myCustomCompetencies,
     required this.mySelectedCompetencies,
@@ -44,7 +51,7 @@ class MyCvModelsPage extends StatelessWidget {
     required this.myReferences,
     required this.myCustomReferences,
     required this.mySelectedReferences,
-
+    required this.myMaxEducation,
   }) : super(key: key);
 
   final UserEnreda? user;
@@ -57,12 +64,19 @@ class MyCvModelsPage extends StatelessWidget {
   String myCustomAboutMe;
   String myCustomEmail;
   String myCustomPhone;
+  String myMaxEducation;
   final List<Experience>? myExperiences;
   List<Experience> myCustomExperiences;
   List<int> mySelectedExperiences;
+  final List<Experience>? myPersonalExperiences;
+  List<Experience> myPersonalCustomExperiences;
+  List<int> myPersonalSelectedExperiences;
   final List<Experience>? myEducation;
   List<Experience> myCustomEducation;
   List<int> mySelectedEducation;
+  List<Experience>? mySecondaryEducation;
+  List<Experience> mySecondaryCustomEducation;
+  List<int> mySecondarySelectedEducation;
   final List<String> competenciesNames;
   List<String> myCustomCompetencies;
   List<int> mySelectedCompetencies;
@@ -73,13 +87,60 @@ class MyCvModelsPage extends StatelessWidget {
   final List<CertificationRequest>? myReferences;
   List<CertificationRequest> myCustomReferences;
   List<int> mySelectedReferences;
+
+  @override
+  _MyCvModelsPageState createState() => _MyCvModelsPageState();
+}
+
+class _MyCvModelsPageState extends State<MyCvModelsPage> {
   int? _selectedEducationIndex;
+  int? _selectedSecondaryEducationIndex;
   int? _selectedExperienceIndex;
+  int? _selectedPersonalExperienceIndex;
   int? _selectedReferenceIndex;
   int? _selectedCompetenciesIndex;
   int? _selectedLanguagesIndex;
   int? _selectedDataOfInterestIndex;
-  final bool _isSelectedPhoto = true;
+  bool _isSelectedAboutMe = true;
+  bool _isSelectedEmail = true;
+  bool _isSelectedPhone = true;
+  bool _isSelectedMyCity = true;
+  bool _isSelectedMyProvince = true;
+  bool _isSelectedMyCountry = true;
+  bool _isSelectedPhoto = true;
+  bool _isSelectedMaxEducation = true;
+  String _myMaxEducation = '';
+
+  List<int> mySelectedDateEducation = [];
+  List<String> idSelectedDateEducation = [];
+  List<int> mySelectedDateSecondaryEducation = [];
+  List<String> idSelectedDateSecondaryEducation = [];
+  List<int>  mySelectedDateExperience = [];
+  List<String> idSelectedDateExperience = [];
+  List<int>  mySelectedDatePersonalExperience = [];
+  List<String> idSelectedDatePersonalExperience = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _myMaxEducation = widget.myMaxEducation;
+    widget.mySelectedEducation.forEach((element) {
+      mySelectedDateEducation.add(element);
+      idSelectedDateEducation.add(widget.myEducation!.elementAt(element).id!);
+    });
+    widget.mySecondarySelectedEducation.forEach((element) {
+      mySelectedDateSecondaryEducation.add(element);
+      idSelectedDateSecondaryEducation.add(widget.mySecondaryEducation!.elementAt(element).id!);
+    });
+    widget.mySelectedExperiences.forEach((element) {
+      mySelectedDateExperience.add(element);
+      idSelectedDateExperience.add(widget.myExperiences!.elementAt(element).id!);
+    });
+    widget.myPersonalSelectedExperiences.forEach((element) {
+      mySelectedDatePersonalExperience.add(element);
+      idSelectedDatePersonalExperience.add(widget.myPersonalExperiences!.elementAt(element).id!);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,9 +150,9 @@ class MyCvModelsPage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            'Curriculum Vitae',
+            'Personalizar mi CV',
             textAlign: TextAlign.left,
-            style: textTheme.bodySmall?.copyWith(
+            style: textTheme.bodyText1?.copyWith(
               color: AppColors.white,
               height: 1.5,
               letterSpacing: 0.3,
@@ -101,13 +162,14 @@ class MyCvModelsPage extends StatelessWidget {
           ),
           backgroundColor: AppColors.primaryColor,
           elevation: 0.0,
-          iconTheme: const IconThemeData(
+          iconTheme: IconThemeData(
             color: Colors.white,
           ),
         ),
         body: _buildContent(context)
     );
   }
+
 
   Widget _buildContent(BuildContext context) {
     return SafeArea(
@@ -123,17 +185,17 @@ class MyCvModelsPage extends StatelessWidget {
   }
 
   Widget _myCurriculumWeb(BuildContext context){
-    var profilePic = user?.profilePic?.src ?? "";
+    var profilePic = widget.user?.profilePic?.src ?? "";
     return Container(
-      margin: const EdgeInsets.all(20.0),
+      margin: EdgeInsets.all(20.0),
       height: MediaQuery.of(context).size.height * 0.90,
       width: MediaQuery.of(context).size.width * 0.80,
-      padding: const EdgeInsets.all(30.0),
+      padding: EdgeInsets.all(30.0),
       decoration: BoxDecoration(
         color: AppColors.lightLilac,
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.circular(20.0),
-        boxShadow: const <BoxShadow>[
+        boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.black26,
             blurRadius: 4.0,
@@ -145,7 +207,7 @@ class MyCvModelsPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-              padding: const EdgeInsets.only(
+              padding: EdgeInsets.only(
                   top: 20.0, bottom: 20, right: 5, left: 20),
               width: Responsive.isDesktop(context) ? 330 : Responsive.isDesktopS(context) ? 290.0 : 290,
               height: double.infinity,
@@ -158,78 +220,92 @@ class MyCvModelsPage extends StatelessWidget {
               child: SingleChildScrollView(
                 controller: ScrollController(),
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
+                  padding: EdgeInsets.only(right: 10.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Stack(
-                        children: [
-                          Padding(
-                            padding: Responsive.isMobile(context)
-                                ? const EdgeInsets.all(8.0)
-                                : const EdgeInsets.all(20.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                !kIsWeb ?
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.all(Radius.circular(60)),
-                                  child:
-                                  Center(
+                      InkWell(
+                        onTap: (){
+                          setState(() {
+                            _isSelectedPhoto = !_isSelectedPhoto;
+                          });
+                        },
+                        child: Stack(
+                          children: [
+                            Padding(
+                              padding: Responsive.isMobile(context)
+                                  ? const EdgeInsets.all(8.0)
+                                  : const EdgeInsets.all(20.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  !kIsWeb ?
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.all(Radius.circular(60)),
                                     child:
-                                    profilePic == "" ?
+                                    Center(
+                                      child:
+                                      profilePic == "" ?
+                                      Container(
+                                        color:  Colors.transparent,
+                                        height: 120,
+                                        width: 120,
+                                        child: Image.asset(ImagePath.USER_DEFAULT),
+                                      ):
+                                      CachedNetworkImage(
+                                          width: 120,
+                                          height: 120,
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.center,
+                                          imageUrl: profilePic),
+                                    ),
+                                  ):
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.all(Radius.circular(60)),
+                                    child:
+                                    widget.user?.profilePic?.src == "" ?
                                     Container(
                                       color:  Colors.transparent,
                                       height: 120,
                                       width: 120,
                                       child: Image.asset(ImagePath.USER_DEFAULT),
                                     ):
-                                    CachedNetworkImage(
-                                        width: 120,
-                                        height: 120,
-                                        fit: BoxFit.cover,
-                                        alignment: Alignment.center,
-                                        imageUrl: profilePic),
+                                    PrecacheAvatarCard(
+                                      imageUrl: profilePic,
+                                    ),
                                   ),
-                                ):
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.all(Radius.circular(60)),
-                                  child:
-                                  user?.profilePic?.src == "" ?
-                                  Container(
-                                    color:  Colors.transparent,
-                                    height: 120,
-                                    width: 120,
-                                    child: Image.asset(ImagePath.USER_DEFAULT),
-                                  ):
-                                  PrecacheAvatarCard(
-                                    imageUrl: profilePic,
-                                    width: 120,
-                                    height: 120,
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                            Positioned(
+                              right: 20,
+                              top: 20,
+                              child: Icon(
+                                _isSelectedPhoto ? Icons.check_box : Icons.crop_square,
+                                color: AppColors.darkGray,
+                                size: 20.0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SpaceH20(),
+                      SpaceH20(),
                       _buildPersonalData(context),
-                      const SpaceH20(),
+                      SpaceH20(),
                       _buildAboutMe(context),
-                      const SpaceH20(),
+                      SpaceH20(),
                       _buildMyDataOfInterest(context),
-                      const SpaceH20(),
+                      SpaceH20(),
                       _buildMyLanguages(context),
-                      const SpaceH20(),
+                      SpaceH20(),
                       _buildMyReferences(context),
-                      const SpaceH20(),
+                      SpaceH20(),
                     ],
                   ),
                 ),
               )),
-          const SpaceW20(),
+          SpaceW20(),
           Expanded(
               child: SingleChildScrollView(
                 controller: ScrollController(),
@@ -238,11 +314,15 @@ class MyCvModelsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildCVHeader(context),
-                    const SpaceH40(),
+                    SpaceH40(),
                     _buildMyEducation(context),
-                    const SpaceH40(),
+                    SpaceH40(),
+                    _buildMySecondaryEducation(context),
+                    SpaceH40(),
                     _buildMyExperiences(context),
-                    const SpaceH40(),
+                    SpaceH40(),
+                    _buildMyPersonalExperiences(context),
+                    SpaceH40(),
                     _buildMyCompetencies(context),
                   ],
                 ),
@@ -254,14 +334,14 @@ class MyCvModelsPage extends StatelessWidget {
 
   Widget _myCurriculumMobile(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    var profilePic = user?.profilePic?.src ?? "";
+    var profilePic = widget.user?.profilePic?.src ?? "";
     return SingleChildScrollView(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.95,
         margin: EdgeInsets.only(top: Sizes.mainPadding, bottom: Sizes.mainPadding),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.greyLight, width: 1),
-          borderRadius: const BorderRadius.all(Radius.circular(40.0)),
+          border: Border.all(color: AppColors.greyUltraLight, width: 1),
+          borderRadius: BorderRadius.all(Radius.circular(40.0)),
           color: AppColors.lightLilac,
         ),
         child: Padding(
@@ -289,114 +369,161 @@ class MyCvModelsPage extends StatelessWidget {
                           MaterialPageRoute(
                               builder: (context) =>
                                   MyCv(
-                                    user: user!,
+                                    user: widget.user!,
                                     myPhoto: _isSelectedPhoto,
-                                    city: myCustomCity,
-                                    province: myCustomProvince,
-                                    country: myCustomCountry,
-                                    myExperiences: myCustomExperiences,
-                                    myEducation: myCustomEducation,
-                                    competenciesNames: myCustomCompetencies,
-                                    aboutMe: myCustomAboutMe,
-                                    languagesNames: myCustomLanguages,
-                                    myDataOfInterest: myCustomDataOfInterest,
-                                    myCustomEmail: myCustomEmail,
-                                    myCustomPhone: myCustomPhone,
-                                    myCustomReferences: myCustomReferences,
-                                  )
-                          ),
+                                    city: widget.myCustomCity,
+                                    province: widget.myCustomProvince,
+                                    country: widget.myCustomCountry,
+                                    myExperiences: widget.myCustomExperiences,
+                                    myPersonalExperiences: widget.myPersonalCustomExperiences,
+                                    myEducation: widget.myCustomEducation,
+                                    mySecondaryEducation: widget.mySecondaryCustomEducation,
+                                    idSelectedDateEducation: idSelectedDateEducation,
+                                    idSelectedDateSecondaryEducation: idSelectedDateSecondaryEducation,
+                                    idSelectedDateExperience: idSelectedDateExperience,
+                                    idSelectedDatePersonalExperience: idSelectedDatePersonalExperience,
+                                    competenciesNames: widget.myCustomCompetencies,
+                                    aboutMe: widget.myCustomAboutMe,
+                                    languagesNames: widget.myCustomLanguages,
+                                    myDataOfInterest: widget.myCustomDataOfInterest,
+                                    myCustomEmail: widget.myCustomEmail,
+                                    myCustomPhone: widget.myCustomPhone,
+                                    myCustomReferences: widget.myCustomReferences,
+                                    myMaxEducation: _myMaxEducation,
+                                  )),
                         );
                       },
                     ),
                   ),
                 ],
               ),
-              const SpaceH20(),
-              Padding(
-                padding: Responsive.isMobile(context)
-                    ? const EdgeInsets.all(8.0)
-                    : const EdgeInsets.all(20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+              SpaceH20(),
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    _isSelectedPhoto = !_isSelectedPhoto;
+                  });
+                },
+                child: Stack(
                   children: [
-                    !kIsWeb ?
-                    ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(60)),
-                      child:
-                      Center(
-                        child:
-                        profilePic == "" ?
-                        Container(
-                          color:  Colors.transparent,
-                          height: 120,
-                          width: 120,
-                          child: Image.asset(ImagePath.USER_DEFAULT),
-                        ):
-                        CachedNetworkImage(
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.center,
-                            imageUrl: profilePic),
+                    Padding(
+                      padding: Responsive.isMobile(context)
+                          ? const EdgeInsets.all(8.0)
+                          : const EdgeInsets.all(20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          !kIsWeb ?
+                          ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(60)),
+                            child:
+                            Center(
+                              child:
+                              profilePic == "" ?
+                              Container(
+                                color:  Colors.transparent,
+                                height: 120,
+                                width: 120,
+                                child: Image.asset(ImagePath.USER_DEFAULT),
+                              ):
+                              CachedNetworkImage(
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.center,
+                                  imageUrl: profilePic),
+                            ),
+                          ):
+                          ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(60)),
+                            child:
+                            widget.user?.profilePic?.src == "" ?
+                            Container(
+                              color:  Colors.transparent,
+                              height: 120,
+                              width: 120,
+                              child: Image.asset(ImagePath.USER_DEFAULT),
+                            ):
+                            PrecacheAvatarCard(
+                              imageUrl: profilePic,
+                            ),
+                          ),
+                        ],
                       ),
-                    ):
-                    ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(60)),
-                      child:
-                      user?.profilePic?.src == "" ?
-                      Container(
-                        color:  Colors.transparent,
-                        height: 120,
-                        width: 120,
-                        child: Image.asset(ImagePath.USER_DEFAULT),
-                      ):
-                      PrecacheAvatarCard(
-                        imageUrl: profilePic,
-                        width: 120,
-                        height: 120,
+                    ),
+                    Positioned(
+                      right: 20,
+                      top: 20,
+                      child: Icon(
+                        _isSelectedPhoto ? Icons.check_box : Icons.crop_square,
+                        color: AppColors.darkGray,
+                        size: 20.0,
                       ),
                     ),
                   ],
                 ),
               ),
-              Responsive.isMobile(context) ? const SpaceH12() : const SpaceH24(),
+              Responsive.isMobile(context) ? SpaceH12() : SpaceH24(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    '${user?.firstName} ${user?.lastName}',
-                    style: textTheme.headlineMedium?.copyWith(
+                    '${widget.user?.firstName} ${widget.user?.lastName}',
+                    style: textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        fontSize: Responsive.isDesktop(context) ? 45.0 : 32.0,
                         color: AppColors.penBlue),
                     textAlign: TextAlign.center,
                   ),
                 ],
               ),
-              const SpaceH24(),
-              Center(child:  Text(
-                user?.educationName?.toUpperCase() ?? '',
-                style: textTheme.bodyMedium?.copyWith(
-                    color:AppColors.greyAlt, fontWeight: FontWeight.w800,),
-              )),
-              const SpaceH24(),
+              SpaceH24(),
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    _isSelectedMaxEducation = !_isSelectedMaxEducation;
+                    if (_myMaxEducation == ""){
+                      _myMaxEducation = widget.myMaxEducation;
+                    } else {
+                      _myMaxEducation = "";
+                    }
+                  });
+                },
+                child: Row(
+                  children: [
+                    CustomTextSmall(text: widget.myMaxEducation),
+                    SpaceW8(),
+                    Icon(
+                      _isSelectedMaxEducation ? Icons.check_box : Icons.crop_square,
+                      color: AppColors.darkGray,
+                      size: 20.0,
+                    ),
+                  ],
+                ),
+              ),
+              SpaceH24(),
               _buildPersonalData(context),
-              const SpaceH24(),
+              SpaceH24(),
               _buildMyEducation(context),
-              const SpaceH24(),
+              SpaceH24(),
+              _buildMySecondaryEducation(context),
+              SpaceH24(),
               _buildMyExperiences(context),
-              const SpaceH24(),
+              SpaceH24(),
+              _buildMyPersonalExperiences(context),
+              SpaceH24(),
               _buildMyCompetencies(context),
-              const SpaceH24(),
+              SpaceH24(),
               _buildAboutMe(context),
-              const SpaceH24(),
+              SpaceH24(),
               _buildMyDataOfInterest(context),
-              const SpaceH24(),
+              SpaceH24(),
               _buildMyLanguages(context),
-              const SpaceH24(),
+              SpaceH24(),
               _buildMyReferences(context),
-              const SpaceH24(),
+              SpaceH24(),
             ],
           ),
         ),
@@ -412,68 +539,164 @@ class MyCvModelsPage extends StatelessWidget {
         Row(
           children: [
             CustomTextBody(text: StringConst.MY_CV.toUpperCase()),
-            const Spacer(),
+            Spacer(),
             EnredaButton(
               buttonTitle: "Vista previa",
               width: 100,
               onPressed: () async {
+                if(widget.myPersonalCustomExperiences.length > 2){
+                  showAlertDialog(
+                    context,
+                    title: 'Error',
+                    content: 'Ha seleccionado demasiadas experiencias personales',
+                    defaultActionText: 'Ok',
+                  );
+                  return;
+                }
+                if(widget.myCustomExperiences.length > 2){
+                  showAlertDialog(
+                    context,
+                    title: 'Error',
+                    content: 'Ha seleccionado demasiadas experiencias profesionales',
+                    defaultActionText: 'Ok',
+                  );
+                  return;
+                }
+                if(widget.mySecondaryCustomEducation.length > 2){
+                  showAlertDialog(
+                    context,
+                    title: 'Error',
+                    content: 'Ha seleccionado demasiadas formaciones complementarias',
+                    defaultActionText: 'Ok',
+                  );
+                  return;
+                }
+                if(widget.myCustomEducation.length > 2){
+                  showAlertDialog(
+                    context,
+                    title: 'Error',
+                    content: 'Ha seleccionado demasiadas formaciones',
+                    defaultActionText: 'Ok',
+                  );
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
                           MyCv(
-                            user: user!,
+                            user: widget.user!,
                             myPhoto: _isSelectedPhoto,
-                            city: myCustomCity,
-                            province: myCustomProvince,
-                            country: myCustomCountry,
-                            myExperiences: myCustomExperiences,
-                            myEducation: myCustomEducation,
-                            competenciesNames: myCustomCompetencies,
-                            aboutMe: myCustomAboutMe,
-                            languagesNames: myCustomLanguages,
-                            myDataOfInterest: myCustomDataOfInterest,
-                            myCustomEmail: myCustomEmail,
-                            myCustomPhone: myCustomPhone,
-                            myCustomReferences: myCustomReferences,
-                          )
-                  ),
+                            city: widget.myCustomCity,
+                            province: widget.myCustomProvince,
+                            country: widget.myCustomCountry,
+                            myExperiences: widget.myCustomExperiences,
+                            myPersonalExperiences: widget.myPersonalCustomExperiences,
+                            myEducation: widget.myCustomEducation,
+                            mySecondaryEducation: widget.mySecondaryCustomEducation,
+                            idSelectedDateEducation: idSelectedDateEducation,
+                            idSelectedDateSecondaryEducation: idSelectedDateSecondaryEducation,
+                            idSelectedDateExperience: idSelectedDateExperience,
+                            idSelectedDatePersonalExperience: idSelectedDatePersonalExperience,
+                            competenciesNames: widget.myCustomCompetencies,
+                            aboutMe: widget.myCustomAboutMe,
+                            languagesNames: widget.myCustomLanguages,
+                            myDataOfInterest: widget.myCustomDataOfInterest,
+                            myCustomEmail: widget.myCustomEmail,
+                            myCustomPhone: widget.myCustomPhone,
+                            myCustomReferences: widget.myCustomReferences,
+                            myMaxEducation: _myMaxEducation,
+                          )),
                 );
               },
             ),
-            const SpaceW8(),
+            SpaceW8(),
           ],
         ),
-        const SpaceH20(),
+        SpaceH20(),
         Text(
-          '${user?.firstName} ${user?.lastName}',
-          style: textTheme.headlineMedium?.copyWith(
+          '${widget.user?.firstName} ${widget.user?.lastName}',
+          style: textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              fontSize: Responsive.isDesktop(context) ? 45.0 : 32.0,
               color: AppColors.penBlue),
         ),
-        const SpaceH20(),
-        Text(
-          user?.educationName?.toUpperCase() ?? '',
-          style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.darkGray),
+        SpaceH20(),
+        InkWell(
+          onTap: (){
+            setState(() {
+              _isSelectedMaxEducation = !_isSelectedMaxEducation;
+              if (_myMaxEducation == ""){
+                _myMaxEducation = widget.myMaxEducation;
+              } else {
+                _myMaxEducation = "";
+              }
+            });
+          },
+          child: Row(
+            children: [
+              CustomTextSmall(text: widget.myMaxEducation),
+              SpaceW8(),
+              Icon(
+                _isSelectedMaxEducation ? Icons.check_box : Icons.crop_square,
+                color: AppColors.darkGray,
+                size: 20.0,
+              ),
+            ],
+          ),
         ),
-        const SpaceH20(),
       ],
     );
   }
 
   Widget _buildAboutMe(BuildContext context) {
+    String aboutMe = widget.user?.aboutMe ?? '';
     return StatefulBuilder(builder: (context, setState) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomTextTitle(title: StringConst.ABOUT_ME.toUpperCase()),
-          Padding(
+          Row(
+            children: [
+              Expanded(
+                child:
+                CustomTextTitle(title: StringConst.ABOUT_ME.toUpperCase()),
+              ),
+            ],
+          ),
+          Container(
             padding: const EdgeInsets.all(20.0),
-            child: CustomTextBody(
-                text: user?.aboutMe != null && user!.aboutMe!.isNotEmpty
-                    ? user!.aboutMe!
-                    : 'Aún no ha añadido información adicional'),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30.0),
+              color: AppColors.white,
+            ),
+            child: InkWell(
+              onTap: (){
+                setState(() {
+                  _isSelectedAboutMe = !_isSelectedAboutMe;
+                  if (widget.myCustomAboutMe == ""){
+                    widget.myCustomAboutMe = aboutMe;
+                  } else {
+                    widget.myCustomAboutMe = "";
+                  }
+                });
+              },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CustomTextBody(
+                        text: widget.user?.aboutMe != null && widget.user!.aboutMe!.isNotEmpty
+                            ? widget.user!.aboutMe!
+                            : 'Aún no has añadido información adicional sobre ti'),
+                  ),
+                  SpaceW8(),
+                  Icon(
+                    _isSelectedAboutMe ? Icons.check_box : Icons.crop_square,
+                    color: AppColors.darkGray,
+                    size: 20.0,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       );
@@ -482,11 +705,14 @@ class MyCvModelsPage extends StatelessWidget {
 
   Widget _buildPersonalData(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    String email = widget.user?.email ?? '';
+    String phone = widget.user?.phone ?? '';
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextTitle(title: StringConst.PERSONAL_DATA.toUpperCase()),
+        SpaceH4(),
         Container(
           padding: const EdgeInsets.all(20.0),
           decoration: BoxDecoration(
@@ -495,49 +721,93 @@ class MyCvModelsPage extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.mail,
-                    color: AppColors.darkGray,
-                    size: 12.0,
-                  ),
-                  const SpaceW4(),
-                  Text(
-                    user?.email ?? '',
-                    style: textTheme.bodySmall?.copyWith(
-                        fontSize: Responsive.isDesktop(context) ? 14 : 14.0,
-                        color: AppColors.darkGray),
-                  ),
-                ],
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    _isSelectedEmail = !_isSelectedEmail;
+                    if (widget.myCustomEmail == ""){
+                      widget.myCustomEmail = email;
+                    } else {
+                      widget.myCustomEmail = "";
+                    }
+                  });
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.mail,
+                      color: AppColors.darkGray,
+                      size: 12.0,
+                    ),
+                    SpaceW4(),
+                    Expanded(
+                      child: Text(
+                        widget.user?.email ?? '',
+                        style: textTheme.bodyText1?.copyWith(
+                            fontSize: Responsive.isDesktop(context) ? 14 : 14.0,
+                            color: AppColors.darkGray),
+                      ),
+                    ),
+                    SpaceW8(),
+                    Icon(
+                      _isSelectedEmail ? Icons.check_box : Icons.crop_square,
+                      color: AppColors.darkGray,
+                      size: 20.0,
+                    ),
+                  ],
+                ),
               ),
-              const SpaceH8(),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.phone,
-                    color: AppColors.darkGray,
-                    size: 12.0,
-                  ),
-                  const SpaceW4(),
-                  Text(
-                    user?.phone ?? '',
-                    style: textTheme.bodySmall?.copyWith(
-                        fontSize: Responsive.isDesktop(context) ? 14 : 14.0,
-                        color: AppColors.darkGray),
-                  ),
-                ],
+              SpaceH8(),
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    _isSelectedPhone = !_isSelectedPhone;
+                    if (widget.myCustomPhone == ""){
+                      widget.myCustomPhone = phone;
+                    } else {
+                      widget.myCustomPhone = "";
+                    }
+                  });
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.phone,
+                      color: AppColors.darkGray,
+                      size: 12.0,
+                    ),
+                    SpaceW4(),
+                    Expanded(
+                      child: Text(
+                        widget.user?.phone ?? '',
+                        style: textTheme.bodyText1?.copyWith(
+                            fontSize: Responsive.isDesktop(context) ? 14 : 14.0,
+                            color: AppColors.darkGray),
+                      ),
+                    ),
+                    SpaceW8(),
+                    Icon(
+                      _isSelectedPhone ? Icons.check_box : Icons.crop_square,
+                      color: AppColors.darkGray,
+                      size: 20.0,
+                    ),
+                  ],
+                ),
               ),
-              const SpaceH8(),
+              SpaceH8(),
               _buildMyLocation(context),
             ],
           ),
         ),
+
       ],
     );
   }
 
   Widget _buildMyLocation(BuildContext context) {
+    String myCity = widget.city ?? '';
+    String myProvince = widget.province ?? '';
+    String myCountry = widget.country ?? '';
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,13 +817,79 @@ class MyCvModelsPage extends StatelessWidget {
           color: Colors.black.withOpacity(0.7),
           size: 16,
         ),
-        const SpaceW4(),
+        SpaceW4(),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTextSmall(text: city ?? ''),
-            CustomTextSmall(text: province ?? ''),
-            CustomTextSmall(text: country ?? ''),
+            InkWell(
+              onTap: (){
+                setState(() {
+                  _isSelectedMyCity = !_isSelectedMyCity;
+                  if (widget.myCustomCity == ""){
+                    widget.myCustomCity = myCity;
+                  } else {
+                    widget.myCustomCity = "";
+                  }
+                });
+              },
+              child: Row(
+                children: [
+                  CustomTextSmall(text: widget.city ?? ''),
+                  SpaceW8(),
+                  Icon(
+                    _isSelectedMyCity ? Icons.check_box : Icons.crop_square,
+                    color: AppColors.darkGray,
+                    size: 20.0,
+                  ),
+                ],
+              ),
+            ),
+            InkWell(
+              onTap: (){
+                setState(() {
+                  _isSelectedMyProvince = !_isSelectedMyProvince;
+                  if (widget.myCustomProvince == ""){
+                    widget.myCustomProvince = myProvince;
+                  } else {
+                    widget.myCustomProvince = "";
+                  }
+                });
+              },
+              child: Row(
+                children: [
+                  CustomTextSmall(text: widget.province ?? ''),
+                  SpaceW8(),
+                  Icon(
+                    _isSelectedMyProvince ? Icons.check_box : Icons.crop_square,
+                    color: AppColors.darkGray,
+                    size: 20.0,
+                  ),
+                ],
+              ),
+            ),
+            InkWell(
+              onTap: (){
+                setState(() {
+                  _isSelectedMyCountry = !_isSelectedMyCountry;
+                  if (widget.myCustomCountry == ""){
+                    widget.myCustomCountry = myCountry;
+                  } else {
+                    widget.myCustomCountry = "";
+                  }
+                });
+              },
+              child: Row(
+                children: [
+                  CustomTextSmall(text: widget.country ?? ''),
+                  SpaceW8(),
+                  Icon(
+                    _isSelectedMyCountry ? Icons.check_box : Icons.crop_square,
+                    color: AppColors.darkGray,
+                    size: 20.0,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ],
@@ -568,45 +904,72 @@ class MyCvModelsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextTitle(title: StringConst.COMPETENCIES.toUpperCase()),
-        const SpaceH4(),
+        SpaceH4(),
         Container(
-          padding: const EdgeInsets.all(20.0),
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30.0),
             color: AppColors.white,
           ),
-          child: competenciesNames.isNotEmpty ?
+          child: widget.competenciesNames.isNotEmpty ?
           ListView.builder(
             shrinkWrap: true,
-            itemCount: competenciesNames.length,
+            itemCount: widget.competenciesNames.length,
             itemBuilder: (context, index) {
               return Container(
                   alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(vertical: 0),
+                  padding: EdgeInsets.symmetric(vertical: 0),
                   child: ListTile(
                     selected: index == _selectedCompetenciesIndex,
-                    title: Row(
-                      children: [
-                        Text(
-                            competenciesNames[index],
-                            style: textTheme.bodySmall
-                                ?.copyWith(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.darkGray)
-                        ),
-                      ],
+                    onTap: (){
+                      print('selected item: ${widget.competenciesNames[index]}');
+                      bool exists = widget.myCustomCompetencies.any((element) => element == widget.competenciesNames[index]);
+                      setState(() {
+                        _selectedCompetenciesIndex = index;
+                        if (exists == true){
+                          widget.myCustomCompetencies.remove(widget.competenciesNames[index]);
+                          widget.mySelectedCompetencies.remove(_selectedCompetenciesIndex);
+                        } else {
+                          widget.myCustomCompetencies.add(widget.competenciesNames[index]);
+                          widget.mySelectedCompetencies.add(_selectedCompetenciesIndex!);
+                        }
+                        print(widget.myCustomCompetencies);
+                        print(widget.mySelectedCompetencies);
+                      });
+                    },
+                    title: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                                widget.competenciesNames[index],
+                                style: textTheme.bodyText1
+                                    ?.copyWith(
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.darkGray)
+                            ),
+                          ),
+                          Icon(
+                            widget.mySelectedCompetencies.contains(index) ? Icons.check_box : Icons.crop_square,
+                            color: AppColors.darkGray,
+                            size: 20.0,
+                          ),
+                        ],
+                      ),
                     ),
                   )
+
               );
             },
           ) :
-          const Padding(
-            padding: EdgeInsets.all(20.0),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Center(
                 child: Text(
-                  'Aquí aparecerán las competencias evaluadas y certificadas'
+                  'Aquí aparecerán las competencias evaluadas a través de los microtests',
+                  style: textTheme.bodyText1,
                 )),
           ),
         ),
@@ -623,97 +986,315 @@ class MyCvModelsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextTitle(title: StringConst.EDUCATION.toUpperCase()),
-        const SpaceH4(),
+        SpaceH4(),
         Container(
-          padding: const EdgeInsets.all(20.0),
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30.0),
             color: AppColors.white,
           ),
-          child: myEducation!.isNotEmpty
+          child: widget.myEducation!.isNotEmpty
               ?
           ListView.builder(
             shrinkWrap: true,
-            itemCount: myEducation!.length,
+            itemCount: widget.myEducation!.length,
             itemBuilder: (context, index) {
               return Container(
                 alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(vertical: 0),
+                padding: EdgeInsets.symmetric(vertical: 0),
                 child: ListTile(
                   selected: index == _selectedEducationIndex,
-                  title: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            if (myEducation![index].activity != null && myEducation![index].activityRole != null)
-                              RichText(
-                                text: TextSpan(
-                                    text: '${myEducation![index].activityRole!.toUpperCase()} -',
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: AppColors.greyAlt,
+                  title: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              if (widget.myEducation![index].activity != null && widget.myEducation![index].activityRole != null && widget.myEducation![index].activity != '')
+                                RichText(
+                                  text: TextSpan(
+                                      text: '${widget.myEducation![index].activityRole!.toUpperCase()} -',
+                                      style: textTheme.bodyText1?.copyWith(
+                                        fontSize: 14.0,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: ' ${widget.myEducation![index].activity!.toUpperCase()}',
+                                          style: textTheme.bodyText1?.copyWith(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      ]),
+                                ),
+                              if (widget.myEducation![index].nameFormation != null )
+                                Text('${widget.myEducation![index].nameFormation!}',
+                                    style: textTheme.bodyText1
+                                        ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                              if (widget.myEducation![index].activity != null && widget.myEducation![index].activityRole == null)
+                                Text('${widget.myEducation![index].activity!}',
+                                    style: textTheme.bodyText1
+                                        ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                              if (widget.myEducation![index].activity != null) SpaceH8(),
+                              if (widget.myEducation![index].organization != null && widget.myEducation![index].organization != "") Column(
+                                children: [
+                                  Text(
+                                    widget.myEducation![index].organization!,
+                                    style: textTheme.bodyText1?.copyWith(
+                                      fontWeight: FontWeight.bold,
                                       fontSize: 14.0,
                                     ),
-                                    children: [
-                                      TextSpan(
-                                        text: ' ${myEducation![index].activity!.toUpperCase()}',
-                                        style: textTheme.bodySmall?.copyWith(
-                                          color: AppColors.greyAlt,
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    ]),
-                              ),
-                            if (myEducation![index].activity != null && myEducation![index].activityRole == null)
-                              Text(myEducation![index].activity!,
-                                  style: textTheme.bodySmall
-                                      ?.copyWith(fontSize: 14.0, color: AppColors.greyAlt, fontWeight: FontWeight.bold)),
-                            if (myEducation![index].activity != null) const SpaceH8(),
-                            if (myEducation![index].organization != null && myEducation![index].organization != "") Column(
-                              children: [
-                                Text(
-                                  myEducation![index].organization!,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.greyAlt,
-                                    fontSize: 14.0,
                                   ),
+                                  SpaceH8()
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '${widget.myEducation![index].startDate != null
+                                        ? formatter.format(widget.myEducation![index].startDate!.toDate())
+                                        : 'Desconocida'} / ${widget.myEducation![index].subtype == 'Responsabilidades familiares'? 'Desconocida'
+                                        : widget.myEducation![index].endDate != null
+                                        ? formatter.format(widget.myEducation![index].endDate!.toDate())
+                                        : 'Actualmente'}',
+                                    style: textTheme.bodyText1?.copyWith(
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                  SpaceW8(),
+                                  IconButton(
+                                    icon: Icon(mySelectedDateEducation.contains(index) ? Icons.check_box : Icons.crop_square),
+                                    color: AppColors.darkGray,
+                                    iconSize: 15.0,
+                                    onPressed: (){
+
+                                      setState(() {
+                                        if(widget.mySelectedEducation.contains(index)){
+                                          if(mySelectedDateEducation.contains(index)){
+                                            mySelectedDateEducation.remove(index);
+                                            idSelectedDateEducation.remove(widget.myEducation!.elementAt(index).id);
+                                          }
+                                          else {
+                                            mySelectedDateEducation.add(index);
+                                            idSelectedDateEducation.add(widget.myEducation!.elementAt(index).id!);
+                                          }
+                                          //print(widget.mySelectedEducation);
+                                          //print(mySelectedDateEducation);
+                                          idSelectedDateEducation.forEach((element) {print(element);});
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SpaceH8(),
+                              Text(
+                                widget.myEducation![index].location,
+                                style: textTheme.bodyText1?.copyWith(
+                                  fontSize: 14.0,
                                 ),
-                                const SpaceH8()
-                              ],
-                            ),
-                            Text(
-                              '${formatter.format(myEducation![index].startDate.toDate())} / ${myEducation![index].endDate != null
-                                  ? formatter.format(myEducation![index].endDate!.toDate())
-                                  : 'Actualmente'}',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.greyAlt,
-                                fontSize: 14.0,
                               ),
-                            ),
-                            const SpaceH8(),
-                            Text(
-                              myEducation![index].location,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.greyAlt,
-                                fontSize: 14.0,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        IconButton(
+                          onPressed: (){
+                            print('selected item: ${widget.myEducation![index].activity}');
+                            bool exists = widget.myCustomEducation.any((element) => element.id == widget.myEducation![index].id);
+                            setState(() {
+                              _selectedEducationIndex = index;
+                              if (exists == true){
+                                widget.myCustomEducation.remove(widget.myEducation![index]);
+                                widget.mySelectedEducation.remove(_selectedEducationIndex);
+                                //Disguise date
+                                mySelectedDateEducation.remove(index);
+                                idSelectedDateEducation.remove(widget.myEducation!.elementAt(index).id);
+                              } else {
+                                widget.myCustomEducation.add(widget.myEducation![index]);
+                                widget.mySelectedEducation.add(_selectedEducationIndex!);
+                                //Show date
+                                mySelectedDateEducation.add(index);
+                                idSelectedDateEducation.add(widget.myEducation!.elementAt(index).id!);
+                              }
+                              print(widget.myCustomEducation);
+                              print(widget.mySelectedEducation);
+                            });
+                          },
+                          icon: Icon(widget.mySelectedEducation.contains(index) ? Icons.check_box : Icons.crop_square),
+                          iconSize: 20,
+                          color: AppColors.darkGray,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
             },
           )
-              : const CustomTextBody(text: 'Aquí aparecerá la educación'),
+              : CustomTextBody(text: StringConst.NO_EDUCATION),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMySecondaryEducation(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomTextTitle(title: StringConst.SECONDARY_EDUCATION.toUpperCase()),
+        SpaceH4(),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: AppColors.white,
+          ),
+          child: widget.mySecondaryEducation!.isNotEmpty
+              ?
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: widget.mySecondaryEducation!.length,
+            itemBuilder: (context, index) {
+              return Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(vertical: 0),
+                child: ListTile(
+                  selected: index == _selectedSecondaryEducationIndex,
+                  title: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              if (widget.mySecondaryEducation![index].activity != null && widget.mySecondaryEducation![index].activityRole != null && widget.mySecondaryEducation![index].activity != '')
+                                RichText(
+                                  text: TextSpan(
+                                      text: '${widget.mySecondaryEducation![index].activityRole!.toUpperCase()} -',
+                                      style: textTheme.bodyText1?.copyWith(
+                                        fontSize: 14.0,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: ' ${widget.mySecondaryEducation![index].activity!.toUpperCase()}',
+                                          style: textTheme.bodyText1?.copyWith(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      ]),
+                                ),
+                              if (widget.mySecondaryEducation![index].nameFormation != null )
+                                Text('${widget.mySecondaryEducation![index].nameFormation!}',
+                                    style: textTheme.bodyText1
+                                        ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                              if (widget.mySecondaryEducation![index].activity != null && widget.mySecondaryEducation![index].activityRole == null)
+                                Text('${widget.mySecondaryEducation![index].activity!}',
+                                    style: textTheme.bodyText1
+                                        ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                              if (widget.mySecondaryEducation![index].activity != null) SpaceH8(),
+                              if (widget.mySecondaryEducation![index].organization != null && widget.mySecondaryEducation![index].organization != "") Column(
+                                children: [
+                                  Text(
+                                    widget.mySecondaryEducation![index].organization!,
+                                    style: textTheme.bodyText1?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                  SpaceH8()
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '${widget.mySecondaryEducation![index].startDate != null
+                                        ? formatter.format(widget.mySecondaryEducation![index].startDate!.toDate())
+                                        : 'Desconocida'} / ${widget.mySecondaryEducation![index].subtype == 'Responsabilidades familiares'? 'Desconocida'
+                                        : widget.mySecondaryEducation![index].endDate != null
+                                        ? formatter.format(widget.mySecondaryEducation![index].endDate!.toDate())
+                                        : 'Actualmente'}',
+                                    style: textTheme.bodyText1?.copyWith(
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                  SpaceW8(),
+                                  IconButton(
+                                    icon: Icon(mySelectedDateSecondaryEducation.contains(index) ? Icons.check_box : Icons.crop_square),
+                                    color: AppColors.darkGray,
+                                    iconSize: 15.0,
+                                    onPressed: (){
+
+                                      setState(() {
+                                        if(widget.mySecondarySelectedEducation.contains(index)){
+                                          if(mySelectedDateSecondaryEducation.contains(index)){
+                                            mySelectedDateSecondaryEducation.remove(index);
+                                            idSelectedDateSecondaryEducation.remove(widget.mySecondaryEducation!.elementAt(index).id);
+                                          }
+                                          else {
+                                            mySelectedDateSecondaryEducation.add(index);
+                                            idSelectedDateSecondaryEducation.add(widget.mySecondaryEducation!.elementAt(index).id!);
+                                          }
+                                          idSelectedDateSecondaryEducation.forEach((element) {print(element);});
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SpaceH8(),
+                              Text(
+                                widget.mySecondaryEducation![index].location,
+                                style: textTheme.bodyText1?.copyWith(
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: (){
+                            print('selected item: ${widget.mySecondaryEducation![index].activity}');
+                            bool exists = widget.mySecondaryCustomEducation.any((element) => element.id == widget.mySecondaryEducation![index].id);
+                            setState(() {
+                              _selectedSecondaryEducationIndex = index;
+                              if (exists == true){
+                                widget.mySecondaryCustomEducation.remove(widget.mySecondaryEducation![index]);
+                                widget.mySecondarySelectedEducation.remove(_selectedSecondaryEducationIndex);
+                                //Disguise date
+                                mySelectedDateSecondaryEducation.remove(index);
+                                idSelectedDateSecondaryEducation.remove(widget.mySecondaryEducation!.elementAt(index).id);
+                              } else {
+                                widget.mySecondaryCustomEducation.add(widget.mySecondaryEducation![index]);
+                                widget.mySecondarySelectedEducation.add(_selectedSecondaryEducationIndex!);
+                                //Show date
+                                mySelectedDateSecondaryEducation.add(index);
+                                idSelectedDateSecondaryEducation.add(widget.mySecondaryEducation!.elementAt(index).id!);
+                              }
+                              print(widget.mySecondaryCustomEducation);
+                              print(widget.mySecondarySelectedEducation);
+                            });
+                          },
+                          icon: Icon(widget.mySecondarySelectedEducation.contains(index) ? Icons.check_box : Icons.crop_square),
+                          iconSize: 20,
+                          color: AppColors.darkGray,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
+              : CustomTextBody(text: StringConst.NO_EDUCATION),
         ),
       ],
     );
@@ -726,98 +1307,306 @@ class MyCvModelsPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomTextTitle(title: StringConst.MY_EXPERIENCES.toUpperCase()),
-        const SpaceH4(),
+        CustomTextTitle(title: StringConst.MY_PROFESIONAL_EXPERIENCES.toUpperCase()),
+        SpaceH4(),
         Container(
-          padding: const EdgeInsets.all(20.0),
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30.0),
             color: AppColors.white,
           ),
-          child: myExperiences!.isNotEmpty
+          child: widget.myExperiences!.isNotEmpty
               ?
           ListView.builder(
             shrinkWrap: true,
-            itemCount: myExperiences!.length,
+            itemCount: widget.myExperiences!.length,
             itemBuilder: (context, index) {
               return Container(
                 alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(vertical: 0),
+                padding: EdgeInsets.symmetric(vertical: 0),
                 child: ListTile(
                   selected: index == _selectedExperienceIndex,
-                  title: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            if (myExperiences![index].activity != null && myExperiences![index].activityRole != null)
-                              RichText(
-                                text: TextSpan(
-                                    text: '${myExperiences![index].activityRole!.toUpperCase()} -',
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: AppColors.greyAlt,
+                  title: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              if (widget.myExperiences![index].activity != null && widget.myExperiences![index].activityRole != null)
+                                RichText(
+                                  text: TextSpan(
+                                      text: '${widget.myExperiences![index].activityRole!.toUpperCase()} -',
+                                      style: textTheme.bodyText1?.copyWith(
+                                        fontSize: 14.0,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: ' ${widget.myExperiences![index].activity!.toUpperCase()}',
+                                          style: textTheme.bodyText1?.copyWith(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      ]),
+                                ),
+                              if (widget.myExperiences![index].activity != null && widget.myExperiences![index].activityRole == null)
+                                Text( widget.myExperiences![index].position == null || widget.myExperiences![index].position == "" ? '${widget.myExperiences![index].activity!}' : '${widget.myExperiences![index].position}',
+                                    style: textTheme.bodyText1
+                                        ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                              if (widget.myExperiences![index].position != null || widget.myExperiences![index].activity != null) SpaceH8(),
+                              if (widget.myExperiences![index].organization != null && widget.myExperiences![index].organization != "") Column(
+                                children: [
+                                  Text(
+                                    widget.myExperiences![index].organization!,
+                                    style: textTheme.bodyText1?.copyWith(
+                                      fontWeight: FontWeight.bold,
                                       fontSize: 14.0,
                                     ),
-                                    children: [
-                                      TextSpan(
-                                        text: ' ${myExperiences![index].activity!.toUpperCase()}',
-                                        style: textTheme.bodySmall?.copyWith(
-                                          fontSize: 14.0,
-                                          color: AppColors.greyAlt,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    ]),
-                              ),
-                            if (myExperiences![index].activity != null && myExperiences![index].activityRole == null)
-                              Text( myExperiences![index].position == null || myExperiences![index].position == "" ? '${myExperiences![index].activity!}' : '${myExperiences![index].position}',
-                                  style: textTheme.bodySmall
-                                      ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.greyAlt,)),
-                            if (myExperiences![index].position != null || myExperiences![index].activity != null) const SpaceH8(),
-                            if (myExperiences![index].organization != null && myExperiences![index].organization != "") Column(
-                              children: [
-                                Text(
-                                  myExperiences![index].organization!,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.greyAlt,
-                                    fontSize: 14.0,
                                   ),
+                                  SpaceH8()
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '${widget.myExperiences![index].startDate != null
+                                        ? formatter.format(widget.myExperiences![index].startDate!.toDate())
+                                        : 'Desconocida'} / ${widget.myExperiences![index].subtype == 'Responsabilidades familiares'? 'Desconocida'
+                                        : widget.myExperiences![index].endDate != null
+                                        ? formatter.format(widget.myExperiences![index].endDate!.toDate())
+                                        : 'Actualmente'}',
+                                    style: textTheme.bodyText1?.copyWith(
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                  SpaceW8(),
+                                  IconButton(
+                                    icon: Icon(mySelectedDateExperience.contains(index) ? Icons.check_box : Icons.crop_square),
+                                    color: AppColors.darkGray,
+                                    iconSize: 15.0,
+                                    onPressed: (){
+
+                                      setState(() {
+                                        if(widget.mySelectedExperiences.contains(index)){
+                                          if(mySelectedDateExperience.contains(index)){
+                                            mySelectedDateExperience.remove(index);
+                                            idSelectedDateExperience.remove(widget.myExperiences!.elementAt(index).id);
+                                          }
+                                          else {
+                                            mySelectedDateExperience.add(index);
+                                            idSelectedDateExperience.add(widget.myExperiences!.elementAt(index).id!);
+                                          }
+                                          idSelectedDateExperience.forEach((element) {print(element);});
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SpaceH8(),
+                              Text(
+                                widget.myExperiences![index].location,
+                                style: textTheme.bodyText1?.copyWith(
+                                  fontSize: 14.0,
                                 ),
-                                const SpaceH8()
-                              ],
-                            ),
-                            Text(
-                              '${formatter.format(myExperiences![index].startDate.toDate())} / ${myExperiences![index].endDate != null
-                                  ? formatter.format(myExperiences![index].endDate!.toDate())
-                                  : 'Actualmente'}',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.greyAlt,
-                                fontSize: 14.0,
                               ),
-                            ),
-                            const SpaceH8(),
-                            Text(
-                              myExperiences![index].location,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.greyAlt,
-                                fontSize: 14.0,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        IconButton(
+                          onPressed: (){
+                            print('selected item: ${widget.myExperiences![index].activity}');
+                            bool exists = widget.myCustomExperiences.any((element) => element.id == widget.myExperiences![index].id);
+                            setState(() {
+                              _selectedExperienceIndex = index;
+                              if (exists == true){
+                                widget.myCustomExperiences.remove(widget.myExperiences![index]);
+                                widget.mySelectedExperiences.remove(_selectedExperienceIndex);
+                                //Disguise date
+                                mySelectedDateExperience.remove(index);
+                                idSelectedDateExperience.remove(widget.myExperiences!.elementAt(index).id);
+                              } else {
+                                widget.myCustomExperiences.add(widget.myExperiences![index]);
+                                widget.mySelectedExperiences.add(_selectedExperienceIndex!);
+                                //Show date
+                                mySelectedDateExperience.add(index);
+                                idSelectedDateExperience.add(widget.myExperiences!.elementAt(index).id!);
+                              }
+                              print(widget.myCustomExperiences);
+                              print(widget.mySelectedExperiences);
+                            });
+                          },
+                          icon: Icon(widget.mySelectedExperiences.contains(index) ? Icons.check_box : Icons.crop_square),
+                          iconSize: 20,
+                          color: AppColors.darkGray,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
             },
           )
-              : const CustomTextBody(text: 'Aquí aparecerá las experiencias'),
+              : CustomTextBody(text: StringConst.NO_EDUCATION),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMyPersonalExperiences(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomTextTitle(title: StringConst.MY_PERSONAL_EXPERIENCES.toUpperCase()),
+        SpaceH4(),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: AppColors.white,
+          ),
+          child: widget.myPersonalExperiences!.isNotEmpty
+              ?
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: widget.myPersonalExperiences!.length,
+            itemBuilder: (context, index) {
+              return Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(vertical: 0),
+                child: ListTile(
+                  selected: index == _selectedPersonalExperienceIndex,
+                  title: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              if (widget.myPersonalExperiences![index].activity != null && widget.myPersonalExperiences![index].activityRole != null)
+                                RichText(
+                                  text: TextSpan(
+                                      text: '${widget.myPersonalExperiences![index].activityRole!.toUpperCase()} -',
+                                      style: textTheme.bodyText1?.copyWith(
+                                        fontSize: 14.0,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: ' ${widget.myPersonalExperiences![index].activity!.toUpperCase()}',
+                                          style: textTheme.bodyText1?.copyWith(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      ]),
+                                ),
+                              if (widget.myPersonalExperiences![index].activity != null && widget.myPersonalExperiences![index].activityRole == null)
+                                Text( widget.myPersonalExperiences![index].position == null || widget.myPersonalExperiences![index].position == "" ? '${widget.myPersonalExperiences![index].activity!}' : '${widget.myPersonalExperiences![index].position}',
+                                    style: textTheme.bodyText1
+                                        ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                              if (widget.myPersonalExperiences![index].position != null || widget.myPersonalExperiences![index].activity != null) SpaceH8(),
+                              if (widget.myPersonalExperiences![index].organization != null && widget.myPersonalExperiences![index].organization != "") Column(
+                                children: [
+                                  Text(
+                                    widget.myPersonalExperiences![index].organization!,
+                                    style: textTheme.bodyText1?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                  SpaceH8()
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '${widget.myPersonalExperiences![index].startDate != null
+                                        ? formatter.format(widget.myPersonalExperiences![index].startDate!.toDate())
+                                        : 'Desconocida'} / ${widget.myPersonalExperiences![index].subtype == 'Responsabilidades familiares'? 'Desconocida'
+                                        : widget.myPersonalExperiences![index].endDate != null
+                                        ? formatter.format(widget.myPersonalExperiences![index].endDate!.toDate())
+                                        : 'Actualmente'}',
+                                    style: textTheme.bodyText1?.copyWith(
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                  SpaceW8(),
+                                  IconButton(
+                                    icon: Icon(mySelectedDatePersonalExperience.contains(index) ? Icons.check_box : Icons.crop_square),
+                                    color: AppColors.darkGray,
+                                    iconSize: 15.0,
+                                    onPressed: (){
+
+                                      setState(() {
+                                        if(widget.myPersonalSelectedExperiences.contains(index)){
+                                          if(mySelectedDatePersonalExperience.contains(index)){
+                                            mySelectedDatePersonalExperience.remove(index);
+                                            idSelectedDatePersonalExperience.remove(widget.myPersonalExperiences!.elementAt(index).id);
+                                          }
+                                          else {
+                                            mySelectedDatePersonalExperience.add(index);
+                                            idSelectedDatePersonalExperience.add(widget.myPersonalExperiences!.elementAt(index).id!);
+                                          }
+                                          idSelectedDatePersonalExperience.forEach((element) {print(element);});
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SpaceH8(),
+                              Text(
+                                widget.myPersonalExperiences![index].location,
+                                style: textTheme.bodyText1?.copyWith(
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: (){
+                            print('selected item: ${widget.myPersonalExperiences![index].activity}');
+                            bool exists = widget.myPersonalCustomExperiences.any((element) => element.id == widget.myPersonalExperiences![index].id);
+                            setState(() {
+                              _selectedPersonalExperienceIndex = index;
+                              if (exists == true){
+                                widget.myPersonalCustomExperiences.remove(widget.myPersonalExperiences![index]);
+                                widget.myPersonalSelectedExperiences.remove(_selectedPersonalExperienceIndex);
+                                //Disguise date
+                                mySelectedDatePersonalExperience.remove(index);
+                                idSelectedDatePersonalExperience.remove(widget.myPersonalExperiences!.elementAt(index).id);
+                              } else {
+                                widget.myPersonalCustomExperiences.add(widget.myPersonalExperiences![index]);
+                                widget.myPersonalSelectedExperiences.add(_selectedPersonalExperienceIndex!);
+                                //Show date
+                                mySelectedDatePersonalExperience.add(index);
+                                idSelectedDatePersonalExperience.add(widget.myPersonalExperiences!.elementAt(index).id!);
+                              }
+                              print(widget.myPersonalCustomExperiences);
+                              print(widget.myPersonalSelectedExperiences);
+                            });
+                          },
+                          icon: Icon(widget.myPersonalSelectedExperiences.contains(index) ? Icons.check_box : Icons.crop_square),
+                          iconSize: 20,
+                          color: AppColors.darkGray,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
+              : CustomTextBody(text: StringConst.NO_EDUCATION),
         ),
       ],
     );
@@ -825,7 +1614,7 @@ class MyCvModelsPage extends StatelessWidget {
 
   Widget _buildMyDataOfInterest(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final myDataOfInterest = user?.dataOfInterest ?? [];
+    final myDataOfInterest = widget.user?.dataOfInterest ?? [];
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -842,25 +1631,56 @@ class MyCvModelsPage extends StatelessWidget {
             shrinkWrap: true,
             itemCount: myDataOfInterest.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                selected: index == _selectedDataOfInterestIndex,
-                title: Text(
-                    myDataOfInterest[index],
-                    style: textTheme.bodySmall
-                        ?.copyWith(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.darkGray)
-                ),
+              return Container(
+                  child: ListTile(
+                    selected: index == _selectedDataOfInterestIndex,
+                    onTap: (){
+                      print('selected item: ${myDataOfInterest[index]}');
+                      bool exists = widget.myCustomDataOfInterest.any((element) => element == myDataOfInterest[index]);
+                      setState(() {
+                        _selectedDataOfInterestIndex = index;
+                        if (exists == true){
+                          widget.myCustomDataOfInterest.remove(myDataOfInterest[index]);
+                          widget.mySelectedDataOfInterest.remove(_selectedDataOfInterestIndex);
+                        } else {
+                          widget.myCustomDataOfInterest.add(myDataOfInterest[index]);
+                          widget.mySelectedDataOfInterest.add(_selectedDataOfInterestIndex!);
+                        }
+                        print(widget.myCustomDataOfInterest);
+                        print(widget.mySelectedDataOfInterest);
+                        print(myDataOfInterest);
+                      });
+                    },
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                              myDataOfInterest[index],
+                              style: textTheme.bodyText1
+                                  ?.copyWith(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.darkGray)
+                          ),
+                        ),
+                        Icon(
+                          widget.mySelectedDataOfInterest.contains(index) ? Icons.check_box : Icons.crop_square,
+                          color: AppColors.darkGray,
+                          size: 20.0,
+                        ),
+                      ],
+                    ),
+                  )
+
               );
             },
           ) :
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(10.0),
             child: Center(
                 child: Text(
                   'Aquí aparecerá la información de interés',
-                  style: textTheme.bodySmall,
+                  style: textTheme.bodyText1,
                 )),
           ),
         ),
@@ -871,37 +1691,75 @@ class MyCvModelsPage extends StatelessWidget {
 
   Widget _buildMyLanguages(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final myLanguages = user?.languages ?? [];
+    final myLanguages = widget.user?.languagesLevels ?? [];
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextTitle(title: StringConst.LANGUAGES.toUpperCase()),
-        myLanguages.isNotEmpty ?
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: myLanguages.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              selected: index == _selectedLanguagesIndex,
-              title: Text(
-                  myLanguages[index],
-                  style: textTheme.bodySmall
-                      ?.copyWith(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.darkGray)
-              ),
-            );
-          },
-        ) :
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Center(
-              child: Text(
-                'Aquí aparecerán los idiomas',
-                style: textTheme.bodySmall,
-              )),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: AppColors.white,
+          ),
+          child: myLanguages.isNotEmpty ?
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: myLanguages.length,
+            itemBuilder: (context, index) {
+              return Container(
+                  child: ListTile(
+                    selected: index == _selectedLanguagesIndex,
+                    onTap: (){
+                      print('selected item: ${myLanguages[index]}');
+                      bool exists = widget.myCustomLanguages.any((element) => element == myLanguages[index]);
+                      setState(() {
+                        _selectedLanguagesIndex = index;
+                        if (exists == true){
+                          widget.myCustomLanguages.remove(myLanguages[index]);
+                          widget.mySelectedLanguages.remove(_selectedLanguagesIndex);
+                        } else {
+                          widget.myCustomLanguages.add(myLanguages[index].name);
+                          widget.mySelectedLanguages.add(_selectedLanguagesIndex!);
+                        }
+                        print(widget.myCustomLanguages);
+                        print(widget.mySelectedLanguages);
+                        print(myLanguages);
+                      });
+                    },
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                              myLanguages[index].name,
+                              style: textTheme.bodyText1
+                                  ?.copyWith(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.darkGray)
+                          ),
+                        ),
+                        Icon(
+                          widget.mySelectedLanguages.contains(index) ? Icons.check_box : Icons.crop_square,
+                          color: AppColors.darkGray,
+                          size: 20.0,
+                        ),
+                      ],
+                    ),
+                  )
+
+              );
+            },
+          ) :
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Center(
+                child: Text(
+                  'Aquí aparecerán mis idiomas',
+                  style: textTheme.bodyText1,
+                )),
+          ),
         ),
 
       ],
@@ -915,57 +1773,83 @@ class MyCvModelsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextTitle(title: StringConst.PERSONAL_REFERENCES.toUpperCase()),
-        myReferences!.isNotEmpty ?
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: myReferences!.length,
-          itemBuilder: (context, index) {
-            return Container(
-              alignment: Alignment.centerLeft,
-              child: ListTile(
-                selected: index == _selectedReferenceIndex,
-                title: Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        CustomTextBold(title: '${myReferences![index].certifierName}'),
-                        const SpaceH4(),
-                        RichText(
-                          text: TextSpan(
-                              text: '${myReferences![index].certifierPosition.toUpperCase()} -',
-                              style: textTheme.bodySmall?.copyWith(
-                                fontSize: 14.0,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: ' ${myReferences![index].certifierCompany.toUpperCase()}',
-                                  style: textTheme.bodySmall?.copyWith(
+        SpaceH4(),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: AppColors.white,
+          ),
+          child: widget.myReferences!.isNotEmpty ?
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: widget.myReferences!.length,
+            itemBuilder: (context, index) {
+              return Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(vertical: 0),
+                child: ListTile(
+                  selected: index == _selectedReferenceIndex,
+                  onTap: (){
+                    bool exists = widget.myCustomReferences.any((element) => element.certificationRequestId == widget.myReferences![index].certificationRequestId);
+                    setState(() {
+                      _selectedReferenceIndex = index;
+                      if (exists == true){
+                        widget.myCustomReferences.remove(widget.myReferences![index]);
+                        widget.mySelectedReferences.remove(_selectedReferenceIndex);
+                      } else {
+                        widget.myCustomReferences.add(widget.myReferences![index]);
+                        widget.mySelectedReferences.add(_selectedReferenceIndex!);
+                      }
+                    });
+                  },
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            CustomTextBold(title: '${widget.myReferences![index].certifierName}'),
+                            SpaceH4(),
+                            RichText(
+                              text: TextSpan(
+                                  text: '${widget.myReferences![index].certifierPosition.toUpperCase()} -',
+                                  style: textTheme.bodyText1?.copyWith(
                                     fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
                                   ),
-                                )
-                              ]),
+                                  children: [
+                                    TextSpan(
+                                      text: ' ${widget.myReferences![index].certifierCompany.toUpperCase()}',
+                                      style: textTheme.bodyText1?.copyWith(
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  ]),
+                            ),
+                            CustomTextSmall(text: '${widget.myReferences![index].email}'),
+                            widget.myReferences![index].phone != "" ? CustomTextSmall(text: '${widget.myReferences![index].phone}') : Container(),
+                          ],
                         ),
-                        CustomTextSmall(text: '${myReferences![index].email}'),
-                        myReferences![index].phone != "" ? CustomTextSmall(text: '${myReferences![index].phone}') : Container(),
-                        const SizedBox(height: 10,),
-                      ],
-                    ),
-                  ],
+                      ),
+                      Icon(
+                        widget.mySelectedReferences.contains(index) ? Icons.check_box : Icons.crop_square,
+                        color: AppColors.darkGray,
+                        size: 20.0,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        )
-            : const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: CustomTextBody(text: 'Aquí aparecerán las referencias personales'),
-            ),
+              );
+            },
+          )
+              : CustomTextBody(text: StringConst.NO_REFERENCES),
+        ),
       ],
     );
   }
+
 }
 
 

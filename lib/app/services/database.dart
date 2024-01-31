@@ -83,6 +83,7 @@ abstract class Database {
      Stream<List<ResourceType>> resourceTypeStream();
      Stream<List<Interest>> interestStream();
      Stream<List<Interest>> interestsStream(String? interestId);
+     Stream<List<SpecificInterest>> specificInterestsStream();
      Stream<List<SpecificInterest>> specificInterestStream(String? interestId);
      Stream<List<CompetencySubCategory>> subCategoriesCompetenciesById(String? competencyId);
      Stream<List<Competency>> competenciesBySubCategoryId(String? competencySubCategoryId);
@@ -544,6 +545,14 @@ class FirestoreDatabase implements Database {
       );
 
   @override
+  Stream<List<SpecificInterest>> specificInterestsStream() => _service.collectionStream(
+    path: APIPath.specificInterests(),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null),
+    builder: (data, documentId) => SpecificInterest.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
+
+  @override
   Stream<List<SpecificInterest>> specificInterestStream(String? interestId) =>
       _service.collectionStream(
         path: APIPath.specificInterests(),
@@ -659,7 +668,8 @@ class FirestoreDatabase implements Database {
         queryBuilder: (query) =>
             query.where('userId', isEqualTo: userId),
         builder: (data, documentId) => Experience.fromMap(data, documentId),
-        sort: (lhs, rhs) => rhs.startDate.compareTo(lhs.startDate),
+        sort: (lhs, rhs) => (rhs.startDate?? Timestamp.fromMicrosecondsSinceEpoch(0))
+            .compareTo(lhs.startDate?? Timestamp.fromMicrosecondsSinceEpoch(0)),
       );
 
   @override
