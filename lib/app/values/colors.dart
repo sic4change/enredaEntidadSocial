@@ -5,6 +5,8 @@ class AppColors {
   //Shades of primary color
   static const Color primary200 = Color(0xFF00CCCC);
   static const Color primary300 = Color(0xFF00CCCC);
+  static const Color primary100 = Color(0xFFA7E4E1);
+  static const Color primary050 = Color(0xFFEDFAF9);
   static const Color secondaryColor = Color(0xfffcfcff);
 
   //accent Colors

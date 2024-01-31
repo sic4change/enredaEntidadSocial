@@ -9,7 +9,6 @@ import 'package:enreda_empresas/app/home/participants/create_participant/create_
 import 'package:enreda_empresas/app/home/social_entity/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
-import 'package:enreda_empresas/app/home/social_entity/create_social_entity_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
@@ -32,14 +31,14 @@ class WebHome extends StatefulWidget {
   const WebHome({Key? key})
       : super(key: key);
 
-  static final controller = SidebarXController(selectedIndex: 1, extended: true);
+  static final controller = SidebarXController(selectedIndex: 2, extended: true);
 
   static goToResources() {
-    controller.selectIndex(2);
+    controller.selectIndex(4);
   }
 
   static goToControlPanel() {
-    controller.selectIndex(1);
+    controller.selectIndex(2);
   }
 
   @override
@@ -155,15 +154,15 @@ class _WebHomeState extends State<WebHome> {
                   builder: (context,child){
                     switch(WebHome.controller.selectedIndex){
                       case 0: _key.currentState?.closeDrawer();
-                      return CreateParticipantPage();
-                      case 1: _key.currentState?.closeDrawer();
-                      return ControlPanelPage(socialEntity: socialEntity, user: user,);
-                      case 2: _key.currentState?.closeDrawer();
-                      return const ParticipantsListPage();
-                      case 3: _key.currentState?.closeDrawer();
-                      return MyResourcesListPage(socialEntity: socialEntity);
-                      case 4: _key.currentState?.closeDrawer();
                       return const PersonalData();
+                      case 1: _key.currentState?.closeDrawer();
+                      return CreateParticipantPage();
+                      case 2: _key.currentState?.closeDrawer();
+                      return ControlPanelPage(socialEntity: socialEntity, user: user,);
+                      case 3: _key.currentState?.closeDrawer();
+                      return const ParticipantsListPage();
+                      case 4: _key.currentState?.closeDrawer();
+                      return MyResourcesListPage(socialEntity: socialEntity);
                       case 5: _key.currentState?.closeDrawer();
                       return  EntityDirectoryPage();
                       default:
@@ -282,28 +281,28 @@ class SideBarWidget extends StatelessWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
         ),
-        hoverColor: AppColors.lightLilac,
+        hoverColor: AppColors.primary050,
         hoverTextStyle: const TextStyle(color: AppColors.greyDark, fontWeight: FontWeight.w600),
-        textStyle: const TextStyle(color: AppColors.penBlue, fontWeight: FontWeight.w800),
-        selectedTextStyle: const TextStyle(color: AppColors.penBlue, fontWeight: FontWeight.w800),
+        textStyle: const TextStyle(color: AppColors.turquoiseBlue, fontWeight: FontWeight.w800),
+        selectedTextStyle: const TextStyle(color: AppColors.turquoiseBlue, fontWeight: FontWeight.w800),
         itemTextPadding: const EdgeInsets.only(left: 10),
         selectedItemTextPadding: const EdgeInsets.only(left: 10),
         itemDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(30),
         ),
         selectedItemDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: AppColors.violet,
+            color: AppColors.primary100,
           ),
-          color: AppColors.violet,
+          color: AppColors.primary100,
         ),
         iconTheme: const IconThemeData(
-          color: AppColors.penBlue,
+          color: AppColors.turquoiseBlue,
           size: 20,
         ),
         selectedIconTheme: const IconThemeData(
-          color: AppColors.penBlue,
+          color: AppColors.turquoiseBlue,
           size: 20,
         ),
       ),
@@ -331,11 +330,11 @@ class SideBarWidget extends StatelessWidget {
         ) : const SizedBox(height: 10,);
       },
       items: const [
+        SidebarXItem(icon: Icons.account_circle_sharp, label: 'Mi perfil'),
         SidebarXItem(icon: Icons.add_circle_outlined, label: StringConst.NEW_PROFILE),
         SidebarXItem(icon: Icons.view_quilt, label: 'Panel de control'),
         SidebarXItem(icon: Icons.supervisor_account, label: 'Participantes'),
         SidebarXItem(icon: Icons.card_travel, label: 'Mis recursos'),
-        SidebarXItem(icon: Icons.account_circle_sharp, label: 'Mi perfil'),
         SidebarXItem(icon: Icons.calendar_month, label: 'Directorio Entidades')
       ],
     );
