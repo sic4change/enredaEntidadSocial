@@ -1,9 +1,9 @@
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_item_builder.dart';
 import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
-import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -11,21 +11,27 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class ParticipantsListPage extends StatefulWidget {
   const ParticipantsListPage({super.key});
+
+  static ValueNotifier<int> selectedIndex = ValueNotifier(0);
 
   @override
   State<ParticipantsListPage> createState() => _ParticipantsListPageState();
 }
 
 class _ParticipantsListPageState extends State<ParticipantsListPage> {
-  Widget? _currentPage;
+  var _bodyWidget = [];
   late UserEnreda socialEntityUser;
 
   @override
   void initState() {
-    _currentPage = _buildParticipantsList();
+    _bodyWidget = [
+      _buildParticipantsList(),
+      ParticipantDetailPage()
+    ];
     super.initState();
   }
 
@@ -35,7 +41,32 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         child: Align(
         alignment: Alignment.topLeft,
         child: SingleChildScrollView(
-          child: _currentPage!,
+          child: ValueListenableBuilder<int>(
+              valueListenable: ParticipantsListPage.selectedIndex,
+              builder: (context, selectedIndex, child) {
+                return Column(
+                  children: [
+                    Container(
+                      height: 50,
+                      child: Row(
+                        children: [
+                          InkWell(
+                              onTap: () => {
+                                setState(() {
+                                  ParticipantsListPage.selectedIndex.value = 0;
+                                })
+                              },
+                              child: selectedIndex != 0 ? CustomTextMedium(text: 'Participantes ') :
+                              CustomTextMediumBold(text: 'Participantes ') ),
+                          selectedIndex == 1 ? CustomTextMediumBold(text:'> ${globals.currentParticipant!.firstName} ${globals.currentParticipant!.lastName}') : Container()
+                        ],
+                      ),
+                    ),
+                    _bodyWidget[selectedIndex],
+                  ],
+              );
+            }
+          ),
         ),
       ),
     );
@@ -51,6 +82,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
+        globals.currentSocialEntityUser = snapshot.data!;
         socialEntityUser = snapshot.data!;
         return StreamBuilder<List<UserEnreda>>(
           stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
@@ -72,11 +104,6 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(StringConst.PARTICIPANTS,
-                          style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.turquoiseBlue),),
-                        SpaceH40(),
                         Text(StringConst.MY_PARTICIPANTS,
                           style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -89,13 +116,8 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                               return ParticipantsListTile(
                                   user: user,
                                   onTap: () => setState(() {
-                                    _currentPage =  ParticipantDetailPage(
-                                      user: user,
-                                      socialEntityUser: socialEntityUser,
-                                      onBack: () => setState(() {
-                                        _currentPage = _buildParticipantsList();
-                                      }),
-                                    );
+                                    globals.currentParticipant = user;
+                                    ParticipantsListPage.selectedIndex.value = 1;
                                   })
                               );
                             }
@@ -113,13 +135,8 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                               return ParticipantsListTile(
                                   user: user,
                                   onTap: () => setState(() {
-                                    _currentPage =  ParticipantDetailPage(
-                                      user: user,
-                                      socialEntityUser: socialEntityUser,
-                                      onBack: () => setState(() {
-                                        _currentPage = _buildParticipantsList();
-                                      }),
-                                    );
+                                    globals.currentParticipant = user;
+                                    ParticipantsListPage.selectedIndex.value = 1;
                                   })
                               );
                             }

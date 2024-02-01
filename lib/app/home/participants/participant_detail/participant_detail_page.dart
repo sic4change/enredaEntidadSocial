@@ -50,18 +50,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class ParticipantDetailPage extends StatefulWidget {
-  const ParticipantDetailPage({
-    super.key,
-    required this.user,
-    required this.socialEntityUser,
-    this.onBack,
-  });
-
-  final UserEnreda user;
-  final UserEnreda socialEntityUser;
-  final VoidCallback? onBack;
+  const ParticipantDetailPage({super.key,});
 
   @override
   State<ParticipantDetailPage> createState() => _ParticipantDetailPageState();
@@ -71,6 +63,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   List<String> _menuOptions = ['Panel de control', 'Informes sociales', 'IPIL', 'Documentación personal', 'Cuestionarios'];
   Widget? _currentPage;
   String? _value;
+  late UserEnreda participantUser, socialEntityUser;
 
   List<PersonalDocument> _userDocuments = [];
   String? techNameComplete;
@@ -78,6 +71,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   @override
   void initState() {
     _value = _menuOptions[0];
+    participantUser = globals.currentParticipant!;
+    socialEntityUser = globals.currentSocialEntityUser!;
     super.initState();
   }
 
@@ -85,12 +80,12 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   @override
   Widget build(BuildContext context) {
     if (_currentPage == null) {
-      _currentPage =  _buildControlPanel(context, widget.user);
+      _currentPage =  _buildControlPanel(context, participantUser);
     }
 
     return Responsive.isMobile(context) || Responsive.isTablet(context)?
-      _buildParticipantProfileMobile(context, widget.user)
-        :_buildParticipantWeb(context, widget.user);
+      _buildParticipantProfileMobile(context, participantUser)
+        :_buildParticipantWeb(context, participantUser);
   }
 
   Widget _buildParticipantWeb(BuildContext context, UserEnreda user){
@@ -254,7 +249,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           MyIpilEntries(
-                                            user: widget.user,
+                                            user: participantUser,
                                             ipilEntries: ipilEntries,
                                             techName: techNameComplete!,
                                           )),
@@ -516,7 +511,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                   children: [
                     GamificationSlider(
                       height: 20.0,
-                      value: user.gamificationFlags.length,
+                      value: participantUser.gamificationFlags.length,
                     ),
                     SpaceH20(),
                     Row(
@@ -529,8 +524,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                             children: [
                               GamificationItem(
                                 imagePath: ImagePath.GAMIFICATION_CHAT_ICON,
-                                progress: (user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? 100:0,
-                                title: (user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? "CHAT INICIADO": "CHAT NO INICIADO",
+                                progress: (participantUser.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? 100:0,
+                                title: (participantUser.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? "CHAT INICIADO": "CHAT NO INICIADO",
                               ),
                               GamificationItem(
                                 imagePath: ImagePath.GAMIFICATION_PILL_ICON,
@@ -539,15 +534,15 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                 title: "PÍLDORAS CONSUMIDAS",
                               ),
                               StreamBuilder<List<Competency>>(
-                                  stream: database.competenciesStream(),
-                                  builder: (context, competenciesStream) {
-                                    double competenciesProgress = 0;
-                                    Map<String, String> certifiedCompetencies = {};
-                                    if (competenciesStream.hasData) {
-                                      certifiedCompetencies = Map.from(user.competencies);
-                                      certifiedCompetencies.removeWhere((key, value) => value != "certified");
-                                      competenciesProgress = (certifiedCompetencies.length / competenciesStream.data!.length) * 100;
-                                    }
+                                stream: database.competenciesStream(),
+                                builder: (context, competenciesStream) {
+                                  double competenciesProgress = 0;
+                                  Map<String, String> certifiedCompetencies = {};
+                                  if (competenciesStream.hasData) {
+                                    certifiedCompetencies = Map.from(participantUser.competencies);
+                                    certifiedCompetencies.removeWhere((key, value) => value != "certified");
+                                    competenciesProgress = (certifiedCompetencies.length / competenciesStream.data!.length) * 100;
+                                  }
 
                                     return GamificationItem(
                                       imagePath: ImagePath.GAMIFICATION_COMPETENCIES_ICON,
@@ -559,8 +554,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                               ),
                               GamificationItem(
                                 imagePath: ImagePath.GAMIFICATION_RESOURCES_ICON,
-                                progress: ((user.resourcesAccessCount?? 0) / 15) * 100,
-                                progressText: "${user.resourcesAccessCount}",
+                                progress: ((participantUser.resourcesAccessCount?? 0) / 15) * 100,
+                                progressText: "${participantUser.resourcesAccessCount}",
                                 title: "RECURSOS INSCRITOS",
                               ),
                               GamificationItem(
@@ -607,15 +602,15 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 StreamBuilder<List<Ability>>(
-                                    stream: database.abilityStream(),
-                                    builder: (context, snapshot) {
-                                      String abilitiesString = "";
-                                      if (snapshot.hasData) {
-                                        user.abilities!.forEach((abilityId) {
-                                          final abilityName = snapshot.data!.firstWhere((a) => abilityId == a.abilityId).name;
-                                          abilitiesString = "$abilitiesString$abilityName, ";
-                                        });
-                                        if (abilitiesString.isNotEmpty) {
+                                  stream: database.abilityStream(),
+                                  builder: (context, snapshot) {
+                                    String abilitiesString = "";
+                                    if (snapshot.hasData) {
+                                      participantUser.abilities!.forEach((abilityId) {
+                                        final abilityName = snapshot.data!.firstWhere((a) => abilityId == a.abilityId).name;
+                                        abilitiesString = "$abilitiesString$abilityName, ";
+                                      });
+                                      if (abilitiesString.isNotEmpty) {
                                           abilitiesString = abilitiesString.substring(0, abilitiesString.lastIndexOf(","));
                                         }
                                       }
@@ -651,7 +646,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     ),
                                     children: [
                                       TextSpan(
-                                        text: user.motivation?.dedication?.label??"",
+                                        text: participantUser.motivation?.dedication?.label??"",
                                         style: textTheme.bodyMedium?.copyWith(
                                           fontSize: fontSize,
                                         ),)
@@ -670,7 +665,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     ),
                                     children: [
                                       TextSpan(
-                                        text: user.motivation?.timeSearching?.label??"",
+                                        text: participantUser.motivation?.timeSearching?.label??"",
                                         style: textTheme.bodyMedium?.copyWith(
                                           fontSize: fontSize,
                                         ),)
@@ -689,7 +684,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     ),
                                     children: [
                                       TextSpan(
-                                        text: user.motivation?.timeSpentWeekly?.label??"",
+                                        text: participantUser.motivation?.timeSpentWeekly?.label??"",
                                         style: textTheme.bodyMedium?.copyWith(
                                           fontSize: fontSize,
                                         ),)
@@ -777,18 +772,17 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     }),
                                 SpaceH12(),
                                 StreamBuilder<List<Interest>>(
-                                    stream: database.interestStream(),
-                                    builder: (context, snapshot) {
-                                      String interestsString = "";
-                                      if (snapshot.hasData) {
-                                        user.interests.forEach((interestId) {
-                                          final interestName = snapshot.data!.firstWhere((i) => interestId == i.interestId).name;
-                                          interestsString = "$interestsString$interestName, ";
-                                        });
-                                        if (interestsString.isNotEmpty) {
-                                          interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
-                                        }
-                                      }
+                                  stream: database.interestStream(),
+                                  builder: (context, snapshot) {
+                                    String interestsString = "";
+                                    if (snapshot.hasData) {
+                                      participantUser.interests.forEach((interestId) {
+                                        final interestName = snapshot.data!.firstWhere((i) => interestId == i.interestId).name;
+                                        interestsString = "$interestsString$interestName, ";
+                                      });
+                                      if (interestsString.isNotEmpty) {
+                                        interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
+                                      }}
                                       return RichText(
                                         text: TextSpan(
                                           text: "${StringConst.FORM_INTERESTS}: ",
@@ -807,42 +801,41 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                           ],
                                         ),
                                       );
-                                    }
-                                ),
+                                    }),
                                 SpaceH12(),
                                 StreamBuilder<List<SpecificInterest>>(
-                                    stream: database.specificInterestsStream(),
-                                    builder: (context, snapshot) {
-                                      String specificInterestsString = "";
-                                      if (snapshot.hasData) {
-                                        user.specificInterests.forEach((specificInterestId) {
-                                          final specificInterestName = snapshot.data!.firstWhere((s) => specificInterestId == s.specificInterestId).name;
-                                          specificInterestsString = "$specificInterestsString$specificInterestName, ";
-                                        });
-                                        if (specificInterestsString.isNotEmpty) {
-                                          specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
-                                        }
+                                  stream: database.specificInterestsStream(),
+                                  builder: (context, snapshot) {
+                                    String specificInterestsString = "";
+                                    if (snapshot.hasData) {
+                                      participantUser.specificInterests.forEach((specificInterestId) {
+                                        final specificInterestName = snapshot.data!.firstWhere((s) => specificInterestId == s.specificInterestId).name;
+                                        specificInterestsString = "$specificInterestsString$specificInterestName, ";
+                                      });
+                                      if (specificInterestsString.isNotEmpty) {
+                                        specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
                                       }
-                                      return RichText(
-                                        text: TextSpan(
-                                          text: "${StringConst.FORM_SPECIFIC_INTERESTS}: ",
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.turquoiseBlue,
-                                            height: 1.5,
-                                            fontSize: fontSize,
-                                          ),
-                                          children: [
-                                            TextSpan(
-                                              text: specificInterestsString,
-                                              style: textTheme.bodyMedium?.copyWith(
-                                                fontSize: fontSize,
-                                              ),)
-                                          ],
-                                        ),
-                                      );
                                     }
-                                ),
+
+                                    return RichText(
+                                      text: TextSpan(
+                                        text: "${StringConst.FORM_SPECIFIC_INTERESTS}: ",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.turquoiseBlue,
+                                          height: 1.5,
+                                          fontSize: fontSize,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: specificInterestsString,
+                                            style: textTheme.bodyMedium?.copyWith(
+                                              fontSize: fontSize,
+                                            ),)
+                                        ],
+                                      ),
+                                    );
+                                  }),
                                 SpaceH12(),
                               ],
                             ),
@@ -1031,12 +1024,12 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                   child: MyCurriculumPage(user: user)),
                             ),
                             child: Transform.scale(
-                              scale:0.3,
-                              child: MyCurriculumPage(
-                                user: user,
-                                mini: true,
-                              ),
-                              alignment: Alignment.topLeft,),
+                                      scale:0.3,
+                                      child: MyCurriculumPage(
+                                        user: participantUser,
+                                        mini: true,
+                                      ),
+                                      alignment: Alignment.topLeft,),
                           ),
                         ],
                       ),
@@ -1342,13 +1335,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: AppColors.greyDark,
-                      ),
-                      onPressed: widget.onBack,
-                    ),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1435,7 +1421,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                     ElevatedButton(
                       onPressed: () => showDialog(
                           context: context,
-                          builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: widget.socialEntityUser.socialEntityId!,)),
+                          builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.violet, // Background color
                       ),
@@ -1496,13 +1482,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: AppColors.greyDark,
-                ),
-                onPressed: widget.onBack,
-              ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -1590,7 +1569,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               ElevatedButton(
                 onPressed: () => showDialog(
                     context: context,
-                    builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: widget.socialEntityUser.socialEntityId!,)),
+                    builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.violet, // Background color
                 ),
@@ -1705,7 +1684,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                   text: 'Invitar a un recurso',
                                   onPressed: () => showDialog(
                                       context: context,
-                                      builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: widget.socialEntityUser.socialEntityId!,)),
+                                      builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
                                 ),
                               ),
                             )
@@ -1774,13 +1753,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: AppColors.greyDark,
-                  ),
-                  onPressed: widget.onBack,
-                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -1867,7 +1839,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                 ElevatedButton(
                   onPressed: () => showDialog(
                       context: context,
-                      builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: widget.socialEntityUser.socialEntityId!,)),
+                      builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.violet, // Background color
                   ),
@@ -2035,7 +2007,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             ),
           ),
           const SizedBox(height: 10,),
-          ParticipantResourcesList(participantId: user.userId!, organizerId: widget.socialEntityUser.socialEntityId!,),
+          ParticipantResourcesList(participantId: user.userId!, organizerId: socialEntityUser.socialEntityId!,),
         ],
       ),
     );
@@ -2085,13 +2057,13 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
   int _getUserPillsConsumed() {
     int userPillsConsumed = 2; // 2 first pills are always consumed
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_PILL_COMPETENCIES]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_PILL_COMPETENCIES]?? false) {
       userPillsConsumed++;
     }
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_PILL_CV_COMPETENCIES]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_PILL_CV_COMPETENCIES]?? false) {
       userPillsConsumed++;
     }
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_PILL_HOW_TO_DO_CV]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_PILL_HOW_TO_DO_CV]?? false) {
       userPillsConsumed++;
     }
     return userPillsConsumed;
@@ -2100,25 +2072,25 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   int _getUserCvStepsCompleted() {
     int userCvStepsCompleted = 0;
 
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_PHOTO]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_CV_PHOTO]?? false) {
       userCvStepsCompleted++;
     }
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_ABOUT_ME]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_CV_ABOUT_ME]?? false) {
       userCvStepsCompleted++;
     }
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_DATA_OF_INTEREST]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_CV_DATA_OF_INTEREST]?? false) {
       userCvStepsCompleted++;
     }
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_FORMATION]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_CV_FORMATION]?? false) {
       userCvStepsCompleted++;
     }
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_COMPLEMENTARY_FORMATION]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_CV_COMPLEMENTARY_FORMATION]?? false) {
       userCvStepsCompleted++;
     }
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_PERSONAL]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_CV_PERSONAL]?? false) {
       userCvStepsCompleted++;
     }
-    if (widget.user.gamificationFlags[UserEnreda.FLAG_CV_PROFESSIONAL]?? false) {
+    if (participantUser.gamificationFlags[UserEnreda.FLAG_CV_PROFESSIONAL]?? false) {
       userCvStepsCompleted++;
     }
 
