@@ -520,7 +520,7 @@ class StringConst {
   // Participants
   static const String GAMIFICATION = "Gamificación";
   static const String GO_PROFILE = "Ver perfil";
-  static const String NEW_PROFILE = "Crear nuevo perfil";
+  static const String NEW_PROFILE = "Crear participante";
   static const String CALL = "Llamar";
   static const String CREATE_PARTICIPANT_SUCCESS = "¡El perfil ha sido creado con éxito!";
   static const String FORM_UNEMPLOYED = "Busco trabajo";

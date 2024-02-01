@@ -101,6 +101,7 @@ class AppColors {
   static const Color turquoiseAlt = Color(0xFF00CCCC);
   static const Color turquoiseButton = Color(0xFF00D0CE);
   static const Color turquoiseButton2 = Color(0xFF18C5C1);
+  static const Color turquoiseUltraLight = Color(0xFFCDDBDF);
 
   //Red
   static const Color red = Color(0xFFF1291A);
