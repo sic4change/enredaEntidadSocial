@@ -1,3 +1,8 @@
+import 'dart:html' as html;
+import 'dart:io';
+import 'dart:math';
+import 'package:http/http.dart' as http;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
@@ -21,6 +26,8 @@ import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/personalDocument.dart';
+import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
@@ -29,12 +36,19 @@ import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/my_custom_scroll_behavior.dart';
+import 'package:enreda_empresas/app/utils/functions.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
+import 'package:file_picker/_internal/file_picker_web.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
 class ParticipantDetailPage extends StatefulWidget {
@@ -57,6 +71,9 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   List<String> _menuOptions = ['Panel de control', 'Informes sociales', 'IPIL', 'Documentación personal', 'Cuestionarios'];
   Widget? _currentPage;
   String? _value;
+
+  List<PersonalDocument> _userDocuments = [];
+  String? techNameComplete;
 
   @override
   void initState() {
@@ -152,12 +169,16 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                       _currentPage = _IPILPage(context, user);
                       break;
                     case 3:
-                      _currentPage = _IPILPage(context, user);
+                      _currentPage = _personalDocumentationPage(context, user);
                       break;
                     case 4:
-                      _currentPage = _IPILPage(context, user);
+                      _currentPage = Container();
+                      break;
+                    default:
+                      _currentPage = Container();
                       break;
                   }
+
                 });
               },
             ),
@@ -235,6 +256,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                           MyIpilEntries(
                                             user: widget.user,
                                             ipilEntries: ipilEntries,
+                                            techName: techNameComplete!,
                                           )),
                                 );
                               },
@@ -296,7 +318,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     ElevatedButton(
                                         onPressed: (){
                                           for(IpilEntry ipilEntry in ipilEntries){
-                                            if(ipilEntry.content == null){
+                                            if(ipilEntry.content == null || ipilEntry.content == ''){
                                               database.deleteIpilEntry(ipilEntry);
                                             }
                                           }
@@ -367,7 +389,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                   ),
                   Column(
                     children: <Widget>[for (var ipilEntry in ipilEntries)
-                      Column(
+                      ipilEntry.ipilId != null ?  Column(
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 50, top: 30),
@@ -400,6 +422,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                       if(snapshot.hasData){
                                         String techName = snapshot.data?.firstName ?? '';
                                         String techLastName = snapshot.data?.lastName ?? '';
+                                        techNameComplete = '$techName $techLastName';
                                         return Container(
                                           height: 85,
                                           width: 220,
@@ -439,11 +462,21 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                 onSaved: (content) async{
                                   await database.updateIpilEntryContent(ipilEntry, content!);
                                 },
+                                onTapOutside: (content) async{
+                                  await database.updateIpilEntryContent(ipilEntry, content);
+                                },
+                                onFieldSubmitted: (content) async{
+                                  await database.updateIpilEntryContent(ipilEntry, content);
+                                },
                               ),
                             ),
                           ),
                         ],
-                      )
+                      ) :
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(),
+                      ),
                     ]
                   ),
                 ],
@@ -483,7 +516,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                   children: [
                     GamificationSlider(
                       height: 20.0,
-                      value: widget.user.gamificationFlags.length,
+                      value: user.gamificationFlags.length,
                     ),
                     SpaceH20(),
                     Row(
@@ -496,8 +529,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                             children: [
                               GamificationItem(
                                 imagePath: ImagePath.GAMIFICATION_CHAT_ICON,
-                                progress: (widget.user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? 100:0,
-                                title: (widget.user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? "CHAT INICIADO": "CHAT NO INICIADO",
+                                progress: (user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? 100:0,
+                                title: (user.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? "CHAT INICIADO": "CHAT NO INICIADO",
                               ),
                               GamificationItem(
                                 imagePath: ImagePath.GAMIFICATION_PILL_ICON,
@@ -506,28 +539,28 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                 title: "PÍLDORAS CONSUMIDAS",
                               ),
                               StreamBuilder<List<Competency>>(
-                                stream: database.competenciesStream(),
-                                builder: (context, competenciesStream) {
-                                  double competenciesProgress = 0;
-                                  Map<String, String> certifiedCompetencies = {};
-                                  if (competenciesStream.hasData) {
-                                    certifiedCompetencies = Map.from(widget.user.competencies);
-                                    certifiedCompetencies.removeWhere((key, value) => value != "certified");
-                                    competenciesProgress = (certifiedCompetencies.length / competenciesStream.data!.length) * 100;
-                                  }
+                                  stream: database.competenciesStream(),
+                                  builder: (context, competenciesStream) {
+                                    double competenciesProgress = 0;
+                                    Map<String, String> certifiedCompetencies = {};
+                                    if (competenciesStream.hasData) {
+                                      certifiedCompetencies = Map.from(user.competencies);
+                                      certifiedCompetencies.removeWhere((key, value) => value != "certified");
+                                      competenciesProgress = (certifiedCompetencies.length / competenciesStream.data!.length) * 100;
+                                    }
 
-                                  return GamificationItem(
-                                    imagePath: ImagePath.GAMIFICATION_COMPETENCIES_ICON,
-                                    progress: competenciesProgress,
-                                    progressText: "${certifiedCompetencies.length}",
-                                    title: "COMPETENCIAS CERTIFICADAS",
-                                  );
-                                }
+                                    return GamificationItem(
+                                      imagePath: ImagePath.GAMIFICATION_COMPETENCIES_ICON,
+                                      progress: competenciesProgress,
+                                      progressText: "${certifiedCompetencies.length}",
+                                      title: "COMPETENCIAS CERTIFICADAS",
+                                    );
+                                  }
                               ),
                               GamificationItem(
                                 imagePath: ImagePath.GAMIFICATION_RESOURCES_ICON,
-                                progress: ((widget.user.resourcesAccessCount?? 0) / 15) * 100,
-                                progressText: "${widget.user.resourcesAccessCount}",
+                                progress: ((user.resourcesAccessCount?? 0) / 15) * 100,
+                                progressText: "${user.resourcesAccessCount}",
                                 title: "RECURSOS INSCRITOS",
                               ),
                               GamificationItem(
@@ -574,21 +607,21 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 StreamBuilder<List<Ability>>(
-                                  stream: database.abilityStream(),
-                                  builder: (context, snapshot) {
-                                    String abilitiesString = "";
-                                    if (snapshot.hasData) {
-                                      widget.user.abilities!.forEach((abilityId) {
-                                        final abilityName = snapshot.data!.firstWhere((a) => abilityId == a.abilityId).name;
-                                        abilitiesString = "$abilitiesString$abilityName, ";
-                                      });
-                                      if (abilitiesString.isNotEmpty) {
+                                    stream: database.abilityStream(),
+                                    builder: (context, snapshot) {
+                                      String abilitiesString = "";
+                                      if (snapshot.hasData) {
+                                        user.abilities!.forEach((abilityId) {
+                                          final abilityName = snapshot.data!.firstWhere((a) => abilityId == a.abilityId).name;
+                                          abilitiesString = "$abilitiesString$abilityName, ";
+                                        });
+                                        if (abilitiesString.isNotEmpty) {
                                           abilitiesString = abilitiesString.substring(0, abilitiesString.lastIndexOf(","));
                                         }
                                       }
-                                    return RichText(
+                                      return RichText(
                                         text: TextSpan(
-                                            text: "${StringConst.FORM_ABILITIES_REV}: ",
+                                          text: "${StringConst.FORM_ABILITIES_REV}: ",
                                           style: textTheme.bodyMedium?.copyWith(
                                             fontWeight: FontWeight.bold,
                                             color: AppColors.turquoiseBlue,
@@ -597,14 +630,14 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                           ),
                                           children: [
                                             TextSpan(
-                                                text: abilitiesString,
-                                                style: textTheme.bodyMedium?.copyWith(
-                                                  fontSize: fontSize,
-                                                ),)
+                                              text: abilitiesString,
+                                              style: textTheme.bodyMedium?.copyWith(
+                                                fontSize: fontSize,
+                                              ),)
                                           ],
                                         ),
-                                    );
-                                  }
+                                      );
+                                    }
                                 ),
                                 SpaceH12(),
                                 RichText(
@@ -618,7 +651,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     ),
                                     children: [
                                       TextSpan(
-                                        text: widget.user.motivation?.dedication?.label??"",
+                                        text: user.motivation?.dedication?.label??"",
                                         style: textTheme.bodyMedium?.copyWith(
                                           fontSize: fontSize,
                                         ),)
@@ -637,7 +670,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     ),
                                     children: [
                                       TextSpan(
-                                        text: widget.user.motivation?.timeSearching?.label??"",
+                                        text: user.motivation?.timeSearching?.label??"",
                                         style: textTheme.bodyMedium?.copyWith(
                                           fontSize: fontSize,
                                         ),)
@@ -656,7 +689,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     ),
                                     children: [
                                       TextSpan(
-                                        text: widget.user.motivation?.timeSpentWeekly?.label??"",
+                                        text: user.motivation?.timeSpentWeekly?.label??"",
                                         style: textTheme.bodyMedium?.copyWith(
                                           fontSize: fontSize,
                                         ),)
@@ -744,77 +777,77 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     }),
                                 SpaceH12(),
                                 StreamBuilder<List<Interest>>(
-                                  stream: database.interestStream(),
-                                  builder: (context, snapshot) {
-                                    String interestsString = "";
-                                    if (snapshot.hasData) {
-                                      widget.user.interests.forEach((interestId) {
-                                        final interestName = snapshot.data!.firstWhere((i) => interestId == i.interestId).name;
-                                        interestsString = "$interestsString$interestName, ";
-                                      });
-                                      if (interestsString.isNotEmpty) {
-                                        interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
+                                    stream: database.interestStream(),
+                                    builder: (context, snapshot) {
+                                      String interestsString = "";
+                                      if (snapshot.hasData) {
+                                        user.interests.forEach((interestId) {
+                                          final interestName = snapshot.data!.firstWhere((i) => interestId == i.interestId).name;
+                                          interestsString = "$interestsString$interestName, ";
+                                        });
+                                        if (interestsString.isNotEmpty) {
+                                          interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
+                                        }
                                       }
-                                    }
-                                    return RichText(
-                                      text: TextSpan(
-                                        text: "${StringConst.FORM_INTERESTS}: ",
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.turquoiseBlue,
-                                          height: 1.5,
-                                          fontSize: fontSize,
+                                      return RichText(
+                                        text: TextSpan(
+                                          text: "${StringConst.FORM_INTERESTS}: ",
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.turquoiseBlue,
+                                            height: 1.5,
+                                            fontSize: fontSize,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text: interestsString,
+                                              style: textTheme.bodyMedium?.copyWith(
+                                                fontSize: fontSize,
+                                              ),)
+                                          ],
                                         ),
-                                        children: [
-                                          TextSpan(
-                                            text: interestsString,
-                                            style: textTheme.bodyMedium?.copyWith(
-                                              fontSize: fontSize,
-                                            ),)
-                                        ],
-                                      ),
-                                    );
-                                  }
+                                      );
+                                    }
                                 ),
                                 SpaceH12(),
                                 StreamBuilder<List<SpecificInterest>>(
-                                  stream: database.specificInterestsStream(),
-                                  builder: (context, snapshot) {
-                                    String specificInterestsString = "";
-                                    if (snapshot.hasData) {
-                                      widget.user.specificInterests.forEach((specificInterestId) {
-                                        final specificInterestName = snapshot.data!.firstWhere((s) => specificInterestId == s.specificInterestId).name;
-                                        specificInterestsString = "$specificInterestsString$specificInterestName, ";
-                                      });
-                                      if (specificInterestsString.isNotEmpty) {
-                                        specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
+                                    stream: database.specificInterestsStream(),
+                                    builder: (context, snapshot) {
+                                      String specificInterestsString = "";
+                                      if (snapshot.hasData) {
+                                        user.specificInterests.forEach((specificInterestId) {
+                                          final specificInterestName = snapshot.data!.firstWhere((s) => specificInterestId == s.specificInterestId).name;
+                                          specificInterestsString = "$specificInterestsString$specificInterestName, ";
+                                        });
+                                        if (specificInterestsString.isNotEmpty) {
+                                          specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
+                                        }
                                       }
-                                    }
-                                    return RichText(
-                                      text: TextSpan(
-                                        text: "${StringConst.FORM_SPECIFIC_INTERESTS}: ",
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.turquoiseBlue,
-                                          height: 1.5,
-                                          fontSize: fontSize,
+                                      return RichText(
+                                        text: TextSpan(
+                                          text: "${StringConst.FORM_SPECIFIC_INTERESTS}: ",
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.turquoiseBlue,
+                                            height: 1.5,
+                                            fontSize: fontSize,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text: specificInterestsString,
+                                              style: textTheme.bodyMedium?.copyWith(
+                                                fontSize: fontSize,
+                                              ),)
+                                          ],
                                         ),
-                                        children: [
-                                          TextSpan(
-                                            text: specificInterestsString,
-                                            style: textTheme.bodyMedium?.copyWith(
-                                              fontSize: fontSize,
-                                            ),)
-                                        ],
-                                      ),
-                                    );
-                                  }
+                                      );
+                                    }
                                 ),
                                 SpaceH12(),
                               ],
                             ),
                           ),
-                      ],),
+                        ],),
                     ),
                     SpaceH40(),
                     RoundedContainer(
@@ -851,40 +884,40 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                         child: ScrollConfiguration(
                                           behavior: MyCustomScrollBehavior(),
                                           child: ListView(
-                                              controller: controller,
-                                              scrollDirection: Axis.horizontal,
-                                              children: myCompetencies.map((competency) {
-                                                final status =
-                                                    user.competencies[competency.id] ??
-                                                        StringConst.BADGE_EMPTY;
-                                                return Column(
-                                                  children: [
-                                                    Stack(
-                                                      alignment: Alignment.center,
-                                                      children: [
-                                                        CompetencyTile(
-                                                          competency: competency,
-                                                          status: status,
-                                                          //mini: true,
-                                                        ),
-                                                        Positioned(
-                                                          bottom: 5,
-                                                          child: Text(
-                                                              status ==
-                                                                  StringConst
-                                                                      .BADGE_VALIDATED
-                                                                  ? 'EVALUADA'
-                                                                  : 'CERTIFICADA',
-                                                              style: textTheme.bodyText1
-                                                                  ?.copyWith(
-                                                                  fontSize: 12.0,
-                                                                  fontWeight: FontWeight.w500)),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                );
-                                              }).toList(),
+                                            controller: controller,
+                                            scrollDirection: Axis.horizontal,
+                                            children: myCompetencies.map((competency) {
+                                              final status =
+                                                  user.competencies[competency.id] ??
+                                                      StringConst.BADGE_EMPTY;
+                                              return Column(
+                                                children: [
+                                                  Stack(
+                                                    alignment: Alignment.center,
+                                                    children: [
+                                                      CompetencyTile(
+                                                        competency: competency,
+                                                        status: status,
+                                                        //mini: true,
+                                                      ),
+                                                      Positioned(
+                                                        bottom: 5,
+                                                        child: Text(
+                                                            status ==
+                                                                StringConst
+                                                                    .BADGE_VALIDATED
+                                                                ? 'EVALUADA'
+                                                                : 'CERTIFICADA',
+                                                            style: textTheme.bodyText1
+                                                                ?.copyWith(
+                                                                fontSize: 12.0,
+                                                                fontWeight: FontWeight.w500)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              );
+                                            }).toList(),
                                           ),
                                         ),
                                       ),
@@ -934,31 +967,31 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                     CustomTextBoldTitle(title: StringConst.RESOURCES_JOINED),
                     SpaceH20(),
                     StreamBuilder<List<Resource>>(
-                      stream: database.resourcesStream(),
-                      builder: (context, snapshot) {
-                        List<Resource> myResources = [];
-                        if (snapshot.hasData) {
-                          myResources = snapshot.data!.where((resource) =>
-                              user.resources.any((id) => resource.resourceId == id))
-                              .toList();
-                        }
+                        stream: database.resourcesStream(),
+                        builder: (context, snapshot) {
+                          List<Resource> myResources = [];
+                          if (snapshot.hasData) {
+                            myResources = snapshot.data!.where((resource) =>
+                                user.resources.any((id) => resource.resourceId == id))
+                                .toList();
+                          }
 
-                        return myResources.isEmpty? Text(
-                          StringConst.NO_RESOURCES,
-                          style: textTheme.bodyMedium,
-                        ): Wrap(
-                          spacing: 10.0,
-                          runSpacing: 10.0,
-                          children: myResources.map((r) => Container(
-                            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                            decoration: BoxDecoration(
-                              color: AppColors.altWhite,
-                              borderRadius: BorderRadius.circular(50),
-                              border: Border.all(color: AppColors.greyAlt.withOpacity(0.15), width: 2.0,),
-                            ),
-                            child: Text(r.title),)).toList(),
-                        );
-                      }
+                          return myResources.isEmpty? Text(
+                            StringConst.NO_RESOURCES,
+                            style: textTheme.bodyMedium,
+                          ): Wrap(
+                            spacing: 10.0,
+                            runSpacing: 10.0,
+                            children: myResources.map((r) => Container(
+                              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                              decoration: BoxDecoration(
+                                color: AppColors.altWhite,
+                                borderRadius: BorderRadius.circular(50),
+                                border: Border.all(color: AppColors.greyAlt.withOpacity(0.15), width: 2.0,),
+                              ),
+                              child: Text(r.title),)).toList(),
+                          );
+                        }
                     ),
                   ],
                 ),
@@ -998,12 +1031,12 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                   child: MyCurriculumPage(user: user)),
                             ),
                             child: Transform.scale(
-                                      scale:0.3,
-                                      child: MyCurriculumPage(
-                                        user: widget.user,
-                                        mini: true,
-                                      ),
-                                      alignment: Alignment.topLeft,),
+                              scale:0.3,
+                              child: MyCurriculumPage(
+                                user: user,
+                                mini: true,
+                              ),
+                              alignment: Alignment.topLeft,),
                           ),
                         ],
                       ),
@@ -1012,6 +1045,279 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+  Widget _personalDocumentationPage(BuildContext context, UserEnreda user){
+    final database = Provider.of<Database>(context, listen: false);
+    late int documentsCount = 0;
+    return
+      StreamBuilder<UserEnreda>(
+        stream: database.userEnredaStreamByUserId(user.userId),
+        builder: (context, snapshot) {
+          if(snapshot.hasData){
+            _userDocuments = snapshot.data!.personalDocuments;
+          }
+          return StreamBuilder<List<PersonalDocumentType>>(
+            stream: database.personalDocumentTypeStream(),
+            builder: (context, snapshot) {
+              if(snapshot.hasData){
+
+                snapshot.data!.forEach((element) {
+                  bool containsDocument = false;
+                  _userDocuments.forEach((item) {
+                    if(item.name == element.title){
+                      containsDocument = true;
+                    }
+                  });
+                  if(!containsDocument){
+                    _userDocuments.add(PersonalDocument(name: element.title, order: snapshot.data!.indexOf(element), document: ''));
+                  }
+
+                });
+                _userDocuments.sort((a, b) {
+                  return a.order.compareTo(b.order);
+                },);
+
+                documentsCount = _userDocuments.length;
+
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: AppColors.greyBorder)
+                  ),
+                  child:
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 50, top: 15.0, bottom: 15.0, right: 20.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Documentación personal'.toUpperCase(),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.bluePetrol,
+                                fontSize: 35,
+                                fontFamily: GoogleFonts.outfit().fontFamily,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                InkWell(
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.add_circle_outlined,
+                                        color: AppColors.turquoiseBlue,
+                                        size: 24,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          'Añadir Documentos',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: GoogleFonts.outfit().fontFamily,
+                                            fontWeight: FontWeight.w300,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: (){
+                                    showDialog(
+                                      context: context,
+                                      builder: (context){
+                                        TextEditingController newDocument = TextEditingController();
+                                        GlobalKey<FormState> addDocumentKey = GlobalKey<FormState>();
+                                        return AlertDialog(
+                                          title: Text('Introduce el nombre del documento'),
+                                          content: Form(
+                                            key: addDocumentKey,
+                                            child: TextFormField(
+                                              controller: newDocument,
+                                              validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+                                            ),
+                                          ),
+                                          actions: <Widget>[
+                                            ElevatedButton(
+                                                onPressed: () => Navigator.of(context).pop((false)),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text('Cancelar',
+                                                      style: TextStyle(
+                                                          color: AppColors.black,
+                                                          height: 1.5,
+                                                          fontWeight: FontWeight.w400,
+                                                          fontSize: 14)),
+                                                )),
+                                            ElevatedButton(
+                                                onPressed: (){
+                                                  if(addDocumentKey.currentState!.validate()){
+                                                    setPersonalDocument(
+                                                      context: context,
+                                                      document: PersonalDocument(name: newDocument.text, order: documentsCount++, document: ''),
+                                                      user: user);
+                                                    Navigator.of(context).pop((true));
+                                                  }
+
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text('Añadir',
+                                                      style: TextStyle(
+                                                          color: AppColors.black,
+                                                          height: 1.5,
+                                                          fontWeight: FontWeight.w400,
+                                                          fontSize: 14)),
+                                                )),
+                                        ],
+                                        );
+                                      }
+                                    );
+                                  }
+                                )
+                              ]
+                            ),
+                          ]
+                        )
+                      ),
+                      Divider(
+                        color: AppColors.greyBorder,
+                        height: 0,
+                      ),
+                      Column(
+                        children: [
+                          for( var document in _userDocuments)
+                            _documentTile(document, user),
+                        ]
+                      )
+                    ]
+                  ),
+                )
+              );
+            }
+          );
+        }
+      );
+  }
+
+  Widget _documentTile(PersonalDocument document, UserEnreda user){
+    bool paridad  = _userDocuments.indexOf(document) % 2 == 0;
+    final database = Provider.of<Database>(context, listen: false);
+
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: paridad ? AppColors.greySearch : AppColors.white,
+        borderRadius: _userDocuments.indexOf(document) == _userDocuments.length-1 ?
+          BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)) :
+          BorderRadius.all(Radius.circular(0)),
+        //border: Border.all(color: AppColors.greyBorder),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 50.0),
+            child: Text(
+              document.name,
+              style: TextStyle(
+                fontFamily: GoogleFonts.inter().fontFamily,
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
+                color: AppColors.chatDarkGray,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 30),
+            child: document.document != '' ? Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.delete,
+                    color: AppColors.chatDarkGray,
+                    size: 20,
+                  ),
+                  onPressed: (){
+                    setPersonalDocument(context: context, document: PersonalDocument(name: document.name, order: -1, document: ''), user: user);
+                    setState(() {
+
+                    });
+                  },
+                ),
+                SpaceW8(),
+                IconButton(
+                  icon: Icon(
+                    Icons.remove_red_eye,
+                    color: AppColors.chatDarkGray,
+                    size: 20,
+                  ),
+                  onPressed: () async {
+                    var data = await http.get(Uri.parse(document.document));
+                    var pdfData = data.bodyBytes;
+                    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+                  },
+                ),
+                SpaceW8(),
+                IconButton(
+                  icon: Icon(
+                    Icons.download,
+                    color: AppColors.chatDarkGray,
+                    size: 20,
+                  ),
+                  onPressed: () async {
+                    final ref = FirebaseStorage.instance.refFromURL(document.document);
+                    if(kIsWeb){
+                    html.AnchorElement anchorElement = html.AnchorElement(href: document.document);
+                    anchorElement.download = document.name;
+                    anchorElement.click();
+                    }else{
+                      final dir = await getApplicationDocumentsDirectory();
+                      final file = File('${dir.path}/${ref.name}');
+                      await ref.writeToFile(file);
+                    }
+                  },
+                ),
+              ],
+            ) :
+            IconButton(
+              icon: Icon(
+                Icons.add,
+                color: AppColors.chatDarkGray,
+                size: 20,
+              ),
+              onPressed: () async {
+                PlatformFile? pickedFile;
+
+                  var result;
+                  if(kIsWeb){
+                    result = await FilePickerWeb.platform.pickFiles();
+                  }else{
+                    result = await FilePicker.platform.pickFiles();
+                  }
+                  if(result == null) return;
+                  pickedFile = result.files.first;
+                  Uint8List fileBytes = pickedFile!.bytes!;
+                  String fileName = pickedFile.name;
+
+                  await database.uploadPersonalDocument(
+                    user,
+                    fileBytes,
+                    fileName,
+                    document,
+                    user.personalDocuments.indexOf(document),
+                  );
+              },
+            ),
+          )
         ],
       ),
     );

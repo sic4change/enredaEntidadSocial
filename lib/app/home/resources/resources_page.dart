@@ -165,17 +165,35 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                                   resource.organizerImage = socialEntity == null ? '' : socialEntity.photo;
                                   resource.setResourceTypeName();
                                   resource.setResourceCategoryName();
-                                  return Container(
-                                    key: Key('resource-${resource.resourceId}'),
-                                    child: ResourceListTile(
-                                      resource: resource,
-                                      onTap: () =>
-                                          setState(() {
-                                            globals.currentResource = resource;
-                                            MyResourcesListPage.selectedIndex.value = 2;
-                                          }),
-                                    ),
-                                  );
+                                  return StreamBuilder<Country>(
+                                      stream: database.countryStream(resource.country),
+                                      builder: (context, snapshot) {
+                                        final country = snapshot.data;
+                                        resource.countryName = country == null ? '' : country.name;
+                                        return StreamBuilder<Province>(
+                                            stream: database.provinceStream(resource.province),
+                                            builder: (context, snapshot) {
+                                              final province = snapshot.data;
+                                              resource.provinceName = province == null ? '' : province.name;
+                                              return StreamBuilder<City>(
+                                                  stream: database.cityStream(resource.city),
+                                                  builder: (context, snapshot) {
+                                                    final city = snapshot.data;
+                                                    resource.cityName = city == null ? '' : city.name;
+                                                    return Container(
+                                                      key: Key('resource-${resource.resourceId}'),
+                                                      child: ResourceListTile(
+                                                        resource: resource,
+                                                        onTap: () =>
+                                                            setState(() {
+                                                              globals.currentResource = resource;
+                                                              MyResourcesListPage.selectedIndex.value = 2;
+                                                            }),
+                                                      ),
+                                                    );
+                                                  });
+                                            });
+                                      });
                                 },
                               );
                             }
@@ -234,17 +252,35 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                                   resource.organizerImage = socialEntity == null ? '' : socialEntity.photo;
                                   resource.setResourceTypeName();
                                   resource.setResourceCategoryName();
-                                  return Container(
-                                    key: Key('resource-${resource.resourceId}'),
-                                    child: ResourceListTile(
-                                      resource: resource,
-                                      onTap: () =>
-                                          setState(() {
-                                            globals.currentResource = resource;
-                                            MyResourcesListPage.selectedIndex.value = 2;
-                                          }),
-                                    ),
-                                  );
+                                  return StreamBuilder<Country>(
+                                      stream: database.countryStream(resource.country),
+                                      builder: (context, snapshot) {
+                                        final country = snapshot.data;
+                                        resource.countryName = country == null ? '' : country.name;
+                                        return StreamBuilder<Province>(
+                                            stream: database.provinceStream(resource.province),
+                                            builder: (context, snapshot) {
+                                              final province = snapshot.data;
+                                              resource.provinceName = province == null ? '' : province.name;
+                                              return StreamBuilder<City>(
+                                                  stream: database.cityStream(resource.city),
+                                                  builder: (context, snapshot) {
+                                                    final city = snapshot.data;
+                                                    resource.cityName = city == null ? '' : city.name;
+                                                    return Container(
+                                                      key: Key('resource-${resource.resourceId}'),
+                                                      child: ResourceListTile(
+                                                        resource: resource,
+                                                        onTap: () =>
+                                                            setState(() {
+                                                              globals.currentResource = resource;
+                                                              MyResourcesListPage.selectedIndex.value = 2;
+                                                            }),
+                                                      ),
+                                                    );
+                                                  });
+                                            });
+                                      });
                                 },
                               );
                             }

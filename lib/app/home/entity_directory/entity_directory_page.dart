@@ -25,12 +25,14 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
 
 class EntityDirectoryPage extends StatefulWidget {
-  const EntityDirectoryPage({super.key});
+  EntityDirectoryPage({super.key});
+
 
   @override
   State<EntityDirectoryPage> createState() => _EntityDirectoryPageState();
@@ -71,13 +73,13 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
 
   @override
   void initState(){
+    _currentPage = _buildEntitiesList();
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _currentPage = _buildEntitiesList();
   }
 
   @override
@@ -89,7 +91,6 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
   }
 
   Widget _buildEntitiesList(){
-    final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: EdgeInsets.all(Sizes.mainPadding),
       margin: EdgeInsets.all(Sizes.mainPadding),
@@ -108,9 +109,10 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                 Padding(
                   padding: const EdgeInsets.all(5.0),
                   child: Text('Directorio de entidades',
-                    style: textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.greyDark2),),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.greyDark2),),
                 ),
                 Expanded(
                   child: SizedBox(),
@@ -144,13 +146,17 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
               });
 
             },
-            onFieldSubmitted: (value) => setStateIfMounted(() async {
-              filterResource.searchText = _queryController.text;
+            onFieldSubmitted: (value) async {
+              setStateIfMounted(() {
+                filterResource.searchText = _queryController.text;
+              });
               var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
               setState((){
                 finalSocialEntities = fetchUsers;
               });
-            }),
+
+
+            },
             clearFilter: (){
               setState(() {
                 _queryController.clear();
@@ -378,7 +384,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
         snapshot.data!.toList().forEach((element) {
           socialEntityTypes.add(element);
         });
-        print('socialEntitites: $socialEntityTypes');
+        print('socialEntities: $socialEntityTypes');
         return ChipsChoice<String>.multiple(
           padding: EdgeInsets.all(5),
           wrapped: true,
@@ -424,8 +430,9 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
     if(tags.isEmpty){
       result = true; //No filter selected -> show all socialEntities
     }
-      
+    print(tags);
     return result;
+
   }
 
   bool _showSocialEntity(SocialEntity currentSocialEntity, List<String> tags, List<SocialEntity> finalSocialEntities){

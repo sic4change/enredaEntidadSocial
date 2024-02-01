@@ -497,8 +497,6 @@ class _EditResourceState extends State<EditResource> {
                     ),
                   ),
                   onTap: () => {_showMultiSelectCompetenciesCategories(context) },
-                  validator: (value) => value!.isNotEmpty ?
-                  null : StringConst.FORM_MOTIVATION_ERROR,
                   maxLines: 2,
                   readOnly: true,
                   style: textTheme.button?.copyWith(
@@ -536,8 +534,6 @@ class _EditResourceState extends State<EditResource> {
                     ),
                   ),
                   onTap: () => {_showMultiSelectCompetenciesSubCategories(context) },
-                  validator: (value) => value!.isNotEmpty ?
-                  null : StringConst.FORM_MOTIVATION_ERROR,
                   maxLines: 2,
                   readOnly: true,
                   style: textTheme.button?.copyWith(

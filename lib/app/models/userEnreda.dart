@@ -3,6 +3,7 @@ import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interestsUserEnreda.dart';
 import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
+import 'package:enreda_empresas/app/models/personalDocument.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
 
 class UserEnreda {
@@ -43,6 +44,7 @@ class UserEnreda {
     this.motivation,
     this.educationId,
     this.checkAgreeCV,
+    this.personalDocuments = const [],
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -167,6 +169,20 @@ class UserEnreda {
       });
     }
 
+    List<PersonalDocument> personalDocuments = [];
+    if (data['personalDocuments'] != null) {
+      data['personalDocuments'].forEach((personalDocument) {
+        final personalDocumentsFirestore = personalDocument as Map<String, dynamic>;
+        personalDocuments.add(
+            PersonalDocument(
+              name: personalDocumentsFirestore['name'] ?? '',
+              order: personalDocumentsFirestore['order'] ?? 0,
+              document: personalDocumentsFirestore['document'] ?? '',
+            )
+        );
+      });
+    }
+
     final String? assignedById = data['assignedById']?? "";
     final String? assignedEntityId = data['assignedEntityId']?? "";
     final int resourcesAccessCount = data['resourcesAccessCount']?? 0;
@@ -216,6 +232,7 @@ class UserEnreda {
       resourcesAccessCount: resourcesAccessCount,
       motivation: motivation,
       checkAgreeCV: checkAgreeCV,
+      personalDocuments: personalDocuments,
     );
   }
 
@@ -255,6 +272,7 @@ class UserEnreda {
   final int? resourcesAccessCount;
   final Motivation? motivation;
   final bool? checkAgreeCV;
+  final List<PersonalDocument> personalDocuments;
 
   @override
   bool operator ==(Object other){
@@ -298,6 +316,7 @@ class UserEnreda {
       'resourcesAccessCount': resourcesAccessCount,
       'motivation': motivation?.toMap(),
       'checkAgreeCV': checkAgreeCV,
+      'personalDocuments': personalDocuments.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -340,6 +359,7 @@ class UserEnreda {
     int? resourcesAccessCount,
     Motivation? motivation,
     bool? checkAgreeCV,
+    List<PersonalDocument>? personalDocuments,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -376,6 +396,7 @@ class UserEnreda {
       resourcesAccessCount: resourcesAccessCount,
       motivation: motivation,
       checkAgreeCV: checkAgreeCV ?? this.checkAgreeCV,
+      personalDocuments: personalDocuments ?? this.personalDocuments,
     );
   }
 

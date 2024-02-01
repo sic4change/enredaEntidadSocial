@@ -1,6 +1,7 @@
 {
   "hosting": {
-    "target": "enredaentidadsocial",
+
+    "site": "enredadentidadsocial",
     "public": "build/web",
     "ignore": [
       "firebase.json",

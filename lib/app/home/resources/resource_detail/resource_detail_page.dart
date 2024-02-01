@@ -1,11 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/build_share_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
-import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/user_avatar.dart';
 import 'package:enreda_empresas/app/home/resources/list_item_builder.dart';
@@ -50,15 +48,10 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
   }
 
   Widget _buildResourcePage(BuildContext context, Resource resource) {
-    TextTheme textTheme = Theme.of(context).textTheme;
-    double fontSizeTitle = responsiveSize(context, 14, 22, md: 18);
-    double fontSizePromotor = responsiveSize(context, 12, 16, md: 14);
     List<String> interestsLocal = [];
     List<String> competenciesLocal = [];
     Set<Interest> selectedInterests = {};
     Set<Competency> selectedCompetencies = {};
-    String? interestsNames;
-    String? competenciesNames;
     final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<Resource>(
         stream: database.resourceStream(resource.resourceId),
@@ -121,7 +114,6 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                         for (var item in selectedInterests) {
                                           concatenate.write('${item.name} / ');
                                         }
-                                        interestsNames = concatenate.toString();
                                         globals.interestsNamesCurrentResource = concatenate.toString();
                                         return StreamBuilder<List<Competency>>(
                                             stream: database.resourcesCompetenciesStream(competenciesLocal),
@@ -129,228 +121,8 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                               if(!snapshotCompetencies.hasData) {
                                                 selectedCompetencies = {};
                                                 globals.selectedCompetenciesCurrentResource = {};
-                                                competenciesNames = '';
                                                 globals.competenciesNamesCurrentResource = '';
-                                                return SingleChildScrollView(
-                                                  child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Flex(
-                                                        direction: Responsive.isMobile(context) ||
-                                                            Responsive.isTablet(context) ||
-                                                            Responsive.isDesktopS(context)
-                                                            ? Axis.vertical
-                                                            : Axis.horizontal,
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        mainAxisAlignment: MainAxisAlignment.start,
-                                                        children: [
-                                                          Expanded(
-                                                              flex: Responsive.isMobile(context) ||
-                                                                  Responsive.isTablet(context) ||
-                                                                  Responsive.isDesktopS(context)
-                                                                  ? 0
-                                                                  : 6,
-                                                              child: Stack(
-                                                                children: [
-                                                                  Container(
-                                                                    constraints: BoxConstraints(
-                                                                      maxWidth: resource.organizer == widget.socialEntityId ? MediaQuery.of(context).size.width
-                                                                          : MediaQuery.of(context).size.width * 0.6,
-                                                                    ),
-                                                                    decoration: BoxDecoration(
-                                                                      shape: BoxShape.rectangle,
-                                                                      border: Border.all(
-                                                                          color: AppColors.greyLight2.withOpacity(0.2),
-                                                                          width: 1),
-                                                                      borderRadius: BorderRadius.circular(Consts.padding),
-                                                                    ),
-                                                                    child: Column(
-                                                                      children: [
-                                                                        Container(
-                                                                          decoration: BoxDecoration(
-                                                                            image: DecorationImage(
-                                                                              image: AssetImage(ImagePath.RECTANGLE_RESOURCE),
-                                                                              fit: BoxFit.cover,
-                                                                            ),
-                                                                            borderRadius: BorderRadius.only(
-                                                                                bottomRight: Radius.circular(Consts.padding),
-                                                                                bottomLeft: Radius.circular(Consts.padding)),
-                                                                          ),
-                                                                          margin: const EdgeInsets.symmetric(horizontal: 20.0),
-                                                                          child: Column(
-                                                                              children: [
-                                                                                Responsive.isMobile(context)
-                                                                                    ? const SpaceH8()
-                                                                                    : const SpaceH20(),
-                                                                                resource.organizerImage == null ||
-                                                                                    resource.organizerImage!.isEmpty
-                                                                                    ? Container()
-                                                                                    : Align(
-                                                                                  alignment: Alignment.topCenter,
-                                                                                  child: Container(
-                                                                                    decoration: BoxDecoration(
-                                                                                        border: Border.all(
-                                                                                            width: 1.0, color: AppColors.greyLight),
-                                                                                        borderRadius: BorderRadius.circular(
-                                                                                          100,
-                                                                                        ),
-                                                                                        color: AppColors.greyLight),
-                                                                                    child: CircleAvatar(
-                                                                                      radius:
-                                                                                      Responsive.isMobile(context) ? 28 : 40,
-                                                                                      backgroundColor: AppColors.white,
-                                                                                      backgroundImage:
-                                                                                      NetworkImage(resource.organizerImage!),
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                Padding(
-                                                                                  padding: const EdgeInsets.only(top: 10, right: 30.0, left: 30.0),
-                                                                                  child: Text(
-                                                                                    resource.title,
-                                                                                    textAlign: TextAlign.center,
-                                                                                    maxLines:
-                                                                                    Responsive.isMobile(context) ? 2 : 1,
-                                                                                    style: textTheme.bodySmall?.copyWith(
-                                                                                      letterSpacing: 1.2,
-                                                                                      color: AppColors.white,
-                                                                                      height: 1.5,
-                                                                                      fontWeight: FontWeight.w300,
-                                                                                      fontSize: fontSizeTitle,
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                const SpaceH4(),
-                                                                                Column(
-                                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                                  children: [
-                                                                                    Text(
-                                                                                      resource.promotor != null
-                                                                                          ? resource.promotor != ""
-                                                                                          ? resource.promotor!
-                                                                                          : resource.organizerName!
-                                                                                          : resource.organizerName!,
-                                                                                      maxLines: 1,
-                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                      style: TextStyle(
-                                                                                        letterSpacing: 1.2,
-                                                                                        fontSize: fontSizePromotor,
-                                                                                        fontWeight: FontWeight.bold,
-                                                                                        color: AppColors.white,
-                                                                                      ),
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                                resource.organizer == widget.socialEntityId ? Row(
-                                                                                  mainAxisAlignment: MainAxisAlignment.end,
-                                                                                  children: [
-                                                                                    Padding(
-                                                                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                                                                      child: EnredaButtonIcon(
-                                                                                        onPressed: () => {
-                                                                                          setState(() {
-                                                                                            MyResourcesListPage.selectedIndex.value = 3;
-                                                                                          })
-                                                                                        },
-                                                                                        buttonColor: Colors.white,
-                                                                                        padding: const EdgeInsets.all(0),
-                                                                                        width: 80,
-                                                                                        height: 10,
-                                                                                        widget: Icon(
-                                                                                          Icons.edit_outlined,
-                                                                                          color: AppColors.greyTxtAlt,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    Padding(
-                                                                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                                                                      child: EnredaButtonIcon(
-                                                                                        onPressed: () => _confirmDeleteResource(context, resource),
-                                                                                        buttonColor: Colors.white,
-                                                                                        padding: const EdgeInsets.all(0),
-                                                                                        width: 80,
-                                                                                        height: 10,
-                                                                                        widget: Icon(
-                                                                                          Icons.delete_outline,
-                                                                                          color: AppColors.greyTxtAlt,
-                                                                                        ),
-
-                                                                                      ),
-                                                                                    ),
-                                                                                    buildShareButton(context, resource, AppColors.darkGray),
-                                                                                    SizedBox(width: 10),
-                                                                                  ],
-                                                                                ) : SizedBox(height: 30,),
-                                                                              ]
-                                                                          ),
-                                                                        ),
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                                                                          child: _buildBoxes(resource),
-                                                                        ),
-                                                                        Flex(
-                                                                          direction: Responsive.isMobile(context) ||
-                                                                              Responsive.isTablet(context) ||
-                                                                              Responsive.isDesktopS(context)
-                                                                              ? Axis.vertical
-                                                                              : Axis.horizontal,
-                                                                          mainAxisAlignment: MainAxisAlignment.start,
-                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                          children: [
-                                                                            Expanded(
-                                                                                flex: Responsive.isMobile(context) ||
-                                                                                    Responsive.isTablet(context) ||
-                                                                                    Responsive.isDesktopS(context)
-                                                                                    ? 0
-                                                                                    : 4,
-                                                                                child: _buildDetailResource(
-                                                                                    context, resource)),
-                                                                          ],
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                          resource.organizer == widget.socialEntityId ? Expanded(
-                                                              flex: Responsive.isMobile(context) ||
-                                                                  Responsive.isTablet(context) ||
-                                                                  Responsive.isDesktopS(context)
-                                                                  ? 0
-                                                                  : 3,
-                                                              child: Container(
-                                                                decoration: BoxDecoration(
-                                                                  border: Border.all(
-                                                                      color: AppColors.greyLight2.withOpacity(0.2),
-                                                                      width: 1),
-                                                                  borderRadius: BorderRadius.circular(Consts.padding),
-                                                                ),
-                                                                alignment: Alignment.center,
-                                                                margin: Responsive.isMobile(context) || Responsive.isDesktopS(context)  ?  EdgeInsets.only(top: 10) : EdgeInsets.only(left: 10),
-                                                                padding: const EdgeInsets.all(20.0),
-                                                                child: SingleChildScrollView(
-                                                                    child: Stack(
-                                                                      children: [
-                                                                        Row(
-                                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                                          children: [
-                                                                            CustomTextTitle(title: '${resource.participants?.length.toString()} ${StringConst.PARTICIPANTS.toUpperCase()}', color: AppColors.turquoiseBlue),
-                                                                          ],
-                                                                        ),
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.only(top: 30.0),
-                                                                          child: _buildParticipantsList(context, resource),
-                                                                        ),
-                                                                      ],
-                                                                    )),
-                                                              )) : Container(),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
+                                                return _buildResourceDetail(context, resource);
                                               }
                                               if (snapshotCompetencies.hasData) {
                                                 selectedCompetencies = snapshotCompetencies.data!.toSet();
@@ -359,228 +131,8 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                 for (var item in selectedCompetencies) {
                                                   concatenate.write('${item.name} / ');
                                                 }
-                                                competenciesNames = concatenate.toString();
                                                 globals.competenciesNamesCurrentResource = concatenate.toString();
-                                                return SingleChildScrollView(
-                                                  child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Flex(
-                                                        direction: Responsive.isMobile(context) ||
-                                                            Responsive.isTablet(context) ||
-                                                            Responsive.isDesktopS(context)
-                                                            ? Axis.vertical
-                                                            : Axis.horizontal,
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        mainAxisAlignment: MainAxisAlignment.start,
-                                                        children: [
-                                                          Expanded(
-                                                              flex: Responsive.isMobile(context) ||
-                                                                  Responsive.isTablet(context) ||
-                                                                  Responsive.isDesktopS(context)
-                                                                  ? 0
-                                                                  : 6,
-                                                              child: Stack(
-                                                                children: [
-                                                                  Container(
-                                                                    constraints: BoxConstraints(
-                                                                      maxWidth: resource.organizer == widget.socialEntityId ? MediaQuery.of(context).size.width
-                                                                          : MediaQuery.of(context).size.width * 0.6,
-                                                                    ),
-                                                                    decoration: BoxDecoration(
-                                                                      shape: BoxShape.rectangle,
-                                                                      border: Border.all(
-                                                                          color: AppColors.greyLight2.withOpacity(0.2),
-                                                                          width: 1),
-                                                                      borderRadius: BorderRadius.circular(Consts.padding),
-                                                                    ),
-                                                                    child: Column(
-                                                                      children: [
-                                                                        Container(
-                                                                          decoration: BoxDecoration(
-                                                                            image: DecorationImage(
-                                                                              image: AssetImage(ImagePath.RECTANGLE_RESOURCE),
-                                                                              fit: BoxFit.cover,
-                                                                            ),
-                                                                            borderRadius: BorderRadius.only(
-                                                                                bottomRight: Radius.circular(Consts.padding),
-                                                                                bottomLeft: Radius.circular(Consts.padding)),
-                                                                          ),
-                                                                          margin: const EdgeInsets.symmetric(horizontal: 20.0),
-                                                                          child: Column(
-                                                                              children: [
-                                                                                Responsive.isMobile(context)
-                                                                                    ? const SpaceH8()
-                                                                                    : const SpaceH20(),
-                                                                                resource.organizerImage == null ||
-                                                                                    resource.organizerImage!.isEmpty
-                                                                                    ? Container()
-                                                                                    : Align(
-                                                                                  alignment: Alignment.topCenter,
-                                                                                  child: Container(
-                                                                                    decoration: BoxDecoration(
-                                                                                        border: Border.all(
-                                                                                            width: 1.0, color: AppColors.greyLight),
-                                                                                        borderRadius: BorderRadius.circular(
-                                                                                          100,
-                                                                                        ),
-                                                                                        color: AppColors.greyLight),
-                                                                                    child: CircleAvatar(
-                                                                                      radius:
-                                                                                      Responsive.isMobile(context) ? 28 : 40,
-                                                                                      backgroundColor: AppColors.white,
-                                                                                      backgroundImage:
-                                                                                      NetworkImage(resource.organizerImage!),
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                Padding(
-                                                                                  padding: const EdgeInsets.only(top: 10, right: 30.0, left: 30.0),
-                                                                                  child: Text(
-                                                                                    resource.title,
-                                                                                    textAlign: TextAlign.center,
-                                                                                    maxLines:
-                                                                                    Responsive.isMobile(context) ? 2 : 1,
-                                                                                    style: textTheme.bodySmall?.copyWith(
-                                                                                      letterSpacing: 1.2,
-                                                                                      color: AppColors.white,
-                                                                                      height: 1.5,
-                                                                                      fontWeight: FontWeight.w300,
-                                                                                      fontSize: fontSizeTitle,
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                const SpaceH4(),
-                                                                                Column(
-                                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                                  children: [
-                                                                                    Text(
-                                                                                      resource.promotor != null
-                                                                                          ? resource.promotor != ""
-                                                                                          ? resource.promotor!
-                                                                                          : resource.organizerName!
-                                                                                          : resource.organizerName!,
-                                                                                      maxLines: 1,
-                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                      style: TextStyle(
-                                                                                        letterSpacing: 1.2,
-                                                                                        fontSize: fontSizePromotor,
-                                                                                        fontWeight: FontWeight.bold,
-                                                                                        color: AppColors.white,
-                                                                                      ),
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                                resource.organizer == widget.socialEntityId ? Row(
-                                                                                  mainAxisAlignment: MainAxisAlignment.end,
-                                                                                  children: [
-                                                                                    Padding(
-                                                                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                                                                      child: EnredaButtonIcon(
-                                                                                        onPressed: () => {
-                                                                                          setState(() {
-                                                                                            MyResourcesListPage.selectedIndex.value = 3;
-                                                                                          })
-                                                                                        },
-                                                                                        buttonColor: Colors.white,
-                                                                                        padding: const EdgeInsets.all(0),
-                                                                                        width: 80,
-                                                                                        height: 10,
-                                                                                        widget: Icon(
-                                                                                          Icons.edit_outlined,
-                                                                                          color: AppColors.greyTxtAlt,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    Padding(
-                                                                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                                                                      child: EnredaButtonIcon(
-                                                                                        onPressed: () => _confirmDeleteResource(context, resource),
-                                                                                        buttonColor: Colors.white,
-                                                                                        padding: const EdgeInsets.all(0),
-                                                                                        width: 80,
-                                                                                        height: 10,
-                                                                                        widget: Icon(
-                                                                                          Icons.delete_outline,
-                                                                                          color: AppColors.greyTxtAlt,
-                                                                                        ),
-
-                                                                                      ),
-                                                                                    ),
-                                                                                    buildShareButton(context, resource, AppColors.darkGray),
-                                                                                    SizedBox(width: 10),
-                                                                                  ],
-                                                                                ) : SizedBox(height: 30,),
-                                                                              ]
-                                                                          ),
-                                                                        ),
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                                                                          child: _buildBoxes(resource),
-                                                                        ),
-                                                                        Flex(
-                                                                          direction: Responsive.isMobile(context) ||
-                                                                              Responsive.isTablet(context) ||
-                                                                              Responsive.isDesktopS(context)
-                                                                              ? Axis.vertical
-                                                                              : Axis.horizontal,
-                                                                          mainAxisAlignment: MainAxisAlignment.start,
-                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                          children: [
-                                                                            Expanded(
-                                                                                flex: Responsive.isMobile(context) ||
-                                                                                    Responsive.isTablet(context) ||
-                                                                                    Responsive.isDesktopS(context)
-                                                                                    ? 0
-                                                                                    : 4,
-                                                                                child: _buildDetailResource(
-                                                                                    context, resource)),
-                                                                          ],
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                          resource.organizer == widget.socialEntityId ? Expanded(
-                                                              flex: Responsive.isMobile(context) ||
-                                                                  Responsive.isTablet(context) ||
-                                                                  Responsive.isDesktopS(context)
-                                                                  ? 0
-                                                                  : 3,
-                                                              child: Container(
-                                                                decoration: BoxDecoration(
-                                                                  border: Border.all(
-                                                                      color: AppColors.greyLight2.withOpacity(0.2),
-                                                                      width: 1),
-                                                                  borderRadius: BorderRadius.circular(Consts.padding),
-                                                                ),
-                                                                alignment: Alignment.center,
-                                                                margin: Responsive.isMobile(context) || Responsive.isDesktopS(context)  ?  EdgeInsets.only(top: 10) : EdgeInsets.only(left: 10),
-                                                                padding: const EdgeInsets.all(20.0),
-                                                                child: SingleChildScrollView(
-                                                                    child: Stack(
-                                                                      children: [
-                                                                        Row(
-                                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                                          children: [
-                                                                            CustomTextTitle(title: '${resource.participants?.length.toString()} ${StringConst.PARTICIPANTS.toUpperCase()}', color: AppColors.turquoiseBlue),
-                                                                          ],
-                                                                        ),
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.only(top: 30.0),
-                                                                          child: _buildParticipantsList(context, resource),
-                                                                        ),
-                                                                      ],
-                                                                    )),
-                                                              )) : Container(),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
+                                                return _buildResourceDetail(context, resource);
                                               }
                                               return Container();
                                             }
@@ -597,6 +149,236 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
           }
           return const Center(child: CircularProgressIndicator());
         });
+  }
+
+  Widget _buildResourceDetail(BuildContext context, Resource resource) {
+    TextTheme textTheme = Theme.of(context).textTheme;
+    double fontSizeTitle = responsiveSize(context, 14, 22, md: 18);
+    double fontSizePromotor = responsiveSize(context, 12, 16, md: 14);
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Flex(
+            direction: Responsive.isMobile(context) ||
+                Responsive.isTablet(context) ||
+                Responsive.isDesktopS(context)
+                ? Axis.vertical
+                : Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Expanded(
+                  flex: Responsive.isMobile(context) ||
+                      Responsive.isTablet(context) ||
+                      Responsive.isDesktopS(context)
+                      ? 0
+                      : 6,
+                  child: Stack(
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: resource.organizer == widget.socialEntityId
+                              ? MediaQuery.of(context).size.width
+                              : MediaQuery.of(context).size.width * 0.6,
+                        ),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          border: Border.all(
+                              color: AppColors.greyLight2.withOpacity(0.2),
+                              width: 1),
+                          borderRadius: BorderRadius.circular(Consts.padding),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage(ImagePath.RECTANGLE_RESOURCE),
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: BorderRadius.only(
+                                    bottomRight: Radius.circular(Consts.padding),
+                                    bottomLeft: Radius.circular(Consts.padding)),
+                              ),
+                              margin: const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Column(
+                                  children: [
+                                    Responsive.isMobile(context)
+                                        ? const SpaceH8()
+                                        : const SpaceH20(),
+                                    resource.organizerImage == null ||
+                                        resource.organizerImage!.isEmpty
+                                        ? Container()
+                                        : Align(
+                                      alignment: Alignment.topCenter,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                width: 1.0, color: AppColors.greyLight),
+                                            borderRadius: BorderRadius.circular(
+                                              100,
+                                            ),
+                                            color: AppColors.greyLight),
+                                        child: CircleAvatar(
+                                          radius:
+                                          Responsive.isMobile(context) ? 28 : 40,
+                                          backgroundColor: AppColors.white,
+                                          backgroundImage:
+                                          NetworkImage(resource.organizerImage!),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 10, right: 30.0, left: 30.0),
+                                      child: Text(
+                                        resource.title,
+                                        textAlign: TextAlign.center,
+                                        maxLines:
+                                        Responsive.isMobile(context) ? 2 : 1,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          letterSpacing: 1.2,
+                                          color: AppColors.white,
+                                          height: 1.5,
+                                          fontWeight: FontWeight.w300,
+                                          fontSize: fontSizeTitle,
+                                        ),
+                                      ),
+                                    ),
+                                    const SpaceH4(),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          resource.promotor != null
+                                              ? resource.promotor != ""
+                                              ? resource.promotor!
+                                              : resource.organizerName!
+                                              : resource.organizerName!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            letterSpacing: 1.2,
+                                            fontSize: fontSizePromotor,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    resource.organizer == widget.socialEntityId ? Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                          child: EnredaButtonIcon(
+                                            onPressed: () => {
+                                              setState(() {
+                                                MyResourcesListPage.selectedIndex.value = 3;
+                                              })
+                                            },
+                                            buttonColor: Colors.white,
+                                            padding: const EdgeInsets.all(0),
+                                            width: 80,
+                                            height: 10,
+                                            widget: Icon(
+                                              Icons.edit_outlined,
+                                              color: AppColors.greyTxtAlt,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                          child: EnredaButtonIcon(
+                                            onPressed: () => _confirmDeleteResource(context, resource),
+                                            buttonColor: Colors.white,
+                                            padding: const EdgeInsets.all(0),
+                                            width: 80,
+                                            height: 10,
+                                            widget: Icon(
+                                              Icons.delete_outline,
+                                              color: AppColors.greyTxtAlt,
+                                            ),
+
+                                          ),
+                                        ),
+                                        buildShareButton(context, resource, AppColors.darkGray),
+                                        SizedBox(width: 10),
+                                      ],
+                                    ) : SizedBox(height: 30,),
+                                  ]
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                              child: _buildBoxes(resource),
+                            ),
+                            Flex(
+                              direction: Responsive.isMobile(context) ||
+                                  Responsive.isTablet(context) ||
+                                  Responsive.isDesktopS(context)
+                                  ? Axis.vertical
+                                  : Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                    flex: Responsive.isMobile(context) ||
+                                        Responsive.isTablet(context) ||
+                                        Responsive.isDesktopS(context)
+                                        ? 0
+                                        : 4,
+                                    child: _buildDetailResource(
+                                        context, resource)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )),
+              resource.organizer == widget.socialEntityId ? Expanded(
+                  flex: Responsive.isMobile(context) ||
+                      Responsive.isTablet(context) ||
+                      Responsive.isDesktopS(context)
+                      ? 0
+                      : 3,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: AppColors.greyLight2.withOpacity(0.2),
+                          width: 1),
+                      borderRadius: BorderRadius.circular(Consts.padding),
+                    ),
+                    alignment: Alignment.center,
+                    margin: Responsive.isMobile(context) || Responsive.isDesktopS(context)
+                        ?  EdgeInsets.only(top: 10) : EdgeInsets.only(left: 10),
+                    padding: const EdgeInsets.all(20.0),
+                    child: SingleChildScrollView(
+                        child: Stack(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CustomTextTitle(
+                                    title: '${resource.participants?.length.toString()} ${StringConst.PARTICIPANTS.toUpperCase()}',
+                                    color: AppColors.turquoiseBlue),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 30.0),
+                              child: _buildParticipantsList(context, resource),
+                            ),
+                          ],
+                        )),
+                  )) : Container(),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDetailResource(BuildContext context, Resource resource) {
@@ -709,7 +491,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
       BoxItemData(
           icon: Icons.card_travel,
           title: StringConst.RESOURCE_TYPE,
-          contact: '${resource.resourceTypeName}'
+          contact: '${resource.resourceCategoryName}'
       ),
       BoxItemData(
         icon: Icons.location_on_outlined,
@@ -840,7 +622,6 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
       ),
     );
   }
-
 
   Future<void> _deleteResource(BuildContext context, Resource resource) async {
     try {
