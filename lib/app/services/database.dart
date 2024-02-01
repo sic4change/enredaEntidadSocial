@@ -15,6 +15,8 @@ import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/personalDocument.dart';
+import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/socialEntityUser.dart';
@@ -100,6 +102,8 @@ abstract class Database {
      Future<void> updateIpilEntryContent(IpilEntry ipilEntry, String content);
      Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date);
      Future<void> deleteIpilEntry(IpilEntry ipilEntry);
+     Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
+     Future<void> uploadPersonalDocument(UserEnreda user, Uint8List data, String name, PersonalDocument document, int position);
 }
 
 class FirestoreDatabase implements Database {
@@ -628,6 +632,37 @@ class FirestoreDatabase implements Database {
   @override
   Future<void> deleteIpilEntry(IpilEntry ipilEntry) =>
       _service.deleteData(path: APIPath.ipilEntryById(ipilEntry.ipilId!));
+
+  @override
+  Stream<List<PersonalDocumentType>> personalDocumentTypeStream() => _service.collectionStream(
+    path: APIPath.personalDocumentType(),
+    queryBuilder: (query) => query.where('personalDocId', isNotEqualTo: null),
+    builder: (data, documentId) => PersonalDocumentType.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Future<void> uploadPersonalDocument(UserEnreda user, Uint8List data, String name, PersonalDocument document, int position) async {
+    var firebaseStorageRef =
+    FirebaseStorage.instance.ref().child('users/${user.userId}/personalDocuments/$name');
+    UploadTask uploadTask = firebaseStorageRef.putData(data);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    taskSnapshot.ref.getDownloadURL().then(
+          (value) async => {
+          if(user.personalDocuments.contains(document)){
+            user.personalDocuments.remove(document),
+          },
+          user.personalDocuments.add(
+              PersonalDocument(
+                name: document.name,
+                order: document.order,
+                document: value)
+              ),
+          await setUserEnreda(user),
+      },
+    );
+  }
+
 }
 
 

@@ -1,6 +1,7 @@
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interestsUserEnreda.dart';
+import 'package:enreda_empresas/app/models/personalDocument.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
 
 class UserEnreda {
@@ -38,6 +39,7 @@ class UserEnreda {
     this.gamificationFlags = const {},
     this.assignedById,
     this.assignedEntityId,
+    this.personalDocuments = const [],
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -161,6 +163,20 @@ class UserEnreda {
       });
     }
 
+    List<PersonalDocument> personalDocuments = [];
+    if (data['personalDocuments'] != null) {
+      data['personalDocuments'].forEach((personalDocument) {
+        final personalDocumentsFirestore = personalDocument as Map<String, dynamic>;
+        personalDocuments.add(
+            PersonalDocument(
+              name: personalDocumentsFirestore['name'] ?? '',
+              order: personalDocumentsFirestore['order'] ?? 0,
+              document: personalDocumentsFirestore['document'] ?? '',
+            )
+        );
+      });
+    }
+
     final String? assignedById = data['assignedById']?? "";
     final String? assignedEntityId = data['assignedEntityId']?? "";
 
@@ -198,6 +214,7 @@ class UserEnreda {
       gamificationFlags: gamificationFlags,
       assignedById: assignedById,
       assignedEntityId: assignedEntityId,
+      personalDocuments: personalDocuments,
     );
   }
 
@@ -234,6 +251,7 @@ class UserEnreda {
   final Map<String, bool> gamificationFlags;
   final String? assignedById;
   final String? assignedEntityId;
+  final List<PersonalDocument> personalDocuments;
 
   @override
   bool operator ==(Object other){
@@ -274,6 +292,7 @@ class UserEnreda {
       'gamificationFlags': gamificationFlags,
       'assignedById': assignedById,
       'assignedEntityId': assignedEntityId,
+      'personalDocuments': personalDocuments.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -313,6 +332,7 @@ class UserEnreda {
     Map<String, bool>? gamificationFlags,
     String? assignedById,
     String? assignedEntityId,
+    List<PersonalDocument>? personalDocuments,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -346,6 +366,7 @@ class UserEnreda {
       gamificationFlags: gamificationFlags ?? this.gamificationFlags,
       assignedById: assignedById,
       assignedEntityId: assignedEntityId,
+      personalDocuments: personalDocuments ?? this.personalDocuments,
     );
   }
 

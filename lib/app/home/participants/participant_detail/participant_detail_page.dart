@@ -1,4 +1,7 @@
+import 'dart:html' as html;
+import 'dart:io';
 import 'dart:math';
+import 'package:http/http.dart' as http;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
@@ -15,16 +18,25 @@ import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.da
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/personalDocument.dart';
+import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/utils/functions.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
+import 'package:file_picker/_internal/file_picker_web.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
 class ParticipantDetailPage extends StatefulWidget {
@@ -48,10 +60,14 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   Widget? _currentPage;
   String? _value;
 
+  List<PersonalDocument> _userDocuments = [];
+  String? techNameComplete;
+
   @override
   void initState() {
     _currentPage =  Container();//_IPILPage(context, widget.user);
     _value = _menuOptions[2]; //For IPIL
+
     super.initState();
 
   }
@@ -130,7 +146,27 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               onSelected: (bool selected) {
                 setState(() {
                   _value = _menuOptions[index]; //: null;
-                  _currentPage = _IPILPage(context, user);
+                  switch(index){
+                    case 0:
+                      _currentPage = Container();
+                      break;
+                    case 1:
+                      _currentPage = Container();
+                      break;
+                    case 2:
+                      _currentPage = _IPILPage(context, user);
+                      break;
+                    case 3:
+                      _currentPage = _personalDocumentationPage(context, user);
+                      break;
+                    case 4:
+                      _currentPage = Container();
+                      break;
+                    default:
+                      _currentPage = Container();
+                      break;
+                  }
+
                 });
               },
             ),
@@ -207,6 +243,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                           MyIpilEntries(
                                             user: widget.user,
                                             ipilEntries: ipilEntries,
+                                            techName: techNameComplete!,
                                           )),
                                 );
                               },
@@ -268,7 +305,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                     ElevatedButton(
                                         onPressed: (){
                                           for(IpilEntry ipilEntry in ipilEntries){
-                                            if(ipilEntry.content == null){
+                                            if(ipilEntry.content == null || ipilEntry.content == ''){
                                               database.deleteIpilEntry(ipilEntry);
                                             }
                                           }
@@ -339,7 +376,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                   ),
                   Column(
                     children: <Widget>[for (var ipilEntry in ipilEntries)
-                      Column(
+                      ipilEntry.ipilId != null ?  Column(
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 50, top: 30),
@@ -372,6 +409,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                       if(snapshot.hasData){
                                         String techName = snapshot.data?.firstName ?? '';
                                         String techLastName = snapshot.data?.lastName ?? '';
+                                        techNameComplete = '$techName $techLastName';
                                         return Container(
                                           height: 85,
                                           width: 220,
@@ -411,11 +449,21 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                 onSaved: (content) async{
                                   await database.updateIpilEntryContent(ipilEntry, content!);
                                 },
+                                onTapOutside: (content) async{
+                                  await database.updateIpilEntryContent(ipilEntry, content);
+                                },
+                                onFieldSubmitted: (content) async{
+                                  await database.updateIpilEntryContent(ipilEntry, content);
+                                },
                               ),
                             ),
                           ),
                         ],
-                      )
+                      ) :
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(),
+                      ),
                     ]
                   ),
                 ],
@@ -425,6 +473,280 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             }
           }
         ),
+      ),
+    );
+  }
+
+  Widget _personalDocumentationPage(BuildContext context, UserEnreda user){
+    final database = Provider.of<Database>(context, listen: false);
+    late int documentsCount = 0;
+    return
+      StreamBuilder<UserEnreda>(
+        stream: database.userEnredaStreamByUserId(user.userId),
+        builder: (context, snapshot) {
+          if(snapshot.hasData){
+            _userDocuments = snapshot.data!.personalDocuments;
+          }
+          return StreamBuilder<List<PersonalDocumentType>>(
+            stream: database.personalDocumentTypeStream(),
+            builder: (context, snapshot) {
+              if(snapshot.hasData){
+
+                snapshot.data!.forEach((element) {
+                  bool containsDocument = false;
+                  _userDocuments.forEach((item) {
+                    if(item.name == element.title){
+                      containsDocument = true;
+                    }
+                  });
+                  if(!containsDocument){
+                    _userDocuments.add(PersonalDocument(name: element.title, order: snapshot.data!.indexOf(element), document: ''));
+                  }
+
+                });
+                _userDocuments.sort((a, b) {
+                  return a.order.compareTo(b.order);
+                },);
+
+                documentsCount = _userDocuments.length;
+
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: AppColors.greyBorder)
+                  ),
+                  child:
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 50, top: 15.0, bottom: 15.0, right: 20.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Documentación personal'.toUpperCase(),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.bluePetrol,
+                                fontSize: 35,
+                                fontFamily: GoogleFonts.outfit().fontFamily,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                InkWell(
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.add_circle_outlined,
+                                        color: AppColors.turquoiseBlue,
+                                        size: 24,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          'Añadir Documentos',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: GoogleFonts.outfit().fontFamily,
+                                            fontWeight: FontWeight.w300,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: (){
+                                    showDialog(
+                                      context: context,
+                                      builder: (context){
+                                        TextEditingController newDocument = TextEditingController();
+                                        GlobalKey<FormState> addDocumentKey = GlobalKey<FormState>();
+                                        return AlertDialog(
+                                          title: Text('Introduce el nombre del documento'),
+                                          content: Form(
+                                            key: addDocumentKey,
+                                            child: TextFormField(
+                                              controller: newDocument,
+                                              validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+                                            ),
+                                          ),
+                                          actions: <Widget>[
+                                            ElevatedButton(
+                                                onPressed: () => Navigator.of(context).pop((false)),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text('Cancelar',
+                                                      style: TextStyle(
+                                                          color: AppColors.black,
+                                                          height: 1.5,
+                                                          fontWeight: FontWeight.w400,
+                                                          fontSize: 14)),
+                                                )),
+                                            ElevatedButton(
+                                                onPressed: (){
+                                                  if(addDocumentKey.currentState!.validate()){
+                                                    setPersonalDocument(
+                                                      context: context,
+                                                      document: PersonalDocument(name: newDocument.text, order: documentsCount++, document: ''),
+                                                      user: user);
+                                                    Navigator.of(context).pop((true));
+                                                  }
+
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text('Añadir',
+                                                      style: TextStyle(
+                                                          color: AppColors.black,
+                                                          height: 1.5,
+                                                          fontWeight: FontWeight.w400,
+                                                          fontSize: 14)),
+                                                )),
+                                        ],
+                                        );
+                                      }
+                                    );
+                                  }
+                                )
+                              ]
+                            ),
+                          ]
+                        )
+                      ),
+                      Divider(
+                        color: AppColors.greyBorder,
+                        height: 0,
+                      ),
+                      Column(
+                        children: [
+                          for( var document in _userDocuments)
+                            _documentTile(document, user),
+                        ]
+                      )
+                    ]
+                  ),
+                )
+              );
+            }
+          );
+        }
+      );
+  }
+
+  Widget _documentTile(PersonalDocument document, UserEnreda user){
+    bool paridad  = _userDocuments.indexOf(document) % 2 == 0;
+    final database = Provider.of<Database>(context, listen: false);
+
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: paridad ? AppColors.greySearch : AppColors.white,
+        borderRadius: _userDocuments.indexOf(document) == _userDocuments.length-1 ?
+          BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)) :
+          BorderRadius.all(Radius.circular(0)),
+        //border: Border.all(color: AppColors.greyBorder),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 50.0),
+            child: Text(
+              document.name,
+              style: TextStyle(
+                fontFamily: GoogleFonts.inter().fontFamily,
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
+                color: AppColors.chatDarkGray,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 30),
+            child: document.document != '' ? Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.delete,
+                    color: AppColors.chatDarkGray,
+                    size: 20,
+                  ),
+                  onPressed: (){
+                    setPersonalDocument(context: context, document: PersonalDocument(name: document.name, order: -1, document: ''), user: user);
+                    setState(() {
+
+                    });
+                  },
+                ),
+                SpaceW8(),
+                IconButton(
+                  icon: Icon(
+                    Icons.remove_red_eye,
+                    color: AppColors.chatDarkGray,
+                    size: 20,
+                  ),
+                  onPressed: () async {
+                    var data = await http.get(Uri.parse(document.document));
+                    var pdfData = data.bodyBytes;
+                    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+                  },
+                ),
+                SpaceW8(),
+                IconButton(
+                  icon: Icon(
+                    Icons.download,
+                    color: AppColors.chatDarkGray,
+                    size: 20,
+                  ),
+                  onPressed: () async {
+                    final ref = FirebaseStorage.instance.refFromURL(document.document);
+                    if(kIsWeb){
+                    html.AnchorElement anchorElement = html.AnchorElement(href: document.document);
+                    anchorElement.download = document.name;
+                    anchorElement.click();
+                    }else{
+                      final dir = await getApplicationDocumentsDirectory();
+                      final file = File('${dir.path}/${ref.name}');
+                      await ref.writeToFile(file);
+                    }
+                  },
+                ),
+              ],
+            ) :
+            IconButton(
+              icon: Icon(
+                Icons.add,
+                color: AppColors.chatDarkGray,
+                size: 20,
+              ),
+              onPressed: () async {
+                PlatformFile? pickedFile;
+
+                  var result;
+                  if(kIsWeb){
+                    result = await FilePickerWeb.platform.pickFiles();
+                  }else{
+                    result = await FilePicker.platform.pickFiles();
+                  }
+                  if(result == null) return;
+                  pickedFile = result.files.first;
+                  Uint8List fileBytes = pickedFile!.bytes!;
+                  String fileName = pickedFile.name;
+
+                  await database.uploadPersonalDocument(
+                    user,
+                    fileBytes,
+                    fileName,
+                    document,
+                    user.personalDocuments.indexOf(document),
+                  );
+              },
+            ),
+          )
+        ],
       ),
     );
   }

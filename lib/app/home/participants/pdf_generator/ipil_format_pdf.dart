@@ -33,6 +33,7 @@ Future<Uint8List> generateIpilFile(
     CustomData data,
     UserEnreda user,
     List<IpilEntry>? ipilEntries,
+    String techName,
     ) async {
   final doc = pw.Document(title: 'Mi Currículum');
 
@@ -64,7 +65,7 @@ Future<Uint8List> generateIpilFile(
           height: 30,
         ),
         for(IpilEntry ipil in ipilEntries!)
-          (ipil.content != null && ipil.content != '') ? _IpilEntry(ipil: ipil) : pw.Container(),
+          (ipil.content != null && ipil.content != '') ? _IpilEntry(ipil: ipil, techName: techName) : pw.Container(),
       ]
     )
   );
@@ -115,9 +116,11 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format, bool myPhoto, profileIma
 class _IpilEntry extends pw.StatelessWidget {
   _IpilEntry({
     required this.ipil,
+    required this.techName
   });
 
   final IpilEntry ipil;
+  final String techName;
 
   @override
   pw.Widget build(pw.Context context) {
@@ -128,8 +131,9 @@ class _IpilEntry extends pw.StatelessWidget {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: <pw.Widget>[
                 pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                  pw.Text('Fecha'),
+                  pw.Text('Fecha', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                   pw.Text('${ipil.date.day}/${ipil.date.month}/${ipil.date.year}')
                   ]
                 ),
@@ -137,21 +141,25 @@ class _IpilEntry extends pw.StatelessWidget {
                   width: 50,
                 ),
                 pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Nombre de la técnica'),
-                      pw.Text('${ipil.techId}')
+                      pw.Text('Nombre de la técnica', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      pw.Text('$techName')
                     ]
                 ),
               ]
           ),
           pw.SizedBox(height: 15),
           pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('Objetivos y seguimiento:'),
+              pw.Text('Objetivos y seguimiento:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
               pw.Text('${ipil.content}'),
             ]
           ),
-          pw.SizedBox(height: 200)
+          pw.SizedBox(height: 20),
+          pw.Divider(),
+          pw.SizedBox(height: 20)
         ]);
   }
 }
