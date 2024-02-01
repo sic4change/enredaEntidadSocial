@@ -62,4 +62,6 @@ class APIPath {
   static String gamificationFlags() => 'gamificationFlags';
   static String ipilEntry() => 'ipilEntry';
   static String ipilEntryById(String? ipilId) => 'ipilEntry/$ipilId';
+  static String personalDocumentType() => 'personalDocumentType';
+  static String personalDocumentUser(String userId) => 'users/$userId';
 }

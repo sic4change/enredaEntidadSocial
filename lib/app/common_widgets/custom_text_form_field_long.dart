@@ -13,13 +13,17 @@ class CustomTextFormFieldLong extends StatelessWidget {
     this.validator,
     this.keyboardType = TextInputType.text,
     this.enabled = true,
+    this.onFieldSubmitted,
+    this.onTapOutside,
   });
 
   final String labelText;
   final String? initialValue, hintText;
   final double fontSize;
   final Function(String)? onChanged;
+  final Function(String)? onFieldSubmitted;
   final Function(String?)? onSaved;
+  final Function(String)? onTapOutside;
   final String ?Function(String?)? validator;
   final TextInputType? keyboardType;
   final bool enabled;
@@ -81,6 +85,9 @@ class CustomTextFormFieldLong extends StatelessWidget {
       onSaved: onSaved,
       keyboardType: keyboardType,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted,
+      //onTapOutside: onTapOutside,
+
       enabled: enabled,
       style: textTheme.button?.copyWith(
         height: 1.5,

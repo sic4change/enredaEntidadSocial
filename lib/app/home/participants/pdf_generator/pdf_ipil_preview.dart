@@ -22,10 +22,12 @@ class MyIpilEntries extends StatefulWidget {
     Key? key,
     required this.user,
     required this.ipilEntries,
+    required this.techName,
   }) : super(key: key);
 
   final UserEnreda user;
   final List<IpilEntry> ipilEntries;
+  final String techName;
 
   @override
   MyAppState createState() {
@@ -145,6 +147,7 @@ class MyAppState extends State<MyIpilEntries> with SingleTickerProviderStateMixi
           _data,
           widget.user!,
           widget.ipilEntries,
+          widget.techName,
         ),
         actions: actions,
         canDebug: false,
