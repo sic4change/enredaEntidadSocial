@@ -269,6 +269,7 @@ class StringConst {
   static const String QUIT_RESOURCE = 'NO ME INTERESA PARTICIPAR';
   static const String ENTER = 'Entrar';
   static const String CANCEL = 'Cancelar';
+  static const String ADD = 'Añadir';
   static const String CLOSE = 'Cerrar';
   static const String SAVE = 'Guardar';
   static const String ONLY_USERS_ALERT = 'Solo los usuarios registrados pueden acceder a los recursos internos. ¿Desea entrar como usuario registrado?';
@@ -539,7 +540,21 @@ class StringConst {
   static const String RESOURCES_JOINED = "Se ha inscrito en los siguientes recursos:";
   static const String NO_COMPETENCIES = "Aquí aparecerán las competencias evaluadas a través de los microtests";
   static const String NO_RESOURCES = "Aquí aparecerán los recursos a los que está inscrito este participante";
-
+  static const String PERSONAL_DOCUMENTATION = "Documentación personal";
+  static const String SET_DOCUMENT_NAME = "Introduce el nombre del documento";
+  static const String ADD_DOCUMENTS = "Añadir documentos";
+  static const String IPIL = "IPIL";
+  static const String SOCIAL_REPORTS = "Informes sociales";
+  static const String QUESTIONNAIRES = "Cuestionarios";
+  static const String EMPTY_FORM_ERROR = "Tiene varios campos vacíos";
+  static const String WANNA_REMOVE = "¿Desea borrarlos?";
+  static const String NO = "No";
+  static const String YES = "Sí";
+  static const String SAVE_SUCCEED = "Se ha guardado con éxito";
+  static const String DATE_ERROR = "Fecha no válida";
+  static const String TECHNICAL_NAME = "Nombre de la técnica";
+  static const String START_HERE = "Comienza aquí...";
+  static const String GOALS_MONITORING = "Objetivos y seguimiento:";
 
   //Create entity errors
   static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';
