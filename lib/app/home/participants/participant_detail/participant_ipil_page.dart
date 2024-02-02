@@ -58,7 +58,7 @@ class ParticipantIPILPage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'IPIL',
+                              StringConst.IPIL,
                               style: TextStyle(
                                 fontWeight: FontWeight.w900,
                                 color: AppColors.bluePetrol,
@@ -120,14 +120,14 @@ class ParticipantIPILPage extends StatelessWidget {
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      title: Text('Tiene varios campos vacios',
+                                      title: Text(StringConst.EMPTY_FORM_ERROR,
                                           style: TextStyle(
                                             color: AppColors.greyDark,
                                             height: 1.5,
                                             fontWeight: FontWeight.w800,
                                             fontSize: 16,
                                           )),
-                                      content: Text('¿Desea borrarlos?',
+                                      content: Text(StringConst.WANNA_REMOVE,
                                           style: TextStyle(
                                             color: AppColors.greyDark,
                                             height: 1.5,
@@ -141,7 +141,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                             },
                                             child: Padding(
                                               padding: const EdgeInsets.all(8.0),
-                                              child: Text('No',
+                                              child: Text(StringConst.NO,
                                                   style: TextStyle(
                                                       color: AppColors.black,
                                                       height: 1.5,
@@ -159,7 +159,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                             },
                                             child: Padding(
                                               padding: const EdgeInsets.all(8.0),
-                                              child: Text('Si',
+                                              child: Text(StringConst.YES,
                                                   style: TextStyle(
                                                       color: AppColors.red,
                                                       height: 1.5,
@@ -173,7 +173,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                   showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
-                                          title: Text('Se ha guardado con exito',
+                                          title: Text(StringConst.SAVE_SUCCEED,
                                               style: TextStyle(
                                                 color: AppColors.greyDark,
                                                 height: 1.5,
@@ -195,7 +195,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                                 },
                                                 child: Padding(
                                                   padding: const EdgeInsets.all(8.0),
-                                                  child: Text('Ok',
+                                                  child: Text(StringConst.OK,
                                                       style: TextStyle(
                                                           color: AppColors.black,
                                                           height: 1.5,
@@ -208,7 +208,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                 }
                               },
                               child: Text(
-                                'Guardar',
+                                StringConst.SAVE,
                                 style: TextStyle(
                                   color: Colors.white,
                                 ),
@@ -243,7 +243,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                               child: customDatePickerTitle(
                                                 context,
                                                 ipilEntry.date,
-                                                'Fecha', 'Fecha no valida',
+                                                StringConst.DATE, StringConst.DATE_ERROR,
                                                     (date){
                                                   database.updateIpilEntryDate(ipilEntry, date);
                                                 },
@@ -266,7 +266,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                                   child: Column(
                                                     children: [
                                                       CustomTextFormFieldTitle(
-                                                        labelText: 'Nombre de la técnica',
+                                                        labelText: StringConst.TECHNICAL_NAME,
                                                         height: 45,
                                                         initialValue: '$techName $techLastName',
                                                         enabled: false,
@@ -301,7 +301,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                               child: customDatePickerTitle(
                                                 context,
                                                 ipilEntry.date,
-                                                'Fecha', 'Fecha no valida',
+                                                StringConst.DATE, StringConst.DATE_ERROR,
                                                     (date){
                                                   database.updateIpilEntryDate(ipilEntry, date);
                                                   },
@@ -323,7 +323,7 @@ class ParticipantIPILPage extends StatelessWidget {
                                                   child: Column(
                                                     children: [
                                                       CustomTextFormFieldTitle(
-                                                        labelText: 'Nombre de la técnica',
+                                                        labelText: StringConst.TECHNICAL_NAME,
                                                         height: 45,
                                                         initialValue: '$techName $techLastName',
                                                         enabled: false,
@@ -345,8 +345,8 @@ class ParticipantIPILPage extends StatelessWidget {
                                   child: Form(
                                     key: contentKeys[ipilEntries.indexOf(ipilEntry)],
                                     child: CustomTextFormFieldLong(
-                                      labelText: 'Objetivos y seguimiento:',
-                                      hintText: 'Comienza aquí...',
+                                      labelText: StringConst.GOALS_MONITORING,
+                                      hintText: StringConst.START_HERE,
                                       initialValue: ipilEntry.content,
                                       validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
                                       enabled: auth.currentUser!.uid == ipilEntry.techId,

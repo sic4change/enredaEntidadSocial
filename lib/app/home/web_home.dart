@@ -330,11 +330,11 @@ class SideBarWidget extends StatelessWidget {
         ) : const SizedBox(height: 10,);
       },
       items: const [
-        SidebarXItem(icon: Icons.account_circle_sharp, label: 'Mi perfil'),
+        SidebarXItem(icon: Icons.account_circle_sharp, label: StringConst.MY_PROFILE),
         SidebarXItem(icon: Icons.add_circle_outlined, label: StringConst.NEW_PROFILE),
-        SidebarXItem(icon: Icons.view_quilt, label: 'Panel de control'),
-        SidebarXItem(icon: Icons.supervisor_account, label: 'Participantes'),
-        SidebarXItem(icon: Icons.card_travel, label: 'Mis recursos'),
+        SidebarXItem(icon: Icons.view_quilt, label: StringConst.CONTROL_PANEL),
+        SidebarXItem(icon: Icons.supervisor_account, label: StringConst.PARTICIPANTS),
+        SidebarXItem(icon: Icons.card_travel, label: StringConst.MY_RESOURCES),
         SidebarXItem(icon: Icons.calendar_month, label: 'Directorio Entidades')
       ],
     );
