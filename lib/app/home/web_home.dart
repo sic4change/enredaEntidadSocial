@@ -32,15 +32,15 @@ class WebHome extends StatefulWidget {
   const WebHome({Key? key})
       : super(key: key);
 
-  static final SidebarXController controller = SidebarXController(selectedIndex: 1, extended: true);
-  static ValueNotifier<int> selectedIndex = ValueNotifier(1);
+  static final SidebarXController controller = SidebarXController(selectedIndex: 0, extended: true);
+  static ValueNotifier<int> selectedIndex = ValueNotifier(2);
 
   static goToResources() {
-    controller.selectIndex(4);
+    controller.selectIndex(2);
   }
 
   static goToControlPanel() {
-    controller.selectIndex(2);
+    controller.selectIndex(0);
   }
 
   @override
@@ -55,6 +55,7 @@ class _WebHomeState extends State<WebHome> {
   void initState() {
     bodyWidget = [
       const PersonalData(),
+      const CreateParticipantPage(),
       Container(),
     ];
     super.initState();
@@ -152,19 +153,18 @@ class _WebHomeState extends State<WebHome> {
                 children: [
                   if(!isSmallScreen) SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
                   if (WebHome.selectedIndex.value == 0) Expanded(child: Center(child: bodyWidget[0]))
+                  else if (WebHome.selectedIndex.value == 1) Expanded(child: Center(child: bodyWidget[1]))
                   else Expanded(child: Center(child: AnimatedBuilder(
                     animation: WebHome.controller,
                     builder: (context, child){
                       switch(WebHome.controller.selectedIndex){
                         case 0: _key.currentState?.closeDrawer();
-                        return CreateParticipantPage();
-                        case 1: _key.currentState?.closeDrawer();
                         return ControlPanelPage(socialEntity: socialEntity, user: user,);
-                        case 2: _key.currentState?.closeDrawer();
+                        case 1: _key.currentState?.closeDrawer();
                         return const ParticipantsListPage();
-                        case 3: _key.currentState?.closeDrawer();
+                        case 2: _key.currentState?.closeDrawer();
                         return MyResourcesListPage(socialEntity: socialEntity);
-                        case 4: _key.currentState?.closeDrawer();
+                        case 3: _key.currentState?.closeDrawer();
                         return EntityDirectoryPage();
                         default:
                           return MyResourcesListPage(socialEntity: socialEntity);
