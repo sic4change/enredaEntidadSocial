@@ -143,10 +143,10 @@ class _SideBarWidgetState extends State<SideBarWidget> {
         );
       },
       items: [
-        SidebarXItem(icon: Icons.view_quilt, label: 'Panel de control', onTap: _setSelectedIndexToOne),
-        SidebarXItem(icon: Icons.supervisor_account, label: 'Participantes', onTap: _setSelectedIndexToOne),
-        SidebarXItem(icon: Icons.card_travel, label: 'Mis recursos' , onTap: _setSelectedIndexToOne),
-        SidebarXItem(icon: Icons.calendar_month, label: 'Directorio Entidades', onTap: _setSelectedIndexToOne)
+        SidebarXItem(iconWidget: Image.asset(ImagePath.VECTOR_2), label: 'Panel de control', onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Image.asset(ImagePath.VECTOR_3), label: 'Participantes', onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Image.asset(ImagePath.VECTOR_4), label: 'Mis recursos' , onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Image.asset(ImagePath.VECTOR_5), label: 'Directorio Entidades', onTap: _setSelectedIndexToOne)
       ],
     );
   }
