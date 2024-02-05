@@ -180,7 +180,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           Padding(
             padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
             child: Text(
-              StringConst.NEW_PROFILE,
+              StringConst.CREATE_PARTICIPANT,
               style: textTheme.titleMedium!.copyWith(
                 color: AppColors.turquoiseBlue,
                 fontWeight: FontWeight.w300,

@@ -1,5 +1,6 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_sidebar_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -30,17 +31,16 @@ class SideBarWidget extends StatefulWidget {
 class _SideBarWidgetState extends State<SideBarWidget> {
   void _setSelectedIndexToOne() {
     setState(() {
-      WebHome.selectedIndex.value = 1;
+      WebHome.selectedIndex.value = 2; // Select empty Container
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    TextTheme textTheme = Theme.of(context).textTheme;
     return SidebarX(
       controller: widget._controller,
-      headerDivider: Container(
-          height: 40, child: Divider(color: AppColors.turquoiseUltraLight, height: 1.5)),
       theme: SidebarXTheme(
         margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -48,9 +48,18 @@ class _SideBarWidgetState extends State<SideBarWidget> {
           borderRadius: BorderRadius.circular(20),
         ),
         hoverColor: AppColors.primary050,
-        hoverTextStyle: const TextStyle(color: AppColors.greyDark, fontWeight: FontWeight.w600),
-        textStyle: const TextStyle(color: AppColors.turquoiseBlue, fontWeight: FontWeight.w800),
-        selectedTextStyle: const TextStyle(color: AppColors.turquoiseBlue, fontWeight: FontWeight.w800),
+        hoverTextStyle: const TextStyle(color: AppColors.turquoiseBlue, fontWeight: FontWeight.w600),
+        textStyle: textTheme.bodySmall?.copyWith(
+              color: AppColors.turquoiseBlue,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+        selectedTextStyle: textTheme.bodySmall?.copyWith(
+          color: AppColors.turquoiseBlue,
+          fontSize: 15,
+          fontWeight: WebHome.selectedIndex.value == 0 ||
+              WebHome.selectedIndex.value == 1 ? FontWeight.w500 : FontWeight.w900,
+        ),
         itemTextPadding: const EdgeInsets.only(left: 10),
         selectedItemTextPadding: const EdgeInsets.only(left: 10),
         itemDecoration: BoxDecoration(
@@ -59,9 +68,13 @@ class _SideBarWidgetState extends State<SideBarWidget> {
         selectedItemDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: WebHome.selectedIndex.value == 0 ? Colors.transparent : AppColors.primary100,
+            color: WebHome.selectedIndex.value == 0 ||
+                WebHome.selectedIndex.value == 1 ?
+            Colors.transparent : AppColors.primary100,
           ),
-          color: WebHome.selectedIndex.value == 0 ? Colors.transparent : AppColors.primary100,
+          color: WebHome.selectedIndex.value == 0 ||
+              WebHome.selectedIndex.value == 1 ?
+          Colors.transparent : AppColors.primary100,
         ),
         iconTheme: const IconThemeData(
           color: AppColors.turquoiseBlue,
@@ -73,7 +86,7 @@ class _SideBarWidgetState extends State<SideBarWidget> {
         ),
       ),
       extendedTheme: const SidebarXTheme(
-        width: 200,
+        width: 210,
         decoration: BoxDecoration(
           color: AppColors.white,
         ),
@@ -81,45 +94,55 @@ class _SideBarWidgetState extends State<SideBarWidget> {
       footerDivider: Divider(color: Colors.grey.withOpacity(0.5), height: 1),
       showToggleButton: false,
       headerBuilder: (context, extended) {
-        return isSmallScreen ?
-        Container(
-          height: 240,
+        return Container(
+          height: isSmallScreen ? 342 : 342,
           child: Padding(
-            padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
+            padding: isSmallScreen ? EdgeInsets.only(top: 10.0, left: 0, right: 0) : EdgeInsets.only(top: 20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SpaceH20(),
-                Image.asset(
+                isSmallScreen ? SpaceH20() : Container(),
+                isSmallScreen ? Image.asset(
                   ImagePath.LOGO,
                   height: 20,
-                ),
+                ) : Container(),
                 SpaceH30(),
                 Column(
                   children: [
                     _buildMyUserPhoto(context, widget.profilePic),
-                    CustomTextBoldCenter(title: widget.userName),
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: CustomTextBoldCenter(title: widget.userName),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0, right: 10, top: 0.0, bottom: 20),
+                      child: Container(
+                        margin: EdgeInsets.symmetric(vertical: 8), // optional for spacing
+                        height: 6, // Thickness of the 'divider'
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary100, // Color for the 'divider'
+                          borderRadius: BorderRadius.all(Radius.circular(10)), // The border radius
+                        ),
+                      ),
+                    ),
+                    CustomSideBarButton(
+                      buttonTitle: StringConst.CREATE_PARTICIPANT,
+                      onPressed: () {
+                        widget.keyWebHome.currentState?.closeDrawer();
+                        WebHome.selectedIndex.value = 1;
+                      },
+                      widget: Icon(Icons.add_circle_outlined, size: 20, color: AppColors.turquoiseBlue,),),
+                    SizedBox(height: 10),
                   ],
                 ),
               ],
             ),
           ),
-        ) : Container(
-          height: 200,
-          margin: const EdgeInsets.only(top: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildMyUserPhoto(context, widget.profilePic),
-              CustomTextBoldCenter(title: widget.userName),
-            ],
-          ),
         );
       },
       items: [
-        SidebarXItem(icon: Icons.add_circle_outlined, label: StringConst.NEW_PROFILE, onTap: _setSelectedIndexToOne),
         SidebarXItem(icon: Icons.view_quilt, label: 'Panel de control', onTap: _setSelectedIndexToOne),
         SidebarXItem(icon: Icons.supervisor_account, label: 'Participantes', onTap: _setSelectedIndexToOne),
         SidebarXItem(icon: Icons.card_travel, label: 'Mis recursos' , onTap: _setSelectedIndexToOne),
