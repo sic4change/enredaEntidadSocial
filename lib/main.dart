@@ -67,7 +67,7 @@ class MyApp extends StatelessWidget {
           routeInformationParser: _router.routeInformationParser,
           routerDelegate: _router.routerDelegate,
           debugShowCheckedModeBanner: false,
-          title: 'enREDa-empresas',
+          title: 'enREDa-entidad-social',
           theme: AppTheme.lightThemeData,
           localizationsDelegates: const [
             //CountryLocalizations.delegate,
