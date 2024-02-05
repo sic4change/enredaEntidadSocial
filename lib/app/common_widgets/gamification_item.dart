@@ -1,4 +1,4 @@
-import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
+import 'package:circular_seek_bar/circular_seek_bar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -25,50 +25,21 @@ class GamificationItem extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
-            height: !Responsive.isDesktop(context)? size/2:size,
-            width: !Responsive.isDesktop(context)? size/2:size,
-            /*
-            child: DashedCircularProgressBar.aspectRatio(
-                aspectRatio: 1, // width ÷ height
-                progress: progress,
-                startAngle: 225,
-                sweepAngle: 270,
-                foregroundColor: AppColors.darkYellow,
-                backgroundColor: AppColors.lightYellow,
-                foregroundStrokeWidth: !Responsive.isDesktop(context)?5: 10,
-                backgroundStrokeWidth: !Responsive.isDesktop(context)?5: 10,
-                seekColor: AppColors.darkYellow,
-                seekSize: !Responsive.isDesktop(context)?5: 10,
-                animation: true,
-                child: Padding(
-                  padding: EdgeInsets.only(top: !Responsive.isDesktop(context)?4.0: 8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        imagePath,
-                        width: !Responsive.isDesktop(context)? imageSize/2.8:imageSize,
-                        height: !Responsive.isDesktop(context)? imageSize/2.8:imageSize,
-                      ),
-                      if (!Responsive.isDesktop(context))
-                        SpaceH4(),
-                      if (progressText != null)
-                        Text(
-                          progressText!,
-                          style: textTheme.titleLarge?.copyWith(
-                              color: AppColors.turquoiseBlue,
-                              fontSize: !Responsive.isDesktop(context)? textTheme.titleLarge!.fontSize!/1.8:textTheme.titleLarge!.fontSize!,
-                          ),
-                        ),
-                      if (progressText == null)
-                        SpaceH8(),
-                    ],
-                  ),
-                )
-            )
-            */
+        CircularSeekBar(
+          height: !Responsive.isDesktop(context)? size/2:size,
+          width: !Responsive.isDesktop(context)? size/2:size,
+          startAngle: 45,
+          sweepAngle: 270,
+          progress: progress,
+          barWidth: !Responsive.isDesktop(context)?5: 10,
+          progressColor: AppColors.darkYellow,
+          innerThumbStrokeWidth: !Responsive.isDesktop(context)?5: 10,
+          innerThumbColor: AppColors.darkYellow,
+          outerThumbColor: Colors.transparent,
+          trackColor: AppColors.lightYellow,
+          strokeCap: StrokeCap.round,
+          animation: true,
+          animDurationMillis: 1500,
           child: Padding(
             padding: EdgeInsets.only(top: !Responsive.isDesktop(context)?4.0: 8.0),
             child: Column(

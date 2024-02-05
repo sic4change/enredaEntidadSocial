@@ -64,6 +64,7 @@ dependencies:
   smooth_star_rating_null_safety: ^1.0.4+2
   file_picker: ^6.1.1
   path_provider: ^2.1.2
+  circular_seek_bar: ^1.1.1
 
 dev_dependencies:
   flutter_test:
