@@ -93,12 +93,12 @@ class ImagePath {
   static const String DOWNLOAD = '$imageDir/icon-download.png';
   static const String LOGOUT = '$imageDir/icon-logout.png';
   static const String ICON_SHARE = '$imageDir/icon-share.png';
-  static const String VECTOR_2 = '$imageDir/vector-2.png';
-  static const String VECTOR_3 = '$imageDir/vector-3.png';
-  static const String VECTOR_4 = '$imageDir/vector-4.png';
-  static const String VECTOR_5 = '$imageDir/vector-5.png';
-  static const String VECTOR_6 = '$imageDir/vector-6.png';
-  static const String VECTOR_7 = '$imageDir/vector-7.png';
+  static const String ICON_ENTITY = '$imageDir/icon-directorio-entidad.png';
+  static const String ICON_PANEL = '$imageDir/icon-panel-entidad.png';
+  static const String ICON_PARTICIPANTS = '$imageDir/icon-participantes-entidad.png';
+  static const String ICON_RESOURCES = '$imageDir/icon-recursos-entidad.png';
+  static const String ICON_SESSIONS = '$imageDir/icon-sesiones-entidad.png';
+  static const String ICON_TOOLS = '$imageDir/icon-caja-entidad.png';
 
   // Participant details
   static const String GAMIFICATION_LOGO = '$imageDir/gamification_logo.png';

@@ -143,10 +143,11 @@ class _SideBarWidgetState extends State<SideBarWidget> {
         );
       },
       items: [
-        SidebarXItem(iconWidget: Image.asset(ImagePath.VECTOR_2), label: 'Panel de control', onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Image.asset(ImagePath.VECTOR_3), label: 'Participantes', onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Image.asset(ImagePath.VECTOR_4), label: 'Mis recursos' , onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Image.asset(ImagePath.VECTOR_5), label: 'Directorio Entidades', onTap: _setSelectedIndexToOne)
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PANEL), width: 20,), label: 'Panel de control', onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PARTICIPANTS), width: 20,), label: 'Participantes', onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_RESOURCES), width: 20,), label: 'Mis recursos' , onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_TOOLS), width: 20,), label: 'Caja de herramientas' , onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_ENTITY), width: 20,), label: 'Directorio Entidades', onTap: _setSelectedIndexToOne)
       ],
     );
   }

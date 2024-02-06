@@ -11,7 +11,7 @@ class ListItemBuilderGrid<T> extends StatelessWidget {
         this.emptyTitle,
         this.emptyMessage,
         this.maxCrossAxisExtentValue = 520,
-        this.mainAxisExtentValue = 240,
+        this.mainAxisExtentValue = 248,
         this.fitSmallerLayout = false})
       : super(key: key);
   final AsyncSnapshot<List<T>> snapshot;
@@ -49,8 +49,8 @@ class ListItemBuilderGrid<T> extends StatelessWidget {
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
             maxCrossAxisExtent: maxCrossAxisExtentValue!,
             mainAxisExtent: mainAxisExtentValue!,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
         ),
         itemBuilder: (context, index) {
           return Container(
