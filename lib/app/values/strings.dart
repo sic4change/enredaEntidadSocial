@@ -558,8 +558,15 @@ class StringConst {
 
   //Create entity errors
   static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';
-
   static const String SOMETHING_WRONG = 'Algo fue mal';
   static const String CANNOT_LOAD_DATA = 'No se pudo cargar los datos';
+
+  //ToolBox
+  static const String TOOL_BOX = 'Caja de herramientas ';
+  static const String ENREDA_METHODOLOGY = 'Metodología Enreda';
+  static const String WORKFLOW = 'Workflow de intervención';
+  static const String MANUAL_METHODOLOGY = 'Manual de Intervención de Metodología';
+  static const String MANUAL_METHODOLOGY_PDF = 'https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/MANUAL%20DE%20INTERVENCIO%CC%81N.%20METODOLOGI%CC%81A%20ENREDA.pdf?alt=media&token=b023917b-04d8-4236-9925-ec47ab21100b';
+
 
 }

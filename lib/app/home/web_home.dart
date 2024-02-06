@@ -10,6 +10,7 @@ import 'package:enreda_empresas/app/home/side_bar_widget.dart';
 import 'package:enreda_empresas/app/home/social_entity/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
+import 'package:enreda_empresas/app/home/tool_box/tool_box_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
@@ -168,6 +169,8 @@ class _WebHomeState extends State<WebHome> {
                             case 2: _key.currentState?.closeDrawer();
                             return MyResourcesListPage(socialEntity: socialEntity);
                             case 3: _key.currentState?.closeDrawer();
+                            return ToolBoxPage();
+                            case 4: _key.currentState?.closeDrawer();
                             return EntityDirectoryPage();
                             default:
                               return MyResourcesListPage(socialEntity: socialEntity);
