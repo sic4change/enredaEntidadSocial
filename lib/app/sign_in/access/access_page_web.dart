@@ -20,12 +20,17 @@ class _AccessPageWebState extends State<AccessPageWeb> {
   Widget build(BuildContext context) {
     const double largeHeight = 800;
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return constraints.maxHeight > largeHeight
-              ? _buildLargeBody(context)
-              : _buildSmallBody(context);
-        }
+      body: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 1580),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return constraints.maxHeight > largeHeight
+                  ? _buildLargeBody(context)
+                  : _buildSmallBody(context);
+            }
+          ),
+        ),
       )
     );
   }

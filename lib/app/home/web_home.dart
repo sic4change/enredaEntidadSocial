@@ -147,31 +147,36 @@ class _WebHomeState extends State<WebHome> {
               ],
             ),
             drawer: SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
-            body: Padding(
-              padding: Responsive.isMobile(context) ? const EdgeInsets.all(0.0) : const EdgeInsets.only(left: 20.0),
-              child: Row(
-                children: [
-                  if(!isSmallScreen) SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
-                  if (WebHome.selectedIndex.value == 0) Expanded(child: Center(child: bodyWidget[0]))
-                  else if (WebHome.selectedIndex.value == 1) Expanded(child: Center(child: bodyWidget[1]))
-                  else Expanded(child: Center(child: AnimatedBuilder(
-                    animation: WebHome.controller,
-                    builder: (context, child){
-                      switch(WebHome.controller.selectedIndex){
-                        case 0: _key.currentState?.closeDrawer();
-                        return ControlPanelPage(socialEntity: socialEntity, user: user,);
-                        case 1: _key.currentState?.closeDrawer();
-                        return const ParticipantsListPage();
-                        case 2: _key.currentState?.closeDrawer();
-                        return MyResourcesListPage(socialEntity: socialEntity);
-                        case 3: _key.currentState?.closeDrawer();
-                        return EntityDirectoryPage();
-                        default:
-                          return MyResourcesListPage(socialEntity: socialEntity);
-                      }
-                    },
-                  ),))
-                ],
+            body: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 1580),
+                child: Padding(
+                  padding: Responsive.isMobile(context) ? const EdgeInsets.all(0.0) : const EdgeInsets.only(left: 20.0),
+                  child: Row(
+                    children: [
+                      if(!isSmallScreen) SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
+                      if (WebHome.selectedIndex.value == 0) Expanded(child: Center(child: bodyWidget[0]))
+                      else if (WebHome.selectedIndex.value == 1) Expanded(child: Center(child: bodyWidget[1]))
+                      else Expanded(child: Center(child: AnimatedBuilder(
+                        animation: WebHome.controller,
+                        builder: (context, child){
+                          switch(WebHome.controller.selectedIndex){
+                            case 0: _key.currentState?.closeDrawer();
+                            return ControlPanelPage(socialEntity: socialEntity, user: user,);
+                            case 1: _key.currentState?.closeDrawer();
+                            return const ParticipantsListPage();
+                            case 2: _key.currentState?.closeDrawer();
+                            return MyResourcesListPage(socialEntity: socialEntity);
+                            case 3: _key.currentState?.closeDrawer();
+                            return EntityDirectoryPage();
+                            default:
+                              return MyResourcesListPage(socialEntity: socialEntity);
+                          }
+                        },
+                      ),))
+                    ],
+                  ),
+                ),
               ),
             ),
 
