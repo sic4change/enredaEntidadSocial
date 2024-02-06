@@ -124,7 +124,7 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
               Padding(
                 padding: const EdgeInsets.all(Sizes.MARGIN_44),
                 child: Text(
-                  StringConst.NEW_PROFILE,
+                  StringConst.CREATE_PARTICIPANT,
                   style: textTheme.titleMedium!.copyWith(
                     color: AppColors.turquoiseBlue,
                     fontWeight: FontWeight.w300,

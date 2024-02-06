@@ -318,6 +318,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                     expanded: buildExpandedResourcesList(),
                   ),
                   Divider(
+                    color: AppColors.greyLight,
                     height: 1,
                   ),
                   Row(
@@ -519,6 +520,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                     expanded: buildExpanded2(),
                   ),
                   Divider(
+                    color: AppColors.greyLight,
                     height: 1,
                   ),
                   Row(

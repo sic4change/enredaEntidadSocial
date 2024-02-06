@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/account/personal_data.dart';
 import 'package:enreda_empresas/app/home/entity_directory/entity_directory_page.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/create_participant_page.dart';
+import 'package:enreda_empresas/app/home/side_bar_widget.dart';
 import 'package:enreda_empresas/app/home/social_entity/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
@@ -31,14 +32,15 @@ class WebHome extends StatefulWidget {
   const WebHome({Key? key})
       : super(key: key);
 
-  static final controller = SidebarXController(selectedIndex: 2, extended: true);
+  static final SidebarXController controller = SidebarXController(selectedIndex: 0, extended: true);
+  static ValueNotifier<int> selectedIndex = ValueNotifier(2);
 
   static goToResources() {
-    controller.selectIndex(4);
+    controller.selectIndex(2);
   }
 
   static goToControlPanel() {
-    controller.selectIndex(2);
+    controller.selectIndex(0);
   }
 
   @override
@@ -51,7 +53,11 @@ class _WebHomeState extends State<WebHome> {
 
   @override
   void initState() {
-    bodyWidget = [];
+    bodyWidget = [
+      const PersonalData(),
+      const CreateParticipantPage(),
+      Container(),
+    ];
     super.initState();
   }
 
@@ -71,6 +77,7 @@ class _WebHomeState extends State<WebHome> {
                         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                         if (snapshot.hasData){
                           var user = snapshot.data!;
+                          var userName = '${user.firstName ?? ""} ${user.lastName ?? ""}';
                           var profilePic = user.photo ?? "";
                           if (user.role != 'Entidad Social') {
                             _unemployedSignOut(context);
@@ -82,7 +89,7 @@ class _WebHomeState extends State<WebHome> {
                                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                                 if (snapshot.hasData) {
                                   var organization = snapshot.data!;
-                                  return _buildContent(context, organization, user, profilePic);
+                                  return _buildContent(context, organization, user, profilePic, userName);
                                 }
                                 return const Center(child: CircularProgressIndicator());
                               });
@@ -94,142 +101,88 @@ class _WebHomeState extends State<WebHome> {
         });
   }
 
-  Widget _buildContent(BuildContext context, SocialEntity socialEntity, UserEnreda user, String profilePic){
+  Widget _buildContent(BuildContext context, SocialEntity socialEntity, UserEnreda user, String profilePic, String userName){
     final auth = Provider.of<AuthBase>(context, listen: false);
-    return Builder(
-      builder: (context) {
-        final isSmallScreen = MediaQuery.of(context).size.width < 600;
-        return Scaffold(
-          key: _key,
-          appBar: AppBar(
-            toolbarHeight: 80,
-            elevation: 0.4,
-            backgroundColor: AppColors.white,
-            leading: isSmallScreen ? IconButton(
-              onPressed: () {
-                _key.currentState?.openDrawer();
-              },
-              icon: const Icon(Icons.menu),
-            ) : Container(),
-            title: Transform(
-              transform:  Responsive.isMobile(context) ? Matrix4.translationValues(0.0, 0.0, 0.0) : Matrix4.translationValues(-40.0, 0.0, 0.0),
-              child: Row(
-                children: [
-                  Image.asset(
-                    ImagePath.LOGO,
-                    height: 24,
-                  ),
-                  !isSmallScreen ? _buildMyCompanyName(context, socialEntity) : Container(),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              InkWell(
-                  onTap: () {
-                  },
-                  child: _buildMyUserFoto(context, profilePic)
-              ),
-              const SizedBox(width: 10),
-              if (!auth.isNullUser)
-                SizedBox(
-                  width: 35,
-                  child: InkWell(
-                    onTap: () => _confirmSignOut(context),
-                    child: Image.asset(
-                      ImagePath.LOGOUT,
-                      height: Sizes.ICON_SIZE_30,
-                    ),),
+    return ValueListenableBuilder<int>(
+        valueListenable: WebHome.selectedIndex,
+        builder: (context, selectedIndex, child) {
+          final isSmallScreen = MediaQuery.of(context).size.width < 600;
+          return Scaffold(
+            key: _key,
+            appBar: AppBar(
+              toolbarHeight: 80,
+              elevation: 0.4,
+              backgroundColor: AppColors.white,
+              leading: isSmallScreen ? IconButton(
+                onPressed: () {
+                  _key.currentState?.openDrawer();
+                },
+                icon: const Icon(Icons.menu),
+              ) : Container(),
+              title: Transform(
+                transform:  Responsive.isMobile(context) ? Matrix4.translationValues(0.0, 0.0, 0.0) : Matrix4.translationValues(-40.0, 0.0, 0.0),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      ImagePath.LOGO,
+                      height: 24,
+                    ),
+                    !isSmallScreen ? _buildMyCompanyName(context, socialEntity) : Container(),
+                  ],
                 ),
-              const SizedBox(width: 50,)
-            ],
-          ),
-          drawer: SideBarWidget(controller: WebHome.controller,),
-          body: Padding(
-            padding: Responsive.isMobile(context) ? const EdgeInsets.all(0.0) : const EdgeInsets.only(left: 20.0),
-            child: Row(
-              children: [
-                if(!isSmallScreen) SideBarWidget(controller: WebHome.controller),
-                Expanded(child: Center(child: AnimatedBuilder(
-                  animation: WebHome.controller,
-                  builder: (context,child){
-                    switch(WebHome.controller.selectedIndex){
-                      case 0: _key.currentState?.closeDrawer();
-                      return const PersonalData();
-                      case 1: _key.currentState?.closeDrawer();
-                      return CreateParticipantPage();
-                      case 2: _key.currentState?.closeDrawer();
-                      return ControlPanelPage(socialEntity: socialEntity, user: user,);
-                      case 3: _key.currentState?.closeDrawer();
-                      return const ParticipantsListPage();
-                      case 4: _key.currentState?.closeDrawer();
-                      return MyResourcesListPage(socialEntity: socialEntity);
-                      case 5: _key.currentState?.closeDrawer();
-                      return  EntityDirectoryPage();
-                      default:
-                        return MyResourcesListPage(socialEntity: socialEntity);
-                    }
-                  },
-                ),))
+              ),
+              actions: <Widget>[
+                const SizedBox(width: 10),
+                if (!auth.isNullUser)
+                  SizedBox(
+                    width: 35,
+                    child: InkWell(
+                      onTap: () => _confirmSignOut(context),
+                      child: Image.asset(
+                        ImagePath.LOGOUT,
+                        height: Sizes.ICON_SIZE_30,
+                      ),),
+                  ),
+                const SizedBox(width: 50,)
               ],
             ),
-          ),
-
-        );
-      }
-    );
-
-  }
-
-  Widget _buildMyUserFoto(BuildContext context, String profilePic) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            !kIsWeb ?
-            ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(60)),
-              child:
-              Center(
-                child:
-                profilePic == "" ?
-                Container(
-                  color:  Colors.transparent,
-                  height: 40,
-                  width: 40,
-                  child: Image.asset(ImagePath.USER_DEFAULT),
-                ):
-                CachedNetworkImage(
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                    imageUrl: profilePic),
+            drawer: SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
+            body: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 1580),
+                child: Padding(
+                  padding: Responsive.isMobile(context) ? const EdgeInsets.all(0.0) : const EdgeInsets.only(left: 20.0),
+                  child: Row(
+                    children: [
+                      if(!isSmallScreen) SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
+                      if (WebHome.selectedIndex.value == 0) Expanded(child: Center(child: bodyWidget[0]))
+                      else if (WebHome.selectedIndex.value == 1) Expanded(child: Center(child: bodyWidget[1]))
+                      else Expanded(child: Center(child: AnimatedBuilder(
+                        animation: WebHome.controller,
+                        builder: (context, child){
+                          switch(WebHome.controller.selectedIndex){
+                            case 0: _key.currentState?.closeDrawer();
+                            return ControlPanelPage(socialEntity: socialEntity, user: user,);
+                            case 1: _key.currentState?.closeDrawer();
+                            return const ParticipantsListPage();
+                            case 2: _key.currentState?.closeDrawer();
+                            return MyResourcesListPage(socialEntity: socialEntity);
+                            case 3: _key.currentState?.closeDrawer();
+                            return EntityDirectoryPage();
+                            default:
+                              return MyResourcesListPage(socialEntity: socialEntity);
+                          }
+                        },
+                      ),))
+                    ],
+                  ),
+                ),
               ),
-            ):
-            ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(60)),
-              child:
-              profilePic == "" ?
-              Container(
-                color:  Colors.transparent,
-                height: 40,
-                width: 40,
-                child: Image.asset(ImagePath.USER_DEFAULT),
-              ):
-              PrecacheAvatarCard(
-                imageUrl: profilePic,
-                width: 35,
-                height: 35,
-              ),
-            )
-          ],
-        ),
-      ],
-    );
+            ),
+
+          );
+        });
+
   }
 
   Widget _buildMyCompanyName(BuildContext context, SocialEntity socialEntity) {
@@ -262,82 +215,6 @@ class _WebHomeState extends State<WebHome> {
       await auth.signOut();
       GoRouter.of(context).go(StringConst.PATH_HOME);
     }
-  }
-}
-
-
-class SideBarWidget extends StatelessWidget {
-  const SideBarWidget({Key? key, required SidebarXController controller}) : _controller = controller, super(key: key);
-  final SidebarXController _controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
-    return SidebarX(
-      controller: _controller,
-      theme: SidebarXTheme(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        hoverColor: AppColors.primary050,
-        hoverTextStyle: const TextStyle(color: AppColors.greyDark, fontWeight: FontWeight.w600),
-        textStyle: const TextStyle(color: AppColors.turquoiseBlue, fontWeight: FontWeight.w800),
-        selectedTextStyle: const TextStyle(color: AppColors.turquoiseBlue, fontWeight: FontWeight.w800),
-        itemTextPadding: const EdgeInsets.only(left: 10),
-        selectedItemTextPadding: const EdgeInsets.only(left: 10),
-        itemDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-        ),
-        selectedItemDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: AppColors.primary100,
-          ),
-          color: AppColors.primary100,
-        ),
-        iconTheme: const IconThemeData(
-          color: AppColors.turquoiseBlue,
-          size: 20,
-        ),
-        selectedIconTheme: const IconThemeData(
-          color: AppColors.turquoiseBlue,
-          size: 20,
-        ),
-      ),
-      extendedTheme: const SidebarXTheme(
-        width: 200,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-        ),
-      ),
-      footerDivider: Divider(color: Colors.grey.withOpacity(0.5), height: 1),
-      headerBuilder: (context, extended) {
-        return isSmallScreen ? SizedBox(
-          height: 60,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                Image.asset(
-                  ImagePath.LOGO,
-                  height: 20,
-                ),
-              ],
-            ),
-          ),
-        ) : const SizedBox(height: 10,);
-      },
-      items: const [
-        SidebarXItem(icon: Icons.account_circle_sharp, label: StringConst.MY_PROFILE),
-        SidebarXItem(icon: Icons.add_circle_outlined, label: StringConst.NEW_PROFILE),
-        SidebarXItem(icon: Icons.view_quilt, label: StringConst.CONTROL_PANEL),
-        SidebarXItem(icon: Icons.supervisor_account, label: StringConst.PARTICIPANTS),
-        SidebarXItem(icon: Icons.card_travel, label: StringConst.MY_RESOURCES),
-        SidebarXItem(icon: Icons.calendar_month, label: 'Directorio Entidades')
-      ],
-    );
   }
 }
 

@@ -180,7 +180,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           Padding(
             padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
             child: Text(
-              StringConst.NEW_PROFILE,
+              StringConst.CREATE_PARTICIPANT,
               style: textTheme.titleMedium!.copyWith(
                 color: AppColors.turquoiseBlue,
                 fontWeight: FontWeight.w300,
@@ -416,8 +416,8 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
               CustomFlexRowColumn(
                 contentPadding: EdgeInsets.all(0.0),
                 separatorSize: Sizes.kDefaultPaddingDouble,
-                //childLeft: streamBuilderForCity(context, selectedCountry, selectedProvince, selectedCity, _buildCityStreamBuilder_setState),
-                childLeft: Container(),
+                childLeft: streamBuilderForCity(context, selectedCountry, selectedProvince, selectedCity, _buildCityStreamBuilder_setState),
+                //childLeft: Container(),
                 childRight: customTextFormFieldName(context, _postalCode!, StringConst.FORM_POSTAL_CODE, StringConst.POSTAL_CODE_ERROR, _postalCode_setState),
               ),
               SpaceH20(),
