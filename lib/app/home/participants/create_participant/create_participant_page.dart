@@ -36,7 +36,6 @@ import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/interests.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/province.dart';
-import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
 import 'package:enreda_empresas/app/models/timeSearching.dart';
 import 'package:enreda_empresas/app/models/timeSpentWeekly.dart';
@@ -1026,16 +1025,9 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       return;
 
     // If not last step, advance and return
-    final isLastStep = currentStep == getSteps().length-1;
+    final isLastStep = currentStep == getSteps().length - 1;
     if (!isLastStep) {
-      setState(() => {
-        if(currentStep == 1 && sum >= 0 && sum <= 6 ) {
-          this.currentStep += 2
-        }
-        else {
-          this.currentStep += 1
-        }
-      });
+      setState(() => this.currentStep += 1);
       return;
     }
     _submit();

@@ -1,5 +1,6 @@
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/home/tool_box/pdf_preview.dart';
 import 'package:enreda_empresas/app/utils/functions.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -37,7 +38,16 @@ class EnredaMethodologyPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 30.0, right: 30.0, top: 10.0),
                     child: InkWell(
-                      onTap: () => launchURL(StringConst.MANUAL_METHODOLOGY_PDF),
+                      onTap: () async {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  MyPreviewPdf(
+                                    url: StringConst.MANUAL_METHODOLOGY_PDF
+                                  )),
+                        );
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
