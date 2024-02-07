@@ -66,8 +66,9 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
       controller: ScrollController(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Responsive.isDesktopS(context)? _buildHeaderMobile(context, user): _buildHeaderWeb(context, user),
+          Responsive.isDesktop(context)? _buildHeaderWeb(context, user): _buildHeaderMobile(context, user),
           SpaceH20(),
           Divider(
             indent: 0,
@@ -77,7 +78,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             height: 1,
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 22.0),
+            padding: const EdgeInsets.fromLTRB(40.0, 22.0,0.0,22.0),
             child: _buildMenuSelectorChips(context, user),
           ),
           Divider(
@@ -88,7 +89,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             height: 0,
           ),
           SpaceH24(),
-
           _currentPage!,
         ],
       ),
@@ -103,7 +103,10 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
         children: [
           _buildHeaderMobile(context, user!),
           SpaceH20(),
-          _buildMenuSelectorChips(context, user),
+          Padding(
+            padding: const EdgeInsets.only(left: Sizes.kDefaultPaddingDouble),
+            child: _buildMenuSelectorChips(context, user),
+          ),
           SpaceH20(),
           _currentPage!,
         ],
@@ -113,8 +116,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
   Widget _buildMenuSelectorChips(BuildContext context, UserEnreda user){
     return Wrap(
-      spacing: 5.0,
-      runSpacing: 5.0,
+      spacing: 20.0,
+      runSpacing: 20.0,
       children: List<Widget>.generate(
         5,
             (int index) {
@@ -171,64 +174,59 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   Widget _buildHeaderWeb(BuildContext context, UserEnreda user){
     final textTheme = Theme.of(context).textTheme;
     final database = Provider.of<Database>(context, listen: false);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        //Photo
-        Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 40, top: 30, right: 20, bottom: 30),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(160),
-                  ),
+    return Padding(
+      padding: const EdgeInsets.only(left: Sizes.kDefaultPaddingDouble*2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 30, right: 20, bottom: 30),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(160),
+              ),
+              child:
+              ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(160)),
+                child:
+                Center(
                   child:
-                  ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(160)),
-                    child:
-                    Center(
-                      child:
-                      user.photo == "" ?
-                      Container(
-                        color:  Colors.transparent,
-                        height: 160,
-                        width: 160,
-                        child: Image.asset(ImagePath.USER_DEFAULT),
-                      ):
-                      FadeInImage.assetNetwork(
-                        placeholder: ImagePath.USER_DEFAULT,
-                        width: 160,
-                        height: 160,
-                        fit: BoxFit.cover,
-                        image: user.photo ?? "",
-                      ),
-                    ),
+                  user.photo == "" ?
+                  Container(
+                    color:  Colors.transparent,
+                    height: 160,
+                    width: 160,
+                    child: Image.asset(ImagePath.USER_DEFAULT),
+                  ):
+                  FadeInImage.assetNetwork(
+                    placeholder: ImagePath.USER_DEFAULT,
+                    width: 160,
+                    height: 160,
+                    fit: BoxFit.cover,
+                    image: user.photo ?? "",
                   ),
                 ),
               ),
-
-
-              //Personal data
-              StreamBuilder<UserEnreda>(
-                stream: database.userEnredaStreamByUserId(user.assignedById),
-                builder: (context, snapshot) {
-                  String techName = snapshot.data?.firstName ?? '';
-                  String techLastName = snapshot.data?.lastName ?? '';
-                  return Padding(
-                    padding: const EdgeInsets.only(top:50),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
+            ),
+          ),
+          //Personal data
+          Expanded(
+            child: StreamBuilder<UserEnreda>(
+              stream: database.userEnredaStreamByUserId(user.assignedById),
+              builder: (context, snapshot) {
+                String techName = snapshot.data?.firstName ?? '';
+                String techLastName = snapshot.data?.lastName ?? '';
+                return Padding(
+                  padding: const EdgeInsets.only(top:50),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
                               '${user.firstName} ${user.lastName}',
                               style:
                                 textTheme.titleLarge?.copyWith(
@@ -238,218 +236,191 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                 fontSize: 35,
                                 ),
                             ),
-                            //Invite resource
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 150, right: 30),
-                                child: AddYellowButton(
-                                  text: 'Invitar a un recurso',
-                                  onPressed: () => showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
-                                ),
+                          ),
+                          AddYellowButton(
+                            text: StringConst.INVITE_RESOURCE,
+                            onPressed: () => showDialog(
+                                context: context,
+                                builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
+                          ),
+                          SpaceW20(),
+                        ],
+                      ),
+                      SpaceH8(),
+                      (techName != '' || techLastName != '') ?
+                        Text('Técnica de referencia: $techName $techLastName') :
+                        Container(),
+                      SpaceH40(),
+                      Row(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.mail,
+                                color: AppColors.darkGray,
+                                size: 22.0,
                               ),
-                            )
-                          ],
-                        ),
-                        SpaceH8(),
-                        (techName != '' || techLastName != '') ?
-                          Text('Tecnico de referencia: $techName $techLastName') :
-                          Container(),
-                        SpaceH50(),
-
-                        Row(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              const SpaceW4(),
+                              CustomTextSmall(text: user.email,),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            child: Row(
                               children: [
                                 const Icon(
-                                  Icons.mail,
+                                  Icons.phone,
                                   color: AppColors.darkGray,
                                   size: 22.0,
                                 ),
                                 const SpaceW4(),
-                                CustomTextSmall(text: user.email,),
+                                CustomTextSmall(text: user.phone ?? '',)
                               ],
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.phone,
-                                    color: AppColors.darkGray,
-                                    size: 22.0,
-                                  ),
-                                  const SpaceW4(),
-                                  CustomTextSmall(text: user.phone ?? '',)
-                                ],
-                              ),
-                            ),
-                            _buildMyLocation(context, user),
-                          ],
-                        )
+                          ),
+                          _buildMyLocation(context, user),
+                        ],
+                      )
 
-                      ],
-                    ),
-                  );
-                }
-              ),
-
-            ],
+                    ],
+                  ),
+                );
+              }
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildHeaderMobile(BuildContext context, UserEnreda user) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(120),
-                  ),
-                  child:
-                  !kIsWeb ? ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(60)),
+    return Padding(
+      padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(120),
+                    ),
                     child:
-                    Center(
+                    !kIsWeb ? ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(60)),
                       child:
-                      user?.photo == "" ?
-                      Container(
-                        color:  Colors.transparent,
-                        height: Responsive.isMobile(context) ? 90 : 120,
-                        width: Responsive.isMobile(context) ? 90 : 120,
-                        child: Image.asset(ImagePath.USER_DEFAULT),
-                      ):
-                      CachedNetworkImage(
+                      Center(
+                        child:
+                        user?.photo == "" ?
+                        Container(
+                          color:  Colors.transparent,
+                          height: Responsive.isMobile(context) ? 90 : 120,
+                          width: Responsive.isMobile(context) ? 90 : 120,
+                          child: Image.asset(ImagePath.USER_DEFAULT),
+                        ):
+                        CachedNetworkImage(
+                            width: Responsive.isMobile(context) ? 90 : 120,
+                            height: Responsive.isMobile(context) ? 90 : 120,
+                            fit: BoxFit.cover,
+                            alignment: Alignment.center,
+                            imageUrl: user?.photo ?? ""),
+                      ),
+                    ):
+                    ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(60)),
+                      child:
+                      Center(
+                        child:
+                        user?.photo == "" ?
+                        Container(
+                          color:  Colors.transparent,
+                          height: Responsive.isMobile(context) ? 90 : 120,
+                          width: Responsive.isMobile(context) ? 90 : 120,
+                          child: Image.asset(ImagePath.USER_DEFAULT),
+                        ):
+                        FadeInImage.assetNetwork(
+                          placeholder: ImagePath.USER_DEFAULT,
                           width: Responsive.isMobile(context) ? 90 : 120,
                           height: Responsive.isMobile(context) ? 90 : 120,
                           fit: BoxFit.cover,
-                          alignment: Alignment.center,
-                          imageUrl: user?.photo ?? ""),
-                    ),
-                  ):
-                  ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(60)),
-                    child:
-                    Center(
-                      child:
-                      user?.photo == "" ?
-                      Container(
-                        color:  Colors.transparent,
-                        height: Responsive.isMobile(context) ? 90 : 120,
-                        width: Responsive.isMobile(context) ? 90 : 120,
-                        child: Image.asset(ImagePath.USER_DEFAULT),
-                      ):
-                      FadeInImage.assetNetwork(
-                        placeholder: ImagePath.USER_DEFAULT,
-                        width: Responsive.isMobile(context) ? 90 : 120,
-                        height: Responsive.isMobile(context) ? 90 : 120,
-                        fit: BoxFit.cover,
-                        image: user?.photo ?? "",
+                          image: user?.photo ?? "",
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${user!.firstName} ${user.lastName}',
-                      maxLines: 2,
-                      style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold, color: AppColors.chatDarkGray, overflow: TextOverflow.ellipsis),
-                    ),
-                    SpaceH8(),
-                    Text(
-                      '${user.educationName}'.toUpperCase(),
-                      maxLines: 2,
-                      style: textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold, color: AppColors.penBlue, overflow: TextOverflow.ellipsis),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.mail,
-                          color: AppColors.darkGray,
-                          size: 14.0,
-                        ),
-                        const SpaceW4(),
-                        CustomTextSmall(text: user.email,),
-                      ],
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.phone,
-                          color: AppColors.darkGray,
-                          size: 14.0,
-                        ),
-                        const SpaceW4(),
-                        CustomTextSmall(text: user.phone ?? '',)
-                      ],
-                    ),
-                    _buildMyLocation(context, user),
-                  ],
+                ],
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${user!.firstName} ${user.lastName}',
+                        maxLines: 2,
+                        style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold, color: AppColors.chatDarkGray, overflow: TextOverflow.ellipsis),
+                      ),
+                      SpaceH8(),
+                      Text(
+                        '${user.educationName}'.toUpperCase(),
+                        maxLines: 2,
+                        style: textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold, color: AppColors.penBlue, overflow: TextOverflow.ellipsis),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.mail,
+                            color: AppColors.darkGray,
+                            size: 14.0,
+                          ),
+                          const SpaceW4(),
+                          CustomTextSmall(text: user.email,),
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.phone,
+                            color: AppColors.darkGray,
+                            size: 14.0,
+                          ),
+                          const SpaceW4(),
+                          CustomTextSmall(text: user.phone ?? '',)
+                        ],
+                      ),
+                      _buildMyLocation(context, user),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        SpaceH20(),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ElevatedButton(
+            ],
+          ),
+          SpaceH40(),
+          Center(
+            child: AddYellowButton(
+              text: 'Invitar a un recurso',
               onPressed: () => showDialog(
                   context: context,
                   builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.violet, // Background color
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(StringConst.INVITE_RESOURCE.toUpperCase(),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.penBlue,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    SizedBox(width: 5),
-                    SizedBox(height: 40, width: 40, child: Image.asset(ImagePath.CREATE_RESOURCE),)
-                  ],
-                ),
-              ),
             ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 

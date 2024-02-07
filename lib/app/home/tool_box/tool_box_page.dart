@@ -10,6 +10,7 @@ import 'package:enreda_empresas/app/home/tool_box/enreda_methodology.dart';
 import 'package:enreda_empresas/app/home/tool_box/workflow_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +54,7 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
         valueListenable: ToolBoxPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
+            contentPadding: EdgeInsets.all(Responsive.isDesktop(context)? Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble,) ,
             child: Stack(
               children: [
                 Column(

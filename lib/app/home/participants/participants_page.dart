@@ -7,6 +7,7 @@ import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -27,17 +28,16 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
   late UserEnreda socialEntityUser;
 
   @override
-  void initState() {
-    _bodyWidget = [
-      _buildParticipantsList(),
-      ParticipantDetailPage()
-    ];
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (_bodyWidget.isEmpty) {
+      _bodyWidget = [
+        _buildParticipantsList(),
+        ParticipantDetailPage()
+      ];
+    }
+
     return RoundedContainer(
+        contentPadding: EdgeInsets.all(0.0),
         child: Align(
         alignment: Alignment.topLeft,
         child: SingleChildScrollView(
@@ -46,8 +46,10 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
               builder: (context, selectedIndex, child) {
                 return Column(
                   children: [
-                    Container(
-                      height: 50,
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: Responsive.isDesktop(context)? Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble,
+                        top: Responsive.isDesktop(context)? Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble,),
                       child: Row(
                         children: [
                           InkWell(
@@ -76,81 +78,85 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final database = Provider.of<Database>(context, listen: false);
 
-    return StreamBuilder<UserEnreda>(
-      stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        globals.currentSocialEntityUser = snapshot.data!;
-        socialEntityUser = snapshot.data!;
-        return StreamBuilder<List<UserEnreda>>(
-          stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
-          builder: (context, userSnapshot) {
-            if(userSnapshot.hasData) {
-              return StreamBuilder(
-                stream: database.socialEntityStreamById(socialEntityUser.socialEntityId!),
-                builder: (context, socialEntitySnapshot) {
-                  if (socialEntitySnapshot.hasData) {
-                    final textTheme = Theme.of(context).textTheme;
-                    final users = userSnapshot.data!;
-                    final myParticipants = users.where((u) =>
-                    u.assignedEntityId == socialEntityUser.socialEntityId!
-                        && u.assignedById == socialEntityUser.userId).toList();
-                    final allOtherParticipants = users.where((u) =>
-                    u.assignedEntityId == socialEntityUser.socialEntityId!
-                        && u.assignedById != socialEntityUser.userId).toList();
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(StringConst.MY_PARTICIPANTS,
-                          style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.turquoiseBlue),),
-                        SpaceH20(),
-                        ParticipantsItemBuilder(
-                            usersList: myParticipants,
-                            emptyMessage: 'No hay participantes gestionados por ti',
-                            itemBuilder: (context, user) {
-                              return ParticipantsListTile(
-                                  user: user,
-                                  onTap: () => setState(() {
-                                    globals.currentParticipant = user;
-                                    ParticipantsListPage.selectedIndex.value = 1;
-                                  })
-                              );
-                            }
-                            ),
-                        SpaceH40(),
-                        Text(StringConst.allParticipants(socialEntitySnapshot.data!.name),
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.turquoiseBlue,),),
-                        SpaceH20(),
-                        ParticipantsItemBuilder(
-                            usersList: allOtherParticipants,
-                            emptyMessage: 'No hay participantes gestionados por tu entidad',
-                            itemBuilder: (context, user) {
-                              return ParticipantsListTile(
-                                  user: user,
-                                  onTap: () => setState(() {
-                                    globals.currentParticipant = user;
-                                    ParticipantsListPage.selectedIndex.value = 1;
-                                  })
-                              );
-                            }
-                            ),
-                      ],
-                    );
-                  }
-                  return const Center(child: CircularProgressIndicator());
-                }
-              );
-            }
+    return Padding(
+      padding: EdgeInsets.all(Responsive.isDesktop(context)?
+        Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble),
+      child: StreamBuilder<UserEnreda>(
+        stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
-        });
-    });
+          }
+          globals.currentSocialEntityUser = snapshot.data!;
+          socialEntityUser = snapshot.data!;
+          return StreamBuilder<List<UserEnreda>>(
+            stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
+            builder: (context, userSnapshot) {
+              if(userSnapshot.hasData) {
+                return StreamBuilder(
+                  stream: database.socialEntityStreamById(socialEntityUser.socialEntityId!),
+                  builder: (context, socialEntitySnapshot) {
+                    if (socialEntitySnapshot.hasData) {
+                      final textTheme = Theme.of(context).textTheme;
+                      final users = userSnapshot.data!;
+                      final myParticipants = users.where((u) =>
+                      u.assignedEntityId == socialEntityUser.socialEntityId!
+                          && u.assignedById == socialEntityUser.userId).toList();
+                      final allOtherParticipants = users.where((u) =>
+                      u.assignedEntityId == socialEntityUser.socialEntityId!
+                          && u.assignedById != socialEntityUser.userId).toList();
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(StringConst.MY_PARTICIPANTS,
+                            style: textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.turquoiseBlue),),
+                          SpaceH20(),
+                          ParticipantsItemBuilder(
+                              usersList: myParticipants,
+                              emptyMessage: 'No hay participantes gestionados por ti',
+                              itemBuilder: (context, user) {
+                                return ParticipantsListTile(
+                                    user: user,
+                                    onTap: () => setState(() {
+                                      globals.currentParticipant = user;
+                                      ParticipantsListPage.selectedIndex.value = 1;
+                                    })
+                                );
+                              }
+                              ),
+                          SpaceH40(),
+                          Text(StringConst.allParticipants(socialEntitySnapshot.data!.name),
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.turquoiseBlue,),),
+                          SpaceH20(),
+                          ParticipantsItemBuilder(
+                              usersList: allOtherParticipants,
+                              emptyMessage: 'No hay participantes gestionados por tu entidad',
+                              itemBuilder: (context, user) {
+                                return ParticipantsListTile(
+                                    user: user,
+                                    onTap: () => setState(() {
+                                      globals.currentParticipant = user;
+                                      ParticipantsListPage.selectedIndex.value = 1;
+                                    })
+                                );
+                              }
+                              ),
+                        ],
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                );
+              }
+              return const Center(child: CircularProgressIndicator());
+          });
+      }),
+    );
   }
 
 }

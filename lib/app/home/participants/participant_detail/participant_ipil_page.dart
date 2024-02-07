@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
@@ -26,7 +27,7 @@ class ParticipantIPILPage extends StatelessWidget {
     final auth = Provider.of<AuthBase>(context, listen: false);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)? 50.0: 8.0, vertical: 30),
+      padding: EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)? 50.0: 20.0, vertical: 30),
       child: Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
@@ -57,15 +58,7 @@ class ParticipantIPILPage extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              StringConst.IPIL,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.bluePetrol,
-                                fontSize: 35,
-                                fontFamily: GoogleFonts.outfit().fontFamily,
-                              ),
-                            ),
+                            CustomTextBoldTitle(title: StringConst.IPIL),
                             Row(
                               children: [
                                 IconButton(
