@@ -37,7 +37,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
 
   Widget _buildBodyDesktop(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/models/personalDocument.dart';
 import 'package:enreda_empresas/app/models/personalDocumentType.dart';
@@ -70,7 +71,7 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
 
                   }
                   return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)? 50.0: 8.0, vertical: 30),
+                      padding: EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)? 50.0: 20.0, vertical: 30),
                       child: Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
@@ -109,15 +110,7 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                StringConst.PERSONAL_DOCUMENTATION.toUpperCase(),
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.bluePetrol,
-                  fontSize: 35.0,
-                  fontFamily: GoogleFonts.outfit().fontFamily,
-                ),
-              ),
+              CustomTextBoldTitle(title: StringConst.PERSONAL_DOCUMENTATION.toUpperCase()),
               Row(
                   children: [
                     InkWell(
@@ -156,15 +149,7 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
         child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                StringConst.PERSONAL_DOCUMENTATION.toUpperCase(),
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.bluePetrol,
-                  fontSize: 18.0,
-                  fontFamily: GoogleFonts.outfit().fontFamily,
-                ),
-              ),
+              CustomTextBoldTitle(title: StringConst.PERSONAL_DOCUMENTATION.toUpperCase()),
               SpaceH8(),
               InkWell(
                 child: Row(

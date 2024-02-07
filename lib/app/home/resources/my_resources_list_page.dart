@@ -46,6 +46,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
         valueListenable: MyResourcesListPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
+            contentPadding: EdgeInsets.all(Sizes.kDefaultPaddingDouble*2),
             child: Stack(
               children: [
                 Row(
@@ -55,6 +56,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                     Container(
                       height: 50,
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           InkWell(
                             onTap: () => {

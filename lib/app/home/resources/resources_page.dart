@@ -76,50 +76,47 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
       return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: StreamBuilder<UserEnreda>(
-                        stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasData) {
-                            var user = snapshot.data!;
-                            return StreamBuilder<List<Resource>>(
-                                stream: database.myResourcesStream(user.socialEntityId!),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return const Center(
-                                        child: CircularProgressIndicator());
-                                  }
-                                  if (snapshot.hasData) {
-                                    List<Resource> resource = snapshot.data!;
-                                    return StreamBuilder<SocialEntity>(
-                                      stream: database.socialEntityStreamById(user.socialEntityId!),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return const Center(
-                                              child: CircularProgressIndicator());
-                                        }
-                                        final SocialEntity? socialEntity = snapshot.data;
-                                        return CustomTextBoldTitle(title: '${resource.length.toString()} recursos creados por ${socialEntity == null ? '' : socialEntity.name}');
-                                      },
-                                    );
-                                  }
-                                  return const Center(child: CircularProgressIndicator());
-                                });
-                          }
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: StreamBuilder<UserEnreda>(
+                      stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
                           return const Center(child: CircularProgressIndicator());
-                        }),
-                  ),
-                ],
-              ),
+                        }
+                        if (snapshot.hasData) {
+                          var user = snapshot.data!;
+                          return StreamBuilder<List<Resource>>(
+                              stream: database.myResourcesStream(user.socialEntityId!),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+                                if (snapshot.hasData) {
+                                  List<Resource> resource = snapshot.data!;
+                                  return StreamBuilder<SocialEntity>(
+                                    stream: database.socialEntityStreamById(user.socialEntityId!),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      }
+                                      final SocialEntity? socialEntity = snapshot.data;
+                                      return CustomTextBoldTitle(title: '${resource.length.toString()} recursos creados por ${socialEntity == null ? '' : socialEntity.name}');
+                                    },
+                                  );
+                                }
+                                return const Center(child: CircularProgressIndicator());
+                              });
+                        }
+                        return const Center(child: CircularProgressIndicator());
+                      }),
+                ),
+              ],
             ),
           ]);
     }
