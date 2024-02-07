@@ -1,3 +1,4 @@
+import 'package:circular_seek_bar/circular_seek_bar.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
@@ -10,6 +11,7 @@ import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -57,7 +59,13 @@ class ParticipantControlPanelPage extends StatelessWidget {
                 ),
               ),
               SpaceW20(),
-              _buildCvSection(context),
+              Column(
+                children: [
+                  _buildCvSection(context),
+                  SpaceH40(),
+                  _buildDocumetationSection(context),
+                ],
+              ),
             ],
           ),
         ],
@@ -80,6 +88,8 @@ class ParticipantControlPanelPage extends StatelessWidget {
           _buildResourcesSection(context),
           SpaceH20(),
           _buildCvSection(context),
+          SpaceH20(),
+          _buildDocumetationSection(context),
         ],
       ),
     );
@@ -611,6 +621,71 @@ class ParticipantControlPanelPage extends StatelessWidget {
             ),
           ),)
       ],
+    );
+  }
+
+  Widget _buildDocumetationSection(BuildContext context) {
+    final database = Provider.of<Database>(context, listen: false);
+    double maxValue = 10;
+    double value = 0;
+    return StreamBuilder<List<PersonalDocumentType>>(
+        stream: database.personalDocumentTypeStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            maxValue = snapshot.data!.length.toDouble();
+            value = participantUser.personalDocuments.where((userDocument) =>
+                userDocument.document.isNotEmpty && snapshot.data!.any((document) => document.title == userDocument.name)
+            ).length.toDouble();
+          }
+          return RoundedContainer(
+            margin: EdgeInsets.all(0.0),
+            //height: 420.0,
+            width: 340.0,
+            borderColor: AppColors.greyAlt.withOpacity(0.15),
+            child: Column (
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomTextBoldTitle(title: StringConst.DOCUMENTATION),
+                SpaceH20(),
+                Stack(
+                  children: [
+                    Center(
+                      child: CircularSeekBar(
+                        height: 260,
+                        width: 260,
+                        startAngle: 45,
+                        sweepAngle: 270,
+                        progress: value,
+                        maxProgress: maxValue,
+                        barWidth: 15,
+                        progressColor: AppColors.darkYellow,
+                        innerThumbStrokeWidth: 15,
+                        innerThumbColor: AppColors.darkYellow,
+                        outerThumbColor: Colors.transparent,
+                        trackColor: AppColors.lightYellow,
+                        strokeCap: StrokeCap.round,
+                        animation: true,
+                        animDurationMillis: 1500,
+                      ),
+                    ),
+                    Center(
+                      child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 40.0),
+                              child: Image.asset(ImagePath.PARTICIPANT_DOCUMENTATION_ICON, width:220,),
+                            ),
+                            CustomTextBoldTitle(title: "${(value/maxValue)*100}%"),
+                            CustomTextMediumBold(text: StringConst.COMPLETED.toUpperCase()),
+                          ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+      }
     );
   }
 

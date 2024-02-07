@@ -149,7 +149,7 @@ class _WebHomeState extends State<WebHome> {
             drawer: SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
             body: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 1580),
+                constraints: BoxConstraints(maxWidth: 1600),
                 child: Padding(
                   padding: Responsive.isMobile(context) ? const EdgeInsets.all(0.0) : const EdgeInsets.only(left: 20.0),
                   child: Row(

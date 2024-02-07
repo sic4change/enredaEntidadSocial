@@ -22,7 +22,7 @@ class _AccessPageWebState extends State<AccessPageWeb> {
     return Scaffold(
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 1580),
+          constraints: BoxConstraints(maxWidth: 1600),
           child: LayoutBuilder(
             builder: (context, constraints) {
               return constraints.maxHeight > largeHeight

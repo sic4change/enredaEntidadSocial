@@ -107,4 +107,5 @@ class ImagePath {
   static const String GAMIFICATION_PILL_ICON = '$imageDir/gamification_pill_icon.png';
   static const String GAMIFICATION_RESOURCES_ICON = '$imageDir/gamification_resources_icon.png';
   static const String GAMIFICATION_CV_ICON = '$imageDir/gamification_cv_icon.png';
+  static const String PARTICIPANT_DOCUMENTATION_ICON = '$imageDir/participant_documentation_icon.png';
 }
