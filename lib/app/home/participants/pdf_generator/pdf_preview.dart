@@ -111,7 +111,7 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
   void _showPrintedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        backgroundColor: AppColors.penLightBlue,
+        backgroundColor: AppColors.turquoiseBlue,
         content: Text('Documento impreso con éxito'),
       ),
     );
@@ -120,7 +120,7 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
   void _showSharedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        backgroundColor: AppColors.penLightBlue,
+        backgroundColor: AppColors.turquoiseBlue,
         content: Text('Documento compartido con éxito'),
       ),
     );
@@ -160,16 +160,18 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.primary100,
         foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
         title: const Text('Mi Currículum'),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.turquoiseBlue,
             fontSize: 22.0),
         bottom: TabBar(
           controller: _tabController,
           tabs: examples.map<Tab>((e) => Tab(text: e.name)).toList(),
-          labelColor: Colors.white,
+          labelColor: AppColors.bluePetrol,
           labelStyle: TextStyle(fontSize: 20),
           isScrollable: true,
         ),
