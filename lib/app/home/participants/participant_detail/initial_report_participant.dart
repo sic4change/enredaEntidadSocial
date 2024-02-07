@@ -1,6 +1,7 @@
 import 'package:enreda_empresas/app/common_widgets/custom_date_picker_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_multi_selection_radio_list.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
@@ -34,15 +35,7 @@ Widget initialReport(BuildContext context, UserEnreda user){
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(
-                    'Informe inicial'.toUpperCase(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.bluePetrol,
-                      fontSize: 35,
-                      fontFamily: GoogleFonts.outfit().fontFamily,
-                    ),
-                  ),
+                  CustomTextBoldTitle(title: 'Informe inicial'.toUpperCase()),
                 ],
               ),
             ),

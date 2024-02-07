@@ -73,7 +73,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
 
   @override
   void initState(){
-    _currentPage = _buildEntitiesList();
+    //_currentPage = _buildEntitiesList();
     super.initState();
   }
 
@@ -86,7 +86,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       controller: ScrollController(),
-      child: _currentPage,
+      child: _buildEntitiesList(),
     );
   }
 
