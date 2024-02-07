@@ -2,6 +2,7 @@ import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -12,9 +13,11 @@ class ParticipantsListTile extends StatefulWidget {
   const ParticipantsListTile({
     Key? key,
     required this.user,
+    required this.socialEntityUserId,
     this.onTap})
       : super(key: key);
   final UserEnreda user;
+  final String socialEntityUserId;
   final VoidCallback? onTap;
 
   @override
@@ -108,7 +111,9 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                         titleColor: Colors.white,
                         height: 40.0,
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                        onPressed: () {},
+                        onPressed: () => showDialog(
+                            context: context,
+                            builder: (BuildContext context) => ShowInvitationDialog(user: widget.user, organizerId: widget.socialEntityUserId!,)),
                       ),
                       SpaceH20(),
                       _buildContactRow(textTheme),

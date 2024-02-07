@@ -36,12 +36,8 @@ class WebHome extends StatefulWidget {
   static final SidebarXController controller = SidebarXController(selectedIndex: 0, extended: true);
   static ValueNotifier<int> selectedIndex = ValueNotifier(2);
 
-  static goToResources() {
-    controller.selectIndex(2);
-  }
-
   static goToControlPanel() {
-    controller.selectIndex(0);
+    WebHome.controller.selectIndex(0);
   }
 
   @override

@@ -120,6 +120,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                               itemBuilder: (context, user) {
                                 return ParticipantsListTile(
                                     user: user,
+                                    socialEntityUserId: socialEntityUser.socialEntityId!,
                                     onTap: () => setState(() {
                                       globals.currentParticipant = user;
                                       ParticipantsListPage.selectedIndex.value = 1;
@@ -139,6 +140,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                               itemBuilder: (context, user) {
                                 return ParticipantsListTile(
                                     user: user,
+                                    socialEntityUserId: socialEntityUser.socialEntityId!,
                                     onTap: () => setState(() {
                                       globals.currentParticipant = user;
                                       ParticipantsListPage.selectedIndex.value = 1;

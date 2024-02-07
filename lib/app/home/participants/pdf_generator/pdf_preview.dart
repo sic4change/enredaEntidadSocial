@@ -205,6 +205,7 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
         ),
         actions: actions,
         canDebug: false,
+        initialPageFormat: PdfPageFormat.a4,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
         canChangeOrientation: false,

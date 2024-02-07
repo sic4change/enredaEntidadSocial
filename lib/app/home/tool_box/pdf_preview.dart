@@ -170,6 +170,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return PdfPreview(
+            maxPageWidth: 700,
             build: (format) => snapshot.data!,
             canDebug: false,
             initialPageFormat: PdfPageFormat.a4,
