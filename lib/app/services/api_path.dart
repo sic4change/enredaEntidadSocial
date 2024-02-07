@@ -64,4 +64,7 @@ class APIPath {
   static String ipilEntryById(String? ipilId) => 'ipilEntry/$ipilId';
   static String personalDocumentType() => 'personalDocumentType';
   static String personalDocumentUser(String userId) => 'users/$userId';
+  static String initialReports() => 'initialReports';
+  static String initialReport(String initialReportId) => 'initialReports/$initialReportId';
+  static String languages() => 'languages';
 }

@@ -15,6 +15,7 @@ import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/gender.dart';
+import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/organization.dart';
@@ -120,6 +121,10 @@ abstract class Database {
      Future<void> deleteIpilEntry(IpilEntry ipilEntry);
      Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
      Future<void> uploadPersonalDocument(UserEnreda user, Uint8List data, String name, PersonalDocument document, int position);
+     Stream<InitialReport> initialReportsStreamByUserId(String? userId);
+     Future<void> setInitialReport(InitialReport initialReport);
+     Future<void> addInitialReport(InitialReport initialReport);
+     Stream<List<String>> languagesStream();
 }
 
 class FirestoreDatabase implements Database {
@@ -830,6 +835,33 @@ class FirestoreDatabase implements Database {
       },
     );
   }
+
+  @override
+  Stream<InitialReport> initialReportsStreamByUserId(String? userId) {
+    return _service.documentStreamByField(
+      path: APIPath.initialReports(),
+      builder: (data, documentId) => InitialReport.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('userId', isEqualTo: userId),
+    );
+  }
+
+  @override
+  Future<void> setInitialReport(InitialReport initialReport) {
+    return _service.updateData(
+        path: APIPath.initialReport(initialReport.initialReportId!), data: initialReport.toMap());
+  }
+
+  @override
+  Future<void> addInitialReport(InitialReport initialReport) =>
+      _service.addData(path: APIPath.initialReports(), data: initialReport.toMap());
+
+  @override
+  Stream<List<String>> languagesStream() => _service.collectionStream(
+    path: APIPath.languages(),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null),
+    builder: (data, documentId) => data['name'].toString(),
+    sort: (lhs, rhs) => lhs.compareTo(rhs),
+  );
 
 }
 

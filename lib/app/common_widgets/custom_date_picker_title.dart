@@ -12,13 +12,17 @@ class CustomDatePickerTitle extends StatelessWidget {
     this.onChanged,
     this.hintText,
     this.validator,
+    this.initialValue,
+    this.enabled,
 
   });
   final String labelText;
   final double fontSize;
-  final Function(String?)? onChanged;
+  final Function(DateTime?)? onChanged;
   final String? hintText;
-  final String ?Function(String?)? validator;
+  final String ?Function(DateTime?)? validator;
+  final DateTime? initialValue;
+  final bool? enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +55,10 @@ class CustomDatePickerTitle extends StatelessWidget {
           Container(
             height: 50,
             child: DateTimeField(
+              initialValue: initialValue,
+              enabled: enabled ?? true,
+              onChanged: onChanged,
+              validator: validator,
               format: DateFormat('dd/MM/yyyy'),
               decoration: InputDecoration(
                 hintText: hintText,

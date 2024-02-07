@@ -2,6 +2,7 @@ class InitialReport {
   InitialReport({
     this.initialReportId,
     this.userId,
+    this.finished,
 
     this.subsidy,
 
@@ -120,6 +121,7 @@ class InitialReport {
   //Basic
   final String? initialReportId;
   final String? userId;
+  final bool? finished;
 
   //Pre-Sections
   final String? subsidy;
@@ -236,29 +238,42 @@ class InitialReport {
 
 
   factory InitialReport.fromMap(Map<String, dynamic> data, String documentId) {
+    List<String> hostingObservations = [];
+    if (data['hostingObservations'] != null) {
+      List<dynamic> list = data['hostingObservations'];
+      list.forEach((element) {
+        hostingObservations.add(element);
+      });
+    }
+
+    List<String> vulnerabilityOptions = [];
+    if (data['vulnerabilityOptions'] != null) {
+      List<dynamic> list = data['vulnerabilityOptions'];
+      list.forEach((element) {
+        vulnerabilityOptions.add(element);
+      });
+    }
+
     return InitialReport(
-      ipilId: data['ipilId'],
-      content: data['content'],
-      techId: data['techId'],
-      date: data['date'].toDate(),
 
         //Basic
       initialReportId: data['initialReportId'],
       userId: data['userId'],
+      finished: data['finished'],
 
       //Pre-Sections
       subsidy: data['subsidy'],
 
       //Section 1
       orientation1: data['orientation1'],
-      arriveDate: data['arriveDate'].toDate(),
+      arriveDate: data['arriveDate'] != null ? data['arriveDate'].toDate() : null,
       receptionResources: data['receptionResources'],
       externalResources: data['externalResources'],
       administrativeSituation: data['administrativeSituation'],
 
       //Section 2
       orientation2: data['orientation2'],
-      expirationDate: data['expirationDate'].toDate(),
+      expirationDate: data['expirationDate'] != null ? data['expirationDate'].toDate() : null,
       healthCard: data['healthCard'],
       disease: data['disease'],
       medication: data['medication'],
@@ -303,60 +318,61 @@ class InitialReport {
       location: data['location'],
       livingUnit: data['livingUnit'],
       centerContact: data['centerContact'],
-      final List<String>? hostingObservations;
+      hostingObservations: hostingObservations,
+
 
       //Section 5
-      final String? orientation5: data['addictionTreatment'],
-      final String? informationNetworks: data['addictionTreatment'],
+      orientation5: data['orientation5'],
+      informationNetworks: data['informationNetworks'],
 
       //Section 6
-      final String? orientation6: data['addictionTreatment'],
-      final String? socialStructureKnowledge: data['addictionTreatment'],
-      final String? autonomyPhysicMental: data['addictionTreatment'],
-      final String? socialSkills: data['addictionTreatment'],
+      orientation6: data['orientation6'],
+      socialStructureKnowledge: data['socialStructureKnowledge'],
+      autonomyPhysicMental: data['autonomyPhysicMental'],
+      socialSkills: data['socialSkills'],
 
       //Section 7
-      final String? orientation7: data['addictionTreatment'],
-      final String? language: data['addictionTreatment'],
-      final String? languageLevel: data['addictionTreatment'],
+      orientation7: data['orientation7'],
+      language: data['language'],
+      languageLevel: data['languageLevel'],
 
       //Section 8
-      final String? orientation8: data['addictionTreatment'],
-      final String? economicProgramHelp: data['addictionTreatment'],
-      final String? familySupport: data['addictionTreatment'],
-      final String? familyResponsibilities: data['addictionTreatment'],
+      orientation8: data['orientation8'],
+      economicProgramHelp: data['economicProgramHelp'],
+      familySupport: data['familySupport'],
+      familyResponsibilities: data['familyResponsibilities'],
 
       //Section 9
-      final String? orientation9: data['addictionTreatment'],
-      final String? socialServiceAccess: data['addictionTreatment'],
-      final String? centerTSReference: data['addictionTreatment'],
-      final String? subsidyBeneficiary: data['addictionTreatment'],
-      final String? socialServicesUser: data['addictionTreatment'],
-      final String? socialExclusionCertificate: data['addictionTreatment'],
+      orientation9: data['orientation9'],
+      socialServiceAccess: data['socialServiceAccess'],
+      centerTSReference: data['centerTSReference'],
+      subsidyBeneficiary: data['subsidyBeneficiary'],
+      socialServicesUser: data['socialServicesUser'],
+      socialExclusionCertificate: data['socialExclusionCertificate'],
 
       //Section 10
-      final String? orientation10;
-      final String? digitalSkillsLevel;
+      orientation10: data['orientation10'],
+      digitalSkillsLevel: data['digitalSkillsLevel'],
 
       //Section 11
-      final String? orientation11;
-      final String? laborMarkerInterest;
-      final String? laborExpectations;
+      orientation11: data['orientation11'],
+      laborMarkerInterest: data['laborMarkerInterest'],
+      laborExpectations: data['laborExpectations'],
 
       //Section 12
-      final String? orientation12;
-      final List<String>? vulnerabilityOptions;
+      orientation12: data['orientation12'],
+      vulnerabilityOptions: vulnerabilityOptions,
 
       //Section 13
-      final String? orientation13;
-      final String? educationLevel;
-      final String? laborSituation;
-      final String? laborExternalResources;
-      final String? educationalEvaluation;
-      final String? formativeItinerary;
-      final String? laborInsertion;
-      final String? accompanimentPostLabor;
-      final String? laborUpgrade;
+      orientation13: data['orientation13'],
+      educationLevel: data['educationLevel'],
+      laborSituation: data['laborSituation'],
+      laborExternalResources: data['laborExternalResources'],
+      educationalEvaluation: data['educationalEvaluation'],
+      formativeItinerary: data['formativeItinerary'],
+      laborInsertion: data['laborInsertion'],
+      accompanimentPostLabor: data['accompanimentPostLabor'],
+      laborUpgrade: data['laborUpgrade'],
     );
   }
 
@@ -370,11 +386,124 @@ class InitialReport {
 
   Map<String, dynamic> toMap() {
     return {
-      'ipilId': ipilId,
-      'content': content,
-      'techId': techId,
+
+      'initialReportId': initialReportId,
       'userId': userId,
-      'date': date,
+      'finished': finished,
+
+      //Pre-Sections
+      'subsidy': subsidy,
+
+      //Section 1
+      'orientation1': orientation1,
+      'arriveDate': arriveDate,
+      'receptionResources': receptionResources,
+      'externalResources': externalResources,
+      'administrativeSituation': administrativeSituation,
+
+      //Section 2
+      'orientation2': administrativeSituation,
+      'expirationDate': expirationDate,
+      'healthCard': healthCard,
+      'disease': disease,
+      'medication': medication,
+
+      //Section 2.1
+      'orientation2_1': orientation2_1,
+      'rest': rest,
+      'diagnosis': diagnosis,
+      'treatment': treatment,
+      'tracking': tracking,
+      'psychosocial': psychosocial,
+
+      //Section 2.2
+      'orientation2_2': orientation2_2,
+      'disabilityState': disabilityState,
+      'referenceProfessionalDisability': referenceProfessionalDisability,
+      'disabilityGrade': disabilityGrade,
+
+      //Section 2.3
+      'orientation2_3': orientation2_3,
+      'dependenceState': dependenceState,
+      'referenceProfessionalDependence': referenceProfessionalDependence,
+      'homeAssistance': homeAssistance,
+      'teleassistance': teleassistance,
+      'dependenceGrade': dependenceGrade,
+
+      //Section 2.4
+      'orientation2_4': orientation2_4,
+      'externalDerivation': externalDerivation,
+      'consumptionLevel': consumptionLevel,
+      'addictionTreatment': addictionTreatment,
+
+      //Section 3
+      'orientation3': orientation3,
+      'openLegalProcess': openLegalProcess,
+      'closeLegalProcess': closeLegalProcess,
+      'legalRepresentation': legalRepresentation,
+
+      //Section 4
+      'orientation4': orientation4,
+      'ownershipType': ownershipType,
+      'location': location,
+      'livingUnit': livingUnit,
+      'centerContact': centerContact,
+      'hostingObservations': hostingObservations,
+
+
+      //Section 5
+      'orientation5': orientation5,
+      'informationNetworks': informationNetworks,
+
+      //Section 6
+      'orientation6': orientation6,
+      'socialStructureKnowledge': socialStructureKnowledge,
+      'autonomyPhysicMental': autonomyPhysicMental,
+      'socialSkills': socialSkills,
+
+      //Section 7
+      'orientation7': orientation7,
+      'language': language,
+      'languageLevel': languageLevel,
+
+      //Section 8
+      'orientation8': orientation8,
+      'economicProgramHelp': economicProgramHelp,
+      'familySupport': familySupport,
+      'familyResponsibilities': familyResponsibilities,
+
+      //Section 9
+      'orientation9': orientation9,
+      'socialServiceAccess': socialServiceAccess,
+      'centerTSReference': centerTSReference,
+      'subsidyBeneficiary': subsidyBeneficiary,
+      'socialServicesUser': socialServicesUser,
+      'socialExclusionCertificate': socialExclusionCertificate,
+
+      //Section 10
+      'orientation10': orientation10,
+      'digitalSkillsLevel': digitalSkillsLevel,
+
+      //Section 11
+      'orientation11': orientation11,
+      'laborMarkerInterest': laborMarkerInterest,
+      'laborExpectations': laborExpectations,
+
+      //Section 12
+      'orientation12': orientation12,
+      'vulnerabilityOptions': vulnerabilityOptions,
+
+      //Section 13
+      'orientation13': orientation13,
+      'educationLevel': educationLevel,
+      'laborSituation': laborSituation,
+      'laborExternalResources': laborExternalResources,
+      'educationalEvaluation': educationalEvaluation,
+      'formativeItinerary': formativeItinerary,
+      'laborInsertion': laborInsertion,
+      'accompanimentPostLabor': accompanimentPostLabor,
+      'laborUpgrade': laborUpgrade,
+
     };
   }
 }

@@ -10,6 +10,7 @@ class CustomDropDownButtonFormFieldTittle extends StatelessWidget {
     required this.source,
     this.hintText,
     this.validator,
+    this.value,
 
   });
   final String labelText;
@@ -18,6 +19,7 @@ class CustomDropDownButtonFormFieldTittle extends StatelessWidget {
   final List<DropdownMenuItem<String>> source;
   final String? hintText;
   final String ?Function(String?)? validator;
+  final String? value;
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +42,12 @@ class CustomDropDownButtonFormFieldTittle extends StatelessWidget {
         Container(
           height: 50,
           child: DropdownButtonFormField(
+            value: value,
             items: source,
             onChanged: onChanged,
             validator: validator,
             decoration: InputDecoration(
+              errorStyle: TextStyle(height: 0.01),
               hintText: hintText,
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(5.0),
