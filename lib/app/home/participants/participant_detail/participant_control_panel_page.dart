@@ -166,7 +166,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
                             GamificationItem(
                               imagePath: ImagePath.GAMIFICATION_CV_ICON,
                               progress: (_getUserCvStepsCompleted()/cvTotalSteps) * 100,
-                              progressText: "${(_getUserCvStepsCompleted()/cvTotalSteps) * 100}%",
+                              progressText: "${(_getUserCvStepsCompleted() / cvTotalSteps * 100).toStringAsFixed(2)}%",
                               title: "CV COMPLETADO",
                             ),
                           ],
