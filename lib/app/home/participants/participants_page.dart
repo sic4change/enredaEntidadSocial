@@ -78,35 +78,35 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final database = Provider.of<Database>(context, listen: false);
 
-    return Padding(
-      padding: EdgeInsets.all(Responsive.isDesktop(context)?
-        Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble),
-      child: StreamBuilder<UserEnreda>(
-        stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          globals.currentSocialEntityUser = snapshot.data!;
-          socialEntityUser = snapshot.data!;
-          return StreamBuilder<List<UserEnreda>>(
-            stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
-            builder: (context, userSnapshot) {
-              if(userSnapshot.hasData) {
-                return StreamBuilder(
-                  stream: database.socialEntityStreamById(socialEntityUser.socialEntityId!),
-                  builder: (context, socialEntitySnapshot) {
-                    if (socialEntitySnapshot.hasData) {
-                      final textTheme = Theme.of(context).textTheme;
-                      final users = userSnapshot.data!;
-                      final myParticipants = users.where((u) =>
-                      u.assignedEntityId == socialEntityUser.socialEntityId!
-                          && u.assignedById == socialEntityUser.userId).toList();
-                      final allOtherParticipants = users.where((u) =>
-                      u.assignedEntityId == socialEntityUser.socialEntityId!
-                          && u.assignedById != socialEntityUser.userId).toList();
+    return StreamBuilder<UserEnreda>(
+      stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        globals.currentSocialEntityUser = snapshot.data!;
+        socialEntityUser = snapshot.data!;
+        return StreamBuilder<List<UserEnreda>>(
+          stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
+          builder: (context, userSnapshot) {
+            if(userSnapshot.hasData) {
+              return StreamBuilder(
+                stream: database.socialEntityStreamById(socialEntityUser.socialEntityId!),
+                builder: (context, socialEntitySnapshot) {
+                  if (socialEntitySnapshot.hasData) {
+                    final textTheme = Theme.of(context).textTheme;
+                    final users = userSnapshot.data!;
+                    final myParticipants = users.where((u) =>
+                    u.assignedEntityId == socialEntityUser.socialEntityId!
+                        && u.assignedById == socialEntityUser.userId).toList();
+                    final allOtherParticipants = users.where((u) =>
+                    u.assignedEntityId == socialEntityUser.socialEntityId!
+                        && u.assignedById != socialEntityUser.userId).toList();
 
-                      return Column(
+                    return Padding(
+                      padding: EdgeInsets.all(Responsive.isDesktop(context)?
+                      Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(StringConst.MY_PARTICIPANTS,
@@ -147,16 +147,16 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                               }
                               ),
                         ],
-                      );
-                    }
-                    return const Center(child: CircularProgressIndicator());
+                      ),
+                    );
                   }
-                );
-              }
-              return const Center(child: CircularProgressIndicator());
-          });
-      }),
-    );
+                  return const Center(child: CircularProgressIndicator());
+                }
+              );
+            }
+            return const Center(child: CircularProgressIndicator());
+        });
+    });
   }
 
 }

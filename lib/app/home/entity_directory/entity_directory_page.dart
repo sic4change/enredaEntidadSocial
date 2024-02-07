@@ -106,16 +106,15 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
             padding: const EdgeInsets.only(top: 45, bottom: 35),
             child: Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Text('Directorio de entidades',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.greyDark2),),
-                ),
                 Expanded(
-                  child: SizedBox(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Text('Directorio de entidades',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.greyDark2),),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 5.0),

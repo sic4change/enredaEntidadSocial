@@ -74,51 +74,44 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
 
     buildTitle() {
       return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: StreamBuilder<UserEnreda>(
-                      stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          StreamBuilder<UserEnreda>(
+              stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasData) {
+                  var user = snapshot.data!;
+                  return StreamBuilder<List<Resource>>(
+                      stream: database.myResourcesStream(user.socialEntityId!),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         if (snapshot.hasData) {
-                          var user = snapshot.data!;
-                          return StreamBuilder<List<Resource>>(
-                              stream: database.myResourcesStream(user.socialEntityId!),
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
-                                }
-                                if (snapshot.hasData) {
-                                  List<Resource> resource = snapshot.data!;
-                                  return StreamBuilder<SocialEntity>(
-                                    stream: database.socialEntityStreamById(user.socialEntityId!),
-                                    builder: (context, snapshot) {
-                                      if (!snapshot.hasData) {
-                                        return const Center(
-                                            child: CircularProgressIndicator());
-                                      }
-                                      final SocialEntity? socialEntity = snapshot.data;
-                                      return CustomTextBoldTitle(title: '${resource.length.toString()} recursos creados por ${socialEntity == null ? '' : socialEntity.name}');
-                                    },
-                                  );
-                                }
-                                return const Center(child: CircularProgressIndicator());
-                              });
+                          List<Resource> resource = snapshot.data!;
+                          return StreamBuilder<SocialEntity>(
+                            stream: database.socialEntityStreamById(user.socialEntityId!),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+                              final SocialEntity? socialEntity = snapshot.data;
+                              return CustomTextBoldTitle(title: '${resource.length.toString()} recursos creados por ${socialEntity == null ? '' : socialEntity.name}');
+                            },
+                          );
                         }
                         return const Center(child: CircularProgressIndicator());
-                      }),
-                ),
-              ],
-            ),
-          ]);
+                      });
+                }
+                return const Center(child: CircularProgressIndicator());
+              }),
+        ],
+      );
     }
 
     buildCollapsedResourcesList() {
@@ -297,7 +290,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
 
     return ExpandableNotifier(
         child: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+          padding: const EdgeInsets.only(left: 0, right: 10, bottom: 10),
           child: ScrollOnExpand(
             child: Card(
               elevation: 0,
@@ -348,10 +341,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
   Widget _buildAllResources(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
     buildCollapsed1() {
-      return Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: CustomTextBoldTitle(title: 'Todos los recursos'),
-      );
+      return CustomTextBoldTitle(title: 'Todos los recursos');
     }
 
     buildCollapsed2() {
@@ -420,17 +410,11 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
       return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: CustomTextBoldTitle(title: 'Recursos creados'),
-                  ),
-                ],
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                CustomTextBoldTitle(title: 'Recursos creados'),
+              ],
             ),
           ]);
     }
@@ -499,7 +483,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
 
     return ExpandableNotifier(
         child: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+          padding: const EdgeInsets.only(left: 0, right: 10, bottom: 10),
           child: ScrollOnExpand(
             child: Card(
               elevation: 0,
