@@ -10,6 +10,7 @@ class CustomDropDownButtonFormFieldTittle extends StatelessWidget {
     required this.source,
     this.hintText,
     this.validator,
+    this.value,
 
   });
   final String labelText;
@@ -18,6 +19,7 @@ class CustomDropDownButtonFormFieldTittle extends StatelessWidget {
   final List<DropdownMenuItem<String>> source;
   final String? hintText;
   final String ?Function(String?)? validator;
+  final String? value;
 
   @override
   Widget build(BuildContext context) {
@@ -37,38 +39,43 @@ class CustomDropDownButtonFormFieldTittle extends StatelessWidget {
               ),
           ),
         ),
-        DropdownButtonFormField(
-          items: source,
-          onChanged: onChanged,
-          validator: validator,
-          decoration: InputDecoration(
-            hintText: hintText,
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
+        Container(
+          height: 50,
+          child: DropdownButtonFormField(
+            value: value,
+            items: source,
+            onChanged: onChanged,
+            validator: validator,
+            decoration: InputDecoration(
+              errorStyle: TextStyle(height: 0.01),
+              hintText: hintText,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                  width: 1.0,
+                ),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                  width: 1.0,
+                ),
               ),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
-                width: 1.0,
-              ),
+            style: textTheme.button?.copyWith(
+                height: 1.4,
+                color: AppColors.greyDark,
+                fontWeight: FontWeight.w400,
+                fontSize: fontSize,
             ),
-            disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
-                width: 1.0,
-              ),
-            ),
-          ),
-          style: textTheme.button?.copyWith(
-              height: 1.5,
-              color: AppColors.greyDark,
-              fontWeight: FontWeight.w400,
-              fontSize: fontSize,
           ),
         ),
       ]

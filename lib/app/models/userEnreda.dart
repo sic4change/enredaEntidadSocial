@@ -45,6 +45,7 @@ class UserEnreda {
     this.educationId,
     this.checkAgreeCV,
     this.personalDocuments = const [],
+    this.initialReportId,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -194,6 +195,7 @@ class UserEnreda {
         timeSpentWeekly: data['timeSpentWeekly']
     );
     final bool? checkAgreeCV = data['checkAgreeCV'];
+    final String? initialReportId = data['initialReportId'];
 
     return UserEnreda(
       email: email,
@@ -233,6 +235,7 @@ class UserEnreda {
       motivation: motivation,
       checkAgreeCV: checkAgreeCV,
       personalDocuments: personalDocuments,
+      initialReportId: initialReportId,
     );
   }
 
@@ -273,6 +276,7 @@ class UserEnreda {
   final Motivation? motivation;
   final bool? checkAgreeCV;
   final List<PersonalDocument> personalDocuments;
+  final String? initialReportId;
 
   @override
   bool operator ==(Object other){
@@ -317,6 +321,7 @@ class UserEnreda {
       'motivation': motivation?.toMap(),
       'checkAgreeCV': checkAgreeCV,
       'personalDocuments': personalDocuments.map((e) => e.toMap()).toList(),
+      'initialReportId': initialReportId,
     };
   }
 
@@ -360,6 +365,7 @@ class UserEnreda {
     Motivation? motivation,
     bool? checkAgreeCV,
     List<PersonalDocument>? personalDocuments,
+    String? initialReportId,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -397,6 +403,7 @@ class UserEnreda {
       motivation: motivation,
       checkAgreeCV: checkAgreeCV ?? this.checkAgreeCV,
       personalDocuments: personalDocuments ?? this.personalDocuments,
+      initialReportId: initialReportId ?? this.initialReportId,
     );
   }
 
