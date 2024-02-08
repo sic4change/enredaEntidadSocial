@@ -203,6 +203,7 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
                   contactChoiceGrade: _contactChoiceGrade,
                   contactKOL: _contactKOL,
                   contactProject: _contactProject,
+                  trust: true, //TODO asignarlo de otra forma
                 );
 
                 try {

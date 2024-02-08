@@ -37,6 +37,7 @@ class SocialEntity {
     this.contactChoiceGrade,
     this.contactKOL,
     this.contactProject,
+    this.trust,
   });
 
   //Old fields
@@ -73,16 +74,23 @@ class SocialEntity {
   final String? contactChoiceGrade;
   final String? contactKOL;
   final String? contactProject;
+  final bool? trust;
 
 
   factory SocialEntity.fromMap(Map<String, dynamic> data, String documentId) {
 
-    final Address address = Address(
-        country: data['address']['country'],
-        province: data['address']['province'],
-        city: data['address']['city'],
-        postalCode: data['address']['postalCode']
-    );
+    Address? address;
+    try{
+      address = Address(
+          country: data['address']['country'],
+          province: data['address']['province'],
+          city: data['address']['city'],
+          postalCode: data['address']['postalCode']
+      );
+    } catch(e) {
+      address = null;
+    }
+
 
     final String name = data['name'];
     final String? socialEntityId = data['socialEntityId'];
@@ -121,6 +129,7 @@ class SocialEntity {
     final contactChoiceGrade = data['contactChoiceGrade'] ?? '';
     final contactKOL = data['contactKOL'] ?? '';
     final contactProject = data['contactProject'] ?? '';
+    final trust = data['trust'] ?? false;
 
     return SocialEntity(
         socialEntityId: socialEntityId,
@@ -149,6 +158,7 @@ class SocialEntity {
         contactChoiceGrade: contactChoiceGrade,
         contactKOL: contactKOL,
         contactProject: contactProject,
+        trust: trust,
     );
   }
 
@@ -187,6 +197,7 @@ class SocialEntity {
       'contactChoiceGrade': contactChoiceGrade,
       'contactKOL': contactKOL,
       'contactProject': contactProject,
+      'trust': trust,
     };
   }
 

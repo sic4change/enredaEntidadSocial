@@ -94,7 +94,7 @@ class ParticipantIPILPage extends StatelessWidget {
                       ),
                       Divider(color: AppColors.greyBorder,),
                       //Save button
-                      Padding(
+                      ipilEntries.isEmpty ? Container() : Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Container(
                           height: 50,

@@ -1,5 +1,3 @@
-import 'dart:js_util';
-
 import 'package:algolia/algolia.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chips_choice/chips_choice.dart';
@@ -51,11 +49,12 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
   final _searchTextController = TextEditingController();
   FilterResource filterResource = FilterResource("", []);
 
-  List<String> tags = ['hBBhGYoCiJ6bWK0fZqmL'];
+  List<String> tags = [];
 
   final _queryController = TextEditingController();
   String get searchQuery => _queryController.text;
   List<SocialEntity> finalSocialEntities = [];
+  bool create = false;  //Choose between show list of social entities or create form
 
 
 
@@ -86,7 +85,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       controller: ScrollController(),
-      child: _buildEntitiesList(),
+      child: create ?  CreateSocialEntityPage() : _buildEntitiesList(),
     );
   }
 
@@ -122,13 +121,13 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                       alignment: Alignment.topRight,
                       child: AddYellowButton(
                         text: 'Crear nueva entidad',
-                        onPressed: () => setState(() {
-                          _currentPage =  CreateSocialEntityPage(
-                           /* onBack: () => setState(() {
-                              _currentPage = _buildEntitiesList();
-                            }),*/
-                          );
-                        }),
+                        onPressed: () {
+                          setState(() {
+                            create = true;
+                          });
+                        }
+
+
                       )
                   ),
                 ),
@@ -180,7 +179,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
     final database = Provider.of<Database>(context, listen: false);
     String name = currentSocialEntity.name;
     String email = currentSocialEntity.email ?? '';
-    String phone = currentSocialEntity.phone ?? '';
+    String phone = (currentSocialEntity.phone == '' ? currentSocialEntity.entityPhone : currentSocialEntity.phone) ?? '';
     String web = currentSocialEntity.website ?? '';
     Address fullLocation = currentSocialEntity.address ?? Address();
     String cityName = '';
@@ -349,7 +348,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                 ),
                 Positioned(
                   top: -27,
-                  child: CachedNetworkImage(
+                  child: currentSocialEntity.photo == '' ? Container() : CachedNetworkImage(
                       width: 92,
                       progressIndicatorBuilder:
                           (context, url, downloadProgress) => Container(
