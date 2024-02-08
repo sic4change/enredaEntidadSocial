@@ -751,7 +751,8 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           content: "",
           defaultActionText: StringConst.FORM_ACCEPT,
         );
-        WebHome.goToControlPanel();
+        //WebHome.goToControlPanel();
+        WebHome.goToParticipants();
       } on FirebaseException catch (e) {
         showExceptionAlertDialog(context,
             title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));

@@ -420,7 +420,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
           SpaceH40(),
           Center(
             child: AddYellowButton(
-              text: 'Invitar a un recurso',
+              text: StringConst.INVITE_RESOURCE,
               onPressed: () => showDialog(
                   context: context,
                   builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),

@@ -149,22 +149,16 @@ class _MyCvModelsPageState extends State<MyCvModelsPage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(
-            'Personalizar mi CV',
-            textAlign: TextAlign.left,
-            style: textTheme.bodyText1?.copyWith(
-              color: AppColors.white,
-              height: 1.5,
-              letterSpacing: 0.3,
-              fontWeight: FontWeight.w800,
-              fontSize: fontSize,
-            ),
-          ),
-          backgroundColor: AppColors.primaryColor,
+          backgroundColor: AppColors.primary100,
+          iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
+          actionsIconTheme: const IconThemeData(color: AppColors.white,),
+          foregroundColor: Colors.white,
+          title: CustomTextBoldCenter(title: 'Personalizar mi CV', color: AppColors.turquoiseBlue,),
+          titleTextStyle: textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 22.0),
           elevation: 0.0,
-          iconTheme: IconThemeData(
-            color: Colors.white,
-          ),
         ),
         body: _buildContent(context)
     );
@@ -361,7 +355,7 @@ class _MyCvModelsPageState extends State<MyCvModelsPage> {
                   Expanded(
                     flex: Responsive.isMobile(context) ? 4 : 2,
                     child: EnredaButton(
-                      buttonTitle: "Vista previa",
+                      buttonTitle: StringConst.PREVIEW,
                       width: 80,
                       onPressed: () async {
                         Navigator.push(
@@ -541,7 +535,7 @@ class _MyCvModelsPageState extends State<MyCvModelsPage> {
             CustomTextBody(text: StringConst.MY_CV.toUpperCase()),
             Spacer(),
             EnredaButton(
-              buttonTitle: "Vista previa",
+              buttonTitle: StringConst.PREVIEW,
               width: 100,
               onPressed: () async {
                 if(widget.myPersonalCustomExperiences.length > 2){

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/ipil_pdf_page.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
@@ -126,15 +127,18 @@ class MyAppState extends State<MyIpilEntries> with SingleTickerProviderStateMixi
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.primary100,
+        iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
+        actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
-        title: const Text('Mi lista de ipils'),
+        title: CustomTextBoldCenter(title: 'Mi lista de ipils', color: AppColors.turquoiseBlue,),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 22.0),
         bottom: TabBar(
           controller: _tabController,
-          tabs: examplesIpil.map<Tab>((e) => Tab(text: e.name)).toList(),
+          tabs: examplesIpil.map((e) => CustomTextBold(title: e.name,)).toList(),
           labelColor: Colors.white,
           labelStyle: TextStyle(fontSize: 20),
           isScrollable: true,

@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
@@ -104,18 +105,17 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                         ),
                       ),
                       SpaceH20(),
-                      // TODO: Improve button style
-                      EnredaButton(
-                        buttonColor: AppColors.turquoise,
-                        buttonTitle: StringConst.INVITE_RESOURCE,
-                        titleColor: Colors.white,
-                        height: 40.0,
-                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                      AddYellowButton(
+                        text: StringConst.INVITE_RESOURCE,
                         onPressed: () => showDialog(
                             context: context,
-                            builder: (BuildContext context) => ShowInvitationDialog(user: widget.user, organizerId: widget.socialEntityUserId!,)),
+                            builder: (BuildContext context) =>
+                                ShowInvitationDialog(
+                                  user: widget.user,
+                                  organizerId: widget.socialEntityUserId,
+                                )),
                       ),
-                      SpaceH20(),
+                      SpaceH30(),
                       _buildContactRow(textTheme),
                     ],
                   ),

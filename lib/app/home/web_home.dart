@@ -37,7 +37,13 @@ class WebHome extends StatefulWidget {
   static ValueNotifier<int> selectedIndex = ValueNotifier(2);
 
   static goToControlPanel() {
+    WebHome.selectedIndex.value = 2;
     WebHome.controller.selectIndex(0);
+  }
+
+  static goToParticipants() {
+    WebHome.selectedIndex.value = 2;
+    WebHome.controller.selectIndex(1);
   }
 
   @override
