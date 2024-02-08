@@ -235,7 +235,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                           child: Icon(
                             Icons.upload,
                             size: 20,
-                            color: AppColors.greyTxtAlt,
+                            color: Colors.transparent,
                           ),
                         ),
                       ),
