@@ -7,6 +7,7 @@ import 'package:enreda_empresas/app/home/resources/resource_detail/resource_deta
 import 'package:enreda_empresas/app/home/resources/resources_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
@@ -46,10 +47,13 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
         valueListenable: MyResourcesListPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
-            contentPadding: EdgeInsets.all(Sizes.kDefaultPaddingDouble*2),
+            contentPadding: Responsive.isMobile(context) ?
+            EdgeInsets.all(Sizes.mainPadding) :
+            EdgeInsets.all(Sizes.kDefaultPaddingDouble * 2),
             child: Stack(
               children: [
-                Row(
+                Flex(
+                  direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -83,12 +87,12 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                         ],
                       ),
                     ),
-                    Spacer(),
+                    Responsive.isMobile(context) ? Container() : Spacer(),
                     selectedIndex == 0 ?
                     Padding(
-                      padding: const EdgeInsets.only(right: 5.0),
+                      padding: Responsive.isMobile(context) ? EdgeInsets.zero : EdgeInsets.only(right: 5.0),
                       child: Align(
-                          alignment: Alignment.topRight,
+                          alignment: Responsive.isMobile(context) ? Alignment.center : Alignment.topRight,
                           child: AddYellowButton(
                             text: 'Crear nuevo recurso',
                             onPressed: () => setState(() {
@@ -102,7 +106,9 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                   ],
                 ),
                 Container(
-                    margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
+                    margin: selectedIndex != 0 && Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 2) :
+                    Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 6) :
+                    EdgeInsets.only(top: Sizes.mainPadding * 3),
                     child: bodyWidget[selectedIndex]),
               ],
             ),
@@ -110,7 +116,5 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
         });
 
   }
-
-
 
 }

@@ -58,6 +58,8 @@ class CustomTextFormFieldTitle extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return TextFormField(
       decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
         contentPadding: EdgeInsets.all(5),
         hintText: hintText,
         focusedBorder: OutlineInputBorder(

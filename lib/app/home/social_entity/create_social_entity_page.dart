@@ -15,6 +15,7 @@ import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -111,39 +112,26 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
   Widget build(BuildContext context) {
     textTheme = Theme.of(context).textTheme;
 
-    return RoundedContainer(
-        child: SingleChildScrollView(
-          controller: ScrollController(),
-          scrollDirection: Axis.vertical,
-          child: Container(
-            height: 2000,
-            width: 1000,
-            child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(Sizes.MARGIN_44),
-                child: Text(
-                  StringConst.CREATE_PARTICIPANT,
-                  style: textTheme.titleMedium!.copyWith(
-                    color: AppColors.turquoiseBlue,
-                    fontWeight: FontWeight.w300,
-                    // Fix the bug with Google Fonts that doesn't allow change the fontWeight with copyWith method
-                    fontFamily: GoogleFonts.poppins().fontFamily,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return _buildCompleteForm(context);
-                  }
-                ),
-              ),
-            ],
-                  ),
-          ),
+    return SingleChildScrollView(
+      controller: ScrollController(),
+      scrollDirection: Axis.vertical,
+      child: Container(
+        width: Responsive.isMobile(context) ||
+            Responsive.isTablet(context)
+            ? MediaQuery.of(context).size.width
+            : MediaQuery.of(context).size.width * 0.80,
+        child: Expanded(
+          child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return _buildCompleteForm(context);
+              }
+            ),
+          ],),
         ),
+      ),
     );
   }
 
@@ -151,9 +139,21 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: Sizes.MARGIN_20),
+          child: Text(
+            'Datos de la entidad',
+            style: textTheme.titleMedium!.copyWith(
+              color: AppColors.turquoiseBlue,
+              fontWeight: FontWeight.w300,
+              // Fix the bug with Google Fonts that doesn't allow change the fontWeight with copyWith method
+              fontFamily: GoogleFonts.poppins().fontFamily,
+            ),
+          ),
+        ),
         _buildFormNewEntity(context),
         Padding(
-          padding: const EdgeInsets.all(Sizes.MARGIN_44),
+          padding: const EdgeInsets.symmetric(vertical: Sizes.MARGIN_20),
           child: Text(
             'Datos de la persona de contacto',
             style: textTheme.titleMedium!.copyWith(
@@ -234,271 +234,262 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
     double fontSize = responsiveSize(context, 14, 16, md: 15);
     return Form(
       key: _formKey,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Sizes.MARGIN_44),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomTextFormFieldTitle(
-              labelText: 'Nombre de la entidad',
-              onChanged: (value){
-                setState(() {
-                  _entityName = value;
-                });
-              },
-              validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
-            SpaceH24(),
-            CustomTextFormFieldTitle(
-              labelText: 'Ambito de actuación',
-              onChanged: (value){
-                setState(() {
-                  _actionScope = value;
-                });
-              },
-              validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
-            SpaceH24(),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(
-                'Sectores/Campos/Etiquetas/Ecosistemas',
-                style: textTheme.button?.copyWith(
-                  height: 1.5,
-                  color: AppColors.greyDark,
-                  fontWeight: FontWeight.w700,
-                  fontSize: fontSize,
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomTextFormFieldTitle(
+            labelText: 'Nombre de la entidad',
+            onChanged: (value){
+              setState(() {
+                _entityName = value;
+              });
+            },
+            validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+          ),
+          SpaceH24(),
+          CustomTextFormFieldTitle(
+            labelText: 'Ambito de actuación',
+            onChanged: (value){
+              setState(() {
+                _actionScope = value;
+              });
+            },
+            validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+          ),
+          SpaceH24(),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Sectores/Campos/Etiquetas/Ecosistemas',
+              style: textTheme.button?.copyWith(
+                height: 1.5,
+                color: AppColors.greyDark,
+                fontWeight: FontWeight.w700,
+                fontSize: fontSize,
               ),
             ),
-            chipContainer(),
-            SpaceH24(),
-            CustomFlexRowColumn(
-                contentPadding: EdgeInsets.zero,
-                separatorSize: 20,
-                childLeft: CustomTextFormFieldTitle(
-                  labelText: 'Categoria',
-                  hintText: 'Tercer sector',
-                  enabled: false,
-                  onSaved: (value){
-                    setState(() {
-                      _category = value;
-                    });
-                  },
-                  validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                  initialValue: 'Tercer sector',
-                ),
-                childRight: CustomDropDownButtonFormFieldTittle(
-                  labelText: 'Sub-categoría',
-                  source: subCategories,
-                  onChanged: (value){
-                    setState(() {
-                      _subCategory = value;
-                    });
-                  },
-                  validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                )
-            ),
-            SpaceH24(),
-            CustomFlexRowColumn(
+          ),
+          chipContainer(),
+          SpaceH24(),
+          CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomDropDownButtonFormFieldTittle(
-                labelText: 'Zona geográfica de influencia',
-                source: geographicZone,
-                onChanged: (value){
-                  _geographicZone = value;
-                },
-                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Sub Zona geográfica de influencia',
-                onChanged: (value){
-                  _subGeographicZone = value;
+              childLeft: CustomTextFormFieldTitle(
+                labelText: 'Categoria',
+                hintText: 'Tercer sector',
+                enabled: false,
+                onSaved: (value){
+                  setState(() {
+                    _category = value;
+                  });
                 },
                 validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+                initialValue: 'Tercer sector',
+              ),
+              childRight: CustomDropDownButtonFormFieldTittle(
+                labelText: 'Sub-categoría',
+                source: subCategories,
+                onChanged: (value){
+                  setState(() {
+                    _subCategory = value;
+                  });
+                },
+                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
-            ),
-            SpaceH24(),
-            CustomTextFormFieldTitle(
-              labelText: 'Url de la página web',
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+            contentPadding: EdgeInsets.zero,
+            separatorSize: 20,
+            childLeft: CustomDropDownButtonFormFieldTittle(
+              labelText: 'Zona geográfica de influencia',
+              source: geographicZone,
               onChanged: (value){
-                _url = value;
+                _geographicZone = value;
+              },
+              validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
+            ),
+            childRight: CustomTextFormFieldTitle(
+              labelText: 'Sub Zona geográfica de influencia',
+              onChanged: (value){
+                _subGeographicZone = value;
               },
               validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
-            SpaceH24(),
-            CustomFlexRowColumn(
-                contentPadding: EdgeInsets.zero,
-                separatorSize: 20,
-                childLeft: CustomTextFormFieldTitle(
-                  labelText: 'Email',
-                  onChanged: (value){
-                    _email = value;
-                  },
-                  validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                ),
-                childRight: CustomPhoneFormFieldTitle(
-                  labelText: 'Teléfono fijo',
-                  phoneCode: entityPhoneCode,
-                  onCountryChange: (code){
-                    entityPhoneCode = code.toString();
-                  },
-                  validator: (value) =>
-                    value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
-                  onSaved: (value) => _entityPhone = entityPhoneCode +' '+ value!,
-                )
-            ),
-            SpaceH24(),
-            CustomFlexRowColumn(
-                contentPadding: EdgeInsets.zero,
-                separatorSize: 20,
-                childLeft: CustomPhoneFormFieldTitle(
-                  labelText: 'Teléfono móvil',
-                  phoneCode: entityMobilePhoneCode,
-                  onCountryChange: (code){
-                    entityMobilePhoneCode = code.toString();
-                  },
-                  validator: (value) =>
-                    value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
-                  onSaved: (value) => _entityMobilePhone = entityMobilePhoneCode +' '+ value!,
-                ),
-                childRight: CustomTextFormFieldTitle(
-                  labelText: 'Linkedin',
-                  onChanged: (value){
-                    _linkedin = value;
-                  },
-                  //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                )
-            ),
-            SpaceH24(),
-            CustomFlexRowColumn(
-                contentPadding: EdgeInsets.zero,
-                separatorSize: 20,
-                childLeft: CustomTextFormFieldTitle(
-                  labelText: 'Twitter',
-                  onChanged: (value){
-                    _twitter = value;
-                  },
-                  //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                ),
-                childRight: CustomTextFormFieldTitle(
-                  labelText: 'Otra red social',
-                  onChanged: (value){
-                    _otherSocialMedia = value;
-                  },
-                  //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                )
             )
+          ),
+          SpaceH24(),
+          CustomTextFormFieldTitle(
+            labelText: 'Url de la página web',
+            onChanged: (value){
+              _url = value;
+            },
+            validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                labelText: 'Email',
+                onChanged: (value){
+                  _email = value;
+                },
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: CustomPhoneFormFieldTitle(
+                labelText: 'Teléfono fijo',
+                phoneCode: entityPhoneCode,
+                onCountryChange: (code){
+                  entityPhoneCode = code.toString();
+                },
+                validator: (value) =>
+                  value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
+                onSaved: (value) => _entityPhone = entityPhoneCode +' '+ value!,
+              )
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomPhoneFormFieldTitle(
+                labelText: 'Teléfono móvil',
+                phoneCode: entityMobilePhoneCode,
+                onCountryChange: (code){
+                  entityMobilePhoneCode = code.toString();
+                },
+                validator: (value) =>
+                  value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
+                onSaved: (value) => _entityMobilePhone = entityMobilePhoneCode +' '+ value!,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                labelText: 'Linkedin',
+                onChanged: (value){
+                  _linkedin = value;
+                },
+                //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                labelText: 'Twitter',
+                onChanged: (value){
+                  _twitter = value;
+                },
+                //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                labelText: 'Otra red social',
+                onChanged: (value){
+                  _otherSocialMedia = value;
+                },
+                //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+          )
 
-          ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildFormContactPerson(BuildContext context){
-    final database = Provider.of<Database>(context, listen: false);
-    TextTheme textTheme = Theme.of(context).textTheme;
-    double fontSize = responsiveSize(context, 14, 16, md: 15);
     return Form(
       key: _formKeyContactPerson,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Sizes.MARGIN_44),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomTextFormFieldTitle(
-              labelText: 'Nombre completo de la técnico de referencia',
-              onChanged: (value){
-                _contactName = value;
-              },
-              validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
-            SpaceH24(),
-            CustomFlexRowColumn(
-                contentPadding: EdgeInsets.zero,
-                separatorSize: 20,
-                childLeft: CustomPhoneFormFieldTitle(
-                  labelText: 'Teléfono fijo',
-                  phoneCode: contactDeskPhoneCode,
-                  onCountryChange: (code){
-                    contactDeskPhoneCode = code.toString();
-                  },
-                  validator: (value) =>
-                    value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
-                  onSaved: (value) => _contactPhone = contactDeskPhoneCode +' '+ value!,
-                ),
-                childRight: CustomPhoneFormFieldTitle(
-                  labelText: 'Teléfono móvil',
-                  phoneCode: contactMobilePhoneCode,
-                  onCountryChange: (code){
-                    contactMobilePhoneCode = code.toString();
-                  },
-                  validator: (value) =>
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomTextFormFieldTitle(
+            labelText: 'Nombre completo de la técnico de referencia',
+            onChanged: (value){
+              _contactName = value;
+            },
+            validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomPhoneFormFieldTitle(
+                labelText: 'Teléfono fijo',
+                phoneCode: contactDeskPhoneCode,
+                onCountryChange: (code){
+                  contactDeskPhoneCode = code.toString();
+                },
+                validator: (value) =>
                   value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
-                  onSaved: (value) => _contactMobilePhone = contactMobilePhoneCode +' '+ value!,
-                ),
-            ),
-            SpaceH24(),
-            CustomFlexRowColumn(
-                contentPadding: EdgeInsets.zero,
-                separatorSize: 20,
-                childLeft: CustomTextFormFieldTitle(
-                  labelText: 'Email',
-                  onChanged: (value){
-                    _contactEmail = value;
-                  },
-                  validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                ),
+                onSaved: (value) => _contactPhone = contactDeskPhoneCode +' '+ value!,
+              ),
+              childRight: CustomPhoneFormFieldTitle(
+                labelText: 'Teléfono móvil',
+                phoneCode: contactMobilePhoneCode,
+                onCountryChange: (code){
+                  contactMobilePhoneCode = code.toString();
+                },
+                validator: (value) =>
+                value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
+                onSaved: (value) => _contactMobilePhone = contactMobilePhoneCode +' '+ value!,
+              ),
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                labelText: 'Email',
+                onChanged: (value){
+                  _contactEmail = value;
+                },
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
 
-                childRight: CustomTextFormFieldTitle(
-                  labelText: 'Cargo de la persona de contacto',
+              childRight: CustomTextFormFieldTitle(
+                labelText: 'Cargo de la persona de contacto',
+                onChanged: (value){
+                  _contactPosition = value;
+                },
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Grado de decisión',
+                  source: choiceGrade,
                   onChanged: (value){
-                    _contactPosition = value;
+                    _contactChoiceGrade = value;
                   },
-                  validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                ),
-            ),
-            SpaceH24(),
-            CustomFlexRowColumn(
-                contentPadding: EdgeInsets.zero,
-                separatorSize: 20,
-                childLeft: CustomDropDownButtonFormFieldTittle(
-                    labelText: 'Grado de decisión',
-                    source: choiceGrade,
-                    onChanged: (value){
-                      _contactChoiceGrade = value;
-                    },
-                  validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                ),
-                childRight: CustomDropDownButtonFormFieldTittle(
-                    labelText: '¿Se considera un KOL (Key Opinion Leader)?',
-                    source: yesNo,
-                    onChanged: (value){
-                      _contactKOL = value;
-                    },
-                  validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                )
-            ),
-            SpaceH24(),
-            CustomFlexRowColumn(
-                contentPadding: EdgeInsets.zero,
-                separatorSize: 20,
-                childLeft: CustomTextFormFieldTitle(
-                  labelText: 'Acuerdos firmados',
-                  enabled: false,
-                ),
-                childRight: CustomTextFormFieldTitle(
-                  labelText: 'Proyecto o programa',
+                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: CustomDropDownButtonFormFieldTittle(
+                  labelText: '¿Se considera un KOL (Key Opinion Leader)?',
+                  source: yesNo,
                   onChanged: (value){
-                    _contactProject = value;
+                    _contactKOL = value;
                   },
-                  validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                )
-            ),
-          ],
-        ),
+                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                labelText: 'Acuerdos firmados',
+                enabled: false,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                labelText: 'Proyecto o programa',
+                onChanged: (value){
+                  _contactProject = value;
+                },
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+          ),
+        ],
       ),
     );
   }
@@ -544,12 +535,13 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
   Widget chipContainer(){
     return Container(
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: AppColors.greyUltraLight,
         )
       ),
-      height: 180,
+      height: Responsive.isMobile(context) ? 350 : Responsive.isDesktopS(context) ? 200 : 150,
       child: Center(child: chipFilter()),
     );
   }

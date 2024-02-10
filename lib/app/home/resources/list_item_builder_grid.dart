@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'empty_content.dart';
 
@@ -44,7 +45,7 @@ class ListItemBuilderGrid<T> extends StatelessWidget {
       return GridView.builder(
         controller: ScrollController(),
         shrinkWrap: constraints.maxWidth < 550 ? true : false,
-        padding: EdgeInsets.all(4.0),
+        padding: Responsive.isMobile(context) ? EdgeInsets.zero : EdgeInsets.all(4.0),
         itemCount: items.length,
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
             maxCrossAxisExtent: maxCrossAxisExtentValue!,
