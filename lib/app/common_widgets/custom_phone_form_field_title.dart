@@ -46,6 +46,8 @@ class CustomPhoneFormFieldTitle extends StatelessWidget {
         TextFormField(
           decoration: InputDecoration(
             //labelText: 'Teléfono fijo',
+            filled: true,
+            fillColor: Colors.white,
             prefixIcon: CountryCodePicker(
               onChanged: onCountryChange,
               initialSelection: 'ES',

@@ -47,6 +47,8 @@ class CustomDropDownButtonFormFieldTittle extends StatelessWidget {
             onChanged: onChanged,
             validator: validator,
             decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
               errorStyle: TextStyle(height: 0.01),
               hintText: hintText,
               focusedBorder: OutlineInputBorder(

@@ -117,7 +117,6 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
     buildCollapsedResourcesList() {
       return Container(
         height: MediaQuery.of(context).size.height * 0.28,
-        padding: const EdgeInsets.all(8.0),
         child: StreamBuilder<UserEnreda>(
             stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
             builder: (context, snapshot) {
@@ -204,7 +203,6 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
     buildExpandedResourcesList() {
       return Container(
         height: MediaQuery.of(context).size.height * 0.55,
-        padding: const EdgeInsets.all(8.0),
         child: StreamBuilder<UserEnreda>(
             stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
             builder: (context, snapshot) {
@@ -347,7 +345,6 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
     buildCollapsed2() {
       return Container(
         height: MediaQuery.of(context).size.height * 0.28,
-        padding: const EdgeInsets.all(8.0),
         child: StreamBuilder<List<Resource>>(
             stream: database.limitResourcesStream(3),
             builder: (context, snapshot) {
@@ -422,7 +419,6 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
     buildExpanded2() {
       return Container(
         height: MediaQuery.of(context).size.height * 0.55,
-        padding: const EdgeInsets.all(8.0),
         child: StreamBuilder<List<Resource>>(
             stream: database.resourcesStream(),
             builder: (context, snapshot) {

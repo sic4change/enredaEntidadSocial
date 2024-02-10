@@ -1,0 +1,228 @@
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enreda_empresas/app/models/addressUser.dart';
+import 'package:enreda_empresas/app/models/city.dart';
+import 'package:enreda_empresas/app/models/country.dart';
+import 'package:enreda_empresas/app/models/socialEntity.dart';
+import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/values/values.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class EntityListTile extends StatefulWidget {
+  const EntityListTile({Key? key, required this.socialEntity, required this.filter, required this.onTap}) : super(key: key);
+  final SocialEntity? socialEntity;
+  final List<String>? filter;
+  final VoidCallback? onTap;
+
+  @override
+  State<EntityListTile> createState() => _EntityListTileState();
+}
+
+class _EntityListTileState extends State<EntityListTile> {
+  @override
+  Widget build(BuildContext context) {
+    return _buildEntityContainer(widget.socialEntity!, widget.filter!);
+  }
+
+  Widget _buildEntityContainer(SocialEntity currentSocialEntity, List<String> filter){
+    final database = Provider.of<Database>(context, listen: false);
+    String name = currentSocialEntity.name;
+    String email = currentSocialEntity.email ?? '';
+    String phone = (currentSocialEntity.phone == '' ? currentSocialEntity.entityPhone : currentSocialEntity.phone) ?? '';
+    String web = currentSocialEntity.website ?? '';
+    Address fullLocation = currentSocialEntity.address ?? Address();
+    String cityName = '';
+    String countryName = '';
+    String location = '';
+    List<String> types = currentSocialEntity.types ?? [];
+    return StreamBuilder<City>(
+        stream: database.cityStream(fullLocation.city),
+        builder: (context, snapshot) {
+          final city = snapshot.data;
+          cityName = city == null ? '' : city.name;
+          return StreamBuilder<Country>(
+              stream: database.countryStream(fullLocation.country),
+              builder: (context, snapshot) {
+                final country = snapshot.data;
+                countryName = country == null ? '' : country.name;
+                if(countryName != ''){
+                  location = countryName;
+                }else if(cityName != ''){
+                  location = cityName;
+                }
+                if(cityName != '' && countryName != ''){
+                  location = location + ', ' + cityName;
+                }
+                return Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.topCenter,
+                  children: [
+                    InkWell(
+                      mouseCursor: MaterialStateMouseCursor.clickable,
+                      onTap: widget.onTap,
+                      child: Container(
+                        height: 270,
+                        width: 335,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(17),
+                            border: Border.all(
+                              color: AppColors.greyBorder,
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 5,
+                              )],
+                            color: Colors.white
+                        ),
+                        child: Column(
+                          //mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 20, right: 28),
+                              child: Align(
+                                alignment: Alignment.topRight,
+                                child: Icon(
+                                  Icons.upload,
+                                  size: 20,
+                                  color: Colors.transparent,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 40, bottom: 18),
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                            //Email
+                            Padding(
+                              padding: const EdgeInsets.only(left: 25),
+                              child: email != '' ? Row(
+                                children: [
+                                  Icon(
+                                    Icons.email,
+                                    color: AppColors.bluePetrol,
+                                    size: 20,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: Text(
+                                      email,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ) :
+                              Container(),
+                            ),
+                            //Phone
+                            Padding(
+                              padding: const EdgeInsets.only(left: 25, top: 8),
+                              child: phone != '' ? Row(
+                                children: [
+                                  Icon(
+                                    Icons.phone,
+                                    color: AppColors.bluePetrol,
+                                    size: 20,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: Text(
+                                      phone,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ) :
+                              Container(),
+                            ),
+                            //Location
+                            Padding(
+                              padding: const EdgeInsets.only(left: 25, top: 8, bottom: 18),
+                              child: location != '' ? Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on,
+                                    color: AppColors.bluePetrol,
+                                    size: 20,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: Text(
+                                      location,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ) :
+                              Container(),
+                            ),
+                            //Button
+                            web != '' ? Padding(
+                              padding: const EdgeInsets.only(bottom: 18),
+                              child: Container(
+                                width: 290,
+                                child: OutlinedButton(
+                                    onPressed: (){},
+                                    child: Text(
+                                      web,
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: AppColors.greyLetter
+                                      ),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(width: 1, color: AppColors.greyBorder),
+                                    )
+                                ),
+                              ),
+                            ) :
+                            Container(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: -27,
+                      child: currentSocialEntity.photo == '' ? Container() : CachedNetworkImage(
+                        width: 92,
+                        progressIndicatorBuilder:
+                            (context, url, downloadProgress) => Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        imageUrl: currentSocialEntity.photo!,
+                      ),
+                    ),
+                  ],
+                );
+              }
+          );
+        }
+    );
+  }
+
+
+}
+
