@@ -1,12 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_chip.dart';
 import 'package:enreda_empresas/app/home/entity_directory/entity_directory_page.dart';
 import 'package:enreda_empresas/app/home/entity_directory/filter_text_field_row.dart';
 import 'package:enreda_empresas/app/home/social_entity/entity_list_tile.dart';
-import 'package:enreda_empresas/app/models/addressUser.dart';
-import 'package:enreda_empresas/app/models/city.dart';
-import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/filterResource.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -15,6 +11,7 @@ import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class EntitiesListPage extends StatefulWidget {
   const EntitiesListPage({Key? key}) : super(key: key);
@@ -181,6 +178,7 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
                           filter: filter,
                           onTap: () {
                             setState(() {
+                              globals.currentSocialEntity = currentSocialEntity;
                               EntityDirectoryPage.selectedIndex.value = 2;
                             });
                           }

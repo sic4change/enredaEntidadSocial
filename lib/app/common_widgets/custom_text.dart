@@ -255,3 +255,32 @@ class CustomTextBoldCenter extends StatelessWidget {
     );
   }
 }
+
+class CustomTextSmallColor extends StatelessWidget {
+
+  const CustomTextSmallColor({super.key,  required this.text, this.color = AppColors.greyTxtAlt, this.height = 1.5});
+  final String text;
+  final Color color;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    TextTheme textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+    padding: const EdgeInsets.only(bottom: 20.0),
+      child: Text(
+        text,
+        textAlign: TextAlign.left,
+        style: textTheme.bodyMedium?.copyWith(
+            color: color,
+            height: height,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+
