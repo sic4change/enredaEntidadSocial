@@ -9,6 +9,7 @@ import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail/box_item_data.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail/invite_users_page.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_dialog.dart';
+import 'package:enreda_empresas/app/home/social_entity/box_social_entity_contact.dart';
 import 'package:enreda_empresas/app/home/social_entity/box_social_network_data.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
@@ -27,8 +28,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
+import '../../../utils/functions.dart';
 import '../social_entity_category_stream.dart';
-
 
 class EntityDetailPage extends StatefulWidget {
   const EntityDetailPage({Key? key, required this.socialEntityId}) : super(key: key);
@@ -90,7 +91,7 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
         children: [
           Container(
             constraints: BoxConstraints(
-              maxWidth: Responsive.isMobile(context) ? MediaQuery.of(context).size.width * 0.8 :
+              maxWidth: Responsive.isMobile(context) ? MediaQuery.of(context).size.width * 0.75 :
               MediaQuery.of(context).size.width * 0.5,
             ),
             decoration: BoxDecoration(
@@ -219,24 +220,33 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                       ]
                   ),
                 ),
-                Flex(
-                  direction: Responsive.isMobile(context) ||
-                      Responsive.isTablet(context) ||
-                      Responsive.isDesktopS(context)
-                      ? Axis.vertical
-                      : Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                        flex: Responsive.isMobile(context) ||
-                            Responsive.isTablet(context) ||
-                            Responsive.isDesktopS(context)
-                            ? 0
-                            : 4,
-                        child: _buildDetailSocialEntity(context, socialEntity)),
-                  ],
+                _buildSocialEntityContactBoxes(socialEntity),
+                SizedBox(height: 15,),
+                _buildDetailSocialEntity(context, socialEntity),
+                socialEntity.website == null || socialEntity.website == '' ? Container() :
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 18),
+                  child: Container(
+                    width: 290,
+                    child: OutlinedButton(
+                        onPressed: (){
+                          launchURL(socialEntity.website!);
+                        },
+                        child: Text(
+                          socialEntity.website!,
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.greyLetter
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(width: 1, color: AppColors.greyBorder),
+                        )
+                    ),
+                  ),
                 ),
+                SizedBox(height: 20,)
               ],
             ),
           ),
@@ -263,25 +273,87 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        socialEntity.actionScope == null || socialEntity.actionScope == '' ? Container() :
         CustomTextBold(title: StringConst.ACTION_SCOPE.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.actionScope == null || socialEntity.actionScope == '' ? Container() :
         CustomTextSmallColor(text: socialEntity.actionScope!,),
+
+        socialEntity.types == null || socialEntity.types!.isEmpty ? Container() :
         CustomTextBold(title: StringConst.TYPES.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.types == null || socialEntity.types!.isEmpty ? Container() :
         Padding(
           padding: const EdgeInsets.only(bottom: 10.0),
           child: TypesBySocialEntity(typesIdList: socialEntity.types!,),
         ),
+
+        socialEntity.category == null || socialEntity.category == '' ? Container() :
         CustomTextBold(title: StringConst.CATEGORY.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.category == null || socialEntity.category == '' ? Container() :
         CustomTextSmallColor(text: socialEntity.category!,),
+
+        socialEntity.subCategory == null || socialEntity.subCategory == '' ?  Container() :
         CustomTextBold(title: StringConst.SUB_CATEGORY.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.subCategory == null || socialEntity.subCategory == '' ?  Container() :
         CustomTextSmallColor(text: socialEntity.subCategory!,),
+
+        socialEntity.geographicZone == null || socialEntity.geographicZone == '' ? Container() :
         CustomTextBold(title: StringConst.ZONE.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.geographicZone == null || socialEntity.geographicZone == '' ? Container() :
         CustomTextSmallColor(text: socialEntity.geographicZone!,),
+
+        socialEntity.subGeographicZone == null || socialEntity.subGeographicZone == '' ? Container() :
         CustomTextBold(title: StringConst.SUB_ZONE.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.subGeographicZone == null || socialEntity.subGeographicZone == '' ? Container() :
         CustomTextSmallColor(text: socialEntity.subGeographicZone!,),
+
+        socialEntity.twitter == null || socialEntity.twitter == '' &&
+        socialEntity.linkedin == null || socialEntity.linkedin == '' &&
+        socialEntity.otherSocialMedia == null || socialEntity.otherSocialMedia == '' ? Container() :
         CustomTextBold(title: StringConst.SOCIAL_NETWORK.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.twitter == null || socialEntity.twitter == '' &&
+            socialEntity.linkedin == null || socialEntity.linkedin == '' &&
+            socialEntity.otherSocialMedia == null || socialEntity.otherSocialMedia == '' ? Container() :
         _buildSocialNetworkBoxes(socialEntity),
         SizedBox(height: 20,),
+
+
+        socialEntity.contactName == null || socialEntity.contactName == '' &&
+        socialEntity.contactPhone == null || socialEntity.contactPhone == '' &&
+        socialEntity.contactEmail == null || socialEntity.contactEmail == '' &&
+        socialEntity.contactPosition == null || socialEntity.contactPosition == '' &&
+        socialEntity.contactChoiceGrade == null || socialEntity.contactChoiceGrade == '' &&
+        socialEntity.contactKOL == null || socialEntity.contactKOL == '' &&
+        socialEntity.contactProject == null || socialEntity.contactProject == '' ? Container() :
         CustomTextMediumBold(text: StringConst.CONTACT_INFORMATION.toUpperCase(),),
+
+        socialEntity.contactName == null || socialEntity.contactName == '' ? Container() :
+        CustomTextSmallColor(text: socialEntity.contactName!, padding: const EdgeInsets.only(bottom: 10.0),),
+
+        socialEntity.contactPhone == null || socialEntity.contactPhone == '' ? Container() :
+        CustomTextSmallColor(text: socialEntity.contactPhone!, padding: const EdgeInsets.only(bottom: 10.0), height: 0,),
+
+        socialEntity.contactEmail == null || socialEntity.contactEmail == '' ? Container() :
+        CustomTextSmallColor(text: socialEntity.contactEmail!),
+
+        socialEntity.contactPosition == null || socialEntity.contactPosition == '' ? Container() :
+        CustomTextBold(title: StringConst.CONTACT_POSITION.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.contactPosition == null || socialEntity.contactPosition == '' ? Container() :
+        CustomTextSmallColor(text: socialEntity.contactPosition!),
+
+        socialEntity.contactChoiceGrade == null || socialEntity.contactChoiceGrade == '' ? Container() :
+        CustomTextBold(title: StringConst.CONTACT_CHOICE_GRADE.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.contactChoiceGrade == null || socialEntity.contactChoiceGrade == '' ? Container() :
+        CustomTextSmallColor(text: socialEntity.contactChoiceGrade!),
+
+        socialEntity.contactKOL == null || socialEntity.contactKOL == '' ? Container() :
+        CustomTextBold(title: StringConst.CONTACT_OPINION_LEADER.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.contactKOL == null || socialEntity.contactKOL == '' ? Container() :
+        CustomTextSmallColor(text: socialEntity.contactKOL!),
+
+        socialEntity.contactProject == null || socialEntity.contactProject == '' ? Container() :
+        CustomTextBold(title: StringConst.CONTACT_PROJECT.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.contactProject == null || socialEntity.contactProject == '' ? Container() :
+        CustomTextSmallColor(text: socialEntity.contactProject!),
       ],
     );
   }
@@ -330,79 +402,52 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
     );
   }
 
-  Widget _buildBoxes(Resource resource) {
-    List<BoxItemData> boxItemData = [
-      BoxItemData(
-          icon: Icons.card_travel,
-          title: StringConst.RESOURCE_TYPE,
-          contact: '${resource.resourceCategoryName}'
+  Widget _buildSocialEntityContactBoxes(SocialEntity socialEntity) {
+    List<BoxSocialEntityContactData> boxItemDataSocialEntity = [
+      BoxSocialEntityContactData(
+        icon: Icons.email,
+        title: socialEntity.email!,
+        onPressed: () { launchURL('mailto:${socialEntity.email}?subject=Contacto ${socialEntity.name}');},
       ),
-      BoxItemData(
-        icon: Icons.location_on_outlined,
-        title: StringConst.LOCATION,
-        contact: '${resource.countryName}',
+      BoxSocialEntityContactData(
+        icon: FontAwesomeIcons.phone,
+        title: socialEntity.entityPhone!,
       ),
-      BoxItemData(
-        icon: Icons.card_travel,
-        title: StringConst.MODALITY,
-        contact: '${resource.modality}',
-      ),
-      BoxItemData(
-        icon: Icons.people,
-        title: StringConst.CAPACITY,
-        contact: '${resource.capacity}',
-      ),
-      BoxItemData(
-        icon: Icons.calendar_month_outlined,
-        title: StringConst.DATE,
-        contact: '${DateFormat('dd/MM/yyyy').format(resource.start!)} - ${DateFormat('dd/MM/yyyy').format(resource.end!)}',
-      ),
-      BoxItemData(
-        icon: Icons.list_alt,
-        title: StringConst.CONTRACT_TYPE,
-        contact: resource.contractType != null && resource.contractType != ''  ? '${resource.contractType}' : 'Sin especificar',
-      ),
-      BoxItemData(
-        icon: Icons.alarm,
-        title: StringConst.FORM_SCHEDULE,
-        contact: resource.temporality != null && resource.temporality != ''  ? '${resource.temporality}' :  'Sin especificar',
-      ),
-      BoxItemData(
-        icon: Icons.currency_exchange,
-        title: StringConst.SALARY,
-        contact: resource.salary != null && resource.salary != ''  ? '${resource.salary}' :  'Sin especificar',
+      BoxSocialEntityContactData(
+        icon: FontAwesomeIcons.locationPin,
+        title: '${socialEntity.countryName!}, ${socialEntity.provinceName}, ${socialEntity.cityName!}',
       ),
     ];
     const int crossAxisCount = 2; // The number of columns in the grid
-    const double maxCrossAxisExtent = 250;
-    const double mainAxisExtent = 60;
-    const double childAspectRatio = 6 / 2;
+    double maxCrossAxisExtent = Responsive.isMobile(context) || Responsive.isDesktopS(context)  ? 600 : 350;
+    double mainAxisExtent = Responsive.isMobile(context) || Responsive.isDesktopS(context) ? 35 : 45;
+    const double childAspectRatio = 30 / 2;
     const double crossAxisSpacing = 10;
     const double mainAxisSpacing = 10;
-    int rowCount = (boxItemData.length / crossAxisCount).ceil();
+    int rowCount = (boxItemDataSocialEntity.length / crossAxisCount).ceil();
     double gridHeight = rowCount * mainAxisExtent + (rowCount - 1) * mainAxisSpacing;
-    double gridHeightD = rowCount * mainAxisExtent + (rowCount - 15) * mainAxisSpacing;
+    //double gridHeightD = rowCount * mainAxisExtent + (rowCount - 15) * mainAxisSpacing;
     return SizedBox(
-      height: Responsive.isDesktop(context) ? gridHeightD : gridHeight,
+      height: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? 150 : 60,
       child: GridView.builder(
+        padding: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? EdgeInsets.all(20.0) :
+        EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
           physics: NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: maxCrossAxisExtent,
               mainAxisExtent: mainAxisExtent,
               childAspectRatio: childAspectRatio,
               crossAxisSpacing: crossAxisSpacing,
               mainAxisSpacing: mainAxisSpacing),
-          itemCount: boxItemData.length,
+          itemCount: boxItemDataSocialEntity.length,
           itemBuilder: (BuildContext context, index) {
-            return BoxItem(
-              icon: boxItemData[index].icon,
-              title: boxItemData[index].title,
-              contact: boxItemData[index].contact,
+            return BoxItemSocialEntityContact(
+              icon: boxItemDataSocialEntity[index].icon,
+              title: boxItemDataSocialEntity[index].title,
             );
           }),
     );
   }
-
 
   Future<void> _deleteResource(BuildContext context, Resource resource) async {
     try {

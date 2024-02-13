@@ -580,4 +580,8 @@ class StringConst {
   static const String SUB_ZONE = 'Sub Zona geográfica de influencia';
   static const String SOCIAL_NETWORK = 'Redes';
   static const String CONTACT_INFORMATION = "Datos de la persona de contacto";
+  static const String CONTACT_POSITION = "Cargo de la persona de contacto";
+  static const String CONTACT_CHOICE_GRADE = "Grado de decisión";
+  static const String CONTACT_OPINION_LEADER = "¿Se considera un KOL (Key Opinion Leader)?";
+  static const String CONTACT_PROJECT = "Proyecto";
 }

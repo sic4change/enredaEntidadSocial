@@ -35,25 +35,20 @@ class TypesBySocialEntity extends StatelessWidget {
                       key: Key(
                           'socialEntityType-${socialEntityType.id}'),
                       child: Container(
-                          margin: const EdgeInsets.only(left: 0, right: 4, top: 4, bottom: 4),
+                          margin: const EdgeInsets.only(left: 0, right: 5, top: 5, bottom: 5),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.turquoiseBlue,
                             border: Border.all(
-                                color: AppColors
-                                    .greyLight2
-                                    .withOpacity(0.2),
+                                color: AppColors.turquoiseBlue.withOpacity(0.2),
                                 width: 1),
                             borderRadius:
                             BorderRadius.circular(
                                 Consts.padding),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets
-                                .symmetric(
-                                vertical: 4.0,
-                                horizontal: 8),
-                            child: CustomText(
-                                title: socialEntityType.name),
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                            child: Text(
+                                socialEntityType.name, style: TextStyle(color: Colors.white, fontSize: 14),),
                           )));
                 }
 
