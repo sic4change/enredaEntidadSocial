@@ -1,7 +1,7 @@
 import 'package:chips_choice/chips_choice.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_chip.dart';
-import 'package:enreda_empresas/app/home/entity_directory/entity_directory_page.dart';
-import 'package:enreda_empresas/app/home/entity_directory/filter_text_field_row.dart';
+import 'package:enreda_empresas/app/home/social_entity/entity_directory_page.dart';
+import 'package:enreda_empresas/app/home/social_entity/filter_text_field_row.dart';
 import 'package:enreda_empresas/app/home/social_entity/entity_list_tile.dart';
 import 'package:enreda_empresas/app/models/filterResource.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';

@@ -1,9 +1,10 @@
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
-import 'package:enreda_empresas/app/home/entity_directory/entities_list_page.dart';
-import 'package:enreda_empresas/app/home/entity_directory/entity_detail/entity_detail_page.dart';
-import 'package:enreda_empresas/app/home/social_entity/create_social_entity_page.dart';
+import 'package:enreda_empresas/app/home/social_entity/edit_social_entity/edit_social_entity_page.dart';
+import 'package:enreda_empresas/app/home/social_entity/entities_list_page.dart';
+import 'package:enreda_empresas/app/home/social_entity/create_social_entity/create_social_entity_page.dart';
+import 'package:enreda_empresas/app/home/social_entity/entity_detail/entity_detail_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -27,8 +28,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
       EntitiesListPage(),
       CreateSocialEntityPage(),
       EntityDetailPage(socialEntityId: widget.socialEntity.socialEntityId,),
-      Container(),
-      //EditEntity()
+      EditSocialEntity()
     ];
     super.initState();
   }

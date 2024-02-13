@@ -9,8 +9,9 @@ import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail/box_item_data.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail/invite_users_page.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_dialog.dart';
-import 'package:enreda_empresas/app/home/social_entity/box_social_entity_contact.dart';
-import 'package:enreda_empresas/app/home/social_entity/box_social_network_data.dart';
+import 'package:enreda_empresas/app/home/social_entity/entity_detail/box_social_entity_contact.dart';
+import 'package:enreda_empresas/app/home/social_entity/entity_detail/box_social_network_data.dart';
+import 'package:enreda_empresas/app/home/social_entity/entity_directory_page.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/province.dart';
@@ -29,7 +30,7 @@ import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 import '../../../utils/functions.dart';
-import '../social_entity_category_stream.dart';
+import 'social_entity_category_stream.dart';
 
 class EntityDetailPage extends StatefulWidget {
   const EntityDetailPage({Key? key, required this.socialEntityId}) : super(key: key);
@@ -184,7 +185,7 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                               child: EnredaButtonIcon(
                                 onPressed: () => {
                                   setState(() {
-                                    MyResourcesListPage.selectedIndex.value = 3;
+                                    EntityDirectoryPage.selectedIndex.value = 3;
                                   })
                                 },
                                 buttonColor: Colors.white,
