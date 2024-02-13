@@ -11,8 +11,11 @@ class SocialEntity {
     this.phone,
     this.address,
     this.country,
+    this.countryName,
     this.province,
+    this.provinceName,
     this.city,
+    this.cityName,
     this.postalCode,
     this.website,
     this.scope,
@@ -46,8 +49,11 @@ class SocialEntity {
   final String? email;
   final String? phone;
   final String? country;
+  String? countryName;
   final String? province;
+  String? provinceName;
   final String? city;
+  String? cityName;
   final Address? address;
   final String? postalCode;
   final String? website;
@@ -95,7 +101,6 @@ class SocialEntity {
     final String name = data['name'];
     final String? socialEntityId = data['socialEntityId'];
     final String email = data['email']??"";
-    final String phone = data['phone']??"";
 
     String photo;
     try {
@@ -130,12 +135,17 @@ class SocialEntity {
     final contactKOL = data['contactKOL'] ?? '';
     final contactProject = data['contactProject'] ?? '';
     final trust = data['trust'] ?? false;
+    final String? country = data['address']['country'];
+    final String? countryName = data['countryName'];
+    final String? province = data['address']['province'];
+    final String? provinceName = data['provinceName'];
+    final String? city = data['address']['city'];
+    final String? cityName = data['cityName'];
 
     return SocialEntity(
         socialEntityId: socialEntityId,
         name: name,
         email: email,
-        phone: phone,
         address: address,
         website: website,
         photo: photo,
@@ -159,23 +169,21 @@ class SocialEntity {
         contactKOL: contactKOL,
         contactProject: contactProject,
         trust: trust,
+        country: country,
+        countryName: countryName,
+        province: province,
+        provinceName: provinceName,
+        city: city,
+        cityName: cityName
     );
   }
 
-  @override
-  bool operator ==(Object other){
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is SocialEntity &&
-            other.socialEntityId == socialEntityId);
-  }
 
   Map<String, dynamic> toMap() {
     return {
       'socialEntityId': socialEntityId,
       'name': name,
       'email': email,
-      'phone': phone,
       'address': address?.toMap(),
       'website': website,
       'types': types,
@@ -198,8 +206,18 @@ class SocialEntity {
       'contactKOL': contactKOL,
       'contactProject': contactProject,
       'trust': trust,
+
     };
   }
+
+  @override
+  bool operator ==(Object other){
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SocialEntity &&
+            other.socialEntityId == socialEntityId);
+  }
+
 
   @override
   // TODO: implement hashCode

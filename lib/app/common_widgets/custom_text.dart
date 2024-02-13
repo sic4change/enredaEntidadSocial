@@ -123,8 +123,10 @@ class CustomTextBold extends StatelessWidget {
 
 class CustomTextSmall extends StatelessWidget {
 
-  const CustomTextSmall({super.key,  required this.text });
+  const CustomTextSmall({super.key,  required this.text, this.height = 1.5, this.color = AppColors.greyAlt});
   final String text;
+  final double height;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +135,8 @@ class CustomTextSmall extends StatelessWidget {
     return Text(
       text,
       style: textTheme.bodySmall?.copyWith(
-        color: AppColors.greyAlt,
-        height: 1.5,
+        color: color,
+        height: height,
         fontSize: fontSize,
       ),
     );
@@ -251,6 +253,61 @@ class CustomTextBoldCenter extends StatelessWidget {
         ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+class CustomTextSmallColor extends StatelessWidget {
+
+  const CustomTextSmallColor({super.key,  required this.text, this.color = AppColors.greyTxtAlt, this.height = 1.5, this.padding = const EdgeInsets.only(bottom: 20.0)});
+  final String text;
+  final Color color;
+  final double height;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    TextTheme textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+    padding: padding,
+      child: Text(
+        text,
+        textAlign: TextAlign.left,
+        style: textTheme.bodyMedium?.copyWith(
+            color: color,
+            height: height,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+
+class CustomTextXSmall extends StatelessWidget {
+
+  const CustomTextXSmall({super.key,  required this.text, this.height = 1.5, this.color = AppColors.greyAlt});
+  final String text;
+  final double height;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 10, 12, md: 11);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Expanded(
+      child: Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        style: textTheme.bodySmall?.copyWith(
+          color: color,
+          height: height,
+          fontSize: fontSize,
+        ),
       ),
     );
   }

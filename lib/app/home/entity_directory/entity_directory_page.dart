@@ -4,12 +4,14 @@ import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/home/entity_directory/entities_list_page.dart';
 import 'package:enreda_empresas/app/home/entity_directory/entity_detail/entity_detail_page.dart';
 import 'package:enreda_empresas/app/home/social_entity/create_social_entity_page.dart';
+import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
 class EntityDirectoryPage extends StatefulWidget {
-  EntityDirectoryPage({super.key});
+  EntityDirectoryPage({Key? key, required this.socialEntity}) : super(key: key);
+  final SocialEntity socialEntity;
   static ValueNotifier<int> selectedIndex = ValueNotifier(0);
 
   @override
@@ -24,7 +26,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
     bodyWidget = [
       EntitiesListPage(),
       CreateSocialEntityPage(),
-      EntityDetailPage(),
+      EntityDetailPage(socialEntityId: widget.socialEntity.socialEntityId,),
       Container(),
       //EditEntity()
     ];

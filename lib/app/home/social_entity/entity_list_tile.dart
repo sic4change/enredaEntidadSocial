@@ -1,10 +1,10 @@
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/utils/functions.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +29,7 @@ class _EntityListTileState extends State<EntityListTile> {
     final database = Provider.of<Database>(context, listen: false);
     String name = currentSocialEntity.name;
     String email = currentSocialEntity.email ?? '';
-    String phone = (currentSocialEntity.phone == '' ? currentSocialEntity.entityPhone : currentSocialEntity.phone) ?? '';
+    String phone = (currentSocialEntity.entityPhone == '' ? currentSocialEntity.entityPhone : currentSocialEntity.entityPhone) ?? '';
     String web = currentSocialEntity.website ?? '';
     Address fullLocation = currentSocialEntity.address ?? Address();
     String cityName = '';
@@ -180,7 +180,9 @@ class _EntityListTileState extends State<EntityListTile> {
                               child: Container(
                                 width: 290,
                                 child: OutlinedButton(
-                                    onPressed: (){},
+                                    onPressed: (){
+                                      launchURL(web);
+                                    },
                                     child: Text(
                                       web,
                                       style: TextStyle(
@@ -202,17 +204,27 @@ class _EntityListTileState extends State<EntityListTile> {
                     ),
                     Positioned(
                       top: -27,
-                      child: currentSocialEntity.photo == '' ? Container() : CachedNetworkImage(
-                        width: 92,
-                        progressIndicatorBuilder:
-                            (context, url, downloadProgress) => Container(
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
+                      child: currentSocialEntity.photo == '' ? Container() :
+                      ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(60)),
+                        child: Center(
+                          child: currentSocialEntity.photo == ""
+                              ? Container(
+                                  color: Colors.transparent,
+                                  height: 100,
+                                  width: 100,
+                                  child: Image.asset(
+                                      ImagePath.IMAGE_DEFAULT),
+                                )
+                              : FadeInImage.assetNetwork(
+                                  placeholder: ImagePath.IMAGE_DEFAULT,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  image: currentSocialEntity.photo!,
+                                ),
                         ),
-                        alignment: Alignment.center,
-                        imageUrl: currentSocialEntity.photo!,
                       ),
                     ),
                   ],

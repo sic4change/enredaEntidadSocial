@@ -29,7 +29,7 @@ class ImagePath {
   static const String DOWNLOAD_RESOURCE = '$imageDir/icon-descargar.png';
   static const String EDIT_RESOURCE = '$imageDir/icon-editar.png';
   static const String DELETE_RESOURCE = '$imageDir/icon-eliminar.png';
-  static const String RECTANGLE_RESOURCE = '$imageDir/rectangle-1595.png';
+  static const String RECTANGLE_RESOURCE = '$imageDir/background-recursos.png';
 
   //Competencies
   static const String EMPTY_BADGE_SAMPLE = '$imageDir/empty_900x503.png';
@@ -108,4 +108,7 @@ class ImagePath {
   static const String GAMIFICATION_RESOURCES_ICON = '$imageDir/gamification_resources_icon.png';
   static const String GAMIFICATION_CV_ICON = '$imageDir/gamification_cv_icon.png';
   static const String PARTICIPANT_DOCUMENTATION_ICON = '$imageDir/participant_documentation_icon.png';
+
+  //Social entities
+  static const String RECTANGLE_SOCIAL_ENTITY = '$imageDir/background-directorio-entidades.png';
 }

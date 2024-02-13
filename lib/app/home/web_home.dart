@@ -173,7 +173,7 @@ class _WebHomeState extends State<WebHome> {
                             case 3: _key.currentState?.closeDrawer();
                             return ToolBoxPage();
                             case 4: _key.currentState?.closeDrawer();
-                            return EntityDirectoryPage();
+                            return EntityDirectoryPage(socialEntity: socialEntity);
                             default:
                               return MyResourcesListPage(socialEntity: socialEntity);
                           }

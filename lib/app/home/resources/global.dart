@@ -16,3 +16,4 @@ Set<Competency> selectedCompetenciesCurrentResource = {};
 List<String> interestsCurrentResource = [];
 UserEnreda? currentParticipant;
 UserEnreda? currentSocialEntityUser;
+SocialEntity? currentSocialEntity;
