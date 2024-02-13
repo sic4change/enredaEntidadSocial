@@ -120,17 +120,15 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
             Responsive.isTablet(context)
             ? MediaQuery.of(context).size.width
             : MediaQuery.of(context).size.width * 0.80,
-        child: Expanded(
-          child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                return _buildCompleteForm(context);
-              }
-            ),
-          ],),
-        ),
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return _buildCompleteForm(context);
+            }
+          ),
+        ],),
       ),
     );
   }
