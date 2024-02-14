@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:datetime_picker_formfield_new/datetime_picker_formfield.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_phone_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_stepper.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_stepper_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
@@ -16,6 +19,7 @@ import 'package:enreda_empresas/app/home/resources/validating_form_controls/stre
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_social_entities.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_province.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_resource_category.dart';
+import 'package:enreda_empresas/app/home/social_entity/entity_directory_page.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
@@ -61,23 +65,30 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   // String? _resourceId;
   String? _socialEntityName;
   String? _socialEntityActionScope;
-  // String? _degree;
-  // String? _contractType;
-  // String? _salary;
-  // bool? _notExpire;
-  // bool selectedNotExpire = false;
-  // String? _duration;
-  // String? _temporality;
-  // String? _place;
-  // int? _capacity;
-  // String? _street;
-  // String? _organizer;
-  // String? _organizerType;
-  // String? _resourceLink;
-  // String? _organizerText;
-  // String? _link;
-  // String? _phone;
-  // String? _email;
+  String? _category;
+  String? _subCategory;
+  String? _geographicZone;
+  String? _subGeographicZone;
+  String? _website;
+  String? _email;
+  String? _entityLandlinePhone;
+  String? _entityMobilePhone;
+  String? _linkedin;
+  String? _twitter;
+  String? _otherSocialMedia;
+  String? _contactName;
+  String? _contactPhone;
+  String? _contactMobilePhone;
+  String? _contactEmail;
+  String? _contactPosition;
+  String? _contactChoiceGrade;
+  String? _contactKOL;
+  String? _contactProject;
+  String _entityLandlinePhoneCode = '+34';
+  String _entityMobilePhoneCode = '+34';
+  String _contactLandlinePhoneCode = '+34';
+  String _contactMobilePhoneCode = '+34';
+
   // String? _countryId;
   // String? _provinceId;
   // String? _cityId;
@@ -123,6 +134,11 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   // TextEditingController textEditingControllerCompetenciesCategories = TextEditingController();
   // TextEditingController textEditingControllerCompetenciesSubCategories = TextEditingController();
 
+  List<String> subCategories = ['Financiación', 'Cooperación técnica', 'Posicionamiento y reputación', 'Asociados'];
+  List<String> geographicZone = ['Global', 'Regional', 'Local'];
+  List<String> choiceGrade = ['Alto', 'Intermedio', 'Bajo'];
+  List<String> yesNo = ['Si', 'No'];
+
   @override
   void initState() {
     super.initState();
@@ -142,7 +158,20 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     // _resourceCategoryId = globals.currentResource?.resourceCategory ?? '';
     // _contractType = globals.currentResource?.contractType ?? '';
     // _salary = globals.currentResource?.salary ?? '';
-    // _degree = globals.currentResource?.degree ?? '';
+    _category = globals.currentSocialEntity?.category ?? '';
+    _subCategory = globals.currentSocialEntity?.category ?? '';
+    _geographicZone = globals.currentSocialEntity?.geographicZone ?? '';
+    _subGeographicZone = globals.currentSocialEntity?.subGeographicZone ?? '';
+    _website = globals.currentSocialEntity?.website ?? '';
+    _website = globals.currentSocialEntity?.website ?? '';
+    _entityLandlinePhone = globals.currentSocialEntity?.entityPhone ?? '';
+    _entityMobilePhone = globals.currentSocialEntity?.entityMobilePhone ?? '';
+    _contactPhone = globals.currentSocialEntity?.contactPhone ?? '';
+    _contactMobilePhone = globals.currentSocialEntity?.contactMobilePhone ?? '';
+    _entityLandlinePhoneCode = globals.currentSocialEntity?.entityPhone == null || globals.currentSocialEntity?.entityPhone == '' ? '+34' : '${globals.currentSocialEntity?.entityPhone?[0]}${globals.currentSocialEntity?.entityPhone?[1]}${globals.currentSocialEntity?.entityPhone?[2]}';
+    _entityMobilePhoneCode = globals.currentSocialEntity?.entityMobilePhone == null || globals.currentSocialEntity?.entityMobilePhone == '' ? '+34' : '${globals.currentSocialEntity?.entityMobilePhone?[0]}${globals.currentSocialEntity?.entityMobilePhone?[1]}${globals.currentSocialEntity?.entityMobilePhone?[2]}';
+    _contactLandlinePhoneCode = globals.currentSocialEntity?.contactPhone == null || globals.currentSocialEntity?.contactPhone == '' ? '+34' : '${globals.currentSocialEntity?.contactPhone?[0]}${globals.currentSocialEntity?.contactPhone?[1]}${globals.currentSocialEntity?.contactPhone?[2]}';
+    _contactMobilePhoneCode = globals.currentSocialEntity?.contactMobilePhone == null || globals.currentSocialEntity?.contactMobilePhone == ''? '+34' : '${globals.currentSocialEntity?.contactMobilePhone?[0]}${globals.currentSocialEntity?.contactMobilePhone?[1]}${globals.currentSocialEntity?.contactMobilePhone?[2]}';
     // _place = globals.currentResource?.address?.place ?? '';
     // _street = globals.currentResource?.street ?? '';
     // _capacity = globals.currentResource?.capacity ?? 0;
@@ -153,7 +182,16 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     // _organizerText = globals.currentResource?.promotor ?? '';
     // _link = globals.currentResource?.link ?? '';
     // _phone = globals.currentResource?.contactPhone ?? '';
-    // _email = globals.currentResource?.contactEmail ?? '';
+    _email = globals.currentSocialEntity?.email ?? '';
+    _linkedin = globals.currentSocialEntity?.linkedin ?? '';
+    _twitter = globals.currentSocialEntity?.twitter ?? '';
+    _otherSocialMedia = globals.currentSocialEntity?.otherSocialMedia ?? '';
+    _contactName = globals.currentSocialEntity?.contactName ?? '';
+    _contactEmail = globals.currentSocialEntity?.contactEmail ?? '';
+    _contactPosition = globals.currentSocialEntity?.contactPosition ?? '';
+    _contactChoiceGrade = globals.currentSocialEntity?.contactChoiceGrade ?? '';
+    _contactKOL = globals.currentSocialEntity?.contactKOL ?? '';
+    _contactProject = globals.currentSocialEntity?.contactProject ?? '';
     // _resourcePictureId = globals.currentResource?.resourcePictureId ?? '';
     // _notExpire = globals.currentResource?.notExpire ?? false;
     // _createdate = globals.currentResource?.createdate;
@@ -189,9 +227,6 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   }
 
   Widget _buildContent(BuildContext context) {
-    final isLastStep = currentStep == getSteps().length - 1;
-    double screenWidth = widthOfScreen(context);
-    double screenHeight = heightOfScreen(context);
     double contactBtnWidth = responsiveSize(
       context,
       contactBtnWidthSm,
@@ -213,763 +248,189 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
           borderRadius: BorderRadius.circular(
               Sizes.kDefaultPaddingDouble / 2),
         ),
-        child: Stack(
-          children: [
-            CustomStepper(
-              elevation: 0,
-              type: Responsive.isMobile(context)
-                  ? CustomStepperType.vertical
-                  : CustomStepperType.horizontal,
-              steps: getSteps(),
-              currentStep: currentStep,
-              onStepContinue: onStepContinue,
-              onStepCancel: onStepCancel,
-              controlsBuilder: (context, _) {
-                return Container(
-                  height: Sizes.kDefaultPaddingDouble * 2,
-                  margin: const EdgeInsets.only(
-                      top: Sizes.kDefaultPaddingDouble * 2),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal:
-                      Sizes.kDefaultPaddingDouble / 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      if (currentStep == 0)
-                        EnredaButton(
-                          buttonTitle:
-                          StringConst.CANCEL,
-                          width: contactBtnWidth,
-                          onPressed: onStepCancel,
-                          padding: EdgeInsets.all(0.0),
-                        ),
-                      const SizedBox(
-                          width: Sizes.kDefaultPaddingDouble),
-                      isLoading
-                          ? const Center(
-                          child: CircularProgressIndicator(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildForm(context),
+              Container(
+                height: Sizes.kDefaultPaddingDouble * 2,
+                margin: const EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    if (currentStep == 0)
+                      EnredaButton(
+                        buttonTitle: StringConst.CANCEL,
+                        width: contactBtnWidth,
+                        onPressed: onStepCancel,
+                        padding: EdgeInsets.all(0.0),
+                      ),
+                    const SizedBox(width: Sizes.kDefaultPaddingDouble),
+                    isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
                             color: AppColors.primary300,
                           ))
-                          : EnredaButton(
-                        buttonTitle:
-                        StringConst.FORM_UPDATE,
-                        width: contactBtnWidth,
-                        buttonColor: AppColors.primaryColor,
-                        titleColor: AppColors.white,
-                        onPressed: onStepContinue,
-                        padding: EdgeInsets.all(4.0),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
+                        : EnredaButton(
+                            buttonTitle: StringConst.FORM_UPDATE,
+                            width: contactBtnWidth,
+                            buttonColor: AppColors.primaryColor,
+                            titleColor: AppColors.white,
+                            onPressed: onStepContinue,
+                            padding: EdgeInsets.all(4.0),
+                          ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildForm(BuildContext context) {
-    TextTheme textTheme = Theme.of(context).textTheme;
-    double fontSize = responsiveSize(context, 14, 16, md: 15);
-    List<String> strings = <String>[
-      'Sin titulación',
-      'Con titulación no oficial',
-      'Con titulación oficial'
-    ];
-    List<String> contractTypes = <String>[
-      'Contrato indefinido',
-      'Contrato temporal',];
     return Form(
       key: _formKey,
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // CustomFlexRowColumn(
-            //   childLeft: streamBuilderDropdownResourceCategory(
-            //       context,
-            //       selectedResourceCategory,
-            //       buildResourceCategoryStreamBuilderSetState,
-            //       resource),
-            //   childRight: Container(),
-            // ),
             CustomFlexRowColumn(
               childLeft: customTextFormField(context, _socialEntityName!,
-                  StringConst.FORM_TITLE, StringConst.NAME_ERROR, nameSetState),
-              childRight: customTextFormMultiline(
+                  StringConst.FORM_NAME_ENTITY, StringConst.FORM_COMPANY_ERROR, nameSetState),
+              childRight: customTextFormField(
                   context,
                   _socialEntityActionScope!,
-                  StringConst.DESCRIPTION,
-                  StringConst.FORM_LASTNAME_ERROR,
-                  descriptionSetState),
+                  StringConst.ACTION_SCOPE,
+                  StringConst.FORM_COMPANY_ERROR,
+                  socialEntityActionScopeSetState),
             ),
-            // CustomFlexRowColumn(
-            //   childLeft: _resourceCategoryId == "6ag9Px7zkFpHgRe17PQk"
-            //       ? DropdownButtonFormField<String>(
-            //     hint: const Text(StringConst.FORM_DEGREE),
-            //     value: _degree == "" ? null : _degree,
-            //     items:
-            //     strings.map<DropdownMenuItem<String>>((String value) {
-            //       return DropdownMenuItem<String>(
-            //         value: value,
-            //         child: Text(
-            //           value,
-            //           style: textTheme.bodyMedium?.copyWith(
-            //             height: 1.5,
-            //             color: AppColors.greyDark,
-            //             fontWeight: FontWeight.w400,
-            //           ),
-            //         ),
-            //       );
-            //     }).toList(),
-            //     validator: (value) => _degree != null
-            //         ? null
-            //         : StringConst.FORM_MOTIVATION_ERROR,
-            //     onChanged: (value) =>
-            //         buildDegreeStreamBuilderSetState(value),
-            //     iconDisabledColor: AppColors.greyDark,
-            //     iconEnabledColor: AppColors.primaryColor,
-            //     decoration: InputDecoration(
-            //       filled: true,
-            //       fillColor: Colors.white,
-            //       labelStyle: textTheme.bodyLarge?.copyWith(
-            //         height: 1.5,
-            //         color: AppColors.greyDark,
-            //         fontWeight: FontWeight.w400,
-            //       ),
-            //       focusedBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //         ),
-            //       ),
-            //       enabledBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //           width: 1.0,
-            //         ),
-            //       ),
-            //     ),
-            //     style: textTheme.bodyMedium?.copyWith(
-            //       height: 1.5,
-            //       color: AppColors.greyDark,
-            //       fontWeight: FontWeight.w400,
-            //     ),
-            //   )
-            //       : Container(),
-            //   childRight: Container(),
-            // ),
-            // CustomFlexRowColumn(
-            //   childLeft: _resourceCategoryId == "POUBGFk5gU6c5X1DKo1b"
-            //       ? DropdownButtonFormField<String>(
-            //     hint: const Text(StringConst.FORM_CONTRACT),
-            //     value: _contractType == "" ? null : _contractType,
-            //     items: contractTypes.map<DropdownMenuItem<String>>((String value) {
-            //       return DropdownMenuItem<String>(
-            //         value: value,
-            //         child: Text(
-            //           value,
-            //           style: textTheme.bodySmall?.copyWith(
-            //             height: 1.5,
-            //             color: AppColors.greyDark,
-            //             fontWeight: FontWeight.w400,
-            //             fontSize: fontSize,
-            //           ),
-            //         ),
-            //       );
-            //     }).toList(),
-            //     validator: (value) => _contractType != null
-            //         ? null
-            //         : StringConst.FORM_COMPANY_ERROR,
-            //     onChanged: (value) => buildContractStreamBuilderSetState(value),
-            //     iconDisabledColor: AppColors.greyDark,
-            //     iconEnabledColor: AppColors.primaryColor,
-            //     decoration: InputDecoration(
-            //       filled: true,
-            //       fillColor: Colors.white,
-            //       labelStyle: textTheme.bodySmall?.copyWith(
-            //         height: 1.5,
-            //         color: AppColors.greyDark,
-            //         fontWeight: FontWeight.w400,
-            //         fontSize: fontSize,
-            //       ),
-            //       focusedBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //         ),
-            //       ),
-            //       enabledBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //           width: 1.0,
-            //         ),
-            //       ),
-            //     ),
-            //     style: textTheme.bodySmall?.copyWith(
-            //       height: 1.5,
-            //       color: AppColors.greyDark,
-            //       fontWeight: FontWeight.w400,
-            //       fontSize: fontSize,
-            //     ),
-            //   )
-            //       : Container(),
-            //   childRight: _resourceCategoryId == "POUBGFk5gU6c5X1DKo1b"
-            //       ? customTextFormField(
-            //       context,
-            //       _salary!,
-            //       StringConst.FORM_SALARY,
-            //       StringConst.FORM_COMPANY_ERROR,
-            //       buildSalaryStreamBuilderSetState)
-            //       : Container(),
-            // ),
-            // CustomFlexRowColumn(
-            //   childLeft: TextFormField(
-            //     decoration: InputDecoration(
-            //       filled: true,
-            //       fillColor: Colors.white,
-            //       labelText: StringConst.FORM_INTERESTS_QUESTION,
-            //       focusColor: AppColors.lilac,
-            //       labelStyle: textTheme.bodyLarge?.copyWith(
-            //         color: AppColors.greyDark,
-            //       ),
-            //       focusedBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //         ),
-            //       ),
-            //       enabledBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //           width: 1.0,
-            //         ),
-            //       ),
-            //     ),
-            //     //initialValue: interestsNamesString,
-            //     controller: textEditingControllerInterests,
-            //     onTap: () => {_showMultiSelectInterests(context)},
-            //     validator: (value) =>
-            //     value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
-            //     readOnly: true,
-            //     style: textTheme.bodyMedium?.copyWith(
-            //       height: 1.5,
-            //       color: AppColors.greyDark,
-            //       fontWeight: FontWeight.w400,
-            //     ),
-            //   ),
-            //   childRight: Container(),
-            // ),
-            // CustomFlexRowColumn(
-            //     childLeft: TextFormField(
-            //       controller: textEditingControllerCompetenciesCategories,
-            //       decoration: InputDecoration(
-            //         filled: true,
-            //         fillColor: Colors.white,
-            //         labelText: StringConst.FORM_COMPETENCIES_CATEGORIES,
-            //         hintText: StringConst.FORM_COMPETENCIES_CATEGORIES,
-            //         hintMaxLines: 2,
-            //         labelStyle: textTheme.bodyText1?.copyWith(
-            //           color: AppColors.greyDark,
-            //           height: 1.5,
-            //           fontWeight: FontWeight.w400,
-            //           fontSize: fontSize,
-            //         ),
-            //         focusedBorder: OutlineInputBorder(
-            //           borderRadius: BorderRadius.circular(5.0),
-            //           borderSide: BorderSide(
-            //             color: AppColors.greyUltraLight,
-            //           ),
-            //         ),
-            //         enabledBorder: OutlineInputBorder(
-            //           borderRadius: BorderRadius.circular(5.0),
-            //           borderSide: BorderSide(
-            //             color: AppColors.greyUltraLight,
-            //             width: 1.0,
-            //           ),
-            //         ),
-            //       ),
-            //       onTap: () => {_showMultiSelectCompetenciesCategories(context) },
-            //       maxLines: 2,
-            //       readOnly: true,
-            //       style: textTheme.button?.copyWith(
-            //         height: 1.5,
-            //         color: AppColors.greyDark,
-            //         fontWeight: FontWeight.w400,
-            //         fontSize: fontSize,
-            //       ),
-            //     ),
-            //     childRight: TextFormField(
-            //       controller: textEditingControllerCompetenciesSubCategories,
-            //       decoration: InputDecoration(
-            //         filled: true,
-            //         fillColor: Colors.white,
-            //         labelText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
-            //         hintText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
-            //         labelStyle: textTheme.bodyText1?.copyWith(
-            //           color: AppColors.greyDark,
-            //           height: 1.5,
-            //           fontWeight: FontWeight.w400,
-            //           fontSize: fontSize,
-            //         ),
-            //         focusedBorder: OutlineInputBorder(
-            //           borderRadius: BorderRadius.circular(5.0),
-            //           borderSide: BorderSide(
-            //             color: AppColors.greyUltraLight,
-            //           ),
-            //         ),
-            //         enabledBorder: OutlineInputBorder(
-            //           borderRadius: BorderRadius.circular(5.0),
-            //           borderSide: BorderSide(
-            //             color: AppColors.greyUltraLight,
-            //             width: 1.0,
-            //           ),
-            //         ),
-            //       ),
-            //       onTap: () => {_showMultiSelectCompetenciesSubCategories(context) },
-            //       maxLines: 2,
-            //       readOnly: true,
-            //       style: textTheme.button?.copyWith(
-            //         height: 1.5,
-            //         color: AppColors.greyDark,
-            //         fontWeight: FontWeight.w400,
-            //         fontSize: fontSize,
-            //       ),
-            //     )),
-            // Padding(
-            //   padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
-            //   child: TextFormField(
-            //     controller: textEditingControllerCompetencies,
-            //     decoration: InputDecoration(
-            //       labelText: StringConst.FORM_COMPETENCIES,
-            //       labelStyle: textTheme.bodyText1?.copyWith(
-            //         color: AppColors.greyDark,
-            //         height: 1.5,
-            //         fontWeight: FontWeight.w400,
-            //         fontSize: fontSize,
-            //       ),
-            //       focusedBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //         ),
-            //       ),
-            //       enabledBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //           width: 1.0,
-            //         ),
-            //       ),
-            //     ),
-            //     onTap: () => {_showMultiSelectCompetencies(context) },
-            //     validator: (value) => value!.isNotEmpty ?
-            //     null : StringConst.FORM_MOTIVATION_ERROR,
-            //     maxLines: 2,
-            //     readOnly: true,
-            //     style: textTheme.button?.copyWith(
-            //       height: 1.5,
-            //       color: AppColors.greyDark,
-            //       fontWeight: FontWeight.w400,
-            //       fontSize: fontSize,
-            //     ),
-            //   ),
-            // ),
-            // CustomFlexRowColumn(
-            //   childLeft: customTextFormField(
-            //       context,
-            //       _duration!,
-            //       StringConst.FORM_DURATION,
-            //       StringConst.FORM_COMPANY_ERROR,
-            //       durationSetState),
-            //   childRight: customTextFormMultilineNotValidator(context,
-            //       _temporality!, StringConst.FORM_SCHEDULE, scheduleSetState),
-            // ),
-            // CustomFlexRowColumn(
-            //     childLeft: CheckboxListTile(
-            //         title: Text(
-            //           'El recurso no expira',
-            //           style: textTheme.bodyMedium?.copyWith(
-            //             height: 1.5,
-            //             color: AppColors.greyDark,
-            //             fontWeight: FontWeight.w700,
-            //           ),
-            //         ),
-            //         value: selectedNotExpire,
-            //         onChanged: (bool? value) => setState(() {
-            //           selectedNotExpire = value!;
-            //           _notExpire = selectedNotExpire;
-            //         })),
-            //     childRight: Container()),
-            // selectedNotExpire == false
-            //     ? Flex(
-            //   direction: Responsive.isMobile(context)
-            //       ? Axis.vertical
-            //       : Axis.horizontal,
-            //   children: [
-            //     Expanded(
-            //         flex: Responsive.isMobile(context) ? 0 : 1,
-            //         child: Padding(
-            //           padding: const EdgeInsets.all(
-            //               Sizes.kDefaultPaddingDouble / 2),
-            //           child: DateTimeField(
-            //             initialValue: _start,
-            //             format: DateFormat('dd/MM/yyyy'),
-            //             decoration: InputDecoration(
-            //               filled: true,
-            //               fillColor: Colors.white,
-            //               prefixIcon: const Icon(Icons.calendar_today),
-            //               labelText: StringConst.FORM_START,
-            //               labelStyle: textTheme.bodyLarge?.copyWith(
-            //                 height: 1.5,
-            //                 color: AppColors.greyDark,
-            //                 fontWeight: FontWeight.w400,
-            //               ),
-            //               focusedBorder: OutlineInputBorder(
-            //                 borderRadius: BorderRadius.circular(5.0),
-            //                 borderSide: const BorderSide(
-            //                   color: AppColors.greyUltraLight,
-            //                 ),
-            //               ),
-            //               enabledBorder: OutlineInputBorder(
-            //                 borderRadius: BorderRadius.circular(5.0),
-            //                 borderSide: const BorderSide(
-            //                   color: AppColors.greyUltraLight,
-            //                   width: 1.0,
-            //                 ),
-            //               ),
-            //             ),
-            //             style: textTheme.bodyMedium?.copyWith(
-            //               height: 1.5,
-            //               color: AppColors.greyDark,
-            //               fontWeight: FontWeight.w400,
-            //             ),
-            //             onShowPicker: (context, currentValue) {
-            //               return showDatePicker(
-            //                 context: context,
-            //                 locale: Locale('es', 'ES'),
-            //                 firstDate: _start!,
-            //                 initialDate: currentValue ?? DateTime.now(),
-            //                 lastDate: DateTime(DateTime.now().year + 10,
-            //                     DateTime.now().month, DateTime.now().day),
-            //               );
-            //             },
-            //             onSaved: (dateTime) {
-            //               setState(() {
-            //                 _start = dateTime;
-            //               });
-            //             },
-            //             validator: (value) {
-            //               if (value == null) {
-            //                 return StringConst.FORM_START_ERROR;
-            //               }
-            //               return null;
-            //             },
-            //           ),
-            //         )),
-            //     Expanded(
-            //         flex: Responsive.isMobile(context) ? 0 : 1,
-            //         child: Padding(
-            //           padding: const EdgeInsets.all(
-            //               Sizes.kDefaultPaddingDouble / 2),
-            //           child: DateTimeField(
-            //             initialValue: _end,
-            //             format: DateFormat('dd/MM/yyyy'),
-            //             decoration: InputDecoration(
-            //               filled: true,
-            //               fillColor: Colors.white,
-            //               prefixIcon: const Icon(Icons.calendar_today),
-            //               labelText: StringConst.FORM_END,
-            //               labelStyle: textTheme.bodyLarge?.copyWith(
-            //                 height: 1.5,
-            //                 color: AppColors.greyDark,
-            //                 fontWeight: FontWeight.w400,
-            //               ),
-            //               focusedBorder: OutlineInputBorder(
-            //                 borderRadius: BorderRadius.circular(5.0),
-            //                 borderSide: const BorderSide(
-            //                   color: AppColors.greyUltraLight,
-            //                 ),
-            //               ),
-            //               enabledBorder: OutlineInputBorder(
-            //                 borderRadius: BorderRadius.circular(5.0),
-            //                 borderSide: const BorderSide(
-            //                   color: AppColors.greyUltraLight,
-            //                   width: 1.0,
-            //                 ),
-            //               ),
-            //             ),
-            //             style: textTheme.bodyMedium?.copyWith(
-            //               height: 1.5,
-            //               color: AppColors.greyDark,
-            //               fontWeight: FontWeight.w400,
-            //             ),
-            //             onShowPicker: (context, currentValue) {
-            //               return showDatePicker(
-            //                 context: context,
-            //                 locale: Locale('es', 'ES'),
-            //                 firstDate: _end!,
-            //                 initialDate: currentValue ?? DateTime.now(),
-            //                 lastDate: DateTime(DateTime.now().year + 10,
-            //                     DateTime.now().month, DateTime.now().day),
-            //               );
-            //             },
-            //             onSaved: (dateTime) {
-            //               setState(() {
-            //                 _end = dateTime;
-            //               });
-            //             },
-            //             validator: (value) {
-            //               if (value == null) {
-            //                 return StringConst.FORM_COMPANY_ERROR;
-            //               }
-            //               return null;
-            //             },
-            //           ),
-            //         )),
-            //     Expanded(
-            //         flex: Responsive.isMobile(context) ? 0 : 1,
-            //         child: Padding(
-            //           padding: const EdgeInsets.all(
-            //               Sizes.kDefaultPaddingDouble / 2),
-            //           child: DateTimeField(
-            //             initialValue: _max,
-            //             format: DateFormat('dd/MM/yyyy'),
-            //             decoration: InputDecoration(
-            //               filled: true,
-            //               fillColor: Colors.white,
-            //               prefixIcon: const Icon(Icons.calendar_today),
-            //               labelText: StringConst.FORM_MAX,
-            //               labelStyle: textTheme.bodyLarge?.copyWith(
-            //                 height: 1.5,
-            //                 color: AppColors.greyDark,
-            //                 fontWeight: FontWeight.w400,
-            //               ),
-            //               focusedBorder: OutlineInputBorder(
-            //                 borderRadius: BorderRadius.circular(5.0),
-            //                 borderSide: const BorderSide(
-            //                   color: AppColors.greyUltraLight,
-            //                 ),
-            //               ),
-            //               enabledBorder: OutlineInputBorder(
-            //                 borderRadius: BorderRadius.circular(5.0),
-            //                 borderSide: const BorderSide(
-            //                   color: AppColors.greyUltraLight,
-            //                   width: 1.0,
-            //                 ),
-            //               ),
-            //             ),
-            //             style: textTheme.bodyMedium?.copyWith(
-            //               height: 1.5,
-            //               color: AppColors.greyDark,
-            //               fontWeight: FontWeight.w400,
-            //             ),
-            //             onShowPicker: (context, currentValue) {
-            //               return showDatePicker(
-            //                 context: context,
-            //                 locale: Locale('es', 'ES'),
-            //                 firstDate: _max!,
-            //                 initialDate: currentValue ?? DateTime.now(),
-            //                 lastDate: DateTime(DateTime.now().year + 10,
-            //                     DateTime.now().month, DateTime.now().day),
-            //               );
-            //             },
-            //             onSaved: (dateTime) {
-            //               setState(() {
-            //                 _max = dateTime;
-            //               });
-            //             },
-            //             validator: (value) {
-            //               if (value == null) {
-            //                 return StringConst.FORM_COMPANY_ERROR;
-            //               }
-            //               return null;
-            //             },
-            //           ),
-            //         )),
-            //   ],
-            // )
-            //     : Container(),
-            // CustomFlexRowColumn(
-            //   childLeft: DropdownButtonFormField<String>(
-            //     hint: const Text(StringConst.FORM_MODALITY),
-            //     value: _modality,
-            //     isExpanded: true,
-            //     items: <String>[
-            //       'Presencial',
-            //       'Semipresencial',
-            //       'Online'
-            //     ].map<DropdownMenuItem<String>>((String value) {
-            //       return DropdownMenuItem<String>(
-            //         value: value,
-            //         child: Text(
-            //           value,
-            //           style: textTheme.bodyMedium?.copyWith(
-            //               height: 1.5,
-            //               color: AppColors.greyDark,
-            //               fontWeight: FontWeight.w400,
-            //               overflow: TextOverflow.ellipsis
-            //           ),
-            //         ),
-            //       );
-            //     }).toList(),
-            //     validator: (value) =>
-            //     _modality != null ? null : StringConst.FORM_COMPANY_ERROR,
-            //     onChanged: (value) => buildModalityStreamBuilderSetState(value),
-            //     onSaved: (value) => buildModalityStreamBuilderSetState(value),
-            //     iconDisabledColor: AppColors.greyDark,
-            //     iconEnabledColor: AppColors.primaryColor,
-            //     decoration: InputDecoration(
-            //       filled: true,
-            //       fillColor: Colors.white,
-            //       labelStyle: textTheme.bodyLarge?.copyWith(
-            //         height: 1.5,
-            //         color: AppColors.greyDark,
-            //         fontWeight: FontWeight.w400,
-            //       ),
-            //       focusedBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //         ),
-            //       ),
-            //       enabledBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //           width: 1.0,
-            //         ),
-            //       ),
-            //     ),
-            //     style: textTheme.bodyMedium?.copyWith(
-            //       height: 1.5,
-            //       color: AppColors.greyDark,
-            //       fontWeight: FontWeight.w400,
-            //     ),
-            //   ),
-            //   childRight: Container(),
-            // ),
-            // CustomFlexRowColumn(
-            //   childLeft: customTextFormField(
-            //       context,
-            //       _place!,
-            //       StringConst.FORM_PLACE,
-            //       StringConst.FORM_COMPANY_ERROR,
-            //       placeSetState),
-            //   childRight: customTextFormFieldNum(
-            //       context,
-            //       _capacity!.toString(),
-            //       StringConst.FORM_CAPACITY,
-            //       StringConst.FORM_COMPANY_ERROR,
-            //       capacitySetState),
-            // ),
-            // _modality != "Online"
-            //     ? CustomFlexRowColumn(
-            //     childLeft: streamBuilderForCountry(context, selectedCountry,
-            //         buildCountryStreamBuilderSetState, resource),
-            //     childRight: streamBuilderForProvince(
-            //         context,
-            //         selectedCountry == null
-            //             ? resource.address?.country
-            //             : selectedCountry?.countryId,
-            //         selectedProvince,
-            //         buildProvinceStreamBuilderSetState,
-            //         resource))
-            //     : Container(),
-            // _modality != "Online"
-            //     ? CustomFlexRowColumn(
-            //   childLeft: streamBuilderForCity(
-            //       context,
-            //       selectedCountry == null
-            //           ? resource.address?.country
-            //           : selectedCountry?.countryId,
-            //       selectedProvince == null
-            //           ? resource.address?.province
-            //           : selectedProvince?.provinceId,
-            //       selectedCity,
-            //       buildCityStreamBuilderSetState,
-            //       resource),
-            //   childRight: customTextFormFieldNotValidator(context, _street!,
-            //       StringConst.FORM_ADDRESS, addressSetState),
-            // )
-            //     : Container(),
-            // CustomFlexRowColumn(
-            //   childLeft: streamBuilderDropdownSocialEntities(
-            //       context,
-            //       selectedSocialEntity,
-            //       globals.organizerCurrentResource!.socialEntityId!,
-            //       buildSocialEntityStreamBuilderSetState),
-            //   childRight: TextFormField(
-            //     decoration: InputDecoration(
-            //       filled: true,
-            //       fillColor: Colors.white,
-            //       labelText: StringConst.FORM_ORGANIZER_TEXT,
-            //       focusColor: AppColors.lilac,
-            //       labelStyle: textTheme.bodyLarge?.copyWith(
-            //         color: AppColors.greyDark,
-            //       ),
-            //       focusedBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //         ),
-            //       ),
-            //       enabledBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(5.0),
-            //         borderSide: const BorderSide(
-            //           color: AppColors.greyUltraLight,
-            //           width: 1.0,
-            //         ),
-            //       ),
-            //     ),
-            //     initialValue: _organizerText,
-            //     onChanged: (String? value) => setState(() {
-            //       _organizerText = value;
-            //     }),
-            //     textCapitalization: TextCapitalization.sentences,
-            //     keyboardType: TextInputType.name,
-            //     style: textTheme.bodyMedium?.copyWith(
-            //       color: AppColors.greyDark,
-            //     ),
-            //   ),
-            // ),
-            // _organizerText != ""
-            //     ? CustomFlexRowColumn(
-            //   childLeft: customTextFormField(
-            //       context,
-            //       _phone!,
-            //       StringConst.FORM_PHONE,
-            //       StringConst.FORM_COMPANY_ERROR,
-            //       phoneSetState),
-            //   childRight: customTextFormField(
-            //       context,
-            //       _email!,
-            //       StringConst.FORM_EMAIL,
-            //       StringConst.FORM_COMPANY_ERROR,
-            //       emailSetState),
-            // )
-            //     : Container(),
-            // CustomFlexRowColumn(
-            //   childLeft:  _organizerText != ""
-            //       ? customTextFormField(
-            //       context, _link!,
-            //       StringConst.FORM_LINK,
-            //       StringConst.FORM_COMPANY_ERROR,
-            //       linkSetState)
-            //       : Container(),
-            //   childRight: Container(),
-            // ),
-            // CustomFlexRowColumn(
-            //   childLeft:  _organizerText != ""
-            //       ? Container()
-            //       : customTextFormFieldNotValidator(
-            //       context, _link!, StringConst.FORM_LINK, linkSetState),
-            //   childRight: Container(),
-            // ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormField(context, _category!,
+                  StringConst.CATEGORY, StringConst.FORM_COMPANY_ERROR, categorySetState),
+              childRight: customTextFormStringList(
+                  context,
+                  subCategories,
+                  _subCategory!,
+                  StringConst.SUB_CATEGORY,
+                  StringConst.FORM_COMPANY_ERROR,
+                  subCategorySetState),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormStringList(
+                  context,
+                  geographicZone,
+                  _geographicZone!,
+                  StringConst.ZONE,
+                  StringConst.FORM_COMPANY_ERROR,
+                  geographicZoneSetState),
+              childRight: customTextFormField(
+                  context,
+                  _subGeographicZone!,
+                  StringConst.SUB_ZONE,
+                  StringConst.FORM_COMPANY_ERROR,
+                  subGeographicZoneSetState),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormField(context, _website!,
+                  StringConst.FORM_WEBSITE, StringConst.FORM_ERROR, websiteSetState),
+              childRight: customTextFormField(context, _email!,
+              StringConst.EMAIL, StringConst.FORM_COMPANY_ERROR, emailSetState),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormPhone(
+                context,
+                _entityLandlinePhone!,
+                _entityLandlinePhoneCode,
+                StringConst.FORM_LANDLINE,
+                StringConst.FORM_COMPANY_ERROR,
+                _onCountryChangeEntityLandline,
+              ),
+              childRight: customTextFormPhone(
+                context,
+                _entityMobilePhone!,
+                _entityMobilePhoneCode,
+                StringConst.FORM_MOBILE_PHONE,
+                StringConst.FORM_COMPANY_ERROR,
+                _onCountryChangeMobilePhone,
+              ),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormFieldNotValidator(context, _linkedin!,
+                  StringConst.FORM_LINKEDIN, linkedinSetState),
+              childRight: customTextFormFieldNotValidator(context, _twitter!,
+                  StringConst.FORM_TWITTER, twitterSetState),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormFieldNotValidator(context, _otherSocialMedia!,
+                  StringConst.FORM_OTHER_SOCIAL_MEDIA, otherSocialMediaSetState),
+              childRight: Container(),
+            ),
+            SizedBox(height: 20.0,),
+            CustomTextMediumBold(text: StringConst.CONTACT_INFORMATION.toUpperCase(),),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: customTextFormField(
+                  context,
+                  _contactName!,
+                  StringConst.FORM_CONTACT_TEC_NAME,
+                  StringConst.FORM_COMPANY_ERROR,
+                  contactNameSetState),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormPhone(
+                context,
+                _contactPhone!,
+                _contactLandlinePhoneCode,
+                StringConst.FORM_LANDLINE,
+                StringConst.FORM_COMPANY_ERROR,
+                _onCountryChangeContactLandline,
+              ),
+              childRight: customTextFormPhone(
+                context,
+                _contactMobilePhone!,
+                _contactMobilePhoneCode,
+                StringConst.FORM_MOBILE_PHONE,
+                StringConst.FORM_COMPANY_ERROR,
+                _onCountryChangeContactMobilePhone,
+              ),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormField(
+                  context,
+                  _contactEmail!,
+                  StringConst.FORM_EMAIL,
+                  StringConst.FORM_COMPANY_ERROR,
+                  contactEmailSetState),
+              childRight: customTextFormField(
+                  context,
+                  _contactPosition!,
+                  StringConst.FORM_CONTACT_POSITION,
+                  StringConst.FORM_COMPANY_ERROR,
+                  contactPositionSetState),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormStringList(
+                  context,
+                  choiceGrade,
+                  _contactChoiceGrade!,
+                  StringConst.CONTACT_CHOICE_GRADE,
+                  StringConst.FORM_COMPANY_ERROR,
+                  contactChoiceGradeSetState),
+              childRight: customTextFormStringList(
+                  context,
+                  yesNo,
+                  _contactKOL!,
+                  StringConst.CONTACT_OPINION_LEADER,
+                  StringConst.FORM_COMPANY_ERROR,
+                  contactKOLSetState),
+            ),
+            CustomFlexRowColumn(
+              childLeft: customTextFormField(context, _contactProject!,
+                  StringConst.FORM_CONTACT_PROJECT, StringConst.FORM_COMPANY_ERROR, contactProjectSetState),
+              childRight: customTextFormField(context, _contactProject!,
+                  StringConst.FORM_CONTACT_PROJECT, StringConst.FORM_COMPANY_ERROR, contactProjectSetState),
+            ),
           ]),
     );
   }
@@ -978,227 +439,83 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     setState(() => _socialEntityName = val!);
   }
 
-  void descriptionSetState(String? val) {
+  void socialEntityActionScopeSetState(String? val) {
     setState(() => _socialEntityActionScope = val!);
   }
 
-  // void buildResourceTypeStreamBuilderSetState(ResourceType? resourceType) {
-  //   setState(() {
-  //     selectedResourceType = resourceType;
-  //   });
-  //   _resourceTypeId = resourceType?.resourceTypeId;
-  // }
-  //
-  // void buildResourceCategoryStreamBuilderSetState(
-  //     ResourceCategory? resourceCategory) {
-  //   setState(() {
-  //     selectedResourceCategory = resourceCategory;
-  //   });
-  //   _resourceCategoryId = resourceCategory?.id;
-  // }
-  //
-  // void buildDegreeStreamBuilderSetState(String? degree) {
-  //   setState(() => _degree = degree);
-  // }
-  //
-  // void buildContractStreamBuilderSetState(String? contract) {
-  //   setState(() => _contractType = contract);
-  // }
-  //
-  // void buildSalaryStreamBuilderSetState(String? salary) {
-  //   setState(() => _salary = salary);
-  // }
-  //
-  // void buildCountryStreamBuilderSetState(Country? country) {
-  //   setState(() {
-  //     selectedProvince = null;
-  //     selectedCity = null;
-  //     selectedCountry = country;
-  //   });
-  //   _countryId = country?.countryId;
-  // }
-  //
-  // void buildProvinceStreamBuilderSetState(Province? province) {
-  //   setState(() {
-  //     selectedCity = null;
-  //     selectedProvince = province;
-  //   });
-  //   _provinceId = province?.provinceId;
-  // }
-  //
-  // void buildCityStreamBuilderSetState(City? city) {
-  //   setState(() {
-  //     selectedCity = city;
-  //   });
-  //   _cityId = city?.cityId;
-  // }
-  //
-  // void buildSocialEntityStreamBuilderSetState(SocialEntity? socialEntity) {
-  //   setState(() {
-  //     selectedSocialEntity = socialEntity;
-  //     organizationId = socialEntity?.socialEntityId;
-  //   });
-  // }
-  //
-  // buildModalityStreamBuilderSetState(String? modality) {
-  //   setState(() => _modality = modality!);
-  // }
-  //
-  // void durationSetState(String? val) {
-  //   setState(() => _duration = val!);
-  // }
-  //
-  // void scheduleSetState(String? val) {
-  //   setState(() => _temporality = val!);
-  // }
-  //
-  // void placeSetState(String? val) {
-  //   setState(() => _place = val!);
-  // }
-  //
-  // void capacitySetState(String? val) {
-  //   setState(() => _capacity = int.parse(val!));
-  // }
-  //
-  // void addressSetState(String? val) {
-  //   setState(() => _street = val!);
-  // }
-  //
-  // void linkSetState(String? val) {
-  //   setState(() => _link = val!);
-  // }
-  //
-  // void phoneSetState(String? val) {
-  //   setState(() => _phone = val!);
-  // }
-  //
-  // void emailSetState(String? val) {
-  //   setState(() => _email = val!);
-  // }
-  //
-  // void buildResourcePictureStreamBuilderSetState(
-  //     ResourcePicture? resourcePicture) {
-  //   setState(() {
-  //     selectedResourcePicture = resourcePicture!;
-  //   });
-  //   _resourcePictureId = resourcePicture?.id;
-  // }
-  //
-  // void _showMultiSelectInterests(BuildContext context) async {
-  //   final selectedValues = await showDialog<Set<Interest>>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return streamBuilderDropdownInterests(
-  //           context, globals.interestsCurrentResource, selectedInterestsSet, resource);
-  //     },
-  //   );
-  //   getValuesFromKeyInterests(selectedValues);
-  // }
-  //
-  // void getValuesFromKeyInterests(selectedValues) {
-  //   var concatenate = StringBuffer();
-  //   List<String> interestsIds = [];
-  //   selectedValues.forEach((item) {
-  //     concatenate.write(item.name + ' / ');
-  //     interestsIds.add(item.interestId);
-  //   });
-  //   setState(() {
-  //     interestsNamesString = concatenate.toString();
-  //     textEditingControllerInterests?.text = concatenate.toString();
-  //     _interests = interestsIds;
-  //     selectedInterestsSet = selectedValues;
-  //   });
-  // }
-  //
-  // void _showMultiSelectCompetenciesCategories(BuildContext context) async {
-  //   final selectedValues = await showDialog<Set<CompetencyCategory>>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return streamBuilderDropdownCompetenciesCategoriesCreate(context, selectedCompetenciesCategoriesSet);
-  //     },
-  //   );
-  //   getValuesFromKeyCompetenciesCategories(selectedValues);
-  // }
-  //
-  // void getValuesFromKeyCompetenciesCategories(selectedValues) {
-  //   var concatenate = StringBuffer();
-  //   List<String> competenciesCategoriesIds = [];
-  //   selectedValues.forEach((item) {
-  //     concatenate.write(item.name + ' / ');
-  //     competenciesCategoriesIds.add(item.competencyCategoryId);
-  //   });
-  //   setState(() {
-  //     competenciesCategoriesNames = concatenate.toString();
-  //     textEditingControllerCompetenciesCategories.text = concatenate.toString();
-  //     _competenciesCategories = competenciesCategoriesIds;
-  //     selectedCompetenciesCategoriesSet = selectedValues;
-  //   });
-  // }
-  //
-  // void _showMultiSelectCompetenciesSubCategories(BuildContext context) async {
-  //   final selectedValues = await showDialog<Set<CompetencySubCategory>>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return streamBuilderDropdownCompetenciesSubCategories(context, selectedCompetenciesCategoriesSet, selectedCompetenciesSubCategoriesSet);
-  //     },
-  //   );
-  //   print(selectedValues);
-  //   getValuesFromKeyCompetenciesSubCategories(selectedValues);
-  // }
-  //
-  // void getValuesFromKeyCompetenciesSubCategories (selectedValues) {
-  //   var concatenate = StringBuffer();
-  //   List<String> competenciesSubCategoriesIds = [];
-  //   selectedValues.forEach((item){
-  //     concatenate.write(item.name +' / ');
-  //     competenciesSubCategoriesIds.add(item.competencySubCategoryId);
-  //   });
-  //   setState(() {
-  //     competenciesSubCategoriesNames = concatenate.toString();
-  //     textEditingControllerCompetenciesSubCategories.text = concatenate.toString();
-  //     _competenciesSubCategories = competenciesSubCategoriesIds;
-  //     selectedCompetenciesSubCategoriesSet = selectedValues;
-  //   });
-  //   print(competenciesSubCategoriesIds);
-  // }
-  //
-  // void _showMultiSelectCompetencies(BuildContext context) async {
-  //   final selectedValues = await showDialog<Set<Competency>>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return streamBuilderDropdownCompetencies(context, selectedCompetenciesSubCategoriesSet, selectedCompetenciesSet);
-  //     },
-  //   );
-  //   print(selectedValues);
-  //   getValuesFromKeyCompetencies(selectedValues);
-  // }
-  //
-  // void getValuesFromKeyCompetencies (selectedValues) {
-  //   var concatenate = StringBuffer();
-  //   List<String> competenciesIds = [];
-  //   selectedValues.forEach((item){
-  //     concatenate.write(item.name +' / ');
-  //     competenciesIds.add(item.id);
-  //   });
-  //   setState(() {
-  //     competenciesNames = concatenate.toString();
-  //     textEditingControllerCompetencies.text = concatenate.toString();
-  //     _competencies = competenciesIds;
-  //     selectedCompetenciesSet = selectedValues;
-  //   });
-  //   print(competenciesNames);
-  //   print(competenciesIds);
-  // }
+  void categorySetState(String? val) {
+    setState(() => _category = val!);
+  }
 
-  List<CustomStep> getSteps() => [
-    CustomStep(
-      isActive: currentStep == 0,
-      state: currentStep == 0 ? CustomStepState.complete : CustomStepState.indexed,
-      title: CustomStepperButton(color: currentStep >= 0 ? AppColors.yellow: AppColors.white,
-        child: CustomTextBold(title: StringConst.FORM_EDIT, color: AppColors.turquoiseBlue,),),
-      content: _buildForm(context),
-    ),
-  ];
+  void subCategorySetState(String? val) {
+    setState(() => _subCategory = val!);
+  }
+
+  void geographicZoneSetState(String? val) {
+    setState(() => _geographicZone = val!);
+  }
+
+  void subGeographicZoneSetState(String? val) {
+    setState(() => _subGeographicZone = val!);
+  }
+
+  void websiteSetState(String? val) {
+    setState(() => _website = val!);
+  }
+
+  void emailSetState(String? val) {
+    setState(() => _email = val!);
+  }
+
+  void _onCountryChangeEntityLandline(CountryCode countryCode) {
+    _entityLandlinePhoneCode = countryCode.toString();
+  }
+
+  void _onCountryChangeMobilePhone(CountryCode countryCode) {
+    _entityMobilePhoneCode = countryCode.toString();
+  }
+  void _onCountryChangeContactLandline(CountryCode countryCode) {
+    _contactLandlinePhoneCode = countryCode.toString();
+  }
+  void _onCountryChangeContactMobilePhone(CountryCode countryCode) {
+    _contactMobilePhoneCode = countryCode.toString();
+  }
+
+  void linkedinSetState(String? val) {
+    setState(() => _linkedin = val!);
+  }
+
+  void twitterSetState(String? val) {
+    setState(() => _twitter = val!);
+  }
+
+  void otherSocialMediaSetState(String? val) {
+    setState(() => _otherSocialMedia = val!);
+  }
+
+  void contactNameSetState(String? val) {
+    setState(() => _contactName = val!);
+  }
+
+  void contactEmailSetState(String? val) {
+    setState(() => _contactEmail = val!);
+  }
+
+  void contactPositionSetState(String? val) {
+    setState(() => _contactPosition = val!);
+  }
+
+  void contactChoiceGradeSetState(String? val) {
+    setState(() => _contactChoiceGrade = val!);
+  }
+
+  void contactKOLSetState(String? val) {
+    setState(() => _contactKOL = val!);
+  }
+
+  void contactProjectSetState(String? val) {
+    setState(() => _contactProject = val!);
+  }
 
   onStepContinue() async {
     if (currentStep == 0 && !_validateAndSaveForm()) {
@@ -1209,7 +526,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
 
   onStepCancel() {
     setState(() {
-      MyResourcesListPage.selectedIndex.value = 2;
+      EntityDirectoryPage.selectedIndex.value = 2;
     });
   }
 

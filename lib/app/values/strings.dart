@@ -584,4 +584,15 @@ class StringConst {
   static const String CONTACT_CHOICE_GRADE = "Grado de decisión";
   static const String CONTACT_OPINION_LEADER = "¿Se considera un KOL (Key Opinion Leader)?";
   static const String CONTACT_PROJECT = "Proyecto";
+  static const String FORM_NAME_ENTITY = "Nombre de la entidad";
+  static const String FORM_WEBSITE = "Url de la página web";
+  static const String FORM_LANDLINE = "Teléfono fijo";
+  static const String FORM_MOBILE_PHONE = "Teléfono móvil";
+  static const String FORM_LINKEDIN = "Linkedin";
+  static const String FORM_TWITTER = "Twitter";
+  static const String FORM_OTHER_SOCIAL_MEDIA = "Otra red social";
+  static const String FORM_CONTACT_TEC_NAME = "Nombre completo de la técnica de referencia";
+  static const String FORM_CONTACT_POSITION = "Cargo de la persona de contacto";
+  static const String FORM_CONTACT_PROJECT = "Proyecto o programa";
+  static const String FORM_EDIT_ENTITY = "Editar entidad social";
 }
