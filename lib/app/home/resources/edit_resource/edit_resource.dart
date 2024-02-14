@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datetime_picker_formfield_new/datetime_picker_formfield.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
-import 'package:enreda_empresas/app/common_widgets/custom_stepper.dart';
-import 'package:enreda_empresas/app/common_widgets/custom_stepper_button.dart';
-import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
@@ -15,9 +12,7 @@ import 'package:enreda_empresas/app/home/resources/validating_form_controls/stre
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_interests.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_social_entities.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_province.dart';
-import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_resourcePicture.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_resource_category.dart';
-import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_resource_type.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
@@ -25,7 +20,6 @@ import 'package:enreda_empresas/app/models/competencyCategory.dart';
 import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
-import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/resourceCategory.dart';
@@ -192,9 +186,6 @@ class _EditResourceState extends State<EditResource> {
   }
 
   Widget _buildContent(BuildContext context) {
-    final isLastStep = currentStep == getSteps().length - 1;
-    double screenWidth = widthOfScreen(context);
-    double screenHeight = heightOfScreen(context);
     double contactBtnWidth = responsiveSize(
       context,
       contactBtnWidthSm,
@@ -216,58 +207,49 @@ class _EditResourceState extends State<EditResource> {
           borderRadius: BorderRadius.circular(
               Sizes.kDefaultPaddingDouble / 2),
         ),
-        child: Stack(
-          children: [
-            CustomStepper(
-              elevation: 0,
-              type: Responsive.isMobile(context)
-                  ? CustomStepperType.vertical
-                  : CustomStepperType.horizontal,
-              steps: getSteps(),
-              currentStep: currentStep,
-              onStepContinue: onStepContinue,
-              onStepCancel: onStepCancel,
-              controlsBuilder: (context, _) {
-                return Container(
-                  height: Sizes.kDefaultPaddingDouble * 2,
-                  margin: const EdgeInsets.only(
-                      top: Sizes.kDefaultPaddingDouble * 2),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal:
-                      Sizes.kDefaultPaddingDouble / 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      if (currentStep == 0)
-                        EnredaButton(
-                          buttonTitle:
-                          StringConst.CANCEL,
-                          width: contactBtnWidth,
-                          onPressed: onStepCancel,
-                          padding: EdgeInsets.all(0.0),
-                        ),
-                      const SizedBox(
-                          width: Sizes.kDefaultPaddingDouble),
-                      isLoading
-                          ? const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary300,
-                          ))
-                          : EnredaButton(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildForm(context),
+              Container(
+                height: Sizes.kDefaultPaddingDouble * 2,
+                margin: const EdgeInsets.only(
+                    top: Sizes.kDefaultPaddingDouble * 2),
+                padding: const EdgeInsets.symmetric(
+                    horizontal:
+                    Sizes.kDefaultPaddingDouble / 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    if (currentStep == 0)
+                      EnredaButton(
                         buttonTitle:
-                        StringConst.FORM_UPDATE,
+                        StringConst.CANCEL,
                         width: contactBtnWidth,
-                        buttonColor: AppColors.primaryColor,
-                        titleColor: AppColors.white,
-                        onPressed: onStepContinue,
-                        padding: EdgeInsets.all(4.0),
+                        onPressed: onStepCancel,
+                        padding: EdgeInsets.all(0.0),
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
+                    const SizedBox(
+                        width: Sizes.kDefaultPaddingDouble),
+                    isLoading
+                        ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary300,
+                        ))
+                        : EnredaButton(
+                      buttonTitle:
+                      StringConst.FORM_UPDATE,
+                      width: contactBtnWidth,
+                      buttonColor: AppColors.primaryColor,
+                      titleColor: AppColors.white,
+                      onPressed: onStepContinue,
+                      padding: EdgeInsets.all(4.0),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1192,16 +1174,6 @@ class _EditResourceState extends State<EditResource> {
     print(competenciesNames);
     print(competenciesIds);
   }
-
-  List<CustomStep> getSteps() => [
-        CustomStep(
-          isActive: currentStep == 0,
-          state: currentStep == 0 ? CustomStepState.complete : CustomStepState.indexed,
-          title: CustomStepperButton(color: currentStep >= 0 ? AppColors.yellow: AppColors.white,
-            child: CustomTextBold(title: StringConst.FORM_EDIT, color: AppColors.turquoiseBlue,),),
-          content: _buildForm(context),
-        ),
-      ];
 
   onStepContinue() async {
     if (currentStep == 0 && !_validateAndSaveForm()) {

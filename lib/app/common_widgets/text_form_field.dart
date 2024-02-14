@@ -1,3 +1,4 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:datetime_picker_formfield_new/datetime_picker_formfield.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
@@ -359,5 +360,112 @@ Widget customTextFormFieldName(BuildContext context, String formValue, String la
       fontWeight: FontWeight.w400,
       fontSize: fontSize,
     ),
+  );
+}
+
+
+Widget customTextFormStringList(BuildContext context, List<String> strings, String formValue, String labelText, String errorText, functionSetState) {
+  TextTheme textTheme = Theme.of(context).textTheme;
+  return DropdownButtonFormField<String>(
+    hint: Text(labelText),
+    value: formValue == "" ? null : formValue,
+    items: strings.map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(
+          value,
+          style: textTheme.bodyMedium?.copyWith(
+            height: 1.5,
+            color: AppColors.greyDark,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      );
+    }).toList(),
+    validator: (value) => formValue != '' ? null : errorText,
+    onChanged: (value) => functionSetState(value),
+    iconDisabledColor: AppColors.greyDark,
+    iconEnabledColor: AppColors.primaryColor,
+    decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      labelStyle: textTheme.bodyLarge?.copyWith(
+        height: 1.5,
+        color: AppColors.greyDark,
+        fontWeight: FontWeight.w400,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(
+          color: AppColors.greyUltraLight,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(
+          color: AppColors.greyUltraLight,
+          width: 1.0,
+        ),
+      ),
+    ),
+    style: textTheme.bodyMedium?.copyWith(
+      height: 1.5,
+      color: AppColors.greyDark,
+      fontWeight: FontWeight.w400,
+    ),
+  );
+}
+
+Widget customTextFormPhone(BuildContext context, String formValue, String formPhoneCode, String labelText, String errorText, functionSetState) {
+  TextTheme textTheme = Theme.of(context).textTheme;
+  return TextFormField(
+    decoration: InputDecoration(
+      labelText: labelText,
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      filled: true,
+      fillColor: Colors.white,
+      prefixIcon: CountryCodePicker(
+        dialogSize: Size(350.0, MediaQuery.of(context).size.height * 0.6),
+        onChanged: functionSetState,
+        initialSelection: formPhoneCode,
+        showFlagDialog: true,
+      ),
+      focusColor: AppColors.primaryColor,
+      labelStyle: textTheme.bodyLarge?.copyWith(
+        height: 1.5,
+        color: AppColors.greyDark,
+        fontWeight: FontWeight.w400,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(
+          color: AppColors.greyUltraLight,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(
+          color: AppColors.greyUltraLight,
+          width: 1.0,
+        ),
+      ),
+    ),
+    initialValue: formValue.indexOf(' ') < 0 && formValue.length > 3
+        ? formValue.substring(3)
+        : formValue.substring(formValue.indexOf(' ') + 1),
+    validator: (value) =>
+    value!.isNotEmpty ? null : errorText,
+    onSaved: (value) => formValue = formPhoneCode + ' ' + value!,
+    textCapitalization: TextCapitalization.sentences,
+    keyboardType: TextInputType.phone,
+    style: textTheme.bodyMedium?.copyWith(
+      height: 1.5,
+      color: AppColors.greyDark,
+      letterSpacing: 1.5,
+      fontWeight: FontWeight.w600,
+    ),
+    inputFormatters: <TextInputFormatter>[
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+    ],
   );
 }
