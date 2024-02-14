@@ -108,4 +108,10 @@ class ImagePath {
   static const String GAMIFICATION_RESOURCES_ICON = '$imageDir/gamification_resources_icon.png';
   static const String GAMIFICATION_CV_ICON = '$imageDir/gamification_cv_icon.png';
   static const String PARTICIPANT_DOCUMENTATION_ICON = '$imageDir/participant_documentation_icon.png';
+
+  //Personal documentation
+  static const String PERSONAL_DOCUMENTATION_DELETE = '$imageDir/icon-eliminar-entidad.png';
+  static const String PERSONAL_DOCUMENTATION_VIEW = '$imageDir/icon-ver-entidad.png';
+  static const String PERSONAL_DOCUMENTATION_ADD = '$imageDir/icon-add-entidad.png';
+  static const String PERSONAL_DOCUMENTATION_DOWNLOAD = '$imageDir/icon-descargar-entidad.png';
 }

@@ -1,4 +1,4 @@
-import 'package:enreda_empresas/app/models/education.dart';
+import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
@@ -6,20 +6,20 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Widget streamBuilderDropdownEducation (BuildContext context, Education? selectedEducation,  functionToWriteBackThings ) {
+Widget streamBuilderForNation (BuildContext context, String? selectedCountry,  functionToWriteBackThings, String title ) {
   final database = Provider.of<Database>(context, listen: false);
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
-  return StreamBuilder<List<Education>>(
-      stream: database.educationStream(),
-      builder: (context, snapshotEducation){
+  return StreamBuilder<List<String>>(
+      stream: database.nationsSpanishStream(),
+      builder: (context, snapshotCountries){
 
-        List<DropdownMenuItem<Education>> educationItems = [];
-        if (snapshotEducation.hasData) {
-          educationItems = snapshotEducation.data!.map((Education education) =>
-              DropdownMenuItem<Education>(
-                value: education,
-                child: Text(education.label),
+        List<DropdownMenuItem<String>> countryItems = [];
+        if (snapshotCountries.hasData) {
+          countryItems = snapshotCountries.data!.map((String c) =>
+              DropdownMenuItem<String>(
+                value: c,
+                child: Text(c),
               ))
               .toList();
         }
@@ -30,9 +30,7 @@ Widget streamBuilderDropdownEducation (BuildContext context, Education? selected
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
-                  StringConst.FORM_EDUCATION,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  title,
                   style: textTheme.button?.copyWith(
                     height: 1.5,
                     color: AppColors.greyDark,
@@ -42,12 +40,12 @@ Widget streamBuilderDropdownEducation (BuildContext context, Education? selected
                 ),
               ),
               Container(
-                height: 55,
+                height: 50,
                 child: DropdownButtonFormField(
-                  value: selectedEducation,
-                  items: educationItems,
+                  value: selectedCountry,
+                  items: countryItems,
                   onChanged: (value) => functionToWriteBackThings(value),
-                  validator: (value) => selectedEducation != null ? null : StringConst.FORM_MOTIVATION_ERROR,
+                  validator: (value) => selectedCountry != null ? null : StringConst.COUNTRY_ERROR,
                   decoration: InputDecoration(
                     errorStyle: TextStyle(height: 0.01),
                     focusedBorder: OutlineInputBorder(
@@ -80,45 +78,6 @@ Widget streamBuilderDropdownEducation (BuildContext context, Education? selected
                 ),
               ),
             ]
-        );
-
-          DropdownButtonFormField<Education>(
-          hint: Text(StringConst.FORM_EDUCATION, maxLines: 2, overflow: TextOverflow.ellipsis),
-          isExpanded: true,
-          isDense: false,
-          value: selectedEducation,
-          items: educationItems,
-          validator: (value) => selectedEducation != null ? null : StringConst.FORM_MOTIVATION_ERROR,
-          onChanged: (value) => functionToWriteBackThings(value),
-          iconDisabledColor: AppColors.greyDark,
-          iconEnabledColor: AppColors.primaryColor,
-          decoration: InputDecoration(
-            labelStyle: textTheme.button?.copyWith(
-              height: 1.5,
-              color: AppColors.greyDark,
-              fontWeight: FontWeight.w400,
-              fontSize: fontSize,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
-                width: 1.0,
-              ),
-            ),
-          ),
-          style: textTheme.button?.copyWith(
-            height: 1.5,
-            color: AppColors.greyDark,
-            fontWeight: FontWeight.w400,
-            fontSize: fontSize,
-          ),
         );
       });
 }

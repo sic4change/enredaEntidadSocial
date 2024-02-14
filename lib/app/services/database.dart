@@ -125,6 +125,7 @@ abstract class Database {
      Future<void> setInitialReport(InitialReport initialReport);
      Future<void> addInitialReport(InitialReport initialReport);
      Stream<List<String>> languagesStream();
+     Stream<List<String>> nationsSpanishStream();
 }
 
 class FirestoreDatabase implements Database {
@@ -860,6 +861,14 @@ class FirestoreDatabase implements Database {
     path: APIPath.languages(),
     queryBuilder: (query) => query.where('name', isNotEqualTo: null),
     builder: (data, documentId) => data['name'].toString(),
+    sort: (lhs, rhs) => lhs.compareTo(rhs),
+  );
+
+  @override
+  Stream<List<String>> nationsSpanishStream() => _service.collectionStream(
+    path: APIPath.nations(),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null),
+    builder: (data, documentId) => data['translations']['es'].toString(),
     sort: (lhs, rhs) => lhs.compareTo(rhs),
   );
 

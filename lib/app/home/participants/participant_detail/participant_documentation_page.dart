@@ -214,10 +214,10 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
             child: document.document != '' ? Row(
               children: [
                 IconButton(
-                  icon: Icon(
-                    Icons.delete,
-                    color: AppColors.chatDarkGray,
-                    size: 20,
+                  icon: Image.asset(
+                    ImagePath.PERSONAL_DOCUMENTATION_DELETE,
+                    width: 20,
+                    height: 20,
                   ),
                   onPressed: (){
                     setPersonalDocument(context: context, document: PersonalDocument(name: document.name, order: -1, document: ''), user: user);
@@ -228,10 +228,10 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
                 ),
                 SpaceW8(),
                 IconButton(
-                  icon: Icon(
-                    Icons.remove_red_eye,
-                    color: AppColors.chatDarkGray,
-                    size: 20,
+                  icon: Image.asset(
+                    ImagePath.PERSONAL_DOCUMENTATION_VIEW,
+                    width: 20,
+                    height: 20,
                   ),
                   onPressed: () async {
                     var data = await http.get(Uri.parse(document.document));
@@ -241,10 +241,10 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
                 ),
                 SpaceW8(),
                 IconButton(
-                  icon: Icon(
-                    Icons.download,
-                    color: AppColors.chatDarkGray,
-                    size: 20,
+                  icon: Image.asset(
+                    ImagePath.PERSONAL_DOCUMENTATION_DOWNLOAD,
+                    width: 20,
+                    height: 20,
                   ),
                   onPressed: () async {
                     final ref = FirebaseStorage.instance.refFromURL(document.document);
@@ -262,10 +262,10 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
               ],
             ) :
             IconButton(
-              icon: Icon(
-                Icons.add,
-                color: AppColors.chatDarkGray,
-                size: 20,
+              icon: Image.asset(
+                ImagePath.PERSONAL_DOCUMENTATION_ADD,
+                width: 20,
+                height: 20,
               ),
               onPressed: () async {
                 PlatformFile? pickedFile;
@@ -308,7 +308,16 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
               key: addDocumentKey,
               child: TextFormField(
                 controller: newDocument,
-                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+                validator: (value){
+                  bool used = false;
+                  if(value!.isEmpty) return StringConst.FORM_GENERIC_ERROR;
+                  _userDocuments.forEach((element) {
+                    if(element.name.toUpperCase() == value.toUpperCase()){
+                      used = true;
+                    }
+                  });
+                  return used ? StringConst.NAME_IN_USE : null;
+                }
               ),
             ),
             actions: <Widget>[
