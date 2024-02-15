@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/home/participants/participant_detail/closure_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_documentation_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_ipil_page.dart';
@@ -154,7 +155,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                     _currentPage = ParticipantControlPanelPage(participantUser: user);
                     break;
                   case 1:
-                    _currentPage = initialReport(context, user);
+                    _currentPage = closureReport(context, user);  //TODO change to initialReport
                     break;
                   case 2:
                     _currentPage = ParticipantIPILPage(participantUser: user);

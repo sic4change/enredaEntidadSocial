@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/city.dart';
+import 'package:enreda_empresas/app/models/closureReport.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/competencyCategory.dart';
 import 'package:enreda_empresas/app/models/competencySubCategory.dart';
@@ -126,6 +127,9 @@ abstract class Database {
      Future<void> addInitialReport(InitialReport initialReport);
      Stream<List<String>> languagesStream();
      Stream<List<String>> nationsSpanishStream();
+     Stream<ClosureReport> closureReportsStreamByUserId(String? userId);
+     Future<void> setClosureReport(ClosureReport closureReport);
+     Future<void> addClosureReport(ClosureReport closureReport);
 }
 
 class FirestoreDatabase implements Database {
@@ -871,6 +875,25 @@ class FirestoreDatabase implements Database {
     builder: (data, documentId) => data['translations']['es'].toString(),
     sort: (lhs, rhs) => lhs.compareTo(rhs),
   );
+
+  @override
+  Stream<ClosureReport> closureReportsStreamByUserId(String? userId) {
+    return _service.documentStreamByField(
+      path: APIPath.closureReports(),
+      builder: (data, documentId) => ClosureReport.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('userId', isEqualTo: userId),
+    );
+  }
+
+  @override
+  Future<void> setClosureReport(ClosureReport closureReport) {
+    return _service.updateData(
+        path: APIPath.closureReport(closureReport.closureReportId!), data: closureReport.toMap());
+  }
+
+  @override
+  Future<void> addClosureReport(ClosureReport closureReport) =>
+      _service.addData(path: APIPath.closureReports(), data: closureReport.toMap());
 
 }
 

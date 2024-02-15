@@ -68,4 +68,6 @@ class APIPath {
   static String initialReport(String initialReportId) => 'initialReports/$initialReportId';
   static String languages() => 'languages';
   static String nations() => 'nations';
+  static String closureReports() => 'closureReports';
+  static String closureReport(String closureReportId) => 'closureReports/$closureReportId';
 }
