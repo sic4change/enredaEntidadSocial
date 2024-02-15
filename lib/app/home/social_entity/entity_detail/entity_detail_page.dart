@@ -355,6 +355,11 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
         CustomTextBold(title: StringConst.CONTACT_PROJECT.toUpperCase(), color: AppColors.turquoiseBlue,),
         socialEntity.contactProject == null || socialEntity.contactProject == '' ? Container() :
         CustomTextSmallColor(text: socialEntity.contactProject!),
+
+        socialEntity.signedAgreements == null || socialEntity.signedAgreements == '' ? Container() :
+        CustomTextBold(title: StringConst.FORM_ENTITY_SIGNED_AGREEMENTS.toUpperCase(), color: AppColors.turquoiseBlue,),
+        socialEntity.signedAgreements == null || socialEntity.signedAgreements == '' ? Container() :
+        CustomTextSmallColor(text: socialEntity.signedAgreements!),
       ],
     );
   }

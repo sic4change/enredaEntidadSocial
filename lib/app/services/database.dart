@@ -102,6 +102,7 @@ abstract class Database {
      Future<void> uploadUserAvatar(String userId, Uint8List data);
      Future<void> addContact(Contact contact);
      Future<void> setResource(Resource resource);
+     Future<void> setSocialEntity(SocialEntity socialEntity);
      Future<void> deleteResource(Resource resource);
      Future<void> addSocialEntityUser(SocialEntityUser socialEntityUser);
      Future<void> addSocialEntity(SocialEntity socialEntity);
@@ -140,7 +141,11 @@ class FirestoreDatabase implements Database {
   Future<void> deleteResource(Resource resource) =>
       _service.deleteData(path: APIPath.resource(resource.resourceId!));
 
-    @override
+  @override
+  Future<void> setSocialEntity(SocialEntity socialEntity) => _service.updateData(
+      path: APIPath.socialEntity(socialEntity.socialEntityId!), data: socialEntity.toMap());
+
+  @override
     Stream<List<Resource>> myResourcesStream(String socialEntityId) =>
         _service.collectionStream(
           path: APIPath.resources(),
