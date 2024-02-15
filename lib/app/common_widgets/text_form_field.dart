@@ -416,7 +416,7 @@ Widget customTextFormStringList(BuildContext context, List<String> strings, Stri
   );
 }
 
-Widget customTextFormPhone(BuildContext context, String formValue, String formPhoneCode, String labelText, String errorText, functionSetState) {
+Widget customTextFormPhone(BuildContext context, String formValue, String formPhoneCode, String labelText, String errorText, functionSetState, functionSetStatePhone) {
   TextTheme textTheme = Theme.of(context).textTheme;
   return TextFormField(
     decoration: InputDecoration(
@@ -455,7 +455,7 @@ Widget customTextFormPhone(BuildContext context, String formValue, String formPh
         : formValue.substring(formValue.indexOf(' ') + 1),
     validator: (value) =>
     value!.isNotEmpty ? null : errorText,
-    onSaved: (value) => formValue = formPhoneCode + ' ' + value!,
+    onSaved: (value) => functionSetStatePhone(value),
     textCapitalization: TextCapitalization.sentences,
     keyboardType: TextInputType.phone,
     style: textTheme.bodyMedium?.copyWith(

@@ -595,4 +595,7 @@ class StringConst {
   static const String FORM_CONTACT_POSITION = "Cargo de la persona de contacto";
   static const String FORM_CONTACT_PROJECT = "Proyecto o programa";
   static const String FORM_EDIT_ENTITY = "Editar entidad social";
+  static const String FORM_ENTITY_LABELS = "Sectores/Campos/Etiquetas/Ecosistemas";
+  static const String FORM_ENTITY_SIGNED_AGREEMENTS = "Acuerdos firmados";
+  static const String FORM_ENTITY_UPDATED = "La entidad social fue actualizada exitosamente.";
 }

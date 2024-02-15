@@ -40,6 +40,7 @@ class SocialEntity {
     this.contactChoiceGrade,
     this.contactKOL,
     this.contactProject,
+    this.signedAgreements,
     this.trust,
   });
 
@@ -80,6 +81,7 @@ class SocialEntity {
   final String? contactChoiceGrade;
   final String? contactKOL;
   final String? contactProject;
+  final String? signedAgreements;
   final bool? trust;
 
 
@@ -122,7 +124,7 @@ class SocialEntity {
     final String entityPhone = data['entityPhone'] ?? '';
     final String entityMobilePhone = data['entityMobilePhone'] ?? '';
     final String contactPhone = data['contactPhone'] ?? '';
-    final String contactMobilePhone = data['contactPhone'] ?? '';
+    final String contactMobilePhone = data['contactMobilePhone'] ?? '';
     final String geographicZone = data['geographicZone'] ?? '';
     final String subGeographicZone = data['subGeographicZone'] ?? '';
     final String linkedin = data['linkedin'] ?? '';
@@ -136,11 +138,9 @@ class SocialEntity {
     final contactProject = data['contactProject'] ?? '';
     final trust = data['trust'] ?? false;
     final String? country = data['address']['country'];
-    final String? countryName = data['countryName'];
     final String? province = data['address']['province'];
-    final String? provinceName = data['provinceName'];
     final String? city = data['address']['city'];
-    final String? cityName = data['cityName'];
+    final String signedAgreements = data['signedAgreements'] ?? '';
 
     return SocialEntity(
         socialEntityId: socialEntityId,
@@ -170,11 +170,9 @@ class SocialEntity {
         contactProject: contactProject,
         trust: trust,
         country: country,
-        countryName: countryName,
         province: province,
-        provinceName: provinceName,
         city: city,
-        cityName: cityName
+        signedAgreements: signedAgreements
     );
   }
 
@@ -206,8 +204,79 @@ class SocialEntity {
       'contactKOL': contactKOL,
       'contactProject': contactProject,
       'trust': trust,
-
+      'country': country,
+      'province': province,
+      'city': city,
+      'signedAgreements': signedAgreements
     };
+  }
+
+  SocialEntity copyWith({
+    String? socialEntityId,
+    String? name,
+    String? email,
+    Address? address,
+    String? website,
+    List<String>? types,
+    String? actionScope,
+    String? category,
+    String? subCategory,
+    String? entityPhone,
+    String? entityMobilePhone,
+    String? contactPhone,
+    String? contactMobilePhone,
+    String? geographicZone,
+    String? subGeographicZone,
+    String? linkedin,
+    String? twitter,
+    String? otherSocialMedia,
+    String? contactName,
+    String? contactEmail,
+    String? contactPosition,
+    String? contactChoiceGrade,
+    String? contactKOL,
+    String? contactProject,
+    String? country,
+    String? countryName,
+    String? province,
+    String? provinceName,
+    String? city,
+    String? cityName,
+    String? signedAgreements,
+  }) {
+    return SocialEntity(
+        socialEntityId: socialEntityId ?? this.socialEntityId,
+        name: name ?? this.name,
+        email: email ?? this.email,
+        address: address ?? this.address,
+        website: website ?? this.website,
+        types: types ?? this.types,
+        actionScope: actionScope ?? this.actionScope,
+        category: category ?? this.category,
+        subCategory: subCategory ?? this.subCategory,
+        entityPhone: entityPhone ?? this.entityPhone,
+        entityMobilePhone: entityMobilePhone ?? this.entityMobilePhone,
+        contactPhone: contactPhone ?? this.contactPhone,
+        contactMobilePhone: contactMobilePhone ?? this.contactMobilePhone,
+        geographicZone: geographicZone ?? this.geographicZone,
+        subGeographicZone: subGeographicZone ?? this.subGeographicZone,
+        linkedin: linkedin ?? this.linkedin,
+        twitter: twitter ?? this.twitter,
+        otherSocialMedia: otherSocialMedia ?? this.otherSocialMedia,
+        contactName: contactName ?? this.contactName,
+        contactEmail: contactEmail ?? this.contactEmail,
+        contactPosition: contactPosition ?? this.contactPosition,
+        contactChoiceGrade: contactChoiceGrade ?? this.contactChoiceGrade,
+        contactKOL: contactKOL ?? this.contactKOL,
+        contactProject: contactProject ?? this.contactProject,
+        country: country ?? this.country,
+        countryName: countryName ?? this.countryName,
+        province: province ?? this.province,
+        provinceName: provinceName ?? this.provinceName,
+        city: city ?? this.city,
+        cityName: cityName ?? this.cityName,
+        signedAgreements: signedAgreements ?? this.signedAgreements
+    );
   }
 
   @override
