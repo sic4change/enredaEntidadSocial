@@ -111,9 +111,14 @@ class ImagePath {
 
   //Social entities
   static const String RECTANGLE_SOCIAL_ENTITY = '$imageDir/background-directorio-entidades.png';
+
   //Personal documentation
   static const String PERSONAL_DOCUMENTATION_DELETE = '$imageDir/icon-eliminar-entidad.png';
   static const String PERSONAL_DOCUMENTATION_VIEW = '$imageDir/icon-ver-entidad.png';
   static const String PERSONAL_DOCUMENTATION_ADD = '$imageDir/icon-add-entidad.png';
   static const String PERSONAL_DOCUMENTATION_DOWNLOAD = '$imageDir/icon-descargar-entidad.png';
+
+  //Control Panel
+  static const String CONTROL_PANEL = '$imageDir/panelcontrol-min.png';
+  static const String CONTROL_PANEL_CALENDAR = '$imageDir/Illustration-calendar.png';
 }
