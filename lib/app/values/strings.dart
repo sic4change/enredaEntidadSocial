@@ -376,8 +376,9 @@ class StringConst {
   static const String FORM_TIME_SEARCHING_REV = "Búsqueda";
   static const String FORM_TIME_SPENT_WEEKLY = "¿Cuánto tiempo dedicas a la búsqueda de empleo semanal?";
   static const String FORM_TIME_SPENT_WEEKLY_REV = "Tiempo dedicado";
-  static const String FORM_EDUCATION = "¿Cuál es tu nivel de titulación más alto?";
+  static const String FORM_EDUCATION = "Nivel de titulación";
   static const String FORM_EDUCATION_REV = "Educación";
+  static const String FORM_EDUCATION_REV_CREATE = "Nivel educativo";
   static const String FORM_NAME_CERTIFIER = "Nombres y Apellidos";
   static const String FORM_COMPANY_CERTIFIER = "Empresa";
   static const String FORM_EMAIL_CERTIFIER = "Correo electrónico";
@@ -404,6 +405,9 @@ class StringConst {
   static const String FORM_ERROR= "Error al crea la cuenta";
   static const String FORM_SELECT= "Seleccionar";
   static const String AVAILABLE = "Disponibilidad";
+  static const String FORM_CURRENT_COUNTRY = "País actual";
+  static const String FORM_SOCIAL_ENTITY = 'Organización o entidad a la que pertenece';
+  static const String FORM_NATIONALITY = "Nacionalidad";
 
   static const List<String> RESOURCE_TYPES = [
     'Oferta de empleo',
@@ -562,6 +566,7 @@ class StringConst {
   static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';
   static const String SOMETHING_WRONG = 'Algo fue mal';
   static const String CANNOT_LOAD_DATA = 'No se pudo cargar los datos';
+  static const String NAME_IN_USE = 'Nombre en uso';
 
   //ToolBox
   static const String TOOL_BOX = 'Caja de herramientas ';

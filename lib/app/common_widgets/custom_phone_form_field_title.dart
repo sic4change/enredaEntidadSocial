@@ -43,45 +43,48 @@ class CustomPhoneFormFieldTitle extends StatelessWidget {
             ),
           ),
         ),
-        TextFormField(
-          decoration: InputDecoration(
-            //labelText: 'Teléfono fijo',
-            filled: true,
-            fillColor: Colors.white,
-            prefixIcon: CountryCodePicker(
-              onChanged: onCountryChange,
-              initialSelection: 'ES',
-              countryFilter: ['ES', 'PE', 'GT'],
-              showFlagDialog: true,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
+        Container(
+          height: 50,
+          child: TextFormField(
+            decoration: InputDecoration(
+              //labelText: 'Teléfono fijo',
+              filled: true,
+              fillColor: Colors.white,
+              prefixIcon: CountryCodePicker(
+                onChanged: onCountryChange,
+                initialSelection: 'ES',
+                countryFilter: ['ES', 'PE', 'GT'],
+                showFlagDialog: true,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                  width: 1.0,
+                ),
               ),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
-                width: 1.0,
-              ),
+            initialValue: initialValue,
+            validator: validator,
+            onSaved: onSaved,
+            textCapitalization: TextCapitalization.sentences,
+            keyboardType: TextInputType.phone,
+            style: textTheme.button?.copyWith(
+              height: 1.5,
+              color: AppColors.greyDark,
+              fontWeight: FontWeight.w400,
+              fontSize: fontSize,
             ),
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+            ],
           ),
-          initialValue: initialValue,
-          validator: validator,
-          onSaved: onSaved,
-          textCapitalization: TextCapitalization.sentences,
-          keyboardType: TextInputType.phone,
-          style: textTheme.button?.copyWith(
-            height: 1.5,
-            color: AppColors.greyDark,
-            fontWeight: FontWeight.w400,
-            fontSize: fontSize,
-          ),
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-          ],
         ),
       ],
     );

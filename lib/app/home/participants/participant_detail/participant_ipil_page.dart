@@ -62,7 +62,11 @@ class ParticipantIPILPage extends StatelessWidget {
                             Row(
                               children: [
                                 IconButton(
-                                  icon: Icon(Icons.add, color: Colors.black, size: 24,),
+                                  icon: Icon(
+                                    Icons.add_circle_outlined,
+                                    color: AppColors.turquoiseBlue,
+                                    size: 24,
+                                  ),
                                   onPressed: (){
                                     IpilEntry newIpilEntry = IpilEntry(
                                       date: DateTime.now(),
@@ -73,7 +77,11 @@ class ParticipantIPILPage extends StatelessWidget {
                                   },
                                 ),
                                 IconButton(
-                                  icon: Icon(Icons.download_for_offline_rounded, color: Colors.black, size: 24,),
+                                  icon: Image.asset(
+                                    ImagePath.PERSONAL_DOCUMENTATION_DOWNLOAD,
+                                    width: 24,
+                                    height: 24,
+                                  ),
                                   onPressed: () async {
                                     Navigator.push(
                                       context,
