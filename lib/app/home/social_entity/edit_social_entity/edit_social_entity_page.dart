@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -23,8 +24,9 @@ import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
@@ -43,11 +45,13 @@ class EditSocialEntity extends StatefulWidget {
 class _EditSocialEntityState extends State<EditSocialEntity> {
   late SocialEntity socialEntity;
   final _formKey = GlobalKey<FormState>();
+  final _formKeyLogo = GlobalKey<FormState>();
   bool isLoading = false;
   int currentStep = 0;
   String? _socialEntityId;
   String? _socialEntityName;
   String? _socialEntityActionScope;
+  String? _photo;
   String? _category;
   String? _subCategory;
   String? _geographicZone;
@@ -85,6 +89,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   List<String> geographicZone = ['Global', 'Regional', 'Local'];
   List<String> choiceGrade = ['Alto', 'Intermedio', 'Bajo'];
   List<String> yesNo = ['Si', 'No'];
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -93,6 +98,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     _socialEntityId = globals.currentSocialEntity?.socialEntityId;
     _socialEntityName = globals.currentSocialEntity?.name;
     _socialEntityActionScope = globals.currentSocialEntity?.actionScope;
+    _photo = globals.currentSocialEntity?.photo;
     _category = globals.currentSocialEntity?.category ?? '';
     _subCategory = globals.currentSocialEntity?.subCategory ?? '';
     _geographicZone = globals.currentSocialEntity?.geographicZone ?? '';
@@ -170,6 +176,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              _buildLogo(context),
               _buildForm(context),
               Container(
                 height: Sizes.kDefaultPaddingDouble * 2,
@@ -205,6 +212,96 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLogo(BuildContext context) {
+    return Form(
+      key: _formKeyLogo,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: InkWell(
+            mouseCursor: MaterialStateMouseCursor.clickable,
+            onTap: () => !kIsWeb
+                ? _displayPickImageDialog()
+                : _onImageButtonPressed(ImageSource.gallery),
+            child: Container(
+              width: 100,
+              height: 100,
+              color: Colors.transparent,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(120),
+                    ),
+                    child: !kIsWeb
+                        ? ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(60)),
+                            child: Center(
+                              child: _photo == ""
+                                  ? Container(
+                                      color: Colors.transparent,
+                                      height: 100,
+                                      width: 100,
+                                      child:
+                                          Image.asset(ImagePath.IMAGE_DEFAULT),
+                                    )
+                                  : CachedNetworkImage(
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                      alignment: Alignment.center,
+                                      imageUrl: _photo!),
+                            ),
+                          )
+                        : ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(60)),
+                            child: Center(
+                              child: _photo == ""
+                                  ? Container(
+                                      color: Colors.transparent,
+                                      height: 100,
+                                      width: 100,
+                                      child:
+                                          Image.asset(ImagePath.IMAGE_DEFAULT),
+                                    )
+                                  : FadeInImage.assetNetwork(
+                                      placeholder: ImagePath.IMAGE_DEFAULT,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                      image: _photo!,
+                                    ),
+                            ),
+                          ),
+                  ),
+                  Positioned(
+                    left: 6,
+                    top: 6,
+                    child: Container(
+                      padding: const EdgeInsets.all(2.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.turquoiseBlue, width: 1.0),
+                      ),
+                      child: const Icon(
+                        Icons.mode_edit_outlined,
+                        size: 22,
+                        color: AppColors.turquoiseBlue,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ]),
     );
   }
 
@@ -522,6 +619,81 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       selectedCity = city;
     });
     _cityId = city?.cityId;
+  }
+
+  Future<void> _displayPickImageDialog() async {
+    final textTheme = Theme.of(context).textTheme;
+    return showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            height: 150,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 16.0, left: 24.0),
+              child: Row(
+                children: <Widget>[
+                  Column(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.camera,
+                          color: Colors.indigo,
+                          size: 30,
+                        ),
+                        onPressed: () {
+                          _onImageButtonPressed(ImageSource.camera);
+                          Navigator.canPop(context);
+                        },
+                      ),
+                      Text(
+                        StringConst.FORM_CAMERA,
+                        style: textTheme.bodyMedium?.copyWith(fontSize: 12.0),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    width: 16,
+                  ),
+                  Column(children: [
+                    IconButton(
+                        icon: const Icon(
+                          Icons.photo,
+                          color: Colors.indigo,
+                          size: 30,
+                        ),
+                        onPressed: () {
+                          _onImageButtonPressed(ImageSource.gallery);
+                          Navigator.canPop(context);
+                        }),
+                    Text(
+                      StringConst.FORM_GALLERY,
+                      style: textTheme.bodyMedium?.copyWith(fontSize: 12.0),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<void> _onImageButtonPressed(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: source,
+      );
+      if (pickedFile != null) {
+        setState(() async {
+          final database = Provider.of<Database>(context, listen: false);
+          await database.uploadLogoAvatar(
+              _socialEntityId!, await pickedFile.readAsBytes());
+        });
+      }
+    } catch (e) {
+      setState(() {
+        //_pickImageError = e;
+      });
+    }
   }
 
   Widget chipContainer(){

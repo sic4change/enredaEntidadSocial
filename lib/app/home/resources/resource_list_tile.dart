@@ -73,7 +73,7 @@ class _ResourceListTileState extends State<ResourceListTile> {
                           Row(
                             children: [
                               Padding(
-                                padding: EdgeInsets.only(left: sidePadding, right: sidePadding, top: sidePadding),
+                                padding: EdgeInsets.only(left: sidePadding, right: sidePadding, top: sidePadding / 1.5),
                                 child: Text(
                                   widget.resource.resourceCategoryName!.toUpperCase(),
                                   textAlign: TextAlign.left,
