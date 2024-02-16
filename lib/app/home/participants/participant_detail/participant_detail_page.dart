@@ -155,7 +155,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                     _currentPage = ParticipantControlPanelPage(participantUser: user);
                     break;
                   case 1:
-                    _currentPage = closureReport(context, user);  //TODO change to initialReport
+                    _currentPage = initialReport(context, user);
                     break;
                   case 2:
                     _currentPage = ParticipantIPILPage(participantUser: user);
