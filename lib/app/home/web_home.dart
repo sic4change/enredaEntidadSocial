@@ -46,6 +46,11 @@ class WebHome extends StatefulWidget {
     WebHome.controller.selectIndex(1);
   }
 
+  static goToEntities() {
+    WebHome.selectedIndex.value = 2;
+    WebHome.controller.selectIndex(4);
+  }
+
   @override
   State<WebHome> createState() => _WebHomeState();
 }
