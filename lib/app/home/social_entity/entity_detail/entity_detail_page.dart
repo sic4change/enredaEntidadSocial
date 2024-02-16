@@ -1,4 +1,5 @@
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
+import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
@@ -41,6 +42,16 @@ class EntityDetailPage extends StatefulWidget {
 }
 
 class _EntityDetailPageState extends State<EntityDetailPage> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,8 +212,7 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
                               child: EnredaButtonIcon(
-                                //onPressed: () => _confirmDeleteResource(context, resource),
-                                onPressed: () => {},
+                                onPressed: () => _confirmDeleteSocialEntity(context, socialEntity),
                                 buttonColor: Colors.white,
                                 padding: const EdgeInsets.all(0),
                                 width: 80,
@@ -455,28 +465,28 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
     );
   }
 
-  Future<void> _deleteResource(BuildContext context, Resource resource) async {
+  Future<void> _deleteSocialEntity(BuildContext context, SocialEntity socialEntity) async {
     try {
       final database = Provider.of<Database>(context, listen: false);
-      await database.deleteResource(resource);
+      await database.deleteSocialEntity(socialEntity);
     } catch (e) {
       print(e.toString());
     }
   }
 
-  // Future<void> _confirmDeleteEntity(BuildContext context, SocialEntity socialEntity) async {
-  //   final didRequestSignOut = await showAlertDialog(context,
-  //       title: 'Eliminar entidad social: ${socialEntity.name} ',
-  //       content: 'Si pulsa en Aceptar se procederá a la eliminación completa '
-  //           'de la entidad social, esta acción no se podrá deshacer, '
-  //           '¿Está seguro que quiere continuar?',
-  //       cancelActionText: 'Cancelar',
-  //       defaultActionText: 'Aceptar');
-  //   if (didRequestSignOut == true) {
-  //     _deleteResource(context, socialEntity);
-  //     setState(() {
-  //       MyResourcesListPage.selectedIndex.value = 0;
-  //     });
-  //   }
-  // }
+  Future<void> _confirmDeleteSocialEntity(BuildContext context, SocialEntity socialEntity) async {
+    final didRequestSignOut = await showAlertDialog(context,
+        title: 'Eliminar entidad social: ${socialEntity.name} ',
+        content: 'Si pulsa en Aceptar se procederá a la eliminación completa '
+            'de la entidad social, esta acción no se podrá deshacer, '
+            '¿Está seguro que quiere continuar?',
+        cancelActionText: 'Cancelar',
+        defaultActionText: 'Aceptar');
+    if (didRequestSignOut == true) {
+      _deleteSocialEntity(context, socialEntity);
+      setState(() {
+        EntityDirectoryPage.selectedIndex.value = 0;
+      });
+    }
+  }
 }

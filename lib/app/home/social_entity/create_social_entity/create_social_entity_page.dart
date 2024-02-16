@@ -7,13 +7,20 @@ import 'package:enreda_empresas/app/common_widgets/custom_phone_form_field_title
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
-import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
+import 'package:enreda_empresas/app/models/addressUser.dart';
+import 'package:enreda_empresas/app/models/city.dart';
+import 'package:enreda_empresas/app/models/country.dart';
+import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/sign_up/validating_form_controls/stream_builder_city.dart';
+import 'package:enreda_empresas/app/sign_up/validating_form_controls/stream_builder_country.dart';
+import 'package:enreda_empresas/app/sign_up/validating_form_controls/stream_builder_province.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
@@ -41,6 +48,16 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
   String? _url;
   String? _email, _linkedin, _twitter, _otherSocialMedia;
   String? _contactName, _contactEmail, _contactPosition, _contactChoiceGrade, _contactKOL, _contactProject;
+  Country? selectedCountry;
+  Province? selectedProvince;
+  City? selectedCity;
+  String? _countryId;
+  String? _provinceId;
+  String? _cityId;
+  String? _postalCode;
+  late String countryName;
+  late String provinceName;
+  late String cityName;
 
   //Country codes for phone numbers
   String entityPhoneCode = '+34';
@@ -106,6 +123,13 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
     _contactChoiceGrade = '';
     _contactKOL = '';
     _contactProject = '';
+    _countryId = null;
+    _provinceId = null;
+    _cityId = null;
+    countryName = "";
+    provinceName = "";
+    cityName = "";
+    _postalCode = "";
   }
 
   @override
@@ -178,6 +202,13 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
                 _formKey.currentState!.save();
                 _formKeyContactPerson.currentState!.save();
 
+                final address = Address(
+                  city: _cityId,
+                  country: _countryId,
+                  province: _provinceId,
+                  postalCode: _postalCode,
+                );
+
                 SocialEntity finalSocialEntity = SocialEntity(
                   name: _entityName!,
                   actionScope: _actionScope,
@@ -202,6 +233,7 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
                   contactKOL: _contactKOL,
                   contactProject: _contactProject,
                   trust: true, //TODO asignarlo de otra forma
+                  address: address
                 );
 
                 try {
@@ -228,7 +260,6 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
 
   Widget _buildFormNewEntity(BuildContext context){
     final database = Provider.of<Database>(context, listen: false);
-    TextTheme textTheme = Theme.of(context).textTheme;
     double fontSize = responsiveSize(context, 14, 16, md: 15);
     return Form(
       key: _formKey,
@@ -385,8 +416,30 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
                 },
                 //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
               )
-          )
-
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              childLeft: streamBuilderForCountryCreate(context, selectedCountry,
+                  buildCountryStreamBuilderSetState),
+              childRight:streamBuilderForProvinceCreate(
+                  context,
+                  selectedCountry,
+                  selectedProvince,
+                  buildProvinceStreamBuilderSetState)),
+          CustomFlexRowColumn(
+            childLeft: streamBuilderForCityCreate(
+                context,
+                selectedCountry,
+                selectedProvince,
+                selectedCity,
+                buildCityStreamBuilderSetState),
+            childRight: customTextFormField(
+                context,
+                _postalCode!,
+                StringConst.FORM_POSTAL_CODE,
+                StringConst.FORM_COMPANY_ERROR,
+                addressSetState),
+          ),
         ],
       ),
     );
@@ -542,6 +595,37 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
       height: Responsive.isMobile(context) ? 350 : Responsive.isDesktopS(context) ? 200 : 150,
       child: Center(child: chipFilter()),
     );
+  }
+
+  void buildCountryStreamBuilderSetState(Country? country) {
+    setState(() {
+      selectedProvince = null;
+      selectedCity = null;
+      selectedCountry = country;
+      countryName = country != null ? country.name : "";
+    });
+    _countryId = country?.countryId;
+  }
+
+  void buildProvinceStreamBuilderSetState(Province? province) {
+    setState(() {
+      selectedCity = null;
+      selectedProvince = province;
+      provinceName = province != null ? province.name : "";
+    });
+    _provinceId = province?.provinceId;
+  }
+
+  void buildCityStreamBuilderSetState(City? city) {
+    setState(() {
+      selectedCity = city;
+      cityName = city != null ? city.name : "";
+    });
+    _cityId = city?.cityId;
+  }
+
+  void addressSetState(String? val) {
+    setState(() => _postalCode = val!);
   }
 
 }

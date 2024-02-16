@@ -198,7 +198,7 @@ class CustomTextMediumBold extends StatelessWidget {
         color: AppColors.turquoiseBlue,
         height: 1.5,
         fontSize: fontSize,
-        fontWeight: FontWeight.bold
+        fontWeight: FontWeight.w900
       ),
     );
   }

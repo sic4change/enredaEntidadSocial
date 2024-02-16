@@ -22,6 +22,7 @@ class APIPath {
   static String user(String userId) => 'users/$userId';
   static String interests() => 'interests';
   static String photoUser(String userId) => 'users/$userId';
+  static String logoSocialEntity(String socialEntityId) => 'socialEntities/$socialEntityId';
   static String contacts() => 'contact';
   static String certificates() => 'certificates';
   static String certificate(String certificateId) => 'certificates/$certificateId';

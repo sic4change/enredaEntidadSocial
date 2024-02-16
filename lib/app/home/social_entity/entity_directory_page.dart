@@ -39,6 +39,11 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
         valueListenable: EntityDirectoryPage.selectedIndex,

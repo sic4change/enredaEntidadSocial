@@ -603,4 +603,6 @@ class StringConst {
   static const String FORM_ENTITY_LABELS = "Sectores/Campos/Etiquetas/Ecosistemas";
   static const String FORM_ENTITY_SIGNED_AGREEMENTS = "Acuerdos firmados";
   static const String FORM_ENTITY_UPDATED = "La entidad social fue actualizada exitosamente.";
+  static const String FORM_CAMERA = "Cámara";
+  static const String FORM_GALLERY = "Galería";
 }

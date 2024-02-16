@@ -72,7 +72,7 @@ abstract class Database {
      Stream<List<UserEnreda>> userParticipantsStream(List<String?> resourceIdList);
      Stream<List<Resource>> resourcesParticipantsStream(List<String?> participantsIdList);
      Stream<List<Interest>> resourcesInterestsStream(List<String?> interestsIdList);
-     Stream<List<Competency>> resourcesCompetenciesStream(List<String>? competenciesIdList);
+     Stream<List<Competency>> resourcesCompetenciesStream(List<String?> competenciesIdList);
      Stream<List<UserEnreda>> participantsByResourceStream(String resourceId);
      Stream<SocialEntity> socialEntityStreamById(String? socialEntityId);
      Stream<Organization> organizationStreamById(String organizationId);
@@ -101,10 +101,12 @@ abstract class Database {
      Future<void> setUserEnreda(UserEnreda userEnreda);
      Future<void> deleteUser(UserEnreda userEnreda);
      Future<void> uploadUserAvatar(String userId, Uint8List data);
+     Future<void> uploadLogoAvatar(String socialEntityId, Uint8List data);
      Future<void> addContact(Contact contact);
      Future<void> setResource(Resource resource);
      Future<void> setSocialEntity(SocialEntity socialEntity);
      Future<void> deleteResource(Resource resource);
+     Future<void> deleteSocialEntity(SocialEntity socialEntity);
      Future<void> addSocialEntityUser(SocialEntityUser socialEntityUser);
      Future<void> addSocialEntity(SocialEntity socialEntity);
      Future<void> addResource(Resource resource);
@@ -145,6 +147,10 @@ class FirestoreDatabase implements Database {
   @override
   Future<void> deleteResource(Resource resource) =>
       _service.deleteData(path: APIPath.resource(resource.resourceId!));
+
+  @override
+  Future<void> deleteSocialEntity(SocialEntity socialEntity) =>
+      _service.deleteData(path: APIPath.socialEntity(socialEntity.socialEntityId!));
 
   @override
   Future<void> setSocialEntity(SocialEntity socialEntity) => _service.updateData(
@@ -421,7 +427,6 @@ class FirestoreDatabase implements Database {
     );
   }
 
-
   @override
   Stream<List<UserEnreda>> participantsByResourceStream(String? resourceId) {
     return _service.collectionStream<UserEnreda>(
@@ -443,28 +448,39 @@ class FirestoreDatabase implements Database {
   }
 
   @override
-  Stream<List<Interest>> resourcesInterestsStream(List<String?> interestsIdList) {
-    return _service.collectionStream<Interest>(
-      path: APIPath.interests(),
-      queryBuilder: (query) => query.where('interestId', whereIn: interestsIdList),
-      builder: (data, documentId) => Interest.fromMap(data, documentId),
-      sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
-    );
+  Stream<List<Interest>> resourcesInterestsStream(List<String?> interestsIdList) async* {
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.interests());
+    final batches = <Future<List<Interest>>>[];
+
+    for (var i = 0; i < interestsIdList.length; i += 10) {
+      final batch = interestsIdList.sublist(i, i + 10 < interestsIdList.length ? i + 10 : interestsIdList.length);
+      final futureBatch = collectionPath
+          .where('interests', arrayContainsAny: batch)
+          .get()
+          .then((results) => results.docs.map<Interest>((result) => Interest.fromMap(result.data(), result.id)).toList());
+      batches.add(futureBatch);
+    }
+    final results = await Future.wait(batches);
+    var combinedResults = results.expand((i) => i).toSet().toList();
+    yield combinedResults;
   }
 
   @override
-  Stream<List<Competency>> resourcesCompetenciesStream(List<String>? competenciesIdList) {
-      if (competenciesIdList == null || competenciesIdList.isEmpty) {
-        return const Stream<List<Competency>>.empty();
-      }
-    return _service.collectionStream<Competency>(
-      path: APIPath.competencies(),
-      queryBuilder: (query) {
-        return query.where('id', whereIn: competenciesIdList);
-      },
-      builder: (data, documentId) => Competency.fromMap(data, documentId),
-      sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
-    );
+  Stream<List<Competency>> resourcesCompetenciesStream(List<String?> competenciesIdList) async* {
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.competencies());
+    final batches = <Future<List<Competency>>>[];
+
+    for (var i = 0; i < competenciesIdList.length; i += 10) {
+      final batch = competenciesIdList.sublist(i, i + 10 < competenciesIdList.length ? i + 10 : competenciesIdList.length);
+      final futureBatch = collectionPath
+          .where('competencies', arrayContainsAny: batch)
+          .get()
+          .then((results) => results.docs.map<Competency>((result) => Competency.fromMap(result.data(), result.id)).toList());
+      batches.add(futureBatch);
+    }
+    final results = await Future.wait(batches);
+    var combinedResults = results.expand((i) => i).toSet().toList();
+    yield combinedResults;
   }
 
   @override
@@ -649,7 +665,25 @@ class FirestoreDatabase implements Database {
         );
       }
 
-    @override
+  @override
+  Future<void> uploadLogoAvatar(String socialEntityId, Uint8List data) async {
+    var firebaseStorageRef =
+    FirebaseStorage.instance.ref().child('socialEntities/$socialEntityId/logoPic');
+    UploadTask uploadTask = firebaseStorageRef.putData(data);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    taskSnapshot.ref.getDownloadURL().then(
+          (value) => {
+        _service.updateData(path: APIPath.logoSocialEntity(socialEntityId), data: {
+          "logoPic": {
+            'src': '$value',
+            'title': 'photo.jpg',
+          }
+        })
+      },
+    );
+  }
+
+  @override
     Future<void> addContact(Contact contact) =>
         _service.addData(path: APIPath.contacts(), data: contact.toMap());
 
