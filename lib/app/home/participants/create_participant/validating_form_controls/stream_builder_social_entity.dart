@@ -23,61 +23,65 @@ Widget streamBuilderForSocialEntity (BuildContext context, SocialEntity? selecte
                 child: Text(s.name),
               ))
               .toList();
-          return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    StringConst.FORM_SOCIAL_ENTITY,
-                    style: textTheme.button?.copyWith(
-                      height: 1.5,
-                      color: AppColors.greyDark,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
+          if(selectedSocialEntity == null || socialEntities.contains(selectedSocialEntity)){
+            return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      StringConst.FORM_SOCIAL_ENTITY,
+                      style: textTheme.button?.copyWith(
+                        height: 1.5,
+                        color: AppColors.greyDark,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  height: 55,
-                  child: DropdownButtonFormField(
-                    value: selectedSocialEntity,
-                    items: socialEntityItems,
-                    onChanged: (value) => functionToWriteBackThings(value),
-                    //validator: validator,
-                    decoration: InputDecoration(
-                      errorStyle: TextStyle(height: 0.01),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                        borderSide: BorderSide(
-                          color: AppColors.greyUltraLight,
+                  Container(
+                    height: 55,
+                    child: DropdownButtonFormField(
+                      value: selectedSocialEntity,
+                      items: socialEntityItems,
+                      onChanged: (value) => functionToWriteBackThings(value),
+                      //validator: validator,
+                      decoration: InputDecoration(
+                        errorStyle: TextStyle(height: 0.01),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(
+                            color: AppColors.greyUltraLight,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(
+                            color: AppColors.greyUltraLight,
+                            width: 1.0,
+                          ),
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(
+                            color: AppColors.greyUltraLight,
+                            width: 1.0,
+                          ),
                         ),
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                        borderSide: BorderSide(
-                          color: AppColors.greyUltraLight,
-                          width: 1.0,
-                        ),
+                      style: textTheme.button?.copyWith(
+                        height: 1.4,
+                        color: AppColors.greyDark,
+                        fontWeight: FontWeight.w400,
+                        fontSize: fontSize,
                       ),
-                      disabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                        borderSide: BorderSide(
-                          color: AppColors.greyUltraLight,
-                          width: 1.0,
-                        ),
-                      ),
-                    ),
-                    style: textTheme.button?.copyWith(
-                      height: 1.4,
-                      color: AppColors.greyDark,
-                      fontWeight: FontWeight.w400,
-                      fontSize: fontSize,
                     ),
                   ),
-                ),
-              ]
-          );
+                ]
+            );
+          }else{
+            return Container();
+          }
         }
         else{
           return Container();

@@ -379,8 +379,8 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                 childRight: CustomTextFormFieldTitle(
                     labelText: StringConst.FORM_POSTAL_CODE,
                     initialValue: _postalCode!,
-                    validator: (value) =>
-                      value!.isNotEmpty ? null : StringConst.POSTAL_CODE_ERROR,
+                    /*validator: (value) =>
+                      value!.isNotEmpty ? null : StringConst.POSTAL_CODE_ERROR,*/
                     onSaved: _postalCode_setState
                 ),
               ),
@@ -693,22 +693,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           value: dedicationValue!
       );
 
-      final TimeSearching? timeSearching = new TimeSearching(
-        label: timeSearchingName,
-        value: timeSearchingValue!,
-      );
 
-      final TimeSpentWeekly? timeSpentWeekly = new TimeSpentWeekly(
-          label: timeSpentWeeklyName,
-          value: timeSearchingValue!
-      );
-
-      final motivation = Motivation(
-        abilities: abilities,
-        dedication: dedication,
-        timeSearching: timeSearching,
-        timeSpentWeekly: timeSpentWeekly,
-      );
 
       final education = Education(
           label: educationName,
@@ -719,6 +704,8 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       final interestsSet = Interests(
         interests: interests,
         specificInterests: specificInterests,
+        surePurpose: selectedDedication,
+        continueLearning: futureLearning,
       );
 
       if(sum >= 0 && sum <= 3)
@@ -745,7 +732,6 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           phone: _phone,
           gender: genderName,
           birthday: _birthday,
-          motivation: motivation,
           interests: interestsSet,
           education: education,
           address: address,
@@ -754,6 +740,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           belongOrganization: _belongOrganization,
           assignedById: user.userId,
           assignedEntityId: selectedSocialEntity!.socialEntityId ?? null,
+          nationality: selectedNationality,
       );
       try {
         final database = Provider.of<Database>(context, listen: false);

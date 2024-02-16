@@ -132,7 +132,7 @@ Widget completeClosureForm(BuildContext context, ClosureReport report, UserEnred
   final DateFormat formatter = DateFormat('dd/MM/yyyy');
   String _userBirthDate = formatter.format(user.birthday!);
   String _userGender = user.gender!;
-  //String _userNationality =
+  String _userNationality = user.nationality ?? '';
 
   bool _finished = report.finished ?? false;
 
@@ -161,8 +161,8 @@ Widget completeClosureForm(BuildContext context, ClosureReport report, UserEnred
           SpaceH4(),
           personalDataLine('Fecha de nacimiento', _userBirthDate),
           SpaceH4(),
-          //personalDataLine('Nacionalidad', ''),
-          //SpaceH4(),
+          _userNationality != '' ? personalDataLine('Nacionalidad', _userNationality) : Container(),
+          _userNationality != '' ? SpaceH4() : Container(),
           personalDataLine('Sexo/Género', _userGender),
           //SpaceH4(),
           //personalDataLine('Estado Civil', ''),

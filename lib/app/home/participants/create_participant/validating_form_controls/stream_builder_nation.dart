@@ -14,70 +14,78 @@ Widget streamBuilderForNation (BuildContext context, String? selectedCountry,  f
       stream: database.nationsSpanishStream(),
       builder: (context, snapshotCountries){
 
+        List<String> countries = [];
         List<DropdownMenuItem<String>> countryItems = [];
         if (snapshotCountries.hasData) {
-          countryItems = snapshotCountries.data!.map((String c) =>
+          countries = snapshotCountries.data!;
+          countryItems = countries.map((String c) =>
               DropdownMenuItem<String>(
                 value: c,
                 child: Text(c),
               ))
               .toList();
         }
-
-        return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  title,
-                  style: textTheme.button?.copyWith(
-                    height: 1.5,
-                    color: AppColors.greyDark,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
+        if(selectedCountry == null || countries.contains(selectedCountry)) {
+          return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    title,
+                    style: textTheme.button?.copyWith(
+                      height: 1.5,
+                      color: AppColors.greyDark,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                height: 50,
-                child: DropdownButtonFormField(
-                  value: selectedCountry,
-                  items: countryItems,
-                  onChanged: (value) => functionToWriteBackThings(value),
-                  validator: (value) => selectedCountry != null ? null : StringConst.COUNTRY_ERROR,
-                  decoration: InputDecoration(
-                    errorStyle: TextStyle(height: 0.01),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                      borderSide: BorderSide(
-                        color: AppColors.greyUltraLight,
+                Container(
+                  height: 50,
+                  child: DropdownButtonFormField(
+                    value: selectedCountry,
+                    items: countryItems,
+                    onChanged: (value) => functionToWriteBackThings(value),
+                    validator: (value) =>
+                    selectedCountry != null
+                        ? null
+                        : StringConst.COUNTRY_ERROR,
+                    decoration: InputDecoration(
+                      errorStyle: TextStyle(height: 0.01),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(
+                          color: AppColors.greyUltraLight,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(
+                          color: AppColors.greyUltraLight,
+                          width: 1.0,
+                        ),
+                      ),
+                      disabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(
+                          color: AppColors.greyUltraLight,
+                          width: 1.0,
+                        ),
                       ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                      borderSide: BorderSide(
-                        color: AppColors.greyUltraLight,
-                        width: 1.0,
-                      ),
+                    style: textTheme.button?.copyWith(
+                      height: 1.4,
+                      color: AppColors.greyDark,
+                      fontWeight: FontWeight.w400,
+                      fontSize: fontSize,
                     ),
-                    disabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                      borderSide: BorderSide(
-                        color: AppColors.greyUltraLight,
-                        width: 1.0,
-                      ),
-                    ),
-                  ),
-                  style: textTheme.button?.copyWith(
-                    height: 1.4,
-                    color: AppColors.greyDark,
-                    fontWeight: FontWeight.w400,
-                    fontSize: fontSize,
                   ),
                 ),
-              ),
-            ]
-        );
+              ]
+          );
+        }else{
+          return Container();
+        }
       });
 }
