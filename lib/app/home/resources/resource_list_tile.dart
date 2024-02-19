@@ -94,12 +94,11 @@ class _ResourceListTileState extends State<ResourceListTile> {
                           Container(
                             decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(10),
                                   topLeft: Radius.circular(10)),
                             ),
                             child: Padding(
                               padding: EdgeInsets.only(
-                                  left: sidePadding, right: sidePadding, top: 10),
+                                  left: sidePadding, right: 0, top: 10),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 crossAxisAlignment: CrossAxisAlignment.start,
