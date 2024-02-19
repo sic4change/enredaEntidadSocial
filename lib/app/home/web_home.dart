@@ -51,6 +51,16 @@ class WebHome extends StatefulWidget {
     WebHome.controller.selectIndex(4);
   }
 
+  static goResources() {
+    WebHome.selectedIndex.value = 2;
+    WebHome.controller.selectIndex(2);
+  }
+
+  static goToolBox() {
+    WebHome.selectedIndex.value = 2;
+    WebHome.controller.selectIndex(3);
+  }
+
   @override
   State<WebHome> createState() => _WebHomeState();
 }

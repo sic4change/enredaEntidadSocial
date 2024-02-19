@@ -121,4 +121,5 @@ class ImagePath {
   //Control Panel
   static const String CONTROL_PANEL = '$imageDir/panelcontrol-min.png';
   static const String CONTROL_PANEL_CALENDAR = '$imageDir/Illustration-calendar.png';
+  static const String CONTROL_CHECKED_BOOK = '$imageDir/book_checked.png';
 }
