@@ -312,3 +312,27 @@ class CustomTextXSmall extends StatelessWidget {
     );
   }
 }
+
+class CustomTextSmallOverflow extends StatelessWidget {
+
+  const CustomTextSmallOverflow({super.key,  required this.text, this.height = 1.5, this.color = AppColors.greyAlt});
+  final String text;
+  final double height;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 14, 15, md: 14);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Text(
+      text,
+      overflow: TextOverflow.ellipsis,
+      maxLines: 3,
+      style: textTheme.bodySmall?.copyWith(
+        color: color,
+        height: height,
+        fontSize: fontSize,
+      ),
+    );
+  }
+}

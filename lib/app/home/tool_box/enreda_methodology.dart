@@ -2,6 +2,7 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/tool_box/pdf_preview.dart';
 import 'package:enreda_empresas/app/utils/functions.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -57,11 +58,15 @@ class EnredaMethodologyPage extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            SizedBox(width: 20.0,),
-                            CustomTextSmall(text: StringConst.MANUAL_METHODOLOGY),
+                            Expanded(child: Padding(
+                              padding: Responsive.isMobile(context) ? const EdgeInsets.all(4.0) : const EdgeInsets.all(20.0),
+                              child: CustomTextSmallOverflow(text: StringConst.MANUAL_METHODOLOGY),
+                            )),
                             Spacer(),
-                            Icon(Icons.remove_red_eye_outlined, color: AppColors.greyDark2,),
-                            SizedBox(width: 20.0,),
+                            Padding(
+                              padding: Responsive.isMobile(context) ? const EdgeInsets.all(4.0) : const EdgeInsets.all(20.0),
+                              child: Icon(Icons.remove_red_eye_outlined, color: AppColors.greyDark2,),
+                            ),
                           ],
                         ),
 

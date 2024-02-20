@@ -67,7 +67,8 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
                       children: [
                         Container(
                           height: 50,
-                          child: Row(
+                          child: Flex(
+                            direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                             children: [
                               InkWell(
                                   onTap: () => {
@@ -84,7 +85,10 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
                         ),
                       ],
                     ),
-                    Row(
+                    Flex(
+                      direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         InkWell(
                           onTap: () => {
@@ -97,7 +101,7 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
                             color: ToolBoxPage.selectedIndex.value == 1 ? AppColors.yellow : AppColors.white,
                           ),
                         ),
-                        SizedBox(width: Sizes.mainPadding,),
+                        Responsive.isMobile(context) ? SizedBox(height: Sizes.mainPadding,) : SizedBox(width: Sizes.mainPadding,),
                         InkWell(
                           onTap: () => {
                             setState(() {
@@ -114,7 +118,7 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
                   ],
                 ),
                 Container(
-                    margin: EdgeInsets.only(top: Sizes.mainPadding * 5),
+                    margin: Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 8) : EdgeInsets.only(top: Sizes.mainPadding * 5),
                     child: bodyWidget[selectedIndex]),
               ],
             ),
