@@ -38,7 +38,7 @@ class _ResourceListTileState extends State<ResourceListTile> {
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Container(
-          margin: const EdgeInsets.all(5.0),
+          margin: Responsive.isMobile(context) ? const EdgeInsets.all(0) : const EdgeInsets.all(5.0),
           child: InkWell(
             mouseCursor: MaterialStateMouseCursor.clickable,
             onTap: widget.onTap,

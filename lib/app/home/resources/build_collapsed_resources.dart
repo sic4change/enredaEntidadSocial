@@ -1,5 +1,8 @@
 import 'package:enreda_empresas/app/home/resources/list_item_builder_grid.dart';
+import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
+import 'package:enreda_empresas/app/home/resources/resource_detail/resource_detail_page.dart';
 import 'package:enreda_empresas/app/home/resources/resource_list_tile.dart';
+import 'package:enreda_empresas/app/home/resources/resources_page.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
@@ -9,12 +12,14 @@ import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'global.dart' as globals;
 
 class CollapsedResourcesList extends StatefulWidget {
-  const CollapsedResourcesList({Key? key}) : super(key: key);
+  const CollapsedResourcesList({Key? key, required this.itemsNumber}) : super(key: key);
+  final int itemsNumber;
 
   @override
   State<CollapsedResourcesList> createState() => _CollapsedResourcesListState();
@@ -37,7 +42,7 @@ class _CollapsedResourcesListState extends State<CollapsedResourcesList> {
             if (snapshot.hasData) {
               var user = snapshot.data!;
               return StreamBuilder<List<Resource>>(
-                  stream: database.myLimitResourcesStream(user.socialEntityId!, 3),
+                  stream: database.myLimitResourcesStream(user.socialEntityId!, widget.itemsNumber),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(
@@ -47,6 +52,7 @@ class _CollapsedResourcesListState extends State<CollapsedResourcesList> {
                       return ListItemBuilderGrid<Resource>(
                         snapshot: snapshot,
                         fitSmallerLayout: false,
+                        mainAxisExtentValue : Responsive.isMobile(context)? 180.0 : 248,
                         itemBuilder: (context, resource) {
                           if (!snapshot.hasData) {
                             return const Center(
@@ -87,7 +93,8 @@ class _CollapsedResourcesListState extends State<CollapsedResourcesList> {
                                                       onTap: () =>
                                                           setState(() {
                                                             globals.currentResource = resource;
-                                                            WebHome.goToolBox();
+                                                            WebHome.goResources();
+                                                            MyResourcesListPage.selectedIndex.value = 2;
                                                           }),
                                                     ),
                                                   );

@@ -36,8 +36,8 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
       color: Colors.white,
       borderWith: 1,
       borderColor: AppColors.greyLight2.withOpacity(0.3),
-      contentPadding: EdgeInsets.all(20.0),
-      margin: EdgeInsets.all(10),
+      contentPadding: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? EdgeInsets.all(10.0) : EdgeInsets.all(20.0),
+      margin: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? EdgeInsets.all(0) : EdgeInsets.only(left: 30, right: 10, bottom: 10, top: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,7 +66,7 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              height: Responsive.isDesktop(context) ? 382.0 : 180.0,
+                              height: 382,
                               color: Colors.white,
                               child: ScrollConfiguration(
                                 behavior: MyCustomScrollBehavior(),
