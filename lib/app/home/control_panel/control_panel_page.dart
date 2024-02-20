@@ -1,5 +1,6 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
+import 'package:enreda_empresas/app/home/participants/my_participants_list.dart';
 import 'package:enreda_empresas/app/home/resources/build_collapsed_resources.dart';
 import 'package:enreda_empresas/app/home/tool_box/tool_box_page.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
@@ -84,7 +85,7 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                         SizedBox(width: 20,),
                         Expanded(
                             flex: Responsive.isMobile(context) ? 0 : 1,
-                            child: Container(child: Image.asset(ImagePath.CONTROL_PANEL), width: 100,))
+                            child: Image.asset(ImagePath.CONTROL_PANEL))
                       ]
                     ),
                   )),
@@ -250,10 +251,9 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                           ]
                       ),
                     )),
-
               ],
             ),
-
+            MyParticipantsScrollPage(),
           ],
       ),
         ),

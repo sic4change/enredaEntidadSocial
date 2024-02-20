@@ -1,5 +1,4 @@
 import 'package:enreda_empresas/app/home/resources/list_item_builder_grid.dart';
-import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
 import 'package:enreda_empresas/app/home/resources/resource_list_tile.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/models/city.dart';
