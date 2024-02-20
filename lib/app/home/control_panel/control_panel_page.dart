@@ -3,7 +3,6 @@ import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/home/participants/my_participants_list.dart';
 import 'package:enreda_empresas/app/home/resources/build_collapsed_resources.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
-import 'package:enreda_empresas/app/home/resources/resource_detail/resource_detail_page.dart';
 import 'package:enreda_empresas/app/home/tool_box/tool_box_page.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -34,7 +33,8 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
   Widget myWelcomePageDesktop(BuildContext context){
     final textTheme = Theme.of(context).textTheme;
     return RoundedContainer(
-        contentPadding: const EdgeInsets.only(left: 0, right: Sizes.kDefaultPaddingDouble, bottom: Sizes.kDefaultPaddingDouble, top: Sizes.kDefaultPaddingDouble),
+        contentPadding: const EdgeInsets.only(left: 0, right: Sizes.kDefaultPaddingDouble,
+            bottom: Sizes.kDefaultPaddingDouble, top: Sizes.kDefaultPaddingDouble),
         child: SingleChildScrollView(
           child: Column(
           children: [
@@ -287,7 +287,7 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
           children: [
             Container(
                 margin: const EdgeInsets.only(top: 10.0, right: 0, left: 0, bottom: 10.0,),
-                height: Responsive.isDesktopS(context) ? 300 : 250,
+                height: Responsive.isDesktopS(context) ? 300 : 255,
                 decoration: BoxDecoration(
                   color: Colors.white,
                 ),
@@ -334,10 +334,10 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0, left: 10),
-                    child: Expanded(child: CustomTextBoldTitle(title: StringConst.TOOL_BOX)),
-                  ),
+                  Expanded(child: Padding(
+                    padding: const EdgeInsets.only(top: 20.0, left: 10),
+                    child: CustomTextBoldTitle(title: StringConst.TOOL_BOX),
+                  )),
                   Divider(color: AppColors.greyLight2.withOpacity(0.3)),
                   InkWell(
                       onTap: () {
