@@ -158,9 +158,9 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                               ),
                                             ),
                                             Positioned(
-                                              bottom: -20,
+                                              bottom: 0,
                                               top: -20,
-                                              right: -10,
+                                              right: 0,
                                               child: InkWell(
                                                 onTap: () {
                                                   setState(() {
@@ -168,7 +168,8 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                                   });
                                                 },
                                                 child: Container(
-                                                    child: Image.asset(ImagePath.CONTROL_PANEL_CALENDAR)),
+                                                  width: 200,
+                                                    child: Image.asset(ImagePath.CONTROL_PANEL_CALENDAR, fit: BoxFit.fitHeight,)),
                                               ),
                                             ),
                                           ],
@@ -192,43 +193,55 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                         height: double.infinity,
                                         borderColor: AppColors.greyLight2.withOpacity(0.3),
                                         contentPadding: EdgeInsets.all(0.0),
-                                        margin: EdgeInsets.zero,
+                                        margin: EdgeInsets.only(bottom: 30.0),
                                         width: double.infinity,
-                                        child: Column(
+                                        child: Flex(
+                                          direction: Axis.vertical,
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           crossAxisAlignment: CrossAxisAlignment.stretch,
                                           children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 10.0,  bottom:10, left: 10),
-                                              child: CustomTextBoldTitle(title: StringConst.TOOL_BOX),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(left: 20, top: 10.0),
+                                                child: CustomTextBoldTitle(title: StringConst.TOOL_BOX),
+                                              ),
                                             ),
                                             Divider(color: AppColors.greyLight2.withOpacity(0.3)),
-                                            InkWell(
-                                                onTap: () {
-                                                  WebHome.goToolBox();
-                                                  ToolBoxPage.selectedIndex.value = 1;
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(top: 15.0, left: 10, bottom: 15.0),
-                                                  child: CustomTextMedium(text: StringConst.ENREDA_METHODOLOGY),
-                                                )),
+                                            Expanded(
+                                              flex: 1,
+                                              child: InkWell(
+                                                  onTap: () {
+                                                    WebHome.goToolBox();
+                                                    ToolBoxPage.selectedIndex.value = 1;
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 20, top: 15.0),
+                                                    child: CustomTextMedium(text: StringConst.ENREDA_METHODOLOGY),
+                                                  )),
+                                            ),
                                             Divider(color: AppColors.greyLight2.withOpacity(0.3)),
-                                            InkWell(
-                                                onTap: () {
-                                                  WebHome.goToolBox();
-                                                  ToolBoxPage.selectedIndex.value = 2;
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(top: 5.0, left: 10, bottom: 5.0),
-                                                  child: CustomTextMedium(text: StringConst.WORKFLOW),
-                                                )),
+                                            Expanded(
+                                              flex: 1,
+                                              child: InkWell(
+                                                  onTap: () {
+                                                    WebHome.goToolBox();
+                                                    ToolBoxPage.selectedIndex.value = 2;
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 20, top: 10.0),
+                                                    child: CustomTextMedium(text: StringConst.WORKFLOW),
+                                                  )),
+                                            ),
                                           ],
                                         ),),
                                       Positioned(
-                                        bottom: -20,
+                                        bottom: 10,
                                         top: -20,
-                                        right: -10,
+                                        right: 10,
                                         child: Container(
+                                          margin: const EdgeInsets.only(top: 50.0),
+                                          height: 200,
                                             child: Image.asset(ImagePath.CONTROL_CHECKED_BOOK)),
                                       ),
                                     ],
