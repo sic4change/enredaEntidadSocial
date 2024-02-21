@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class RoundedPlusShape extends StatelessWidget {
   RoundedPlusShape({
     this.padding = const EdgeInsets.all(11.0),
-    this.strokeWidth = 6,
+    this.strokeWidth = 4.5,
   });
 
   final EdgeInsetsGeometry? padding;
