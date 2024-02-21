@@ -1,4 +1,5 @@
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
+import 'package:enreda_empresas/app/common_widgets/add_yellow_button_small.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
@@ -105,7 +106,7 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                         ),
                       ),
                       SpaceH20(),
-                      AddYellowButton(
+                      AddYellowButtonSmall(
                         text: StringConst.INVITE_RESOURCE,
                         onPressed: () => showDialog(
                             context: context,
@@ -114,6 +115,9 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                                   user: widget.user,
                                   organizerId: widget.socialEntityUserId,
                                 )),
+                        height: 40,
+                        circleHeight: 41,
+                        circleWidth: 41,
                       ),
                       SpaceH30(),
                       _buildContactRow(textTheme),
