@@ -336,3 +336,24 @@ class CustomTextSmallOverflow extends StatelessWidget {
     );
   }
 }
+
+class CustomTextButton extends StatelessWidget {
+
+  const CustomTextButton({super.key,  required this.text, this.color = AppColors.white});
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 14, 16, md: 15);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Text(
+      text,
+      style: textTheme.bodySmall?.copyWith(
+        color: color,
+        fontSize: fontSize,
+        fontWeight: FontWeight.w500
+      ),
+    );
+  }
+}
