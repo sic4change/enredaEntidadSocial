@@ -223,7 +223,7 @@ class _CreateResourceState extends State<CreateResource> {
         contractType: _contractType,
         duration: _duration!,
         //status: 'A actualizar',
-        status: 'No disponible', //TO DO modificar para producción
+        status: 'Disponible', 
         resourceType: resourceTypeId,
         resourceCategory: resourceCategoryId,
         maximumDate: _max!,
