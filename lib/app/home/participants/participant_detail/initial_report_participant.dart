@@ -75,7 +75,7 @@ Widget informSectionTitle(String title){
         fontSize: 18,
         fontWeight: FontWeight.w700,
         fontFamily: GoogleFonts.outfit().fontFamily,
-        color: AppColors.penBlue,
+        color: AppColors.bluePetrol,
       ),
     ),
   );
@@ -90,7 +90,7 @@ Widget informSubSectionTitle(String title){
         fontSize: 14,
         fontWeight: FontWeight.w500,
         fontFamily: GoogleFonts.outfit().fontFamily,
-        color: AppColors.penBlue,
+        color: AppColors.bluePetrol,
       ),
     ),
   );
@@ -1117,7 +1117,7 @@ Widget completeInitialForm(BuildContext context, InitialReport report){
               validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
             ) :
             CustomDropDownButtonFormFieldTittle(
-              labelText: 'Usuaria',
+              labelText: 'Certificado de Exclusión Social',
               source: _yesNoSelection,
               value: _socialServicesUser,
               onChanged: _finished ? null : (value){

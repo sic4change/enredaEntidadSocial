@@ -6,6 +6,7 @@ import 'dart:html' as html;
 import 'dart:io';
 import 'dart:math';
 import 'package:enreda_empresas/app/home/participants/participant_detail/initial_report_participant.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:http/http.dart' as http;
 
@@ -155,7 +156,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                     _currentPage = ParticipantControlPanelPage(participantUser: user);
                     break;
                   case 1:
-                    _currentPage = initialReport(context, user);
+                    _currentPage = ParticipantSocialReportPage(participantUser: user, context: context);
                     break;
                   case 2:
                     _currentPage = ParticipantIPILPage(participantUser: user);
