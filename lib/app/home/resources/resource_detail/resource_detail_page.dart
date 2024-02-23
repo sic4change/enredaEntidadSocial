@@ -110,11 +110,8 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                       if (snapshotInterest.hasData) {
                                         selectedInterests = snapshotInterest.data!.toSet();
                                         globals.selectedInterestsCurrentResource = snapshotInterest.data!.toSet();
-                                        var concatenate = StringBuffer();
-                                        for (var item in selectedInterests) {
-                                          concatenate.write('${item.name} / ');
-                                        }
-                                        globals.interestsNamesCurrentResource = concatenate.toString();
+                                        globals.interestsNamesCurrentResource = 
+                                            selectedInterests.map((item) => item.name).join(' / ');
                                         return StreamBuilder<List<Competency>>(
                                             stream: database.resourcesCompetenciesStream(competenciesLocal),
                                             builder: (context, snapshotCompetencies) {
@@ -127,11 +124,8 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                               if (snapshotCompetencies.hasData) {
                                                 selectedCompetencies = snapshotCompetencies.data!.toSet();
                                                 globals.selectedCompetenciesCurrentResource = snapshotCompetencies.data!.toSet();
-                                                var concatenate = StringBuffer();
-                                                for (var item in selectedCompetencies) {
-                                                  concatenate.write('${item.name} / ');
-                                                }
-                                                globals.competenciesNamesCurrentResource = concatenate.toString();
+                                                globals.competenciesNamesCurrentResource = 
+                                                    selectedCompetencies.map((item) => item.name).join(' / ');
                                                 return _buildResourceDetail(context, resource);
                                               }
                                               return Container();
