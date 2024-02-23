@@ -455,7 +455,7 @@ class FirestoreDatabase implements Database {
     for (var i = 0; i < interestsIdList.length; i += 10) {
       final batch = interestsIdList.sublist(i, i + 10 < interestsIdList.length ? i + 10 : interestsIdList.length);
       final futureBatch = collectionPath
-          .where('interests', arrayContainsAny: batch)
+          .where('interestId', whereIn: batch)
           .get()
           .then((results) => results.docs.map<Interest>((result) => Interest.fromMap(result.data(), result.id)).toList());
       batches.add(futureBatch);
@@ -473,7 +473,7 @@ class FirestoreDatabase implements Database {
     for (var i = 0; i < competenciesIdList.length; i += 10) {
       final batch = competenciesIdList.sublist(i, i + 10 < competenciesIdList.length ? i + 10 : competenciesIdList.length);
       final futureBatch = collectionPath
-          .where('competencies', arrayContainsAny: batch)
+          .where('id', whereIn: batch)
           .get()
           .then((results) => results.docs.map<Competency>((result) => Competency.fromMap(result.data(), result.id)).toList());
       batches.add(futureBatch);
