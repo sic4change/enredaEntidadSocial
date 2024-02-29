@@ -21,7 +21,6 @@ const examples = <Example>[
   !kIsWeb ? Example('Modelo 1', 'resume1_mobile.dart', my_worker.generateResume1) : Example('Modelo 1', 'resume1_web.dart', my_worker.generateResume1),
   !kIsWeb ? Example('Modelo 2', 'resume2_mobile.dart', my_worker.generateResume2) : Example('Modelo 2', 'resume2_web.dart', my_worker.generateResume2),
   !kIsWeb ? Example('Modelo 3', 'resume3_mobile.dart', my_worker.generateResume3) : Example('Modelo 3', 'resume3_web.dart', my_worker.generateResume3),
-  //!kIsWeb ? Example('Modelo 3', 'resume_mobile.dart', my_worker.generateResume) : Example('Modelo 3', 'resume_web.dart', my_worker.generateResume),
 ];
 
 typedef LayoutCallbackWithData = Future<Uint8List> Function(
