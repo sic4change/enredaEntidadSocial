@@ -9,7 +9,6 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
-import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -19,22 +18,23 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-class InitialReportForm extends StatefulWidget {
-  const InitialReportForm({super.key, required this.user});
+class FollowReportForm extends StatefulWidget {
+  const FollowReportForm({super.key, required this.user, this.followReport});
 
   final UserEnreda user;
+  final FollowReport? followReport;
 
   @override
-  State<InitialReportForm> createState() => _InitialReportFormState();
+  State<FollowReportForm> createState() => _FollowReportFormState();
 }
 
-class _InitialReportFormState extends State<InitialReportForm> {
+class _FollowReportFormState extends State<FollowReportForm> {
 
   late Widget currentPage;
 
   @override
   void initState() {
-    currentPage = initialReport(context, widget.user);
+    currentPage = followReport(context, widget.user);
     super.initState();
   }
 
@@ -51,7 +51,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
   }
 
 
-  Widget initialReport(BuildContext context, UserEnreda user) {
+  Widget followReport(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
 
     return Padding(
@@ -71,23 +71,21 @@ class _InitialReportFormState extends State<InitialReportForm> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       CustomTextBoldTitle(
-                          title: 'Informe inicial'.toUpperCase()),
+                          title: 'Informe de seguimiento'.toUpperCase()),
                     ],
                   ),
                 ),
                 Divider(color: AppColors.greyBorder,),
-                StreamBuilder<InitialReport>(
-                    stream: database.initialReportsStreamByUserId(user.userId),
+                StreamBuilder<FollowReport>(
+                    stream: database.followReportsStreamByUserId(user.userId),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        InitialReport initialReportSaved = snapshot.data!;
-                        return completeInitialForm(context, initialReportSaved);
+                        FollowReport followReportSaved = snapshot.data!;
+                        return completeFollowForm(context, followReportSaved);
                       }
                       else {
-                        if (user.initialReportId == null) {
-                          database.addInitialReport(InitialReport(
-                            userId: user.userId,
-                          ));
+                        if (user.followReportId == null) {
+                          database.addFollowReport(widget.followReport!);
                         }
                         return Container(
                           height: 300,
@@ -203,7 +201,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
     );
   }
 
-  Widget completeInitialForm(BuildContext context, InitialReport report) {
+  Widget completeFollowForm(BuildContext context, FollowReport report) {
     final database = Provider.of<Database>(context, listen: false);
     final _formKey = GlobalKey<FormState>();
 
@@ -1689,10 +1687,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   width: 250,
                   child: ElevatedButton(
                       onPressed: () async {
-                        database.setInitialReport(
-                            InitialReport(
+                        database.setFollowReport(
+                            FollowReport(
                               userId: report.userId,
-                              initialReportId: report.initialReportId,
+                              followReportId: report.followReportId,
                               subsidy: _subsidy,
                               orientation1: _orientation1,
                               arriveDate: _arriveDate,
@@ -1869,11 +1867,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                   actions: <Widget>[
                                     ElevatedButton(
                                         onPressed: () async {
-                                          database.setInitialReport(
-                                              InitialReport(
+                                          database.setFollowReport(
+                                              FollowReport(
                                                 userId: report.userId,
-                                                initialReportId: report
-                                                    .initialReportId,
+                                                followReportId: report.followReportId,
                                                 subsidy: _subsidy,
                                                 orientation1: _orientation1,
                                                 arriveDate: _arriveDate,
@@ -1950,8 +1947,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                                 laborInsertion: _laborInsertion,
                                                 accompanimentPostLabor: _accompanimentPostLabor,
                                                 laborUpgrade: _laborUpgrade,
+                                                completedDate : DateTime.now(),
                                                 finished: true,
-                                                completedDate: DateTime.now(),
                                               )
                                           );
                                           Navigator.of(context).pop();

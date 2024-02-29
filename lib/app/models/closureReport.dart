@@ -3,6 +3,7 @@ class ClosureReport {
     this.closureReportId,
     this.userId,
     this.finished,
+    this.completedDate,
 
     this.background,
     this.initialDiagnosis,
@@ -15,6 +16,7 @@ class ClosureReport {
   final String? closureReportId;
   final String? userId;
   final bool? finished;
+  final DateTime? completedDate;
 
   final String? background;
   final String? initialDiagnosis;
@@ -28,6 +30,7 @@ class ClosureReport {
       closureReportId: data['closureReportId'],
       userId: data['userId'],
       finished: data['finished'],
+      completedDate: data['completedDate'] != null ? data['completedDate'].toDate() : null,
 
       background: data['background'],
       initialDiagnosis: data['initialDiagnosis'],
@@ -50,6 +53,7 @@ class ClosureReport {
       'closureReportId': closureReportId,
       'userId': userId,
       'finished': finished,
+      'completedDate': completedDate,
 
       'background': background,
       'initialDiagnosis': initialDiagnosis,

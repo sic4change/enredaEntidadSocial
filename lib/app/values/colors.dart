@@ -75,6 +75,7 @@ class AppColors {
   static const Color greyLetter = Color(0xFF4E657E);
   static const Color greyChip = Color(0xFFF5F5F5);
   static const Color greySearch = Color(0xFFEBF1F2);
+  static const Color greyDropMenuBorder = Color(0xFFB8B8C5);
 
   //Violet
   static const Color darkViolet = Color(0xFFA0A5D2);

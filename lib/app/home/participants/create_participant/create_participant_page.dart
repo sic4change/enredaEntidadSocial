@@ -23,6 +23,7 @@ import 'package:enreda_empresas/app/home/participants/create_participant/validat
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_education.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_gender.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_interests.dart';
+import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_keepLearningOptions.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_province.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_specificInterests.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_timeSearching.dart';
@@ -38,6 +39,7 @@ import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/interests.dart';
+import 'package:enreda_empresas/app/models/keepLearningOption.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -94,9 +96,11 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   List<String> cities = [];
   List abilities = [];
   List<String> interests = [];
+  List<String> keepLearningOptions = [];
   List<String> specificInterests = [];
   Set<Ability> selectedAbilities = {};
   Set<Interest> selectedInterests = {};
+  Set<KeepLearningOption> selectedKeepLearningOptions = {};
   Set<SpecificInterest> selectedSpecificInterests = {};
 
   String writtenEmail = '';
@@ -123,9 +127,11 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   late String educationName;
   late String genderName;
   late String interestsNames;
+  late String keepLearningOptionsNames;
   late String specificInterestsNames;
   String? _abilityId;
   String? _interestId;
+  String? _keepLearningOptionId;
   int? dedicationValue;
   String? dedicationId;
   int? timeSearchingValue;
@@ -138,6 +144,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   TextEditingController textEditingControllerDateInput = TextEditingController();
   TextEditingController textEditingControllerAbilities = TextEditingController();
   TextEditingController textEditingControllerInterests = TextEditingController();
+  TextEditingController textEditingControllerKeepLearningOptions = TextEditingController();
   TextEditingController textEditingControllerSpecificInterests = TextEditingController();
 
   int sum = 0;
@@ -179,6 +186,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     unemployedType = "";
     _nationality = '';
     nationalityName = '';
+    keepLearningOptionsNames = '';
   }
 
   @override
@@ -552,22 +560,14 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                 padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
                 child: Container(
                   height: 60,
-                  child: DropdownButtonFormField<String>(
-                    hint: Text('¿Qué te gustaría seguir aprendiendo?', maxLines: 2, overflow: TextOverflow.ellipsis),
-                    isDense: true,
-                    isExpanded: true,
-                    value: futureLearning,
-                    items: _futureLearningOptions,
-                    validator: (value) => futureLearning != null ? null : StringConst.FORM_MOTIVATION_ERROR,
-                    onChanged: (value) => setState(() {
-                      futureLearning = value;
-                    }), //functionToWriteBackThings(value),
-                    iconDisabledColor: AppColors.greyDark,
-                    iconEnabledColor: AppColors.primaryColor,
+                  child: TextFormField(
+                    controller: textEditingControllerKeepLearningOptions,
                     decoration: InputDecoration(
-                      labelStyle: textTheme.button?.copyWith(
-                        height: 1.5,
+                      hintText: '¿Qué te gustaría seguir aprendiendo?',
+                      hintMaxLines: 2,
+                      labelStyle: textTheme.bodyText1?.copyWith(
                         color: AppColors.greyDark,
+                        height: 1.5,
                         fontWeight: FontWeight.w400,
                         fontSize: fontSize,
                       ),
@@ -585,6 +585,12 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                         ),
                       ),
                     ),
+                    onTap: () => {_showMultiSelectKeepLearningOptions(context) },
+                    validator: (value) => value!.isNotEmpty ?
+                    null : StringConst.FORM_MOTIVATION_ERROR,
+                    onSaved: (value) => value = _keepLearningOptionId,
+                    maxLines: 2,
+                    readOnly: true,
                     style: textTheme.button?.copyWith(
                       height: 1.5,
                       color: AppColors.greyDark,
@@ -626,6 +632,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
               educationName,
               specificInterestsNames,
               interestsNames,
+              keepLearningOptionsNames,
             ),
           ),
           checkboxForm(context, _checkFieldKey, _isChecked, functionSetState)
@@ -705,7 +712,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
         interests: interests,
         specificInterests: specificInterests,
         surePurpose: selectedDedication,
-        continueLearning: futureLearning,
+        continueLearning: keepLearningOptions,
       );
 
       if(sum >= 0 && sum <= 3)
@@ -904,6 +911,17 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     getValuesFromKeyInterests(selectedValues);
   }
 
+  void _showMultiSelectKeepLearningOptions(BuildContext context) async {
+    final selectedOptions = await showDialog<Set<KeepLearningOption>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownKeepLearningOptions(context, selectedKeepLearningOptions);
+      },
+    );
+    print(selectedOptions);
+    getValuesFromKeyKeepLearningOptions(selectedOptions);
+  }
+
   void getValuesFromKeyInterests (selectedValues) {
     var concatenate = StringBuffer();
     List<String> interestsIds = [];
@@ -919,6 +937,23 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     });
     print(interestsNames);
     print(interestsIds);
+  }
+
+  void getValuesFromKeyKeepLearningOptions (selectedOptions) {
+    var concatenate = StringBuffer();
+    List<String> keepLearningIds = [];
+    selectedOptions.forEach((item){
+      concatenate.write(item.title +' / ');
+      keepLearningIds.add(item.keepLearningOptionId);
+    });
+    setState(() {
+      this.keepLearningOptionsNames = concatenate.toString();
+      this.textEditingControllerKeepLearningOptions.text = concatenate.toString();
+      this.keepLearningOptions = keepLearningIds;
+      this.selectedKeepLearningOptions = selectedOptions;
+    });
+    print(keepLearningOptionsNames);
+    print(keepLearningIds);
   }
 
   void _showMultiSelectSpecificInterests(BuildContext context) async {

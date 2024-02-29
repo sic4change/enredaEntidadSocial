@@ -1,6 +1,6 @@
-class InitialReport {
-  InitialReport({
-    this.initialReportId,
+class FollowReport {
+  FollowReport({
+    this.followReportId,
     this.userId,
     this.finished,
     this.completedDate,
@@ -120,7 +120,7 @@ class InitialReport {
   });
 
   //Basic
-  final String? initialReportId;
+  final String? followReportId;
   final String? userId;
   final bool? finished;
   final DateTime? completedDate;
@@ -239,7 +239,7 @@ class InitialReport {
 
 
 
-  factory InitialReport.fromMap(Map<String, dynamic> data, String documentId) {
+  factory FollowReport.fromMap(Map<String, dynamic> data, String documentId) {
     List<String> hostingObservations = [];
     if (data['hostingObservations'] != null) {
       List<dynamic> list = data['hostingObservations'];
@@ -256,10 +256,10 @@ class InitialReport {
       });
     }
 
-    return InitialReport(
+    return FollowReport(
 
         //Basic
-      initialReportId: data['initialReportId'],
+      followReportId: data['followReportId'],
       userId: data['userId'],
       finished: data['finished'],
       completedDate: data['completedDate'] != null ? data['completedDate'].toDate() : null,
@@ -383,14 +383,14 @@ class InitialReport {
   bool operator ==(Object other){
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is InitialReport &&
-            other.initialReportId == initialReportId);
+            other is FollowReport &&
+            other.followReportId == followReportId);
   }
 
   Map<String, dynamic> toMap() {
     return {
 
-      'initialReportId': initialReportId,
+      'followReportId': followReportId,
       'userId': userId,
       'finished': finished,
       'completedDate': completedDate,

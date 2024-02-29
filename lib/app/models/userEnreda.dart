@@ -47,6 +47,7 @@ class UserEnreda {
     this.personalDocuments = const [],
     this.initialReportId,
     this.closureReportId,
+    this.followReportId,
     this.nationality,
   });
 
@@ -199,6 +200,7 @@ class UserEnreda {
     final bool? checkAgreeCV = data['checkAgreeCV'];
     final String? initialReportId = data['initialReportId'];
     final String? closureReportId = data['closureReportId'];
+    final String? followReportId = data['followReportId'];
     final String? nationality = data['nationality'] ?? '';
 
     return UserEnreda(
@@ -241,6 +243,7 @@ class UserEnreda {
       personalDocuments: personalDocuments,
       initialReportId: initialReportId,
       closureReportId: closureReportId,
+      followReportId: followReportId,
       nationality: nationality,
     );
   }
@@ -284,6 +287,7 @@ class UserEnreda {
   final List<PersonalDocument> personalDocuments;
   final String? initialReportId;
   final String? closureReportId;
+  final String? followReportId;
   final String? nationality;
 
   @override
@@ -331,6 +335,7 @@ class UserEnreda {
       'personalDocuments': personalDocuments.map((e) => e.toMap()).toList(),
       'initialReportId': initialReportId,
       'closureReportId': closureReportId,
+      'followReportId': followReportId,
       'nationality' : nationality,
     };
   }
@@ -377,6 +382,7 @@ class UserEnreda {
     List<PersonalDocument>? personalDocuments,
     String? initialReportId,
     String? closureReportId,
+    String? followReportId,
     String? nationality,
   }) {
     return UserEnreda(
@@ -417,6 +423,7 @@ class UserEnreda {
       personalDocuments: personalDocuments ?? this.personalDocuments,
       initialReportId: initialReportId ?? this.initialReportId,
       closureReportId: closureReportId ?? this.closureReportId,
+      followReportId: followReportId ?? this.followReportId,
       nationality: nationality ?? this.nationality,
     );
   }
