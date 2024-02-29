@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
+import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
@@ -39,7 +40,7 @@ typedef LayoutCallbackWithData = Future<Uint8List> Function(
     List<String>? idSelectedDateExperience,
     List<String>? idSelectedDatePersonalExperience,
     List<String> competenciesNames,
-    List<String> languagesNames,
+    List<Language> languagesNames,
     String? aboutMe,
     List<String> myDataOfInterest,
     String myCustomEmail,
