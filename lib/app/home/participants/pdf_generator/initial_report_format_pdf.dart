@@ -28,6 +28,7 @@ const PdfColor black = PdfColor.fromInt(0xF44494B);
 const PdfColor white = PdfColor.fromInt(0xFFFFFFFF);
 const leftWidth = 230.0;
 const rightWidth = 350.0;
+final DateFormat formatter = DateFormat('dd/MM/yyyy');
 
 Future<Uint8List> generateInitialReportFile(
     PdfPageFormat format,
@@ -70,7 +71,7 @@ Future<Uint8List> generateInitialReportFile(
         _sectionTitle(title: '1. Itinerario en España'),
         _customItem(title: 'Orinetaciones', content: initialReport.orientation1 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: initialReport.arriveDate.toString() ?? '', content2: initialReport.receptionResources ?? ''),
+        _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: formatter.format(initialReport.arriveDate!) ?? '', content2: initialReport.receptionResources ?? ''),
         SpaceH12(),
         _customRow(title1: 'Recursos externos de apoyo', title2: 'Situación administrativa', content1: initialReport.externalResources ?? '', content2: initialReport.administrativeSituation ?? ''),
 
@@ -78,7 +79,7 @@ Future<Uint8List> generateInitialReportFile(
         _sectionTitle(title: '2. Situación Sanitaria'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation2 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: initialReport.healthCard ?? '', content2: initialReport.expirationDate.toString() ?? ''),
+        _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: initialReport.healthCard ?? '', content2: formatter.format(initialReport.expirationDate!) ?? ''),
         SpaceH12(),
         _customRow(title1: 'Enfermedad', title2: 'Medicación/Tratamiento', content1: initialReport.disease ?? '', content2: initialReport.medication ?? ''),
 

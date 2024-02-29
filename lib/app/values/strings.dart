@@ -408,6 +408,7 @@ class StringConst {
   static const String FORM_CURRENT_COUNTRY = "País actual";
   static const String FORM_SOCIAL_ENTITY = 'Organización o entidad a la que pertenece';
   static const String FORM_NATIONALITY = "Nacionalidad";
+  static const String FORM_GOALS = 'Objetivos';
 
   static const List<String> RESOURCE_TYPES = [
     'Oferta de empleo',

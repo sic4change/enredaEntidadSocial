@@ -70,4 +70,7 @@ class APIPath {
   static String nations() => 'nations';
   static String closureReports() => 'closureReports';
   static String closureReport(String closureReportId) => 'closureReports/$closureReportId';
+  static String keepLearningOptions() => 'keepLearningOptions';
+  static String followReports() => 'followReports';
+  static String followReport(String followReportId) => 'followReports/$followReportId';
 }

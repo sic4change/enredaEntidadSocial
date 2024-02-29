@@ -14,11 +14,13 @@ import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/dedication.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
+import 'package:enreda_empresas/app/models/followReport.dart';
 import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/keepLearningOption.dart';
 import 'package:enreda_empresas/app/models/organization.dart';
 import 'package:enreda_empresas/app/models/region.dart';
 import 'package:enreda_empresas/app/models/personalDocument.dart';
@@ -131,6 +133,10 @@ abstract class Database {
      Stream<ClosureReport> closureReportsStreamByUserId(String? userId);
      Future<void> setClosureReport(ClosureReport closureReport);
      Future<void> addClosureReport(ClosureReport closureReport);
+     Stream<List<KeepLearningOption>> keepLearningOptionsStream();
+     Stream<FollowReport> followReportsStreamByUserId(String? userId);
+     Future<void> setFollowReport(FollowReport followReport);
+     Future<void> addFollowReport(FollowReport followReport);
 }
 
 class FirestoreDatabase implements Database {
@@ -899,6 +905,33 @@ class FirestoreDatabase implements Database {
   @override
   Future<void> addClosureReport(ClosureReport closureReport) =>
       _service.addData(path: APIPath.closureReports(), data: closureReport.toMap());
+
+  @override
+  Stream<List<KeepLearningOption>> keepLearningOptionsStream() => _service.collectionStream(
+    path: APIPath.keepLearningOptions(),
+    queryBuilder: (query) => query.where('keepLearningOptionId', isNotEqualTo: null),
+    builder: (data, documentId) => KeepLearningOption.fromMap(data, documentId),
+    //sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<FollowReport> followReportsStreamByUserId(String? userId) {
+    return _service.documentStreamByField(
+      path: APIPath.followReports(),
+      builder: (data, documentId) => FollowReport.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('userId', isEqualTo: userId),
+    );
+  }
+
+  @override
+  Future<void> setFollowReport(FollowReport followReport) {
+    return _service.updateData(
+        path: APIPath.followReport(followReport.followReportId!), data: followReport.toMap());
+  }
+
+  @override
+  Future<void> addFollowReport(FollowReport followReport) =>
+      _service.addData(path: APIPath.followReports(), data: followReport.toMap());
 
 }
 
