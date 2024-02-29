@@ -16,6 +16,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../models/language.dart';
+
 class MyCvModelsPage extends StatefulWidget {
   MyCvModelsPage({
     Key? key,
@@ -82,7 +84,7 @@ class MyCvModelsPage extends StatefulWidget {
   List<int> mySelectedCompetencies;
   List<String> myCustomDataOfInterest;
   List<int> mySelectedDataOfInterest;
-  List<String> myCustomLanguages;
+  List<Language> myCustomLanguages;
   List<int> mySelectedLanguages;
   final List<CertificationRequest>? myReferences;
   List<CertificationRequest> myCustomReferences;
@@ -1714,7 +1716,7 @@ class _MyCvModelsPageState extends State<MyCvModelsPage> {
                           widget.myCustomLanguages.remove(myLanguages[index]);
                           widget.mySelectedLanguages.remove(_selectedLanguagesIndex);
                         } else {
-                          widget.myCustomLanguages.add(myLanguages[index].name);
+                          widget.myCustomLanguages.add(myLanguages[index]);
                           widget.mySelectedLanguages.add(_selectedLanguagesIndex!);
                         }
                         print(widget.myCustomLanguages);

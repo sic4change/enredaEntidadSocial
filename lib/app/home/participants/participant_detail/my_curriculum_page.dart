@@ -11,6 +11,7 @@ import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
+import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
@@ -101,7 +102,7 @@ class MyCurriculumPage extends StatelessWidget {
 
   List<int> mySelectedDataOfInterest = [];
 
-  List<String> myCustomLanguages = [];
+  List<Language> myCustomLanguages = [];
 
   List<int> mySelectedLanguages = [];
 
@@ -151,7 +152,7 @@ class MyCurriculumPage extends StatelessWidget {
               mySelectedDataOfInterest = List.generate(myCustomDataOfInterest.length, (i) => i);
 
               final myLanguages = user?.languagesLevels ?? [];
-              myCustomLanguages = myLanguages.map((element) => element.name).toList();
+              myCustomLanguages = myLanguages.map((element) => element).toList();
               mySelectedLanguages = List.generate(myCustomLanguages.length, (i) => i);
 
               if (mini)
