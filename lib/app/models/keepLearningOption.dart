@@ -28,4 +28,9 @@ class KeepLearningOption {
       'order': order,
     };
   }
+
+  @override
+  // TODO: implement hashCode
+  int get hashCode => super.hashCode;
+
 }

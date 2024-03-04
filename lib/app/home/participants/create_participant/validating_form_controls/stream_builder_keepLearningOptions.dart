@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'multi_select_button.dart';
 
-Widget streamBuilderDropdownKeepLearningOptions (BuildContext context, Set<KeepLearningOption> selectedInterests) {
+Widget streamBuilderDropdownKeepLearningOptions (BuildContext context, Set<KeepLearningOption> selectedKeepLearningOptions) {
   final database = Provider.of<Database>(context, listen: false);
   return StreamBuilder<List<KeepLearningOption>>(
       stream: database.keepLearningOptionsStream(),
@@ -24,7 +24,7 @@ Widget streamBuilderDropdownKeepLearningOptions (BuildContext context, Set<KeepL
 
         return MultiSelectDialog<KeepLearningOption>(
           items: options,
-          initialSelectedValues: selectedInterests,
+          initialSelectedValues: selectedKeepLearningOptions,
         );
       });
 }

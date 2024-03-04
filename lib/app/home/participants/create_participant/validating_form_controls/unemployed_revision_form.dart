@@ -4,7 +4,7 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
-Widget UnemployedRevisionForm(
+Widget unemployedRevisionForm(
     BuildContext context,
     String _firstName,
     String _lastName,

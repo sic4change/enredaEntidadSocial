@@ -945,7 +945,7 @@ class FirestoreDatabase implements Database {
     path: APIPath.keepLearningOptions(),
     queryBuilder: (query) => query.where('keepLearningOptionId', isNotEqualTo: null),
     builder: (data, documentId) => KeepLearningOption.fromMap(data, documentId),
-    //sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
   @override
