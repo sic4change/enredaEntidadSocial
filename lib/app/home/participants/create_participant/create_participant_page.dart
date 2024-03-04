@@ -3,18 +3,15 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_date_picker_title.dart';
-import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_padding.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_phone_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_stepper.dart';
-import 'package:enreda_empresas/app/common_widgets/custom_text_form_field.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
-import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/checkbox_form.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_abilities.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_city.dart';
@@ -40,7 +37,6 @@ import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/interests.dart';
 import 'package:enreda_empresas/app/models/keepLearningOption.dart';
-import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
@@ -151,13 +147,6 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
 
   late TextTheme textTheme;
 
-  List<DropdownMenuItem<String>> _futureLearningOptions = ['No me interesa nada', 'Formación', 'Prácticas', 'Ocio', 'Voluntariado', 'Empleo'].map<DropdownMenuItem<String>>((String value){
-    return DropdownMenuItem<String>(
-      value: value,
-      child: Text(value),
-    );
-  }).toList();
-
   @override
   void initState() {
     super.initState();
@@ -264,8 +253,6 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
 
   Widget _buildForm(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
-    TextTheme textTheme = Theme.of(context).textTheme;
-    double fontSize = responsiveSize(context, 14, 16, md: 15);
     return Form(
       key: _formKey,
       child: Column(
@@ -617,7 +604,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
         children: [
           RoundedContainer(
             width: MediaQuery.of(context).size.width * 0.6,
-            child: UnemployedRevisionForm(
+            child: unemployedRevisionForm(
               context,
               _firstName!,
               _lastName!,

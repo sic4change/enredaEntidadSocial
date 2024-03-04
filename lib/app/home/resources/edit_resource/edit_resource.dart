@@ -265,7 +265,8 @@ class _EditResourceState extends State<EditResource> {
     ];
     List<String> contractTypes = <String>[
       'Contrato indefinido',
-      'Contrato temporal',];
+      'Contrato temporal',
+      'Sin especificar',];
     return Form(
       key: _formKey,
       child: Column(
@@ -281,12 +282,12 @@ class _EditResourceState extends State<EditResource> {
             ),
             CustomFlexRowColumn(
               childLeft: customTextFormField(context, _resourceTitle!,
-                  StringConst.FORM_TITLE, StringConst.NAME_ERROR, nameSetState),
+                  StringConst.FORM_TITLE, StringConst.FORM_COMPANY_ERROR, nameSetState),
               childRight: customTextFormMultiline(
                   context,
                   _resourceDescription!,
                   StringConst.DESCRIPTION,
-                  StringConst.FORM_LASTNAME_ERROR,
+                  StringConst.FORM_COMPANY_ERROR,
                   descriptionSetState),
             ),
             CustomFlexRowColumn(
@@ -310,7 +311,7 @@ class _EditResourceState extends State<EditResource> {
                       }).toList(),
                       validator: (value) => _degree != null
                           ? null
-                          : StringConst.FORM_MOTIVATION_ERROR,
+                          : StringConst.FORM_COMPANY_ERROR,
                       onChanged: (value) =>
                           buildDegreeStreamBuilderSetState(value),
                       iconDisabledColor: AppColors.greyDark,
@@ -403,11 +404,10 @@ class _EditResourceState extends State<EditResource> {
                   )
                   : Container(),
               childRight: _resourceCategoryId == "POUBGFk5gU6c5X1DKo1b"
-                  ? customTextFormField(
+                  ? customTextFormFieldNotValidator(
                       context,
                       _salary!,
                       StringConst.FORM_SALARY,
-                      StringConst.FORM_COMPANY_ERROR,
                       buildSalaryStreamBuilderSetState)
                   : Container(),
             ),
@@ -552,8 +552,6 @@ class _EditResourceState extends State<EditResource> {
                   ),
                 ),
                 onTap: () => {_showMultiSelectCompetencies(context) },
-                validator: (value) => value!.isNotEmpty ?
-                null : StringConst.FORM_MOTIVATION_ERROR,
                 maxLines: 2,
                 readOnly: true,
                 style: textTheme.button?.copyWith(

@@ -282,7 +282,8 @@ class _CreateResourceState extends State<CreateResource> {
       'Con titulación oficial'];
     List<String> contractTypes = <String>[
       'Contrato indefinido',
-      'Contrato temporal',];
+      'Contrato temporal',
+      'Sin especificar'];
     return Form(
       key: _formKey,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <
@@ -296,12 +297,12 @@ class _CreateResourceState extends State<CreateResource> {
         ),
         CustomFlexRowColumn(
           childLeft: customTextFormField(context, _resourceTitle!,
-              StringConst.FORM_TITLE, StringConst.NAME_ERROR, nameSetState),
+              StringConst.FORM_TITLE, StringConst.FORM_COMPANY_ERROR, nameSetState),
           childRight: customTextFormMultiline(
               context,
               _resourceDescription!,
               StringConst.DESCRIPTION,
-              StringConst.FORM_LASTNAME_ERROR,
+              StringConst.FORM_COMPANY_ERROR,
               descriptionSetState),
         ),
         CustomFlexRowColumn(
@@ -417,11 +418,10 @@ class _CreateResourceState extends State<CreateResource> {
             ),
           ) : Container(),
           childRight: resourceCategoryName == "Empleo"
-              ? customTextFormField(
+              ? customTextFormFieldNotValidator(
                   context,
                   _salary!,
                   StringConst.FORM_SALARY,
-                  StringConst.FORM_COMPANY_ERROR,
                   buildSalaryStreamBuilderSetState)
               : Container(),
         ),
@@ -490,8 +490,6 @@ class _CreateResourceState extends State<CreateResource> {
                 ),
               ),
               onTap: () => {_showMultiSelectCompetenciesCategories(context) },
-              validator: (value) => value!.isNotEmpty ?
-              null : StringConst.FORM_MOTIVATION_ERROR,
               maxLines: 2,
               readOnly: true,
               style: textTheme.button?.copyWith(
@@ -529,8 +527,6 @@ class _CreateResourceState extends State<CreateResource> {
                 ),
               ),
               onTap: () => {_showMultiSelectCompetenciesSubCategories(context) },
-              validator: (value) => value!.isNotEmpty ?
-              null : StringConst.FORM_MOTIVATION_ERROR,
               maxLines: 2,
               readOnly: true,
               style: textTheme.button?.copyWith(
@@ -567,8 +563,6 @@ class _CreateResourceState extends State<CreateResource> {
               ),
             ),
             onTap: () => {_showMultiSelectCompetencies(context) },
-            validator: (value) => value!.isNotEmpty ?
-            null : StringConst.FORM_MOTIVATION_ERROR,
             maxLines: 2,
             readOnly: true,
             style: textTheme.button?.copyWith(
