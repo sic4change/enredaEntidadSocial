@@ -90,10 +90,10 @@ class Experience {
     final String? peopleAffected = data['peopleAffected'];
     final String? organization = data['organization'];
     final String? position = data['position'];
-    final String? professionActivitiesText = data['professionActivitiesText'];
+    final String? professionActivitiesText = data['professionActivitiesText']??"";
     final Timestamp? startDate = data['startDate'];
     final Timestamp? endDate = data['endDate'];
-    final String location = data['location'];
+    final String location = data['location']??"";
     final String workType = data['workType'];
     final String context = data['context'];
     final String contextPlace = data['contextPlace'];

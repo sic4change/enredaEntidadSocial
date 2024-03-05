@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:enreda_empresas/app/home/participants/pdf_generator/data.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
@@ -13,6 +12,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:http/http.dart';
+
 
 const PdfColor lilac = PdfColor.fromInt(0xFF6768AB);
 const PdfColor lightLilac = PdfColor.fromInt(0xFFF4F5FB);
@@ -306,9 +306,9 @@ Future<Uint8List> generateResume1(
 }
 
 Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
-  final bgShape = await rootBundle.loadString('images/cv-dots-1.svg');
-  final bgShape2 = await rootBundle.loadString('images/cv-dots-2.svg');
-  final bgShape3 = await rootBundle.loadString('images/cv-dots-3.svg');
+  final bgShape = await rootBundle.loadString('assets/images/cv-dots-1.svg');
+  final bgShape2 = await rootBundle.loadString('assets/images/cv-dots-2.svg');
+  final bgShape3 = await rootBundle.loadString('assets/images/cv-dots-3.svg');
 
   format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,
