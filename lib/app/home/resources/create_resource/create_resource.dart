@@ -288,12 +288,12 @@ class _CreateResourceState extends State<CreateResource> {
       key: _formKey,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <
           Widget>[
-        CustomFlexRowColumn(
-          childLeft: streamBuilderDropdownResourceCategoryCreate(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+          child: streamBuilderDropdownResourceCategoryCreate(
               context,
               selectedResourceCategory,
               buildResourceCategoryStreamBuilderSetState),
-          childRight: Container(),
         ),
         CustomFlexRowColumn(
           childLeft: customTextFormField(context, _resourceTitle!,
@@ -305,9 +305,10 @@ class _CreateResourceState extends State<CreateResource> {
               StringConst.FORM_COMPANY_ERROR,
               descriptionSetState),
         ),
-        CustomFlexRowColumn(
-          childLeft: resourceCategoryName == "Formación"
-              ? DropdownButtonFormField<String>(
+        resourceCategoryName == "Formación"
+            ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: DropdownButtonFormField<String>(
                   hint: const Text(StringConst.FORM_DEGREE),
                   value: _degree == "" ? null : _degree,
                   items: degrees.map<DropdownMenuItem<String>>((String value) {
@@ -359,10 +360,8 @@ class _CreateResourceState extends State<CreateResource> {
                     fontWeight: FontWeight.w400,
                     fontSize: fontSize,
                   ),
-                )
-              : Container(),
-          childRight: Container(),
-        ),
+                ),
+            ) : Container(),
         CustomFlexRowColumn(
           childLeft: resourceCategoryName == "Empleo" ? DropdownButtonFormField<String>(
             hint: const Text(StringConst.FORM_CONTRACT),
@@ -425,41 +424,42 @@ class _CreateResourceState extends State<CreateResource> {
                   buildSalaryStreamBuilderSetState)
               : Container(),
         ),
-        CustomFlexRowColumn(
-            childLeft: TextFormField(
-              controller: textEditingControllerInterests,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                labelText: StringConst.FORM_INTERESTS_QUESTION,
-                focusColor: AppColors.lilac,
-                labelStyle: textTheme.bodyLarge?.copyWith(
-                  color: AppColors.greyDark,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                  borderSide: const BorderSide(
-                    color: AppColors.greyUltraLight,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                  borderSide: const BorderSide(
-                    color: AppColors.greyUltraLight,
-                    width: 1.0,
-                  ),
-                ),
-              ),
-              onTap: () => {_showMultiSelectInterests(context)},
-              validator: (value) =>
-              value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
-              onSaved: (value) => value = _interestId,
-              readOnly: true,
-              style: textTheme.bodyMedium?.copyWith(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+          child: TextFormField(
+            controller: textEditingControllerInterests,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              labelText: StringConst.FORM_INTERESTS_QUESTION,
+              focusColor: AppColors.lilac,
+              labelStyle: textTheme.bodyLarge?.copyWith(
                 color: AppColors.greyDark,
               ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: const BorderSide(
+                  color: AppColors.greyUltraLight,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: const BorderSide(
+                  color: AppColors.greyUltraLight,
+                  width: 1.0,
+                ),
+              ),
             ),
-            childRight: Container()),
+            onTap: () => {_showMultiSelectInterests(context)},
+            validator: (value) =>
+            value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
+            onSaved: (value) => value = _interestId,
+            readOnly: true,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.greyDark,
+            ),
+          ),
+        ),
         CustomFlexRowColumn(
             childLeft: TextFormField(
               controller: textEditingControllerCompetenciesCategories,
@@ -583,20 +583,21 @@ class _CreateResourceState extends State<CreateResource> {
           childRight: customTextFormMultilineNotValidator(
               context, _temporality!, StringConst.FORM_SCHEDULE, scheduleSetState),
         ),
-        CustomFlexRowColumn(
-            childLeft: CheckboxListTile(
-                title: Text(
-                  'El recurso no expira',
-                  style: textTheme.bodySmall?.copyWith(
-                    height: 1.5,
-                    color: AppColors.greyDark,
-                    fontWeight: FontWeight.w700,
-                    fontSize: fontSize,
-                  ),
+        Container(
+          width: 250,
+          child: CheckboxListTile(
+              title: Text(
+                'El recurso no expira',
+                style: textTheme.bodySmall?.copyWith(
+                  height: 1.5,
+                  color: AppColors.greyDark,
+                  fontWeight: FontWeight.w700,
+                  fontSize: fontSize,
                 ),
-                value: _notExpire,
-                onChanged: (bool? value) => setState(() => _notExpire = value!)),
-            childRight: Container()),
+              ),
+              value: _notExpire,
+              onChanged: (bool? value) => setState(() => _notExpire = value!)),
+        ),
         !_notExpire
             ? Flex(
                 direction: Responsive.isMobile(context)
@@ -776,8 +777,9 @@ class _CreateResourceState extends State<CreateResource> {
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            CustomFlexRowColumn(
-              childLeft: DropdownButtonFormField<String>(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: DropdownButtonFormField<String>(
                 hint: const Text(StringConst.FORM_MODALITY),
                 value: _modality,
                 items: <String>[
@@ -834,7 +836,6 @@ class _CreateResourceState extends State<CreateResource> {
                   fontSize: fontSize,
                 ),
               ),
-              childRight: Container(),
             ),
             CustomFlexRowColumn(
               childLeft: customTextFormField(
@@ -933,23 +934,23 @@ class _CreateResourceState extends State<CreateResource> {
                   StringConst.FORM_COMPANY_ERROR,
                   emailSetState),
             ) : Container(),
-            CustomFlexRowColumn(
-              childLeft: _organizerText != "" ? customTextFormField(
+            _organizerText != "" ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: customTextFormField(
                   context,
                   _link!,
                   StringConst.FORM_LINK,
                   StringConst.FORM_COMPANY_ERROR,
-                  linkSetState) : Container(),
-              childRight: Container(),
-            ),
-            CustomFlexRowColumn(
-              childLeft: _organizerText != "" ? Container() : customTextFormFieldNotValidator(
+                  linkSetState),
+            ) : Container(),
+            _organizerText != "" ? Container() : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: customTextFormFieldNotValidator(
                   context,
                   _link!,
                   StringConst.FORM_LINK,
                   linkSetState),
-              childRight: Container(),
-            ),
+            )
           ]),
     );
   }
