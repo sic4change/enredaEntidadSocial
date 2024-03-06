@@ -272,13 +272,13 @@ class _EditResourceState extends State<EditResource> {
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            CustomFlexRowColumn(
-              childLeft: streamBuilderDropdownResourceCategory(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: streamBuilderDropdownResourceCategory(
                   context,
                   selectedResourceCategory,
                   buildResourceCategoryStreamBuilderSetState,
                   resource),
-              childRight: Container(),
             ),
             CustomFlexRowColumn(
               childLeft: customTextFormField(context, _resourceTitle!,
@@ -290,13 +290,14 @@ class _EditResourceState extends State<EditResource> {
                   StringConst.FORM_COMPANY_ERROR,
                   descriptionSetState),
             ),
-            CustomFlexRowColumn(
-              childLeft: _resourceCategoryId == "6ag9Px7zkFpHgRe17PQk"
-                  ? DropdownButtonFormField<String>(
-                      hint: const Text(StringConst.FORM_DEGREE),
-                      value: _degree == "" ? null : _degree,
-                      items:
-                          strings.map<DropdownMenuItem<String>>((String value) {
+            _resourceCategoryId == "6ag9Px7zkFpHgRe17PQk"
+                ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                  child: DropdownButtonFormField<String>(
+                    hint: const Text(StringConst.FORM_DEGREE),
+                    value: _degree == "" ? null : _degree,
+                    items:
+                    strings.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(
@@ -308,15 +309,15 @@ class _EditResourceState extends State<EditResource> {
                             ),
                           ),
                         );
-                      }).toList(),
-                      validator: (value) => _degree != null
+                    }).toList(),
+                    validator: (value) => _degree != null
                           ? null
                           : StringConst.FORM_COMPANY_ERROR,
-                      onChanged: (value) =>
+                    onChanged: (value) =>
                           buildDegreeStreamBuilderSetState(value),
-                      iconDisabledColor: AppColors.greyDark,
-                      iconEnabledColor: AppColors.primaryColor,
-                      decoration: InputDecoration(
+                    iconDisabledColor: AppColors.greyDark,
+                    iconEnabledColor: AppColors.primaryColor,
+                    decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
                         labelStyle: textTheme.bodyLarge?.copyWith(
@@ -337,16 +338,15 @@ class _EditResourceState extends State<EditResource> {
                             width: 1.0,
                           ),
                         ),
-                      ),
-                      style: textTheme.bodyMedium?.copyWith(
+                    ),
+                    style: textTheme.bodyMedium?.copyWith(
                         height: 1.5,
                         color: AppColors.greyDark,
                         fontWeight: FontWeight.w400,
-                      ),
-                    )
-                  : Container(),
-              childRight: Container(),
-            ),
+                    ),
+                  ),
+                      )
+                      : Container(),
             CustomFlexRowColumn(
               childLeft: _resourceCategoryId == "POUBGFk5gU6c5X1DKo1b"
                   ? DropdownButtonFormField<String>(
@@ -411,8 +411,9 @@ class _EditResourceState extends State<EditResource> {
                       buildSalaryStreamBuilderSetState)
                   : Container(),
             ),
-            CustomFlexRowColumn(
-              childLeft: TextFormField(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: TextFormField(
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -439,7 +440,7 @@ class _EditResourceState extends State<EditResource> {
                 controller: textEditingControllerInterests,
                 onTap: () => {_showMultiSelectInterests(context)},
                 validator: (value) =>
-                    value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
+                value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
                 readOnly: true,
                 style: textTheme.bodyMedium?.copyWith(
                   height: 1.5,
@@ -447,7 +448,6 @@ class _EditResourceState extends State<EditResource> {
                   fontWeight: FontWeight.w400,
                 ),
               ),
-              childRight: Container(),
             ),
             CustomFlexRowColumn(
                 childLeft: TextFormField(
@@ -572,22 +572,23 @@ class _EditResourceState extends State<EditResource> {
               childRight: customTextFormMultilineNotValidator(context,
                   _temporality!, StringConst.FORM_SCHEDULE, scheduleSetState),
             ),
-            CustomFlexRowColumn(
-                childLeft: CheckboxListTile(
-                    title: Text(
-                      'El recurso no expira',
-                      style: textTheme.bodyMedium?.copyWith(
-                        height: 1.5,
-                        color: AppColors.greyDark,
-                        fontWeight: FontWeight.w700,
-                      ),
+            Container(
+              width: 250.0,
+              child: CheckboxListTile(
+                  title: Text(
+                    'El recurso no expira',
+                    style: textTheme.bodyMedium?.copyWith(
+                      height: 1.5,
+                      color: AppColors.greyDark,
+                      fontWeight: FontWeight.w700,
                     ),
-                    value: selectedNotExpire,
-                    onChanged: (bool? value) => setState(() {
-                          selectedNotExpire = value!;
-                          _notExpire = selectedNotExpire;
-                        })),
-                childRight: Container()),
+                  ),
+                  value: selectedNotExpire,
+                  onChanged: (bool? value) => setState(() {
+                    selectedNotExpire = value!;
+                    _notExpire = selectedNotExpire;
+                  })),
+            ),
             selectedNotExpire == false
                 ? Flex(
                     direction: Responsive.isMobile(context)
@@ -777,8 +778,9 @@ class _EditResourceState extends State<EditResource> {
                     ],
                   )
                 : Container(),
-            CustomFlexRowColumn(
-              childLeft: DropdownButtonFormField<String>(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: DropdownButtonFormField<String>(
                 hint: const Text(StringConst.FORM_MODALITY),
                 value: _modality,
                 isExpanded: true,
@@ -792,16 +794,16 @@ class _EditResourceState extends State<EditResource> {
                     child: Text(
                       value,
                       style: textTheme.bodyMedium?.copyWith(
-                        height: 1.5,
-                        color: AppColors.greyDark,
-                        fontWeight: FontWeight.w400,
-                        overflow: TextOverflow.ellipsis
+                          height: 1.5,
+                          color: AppColors.greyDark,
+                          fontWeight: FontWeight.w400,
+                          overflow: TextOverflow.ellipsis
                       ),
                     ),
                   );
                 }).toList(),
                 validator: (value) =>
-                    _modality != null ? null : StringConst.FORM_COMPANY_ERROR,
+                _modality != null ? null : StringConst.FORM_COMPANY_ERROR,
                 onChanged: (value) => buildModalityStreamBuilderSetState(value),
                 onSaved: (value) => buildModalityStreamBuilderSetState(value),
                 iconDisabledColor: AppColors.greyDark,
@@ -834,7 +836,6 @@ class _EditResourceState extends State<EditResource> {
                   fontWeight: FontWeight.w400,
                 ),
               ),
-              childRight: Container(),
             ),
             CustomFlexRowColumn(
               childLeft: customTextFormField(
@@ -936,23 +937,23 @@ class _EditResourceState extends State<EditResource> {
                         emailSetState),
                   )
                 : Container(),
-            CustomFlexRowColumn(
-              childLeft:  _organizerText != ""
-                  ? customTextFormField(
-                      context, _link!,
-                      StringConst.FORM_LINK,
-                      StringConst.FORM_COMPANY_ERROR,
-                      linkSetState)
-                  : Container(),
-              childRight: Container(),
-            ),
-            CustomFlexRowColumn(
-              childLeft:  _organizerText != ""
-                  ? Container()
-                  : customTextFormFieldNotValidator(
-                      context, _link!, StringConst.FORM_LINK, linkSetState),
-              childRight: Container(),
-            ),
+            _organizerText != ""
+                ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                  child: customTextFormField(
+                  context, _link!,
+                  StringConst.FORM_LINK,
+                  StringConst.FORM_COMPANY_ERROR,
+                  linkSetState),
+                )
+                : Container(),
+            _organizerText != ""
+                ? Container()
+                : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                  child: customTextFormFieldNotValidator(
+                  context, _link!, StringConst.FORM_LINK, linkSetState),
+                ),
           ]),
     );
   }

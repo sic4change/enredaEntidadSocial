@@ -35,7 +35,7 @@ Widget resourceRevisionForm(
     String email,
 ) {
   TextTheme textTheme = Theme.of(context).textTheme;
-  double fontSize = responsiveSize(context, 14, 16, md: 15);
+  double fontSize = responsiveSize(context, 13, 15, md: 14);
   return Column(
     children: [
       CustomExpandedRow(title: StringConst.FORM_TITLE, text: resourceTitle),
@@ -70,7 +70,7 @@ Widget resourceRevisionForm(
       (competenciesCategoriesNames != '') ? const SizedBox(height: Sizes.kDefaultPaddingDouble) : Container(),
       (competenciesCategoriesNames != '') ? CustomExpandedRow(title: StringConst.FORM_COMPETENCIES_CATEGORIES, text: competenciesCategoriesNames) : Container(),
       (competenciesSubCategoriesNames != '') ? const SizedBox(height: Sizes.kDefaultPaddingDouble) : Container(),
-      (competenciesSubCategoriesNames != '') ? CustomExpandedRow(title: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES, text: competenciesCategoriesNames) : Container(),
+      (competenciesSubCategoriesNames != '') ? CustomExpandedRow(title: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES, text: competenciesSubCategoriesNames) : Container(),
       (countryName != '') ? const SizedBox(height: Sizes.kDefaultPaddingDouble) : Container(),
       (countryName != '') ? CustomExpandedRow(title: StringConst.FORM_COUNTRY, text: countryName) : Container(),
       (provinceName != '') ? const SizedBox(height: Sizes.kDefaultPaddingDouble) : Container(),
@@ -89,17 +89,16 @@ Widget resourceRevisionForm(
       (email != '') ? CustomExpandedRow(title: StringConst.FORM_EMAIL, text: email) : Container(),
       (link != '') ? const SizedBox(height: Sizes.kDefaultPaddingDouble) : Container(),
       (link != '') ? CustomExpandedRow(title: StringConst.FORM_LINK, text: link) : Container(),
-      const SizedBox(height: Sizes.kDefaultPaddingDouble),
+      const SizedBox(height: Sizes.kDefaultPaddingDouble * 3),
       /*CustomExpandedRow(title: StringConst.FORM_TRUST, text: trust == true ? "Si" : "No"),
       const SizedBox(height: Sizes.kDefaultPaddingDouble),*/
       Text(StringConst.FORM_ACCEPTANCE,
         style: textTheme.bodySmall?.copyWith(
           height: 1.5,
           color: AppColors.greyDark,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.normal,
           fontSize: fontSize,
         ),),
-      const SizedBox(height: Sizes.kDefaultPaddingDouble),
     ],
   );
 }
