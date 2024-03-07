@@ -194,11 +194,10 @@ class CustomTextMediumBold extends StatelessWidget {
     TextTheme textTheme = Theme.of(context).textTheme;
     return Text(
       text,
-      style: textTheme.bodyMedium?.copyWith(
+      style: textTheme.bodyLarge?.copyWith(
         color: AppColors.turquoiseBlue,
         height: 1.5,
         fontSize: fontSize,
-        fontWeight: FontWeight.w900
       ),
     );
   }
