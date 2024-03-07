@@ -17,12 +17,8 @@ class ExperienceTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final DateFormat formatter = DateFormat('yyyy');
     bool dismissible = true;
-    String startDate = experience.startDate != null
-        ? formatter.format(experience.startDate!.toDate())
-        : 'Desconocida';
-    String endDate = experience.subtype == 'Responsabilidades familiares'? 'Desconocida': experience.endDate != null
-        ? formatter.format(experience.endDate!.toDate())
-        : 'Actualmente';
+    String startDate = experience.startDate != null ? formatter.format(experience.startDate!.toDate()) : '-';
+    String endDate = experience.endDate != null ? formatter.format(experience.endDate!.toDate()) : 'Actualmente';
 
     return InkWell(
       onTap: onTap,
@@ -37,15 +33,15 @@ class ExperienceTile extends StatelessWidget {
               RichText(
                 text: TextSpan(
                     text: '${experience.activityRole!.toUpperCase()} -',
-                    style: textTheme.bodyText1?.copyWith(
+                    style: textTheme.bodySmall?.copyWith(
                       fontSize: 14.0,
                     ),
                     children: [
                       TextSpan(
                         text: ' ${experience.activity!.toUpperCase()}',
-                        style: textTheme.bodyText1?.copyWith(
+                        style: textTheme.bodySmall?.copyWith(
                           fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.normal,
                         ),
                       )
                     ]),
@@ -56,30 +52,44 @@ class ExperienceTile extends StatelessWidget {
               RichText(
                 text: TextSpan(
                     text: '${experience.institution!.toUpperCase()} -',
-                    style: textTheme.bodyText1?.copyWith(
+                    style: textTheme.bodySmall?.copyWith(
                       fontSize: 14.0,
                     ),
                     children: [
                       TextSpan(
                         text: ' ${experience.nameFormation!.toUpperCase()}',
-                        style: textTheme.bodyText1?.copyWith(
+                        style: textTheme.bodySmall?.copyWith(
                           fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.normal,
                         ),
                       )
                     ]),
               ),
+            if(experience.subtype == 'Responsabilidades familiares' || experience.subtype == 'Compromiso social')
+              Text(
+                '${experience.subtype}',
+                style: textTheme.bodySmall?.copyWith(
+                  fontSize: 14.0,
+                ),
+              ),
+            if(experience.subtype == 'Otro')
+              Text(
+                '${experience.position}',
+                style: textTheme.bodySmall?.copyWith(
+                  fontSize: 14.0,
+                ),
+              ),
             if (experience.activity != null && experience.activityRole == null)
               Text( experience.position == null || experience.position == "" ? '${experience.activity}' : '${experience.position}',
-                  style: textTheme.bodyText1
-                      ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                  style: textTheme.bodySmall
+                      ?.copyWith(fontSize: 14.0, fontWeight: FontWeight.normal)),
             if (experience.position != null || experience.activity != null) SpaceH8(),
             if (experience.organization != null && experience.organization != "") Column(
               children: [
                 Text(
                   experience.organization!,
-                  style: textTheme.bodyText1?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.normal,
                     fontSize: 14.0,
                   ),
                 ),
@@ -88,7 +98,7 @@ class ExperienceTile extends StatelessWidget {
             ),
             Text(
               '$startDate / $endDate',
-              style: textTheme.bodyText1?.copyWith(
+              style: textTheme.bodySmall?.copyWith(
                 fontSize: 14.0,
               ),
             ),
@@ -99,7 +109,7 @@ class ExperienceTile extends StatelessWidget {
                 children: [
                   Text(
                     experience.extraData!,
-                    style: textTheme.bodyText1?.copyWith(
+                    style: textTheme.bodySmall?.copyWith(
                       fontSize: 14.0,
                     ),
                     maxLines: 1,
@@ -111,7 +121,7 @@ class ExperienceTile extends StatelessWidget {
 
             Text(
               experience.location,
-              style: textTheme.bodyText1?.copyWith(
+              style: textTheme.bodySmall?.copyWith(
                 fontSize: 14.0,
               ),
             ),
