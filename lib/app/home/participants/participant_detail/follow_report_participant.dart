@@ -70,6 +70,13 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
+                      IconButton(
+                        onPressed: setStateMenuPage,
+                        icon: Icon(Icons.arrow_back_rounded),
+                        iconSize: 30,
+                        color: AppColors.turquoiseBlue,
+                      ),
+                      SpaceW8(),
                       CustomTextBoldTitle(
                           title: 'Informe de seguimiento'.toUpperCase()),
                     ],

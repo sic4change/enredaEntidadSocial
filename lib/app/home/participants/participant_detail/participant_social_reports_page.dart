@@ -6,6 +6,8 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/closure_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/follow_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/initial_report_participant.dart';
+import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_closure_follow_preview.dart';
+import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_follow_preview.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_report_preview.dart';
 import 'package:enreda_empresas/app/models/closureReport.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
@@ -33,7 +35,7 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:html' as html;
 
-enum SampleItem { itemOne, itemTwo, itemThree }
+enum SampleItem { itemOne, itemTwo, itemThree, itemFour }
 
 class ParticipantSocialReportPage extends StatefulWidget {
   ParticipantSocialReportPage({required this.participantUser, super.key, required this.context});
@@ -58,13 +60,6 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
     }else{
       currentPage = selectionPage();
     }
-    if(widget.participantUser.followReportId != null ){
-      totalReports++;
-    }
-    if(widget.participantUser.closureReportId != null ){
-      totalReports++;
-      print('total reports: $totalReports');
-    }
     super.initState();
   }
 
@@ -85,6 +80,13 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             user = snapshot.data!;
+            totalReports = 1;
+            if(user.followReportId != null ){
+              totalReports++;
+            }
+            if(user.closureReportId != null ){
+              totalReports++;
+            }
           }else{
             user = widget.participantUser;
           }
@@ -171,14 +173,38 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                                             setState(() {
                                               currentPage = FollowReportForm(user: widget.participantUser);
                                             });
-                                          }, (){}, followReportUser.finished ?? false),
+                                          },
+                                          () async {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      MyFollowReport(
+                                                        user: user,
+                                                        followReport: followReportUser,
+                                                      )
+                                              ),
+                                            );
+                                          }, followReportUser.finished ?? false),
 
                                         if(user.closureReportId != null)
                                           _documentTile(context, 'INFORME DE CIERRE', formatter.format(closureReportUser.completedDate ?? DateTime.now()), user.followReportId == null ? 1 : 2, (){
                                             setState(() {
                                               currentPage = ClosureReportForm(user: widget.participantUser);
                                             });
-                                          }, (){}, closureReportUser.finished ?? false),
+                                          },
+                                          () async {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      MyClosureReport(
+                                                        user: user,
+                                                        closureReport: closureReportUser,
+                                                      )
+                                              ),
+                                            );
+                                          }, closureReportUser.finished ?? false),
                                       ]
                                   )
                                 ]
@@ -376,6 +402,18 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                     ),
                     PopupMenuItem<SampleItem>(
                       value: SampleItem.itemThree,
+                      enabled: false,
+                      child: Text(
+                        'INFORME DE DERIVACIÓN',
+                        style: TextStyle(
+                          fontFamily: GoogleFonts.inter().fontFamily,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem<SampleItem>(
+                      value: SampleItem.itemFour,
                       child: Text(
                         'INFORME DE CIERRE',
                         style: TextStyle(

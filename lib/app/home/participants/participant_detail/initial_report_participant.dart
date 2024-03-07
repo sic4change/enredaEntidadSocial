@@ -69,31 +69,49 @@ class _InitialReportFormState extends State<InitialReportForm> {
                       horizontal: 50, vertical: 15.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      IconButton(
+                        onPressed: setStateMenuPage,
+                        icon: Icon(Icons.arrow_back_rounded),
+                        iconSize: 30,
+                        color: AppColors.turquoiseBlue,
+                      ),
+                      SpaceW8(),
                       CustomTextBoldTitle(
-                          title: 'Informe inicial'.toUpperCase()),
+                          title: 'Informe inicial'.toUpperCase()
+                      ),
                     ],
                   ),
                 ),
                 Divider(color: AppColors.greyBorder,),
-                StreamBuilder<InitialReport>(
-                    stream: database.initialReportsStreamByUserId(user.userId),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        InitialReport initialReportSaved = snapshot.data!;
-                        return completeInitialForm(context, initialReportSaved);
-                      }
-                      else {
-                        if (user.initialReportId == null) {
-                          database.addInitialReport(InitialReport(
-                            userId: user.userId,
-                          ));
-                        }
-                        return Container(
-                          height: 300,
-                        );
-                      }
+                StreamBuilder(
+                  stream: database.userEnredaStreamByUserId(user.userId),
+                  builder: (context, snapshotUser){
+                    UserEnreda userStream = user;
+                    if(snapshotUser.hasData){
+                      userStream = snapshotUser.data!;
                     }
+                  return StreamBuilder<InitialReport>(
+                      stream: database.initialReportsStreamByUserId(user.userId),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          InitialReport initialReportSaved = snapshot.data!;
+                          return completeInitialForm(context, initialReportSaved);
+                        }
+                        else {
+                          if (userStream.initialReportId == null) {
+                            database.addInitialReport(InitialReport(
+                              userId: user.userId,
+                            ));
+                          }
+                          return Container(
+                            height: 300,
+                          );
+                        }
+                      }
+                    );
+                  }
                 ),
               ]
           ),
