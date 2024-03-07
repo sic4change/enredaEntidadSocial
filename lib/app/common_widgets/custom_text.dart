@@ -170,7 +170,7 @@ class CustomTextMedium extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double fontSize = responsiveSize(context, 15, 18, md: 16);
+    double fontSize = responsiveSize(context, 15, 20, md: 16);
     TextTheme textTheme = Theme.of(context).textTheme;
     return Text(
       text,
@@ -190,7 +190,7 @@ class CustomTextMediumBold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double fontSize = responsiveSize(context, 15, 18, md: 16);
+    double fontSize = responsiveSize(context, 15, 20, md: 16);
     TextTheme textTheme = Theme.of(context).textTheme;
     return Text(
       text,

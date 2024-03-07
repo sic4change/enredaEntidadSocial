@@ -120,7 +120,7 @@ class AppTheme {
     bodyMedium: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_15,
       color: AppColors.black,
-      fontWeight: _light,
+      fontWeight: _regular,
       fontStyle: FontStyle.normal,
     ),
     labelLarge: GoogleFonts.outfit(
@@ -137,7 +137,7 @@ class AppTheme {
     ),
     bodySmall: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_12,
-      color: AppColors.primaryText1,
+      color: AppColors.chatDarkGray,
       fontWeight: _regular,
       fontStyle: FontStyle.normal,
     ),

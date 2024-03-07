@@ -66,9 +66,10 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          height: 50,
+                          height: 60,
                           child: Flex(
                             direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               InkWell(
                                   onTap: () => {
@@ -118,7 +119,7 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
                   ],
                 ),
                 Container(
-                    margin: Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 8) : EdgeInsets.only(top: Sizes.mainPadding * 5),
+                    margin: Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 9) : EdgeInsets.only(top: Sizes.mainPadding * 6),
                     child: bodyWidget[selectedIndex]),
               ],
             ),

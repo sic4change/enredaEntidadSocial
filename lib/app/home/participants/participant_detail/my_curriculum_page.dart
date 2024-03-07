@@ -466,7 +466,7 @@ class MyCurriculumPage extends StatelessWidget {
                   SpaceW4(),
                   Text(
                     user?.phone ?? '',
-                    style: textTheme.bodyText1?.copyWith(
+                    style: textTheme.bodySmall?.copyWith(
                         fontSize: Responsive.isDesktop(context) ? 16 : 14.0,
                         color: AppColors.darkGray),
                   ),
@@ -800,7 +800,7 @@ class MyCurriculumPage extends StatelessWidget {
       children: [
         Text(
           StringConst.PERSONAL_DATA.toUpperCase(),
-          style: textTheme.bodyText1?.copyWith(
+          style: textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w600,
             fontSize: Responsive.isDesktop(context) ? 18 : 14.0,
             color: AppColors.darkLilac,
@@ -818,7 +818,7 @@ class MyCurriculumPage extends StatelessWidget {
             Flexible(
               child: Text(
                 user?.email ?? '',
-                style: textTheme.bodyText1?.copyWith(
+                style: textTheme.bodySmall?.copyWith(
                     fontSize: Responsive.isDesktop(context) ? 14 : 11.0,
                     color: AppColors.darkGray),
               ),
@@ -836,7 +836,7 @@ class MyCurriculumPage extends StatelessWidget {
             SpaceW4(),
             Text(
               user?.phone ?? '',
-              style: textTheme.bodyText1?.copyWith(
+              style: textTheme.bodySmall?.copyWith(
                   fontSize: Responsive.isDesktop(context) ? 14 : 11.0,
                   color: AppColors.darkGray),
             ),
@@ -993,7 +993,7 @@ class MyCurriculumPage extends StatelessWidget {
                                                   .BADGE_VALIDATED
                                           ? 'EVALUADA'
                                           : 'CERTIFICADA',
-                                      style: textTheme.bodyText1
+                                      style: textTheme.bodySmall
                                           ?.copyWith(
                                           fontSize: 12.0,
                                           fontWeight: FontWeight.w500,
@@ -1030,7 +1030,7 @@ class MyCurriculumPage extends StatelessWidget {
                       child: Center(
                           child: Text(
                             'Aquí aparecerán las competencias evaluadas a través de los microtests',
-                            style: textTheme.bodyText1,
+                            style: textTheme.bodySmall,
                           )),
                     ),
               ],
@@ -1361,7 +1361,7 @@ class MyCurriculumPage extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       l.name,
-                                      style: textTheme.bodyText1?.copyWith(
+                                      style: textTheme.bodySmall?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14.0,
                                       ),
@@ -1466,7 +1466,7 @@ class MyCurriculumPage extends StatelessWidget {
         Expanded(
           child: Text(
             'Expresión escrita',
-            style: textTheme.bodyText1?.copyWith(
+            style: textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.normal,
               fontSize: 14.0,
             ),
@@ -1499,7 +1499,7 @@ class MyCurriculumPage extends StatelessWidget {
         Expanded(
           child: Text(
             'Expresión oral',
-            style: textTheme.bodyText1?.copyWith(
+            style: textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.normal,
               fontSize: 14.0,
             ),
