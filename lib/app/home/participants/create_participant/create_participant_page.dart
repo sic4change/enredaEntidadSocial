@@ -735,6 +735,10 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           assignedById: user.userId,
           assignedEntityId: selectedSocialEntity!.socialEntityId ?? null,
           nationality: selectedNationality,
+          gamificationFlags: {
+            UserEnreda.FLAG_SIGN_UP: true,
+            UserEnreda.FLAG_PILL_WHAT_IS_ENREDA: true,
+          },
       );
       try {
         final database = Provider.of<Database>(context, listen: false);

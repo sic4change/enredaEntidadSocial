@@ -434,7 +434,7 @@ class UserEnreda {
 
   static const String FLAG_SIGN_UP = "iIcnoLQfpVs7MmDzRGg7";
   static const String FLAG_PILL_WHAT_IS_ENREDA = "9tnftkYhk6xNUzokdi88";
-  static const String FLAG_PILL_TRAVEL_BEGINS = "X1Lzl17lvipjLRfXkXyB";
+  //static const String FLAG_PILL_TRAVEL_BEGINS = "X1Lzl17lvipjLRfXkXyB";
   static const String FLAG_PILL_COMPETENCIES = "08IEuCZq5ZpSihRHolTw";
   static const String FLAG_CHAT = "sfEkAorz3lEPflUwmfKv";
   static const String FLAG_EVALUATE_COMPETENCY = "7pFCCgX4X67ps2K3Mx0o";
@@ -448,5 +448,4 @@ class UserEnreda {
   static const String FLAG_CV_DATA_OF_INTEREST = "c6h0owyqz66P6MqbrSB6";
   static const String FLAG_CV_PHOTO = "fjr17WGx5vegzNHc9RWY";
   static const String FLAG_JOIN_RESOURCE = "oreFRQYdp5TNusvu3ubK";
-
 }
