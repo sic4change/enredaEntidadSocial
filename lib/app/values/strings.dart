@@ -515,7 +515,7 @@ class StringConst {
   static const String PARTICIPANTS = "Participantes inscritos";
   static const String MY_PARTICIPANTS = "Mis Participantes";
   static String allParticipants(String socialEntityName) => "Todos los participantes inscritos en $socialEntityName";
-  static const String WELCOME_COMPANY = "Bienvenida a Enreda Entidad";
+  static const String WELCOME_COMPANY = "Te damos la bienvenida a Enreda Entidad";
   static const String WELCOME_TEXT = "Esta es tu ventana de administración. \nSegún tu rol, puedes visualizar, editar y eliminar todos los recursos disponibles en esta web. Por favor, procede con precaución.";
   static const String RESOURCES_CREATED_BY = "Recursos creados";
 
