@@ -27,6 +27,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
@@ -469,16 +470,60 @@ class _PersonalDataState extends State<PersonalData> {
         });
   }
 
+  Future<XFile?> _cropImage({required XFile imageFile}) async {
+    CroppedFile? croppedImage = await ImageCropper().cropImage(
+        sourcePath: imageFile.path,
+        uiSettings: [
+          WebUiSettings(
+              context: context,
+              presentStyle: CropperPresentStyle.dialog,
+              boundary: const CroppieBoundary(
+                width: 400,
+                height: 400,
+              ),
+              viewPort:
+              const CroppieViewPort(width: 300, height: 300, type: 'circle',),
+              enableExif: true,
+              enableZoom: true,
+              showZoomer: true,
+              enableResize: false,
+              mouseWheelZoom: true,
+              translations: WebTranslations(
+                title: 'Recortar imagen',
+                rotateLeftTooltip: 'Rotar 90 grados a la izquierda',
+                rotateRightTooltip: 'Rotar 90 grados a la derecha',
+                cancelButton: 'Cancelar',
+                cropButton: 'Recortar',
+              )
+          ),
+          AndroidUiSettings(
+              toolbarTitle: 'Recortar imagen',
+              toolbarColor: AppColors.primaryColor,
+              toolbarWidgetColor: Colors.white,
+              activeControlsWidgetColor: AppColors.primaryColor,
+              initAspectRatio: CropAspectRatioPreset.original,
+              hideBottomControls: false,
+              lockAspectRatio: false),
+          IOSUiSettings(
+            title: 'Cropper',
+          ),
+        ]
+    );
+    if(croppedImage == null) return null;
+    return XFile(croppedImage.path);
+  }
+
   Future<void> _onImageButtonPressed(ImageSource source) async {
     try {
-      final XFile? pickedFile = await _imagePicker.pickImage(
+      XFile? pickedFile = await _imagePicker.pickImage(
         source: source,
       );
       if (pickedFile != null) {
+        pickedFile = await _cropImage(imageFile: pickedFile);
         setState(() async {
           final database = Provider.of<Database>(context, listen: false);
           await database.uploadUserAvatar(
-              _userId, await pickedFile.readAsBytes());
+              _userId, await pickedFile!.readAsBytes());
         });
       }
     } catch (e) {

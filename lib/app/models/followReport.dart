@@ -1,3 +1,5 @@
+import 'package:enreda_empresas/app/models/languageReport.dart';
+
 class FollowReport {
   FollowReport({
     this.followReportId,
@@ -11,14 +13,12 @@ class FollowReport {
     this.orientation1,
     this.arriveDate,
     this.receptionResources,
-    this.externalResources,
     this.administrativeSituation,
 
     //Section 2
     this.orientation2,
     this.expirationDate,
     this.healthCard,
-    this.disease,
     this.medication,
 
     //Section 2.1
@@ -34,72 +34,49 @@ class FollowReport {
     this.disabilityState,
     this.referenceProfessionalDisability,
     this.disabilityGrade,
+    this.granted,
+    this.revisionDate,
+    this.disabilityType,
 
     //Section 2.3
     this.orientation2_3,
     this.dependenceState,
     this.referenceProfessionalDependence,
-    this.homeAssistance,
-    this.teleassistance,
     this.dependenceGrade,
 
     //Section 2.4
     this.orientation2_4,
     this.externalDerivation,
-    this.consumptionLevel,
-    this.addictionTreatment,
 
     //Section 3
     this.orientation3,
-    this.openLegalProcess,
-    this.closeLegalProcess,
+    this.internalDerivationLegal,
+    this.externalDerivationLegal,
     this.legalRepresentation,
 
     //Section 4
     this.orientation4,
     this.ownershipType,
     this.location,
-    this.livingUnit,
     this.centerContact,
     this.hostingObservations,
 
     //Section 5
     this.orientation5,
     this.informationNetworks,
-
-    //Section 6
-    this.orientation6,
-    this.socialStructureKnowledge,
-    this.autonomyPhysicMental,
-    this.socialSkills,
+    this.institutionNetworks,
+    this.familyConciliation,
 
     //Section 7
     this.orientation7,
-    this.language,
-    this.languageLevel,
-
-    //Section 8
-    this.orientation8,
-    this.economicProgramHelp,
-    this.familySupport,
-    this.familyResponsibilities,
+    this.languages,
 
     //Section 9
     this.orientation9,
-    this.socialServiceAccess,
     this.centerTSReference,
     this.subsidyBeneficiary,
     this.socialServicesUser,
     this.socialExclusionCertificate,
-
-    //Section 10
-    this.orientation10,
-    this.digitalSkillsLevel,
-
-    //Section 11
-    this.orientation11,
-    this.laborMarkerInterest,
-    this.laborExpectations,
 
     //Section 12
     this.orientation12,
@@ -109,12 +86,16 @@ class FollowReport {
     this.orientation13,
     this.educationLevel,
     this.laborSituation,
-    this.laborExternalResources,
-    this.educationalEvaluation,
-    this.formativeItinerary,
-    this.laborInsertion,
-    this.accompanimentPostLabor,
-    this.laborUpgrade,
+    this.activeLabor,
+    this.occupiedLabor,
+    this.tempLabor,
+    this.workingDayLabor,
+    this.competencies,
+    this.contextualization,
+    this.connexion,
+    this.shortTerm,
+    this.mediumTerm,
+    this.longTerm,
 
 
   });
@@ -132,14 +113,12 @@ class FollowReport {
   final String? orientation1;
   final DateTime? arriveDate;
   final String? receptionResources;
-  final String? externalResources;
   final String? administrativeSituation;
 
   //Section 2
   final String? orientation2;
   final DateTime? expirationDate;
   final String? healthCard;
-  final String? disease;
   final String? medication;
 
   //Section 2.1
@@ -155,72 +134,49 @@ class FollowReport {
   final String? disabilityState;
   final String? referenceProfessionalDisability;
   final String? disabilityGrade;
+  final String? granted;
+  final DateTime? revisionDate;
+  final String? disabilityType;
 
   //Section 2.3
   final String? orientation2_3;
   final String? dependenceState;
   final String? referenceProfessionalDependence;
-  final String? homeAssistance;
-  final String? teleassistance;
   final String? dependenceGrade;
 
   //Section 2.4
   final String? orientation2_4;
   final String? externalDerivation;
-  final String? consumptionLevel;
-  final String? addictionTreatment;
 
   //Section 3
   final String? orientation3;
-  final String? openLegalProcess;
-  final String? closeLegalProcess;
+  final String? internalDerivationLegal;
+  final String? externalDerivationLegal;
   final String? legalRepresentation;
 
   //Section 4
   final String? orientation4;
   final String? ownershipType;
   final String? location;
-  final String? livingUnit;
   final String? centerContact;
   final List<String>? hostingObservations;
 
   //Section 5
   final String? orientation5;
   final String? informationNetworks;
-
-  //Section 6
-  final String? orientation6;
-  final String? socialStructureKnowledge;
-  final String? autonomyPhysicMental;
-  final String? socialSkills;
+  final String? institutionNetworks;
+  final String? familyConciliation;
 
   //Section 7
   final String? orientation7;
-  final String? language;
-  final String? languageLevel;
-
-  //Section 8
-  final String? orientation8;
-  final String? economicProgramHelp;
-  final String? familySupport;
-  final String? familyResponsibilities;
+  final List<LanguageReport>? languages;
 
   //Section 9
   final String? orientation9;
-  final String? socialServiceAccess;
   final String? centerTSReference;
   final String? subsidyBeneficiary;
   final String? socialServicesUser;
   final String? socialExclusionCertificate;
-
-  //Section 10
-  final String? orientation10;
-  final String? digitalSkillsLevel;
-
-  //Section 11
-  final String? orientation11;
-  final String? laborMarkerInterest;
-  final String? laborExpectations;
 
   //Section 12
   final String? orientation12;
@@ -230,12 +186,17 @@ class FollowReport {
   final String? orientation13;
   final String? educationLevel;
   final String? laborSituation;
-  final String? laborExternalResources;
-  final String? educationalEvaluation;
-  final String? formativeItinerary;
-  final String? laborInsertion;
-  final String? accompanimentPostLabor;
-  final String? laborUpgrade;
+  final String? activeLabor;
+  final String? occupiedLabor;
+  final String? tempLabor;
+  final String? workingDayLabor;
+  final String? competencies;
+  final String? contextualization;
+  final String? connexion;
+  final String? shortTerm;
+  final String? mediumTerm;
+  final String? longTerm;
+
 
 
 
@@ -256,9 +217,22 @@ class FollowReport {
       });
     }
 
+    List<LanguageReport> languages = [];
+    if (data['languages'] != null) {
+      data['languages'].forEach((language) {
+        final languagesFirestore = language as Map<String, dynamic>;
+        languages.add(
+            LanguageReport(
+              name: languagesFirestore['name'] ?? '',
+              level: languagesFirestore['level'] ?? '',
+            )
+        );
+      });
+    }
+
     return FollowReport(
 
-        //Basic
+      //Basic
       followReportId: data['followReportId'],
       userId: data['userId'],
       finished: data['finished'],
@@ -271,14 +245,12 @@ class FollowReport {
       orientation1: data['orientation1'],
       arriveDate: data['arriveDate'] != null ? data['arriveDate'].toDate() : null,
       receptionResources: data['receptionResources'],
-      externalResources: data['externalResources'],
       administrativeSituation: data['administrativeSituation'],
 
       //Section 2
       orientation2: data['orientation2'],
       expirationDate: data['expirationDate'] != null ? data['expirationDate'].toDate() : null,
       healthCard: data['healthCard'],
-      disease: data['disease'],
       medication: data['medication'],
 
       //Section 2.1
@@ -294,32 +266,30 @@ class FollowReport {
       disabilityState: data['disabilityState'],
       referenceProfessionalDisability: data['referenceProfessionalDisability'],
       disabilityGrade: data['disabilityGrade'],
+      granted: data['granted'],
+      revisionDate: data['revisionDate'] != null ? data['revisionDate'].toDate() : null,
+      disabilityType: data['disabilityType'],
 
       //Section 2.3
       orientation2_3: data['orientation2_3'],
       dependenceState: data['dependenceState'],
       referenceProfessionalDependence: data['referenceProfessionalDependence'],
-      homeAssistance: data['homeAssistance'],
-      teleassistance: data['teleassistance'],
       dependenceGrade: data['dependenceGrade'],
 
       //Section 2.4
       orientation2_4: data['orientation2_4'],
       externalDerivation: data['externalDerivation'],
-      consumptionLevel: data['consumptionLevel'],
-      addictionTreatment: data['addictionTreatment'],
 
       //Section 3
       orientation3: data['orientation3'],
-      openLegalProcess: data['openLegalProcess'],
-      closeLegalProcess: data['closeLegalProcess'],
+      internalDerivationLegal: data['internalDerivationLegal'],
+      externalDerivationLegal: data['externalDerivationLegal'],
       legalRepresentation: data['legalRepresentation'],
 
       //Section 4
       orientation4: data['orientation4'],
       ownershipType: data['ownershipType'],
       location: data['location'],
-      livingUnit: data['livingUnit'],
       centerContact: data['centerContact'],
       hostingObservations: hostingObservations,
 
@@ -327,40 +297,19 @@ class FollowReport {
       //Section 5
       orientation5: data['orientation5'],
       informationNetworks: data['informationNetworks'],
-
-      //Section 6
-      orientation6: data['orientation6'],
-      socialStructureKnowledge: data['socialStructureKnowledge'],
-      autonomyPhysicMental: data['autonomyPhysicMental'],
-      socialSkills: data['socialSkills'],
+      institutionNetworks: data['institutionNetworks'],
+      familyConciliation: data['familyConciliation'],
 
       //Section 7
       orientation7: data['orientation7'],
-      language: data['language'],
-      languageLevel: data['languageLevel'],
-
-      //Section 8
-      orientation8: data['orientation8'],
-      economicProgramHelp: data['economicProgramHelp'],
-      familySupport: data['familySupport'],
-      familyResponsibilities: data['familyResponsibilities'],
+      languages: languages,
 
       //Section 9
       orientation9: data['orientation9'],
-      socialServiceAccess: data['socialServiceAccess'],
       centerTSReference: data['centerTSReference'],
       subsidyBeneficiary: data['subsidyBeneficiary'],
       socialServicesUser: data['socialServicesUser'],
       socialExclusionCertificate: data['socialExclusionCertificate'],
-
-      //Section 10
-      orientation10: data['orientation10'],
-      digitalSkillsLevel: data['digitalSkillsLevel'],
-
-      //Section 11
-      orientation11: data['orientation11'],
-      laborMarkerInterest: data['laborMarkerInterest'],
-      laborExpectations: data['laborExpectations'],
 
       //Section 12
       orientation12: data['orientation12'],
@@ -370,12 +319,16 @@ class FollowReport {
       orientation13: data['orientation13'],
       educationLevel: data['educationLevel'],
       laborSituation: data['laborSituation'],
-      laborExternalResources: data['laborExternalResources'],
-      educationalEvaluation: data['educationalEvaluation'],
-      formativeItinerary: data['formativeItinerary'],
-      laborInsertion: data['laborInsertion'],
-      accompanimentPostLabor: data['accompanimentPostLabor'],
-      laborUpgrade: data['laborUpgrade'],
+      activeLabor: data['activeLabor'],
+      occupiedLabor: data['occupiedLabor'],
+      tempLabor: data['tempLabor'],
+      workingDayLabor: data['workingDayLabor'],
+      competencies: data['competencies'],
+      contextualization: data['contextualization'],
+      connexion: data['connexion'],
+      shortTerm: data['shortTerm'],
+      mediumTerm: data['mediumTerm'],
+      longTerm: data['longTerm'],
     );
   }
 
@@ -402,14 +355,12 @@ class FollowReport {
       'orientation1': orientation1,
       'arriveDate': arriveDate,
       'receptionResources': receptionResources,
-      'externalResources': externalResources,
       'administrativeSituation': administrativeSituation,
 
       //Section 2
       'orientation2': administrativeSituation,
       'expirationDate': expirationDate,
       'healthCard': healthCard,
-      'disease': disease,
       'medication': medication,
 
       //Section 2.1
@@ -425,32 +376,30 @@ class FollowReport {
       'disabilityState': disabilityState,
       'referenceProfessionalDisability': referenceProfessionalDisability,
       'disabilityGrade': disabilityGrade,
+      'granted': granted,
+      'revisionDate': revisionDate,
+      'disabilityType': disabilityType,
 
       //Section 2.3
       'orientation2_3': orientation2_3,
       'dependenceState': dependenceState,
       'referenceProfessionalDependence': referenceProfessionalDependence,
-      'homeAssistance': homeAssistance,
-      'teleassistance': teleassistance,
       'dependenceGrade': dependenceGrade,
 
       //Section 2.4
       'orientation2_4': orientation2_4,
       'externalDerivation': externalDerivation,
-      'consumptionLevel': consumptionLevel,
-      'addictionTreatment': addictionTreatment,
 
       //Section 3
       'orientation3': orientation3,
-      'openLegalProcess': openLegalProcess,
-      'closeLegalProcess': closeLegalProcess,
+      'internalDerivationLegal': internalDerivationLegal,
+      'externalDerivationLegal': externalDerivationLegal,
       'legalRepresentation': legalRepresentation,
 
       //Section 4
       'orientation4': orientation4,
       'ownershipType': ownershipType,
       'location': location,
-      'livingUnit': livingUnit,
       'centerContact': centerContact,
       'hostingObservations': hostingObservations,
 
@@ -458,40 +407,20 @@ class FollowReport {
       //Section 5
       'orientation5': orientation5,
       'informationNetworks': informationNetworks,
+      'institutionNetworks': institutionNetworks,
+      'familyConciliation': familyConciliation,
 
-      //Section 6
-      'orientation6': orientation6,
-      'socialStructureKnowledge': socialStructureKnowledge,
-      'autonomyPhysicMental': autonomyPhysicMental,
-      'socialSkills': socialSkills,
 
       //Section 7
       'orientation7': orientation7,
-      'language': language,
-      'languageLevel': languageLevel,
-
-      //Section 8
-      'orientation8': orientation8,
-      'economicProgramHelp': economicProgramHelp,
-      'familySupport': familySupport,
-      'familyResponsibilities': familyResponsibilities,
+      'languages': languages != null ? languages!.map((e) => e.toMap()).toList() : [],
 
       //Section 9
       'orientation9': orientation9,
-      'socialServiceAccess': socialServiceAccess,
       'centerTSReference': centerTSReference,
       'subsidyBeneficiary': subsidyBeneficiary,
       'socialServicesUser': socialServicesUser,
       'socialExclusionCertificate': socialExclusionCertificate,
-
-      //Section 10
-      'orientation10': orientation10,
-      'digitalSkillsLevel': digitalSkillsLevel,
-
-      //Section 11
-      'orientation11': orientation11,
-      'laborMarkerInterest': laborMarkerInterest,
-      'laborExpectations': laborExpectations,
 
       //Section 12
       'orientation12': orientation12,
@@ -501,12 +430,16 @@ class FollowReport {
       'orientation13': orientation13,
       'educationLevel': educationLevel,
       'laborSituation': laborSituation,
-      'laborExternalResources': laborExternalResources,
-      'educationalEvaluation': educationalEvaluation,
-      'formativeItinerary': formativeItinerary,
-      'laborInsertion': laborInsertion,
-      'accompanimentPostLabor': accompanimentPostLabor,
-      'laborUpgrade': laborUpgrade,
+      'activeLabor': activeLabor,
+      'occupiedLabor': occupiedLabor,
+      'tempLabor': tempLabor,
+      'workingDayLabor': workingDayLabor,
+      'competencies': competencies,
+      'contextualization': contextualization,
+      'connexion': connexion,
+      'shortTerm': shortTerm,
+      'mediumTerm': mediumTerm,
+      'longTerm': longTerm,
 
     };
   }

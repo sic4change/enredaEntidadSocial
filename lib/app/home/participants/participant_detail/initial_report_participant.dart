@@ -10,6 +10,7 @@ import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
+import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -31,6 +32,12 @@ class InitialReportForm extends StatefulWidget {
 class _InitialReportFormState extends State<InitialReportForm> {
 
   late Widget currentPage;
+  late String? _disabilityState = '';
+  late String? _granted = '';
+  late List<LanguageReport>? _languages = null;
+  late String? _laborSituation = '';
+  late String? _activeLabor = '';
+  late String? _occupiedLabor = '';
 
   @override
   void initState() {
@@ -47,6 +54,56 @@ class _InitialReportFormState extends State<InitialReportForm> {
     setState(() {
       currentPage = ParticipantSocialReportPage(
           participantUser: widget.user, context: context);
+    });
+  }
+
+  void setStateGranted(String value){
+    setState(() {
+      //To refresh the page
+      currentPage = initialReport(context, widget.user);
+      _disabilityState = value;
+    });
+  }
+
+  void setStateDefinitive(String value){
+    setState(() {
+      //To refresh the page
+      currentPage = initialReport(context, widget.user);
+      _granted = value;
+    });
+  }
+
+  void setStateAddLanguage(List<LanguageReport> value){
+    setState(() {
+      //To refresh the page
+      currentPage = initialReport(context, widget.user);
+      List<LanguageReport> addition = value;
+      addition.add(LanguageReport(name: '', level: ''));
+      _languages = addition;
+    });
+  }
+
+  void setStateLaborSituation(String value){
+    setState(() {
+      //To refresh the page
+      currentPage = initialReport(context, widget.user);
+      _laborSituation = value;
+    });
+  }
+
+  void setStateActiveLabor(String value){
+    setState(() {
+      //To refresh the page
+      currentPage = initialReport(context, widget.user);
+      _activeLabor = value;
+    });
+  }
+
+  void setStateOccupiedLabor(String value){
+    setState(() {
+      //To refresh the page
+      currentPage = initialReport(context, widget.user);
+      _occupiedLabor = value;
     });
   }
 
@@ -221,6 +278,31 @@ class _InitialReportFormState extends State<InitialReportForm> {
     );
   }
 
+  Widget addLanguageButton(){
+    return InkWell(
+      child: Row(
+        children: [
+          Icon(
+            Icons.add_circle_outline,
+            color: AppColors.turquoiseBlue,
+          ),
+          SpaceW8(),
+          Text(
+            'Añadir idioma',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: AppColors.turquoiseBlue,
+            ),
+          ),
+        ],
+      ),
+      onTap: (){
+        setStateAddLanguage(_languages!);
+      }
+    );
+  }
+
   Widget completeInitialForm(BuildContext context, InitialReport report) {
     final database = Provider.of<Database>(context, listen: false);
     final _formKey = GlobalKey<FormState>();
@@ -236,12 +318,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
     }).toList();
 
     List<DropdownMenuItem<String>> _subsidySelection = [
-      'xxxxxx1',
-      'xxxxxx2',
-      'xxxxxx3',
-      'xxxxxx4',
-      'xxxxxx5',
-      'xxxxxx6'
+      '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS',
+      '529775_SICFCH - Acompañamiento, tecnología y colaboración: 3 claves en el camino hacia el empleo joven',
     ].map<DropdownMenuItem<String>>((String value) {
       return DropdownMenuItem<String>(
         value: value,
@@ -256,7 +334,6 @@ class _InitialReportFormState extends State<InitialReportForm> {
     String _orientation1 = report.orientation1 ?? '';
     DateTime? _arriveDate = report.arriveDate;
     String _receptionResources = report.receptionResources ?? '';
-    String _externalResources = report.externalResources ?? '';
     String _administrativeSituation = report.administrativeSituation ?? '';
 
     List<DropdownMenuItem<String>> _arriveTypeSelection = ['Segura', 'Insegura']
@@ -271,7 +348,6 @@ class _InitialReportFormState extends State<InitialReportForm> {
     DateTime? _expirationDate = report.expirationDate;
     String? _orientation2 = report.orientation2 ?? '';
     String? _healthCard = report.healthCard ?? '';
-    String? _disease = report.disease ?? '';
     String? _medication = report.medication ?? '';
     List<DropdownMenuItem<String>> _healthCardSelection = [
       'Si',
@@ -294,11 +370,20 @@ class _InitialReportFormState extends State<InitialReportForm> {
 
     //Subsection 2.2
     String? _orientation2_2 = report.orientation2_2 ?? '';
-    String? _disabilityState = report.disabilityState ?? '';
-    String? _referenceProfessionalDisability = report
-        .referenceProfessionalDisability ?? '';
+    _disabilityState == '' ? _disabilityState = report.disabilityState : _disabilityState = _disabilityState;
+    String? _referenceProfessionalDisability = report.referenceProfessionalDisability ?? '';
     String? _disabilityGrade = report.disabilityGrade ?? '';
-    List<DropdownMenuItem<String>> _stateSelection = ['En trámite', 'Concedida']
+    _granted == '' ? _granted = report.granted : _granted = _granted;
+    DateTime? _revisionDate = report.revisionDate;
+    String? _disabilityType = report.disabilityType ?? '';
+    List<DropdownMenuItem<String>> _stateSelection = ['En trámite', 'Concedida', 'No aplica']
+        .map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+    List<DropdownMenuItem<String>> _grantedSelection = ['Revisable', 'Definitiva']
         .map<DropdownMenuItem<String>>((String value) {
       return DropdownMenuItem<String>(
         value: value,
@@ -317,16 +402,22 @@ class _InitialReportFormState extends State<InitialReportForm> {
         child: Text(value),
       );
     }).toList();
+    List<DropdownMenuItem<String>> _disabilityTypeSelection = [
+      'Sensorial', 'Intelectual', 'Psíquica'
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
 
     //Subsection 2.3
     String? _orientation2_3 = report.orientation2_3 ?? '';
     String? _dependenceState = report.dependenceState ?? '';
     String? _referenceProfessionalDependence = report
         .referenceProfessionalDependence ?? '';
-    String? _homeAssistance = report.homeAssistance ?? '';
-    String? _teleassistance = report.teleassistance ?? '';
     String? _dependenceGrade = report.dependenceGrade ?? '';
-    List<DropdownMenuItem<String>> _dependencyGradeSelection = ['1', '2', '3']
+    List<DropdownMenuItem<String>> _dependencyGradeSelection = ['I', 'II', 'III']
         .map<DropdownMenuItem<String>>((String value) {
       return DropdownMenuItem<String>(
         value: value,
@@ -337,25 +428,29 @@ class _InitialReportFormState extends State<InitialReportForm> {
     //Subsection 2.4
     String? _orientation2_4 = report.orientation2_4 ?? '';
     String? _externalDerivation = report.externalDerivation ?? '';
-    String? _consumptionLevel = report.consumptionLevel ?? '';
-    String? _addictionTreatment = report.addictionTreatment ?? '';
 
     //Section 3
     String? _orientation3 = report.orientation3 ?? '';
-    String? _openLegalProcess = report.openLegalProcess ?? '';
-    String? _closeLegalProcess = report.closeLegalProcess ?? '';
+    String? _internalDerivationLegal = report.internalDerivationLegal ?? '';
+    String? _externalDerivationLegal = report.externalDerivationLegal ?? '';
     String? _legalRepresentation = report.legalRepresentation ?? '';
 
     //Section 4
     String? _orientation4 = report.orientation4 ?? '';
     String? _ownershipType = report.ownershipType ?? '';
     String? _location = report.location ?? '';
-    String? _livingUnit = report.livingUnit ?? '';
     String? _centerContact = report.centerContact ?? '';
     List<String>? _hostingObservations = report.hostingObservations ?? [];
 
+    List<DropdownMenuItem<String>> _ownershipTypeSelection = ['Hogar', 'Sin hogar']
+        .map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+
     const List<String> _optionsSectionFour = [
-      'Habitabilidad',
       'Luz',
       'Gas',
       'Hacinamiento',
@@ -369,52 +464,20 @@ class _InitialReportFormState extends State<InitialReportForm> {
     //Section 5
     String? _orientation5 = report.orientation5 ?? '';
     String? _informationNetworks = report.informationNetworks ?? '';
-
-    //Section 6
-    String? _orientation6 = report.orientation6 ?? '';
-    String? _socialStructureKnowledge = report.socialStructureKnowledge ?? '';
-    String? _autonomyPhysicMental = report.autonomyPhysicMental ?? '';
-    String? _socialSkills = report.socialSkills ?? '';
+    String? _institutionNetworks = report.institutionNetworks ?? '';
+    String? _familyConciliation = report.familyConciliation ?? '';
 
     //Section 7
     String? _orientation7 = report.orientation7 ?? '';
-    String? _language = report.language ?? '';
-    String? _languageLevel = report.languageLevel ?? '';
-
-    //Section 8
-    String? _orientation8 = report.orientation8 ?? '';
-    String? _economicProgramHelp = report.economicProgramHelp ?? '';
-    String? _familySupport = report.familySupport ?? '';
-    String? _familyResponsibilities = report.familyResponsibilities ?? '';
+    _languages == null ? _languages = report.languages : _languages = _languages;
 
     //Section 9
     String? _orientation9 = report.orientation9 ?? '';
-    String? _socialServiceAccess = report.socialServiceAccess ?? '';
     String? _centerTSReference = report.centerTSReference ?? '';
     String? _subsidyBeneficiary = report.subsidyBeneficiary ?? '';
     String? _socialServicesUser = report.socialServicesUser ?? '';
     String? _socialExclusionCertificate = report.socialExclusionCertificate ??
         '';
-
-    //Section 10
-    String? _orientation10 = report.orientation10 ?? '';
-    String? _digitalSkillsLevel = report.digitalSkillsLevel ?? '';
-
-    List<DropdownMenuItem<String>> _digitalSkillsSelection = [
-      'Bajo',
-      'Medio',
-      'Alto'
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
-    //Section 11
-    String? _orientation11 = report.orientation11 ?? '';
-    String? _laborMarkerInterest = report.laborMarkerInterest ?? '';
-    String? _laborExpectations = report.laborExpectations ?? '';
 
     //Section 12
     String? _orientation12 = report.orientation12 ?? '';
@@ -438,13 +501,17 @@ class _InitialReportFormState extends State<InitialReportForm> {
     //Section 13
     String? _orientation13 = report.orientation13 ?? '';
     String? _educationLevel = report.educationLevel ?? '';
-    String? _laborSituation = report.laborSituation ?? '';
-    String? _laborExternalResources = report.laborExternalResources ?? '';
-    String? _educationalEvaluation = report.educationalEvaluation ?? '';
-    String? _formativeItinerary = report.formativeItinerary ?? '';
-    String? _laborInsertion = report.laborInsertion ?? '';
-    String? _accompanimentPostLabor = report.accompanimentPostLabor ?? '';
-    String? _laborUpgrade = report.laborUpgrade ?? '';
+    _laborSituation == '' ? _laborSituation = report.laborSituation : _laborSituation = _laborSituation;
+    _activeLabor == '' ? _activeLabor = report.activeLabor : _activeLabor = _activeLabor;
+    _occupiedLabor == '' ? _occupiedLabor = report.occupiedLabor : _occupiedLabor = _occupiedLabor;
+    String? _tempLabor = report.tempLabor ?? '';
+    String? _workingDayLabor = report.workingDayLabor ?? '';
+    String? _competencies = report.competencies ?? '';
+    String? _contextualization = report.contextualization ?? '';
+    String? _connexion = report.connexion ?? '';
+    String? _shortTerm = report.shortTerm ?? '';
+    String? _mediumTerm = report.mediumTerm ?? '';
+    String? _longTerm = report.longTerm ?? '';
 
     List<DropdownMenuItem<String>> _educationalLevelSelection = [
       '1er ciclo 2ria (Max CINE 0-2)',
@@ -458,11 +525,50 @@ class _InitialReportFormState extends State<InitialReportForm> {
     }).toList();
 
     List<DropdownMenuItem<String>> _laborSituationSelection = [
+      'Activa',
       'Inactiva',
-      'Ocupada (por cuenta propia)',
-      'Ocupada (por cuenta ajena)',
-      'Desempleada (menos de 12 meses)',
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+
+    List<DropdownMenuItem<String>> _activeSelection = [
+      'Ocupada',
       'Desempleada de larga duración (12 meses o más)',
+      'Desempleada (menos de 12 meses)'
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+
+    List<DropdownMenuItem<String>> _occupiedSelection = [
+      'Cuenta propia',
+      'Cuenta ajena',
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+
+    List<DropdownMenuItem<String>> _tempSelection = [
+      'Contrato indefinido',
+      'Contrato temporal',
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+
+    List<DropdownMenuItem<String>> _workDaySelection = [
+      'Completa',
+      'Parcial/Voluntaria',
+      'Parcial/Involuntaria'
     ].map<DropdownMenuItem<String>>((String value) {
       return DropdownMenuItem<String>(
         value: value,
@@ -545,35 +651,18 @@ class _InitialReportFormState extends State<InitialReportForm> {
               ),
             ),
             SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Recursos externos de apoyo',
-                initialValue: _externalResources,
-                onChanged: (value) {
-                  _externalResources = value ?? '';
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Situación administrativa',
-                hintText: 'Ley de asilo, arraigo, ex-menor tutelado...',
-                initialValue: _administrativeSituation,
-                onChanged: (value) {
-                  _administrativeSituation = value ?? '';
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
+            CustomTextFormFieldTitle(
+              labelText: 'Situación administrativa',
+              hintText: 'Ley de asilo, arraigo, ex-menor tutelado...',
+              initialValue: _administrativeSituation,
+              onChanged: (value) {
+                _administrativeSituation = value ?? '';
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
             ),
 
             //Section 2
@@ -627,35 +716,18 @@ class _InitialReportFormState extends State<InitialReportForm> {
               ),
             ),
             SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Enfermedad',
-                initialValue: _disease,
-                onChanged: (value) {
-                  _disease = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Medicación/Tratamiento',
-                initialValue: _medication,
-                onChanged: (value) {
-                  _medication = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
+            CustomTextFormFieldTitle(
+              labelText: 'Medicación/Tratamiento',
+              initialValue: _medication,
+              onChanged: (value) {
+                _medication = value;
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
             ),
-
             //Subsection 2.1
             informSubSectionTitle('2.1 Salud mental'),
             CustomTextFormFieldTitle(
@@ -773,15 +845,12 @@ class _InitialReportFormState extends State<InitialReportForm> {
               enabled: !_finished,
             ),
             SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: _disabilityState == ''
+            _disabilityState == ''
                   ? CustomDropDownButtonFormFieldTittle(
                 labelText: 'Estado',
                 source: _stateSelection,
                 onChanged: _finished ? null : (value) {
-                  _disabilityState = value;
+                  setStateGranted(value!);
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
@@ -792,12 +861,63 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 source: _stateSelection,
                 value: _disabilityState,
                 onChanged: _finished ? null : (value) {
-                  _disabilityState = value;
+                  setStateGranted(value!);
+                  if(value != 'Concedida'){
+                    _granted = '';
+                    _revisionDate = null;
+                  }
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomTextFormFieldTitle(
+            SpaceH12(),
+
+            _disabilityState == 'Concedida'
+                ? CustomFlexRowColumn(
+                  contentPadding: EdgeInsets.zero,
+                  separatorSize: 20,
+
+                  //Granted selection
+                  childLeft: _granted == ''
+                      ? CustomDropDownButtonFormFieldTittle(
+                    labelText: 'Concedida',
+                    source: _grantedSelection,
+                    onChanged: _finished ? null : (value) {
+                      setStateDefinitive(value!);
+                    },
+                    validator: (value) =>
+                    value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  )
+                      :
+                  CustomDropDownButtonFormFieldTittle(
+                    labelText: 'Concedida',
+                    source: _grantedSelection,
+                    value: _granted,
+                    onChanged: _finished ? null : (value) {
+                      setStateDefinitive(value!);
+                    },
+                    validator: (value) =>
+                    value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+
+                  //Date selection if revisable
+                  childRight: _granted == 'Revisable' ?
+                    CustomDatePickerTitle(
+                      labelText: 'Fecha',
+                      initialValue: _revisionDate,
+                      onChanged: (value) {
+                        _revisionDate = value;
+                      },
+                      enabled: !_finished,
+                      validator: (value) =>
+                      (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                    ) : Container(),
+            ) :
+                Container(),
+
+            _disabilityState == 'Concedida' ? SpaceH12() : Container(),
+
+            CustomTextFormFieldTitle(
                 labelText: 'Profesional de referencia',
                 initialValue: _referenceProfessionalDisability,
                 onChanged: (value) {
@@ -809,26 +929,51 @@ class _InitialReportFormState extends State<InitialReportForm> {
                     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
-            ),
+
             SpaceH12(),
-            _disabilityGrade == '' ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Grado de discapacidad',
-              source: _disabilityGradeSelection,
-              onChanged: _finished ? null : (value) {
-                _disabilityGrade = value;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ) :
-            CustomDropDownButtonFormFieldTittle(
-              labelText: 'Grado de discapacidad',
-              source: _disabilityGradeSelection,
-              value: _disabilityGrade,
-              onChanged: _finished ? null : (value) {
-                _disabilityGrade = value;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _disabilityGrade == '' ?
+                CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Grado de discapacidad',
+                  source: _disabilityGradeSelection,
+                  onChanged: _finished ? null : (value) {
+                    _disabilityGrade = value;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ) :
+                CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Grado de discapacidad',
+                  source: _disabilityGradeSelection,
+                  value: _disabilityGrade,
+                  onChanged: _finished ? null : (value) {
+                    _disabilityGrade = value;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
+              childRight: _disabilityType == '' ?
+                CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Tipo de discapacidad',
+                  source: _disabilityTypeSelection,
+                  onChanged: _finished ? null : (value) {
+                    _disabilityType = value;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ) :
+                CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Tipo de discapacidad',
+                  source: _disabilityTypeSelection,
+                  value: _disabilityType,
+                  onChanged: _finished ? null : (value) {
+                    _disabilityType = value;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
             ),
 
             //Subsection 2.3
@@ -884,35 +1029,6 @@ class _InitialReportFormState extends State<InitialReportForm> {
               ),
             ),
             SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Servicio de ayuda a domicilio',
-                initialValue: _homeAssistance,
-                onChanged: (value) {
-                  _homeAssistance = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Teleasistencia',
-                initialValue: _teleassistance,
-                onChanged: (value) {
-                  _teleassistance = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-            ),
-            SpaceH12(),
             _dependenceGrade == '' ? CustomDropDownButtonFormFieldTittle(
               labelText: 'Grado de dependencia',
               source: _dependencyGradeSelection,
@@ -948,40 +1064,11 @@ class _InitialReportFormState extends State<InitialReportForm> {
               enabled: !_finished,
             ),
             SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Derivación externa',
-                initialValue: _externalDerivation,
-                onChanged: (value) {
-                  _externalDerivation = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Nivel de consumo',
-                initialValue: _consumptionLevel,
-                onChanged: (value) {
-                  _consumptionLevel = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-            ),
-            SpaceH12(),
             CustomTextFormFieldTitle(
-              labelText: 'Tratamiento',
-              initialValue: _addictionTreatment,
+              labelText: 'Derivación externa',
+              initialValue: _externalDerivation,
               onChanged: (value) {
-                _addictionTreatment = value;
+                _externalDerivation = value;
               },
               validator: (value) =>
               (value!.isNotEmpty || value != '')
@@ -1008,23 +1095,32 @@ class _InitialReportFormState extends State<InitialReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Procesos legales abiertos',
-                initialValue: _openLegalProcess,
-                onChanged: (value) {
-                  _openLegalProcess = value;
+              childLeft: _internalDerivationLegal == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: 'Derivación interna',
+                source: _yesNoSelection,
+                onChanged: _finished ? null : (value) {
+                  _internalDerivationLegal = value;
                 },
                 validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  :
+                CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Derivación interna',
+                  source: _yesNoSelection,
+                  value: _internalDerivationLegal,
+                  onChanged: _finished ? null : (value) {
+                    _internalDerivationLegal = value;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
               childRight: CustomTextFormFieldTitle(
-                labelText: 'Procesos legales cerrados',
-                initialValue: _closeLegalProcess,
+                labelText: 'Derivación externa',
+                initialValue: _externalDerivationLegal,
                 onChanged: (value) {
-                  _closeLegalProcess = value;
+                  _externalDerivationLegal = value;
                 },
                 validator: (value) =>
                 (value!.isNotEmpty || value != '')
@@ -1066,21 +1162,29 @@ class _InitialReportFormState extends State<InitialReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
+              childLeft: _ownershipType == ''
+                  ? CustomDropDownButtonFormFieldTittle(
                 labelText: 'Tipo de tenencia',
-                hintText: 'Alquiler, ocupación, compra, etc',
-                initialValue: _ownershipType,
-                onChanged: (value) {
+                source: _ownershipTypeSelection,
+                onChanged: _finished ? null : (value) {
                   _ownershipType = value;
                 },
                 validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  :
+              CustomDropDownButtonFormFieldTittle(
+                labelText: 'Tipo de tenencia',
+                source: _ownershipTypeSelection,
+                value: _ownershipType,
+                onChanged: _finished ? null : (value) {
+                  _ownershipType = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomTextFormFieldTitle(
-                labelText: 'Ubicación',
+                labelText: 'Ubicación actual de la persona',
                 initialValue: _location,
                 onChanged: (value) {
                   _location = value;
@@ -1093,34 +1197,17 @@ class _InitialReportFormState extends State<InitialReportForm> {
               ),
             ),
             SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Unidad de convivencia',
-                hintText: 'Parentesco y relación de convivencia',
-                initialValue: _livingUnit,
-                onChanged: (value) {
-                  _livingUnit = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Datos de contacto del centro y persona de referencia',
-                initialValue: _centerContact,
-                onChanged: (value) {
-                  _centerContact = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
+            CustomTextFormFieldTitle(
+              labelText: 'Datos de contacto del centro y persona de referencia',
+              initialValue: _centerContact,
+              onChanged: (value) {
+                _centerContact = value;
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
             ),
             SpaceH12(),
             Align(
@@ -1146,7 +1233,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             ),
             SpaceH12(),
             CustomTextFormFieldTitle(
-              labelText: 'Redes informales',
+              labelText: 'Redes de apoyo personales y familiares',
               initialValue: _informationNetworks,
               hintText: 'Asociación vecinal, grupo de facebook, whatsap, etc',
               onChanged: (value) {
@@ -1158,44 +1245,15 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
-
-            //Section 6
-            informSectionTitle('6. Situación social integral'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation6,
-              onChanged: (value) {
-                _orientation6 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Conocimiento de la estructura social',
-              initialValue: _socialStructureKnowledge,
-              hintText: 'Sistema sanitario, sistema educativo',
-              onChanged: (value) {
-                _socialStructureKnowledge = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
             SpaceH12(),
             CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
               separatorSize: 20,
+              contentPadding: EdgeInsets.zero,
               childLeft: CustomTextFormFieldTitle(
-                labelText: 'Nivel de autonomía física y psicológica',
-                initialValue: _autonomyPhysicMental,
+                labelText: 'Redes de apoyo institucionales',
+                initialValue: _institutionNetworks,
                 onChanged: (value) {
-                  _autonomyPhysicMental = value;
+                  _institutionNetworks = value;
                 },
                 validator: (value) =>
                 (value!.isNotEmpty || value != '')
@@ -1204,11 +1262,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
-                labelText: 'Habilidades sociales',
-                initialValue: _socialSkills,
+                labelText: 'Conciliación familiar',
+                initialValue: _familyConciliation,
                 onChanged: (value) {
-                  _socialSkills = value;
-                  print(_socialSkills);
+                  _familyConciliation = value;
                 },
                 validator: (value) =>
                 (value!.isNotEmpty || value != '')
@@ -1219,7 +1276,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             ),
 
             //Section 7
-            informSectionTitle('7. Idiomas'),
+            informSectionTitle('6. Idiomas'),
             CustomTextFormFieldTitle(
               labelText: 'Orientaciones',
               initialValue: _orientation7,
@@ -1239,114 +1296,67 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   if (!snapshot.hasData) {
                     return Container();
                   }
-                  final _languages = snapshot.data;
-                  final _languageOptions = _languages!.map<
+                  final _languagesStream = snapshot.data;
+                  final _languageOptions = _languagesStream!.map<
                       DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
                     );
                   }).toList();
-                  return CustomFlexRowColumn(
-                    contentPadding: EdgeInsets.zero,
-                    separatorSize: 20,
-                    childLeft: _language == ''
-                        ? CustomDropDownButtonFormFieldTittle(
-                      labelText: 'Idioma',
-                      source: _languageOptions, //TODO libreria de idiomas ?
-                      onChanged: _finished ? null : (value) {
-                        _language = value;
-                      },
-                      validator: (value) =>
-                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                    )
-                        :
-                    CustomDropDownButtonFormFieldTittle(
-                      labelText: 'Idioma',
-                      value: _language,
-                      source: _languageOptions,
-                      //TODO libreria de idiomas ?
-                      onChanged: _finished ? null : (value) {
-                        _language = value;
-                      },
-                      validator: (value) =>
-                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                    ),
-                    childRight: CustomTextFormFieldTitle(
-                      labelText: 'Reconocimiento / acreditación - nivel',
-                      initialValue: _languageLevel,
-                      onChanged: (value) {
-                        _languageLevel = value;
-                      },
-                      validator: (value) =>
-                      (value!.isNotEmpty || value != '')
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                      enabled: !_finished,
-                    ),
+                  return Column(
+                    children: [
+                      for(LanguageReport language in _languages!)
+                      Column(
+                        children: [
+                          CustomFlexRowColumn(
+                            contentPadding: EdgeInsets.zero,
+                            separatorSize: 20,
+                            childLeft: language.name == ''
+                                ? CustomDropDownButtonFormFieldTittle(
+                              labelText: 'Idioma',
+                              source: _languageOptions,
+                              onChanged: _finished ? null : (value) {
+                                language.name = value!;
+                              },
+                              validator: (value) =>
+                              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                            )
+                                :
+                            CustomDropDownButtonFormFieldTittle(
+                              labelText: 'Idioma',
+                              value: language.name,
+                              source: _languageOptions,
+                              onChanged: _finished ? null : (value) {
+                                language.name = value!;
+                              },
+                              validator: (value) =>
+                              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                            ),
+                            childRight: CustomTextFormFieldTitle(
+                              labelText: 'Reconocimiento / acreditación - nivel',
+                              initialValue: language.level,
+                              onChanged: (value) {
+                                language.level = value;
+                              },
+                              validator: (value) =>
+                              (value!.isNotEmpty || value != '')
+                                  ? null
+                                  : StringConst.FORM_GENERIC_ERROR,
+                              enabled: !_finished,
+                            ),
+                          ),
+                          SpaceH12(),
+                        ],
+                      ),
+                    ],
                   );
                 }
             ),
-
-            //Section 8
-            informSectionTitle('8. Economía'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation8,
-              onChanged: (value) {
-                _orientation8 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                initialValue: _economicProgramHelp,
-                labelText: 'Acogida a algún programa de ayuda económica',
-                onChanged: (value) {
-                  _economicProgramHelp = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Ayuda familiar',
-                initialValue: _familySupport,
-                onChanged: (value) {
-                  _familySupport = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Responsabilidades familiares',
-              initialValue: _familyResponsibilities,
-              onChanged: (value) {
-                _familyResponsibilities = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
+            addLanguageButton(),
 
             //Section 9
-            informSectionTitle('9. Servicios sociales'),
+            informSectionTitle('7. Atención social integral'),
             CustomTextFormFieldTitle(
               labelText: 'Orientaciones',
               initialValue: _orientation9,
@@ -1360,40 +1370,24 @@ class _InitialReportFormState extends State<InitialReportForm> {
               enabled: !_finished,
             ),
             SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Acceso a Servicios Sociales',
-                initialValue: _socialServiceAccess,
-                onChanged: (value) {
-                  _socialServiceAccess = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Centro y TS de referencia',
-                initialValue: _centerTSReference,
-                onChanged: (value) {
-                  _centerTSReference = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
+            CustomTextFormFieldTitle(
+              labelText: 'Centro y TS de referencia',
+              initialValue: _centerTSReference,
+              onChanged: (value) {
+                _centerTSReference = value;
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
             ),
             SpaceH12(),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
-                labelText: 'Beneficiario de subvención y/o programa de apoyo',
+                labelText: 'Destinataria de subvención y/o programa de apoyo',
                 initialValue: _subsidyBeneficiary,
                 onChanged: (value) {
                   _subsidyBeneficiary = value;
@@ -1416,7 +1410,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
               )
                   :
               CustomDropDownButtonFormFieldTittle(
-                labelText: 'Certificado de Exclusión Social',
+                labelText: 'Usuaria',
                 source: _yesNoSelection,
                 value: _socialServicesUser,
                 onChanged: _finished ? null : (value) {
@@ -1429,7 +1423,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             _socialExclusionCertificate == ''
                 ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Usuaria',
+              labelText: 'Certificado de Exclusión Social',
               source: _yesNoSelection,
               onChanged: _finished ? null : (value) {
                 _socialExclusionCertificate = value;
@@ -1449,87 +1443,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
               value != null ? null : StringConst.FORM_GENERIC_ERROR,
             ),
 
-            //Section 10
-            informSectionTitle('10. Tecnología'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation10,
-              onChanged: (value) {
-                _orientation10 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            _digitalSkillsLevel == '' ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Nivel de competencias digitales',
-              source: _digitalSkillsSelection,
-              onChanged: _finished ? null : (value) {
-                _digitalSkillsLevel = value;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ) :
-            CustomDropDownButtonFormFieldTittle(
-              labelText: 'Nivel de competencias digitales',
-              source: _digitalSkillsSelection,
-              value: _digitalSkillsLevel,
-              onChanged: _finished ? null : (value) {
-                _digitalSkillsLevel = value;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
-
-            //Section 11
-            informSectionTitle('11. Objetivos de vida y laborales'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation11,
-              onChanged: (value) {
-                _orientation11 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Intereses en el mercado laboral',
-                initialValue: _laborMarkerInterest,
-                onChanged: (value) {
-                  _laborMarkerInterest = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Expectativas laborales',
-                initialValue: _laborExpectations,
-                onChanged: (value) {
-                  _laborExpectations = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-            ),
-
             //Section 12
-            informSectionTitle('12. Situación de Vulnerabilidad'),
+            informSectionTitle('8. Situación de Vulnerabilidad'),
             CustomTextFormFieldTitle(
               labelText: 'Orientaciones',
               initialValue: _orientation12,
@@ -1548,7 +1463,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 enabled: !_finished),
 
             //Section 13
-            informSectionTitle('13. Itinerario formativo laboral'),
+            informSectionTitle('9. Itinerario formativo laboral'),
             CustomTextFormFieldTitle(
               labelText: 'Orientaciones',
               initialValue: _orientation13,
@@ -1591,7 +1506,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 labelText: 'Situación laboral',
                 source: _laborSituationSelection,
                 onChanged: _finished ? null : (value) {
-                  _laborSituation = value;
+                  setStateLaborSituation(value!);
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
@@ -1602,102 +1517,193 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 source: _laborSituationSelection,
                 value: _laborSituation,
                 onChanged: _finished ? null : (value) {
-                  _laborSituation = value;
+                  setStateLaborSituation(value!);
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Recursos externos',
-              initialValue: _laborExternalResources,
-              onChanged: (value) {
-                _laborExternalResources = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Valoración educativa',
-              hintText: 'Autopercepción, ajuste de expectativas, intereses iniciales y evolución de los mismos, adquisición o reconocimiento de competencias...',
-              initialValue: _educationalEvaluation,
-              onChanged: (value) {
-                _educationalEvaluation = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Itinerario Formativo',
-              hintText: 'Nombre, tipo de formación. Fecha, duración, lugar de realización. Posibilidad de homologación en caso de migrantes.',
-              initialValue: _formativeItinerary,
-              onChanged: (value) {
-                _formativeItinerary = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
+
             SpaceH12(),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Inserción laboral',
-                initialValue: _laborInsertion,
-                onChanged: (value) {
-                  _laborInsertion = value;
+              childLeft: _laborSituation == 'Activa' ? Container(
+                child: _activeLabor == ''
+                    ? CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Activa',
+                  source: _activeSelection,
+                  onChanged: _finished ? null : (value) {
+                    setStateActiveLabor(value!);
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                )
+                    :
+                CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Activa',
+                  source: _activeSelection,
+                  value: _activeLabor,
+                  onChanged: _finished ? null : (value) {
+                    setStateActiveLabor(value!);
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
+              ) : Container(),
+              childRight: _activeLabor == 'Ocupada' ? Container(
+                child: _occupiedLabor == ''
+                    ? CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Ocupada',
+                  source: _occupiedSelection,
+                  onChanged: _finished ? null : (value) {
+                    setStateOccupiedLabor(value!);
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                )
+                    :
+                CustomDropDownButtonFormFieldTittle(
+                  labelText: 'Ocupada',
+                  source: _occupiedSelection,
+                  value: _occupiedLabor,
+                  onChanged: _finished ? null : (value) {
+                    setStateOccupiedLabor(value!);
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
+              ) : Container(),
+            ),
+
+            SpaceH12(),
+            _occupiedLabor == 'Cuenta ajena' ? CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _tempLabor == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: 'Temporalidad',
+                source: _tempSelection,
+                onChanged: _finished ? null : (value) {
+                  _tempLabor = value;
                 },
                 validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Acompañamiento post laboral',
-                initialValue: _accompanimentPostLabor,
-                onChanged: (value) {
-                  _accompanimentPostLabor = value;
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  :
+              CustomDropDownButtonFormFieldTittle(
+                labelText: 'Temporalidad',
+                source: _tempSelection,
+                value: _tempLabor,
+                onChanged: _finished ? null : (value) {
+                  _tempLabor = value;
                 },
                 validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
+              childRight: _workingDayLabor == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: 'Jornada laboral',
+                source: _workDaySelection,
+                onChanged: _finished ? null : (value) {
+                  _workingDayLabor = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  :
+              CustomDropDownButtonFormFieldTittle(
+                labelText: 'Jornada laboral',
+                source: _workDaySelection,
+                value: _workingDayLabor,
+                onChanged: _finished ? null : (value) {
+                  _workingDayLabor = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+            ) : Container(),
+
+            informSubSectionTitle('9.2 Trayectoria B.A.E previa'),
+            CustomTextFormFieldTitle(
+              labelText: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)',
+              initialValue: _competencies,
+              onChanged: (value) {
+                _competencies = value ?? '';
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
             ),
             SpaceH12(),
-            _laborUpgrade == '' ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Mejora laboral',
-              source: _yesNoSelection,
-              onChanged: _finished ? null : (value) {
-                _laborUpgrade = value;
+            CustomTextFormFieldTitle(
+              labelText: 'Contextualización del territorio',
+              initialValue: _contextualization,
+              onChanged: (value) {
+                _contextualization = value ?? '';
               },
               validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ) :
-            CustomDropDownButtonFormFieldTittle(
-              labelText: 'Mejora laboral',
-              source: _yesNoSelection,
-              value: _laborUpgrade,
-              onChanged: _finished ? null : (value) {
-                _laborUpgrade = value;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
             ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: 'Conexión del entorno',
+              initialValue: _connexion,
+              onChanged: (value) {
+                _connexion = value ?? '';
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
+            informSubSectionTitle('9.3 Deseos y expectativas laborales'),
+            CustomTextFormFieldTitle(
+              labelText: 'Corto plazo',
+              initialValue: _shortTerm,
+              onChanged: (value) {
+                _shortTerm = value ?? '';
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: 'Medio plazo',
+              initialValue: _mediumTerm,
+              onChanged: (value) {
+                _mediumTerm = value ?? '';
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: 'Largo plazo',
+              initialValue: _longTerm,
+              onChanged: (value) {
+                _longTerm = value ?? '';
+              },
+              validator: (value) =>
+              (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
 
             _finished ? Container() : Padding(
               padding: const EdgeInsets.only(top: 40, bottom: 30),
@@ -1715,12 +1721,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                               orientation1: _orientation1,
                               arriveDate: _arriveDate,
                               receptionResources: _receptionResources,
-                              externalResources: _externalResources,
                               administrativeSituation: _administrativeSituation,
                               expirationDate: _expirationDate,
                               orientation2: _orientation2,
                               healthCard: _healthCard,
-                              disease: _disease,
                               medication: _medication,
                               orientation2_1: _orientation2_1,
                               rest: _rest,
@@ -1732,61 +1736,50 @@ class _InitialReportFormState extends State<InitialReportForm> {
                               disabilityState: _disabilityState,
                               referenceProfessionalDisability: _referenceProfessionalDisability,
                               disabilityGrade: _disabilityGrade,
+                              disabilityType: _disabilityType,
+                              granted: _granted,
+                              revisionDate: _revisionDate,
                               orientation2_3: _orientation2_3,
                               dependenceState: _dependenceState,
                               referenceProfessionalDependence: _referenceProfessionalDependence,
-                              homeAssistance: _homeAssistance,
-                              teleassistance: _teleassistance,
                               dependenceGrade: _dependenceGrade,
                               orientation2_4: _orientation2_4,
                               externalDerivation: _externalDerivation,
-                              consumptionLevel: _consumptionLevel,
-                              addictionTreatment: _addictionTreatment,
                               orientation3: _orientation3,
-                              openLegalProcess: _openLegalProcess,
-                              closeLegalProcess: _closeLegalProcess,
+                              internalDerivationLegal: _internalDerivationLegal,
+                              externalDerivationLegal: _externalDerivationLegal,
                               legalRepresentation: _legalRepresentation,
                               orientation4: _orientation4,
                               ownershipType: _ownershipType,
                               location: _location,
-                              livingUnit: _livingUnit,
                               centerContact: _centerContact,
                               hostingObservations: _hostingObservations,
                               orientation5: _orientation5,
                               informationNetworks: _informationNetworks,
-                              orientation6: _orientation6,
-                              socialStructureKnowledge: _socialStructureKnowledge,
-                              autonomyPhysicMental: _autonomyPhysicMental,
-                              socialSkills: _socialSkills,
+                              institutionNetworks: _institutionNetworks,
+                              familyConciliation: _familyConciliation,
                               orientation7: _orientation7,
-                              language: _language,
-                              languageLevel: _languageLevel,
-                              orientation8: _orientation8,
-                              economicProgramHelp: _economicProgramHelp,
-                              familySupport: _familySupport,
-                              familyResponsibilities: _familyResponsibilities,
+                              languages: _languages,
                               orientation9: _orientation9,
-                              socialServiceAccess: _socialServiceAccess,
                               centerTSReference: _centerTSReference,
                               subsidyBeneficiary: _subsidyBeneficiary,
                               socialServicesUser: _socialServicesUser,
                               socialExclusionCertificate: _socialExclusionCertificate,
-                              orientation10: _orientation10,
-                              digitalSkillsLevel: _digitalSkillsLevel,
-                              orientation11: _orientation11,
-                              laborMarkerInterest: _laborMarkerInterest,
-                              laborExpectations: _laborExpectations,
                               orientation12: _orientation12,
                               vulnerabilityOptions: _vulnerabilityOptions,
                               orientation13: _orientation13,
                               educationLevel: _educationLevel,
                               laborSituation: _laborSituation,
-                              laborExternalResources: _laborExternalResources,
-                              educationalEvaluation: _educationalEvaluation,
-                              formativeItinerary: _formativeItinerary,
-                              laborInsertion: _laborInsertion,
-                              accompanimentPostLabor: _accompanimentPostLabor,
-                              laborUpgrade: _laborUpgrade,
+                              activeLabor: _activeLabor,
+                              occupiedLabor: _occupiedLabor,
+                              tempLabor: _tempLabor,
+                              workingDayLabor: _workingDayLabor,
+                              competencies: _competencies,
+                              contextualization: _contextualization,
+                              connexion: _connexion,
+                              shortTerm: _shortTerm,
+                              mediumTerm: _mediumTerm,
+                              longTerm: _longTerm,
                               finished: false,
                             )
                         );
@@ -1896,12 +1889,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                                 orientation1: _orientation1,
                                                 arriveDate: _arriveDate,
                                                 receptionResources: _receptionResources,
-                                                externalResources: _externalResources,
                                                 administrativeSituation: _administrativeSituation,
                                                 expirationDate: _expirationDate,
                                                 orientation2: _orientation2,
                                                 healthCard: _healthCard,
-                                                disease: _disease,
                                                 medication: _medication,
                                                 orientation2_1: _orientation2_1,
                                                 rest: _rest,
@@ -1913,61 +1904,50 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                                 disabilityState: _disabilityState,
                                                 referenceProfessionalDisability: _referenceProfessionalDisability,
                                                 disabilityGrade: _disabilityGrade,
+                                                disabilityType: _disabilityType,
+                                                granted: _granted,
+                                                revisionDate: _revisionDate,
                                                 orientation2_3: _orientation2_3,
                                                 dependenceState: _dependenceState,
                                                 referenceProfessionalDependence: _referenceProfessionalDependence,
-                                                homeAssistance: _homeAssistance,
-                                                teleassistance: _teleassistance,
                                                 dependenceGrade: _dependenceGrade,
                                                 orientation2_4: _orientation2_4,
                                                 externalDerivation: _externalDerivation,
-                                                consumptionLevel: _consumptionLevel,
-                                                addictionTreatment: _addictionTreatment,
                                                 orientation3: _orientation3,
-                                                openLegalProcess: _openLegalProcess,
-                                                closeLegalProcess: _closeLegalProcess,
+                                                internalDerivationLegal: _internalDerivationLegal,
+                                                externalDerivationLegal: _externalDerivationLegal,
                                                 legalRepresentation: _legalRepresentation,
                                                 orientation4: _orientation4,
                                                 ownershipType: _ownershipType,
                                                 location: _location,
-                                                livingUnit: _livingUnit,
                                                 centerContact: _centerContact,
                                                 hostingObservations: _hostingObservations,
                                                 orientation5: _orientation5,
                                                 informationNetworks: _informationNetworks,
-                                                orientation6: _orientation6,
-                                                socialStructureKnowledge: _socialStructureKnowledge,
-                                                autonomyPhysicMental: _autonomyPhysicMental,
-                                                socialSkills: _socialSkills,
+                                                institutionNetworks: _institutionNetworks,
+                                                familyConciliation: _familyConciliation,
                                                 orientation7: _orientation7,
-                                                language: _language,
-                                                languageLevel: _languageLevel,
-                                                orientation8: _orientation8,
-                                                economicProgramHelp: _economicProgramHelp,
-                                                familySupport: _familySupport,
-                                                familyResponsibilities: _familyResponsibilities,
+                                                languages: _languages,
                                                 orientation9: _orientation9,
-                                                socialServiceAccess: _socialServiceAccess,
                                                 centerTSReference: _centerTSReference,
                                                 subsidyBeneficiary: _subsidyBeneficiary,
                                                 socialServicesUser: _socialServicesUser,
                                                 socialExclusionCertificate: _socialExclusionCertificate,
-                                                orientation10: _orientation10,
-                                                digitalSkillsLevel: _digitalSkillsLevel,
-                                                orientation11: _orientation11,
-                                                laborMarkerInterest: _laborMarkerInterest,
-                                                laborExpectations: _laborExpectations,
                                                 orientation12: _orientation12,
                                                 vulnerabilityOptions: _vulnerabilityOptions,
                                                 orientation13: _orientation13,
                                                 educationLevel: _educationLevel,
                                                 laborSituation: _laborSituation,
-                                                laborExternalResources: _laborExternalResources,
-                                                educationalEvaluation: _educationalEvaluation,
-                                                formativeItinerary: _formativeItinerary,
-                                                laborInsertion: _laborInsertion,
-                                                accompanimentPostLabor: _accompanimentPostLabor,
-                                                laborUpgrade: _laborUpgrade,
+                                                activeLabor: _activeLabor,
+                                                occupiedLabor: _occupiedLabor,
+                                                tempLabor: _tempLabor,
+                                                workingDayLabor: _workingDayLabor,
+                                                competencies: _competencies,
+                                                contextualization: _contextualization,
+                                                connexion: _connexion,
+                                                shortTerm: _shortTerm,
+                                                mediumTerm: _mediumTerm,
+                                                longTerm: _longTerm,
                                                 finished: true,
                                                 completedDate: DateTime.now(),
                                               )

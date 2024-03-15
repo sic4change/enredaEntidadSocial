@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -73,7 +74,7 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH12(),
         _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: formatter.format(initialReport.arriveDate!) ?? '', content2: initialReport.receptionResources ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Recursos externos de apoyo', title2: 'Situación administrativa', content1: initialReport.externalResources ?? '', content2: initialReport.administrativeSituation ?? ''),
+        _customItem(title: 'Situación administrativa', content: initialReport.administrativeSituation ?? ''),
 
         //Section 2
         _sectionTitle(title: '2. Situación Sanitaria'),
@@ -81,7 +82,7 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH12(),
         _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: initialReport.healthCard ?? '', content2: formatter.format(initialReport.expirationDate!) ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Enfermedad', title2: 'Medicación/Tratamiento', content1: initialReport.disease ?? '', content2: initialReport.medication ?? ''),
+        _customItem(title: 'Medicación/Tratamiento', content: initialReport.medication ?? ''),
 
         //Subsection 2.1
         _subSectionTitle(title: '2.1 Salud Mental'),
@@ -97,9 +98,15 @@ Future<Uint8List> generateInitialReportFile(
         _subSectionTitle(title: '2.2 Discapacidad'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation2_2 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Estado', title2: 'Profesional de referencia', content1: initialReport.disabilityState ?? '', content2: initialReport.referenceProfessionalDisability ?? ''),
+        _customItem(title: 'Estado', content: initialReport.disabilityState ?? ''),
+        initialReport.dependenceState == 'Concedida' ?
+          _customRow(title1: 'Concedida', title2: 'Fecha', content1: initialReport.granted ?? '', content2: formatter.format(initialReport.revisionDate!) ?? '') :
+          pw.Container(),
+        initialReport.dependenceState == 'Concedida' ? SpaceH12() : pw.Container(),
         SpaceH12(),
-        _customItem(title: 'Grado de discapacidad', content: initialReport.disabilityGrade ?? ''),
+        _customItem(title: 'Profesional de referencia', content: initialReport.referenceProfessionalDisability ?? ''),
+        SpaceH12(),
+        _customRow(title1: 'Grado de discapacidad', title2: 'Tipo de discapacidad', content1: initialReport.disabilityGrade ?? '', content2: initialReport.disabilityType ?? ''),
 
         //Subsection 2.3
         _subSectionTitle(title: '2.3 Dependencia'),
@@ -107,23 +114,19 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH12(),
         _customRow(title1: 'Estado', title2: 'Profesional de referencia', content1: initialReport.dependenceState ?? '', content2: initialReport.referenceProfessionalDependence ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Servicio de ayuda a domicilio', title2: 'Teleasistencia', content1: initialReport.homeAssistance ?? '', content2: initialReport.teleassistance ?? ''),
-        SpaceH12(),
         _customItem(title: 'Grado de dependencia', content: initialReport.dependenceGrade ?? ''),
 
         //Subsection 2.4
         _subSectionTitle(title: '2.4 Adicciones'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation2_4 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación externa', title2: 'Nivel de consumo', content1: initialReport.externalDerivation ?? '', content2: initialReport.consumptionLevel ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Tratamiento', content: initialReport.addictionTreatment ?? ''),
+        _customItem(title: 'Derivación externa', content: initialReport.externalDerivation ?? ''),
 
         //Section 3
         _sectionTitle(title: '3. Situación legal'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation3 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Procesos legales abiertos', title2: 'Procesos legales cerrados', content1: initialReport.openLegalProcess ?? '', content2: initialReport.closeLegalProcess ?? ''),
+        _customRow(title1: 'Derivación interma', title2: 'Derivación externa', content1: initialReport.internalDerivationLegal ?? '', content2: initialReport.externalDerivationLegal ?? ''),
         SpaceH12(),
         _customItem(title: 'Representación legal', content: initialReport.legalRepresentation ?? ''),
 
@@ -131,9 +134,9 @@ Future<Uint8List> generateInitialReportFile(
         _sectionTitle(title: 'Situación alojativa'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation4 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Tipo de tenencia', title2: 'Ubicación', content1: initialReport.ownershipType ?? '', content2: initialReport.location ?? ''),
+        _customRow(title1: 'Tipo de tenencia', title2: 'Ubicación actual de la persona', content1: initialReport.ownershipType ?? '', content2: initialReport.location ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Unidad de convicencia', title2: 'Datos de contacto del centro y persona de referencia', content1: initialReport.livingUnit ?? '', content2: initialReport.centerContact ?? ''),
+        _customItem(title: 'Datos de contacto del centro y persona de referencia', content: initialReport.centerContact ?? ''),
         SpaceH12(),
         _customEnumeration(enumeration: initialReport.hostingObservations ?? []),
 
@@ -142,74 +145,71 @@ Future<Uint8List> generateInitialReportFile(
         _customItem(title: 'Orientaciones', content: initialReport.orientation5 ?? ''),
         SpaceH12(),
         _customItem(title: 'Redes informales', content: initialReport.informationNetworks ?? ''),
-
-        //Section 6
-        _sectionTitle(title: '6. Situación social integral'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation6 ?? ''),
         SpaceH12(),
-        _customItem(title: 'Conocimiento de la estructura social', content: initialReport.socialStructureKnowledge ?? ''),
-        SpaceH12(),
-        _customRow(title1: 'Nivel de autonomía física y psicológica', title2: 'Habilidades sociales', content1: initialReport.autonomyPhysicMental ?? '', content2: initialReport.socialSkills ?? ''),
+        _customRow(title1: 'Redes de apoyo institucionales', title2: 'Conciliación familiar', content1: initialReport.institutionNetworks ?? '', content2: initialReport.familyConciliation ?? ''),
 
         //Section7
-        _sectionTitle(title: '7. Idiomas'),
+        _sectionTitle(title: '6. Idiomas'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation7 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Idioma', title2: 'Reconocimiento / Acreditación - nivel', content1: initialReport.language ?? '', content2: initialReport.languageLevel ?? ''),
-
-        //Section 8
-        _sectionTitle(title: '8. Economía'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation8 ?? ''),
-        SpaceH12(),
-        _customRow(title1: 'Acogida a algún programa de ayuda económica', title2: 'Apoyo familiar', content1: initialReport.economicProgramHelp ?? '', content2: initialReport.familySupport ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Responsabilidades familiares', content: initialReport.familyResponsibilities ?? ''),
+        pw.Column(
+          children: [
+            for(LanguageReport language in initialReport.languages ?? [])
+              pw.Column(
+                children: [
+                  _customRow(title1: 'Idioma', title2: 'Reconocimiento / acreditación - nivel', content1: language.name, content2: language.level),
+                  SpaceH12(),
+                ]
+              )
+          ]
+        ),
 
         //Section 9
-        _sectionTitle(title: '9. Servicios sociales'),
+        _sectionTitle(title: '7. Atención social integral'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation9 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Acceso a Servicios Sociales', title2: 'Centro y TS de referencia', content1: initialReport.socialServiceAccess ?? '', content2: initialReport.centerTSReference ?? ''),
+        _customItem(title: 'Centro y TS de referencia', content: initialReport.centerTSReference ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Beneficiario de subvención y/o programa de apoyo', title2: 'Usuaria', content1: initialReport.subsidyBeneficiary ?? '', content2: initialReport.socialServicesUser ?? ''),
+        _customRow(title1: 'Destinataria de subvención y/o programa de apoyo', title2: 'Usuaria', content1: initialReport.subsidyBeneficiary ?? '', content2: initialReport.socialServicesUser ?? ''),
         SpaceH12(),
         _customItem(title: 'Certificado de Exclusión Social', content: initialReport.socialExclusionCertificate ?? ''),
 
-        //Section 10
-        _sectionTitle(title: '10. Tecnología'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation10 ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Nivel de competencias digitales', content: initialReport.digitalSkillsLevel ?? ''),
-
-        //Section 11
-        _sectionTitle(title: '11. Objetivos de vida y laborales'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation11 ?? ''),
-        SpaceH12(),
-        _customRow(title1: 'Intereses en el mercado laboral', title2: 'Expectativas laborares', content1: initialReport.laborMarkerInterest ?? '', content2: initialReport.laborExpectations ?? ''),
-
         //Section 12
-        _sectionTitle(title: '12. Situación de Vulnerabilidad'),
+        _sectionTitle(title: '8. Situación de Vulnerabilidad'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation12 ?? ''),
         SpaceH12(),
         _customEnumeration(enumeration: initialReport.vulnerabilityOptions ?? []),
 
         //Section 13
-        _sectionTitle(title: '13. Itinerario formativo laboral'),
+        _sectionTitle(title: '9. Itinerario formativo laboral'),
         _customItem(title: 'Orientaciones', content: initialReport.orientation13 ?? ''),
         SpaceH12(),
         _customRow(title1: 'Nivel educativo', title2: 'Situación laboral', content1: initialReport.educationLevel ?? '', content2: initialReport.laborSituation ?? ''),
         SpaceH12(),
-        _customItem(title: 'Recursos externos', content: initialReport.laborExternalResources ?? ''),
+        initialReport.laborSituation == 'Activa' ?
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                _customItem(title: 'Activa', content: initialReport.activeLabor ?? ''),
+                initialReport.activeLabor == 'Ocupada' ? SpaceH12() : pw.Container(),
+                initialReport.activeLabor == 'Ocupada' ? _customItem(title: 'Ocuada', content: initialReport.occupiedLabor ?? '') : pw.Container(),
+                initialReport.occupiedLabor == 'Cuenta ajena' ? SpaceH12() : pw.Container(),
+                initialReport.occupiedLabor == 'Cuenta ajena' ? _customRow(title1: 'Temporalidad', title2: 'Jornada', content1: initialReport.tempLabor ?? '', content2: initialReport.workingDayLabor ?? '') : pw.Container(),
+                initialReport.occupiedLabor == 'Cuenta ajena' ? SpaceH12() : pw.Container(),
+              ]
+            )
+         : pw.Container(),
+        _customItem(title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: initialReport.competencies ?? ''),
         SpaceH12(),
-        _customItem(title: 'Valoración educativa', content: initialReport.educationalEvaluation ?? ''),
+        _customItem(title: 'Contextualización del territorio', content: initialReport.contextualization ?? ''),
         SpaceH12(),
-        _customItem(title: 'Itinerario formativo', content: initialReport.formativeItinerary ?? ''),
+        _customItem(title: 'Conexión del entorno', content: initialReport.connexion ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Inserción laboral', title2: 'Acompañamiento post laboral', content1: initialReport.laborInsertion ?? '', content2: initialReport.accompanimentPostLabor ?? ''),
+        _customItem(title: 'Corto plazo', content: initialReport.shortTerm ?? ''),
         SpaceH12(),
-        _customItem(title: 'Mejora laboral', content: initialReport.laborUpgrade ?? ''),
-
-
+        _customItem(title: 'Medio plazo', content: initialReport.mediumTerm ?? ''),
+        SpaceH12(),
+        _customItem(title: 'Largo plazo', content: initialReport.longTerm ?? ''),
         
       ]
     )
