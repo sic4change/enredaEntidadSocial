@@ -187,7 +187,7 @@ class UserEnreda {
       });
     }
 
-    final String? assignedById = data['assignedById']?? "";
+    late String? assignedById = data['assignedById']?? "";
     final String? assignedEntityId = data['assignedEntityId']?? "";
     final int resourcesAccessCount = data['resourcesAccessCount']?? 0;
 
@@ -279,7 +279,7 @@ class UserEnreda {
   final String? socialEntityId;
   final List<String> resources;
   final Map<String, bool> gamificationFlags;
-  final String? assignedById;
+  late String? assignedById;
   final String? assignedEntityId;
   final int? resourcesAccessCount;
   final Motivation? motivation;

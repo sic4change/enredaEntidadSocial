@@ -258,7 +258,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                       SpaceH8(),
                       (techName != '' || techLastName != '') ?
                         Text('Técnica de referencia: $techName $techLastName') :
-                        Container(),
+                        _bottomAddTech(socialEntityUser),
                       SpaceH40(),
                       Row(
                         children: [
@@ -301,6 +301,47 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
         ],
       ),
     );
+  }
+
+  Widget _bottomAddTech(UserEnreda tech){
+    final database = Provider.of<Database>(context, listen: false);
+    return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          InkWell(
+            onTap: () async {
+              setState((){
+                participantUser.assignedById = tech.userId;
+              });
+              await database.setUserEnreda(participantUser);
+            },
+            child: Text(
+              'Asignar este participante',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontFamily: GoogleFonts.inter().fontFamily,
+                fontSize: 16,
+                color: AppColors.turquoiseButton2,
+              ),
+            ),
+          ),
+          SpaceW12(),
+          InkWell(
+            onTap: () async {
+              setState((){
+                participantUser.assignedById = tech.userId;
+              });
+              await database.setUserEnreda(participantUser);
+            },
+            child: Icon(
+              Icons.add_circle,
+              color: AppColors.turquoiseButton2,
+              size: 24,
+            ),
+          ),
+        ],
+      );
+
   }
 
   Widget _buildHeaderMobile(BuildContext context, UserEnreda user) {
