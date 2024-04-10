@@ -48,6 +48,7 @@ class UserEnreda {
     this.initialReportId,
     this.closureReportId,
     this.followReportId,
+    this.derivationReportId,
     this.nationality,
   });
 
@@ -201,6 +202,7 @@ class UserEnreda {
     final String? initialReportId = data['initialReportId'];
     final String? closureReportId = data['closureReportId'];
     final String? followReportId = data['followReportId'];
+    final String? derivationReportId = data['derivationReportId'];
     final String? nationality = data['nationality'] ?? '';
 
     return UserEnreda(
@@ -244,6 +246,7 @@ class UserEnreda {
       initialReportId: initialReportId,
       closureReportId: closureReportId,
       followReportId: followReportId,
+      derivationReportId: derivationReportId,
       nationality: nationality,
     );
   }
@@ -288,6 +291,7 @@ class UserEnreda {
   final String? initialReportId;
   final String? closureReportId;
   final String? followReportId;
+  final String? derivationReportId;
   final String? nationality;
 
   @override
@@ -336,6 +340,7 @@ class UserEnreda {
       'initialReportId': initialReportId,
       'closureReportId': closureReportId,
       'followReportId': followReportId,
+      'derivationReportId': derivationReportId,
       'nationality' : nationality,
     };
   }
@@ -383,6 +388,7 @@ class UserEnreda {
     String? initialReportId,
     String? closureReportId,
     String? followReportId,
+    String? derivationReportId,
     String? nationality,
   }) {
     return UserEnreda(
@@ -424,6 +430,7 @@ class UserEnreda {
       initialReportId: initialReportId ?? this.initialReportId,
       closureReportId: closureReportId ?? this.closureReportId,
       followReportId: followReportId ?? this.followReportId,
+      derivationReportId: derivationReportId ?? this.derivationReportId,
       nationality: nationality ?? this.nationality,
     );
   }

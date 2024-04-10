@@ -7,9 +7,9 @@ import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
-import 'package:enreda_empresas/app/models/closureReport.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
+import 'package:enreda_empresas/app/models/derivationReport.dart';
 import 'package:enreda_empresas/app/models/formationReport.dart';
-import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
@@ -18,22 +18,19 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import 'participant_social_reports_page.dart';
-
-class ClosureReportForm extends StatefulWidget {
-  const ClosureReportForm({super.key, required this.user, this.closureReport});
+class DerivationReportForm extends StatefulWidget {
+  const DerivationReportForm({super.key, required this.user, this.derivationReport});
 
   final UserEnreda user;
-  final ClosureReport? closureReport;
+  final DerivationReport? derivationReport;
 
   @override
-  State<ClosureReportForm> createState() => _ClosureReportFormState();
+  State<DerivationReportForm> createState() => _DerivationReportFormState();
 }
 
-class _ClosureReportFormState extends State<ClosureReportForm> {
+class _DerivationReportFormState extends State<DerivationReportForm> {
 
   late Widget currentPage;
   final ValueNotifier<String> _techNameNotifier =
@@ -69,12 +66,51 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
   final ValueNotifier<int> _totalDaysNotifier =
   ValueNotifier<int>(0);
 
+  final ValueNotifier<bool> _allow1Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow1_1Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow2Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow2_1Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow2_2Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow2_3Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow2_4Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow3Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow4Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow5Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow6Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow7Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow8Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow9Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow9_2Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow9_3Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow9_4Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow9_5Notifier =
+  ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _allow9_6Notifier =
+  ValueNotifier<bool>(true);
+
   final TextEditingController _techPersonController = TextEditingController();
   final TextEditingController _totalDaysController = TextEditingController();
 
   @override
   void initState() {
-    currentPage = closureReport(context, widget.user);
+    currentPage = derivationReport(context, widget.user);
     _totalDaysController.text = '0';
     super.initState();
   }
@@ -102,7 +138,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
   }
 
 
-  Widget closureReport(BuildContext context, UserEnreda user) {
+  Widget derivationReport(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
 
     return Padding(
@@ -129,22 +165,21 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                       ),
                       SpaceW8(),
                       CustomTextBoldTitle(
-                          title: 'Informe de cierre de caso'.toUpperCase()),
+                          title: 'Informe de derivación'.toUpperCase()),
                     ],
                   ),
                 ),
                 Divider(color: AppColors.greyBorder,),
-                StreamBuilder<ClosureReport>(
-                    stream: database.closureReportsStreamByUserId(user.userId),
+                StreamBuilder<DerivationReport>(
+                    stream: database.derivationReportsStreamByUserId(user.userId),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        ClosureReport closureReportSaved = snapshot.data!;
-                        return completeClosureForm(
-                            context, closureReportSaved, user);
+                        DerivationReport derivationReportSaved = snapshot.data!;
+                        return completeDerivationForm(context, derivationReportSaved);
                       }
                       else {
-                        if (user.closureReportId == null) {
-                          database.addClosureReport(widget.closureReport!);
+                        if (user.derivationReportId == null) {
+                          database.addDerivationReport(widget.derivationReport!);
                         }
                         return Container(
                           height: 300,
@@ -158,66 +193,68 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     );
   }
 
-  Widget personalDataLine(String title, String content) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Text(
-          title + ': ',
-          style: TextStyle(
-            fontFamily: GoogleFonts
-                .inter()
-                .fontFamily,
-            fontWeight: FontWeight.w400,
-            color: AppColors.greyAlt,
-            fontSize: 14,
-          ),
-        ),
-        Text(
-          content,
-          style: TextStyle(
-            fontFamily: GoogleFonts
-                .inter()
-                .fontFamily,
-            fontWeight: FontWeight.w600,
-            color: AppColors.turquoiseBlue,
-            fontSize: 14,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget informSectionTitle(String title) {
+  Widget informSectionTitle(String title, bool showSection, VoidCallback onTap) {
     return Padding(
       padding: const EdgeInsets.only(top: 30, bottom: 15),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          fontFamily: GoogleFonts
-              .outfit()
-              .fontFamily,
-          color: AppColors.penBlue,
-        ),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              fontFamily: GoogleFonts
+                  .outfit()
+                  .fontFamily,
+              color: AppColors.bluePetrol,
+            ),
+          ),
+          SpaceW8(),
+          IconButton(
+            icon: showSection ? Image.asset(
+              ImagePath.PERSONAL_DOCUMENTATION_VIEW,
+              width: 24,
+              height: 24,
+            ) : Icon(
+              Icons.add_circle,
+              size: 24,
+            ),
+            onPressed: onTap,
+          ),
+        ],
       ),
     );
   }
 
-  Widget informSubSectionTitle(String title) {
+  Widget informSubSectionTitle(String title, bool showSection, bool showSubSection, VoidCallback onTap) {
     return Padding(
       padding: const EdgeInsets.only(top: 30, bottom: 15),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          fontFamily: GoogleFonts
-              .outfit()
-              .fontFamily,
-          color: AppColors.penBlue,
-        ),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: GoogleFonts
+                  .outfit()
+                  .fontFamily,
+              color: AppColors.bluePetrol,
+            ),
+          ),
+          SpaceW8(),
+          showSection ? IconButton(
+            icon: showSubSection ? Image.asset(
+              ImagePath.PERSONAL_DOCUMENTATION_VIEW,
+              width: 24,
+              height: 24,
+            ) : Icon(
+              Icons.add_circle,
+              size: 24,
+            ),
+            onPressed: onTap,
+          ) : Container(),
+        ],
       ),
     );
   }
@@ -340,8 +377,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     );
   }
 
-  Widget completeClosureForm(BuildContext context, ClosureReport report,
-      UserEnreda user) {
+  Widget completeDerivationForm(BuildContext context, DerivationReport report) {
     final database = Provider.of<Database>(context, listen: false);
     final _formKey = GlobalKey<FormState>();
 
@@ -350,6 +386,8 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     //Pre-Selection
     String? _subsidy = report.subsidy ?? '';
     String? _techPerson = report.techPerson ?? widget.user.assignedById;
+    String? _addressedTo = report.addressedTo ?? '';
+    String? _objectiveDerivation = report.objectiveDerivation ?? '';
 
     //Section 1
     String _orientation1 = report.orientation1 ?? '';
@@ -541,11 +579,84 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     }
     String? _jobMaintenance = report.jobMaintenance ?? '';
 
-    //Section 10
-    String? _orientation10 = report.orientation10 ?? '';
-    String? _motiveClose = report.motiveClose ?? '';
-    String? _motiveCloseDetail = report.motiveCloseDetail ?? '';
-    DateTime? _closeDate = report.closeDate;
+    //Allow see
+    if (_allow1Notifier.value == true &&
+        report.allow1 != null) {
+      _allow1Notifier.value = report.allow1!;
+    }
+    if (_allow1_1Notifier.value == true &&
+        report.allow1_1 != null) {
+      _allow1_1Notifier.value = report.allow1_1!;
+    }
+    if (_allow2Notifier.value == true &&
+        report.allow2 != null) {
+      _allow2Notifier.value = report.allow2!;
+    }
+    if (_allow2_1Notifier.value == true &&
+        report.allow2_1 != null) {
+      _allow2_1Notifier.value = report.allow2_1!;
+    }
+    if (_allow2_2Notifier.value == true &&
+        report.allow2_2 != null) {
+      _allow2_2Notifier.value = report.allow2_2!;
+    }
+    if (_allow2_3Notifier.value == true &&
+        report.allow2_3 != null) {
+      _allow2_3Notifier.value = report.allow2_3!;
+    }
+    if (_allow2_4Notifier.value == true &&
+        report.allow2_4 != null) {
+      _allow2_4Notifier.value = report.allow2_4!;
+    }
+    if (_allow3Notifier.value == true &&
+        report.allow3 != null) {
+      _allow3Notifier.value = report.allow3!;
+    }
+    if (_allow4Notifier.value == true &&
+        report.allow4 != null) {
+      _allow4Notifier.value = report.allow4!;
+    }
+    if (_allow5Notifier.value == true &&
+        report.allow5 != null) {
+      _allow5Notifier.value = report.allow5!;
+    }
+    if (_allow6Notifier.value == true &&
+        report.allow6 != null) {
+      _allow6Notifier.value = report.allow6!;
+    }
+    if (_allow7Notifier.value == true &&
+        report.allow7 != null) {
+      _allow7Notifier.value = report.allow7!;
+    }
+    if (_allow8Notifier.value == true &&
+        report.allow8 != null) {
+      _allow8Notifier.value = report.allow8!;
+    }
+    if (_allow9Notifier.value == true &&
+        report.allow9 != null) {
+      _allow9Notifier.value = report.allow9!;
+    }
+    if (_allow9_2Notifier.value == true &&
+        report.allow9_2 != null) {
+      _allow9_2Notifier.value = report.allow9_2!;
+    }
+    if (_allow9_3Notifier.value == true &&
+        report.allow9_3 != null) {
+      _allow9_3Notifier.value = report.allow9_3!;
+    }
+    if (_allow9_4Notifier.value == true &&
+        report.allow9_4 != null) {
+      _allow9_4Notifier.value = report.allow9_4!;
+    }
+    if (_allow9_5Notifier.value == true &&
+        report.allow9_5 != null) {
+      _allow9_5Notifier.value = report.allow9_5!;
+    }
+    if (_allow9_6Notifier.value == true &&
+        report.allow9_6 != null) {
+      _allow9_6Notifier.value = report.allow9_6!;
+    }
+
 
     return Padding(
       padding: const EdgeInsets.only(left: 50, right: 30),
@@ -583,6 +694,31 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                   : StringConst.FORM_GENERIC_ERROR,
             ),
             SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.DERIVATION_ADDRESSED,
+              initialValue: _addressedTo,
+              onChanged: (value) {
+                _addressedTo = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.DERIVATION_OBJECTIVE,
+              initialValue: _objectiveDerivation,
+              onChanged: (value) {
+                _objectiveDerivation = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+
             StreamBuilder<UserEnreda>(
                 stream: database.userEnredaStreamByUserId(_techPerson),
                 builder: (context, snapshot) {
@@ -602,7 +738,13 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
             //Section 1
-            informSectionTitle(StringConst.INITIAL_TITLE1_ITINERARY),
+            ValueListenableBuilder(
+              valueListenable: _allow1Notifier,
+              builder: (context, value, child){
+                return informSectionTitle(StringConst.INITIAL_TITLE1_ITINERARY, _allow1Notifier.value, (){_allow1Notifier.value = !_allow1Notifier.value;});
+              }
+            ),
+
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation1,
@@ -654,7 +796,18 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
             //Section 1.1
-            informSubSectionTitle(StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION),
+            ValueListenableBuilder(
+                valueListenable: _allow1Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow1_1Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION, _allow1Notifier.value, _allow1_1Notifier.value, (){_allow1_1Notifier.value = !_allow1_1Notifier.value;});
+                      }
+                  );
+                }
+            ),
+
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
@@ -876,7 +1029,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
 
 
             //Section 2
-            informSectionTitle(StringConst.INITIAL_TITLE2_SANITARY),
+            ValueListenableBuilder(
+                valueListenable: _allow2Notifier,
+                builder: (context, value, child){
+                  return informSectionTitle(StringConst.INITIAL_TITLE2_SANITARY, _allow2Notifier.value, (){_allow2Notifier.value = !_allow2Notifier.value;});
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2,
@@ -940,7 +1098,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               enabled: !_finished,
             ),
             //Subsection 2.1
-            informSubSectionTitle(StringConst.INITIAL_TITLE_2_1_MENTAL_HEALTH),
+            ValueListenableBuilder(
+                valueListenable: _allow2Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow2_1Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_1_MENTAL_HEALTH, _allow2Notifier.value, _allow2_1Notifier.value, (){_allow2_1Notifier.value = !_allow2_1Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2_1,
@@ -1021,7 +1189,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
             //Subsection 2.2
-            informSubSectionTitle(StringConst.INITIAL_TITLE_2_2_DISABILITY),
+            ValueListenableBuilder(
+                valueListenable: _allow2Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow2_2Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_2_DISABILITY, _allow2Notifier.value, _allow2_2Notifier.value, (){_allow2_2Notifier.value = !_allow2_2Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2_2,
@@ -1200,7 +1378,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
             //Subsection 2.3
-            informSubSectionTitle(StringConst.INITIAL_TITLE_2_3_DEPENDENCE),
+            ValueListenableBuilder(
+                valueListenable: _allow2Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow2_3Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_3_DEPENDENCE, _allow2Notifier.value, _allow2_3Notifier.value, (){_allow2_3Notifier.value = !_allow2_3Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2_3,
@@ -1279,7 +1467,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
             //Subsection 2.4
-            informSubSectionTitle(StringConst.INITIAL_TITLE_2_4_ADDICTIONS),
+            ValueListenableBuilder(
+                valueListenable: _allow2Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow2_4Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_4_ADDICTIONS, _allow2Notifier.value, _allow2_4Notifier.value, (){_allow2_4Notifier.value = !_allow2_4Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2_4,
@@ -1333,7 +1531,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
             //Section 3
-            informSectionTitle(StringConst.INITIAL_TITLE_3_LEGAL_SITUATION),
+            ValueListenableBuilder(
+                valueListenable: _allow3Notifier,
+                builder: (context, value, child){
+                  return informSectionTitle(StringConst.INITIAL_TITLE_3_LEGAL_SITUATION, _allow3Notifier.value, (){_allow3Notifier.value = !_allow3Notifier.value;});
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation3,
@@ -1554,7 +1757,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
             //Section 4
-            informSectionTitle(StringConst.INITIAL_TITLE_4_HOUSE_SITUATION),
+            ValueListenableBuilder(
+                valueListenable: _allow4Notifier,
+                builder: (context, value, child){
+                  return informSectionTitle(StringConst.INITIAL_TITLE_4_HOUSE_SITUATION, _allow4Notifier.value, (){_allow4Notifier.value = !_allow4Notifier.value;});
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation4,
@@ -1747,7 +1955,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                     enabled: !_finished)),
 
             //Section 5
-            informSectionTitle(StringConst.INITIAL_TITLE_5_SUPPORT),
+            ValueListenableBuilder(
+                valueListenable: _allow5Notifier,
+                builder: (context, value, child){
+                  return informSectionTitle(StringConst.INITIAL_TITLE_5_SUPPORT, _allow5Notifier.value, (){_allow5Notifier.value = !_allow5Notifier.value;});
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation5,
@@ -1801,7 +2014,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
             //Section 7
-            informSectionTitle(StringConst.INITIAL_TITLE_6_LANGUAGES),
+            ValueListenableBuilder(
+                valueListenable: _allow6Notifier,
+                builder: (context, value, child){
+                  return informSectionTitle(StringConst.INITIAL_TITLE_6_LANGUAGES, _allow6Notifier.value, (){_allow6Notifier.value = !_allow6Notifier.value;});
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation7,
@@ -1900,7 +2118,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             addLanguageButton(),
 
             //Section 9
-            informSectionTitle(StringConst.INITIAL_TITLE_7_SOCIAL_ATTENTION),
+            ValueListenableBuilder(
+                valueListenable: _allow7Notifier,
+                builder: (context, value, child){
+                  return informSectionTitle(StringConst.INITIAL_TITLE_7_SOCIAL_ATTENTION, _allow7Notifier.value, (){_allow7Notifier.value = !_allow7Notifier.value;});
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation9,
@@ -2040,7 +2263,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                 }
             ),
             //Section 12
-            informSectionTitle(StringConst.INITIAL_TITLE_8_VULNERABILITY),
+            ValueListenableBuilder(
+                valueListenable: _allow8Notifier,
+                builder: (context, value, child){
+                  return informSectionTitle(StringConst.INITIAL_TITLE_8_VULNERABILITY, _allow8Notifier.value, (){_allow8Notifier.value = !_allow8Notifier.value;});
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation12,
@@ -2059,7 +2287,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                 enabled: !_finished),
 
             //Section 13
-            informSectionTitle(StringConst.INITIAL_TITLE_9_WORK),
+            ValueListenableBuilder(
+                valueListenable: _allow9Notifier,
+                builder: (context, value, child){
+                  return informSectionTitle(StringConst.INITIAL_TITLE_9_WORK, _allow9Notifier.value, (){_allow9Notifier.value = !_allow9Notifier.value;});
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation13,
@@ -2096,7 +2329,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               validator: (value) =>
               value != null ? null : StringConst.FORM_GENERIC_ERROR,
             ),
-            informSubSectionTitle(StringConst.INITIAL_TITLE_9_2_WORK_SITUATION),
+            ValueListenableBuilder(
+                valueListenable: _allow9Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow9_2Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_9_2_WORK_SITUATION, _allow9Notifier.value, _allow9_2Notifier.value, (){_allow9_2Notifier.value = !_allow9_2Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation13_2,
@@ -2109,7 +2352,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               enabled: !_finished,
             ),
 
-            informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
+            ValueListenableBuilder(
+                valueListenable: _allow9Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow9_3Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY, _allow9Notifier.value, _allow9_3Notifier.value, (){_allow9_3Notifier.value = !_allow9_3Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText:
               StringConst.INITIAL_COMPETENCIES,
@@ -2147,7 +2400,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               enabled: !_finished,
             ),
 
-            informSubSectionTitle(StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
+            ValueListenableBuilder(
+                valueListenable: _allow9Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow9_4Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_9_4_EXPECTATIONS, _allow9Notifier.value, _allow9_4Notifier.value, (){_allow9_4Notifier.value = !_allow9_4Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_SHORT_TERM,
               initialValue: _shortTerm,
@@ -2184,7 +2447,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               enabled: !_finished,
             ),
 
-            informSubSectionTitle(StringConst.FOLLOW_TITLE_9_5_DEVELOP),
+            ValueListenableBuilder(
+                valueListenable: _allow9Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow9_5Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_5_DEVELOP, _allow9Notifier.value, _allow9_5Notifier.value, (){_allow9_5Notifier.value = !_allow9_5Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation9_5,
@@ -2197,7 +2470,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               enabled: !_finished,
             ),
 
-            informSubSectionTitle(StringConst.FOLLOW_FORMATIONS),
+            informSubSectionTitle(StringConst.FOLLOW_FORMATIONS, false, false, (){}),
 
             ValueListenableBuilder(
                 valueListenable: _formationsNotifier,
@@ -2321,7 +2594,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                 onChanged: _finished
                     ? null
                     : (value) {
-                  _formationBag = value;
+                      _formationBag = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
@@ -2363,7 +2636,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
 
 
-            informSubSectionTitle(StringConst.FOLLOW_JOB),
+            informSubSectionTitle(StringConst.FOLLOW_JOB, false, false, (){}),
 
             _laborSituationNotifier.value == ''
                 ? CustomDropDownButtonFormFieldTittle(
@@ -2532,7 +2805,17 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               enabled: !_finished,
             ),
 
-            informSubSectionTitle(StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
+            ValueListenableBuilder(
+                valueListenable: _allow9Notifier,
+                builder: (context, value, child){
+                  return             ValueListenableBuilder(
+                      valueListenable: _allow9_6Notifier,
+                      builder: (context, value, child){
+                        return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT, _allow9Notifier.value, _allow9_6Notifier.value, (){_allow9_6Notifier.value = !_allow9_6Notifier.value;});
+                      }
+                  );
+                }
+            ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation9_6,
@@ -2573,25 +2856,25 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
             SpaceH12(),
             ValueListenableBuilder(
-                valueListenable: _postLaborAccompanimentNotifier,
-                builder: (context, value, child){
-                  return _postLaborAccompanimentNotifier.value == 'No' ? Column(
-                    children: [
-                      CustomTextFormFieldTitle(
-                        labelText: StringConst.INITIAL_MOTIVE,
-                        initialValue: _postLaborAccompanimentMotive,
-                        onChanged: (value) {
-                          _postLaborAccompanimentMotive = value ?? '';
-                        },
-                        validator: (value) => (value!.isNotEmpty || value != '')
-                            ? null
-                            : StringConst.FORM_GENERIC_ERROR,
-                        enabled: !_finished,
-                      ),
-                      SpaceH12(),
-                    ],
-                  ) : Container();
-                }
+              valueListenable: _postLaborAccompanimentNotifier,
+              builder: (context, value, child){
+                return _postLaborAccompanimentNotifier.value == 'No' ? Column(
+                  children: [
+                    CustomTextFormFieldTitle(
+                      labelText: StringConst.INITIAL_MOTIVE,
+                      initialValue: _postLaborAccompanimentMotive,
+                      onChanged: (value) {
+                        _postLaborAccompanimentMotive = value ?? '';
+                      },
+                      validator: (value) => (value!.isNotEmpty || value != '')
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                      enabled: !_finished,
+                    ),
+                    SpaceH12(),
+                  ],
+                ) : Container();
+              }
             ),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
@@ -2627,14 +2910,14 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
             SpaceH12(),
             ValueListenableBuilder(
-                valueListenable: _totalDaysNotifier,
-                builder: (context, value, child){
-                  return CustomTextFormFieldTitle(
-                    labelText: StringConst.FOLLOW_POST_LABOR_TOTAL_DAYS,
-                    controller: _totalDaysController,
-                    enabled: false,
-                  );
-                }
+              valueListenable: _totalDaysNotifier,
+              builder: (context, value, child){
+                return CustomTextFormFieldTitle(
+                  labelText: StringConst.FOLLOW_POST_LABOR_TOTAL_DAYS,
+                  controller: _totalDaysController,
+                  enabled: false,
+                );
+              }
             ),
             SpaceH12(),
             _jobMaintenance == ''
@@ -2662,72 +2945,6 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               validator: (value) => value != null
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
-            ),
-
-            informSectionTitle(StringConst.CLOSURE_TITLE_10),
-            CustomTextFormFieldTitle(
-              labelText: StringConst.INITIAL_OBSERVATIONS,
-              initialValue: _orientation10,
-              onChanged: (value) {
-                _orientation10 = value ?? '';
-              },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            _motiveClose == ''
-                ? CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.CLOSURE_CLOSE_MOTIVE,
-              source: StringConst.CLOSURE_MOTIVE_SELECTION,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _motiveClose = value;
-              },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-            )
-                : CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.CLOSURE_CLOSE_MOTIVE,
-              source: StringConst.CLOSURE_MOTIVE_SELECTION,
-              value: _motiveClose,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _motiveClose = value;
-              },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-            ),
-            SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: StringConst.CLOSURE_CLOSE_MOTIVE_DETAIL,
-                initialValue: _motiveCloseDetail,
-                onChanged: (value) {
-                  _motiveCloseDetail = value ?? '';
-                },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomDatePickerTitle(
-                labelText: StringConst.INITIAL_DATE,
-                initialValue: _closeDate,
-                onChanged: (value) {
-                  _closeDate = value;
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
             ),
 
             SpaceH12(),
@@ -2761,11 +2978,13 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                   width: 250,
                   child: ElevatedButton(
                       onPressed: () async {
-                        database.setClosureReport(ClosureReport(
+                        database.setDerivationReport(DerivationReport(
                           userId: report.userId,
-                          closureReportId: report.closureReportId,
+                          derivationReportId: report.derivationReportId,
                           subsidy: _subsidy,
                           techPerson: _techPerson,
+                          addressedTo: _addressedTo,
+                          objectiveDerivation: _objectiveDerivation,
                           orientation1: _orientation1,
                           arriveDate: _arriveDate,
                           receptionResources: _receptionResources,
@@ -2879,10 +3098,25 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                           postLaborFinalDate: _postLaborFinalDate,
                           postLaborTotalDays: int.parse(_totalDaysController.text),
                           jobMaintenance: _jobMaintenance,
-                          orientation10: _orientation10,
-                          motiveClose: _motiveClose,
-                          motiveCloseDetail: _motiveCloseDetail,
-                          closeDate: _closeDate,
+                          allow1: _allow1Notifier.value,
+                          allow1_1: _allow1_1Notifier.value,
+                          allow2: _allow2Notifier.value,
+                          allow2_1: _allow2_1Notifier.value,
+                          allow2_2: _allow2_2Notifier.value,
+                          allow2_3: _allow2_3Notifier.value,
+                          allow2_4: _allow2_4Notifier.value,
+                          allow3: _allow3Notifier.value,
+                          allow4: _allow4Notifier.value,
+                          allow5: _allow5Notifier.value,
+                          allow6: _allow6Notifier.value,
+                          allow7: _allow7Notifier.value,
+                          allow8: _allow8Notifier.value,
+                          allow9: _allow9Notifier.value,
+                          allow9_2: _allow9_2Notifier.value,
+                          allow9_3: _allow9_3Notifier.value,
+                          allow9_4: _allow9_4Notifier.value,
+                          allow9_5: _allow9_5Notifier.value,
+                          allow9_6: _allow9_6Notifier.value,
                           finished: false,
                         ));
                         showDialog(
@@ -2984,13 +3218,15 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                               actions: <Widget>[
                                 ElevatedButton(
                                     onPressed: () async {
-                                      database.setClosureReport(
-                                          ClosureReport(
+                                      database.setDerivationReport(
+                                          DerivationReport(
                                             userId: report.userId,
-                                            closureReportId:
-                                            report.closureReportId,
+                                            derivationReportId:
+                                            report.derivationReportId,
                                             subsidy: _subsidy,
                                             techPerson: _techPerson,
+                                            addressedTo: _addressedTo,
+                                            objectiveDerivation: _objectiveDerivation,
                                             orientation1: _orientation1,
                                             arriveDate: _arriveDate,
                                             receptionResources:
@@ -3128,10 +3364,25 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                                             postLaborFinalDate: _postLaborFinalDate,
                                             postLaborTotalDays: int.parse(_totalDaysController.text),
                                             jobMaintenance: _jobMaintenance,
-                                            orientation10: _orientation10,
-                                            motiveClose: _motiveClose,
-                                            motiveCloseDetail: _motiveCloseDetail,
-                                            closeDate: _closeDate,
+                                            allow1: _allow1Notifier.value,
+                                            allow1_1: _allow1_1Notifier.value,
+                                            allow2: _allow2Notifier.value,
+                                            allow2_1: _allow2_1Notifier.value,
+                                            allow2_2: _allow2_2Notifier.value,
+                                            allow2_3: _allow2_3Notifier.value,
+                                            allow2_4: _allow2_4Notifier.value,
+                                            allow3: _allow3Notifier.value,
+                                            allow4: _allow4Notifier.value,
+                                            allow5: _allow5Notifier.value,
+                                            allow6: _allow6Notifier.value,
+                                            allow7: _allow7Notifier.value,
+                                            allow8: _allow8Notifier.value,
+                                            allow9: _allow9Notifier.value,
+                                            allow9_2: _allow9_2Notifier.value,
+                                            allow9_3: _allow9_3Notifier.value,
+                                            allow9_4: _allow9_4Notifier.value,
+                                            allow9_5: _allow9_5Notifier.value,
+                                            allow9_6: _allow9_6Notifier.value,
                                             finished: true,
                                             completedDate: DateTime.now(),
                                           ));

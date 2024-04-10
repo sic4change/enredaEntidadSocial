@@ -14,6 +14,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.enabled = true,
     this.height,
+    this.controller,
   });
 
   final String labelText;
@@ -25,6 +26,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool enabled;
   final double? height;
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +85,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
           ),
         ),
       ),
+      controller: controller,
       initialValue: initialValue,
       validator: validator,
       onSaved: onSaved,

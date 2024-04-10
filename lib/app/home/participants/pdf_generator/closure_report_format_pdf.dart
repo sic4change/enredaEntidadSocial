@@ -77,15 +77,6 @@ Future<Uint8List> generateClosureReportFile(
         SpaceH12(),
         _customItem(title: 'Sexo/Género', content: user.gender ?? ''),
 
-        //Section 2
-        _sectionTitle(title: '2. Historial'),
-        _customItem(title: 'Antecedentes', content: closureReport.background ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Diagnóstico inicial', content: closureReport.initialDiagnosis ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Motivos del cierre del caso', content: closureReport.closureReasons ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Itinerario realizado', content: closureReport.itineraryFollowed ?? ''),
         
       ]
     )

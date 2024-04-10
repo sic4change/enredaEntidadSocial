@@ -74,7 +74,7 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH12(),
         _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: formatter.format(initialReport.arriveDate!) ?? '', content2: initialReport.receptionResources ?? ''),
         SpaceH12(),
-        _customItem(title: 'Situación administrativa', content: initialReport.administrativeSituation ?? ''),
+        _customItem(title: 'Situación administrativa', content: initialReport.administrativeExternalResources ?? ''),
 
         //Section 2
         _sectionTitle(title: '2. Situación Sanitaria'),
@@ -91,8 +91,6 @@ Future<Uint8List> generateInitialReportFile(
         _customRow(title1: 'Sueño y descanso', title2: 'Diagnostico', content1: initialReport.rest ?? '', content2: initialReport.diagnosis ?? ''),
         SpaceH12(),
         _customRow(title1: 'Tratamiento', title2: 'Seguimiento', content1: initialReport.treatment ?? '', content2: initialReport.tracking ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Derivación interna al área psicosocial', content: initialReport.psychosocial ?? ''),
 
         //Subsection 2.2
         _subSectionTitle(title: '2.2 Discapacidad'),
@@ -170,7 +168,7 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH12(),
         _customItem(title: 'Centro y TS de referencia', content: initialReport.centerTSReference ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Destinataria de subvención y/o programa de apoyo', title2: 'Usuaria', content1: initialReport.subsidyBeneficiary ?? '', content2: initialReport.socialServicesUser ?? ''),
+        _customItem(title: 'Destinataria de subvención y/o programa de apoyo', content: initialReport.subsidyBeneficiary ?? ''),
         SpaceH12(),
         _customItem(title: 'Certificado de Exclusión Social', content: initialReport.socialExclusionCertificate ?? ''),
 
@@ -190,12 +188,7 @@ Future<Uint8List> generateInitialReportFile(
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                _customItem(title: 'Activa', content: initialReport.activeLabor ?? ''),
-                initialReport.activeLabor == 'Ocupada' ? SpaceH12() : pw.Container(),
-                initialReport.activeLabor == 'Ocupada' ? _customItem(title: 'Ocuada', content: initialReport.occupiedLabor ?? '') : pw.Container(),
-                initialReport.occupiedLabor == 'Cuenta ajena' ? SpaceH12() : pw.Container(),
-                initialReport.occupiedLabor == 'Cuenta ajena' ? _customRow(title1: 'Temporalidad', title2: 'Jornada', content1: initialReport.tempLabor ?? '', content2: initialReport.workingDayLabor ?? '') : pw.Container(),
-                initialReport.occupiedLabor == 'Cuenta ajena' ? SpaceH12() : pw.Container(),
+                //TODO
               ]
             )
          : pw.Container(),

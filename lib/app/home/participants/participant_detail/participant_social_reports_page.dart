@@ -4,12 +4,14 @@ import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/closure_report_participant.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/derivation_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/follow_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/initial_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_closure_follow_preview.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_follow_preview.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_report_preview.dart';
 import 'package:enreda_empresas/app/models/closureReport.dart';
+import 'package:enreda_empresas/app/models/derivationReport.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/personalDocument.dart';
@@ -73,6 +75,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
     late InitialReport initialReportUser = InitialReport();
     late ClosureReport closureReportUser = ClosureReport();
     late FollowReport followReportUser = FollowReport();
+    late DerivationReport derivationReportUser = DerivationReport();
 
     return StreamBuilder<UserEnreda>(
         stream: database.userEnredaStreamByUserId(
@@ -85,6 +88,9 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               totalReports++;
             }
             if(user.closureReportId != null ){
+              totalReports++;
+            }
+            if(user.derivationReportId != null){
               totalReports++;
             }
           }else{
@@ -108,108 +114,136 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                       if(snapshot.hasData){
                         followReportUser = snapshot.data!;
                       }
-                      return Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: Responsive.isDesktop(context) ? 50.0 : 20.0,
-                              vertical: 30),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(color: AppColors.greyBorder)
-                            ),
-                            child:
-                            Column(
-                                children: [
-                                  if (Responsive.isDesktop(context) &&
-                                      !Responsive.isDesktopS(context))
-                                    _buildHeaderDesktop(() {
-                                      if(user.closureReportId == null){
-                                        setState(() {
-                                          currentPage = ClosureReportForm(user: widget.participantUser);
-                                        });
-                                      }
-                                    }, user, initialReportUser),
-                                  if (!Responsive.isDesktop(context) ||
-                                      Responsive.isDesktopS(context))
-                                    _buildHeaderMobile((){
-                                      if(widget.participantUser.closureReportId == null){
+                      return StreamBuilder<DerivationReport>(
+                        stream: database.derivationReportsStreamByUserId(user.userId),
+                        builder: (context, snapshot) {
+                          if(snapshot.hasData){
+                            derivationReportUser = snapshot.data!;
+                          }
+                          return Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: Responsive.isDesktop(context) ? 50.0 : 20.0,
+                                  vertical: 30),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(color: AppColors.greyBorder)
+                                ),
+                                child:
+                                Column(
+                                    children: [
+                                      if (Responsive.isDesktop(context) &&
+                                          !Responsive.isDesktopS(context))
+                                        _buildHeaderDesktop(() {
+                                          if(user.closureReportId == null){
+                                            setState(() {
+                                              currentPage = ClosureReportForm(user: widget.participantUser);
+                                            });
+                                          }
+                                        }, user, initialReportUser),
+                                      if (!Responsive.isDesktop(context) ||
+                                          Responsive.isDesktopS(context))
+                                        _buildHeaderMobile((){
+                                          if(widget.participantUser.closureReportId == null){
 
-                                      }
-                                    }, user),
-                                  Divider(
-                                    color: AppColors.greyBorder,
-                                    height: 0,
-                                  ),
-                                  Column(
-                                      children: [
-                                        if(user.initialReportId != null)
-                                           _documentTile(
-                                              context,
-                                              'INFORME INICIAL',
-                                              formatter.format(initialReportUser.completedDate ?? DateTime.now()),
-                                              0,
-                                              (){
+                                          }
+                                        }, user),
+                                      Divider(
+                                        color: AppColors.greyBorder,
+                                        height: 0,
+                                      ),
+                                      Column(
+                                          children: [
+                                            if(user.initialReportId != null)
+                                               _documentTile(
+                                                  context,
+                                                  'INFORME INICIAL',
+                                                  formatter.format(initialReportUser.completedDate ?? DateTime.now()),
+                                                  0,
+                                                  (){
+                                                    setState(() {
+                                                      currentPage = InitialReportForm(user: widget.participantUser);
+                                                    });
+                                                  },
+                                                  () async {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            MyInitialReport(
+                                                              user: user,
+                                                              initialReport: initialReportUser,
+                                                            )
+                                                      ),
+                                                    );
+                                                  },
+                                                initialReportUser.finished ?? false,
+                                              ),
+
+                                            if(user.followReportId != null)
+                                              _documentTile(context, 'INFORME DE SEGUIMIENTO', formatter.format(followReportUser.completedDate ?? DateTime.now()), 1, (){
                                                 setState(() {
-                                                  currentPage = InitialReportForm(user: widget.participantUser);
+                                                  currentPage = FollowReportForm(user: widget.participantUser);
                                                 });
                                               },
                                               () async {
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        MyInitialReport(
-                                                          user: user,
-                                                          initialReport: initialReportUser,
-                                                        )
+                                                      builder: (context) =>
+                                                          MyFollowReport(
+                                                            user: user,
+                                                            followReport: followReportUser,
+                                                          )
                                                   ),
                                                 );
+                                              }, followReportUser.finished ?? false),
+
+                                            if(user.derivationReportId != null)
+                                              _documentTile(context, 'INFORME DE DERIVACIÓN', formatter.format(followReportUser.completedDate ?? DateTime.now()), user.followReportId == null ? 1 : 2, (){
+                                                setState(() {
+                                                  currentPage = DerivationReportForm(user: widget.participantUser);
+                                                });
                                               },
-                                            initialReportUser.finished ?? false,
-                                          ),
+                                                      () async {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                          //TODO hacer el pdf
+                                                              /*MyDerivationReport(
+                                                                user: user,
+                                                                derivationReport: derivationReportUser,
+                                                              )*/Container(),
+                                                      ),
+                                                    );
+                                                  }, derivationReportUser.finished ?? false),
 
-                                        if(user.followReportId != null)
-                                          _documentTile(context, 'INFORME DE SEGUIMIENTO', formatter.format(followReportUser.completedDate ?? DateTime.now()), 1, (){
-                                            setState(() {
-                                              currentPage = FollowReportForm(user: widget.participantUser);
-                                            });
-                                          },
-                                          () async {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      MyFollowReport(
-                                                        user: user,
-                                                        followReport: followReportUser,
-                                                      )
-                                              ),
-                                            );
-                                          }, followReportUser.finished ?? false),
-
-                                        if(user.closureReportId != null)
-                                          _documentTile(context, 'INFORME DE CIERRE', formatter.format(closureReportUser.completedDate ?? DateTime.now()), user.followReportId == null ? 1 : 2, (){
-                                            setState(() {
-                                              currentPage = ClosureReportForm(user: widget.participantUser);
-                                            });
-                                          },
-                                          () async {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      MyClosureReport(
-                                                        user: user,
-                                                        closureReport: closureReportUser,
-                                                      )
-                                              ),
-                                            );
-                                          }, closureReportUser.finished ?? false),
-                                      ]
-                                  )
-                                ]
-                            ),
-                          )
+                                            if(user.closureReportId != null)
+                                              _documentTile(context, 'INFORME DE CIERRE', formatter.format(closureReportUser.completedDate ?? DateTime.now()), _closureReportNumber(), (){
+                                                setState(() {
+                                                  currentPage = ClosureReportForm(user: widget.participantUser);
+                                                });
+                                              },
+                                              () async {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          MyClosureReport(
+                                                            user: user,
+                                                            closureReport: closureReportUser,
+                                                          )
+                                                  ),
+                                                );
+                                              }, closureReportUser.finished ?? false),
+                                          ]
+                                      )
+                                    ]
+                                ),
+                              )
+                          );
+                        }
                       );
                     }
                   );
@@ -219,6 +253,17 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
           );
         }
     );
+  }
+
+  int _closureReportNumber(){
+    int result = 1;
+    if(user.derivationReportId != null){
+      result++;
+    }
+    if(user.followReportId != null){
+      result++;
+    }
+    return result;
   }
 
   Widget _buildHeaderDesktop(VoidCallback onTap, UserEnreda user, InitialReport initialReport) {
@@ -318,11 +363,23 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                               followReport: FollowReport(
                                 userId: initialReport.userId,
                                 subsidy: initialReport.subsidy,
+                                techPerson: initialReport.techPerson,
                                 orientation1: initialReport.orientation1,
                                 arriveDate: initialReport.arriveDate,
                                 receptionResources: initialReport.receptionResources,
-                                administrativeSituation: initialReport.administrativeSituation,
+                                administrativeExternalResources: initialReport.administrativeExternalResources,
                                 expirationDate: initialReport.expirationDate,
+                                adminState: initialReport.adminState,
+                                adminNoThrough: initialReport.adminNoThrough,
+                                adminDateAsk: initialReport.adminDateAsk,
+                                adminDateResolution: initialReport.adminDateResolution,
+                                adminDateConcession: initialReport.adminDateConcession,
+                                adminTemp: initialReport.adminTemp,
+                                adminResidenceWork: initialReport.adminResidenceWork,
+                                adminDateRenovation: initialReport.adminDateRenovation,
+                                adminResidenceType: initialReport.adminResidenceType,
+                                adminJuridicFigure: initialReport.adminJuridicFigure,
+                                adminOther: initialReport.adminOther,
                                 orientation2: initialReport.orientation2,
                                 healthCard: initialReport.healthCard,
                                 medication: initialReport.medication,
@@ -331,7 +388,6 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                                 diagnosis: initialReport.diagnosis,
                                 treatment: initialReport.treatment,
                                 tracking: initialReport.tracking,
-                                psychosocial: initialReport.psychosocial,
                                 orientation2_2: initialReport.orientation2_2,
                                 disabilityState: initialReport.disabilityState,
                                 referenceProfessionalDisability: initialReport.referenceProfessionalDisability,
@@ -345,15 +401,28 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                                 dependenceGrade: initialReport.dependenceGrade,
                                 orientation2_4: initialReport.orientation2_4,
                                 externalDerivation: initialReport.externalDerivation,
+                                motive: initialReport.motive,
                                 orientation3: initialReport.orientation3,
                                 internalDerivationLegal: initialReport.internalDerivationLegal,
+                                internalDerivationDate: initialReport.internalDerivationDate,
+                                internalDerivationMotive: initialReport.internalDerivationMotive,
                                 externalDerivationLegal: initialReport.externalDerivationLegal,
+                                externalDerivationDate: initialReport.externalDerivationDate,
+                                externalDerivationMotive: initialReport.externalDerivationMotive,
+                                psychosocialDerivationLegal: initialReport.psychosocialDerivationLegal,
+                                psychosocialDerivationDate: initialReport.psychosocialDerivationDate,
+                                psychosocialDerivationMotive: initialReport.psychosocialDerivationMotive,
                                 legalRepresentation: initialReport.legalRepresentation,
                                 orientation4: initialReport.orientation4,
                                 ownershipType: initialReport.ownershipType,
                                 location: initialReport.location,
                                 centerContact: initialReport.centerContact,
                                 hostingObservations: initialReport.hostingObservations,
+                                ownershipTypeOpen: initialReport.ownershipTypeOpen,
+                                homelessnessSituation: initialReport.homelessnessSituation,
+                                homelessnessSituationOpen: initialReport.homelessnessSituationOpen,
+                                livingUnit: initialReport.livingUnit,
+                                ownershipTypeConcrete: initialReport.ownershipTypeConcrete,
                                 orientation5: initialReport.orientation5,
                                 informationNetworks: initialReport.informationNetworks,
                                 institutionNetworks: initialReport.institutionNetworks,
@@ -363,15 +432,15 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                                 orientation9: initialReport.orientation9,
                                 centerTSReference: initialReport.centerTSReference,
                                 subsidyBeneficiary: initialReport.subsidyBeneficiary,
-                                socialServicesUser: initialReport.socialServicesUser,
                                 socialExclusionCertificate: initialReport.socialExclusionCertificate,
+                                subsidyName: initialReport.subsidyName,
+                                socialExclusionCertificateDate: initialReport.socialExclusionCertificateDate,
+                                socialExclusionCertificateObservations: initialReport.socialExclusionCertificateObservations,
                                 orientation12: initialReport.orientation12,
                                 vulnerabilityOptions: initialReport.vulnerabilityOptions,
                                 orientation13: initialReport.orientation13,
+                                orientation13_2: initialReport.orientation13_2,
                                 educationLevel: initialReport.educationLevel,
-                                laborSituation: initialReport.laborSituation,
-                                activeLabor: initialReport.activeLabor,
-                                occupiedLabor: initialReport.occupiedLabor,
                                 tempLabor: initialReport.tempLabor,
                                 workingDayLabor: initialReport.workingDayLabor,
                                 competencies: initialReport.competencies,
@@ -387,9 +456,10 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
 
                       }
                     ),
+                    //TODO tener en cuenta inicial o de seguimiento
                     PopupMenuItem<SampleItem>(
                       value: SampleItem.itemThree,
-                      enabled: false,
+                      enabled: true,
                       child: Text(
                         'INFORME DE DERIVACIÓN',
                         style: TextStyle(
@@ -398,6 +468,122 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                           fontSize: 18,
                         ),
                       ),
+                      onTap: (){
+                        if(user.derivationReportId != null){
+                          showAlertDialog(
+                            context,
+                            title: 'Error',
+                            content: 'Este participante ya tiene un informe de derivación',
+                            defaultActionText: 'Aceptar',
+                          );
+                          return;
+                        }
+                        if(!initialReport.finished!){
+                          showAlertDialog(
+                            context,
+                            title: 'Error',
+                            content: 'El informe inicial aún no se ha completado',
+                            defaultActionText: 'Aceptar',
+                          );
+                          return;
+                        }
+                        setState(() {
+                          currentPage = DerivationReportForm(
+                            user: widget.participantUser,
+                            derivationReport: DerivationReport(
+                              userId: initialReport.userId,
+                              subsidy: initialReport.subsidy,
+                              techPerson: initialReport.techPerson,
+                              orientation1: initialReport.orientation1,
+                              arriveDate: initialReport.arriveDate,
+                              receptionResources: initialReport.receptionResources,
+                              administrativeExternalResources: initialReport.administrativeExternalResources,
+                              expirationDate: initialReport.expirationDate,
+                              adminState: initialReport.adminState,
+                              adminNoThrough: initialReport.adminNoThrough,
+                              adminDateAsk: initialReport.adminDateAsk,
+                              adminDateResolution: initialReport.adminDateResolution,
+                              adminDateConcession: initialReport.adminDateConcession,
+                              adminTemp: initialReport.adminTemp,
+                              adminResidenceWork: initialReport.adminResidenceWork,
+                              adminDateRenovation: initialReport.adminDateRenovation,
+                              adminResidenceType: initialReport.adminResidenceType,
+                              adminJuridicFigure: initialReport.adminJuridicFigure,
+                              adminOther: initialReport.adminOther,
+                              orientation2: initialReport.orientation2,
+                              healthCard: initialReport.healthCard,
+                              medication: initialReport.medication,
+                              orientation2_1: initialReport.orientation2_1,
+                              rest: initialReport.rest,
+                              diagnosis: initialReport.diagnosis,
+                              treatment: initialReport.treatment,
+                              tracking: initialReport.tracking,
+                              orientation2_2: initialReport.orientation2_2,
+                              disabilityState: initialReport.disabilityState,
+                              referenceProfessionalDisability: initialReport.referenceProfessionalDisability,
+                              disabilityGrade: initialReport.disabilityGrade,
+                              disabilityType: initialReport.disabilityType,
+                              granted: initialReport.granted,
+                              revisionDate: initialReport.revisionDate,
+                              orientation2_3: initialReport.orientation2_3,
+                              dependenceState: initialReport.dependenceState,
+                              referenceProfessionalDependence: initialReport.referenceProfessionalDependence,
+                              dependenceGrade: initialReport.dependenceGrade,
+                              orientation2_4: initialReport.orientation2_4,
+                              externalDerivation: initialReport.externalDerivation,
+                              motive: initialReport.motive,
+                              orientation3: initialReport.orientation3,
+                              internalDerivationLegal: initialReport.internalDerivationLegal,
+                              internalDerivationDate: initialReport.internalDerivationDate,
+                              internalDerivationMotive: initialReport.internalDerivationMotive,
+                              externalDerivationLegal: initialReport.externalDerivationLegal,
+                              externalDerivationDate: initialReport.externalDerivationDate,
+                              externalDerivationMotive: initialReport.externalDerivationMotive,
+                              psychosocialDerivationLegal: initialReport.psychosocialDerivationLegal,
+                              psychosocialDerivationDate: initialReport.psychosocialDerivationDate,
+                              psychosocialDerivationMotive: initialReport.psychosocialDerivationMotive,
+                              legalRepresentation: initialReport.legalRepresentation,
+                              orientation4: initialReport.orientation4,
+                              ownershipType: initialReport.ownershipType,
+                              location: initialReport.location,
+                              centerContact: initialReport.centerContact,
+                              hostingObservations: initialReport.hostingObservations,
+                              ownershipTypeOpen: initialReport.ownershipTypeOpen,
+                              homelessnessSituation: initialReport.homelessnessSituation,
+                              homelessnessSituationOpen: initialReport.homelessnessSituationOpen,
+                              livingUnit: initialReport.livingUnit,
+                              ownershipTypeConcrete: initialReport.ownershipTypeConcrete,
+                              orientation5: initialReport.orientation5,
+                              informationNetworks: initialReport.informationNetworks,
+                              institutionNetworks: initialReport.institutionNetworks,
+                              familyConciliation: initialReport.familyConciliation,
+                              orientation7: initialReport.orientation7,
+                              languages: initialReport.languages,
+                              orientation9: initialReport.orientation9,
+                              centerTSReference: initialReport.centerTSReference,
+                              subsidyBeneficiary: initialReport.subsidyBeneficiary,
+                              socialExclusionCertificate: initialReport.socialExclusionCertificate,
+                              subsidyName: initialReport.subsidyName,
+                              socialExclusionCertificateDate: initialReport.socialExclusionCertificateDate,
+                              socialExclusionCertificateObservations: initialReport.socialExclusionCertificateObservations,
+                              orientation12: initialReport.orientation12,
+                              vulnerabilityOptions: initialReport.vulnerabilityOptions,
+                              orientation13: initialReport.orientation13,
+                              orientation13_2: initialReport.orientation13_2,
+                              educationLevel: initialReport.educationLevel,
+                              tempLabor: initialReport.tempLabor,
+                              workingDayLabor: initialReport.workingDayLabor,
+                              competencies: initialReport.competencies,
+                              contextualization: initialReport.contextualization,
+                              connexion: initialReport.connexion,
+                              shortTerm: initialReport.shortTerm,
+                              mediumTerm: initialReport.mediumTerm,
+                              longTerm: initialReport.longTerm,
+                              finished: false,
+                            ),
+                          );
+                        });
+                      },
                     ),
                     PopupMenuItem<SampleItem>(
                       value: SampleItem.itemFour,
@@ -429,7 +615,100 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             return;
                           }
                           setState(() {
-                            currentPage = ClosureReportForm(user: widget.participantUser);
+                            currentPage = ClosureReportForm(
+                                user: widget.participantUser,
+                              closureReport: ClosureReport(
+                              userId: initialReport.userId,
+                              subsidy: initialReport.subsidy,
+                              techPerson: initialReport.techPerson,
+                              orientation1: initialReport.orientation1,
+                              arriveDate: initialReport.arriveDate,
+                              receptionResources: initialReport.receptionResources,
+                              administrativeExternalResources: initialReport.administrativeExternalResources,
+                              expirationDate: initialReport.expirationDate,
+                              adminState: initialReport.adminState,
+                              adminNoThrough: initialReport.adminNoThrough,
+                              adminDateAsk: initialReport.adminDateAsk,
+                              adminDateResolution: initialReport.adminDateResolution,
+                              adminDateConcession: initialReport.adminDateConcession,
+                              adminTemp: initialReport.adminTemp,
+                              adminResidenceWork: initialReport.adminResidenceWork,
+                              adminDateRenovation: initialReport.adminDateRenovation,
+                              adminResidenceType: initialReport.adminResidenceType,
+                              adminJuridicFigure: initialReport.adminJuridicFigure,
+                              adminOther: initialReport.adminOther,
+                              orientation2: initialReport.orientation2,
+                              healthCard: initialReport.healthCard,
+                              medication: initialReport.medication,
+                              orientation2_1: initialReport.orientation2_1,
+                              rest: initialReport.rest,
+                              diagnosis: initialReport.diagnosis,
+                              treatment: initialReport.treatment,
+                              tracking: initialReport.tracking,
+                              orientation2_2: initialReport.orientation2_2,
+                              disabilityState: initialReport.disabilityState,
+                              referenceProfessionalDisability: initialReport.referenceProfessionalDisability,
+                              disabilityGrade: initialReport.disabilityGrade,
+                              disabilityType: initialReport.disabilityType,
+                              granted: initialReport.granted,
+                              revisionDate: initialReport.revisionDate,
+                              orientation2_3: initialReport.orientation2_3,
+                              dependenceState: initialReport.dependenceState,
+                              referenceProfessionalDependence: initialReport.referenceProfessionalDependence,
+                              dependenceGrade: initialReport.dependenceGrade,
+                              orientation2_4: initialReport.orientation2_4,
+                              externalDerivation: initialReport.externalDerivation,
+                              motive: initialReport.motive,
+                              orientation3: initialReport.orientation3,
+                              internalDerivationLegal: initialReport.internalDerivationLegal,
+                              internalDerivationDate: initialReport.internalDerivationDate,
+                              internalDerivationMotive: initialReport.internalDerivationMotive,
+                              externalDerivationLegal: initialReport.externalDerivationLegal,
+                              externalDerivationDate: initialReport.externalDerivationDate,
+                              externalDerivationMotive: initialReport.externalDerivationMotive,
+                              psychosocialDerivationLegal: initialReport.psychosocialDerivationLegal,
+                              psychosocialDerivationDate: initialReport.psychosocialDerivationDate,
+                              psychosocialDerivationMotive: initialReport.psychosocialDerivationMotive,
+                              legalRepresentation: initialReport.legalRepresentation,
+                              orientation4: initialReport.orientation4,
+                              ownershipType: initialReport.ownershipType,
+                              location: initialReport.location,
+                              centerContact: initialReport.centerContact,
+                              hostingObservations: initialReport.hostingObservations,
+                              ownershipTypeOpen: initialReport.ownershipTypeOpen,
+                              homelessnessSituation: initialReport.homelessnessSituation,
+                              homelessnessSituationOpen: initialReport.homelessnessSituationOpen,
+                              livingUnit: initialReport.livingUnit,
+                              ownershipTypeConcrete: initialReport.ownershipTypeConcrete,
+                              orientation5: initialReport.orientation5,
+                              informationNetworks: initialReport.informationNetworks,
+                              institutionNetworks: initialReport.institutionNetworks,
+                              familyConciliation: initialReport.familyConciliation,
+                              orientation7: initialReport.orientation7,
+                              languages: initialReport.languages,
+                              orientation9: initialReport.orientation9,
+                              centerTSReference: initialReport.centerTSReference,
+                              subsidyBeneficiary: initialReport.subsidyBeneficiary,
+                              socialExclusionCertificate: initialReport.socialExclusionCertificate,
+                              subsidyName: initialReport.subsidyName,
+                              socialExclusionCertificateDate: initialReport.socialExclusionCertificateDate,
+                              socialExclusionCertificateObservations: initialReport.socialExclusionCertificateObservations,
+                              orientation12: initialReport.orientation12,
+                              vulnerabilityOptions: initialReport.vulnerabilityOptions,
+                              orientation13: initialReport.orientation13,
+                              orientation13_2: initialReport.orientation13_2,
+                              educationLevel: initialReport.educationLevel,
+                              tempLabor: initialReport.tempLabor,
+                              workingDayLabor: initialReport.workingDayLabor,
+                              competencies: initialReport.competencies,
+                              contextualization: initialReport.contextualization,
+                              connexion: initialReport.connexion,
+                              shortTerm: initialReport.shortTerm,
+                              mediumTerm: initialReport.mediumTerm,
+                              longTerm: initialReport.longTerm,
+                              finished: false,
+                            ),
+                            );
                           });
                         }
                     ),

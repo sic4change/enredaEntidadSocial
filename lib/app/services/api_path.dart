@@ -74,4 +74,6 @@ class APIPath {
   static String keepLearningOptions() => 'keepLearningOptions';
   static String followReports() => 'followReports';
   static String followReport(String followReportId) => 'followReports/$followReportId';
+  static String derivationReports() => 'derivationReports';
+  static String derivationReport(String derivationReportId) => 'derivationReports/$derivationReportId';
 }

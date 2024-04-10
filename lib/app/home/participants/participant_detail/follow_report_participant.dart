@@ -9,6 +9,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
+import 'package:enreda_empresas/app/models/formationReport.dart';
 import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
@@ -32,16 +33,46 @@ class FollowReportForm extends StatefulWidget {
 class _FollowReportFormState extends State<FollowReportForm> {
 
   late Widget currentPage;
-  late String? _disabilityState = '';
-  late String? _granted = '';
-  late List<LanguageReport>? _languages = null;
-  late String? _laborSituation = '';
-  late String? _activeLabor = '';
-  late String? _occupiedLabor = '';
+  final ValueNotifier<String> _techNameNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _disabilityStateNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _grantedNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<List<LanguageReport>> _languagesNotifier =
+  ValueNotifier<List<LanguageReport>>([LanguageReport(name: '', level: '')]);
+  final ValueNotifier<String> _laborSituationNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _adminStateNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _adminTempNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _adminJuridicFigureNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _ownershipTypeNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _ownershipTypeConcreteNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _homelessnessSituationNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _subsidyBeneficiaryNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<String> _socialExclusionCertificateNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<List<FormationReport>> _formationsNotifier =
+  ValueNotifier<List<FormationReport>>([FormationReport(name: '', type: '', certification: '')]);
+  final ValueNotifier<String> _postLaborAccompanimentNotifier =
+  ValueNotifier<String>('');
+  final ValueNotifier<int> _totalDaysNotifier =
+  ValueNotifier<int>(0);
+
+  final TextEditingController _techPersonController = TextEditingController();
+  final TextEditingController _totalDaysController = TextEditingController();
 
   @override
   void initState() {
     currentPage = followReport(context, widget.user);
+    _totalDaysController.text = '0';
     super.initState();
   }
 
@@ -57,56 +88,15 @@ class _FollowReportFormState extends State<FollowReportForm> {
     });
   }
 
-  void setStateGranted(String value){
-    setState(() {
-      //To refresh the page
-      currentPage = followReport(context, widget.user);
-      _disabilityState = value;
-    });
+  void _addLanguage(){
+    final newLanguages = List<LanguageReport>.from(_languagesNotifier.value)..add(LanguageReport(name: '', level: ''));
+    _languagesNotifier.value = newLanguages;
   }
 
-  void setStateDefinitive(String value){
-    setState(() {
-      //To refresh the page
-      currentPage = followReport(context, widget.user);
-      _granted = value;
-    });
+  void _addFormation(){
+    final newFormations = List<FormationReport>.from(_formationsNotifier.value)..add(FormationReport(name: '', type: '', certification: ''));
+    _formationsNotifier.value = newFormations;
   }
-
-  void setStateAddLanguage(List<LanguageReport> value){
-    setState(() {
-      //To refresh the page
-      currentPage = followReport(context, widget.user);
-      List<LanguageReport> addition = value;
-      addition.add(LanguageReport(name: '', level: ''));
-      _languages = addition;
-    });
-  }
-
-  void setStateLaborSituation(String value){
-    setState(() {
-      //To refresh the page
-      currentPage = followReport(context, widget.user);
-      _laborSituation = value;
-    });
-  }
-
-  void setStateActiveLabor(String value){
-    setState(() {
-      //To refresh the page
-      currentPage = followReport(context, widget.user);
-      _activeLabor = value;
-    });
-  }
-
-  void setStateOccupiedLabor(String value){
-    setState(() {
-      //To refresh the page
-      currentPage = followReport(context, widget.user);
-      _occupiedLabor = value;
-    });
-  }
-
 
 
   Widget followReport(BuildContext context, UserEnreda user) {
@@ -286,7 +276,32 @@ class _FollowReportFormState extends State<FollowReportForm> {
           ],
         ),
         onTap: (){
-          setStateAddLanguage(_languages!);
+          _addLanguage();
+        }
+    );
+  }
+
+  Widget addFormationButton(){
+    return InkWell(
+        child: Row(
+          children: [
+            Icon(
+              Icons.add_circle_outline,
+              color: AppColors.turquoiseBlue,
+            ),
+            SpaceW8(),
+            Text(
+              'Añadir formación',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: AppColors.turquoiseBlue,
+              ),
+            ),
+          ],
+        ),
+        onTap: (){
+          _addFormation();
         }
     );
   }
@@ -297,56 +312,44 @@ class _FollowReportFormState extends State<FollowReportForm> {
 
     bool _finished = report.finished ?? false;
 
-    List<DropdownMenuItem<String>> _yesNoSelection = ['Si', 'No'].map<
-        DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
-    List<DropdownMenuItem<String>> _subsidySelection = [
-      '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS',
-      '529775_SICFCH - Acompañamiento, tecnología y colaboración: 3 claves en el camino hacia el empleo joven',
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
     //Pre-Selection
     String? _subsidy = report.subsidy ?? '';
+    String? _techPerson = report.techPerson ?? widget.user.assignedById;
 
     //Section 1
     String _orientation1 = report.orientation1 ?? '';
     DateTime? _arriveDate = report.arriveDate;
     String _receptionResources = report.receptionResources ?? '';
-    String _administrativeSituation = report.administrativeSituation ?? '';
+    String _administrativeExternalResources = report.administrativeExternalResources ?? '';
 
-    List<DropdownMenuItem<String>> _arriveTypeSelection = ['Segura', 'Insegura']
-        .map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
+
+    //Section 1.1
+    if (_adminStateNotifier.value == '' &&
+        report.adminState != null) {
+      _adminStateNotifier.value = report.adminState!;
+    }
+    String? _adminNoThrough = report.adminNoThrough ?? '';
+    DateTime? _adminDateAsk = report.adminDateAsk;
+    DateTime? _adminDateResolution = report.adminDateResolution;
+    DateTime? _adminDateConcession = report.adminDateConcession;
+    if (_adminTempNotifier.value == '' &&
+        report.adminTemp != null) {
+      _adminTempNotifier.value = report.adminTemp!;
+    }
+    if (_adminJuridicFigureNotifier.value == '' &&
+        report.adminJuridicFigure != null) {
+      _adminJuridicFigureNotifier.value = report.adminJuridicFigure!;
+    }
+    String? _adminResidenceWork = report.adminResidenceWork ?? '';
+    DateTime? _adminDateRenovation = report.adminDateRenovation;
+    String? _adminResidenceType = report.adminResidenceType ?? '';
+    String? _adminOther = report.adminOther ?? '';
 
     //Section 2
     DateTime? _expirationDate = report.expirationDate;
     String? _orientation2 = report.orientation2 ?? '';
     String? _healthCard = report.healthCard ?? '';
     String? _medication = report.medication ?? '';
-    List<DropdownMenuItem<String>> _healthCardSelection = [
-      'Si',
-      'No',
-      'Caducidad'
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
 
     //Subsection 2.1
     String? _orientation2_1 = report.orientation2_1 ?? '';
@@ -354,101 +357,74 @@ class _FollowReportFormState extends State<FollowReportForm> {
     String? _diagnosis = report.diagnosis ?? '';
     String? _treatment = report.treatment ?? '';
     String? _tracking = report.tracking ?? '';
-    String? _psychosocial = report.psychosocial ?? '';
 
     //Subsection 2.2
     String? _orientation2_2 = report.orientation2_2 ?? '';
-    _disabilityState == '' ? _disabilityState = report.disabilityState : _disabilityState = _disabilityState;
-    String? _referenceProfessionalDisability = report.referenceProfessionalDisability ?? '';
+    if (_disabilityStateNotifier.value == '' &&
+        report.disabilityState != null) {
+      _disabilityStateNotifier.value = report.disabilityState!;
+    }
+    String? _referenceProfessionalDisability =
+        report.referenceProfessionalDisability ?? '';
     String? _disabilityGrade = report.disabilityGrade ?? '';
-    _granted == '' ? _granted = report.granted : _granted = _granted;
+    if (_grantedNotifier.value == '' &&
+        report.granted != null) {
+      _grantedNotifier.value = report.granted!;
+    }
     DateTime? _revisionDate = report.revisionDate;
     String? _disabilityType = report.disabilityType ?? '';
-    List<DropdownMenuItem<String>> _stateSelection = ['En trámite', 'Concedida', 'No aplica']
-        .map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-    List<DropdownMenuItem<String>> _grantedSelection = ['Revisable', 'Definitiva']
-        .map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-    List<DropdownMenuItem<String>> _disabilityGradeSelection = [
-      '1',
-      '2',
-      '3',
-      '4',
-      '5'
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-    List<DropdownMenuItem<String>> _disabilityTypeSelection = [
-      'Sensorial', 'Intelectual', 'Psíquica'
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
 
     //Subsection 2.3
     String? _orientation2_3 = report.orientation2_3 ?? '';
     String? _dependenceState = report.dependenceState ?? '';
-    String? _referenceProfessionalDependence = report
-        .referenceProfessionalDependence ?? '';
+    String? _referenceProfessionalDependence =
+        report.referenceProfessionalDependence ?? '';
     String? _dependenceGrade = report.dependenceGrade ?? '';
-    List<DropdownMenuItem<String>> _dependencyGradeSelection = ['I', 'II', 'III']
-        .map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
+
 
     //Subsection 2.4
     String? _orientation2_4 = report.orientation2_4 ?? '';
     String? _externalDerivation = report.externalDerivation ?? '';
+    String? _motive = report.motive ?? '';
 
     //Section 3
     String? _orientation3 = report.orientation3 ?? '';
     String? _internalDerivationLegal = report.internalDerivationLegal ?? '';
+    DateTime?  _internalDerivationDate = report.internalDerivationDate;
+    String? _internalDerivationMotive = report.internalDerivationMotive ?? '';
     String? _externalDerivationLegal = report.externalDerivationLegal ?? '';
+    DateTime? _externalDerivationDate = report.externalDerivationDate;
+    String? _externalDerivationMotive = report.externalDerivationMotive ?? '';
+    String? _psychosocialDerivationLegal = report.psychosocialDerivationLegal ?? '';
+    DateTime? _psychosocialDerivationDate = report.psychosocialDerivationDate;
+    String? _psychosocialDerivationMotive = report.psychosocialDerivationMotive ?? '';
     String? _legalRepresentation = report.legalRepresentation ?? '';
+    String? _processingBag = report.processingBag ?? '';
+    DateTime? _processingBagDate = report.processingBagDate;
+    String? _economicAmount = report.economicAmount ?? '';
 
     //Section 4
     String? _orientation4 = report.orientation4 ?? '';
-    String? _ownershipType = report.ownershipType ?? '';
+    if (_ownershipTypeNotifier.value == '' &&
+        report.ownershipType != null) {
+      _ownershipTypeNotifier.value = report.ownershipType!;
+    }
+    if (_ownershipTypeConcreteNotifier.value == '' &&
+        report.ownershipTypeConcrete != null) {
+      _ownershipTypeConcreteNotifier.value = report.ownershipTypeConcrete!;
+    }
+    if (_homelessnessSituationNotifier.value == '' &&
+        report.homelessnessSituation != null) {
+      _homelessnessSituationNotifier.value = report.homelessnessSituation!;
+    }
+    String? _ownershipTypeOpen = report.ownershipTypeOpen ?? '';
+    String? _homelessnessSituationOpen = report.homelessnessSituationOpen ?? '';
+    String? _livingUnit = report.livingUnit ?? '';
+
+
     String? _location = report.location ?? '';
     String? _centerContact = report.centerContact ?? '';
     List<String>? _hostingObservations = report.hostingObservations ?? [];
-
-    List<DropdownMenuItem<String>> _ownershipTypeSelection = ['Hogar', 'Sin hogar']
-        .map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
-    const List<String> _optionsSectionFour = [
-      'Luz',
-      'Gas',
-      'Hacinamiento',
-      'Accesibilidad',
-      'Agua corriente',
-      'Baño',
-      'Agua caliente',
-      'Mobiliario básico'
-    ];
-
     //Section 5
     String? _orientation5 = report.orientation5 ?? '';
     String? _informationNetworks = report.informationNetworks ?? '';
@@ -457,41 +433,40 @@ class _FollowReportFormState extends State<FollowReportForm> {
 
     //Section 7
     String? _orientation7 = report.orientation7 ?? '';
-    _languages == null ? _languages = report.languages : _languages = _languages;
+    if(report.languages != null){
+      _languagesNotifier.value = report.languages!;
+    }
 
     //Section 9
+    if (_subsidyBeneficiaryNotifier.value == '' &&
+        report.subsidyBeneficiary != null) {
+      _subsidyBeneficiaryNotifier.value = report.subsidyBeneficiary!;
+    }
+    if (_socialExclusionCertificateNotifier.value == '' &&
+        report.socialExclusionCertificate != null) {
+      _socialExclusionCertificateNotifier.value = report.socialExclusionCertificate!;
+    }
+    String? _subsidyName = report.subsidyName ?? '';
+    DateTime? _socialExclusionCertificateDate = report.socialExclusionCertificateDate;
+    String? _socialExclusionCertificateObservations = report.socialExclusionCertificateObservations ?? '';
     String? _orientation9 = report.orientation9 ?? '';
     String? _centerTSReference = report.centerTSReference ?? '';
-    String? _subsidyBeneficiary = report.subsidyBeneficiary ?? '';
-    String? _socialServicesUser = report.socialServicesUser ?? '';
-    String? _socialExclusionCertificate = report.socialExclusionCertificate ??
-        '';
+
 
     //Section 12
     String? _orientation12 = report.orientation12 ?? '';
     List<String>? _vulnerabilityOptions = report.vulnerabilityOptions ?? [];
 
-    List<String> _optionsSectionTwelve = [
-      'Barrera ideomática',
-      'Situación sinhogarismo',
-      'Colectivo LGTBI',
-      'Salud mental grave',
-      'Joven ex tutelado/a',
-      'Responsabilidades familiares',
-      'Madre monomarental',
-      'Minoría étnica',
-      'Falta de red de apoyo',
-      'Violencia de Género',
-      'Adicciones',
-      'Rularidad'
-    ];
+
 
     //Section 13
     String? _orientation13 = report.orientation13 ?? '';
+    String? _orientation13_2 = report.orientation13_2 ?? '';
     String? _educationLevel = report.educationLevel ?? '';
-    _laborSituation == '' ? _laborSituation = report.laborSituation : _laborSituation = _laborSituation;
-    _activeLabor == '' ? _activeLabor = report.activeLabor : _activeLabor = _activeLabor;
-    _occupiedLabor == '' ? _occupiedLabor = report.occupiedLabor : _occupiedLabor = _occupiedLabor;
+    if (_laborSituationNotifier.value == '' &&
+        report.laborSituation != null) {
+      _laborSituationNotifier.value = report.laborSituation!;
+    }
     String? _tempLabor = report.tempLabor ?? '';
     String? _workingDayLabor = report.workingDayLabor ?? '';
     String? _competencies = report.competencies ?? '';
@@ -501,69 +476,35 @@ class _FollowReportFormState extends State<FollowReportForm> {
     String? _mediumTerm = report.mediumTerm ?? '';
     String? _longTerm = report.longTerm ?? '';
 
-    List<DropdownMenuItem<String>> _educationalLevelSelection = [
-      '1er ciclo 2ria (Max CINE 0-2)',
-      '2do ciclo 2ria (CINE 3) o postsecundaria (CINE 4)',
-      'Superior o 3ria (CINE 5 a 8)',
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
-    List<DropdownMenuItem<String>> _laborSituationSelection = [
-      'Activa',
-      'Inactiva',
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
-    List<DropdownMenuItem<String>> _activeSelection = [
-      'Ocupada',
-      'Desempleada de larga duración (12 meses o más)',
-      'Desempleada (menos de 12 meses)'
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
-    List<DropdownMenuItem<String>> _occupiedSelection = [
-      'Cuenta propia',
-      'Cuenta ajena',
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
-    List<DropdownMenuItem<String>> _tempSelection = [
-      'Contrato indefinido',
-      'Contrato temporal',
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
-    List<DropdownMenuItem<String>> _workDaySelection = [
-      'Completa',
-      'Parcial/Voluntaria',
-      'Parcial/Involuntaria'
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
-
+    //Section 9.5
+    String? _orientation9_5 = report.orientation9_5 ?? '';
+    if(report.formations != null){
+      _formationsNotifier.value = report.formations!;
+    }
+    String? _formationBag = report.formationBag ?? '';
+    DateTime? _formationBagDate = report.formationBagDate;
+    String? _formationBagMotive = report.formationBagMotive ?? '';
+    String? _formationBagEconomic = report.formationBagEconomic ?? '';
+    String? _jobObtaining = report.jobObtaining ?? '';
+    DateTime? _jobObtainDate = report.jobObtainDate;
+    DateTime? _jobFinishDate = report.jobFinishDate;
+    String? _jobUpgrade = report.jobUpgrade ?? '';
+    String? _upgradeMotive = report.upgradeMotive ?? '';
+    DateTime? _upgradeDate = report.upgradeDate;
+    String? _orientation9_6 = report.orientation9_6 ?? '';
+    if (_postLaborAccompanimentNotifier.value == '' &&
+        report.postLaborAccompaniment != null) {
+      _postLaborAccompanimentNotifier.value = report.postLaborAccompaniment!;
+    }
+    String? _postLaborAccompanimentMotive = report.postLaborAccompanimentMotive ?? '';
+    DateTime? _postLaborInitialDate = report.postLaborInitialDate;
+    DateTime? _postLaborFinalDate = report.postLaborFinalDate;
+    if (_totalDaysNotifier.value == 0 &&
+        report.postLaborTotalDays != null) {
+      _totalDaysNotifier.value = report.postLaborTotalDays!;
+      _totalDaysController.text = report.postLaborTotalDays!.toString();
+    }
+    String? _jobMaintenance = report.jobMaintenance ?? '';
 
     return Padding(
       padding: const EdgeInsets.only(left: 50, right: 30),
@@ -572,40 +513,62 @@ class _FollowReportFormState extends State<FollowReportForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             SpaceH20(),
-            _subsidy == '' ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Subvención a la que el/la participante está imputado/a',
-              source: _subsidySelection,
-              onChanged: _finished ? null : (value) {
+            _subsidy == ''
+                ? CustomDropDownButtonFormFieldTittle(
+              labelText:
+              StringConst.INITIAL_SUBSIDY,
+              source: StringConst.SUBSIDY_SELECTION,
+              onChanged: _finished
+                  ? null
+                  : (value) {
                 _subsidy = value;
               },
               validator: (value) =>
               value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ) :
-            CustomDropDownButtonFormFieldTittle(
-              labelText: 'Subvención a la que el/la participante está imputado/a',
-              source: _subsidySelection,
+            )
+                : CustomDropDownButtonFormFieldTittle(
+              labelText:
+              StringConst.INITIAL_SUBSIDY,
+              source: StringConst.SUBSIDY_SELECTION,
               value: _subsidy,
-              onChanged: _finished ? null : (value) {
+              onChanged: _finished
+                  ? null
+                  : (value) {
                 _subsidy = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
             ),
+            SpaceH12(),
+            StreamBuilder<UserEnreda>(
+                stream: database.userEnredaStreamByUserId(_techPerson),
+                builder: (context, snapshot) {
+
+                  if(snapshot.hasData && snapshot.connectionState != ConnectionState.waiting){
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _techPersonController.text = '${snapshot.data?.firstName}' + ' ' + '${snapshot.data?.lastName}';
+                    });
+                  }
+                  return CustomTextFormFieldTitle(
+                    labelText: StringConst.INITIAL_TECH_PERSON,
+                    controller: _techPersonController,
+                    enabled: false,
+                  );
+                }
+            ),
 
             //Section 1
-            informSectionTitle('1. Itinerario en España'),
+            informSectionTitle(StringConst.INITIAL_TITLE1_ITINERARY),
             CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
+              labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation1,
               onChanged: (value) {
                 _orientation1 = value ?? '';
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
@@ -615,7 +578,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
               childLeft: CustomDatePickerTitle(
-                labelText: 'Fecha de llegada a España',
+                labelText: StringConst.INITIAL_ARRIVE_DATE,
                 initialValue: _arriveDate,
                 onChanged: (value) {
                   _arriveDate = value;
@@ -624,15 +587,13 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 validator: (value) =>
                 (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-
               childRight: CustomTextFormFieldTitle(
-                labelText: 'Recursos de Acogida',
+                labelText: StringConst.INITIAL_RECEPTION_RESOURCES,
                 initialValue: _receptionResources,
                 onChanged: (value) {
                   _receptionResources = value ?? '';
                 },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
+                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
@@ -640,29 +601,248 @@ class _FollowReportFormState extends State<FollowReportForm> {
             ),
             SpaceH12(),
             CustomTextFormFieldTitle(
-              labelText: 'Situación administrativa',
-              hintText: 'Ley de asilo, arraigo, ex-menor tutelado...',
-              initialValue: _administrativeSituation,
+              labelText: StringConst.INITIAL_EXTERNAL_RESOURCES,
+              initialValue: _administrativeExternalResources,
               onChanged: (value) {
-                _administrativeSituation = value ?? '';
+                _administrativeExternalResources = value ?? '';
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
+            //Section 1.1
+            informSubSectionTitle(StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION),
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _adminStateNotifier.value == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText:
+                StringConst.INITIAL_STATE,
+                source: StringConst.ADMIN_STATE_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _adminStateNotifier.value = value!;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText:
+                StringConst.INITIAL_STATE,
+                source: StringConst.ADMIN_STATE_SELECTION,
+                value: _adminStateNotifier.value,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _adminStateNotifier.value = value!;
+                },
+                validator: (value) => (value!.isNotEmpty || value != '')
+                    ? null
+                    : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: ValueListenableBuilder(
+                  valueListenable: _adminStateNotifier,
+                  builder: (context, value, child){
+                    return _adminStateNotifier.value == 'Sin tramitar' ?
+                    CustomTextFormFieldTitle(
+                      labelText: 'Sin tramitar',
+                      initialValue: _adminNoThrough,
+                      onChanged: (value) {
+                        _adminNoThrough = value;
+                      },
+                      validator: (value) => (value!.isNotEmpty || value != '')
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                      enabled: !_finished,
+                    ) : //Open Field
+                    _adminStateNotifier.value == 'Concedida' ?
+                    CustomDatePickerTitle(
+                      labelText: StringConst.INITIAL_DATE_CONCESSION,
+                      initialValue: _adminDateConcession,
+                      onChanged: (value) {
+                        _adminDateConcession = value;
+                      },
+                      enabled: !_finished,
+                      validator: (value) => (value != null)
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                    ) : //Fecha concesion
+                    Container();
+                  }
+              ),
+            ),
+            ValueListenableBuilder(
+                valueListenable: _adminStateNotifier,
+                builder: (context, value, child){
+                  return _adminStateNotifier.value == 'En trámite' ?
+                  Column(
+                    children: [
+                      SpaceH12(),
+                      CustomFlexRowColumn(
+                        contentPadding: EdgeInsets.zero,
+                        separatorSize: 20,
+                        childLeft: CustomDatePickerTitle(
+                          labelText: StringConst.INITIAL_DATE_ASK,
+                          initialValue: _adminDateAsk,
+                          onChanged: (value) {
+                            _adminDateAsk = value;
+                          },
+                          enabled: !_finished,
+                          validator: (value) => (value != null)
+                              ? null
+                              : StringConst.FORM_GENERIC_ERROR,
+                        ),
+                        childRight: CustomDatePickerTitle(
+                          labelText: StringConst.INITIAL_DATE_RESOLUTION,
+                          initialValue: _adminDateResolution,
+                          onChanged: (value) {
+                            _adminDateResolution = value;
+                          },
+                          enabled: !_finished,
+                          validator: (value) => (value != null)
+                              ? null
+                              : StringConst.FORM_GENERIC_ERROR,
+                        ),
+                      ),
+                    ],
+                  ) : Container();
+                }
+            ),
+            SpaceH12(),
+            CustomFlexRowColumn(
+                contentPadding: EdgeInsets.zero,
+                separatorSize: 20,
+                childLeft: _adminTempNotifier.value == ''
+                    ? CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.INITIAL_TEMP,
+                  source: StringConst.ADMIN_TEMP_SELECTION,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _adminTempNotifier.value = value!;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                )
+                    : CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.INITIAL_TEMP,
+                  value: _adminTempNotifier.value,
+                  source: StringConst.ADMIN_TEMP_SELECTION,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _adminTempNotifier.value = value!;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
+                childRight: ValueListenableBuilder(
+                  valueListenable: _adminTempNotifier,
+                  builder: (context, value, child){
+                    return _adminTempNotifier.value == 'Inicial' || _adminTempNotifier.value == 'Temporal' ?
+                    CustomDatePickerTitle(
+                      labelText: StringConst.INITIAL_DATE_RENOVATION,
+                      initialValue: _adminDateRenovation,
+                      onChanged: (value) {
+                        _adminDateRenovation = value;
+                      },
+                      enabled: !_finished,
+                      validator: (value) => (value != null)
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                    ) : Container();
+                  },
+                )
+            ),
+            SpaceH12(),
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childRight: _adminJuridicFigureNotifier.value == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_JURIDIC_FIGURE,
+                source: StringConst.ADMIN_JURIDIC_FIGUR_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _adminJuridicFigureNotifier.value = value!;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_JURIDIC_FIGURE,
+                value: _adminJuridicFigureNotifier.value,
+                source: StringConst.ADMIN_JURIDIC_FIGUR_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _adminJuridicFigureNotifier.value = value!;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childLeft: _adminResidenceType == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_RESIDENCE_TYPE,
+                source: StringConst.ADMIN_RESIDENCE_TYPE_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _adminResidenceType = value!;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_RESIDENCE_TYPE,
+                value: _adminResidenceType,
+                source: StringConst.ADMIN_RESIDENCE_TYPE_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _adminResidenceType = value!;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+            ),
+            ValueListenableBuilder(
+                valueListenable: _adminJuridicFigureNotifier,
+                builder: (context, value, child){
+                  return _adminJuridicFigureNotifier.value == 'Otros' ? Column(
+                    children: [
+                      SpaceH12(),
+                      CustomTextFormFieldTitle(
+                        labelText: StringConst.INITIAL_OTHERS,
+                        initialValue: _adminOther,
+                        onChanged: (value) {
+                          _adminOther = value;
+                        },
+                        validator: (value) => (value!.isNotEmpty || value != '')
+                            ? null
+                            : StringConst.FORM_GENERIC_ERROR,
+                        enabled: !_finished,
+                      ),
+                    ],
+                  ) : Container();
+                }
+            ),
+
+
             //Section 2
-            informSectionTitle('2. Situación Sanitaria'),
+            informSectionTitle(StringConst.INITIAL_TITLE2_SANITARY),
             CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
+              labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2,
               onChanged: (value) {
                 _orientation2 = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
@@ -673,27 +853,30 @@ class _FollowReportFormState extends State<FollowReportForm> {
               separatorSize: 20,
               childLeft: _healthCard == ''
                   ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Tarjeta sanitaria',
-                source: _healthCardSelection,
-                onChanged: _finished ? null : (value) {
+                labelText: StringConst.INITIAL_HEALTH_CARD,
+                source: StringConst.HEALTH_CARD_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _healthCard = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Tarjeta sanitaria',
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_HEALTH_CARD,
                 value: _healthCard,
-                source: _healthCardSelection,
-                onChanged: _finished ? null : (value) {
+                source: StringConst.HEALTH_CARD_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _healthCard = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitle(
-                labelText: 'Fecha de caducidad',
+                labelText: StringConst.INITIAL_EXPIRATION_DATE,
                 initialValue: _expirationDate,
                 onChanged: (value) {
                   _expirationDate = value;
@@ -705,27 +888,25 @@ class _FollowReportFormState extends State<FollowReportForm> {
             ),
             SpaceH12(),
             CustomTextFormFieldTitle(
-              labelText: 'Medicación/Tratamiento',
+              labelText: StringConst.INITIAL_MEDICATION,
               initialValue: _medication,
               onChanged: (value) {
                 _medication = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             //Subsection 2.1
-            informSubSectionTitle('2.1 Salud mental'),
+            informSubSectionTitle(StringConst.INITIAL_TITLE_2_1_MENTAL_HEALTH),
             CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
+              labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2_1,
               onChanged: (value) {
                 _orientation2_1 = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
@@ -735,33 +916,35 @@ class _FollowReportFormState extends State<FollowReportForm> {
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
-                labelText: 'Sueño y descanso',
+                labelText: StringConst.INITIAL_REST,
                 initialValue: _rest,
                 onChanged: (value) {
                   _rest = value;
                 },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
+                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
               childRight: _diagnosis == ''
                   ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Diagnóstico',
-                source: _yesNoSelection,
-                onChanged: _finished ? null : (value) {
+                labelText: StringConst.INITIAL_DIAGNOSIS,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _diagnosis = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Diagnóstico',
-                source: _yesNoSelection,
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_DIAGNOSIS,
+                source: StringConst.YES_NO_SELECTION,
                 value: _diagnosis,
-                onChanged: _finished ? null : (value) {
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _diagnosis = value;
                 },
                 validator: (value) =>
@@ -773,146 +956,149 @@ class _FollowReportFormState extends State<FollowReportForm> {
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
-                labelText: 'Tratamiento',
+                labelText: StringConst.INITIAL_TREATMENT,
                 initialValue: _treatment,
                 onChanged: (value) {
                   _treatment = value;
                 },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
+                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
-                labelText: 'Seguimiento',
+                labelText: StringConst.INITIAL_TRACKING,
                 initialValue: _tracking,
                 onChanged: (value) {
                   _tracking = value;
                 },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
+                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
             ),
-            SpaceH12(),
-            _psychosocial == '' ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Derivación interna al área psicosocial',
-              source: _yesNoSelection,
-              onChanged: _finished ? null : (value) {
-                _psychosocial = value;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ) :
-            CustomDropDownButtonFormFieldTittle(
-              labelText: 'Derivación interna al área psicosocial',
-              source: _yesNoSelection,
-              value: _psychosocial,
-              onChanged: _finished ? null : (value) {
-                _psychosocial = value;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
 
             //Subsection 2.2
-            informSubSectionTitle('2.2 Discapacidad'),
+            informSubSectionTitle(StringConst.INITIAL_TITLE_2_2_DISABILITY),
             CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
+              labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2_2,
               onChanged: (value) {
                 _orientation2_2 = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
-            _disabilityState == ''
-                ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Estado',
-              source: _stateSelection,
-              onChanged: _finished ? null : (value) {
-                setStateGranted(value!);
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            )
-                :
-            CustomDropDownButtonFormFieldTittle(
-              labelText: 'Estado',
-              source: _stateSelection,
-              value: _disabilityState,
-              onChanged: _finished ? null : (value) {
-                setStateGranted(value!);
-                if(value != 'Concedida'){
-                  _granted = '';
-                  _revisionDate = null;
-                }
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
-            SpaceH12(),
 
-            _disabilityState == 'Concedida'
-                ? CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
+            ValueListenableBuilder(
+                valueListenable: _disabilityStateNotifier,
+                builder: (context, value, child) {
+                  return Column(
+                    children: [
+                      _disabilityStateNotifier.value == ''
+                          ? CustomDropDownButtonFormFieldTittle(
+                        labelText: StringConst.INITIAL_STATE,
+                        source: StringConst.STATE_SELECTION,
+                        onChanged: _finished
+                            ? null
+                            : (value) {
+                          _disabilityStateNotifier.value = value!;
+                        },
+                        validator: (value) => value != null
+                            ? null
+                            : StringConst.FORM_GENERIC_ERROR,
+                      )
+                          : CustomDropDownButtonFormFieldTittle(
+                        labelText: StringConst.INITIAL_STATE,
+                        source: StringConst.STATE_SELECTION,
+                        value: _disabilityStateNotifier.value,
+                        onChanged: _finished
+                            ? null
+                            : (value) {
+                          _disabilityStateNotifier.value = value!;
+                          if (value != 'Concedida') {
+                            _grantedNotifier.value = '';
+                            _revisionDate = null;
+                          }
+                        },
+                        validator: (value) => value != null
+                            ? null
+                            : StringConst.FORM_GENERIC_ERROR,
+                      ),
+                      SpaceH12(),
+                      _disabilityStateNotifier.value == 'Concedida'
+                          ? ValueListenableBuilder(
+                          valueListenable: _grantedNotifier,
+                          builder: (context, value, child){
+                            return CustomFlexRowColumn(
+                              contentPadding: EdgeInsets.zero,
+                              separatorSize: 20,
 
-              //Granted selection
-              childLeft: _granted == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Concedida',
-                source: _grantedSelection,
-                onChanged: _finished ? null : (value) {
-                  setStateDefinitive(value!);
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Concedida',
-                source: _grantedSelection,
-                value: _granted,
-                onChanged: _finished ? null : (value) {
-                  setStateDefinitive(value!);
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
+                              //Granted selection
+                              childLeft:  _grantedNotifier.value == ''
+                                  ? CustomDropDownButtonFormFieldTittle(
+                                labelText: StringConst.INITIAL_GRANTED,
+                                source: StringConst.GRANTED_SELECTION,
+                                onChanged: _finished
+                                    ? null
+                                    : (value) {
+                                  _grantedNotifier.value = value!;
+                                },
+                                validator: (value) => value != null
+                                    ? null
+                                    : StringConst.FORM_GENERIC_ERROR,
+                              )
+                                  : CustomDropDownButtonFormFieldTittle(
+                                labelText: StringConst.INITIAL_GRANTED,
+                                source: StringConst.GRANTED_SELECTION,
+                                value: _grantedNotifier.value,
+                                onChanged: _finished
+                                    ? null
+                                    : (value) {
+                                  _grantedNotifier.value = value!;
+                                },
+                                validator: (value) => value != null
+                                    ? null
+                                    : StringConst.FORM_GENERIC_ERROR,
+                              ),
 
-              //Date selection if revisable
-              childRight: _granted == 'Revisable' ?
-              CustomDatePickerTitle(
-                labelText: 'Fecha',
-                initialValue: _revisionDate,
-                onChanged: (value) {
-                  _revisionDate = value;
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ) : Container(),
-            ) :
-            Container(),
 
-            _disabilityState == 'Concedida' ? SpaceH12() : Container(),
+                              //Date selection if revisable
+                              childRight: _grantedNotifier.value == 'Revisable'
+                                  ? CustomDatePickerTitle(
+                                labelText: StringConst.INITIAL_DATE,
+                                initialValue: _revisionDate,
+                                onChanged: (value) {
+                                  _revisionDate = value;
+                                },
+                                enabled: !_finished,
+                                validator: (value) => (value != null)
+                                    ? null
+                                    : StringConst.FORM_GENERIC_ERROR,
+                              )
+                                  : Container(),
+                            );
+                          }
+                      )
+                          : Container(),
+                      _disabilityStateNotifier.value == 'Concedida'
+                          ? SpaceH12()
+                          : Container(),
+                    ],
+                  );
+                }),
 
             CustomTextFormFieldTitle(
-              labelText: 'Profesional de referencia',
+              labelText: StringConst.INITIAL_REFERENCE_PROFESSIONAL,
               initialValue: _referenceProfessionalDisability,
               onChanged: (value) {
                 _referenceProfessionalDisability = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
@@ -922,41 +1108,49 @@ class _FollowReportFormState extends State<FollowReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: _disabilityGrade == '' ?
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Grado de discapacidad',
-                source: _disabilityGradeSelection,
-                onChanged: _finished ? null : (value) {
+              childLeft: _disabilityGrade == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_DISABILITY_GRADE,
+                source: StringConst.DISABILITY_GRADE_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _disabilityGrade = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              ) :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Grado de discapacidad',
-                source: _disabilityGradeSelection,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_DISABILITY_GRADE,
+                source: StringConst.DISABILITY_GRADE_SELECTION,
                 value: _disabilityGrade,
-                onChanged: _finished ? null : (value) {
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _disabilityGrade = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: _disabilityType == '' ?
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Tipo de discapacidad',
-                source: _disabilityTypeSelection,
-                onChanged: _finished ? null : (value) {
+              childRight: _disabilityType == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_DISABILITY_TYPE,
+                source: StringConst.DISABILITY_TYPE_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _disabilityType = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              ) :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Tipo de discapacidad',
-                source: _disabilityTypeSelection,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_DISABILITY_TYPE,
+                source: StringConst.DISABILITY_TYPE_SELECTION,
                 value: _disabilityType,
-                onChanged: _finished ? null : (value) {
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _disabilityType = value;
                 },
                 validator: (value) =>
@@ -965,15 +1159,14 @@ class _FollowReportFormState extends State<FollowReportForm> {
             ),
 
             //Subsection 2.3
-            informSubSectionTitle('2.3 Dependencia'),
+            informSubSectionTitle(StringConst.INITIAL_TITLE_2_3_DEPENDENCE),
             CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
+              labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2_3,
               onChanged: (value) {
                 _orientation2_3 = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
@@ -984,53 +1177,60 @@ class _FollowReportFormState extends State<FollowReportForm> {
               separatorSize: 20,
               childLeft: _dependenceState == ''
                   ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Estado',
-                source: _stateSelection,
-                onChanged: _finished ? null : (value) {
+                labelText: StringConst.INITIAL_STATE,
+                source: StringConst.DEPENDENCE_STATE_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _dependenceState = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Estado',
-                source: _stateSelection,
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_STATE,
+                source: StringConst.DEPENDENCE_STATE_SELECTION,
                 value: _dependenceState,
-                onChanged: _finished ? null : (value) {
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _dependenceState = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomTextFormFieldTitle(
-                labelText: 'Profesional de referencia',
+                labelText: StringConst.INITIAL_REFERENCE_PROFESSIONAL,
                 initialValue: _referenceProfessionalDependence,
                 onChanged: (value) {
                   _referenceProfessionalDependence = value;
                 },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
+                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
             ),
             SpaceH12(),
-            _dependenceGrade == '' ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Grado de dependencia',
-              source: _dependencyGradeSelection,
-              onChanged: _finished ? null : (value) {
+            _dependenceGrade == ''
+                ? CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.INITIAL_DEPENDENCE_GRADE,
+              source: StringConst.DEPENDENCE_GRADE_SELECTION,
+              onChanged: _finished
+                  ? null
+                  : (value) {
                 _dependenceGrade = value;
               },
               validator: (value) =>
               value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ) :
-            CustomDropDownButtonFormFieldTittle(
-              labelText: 'Grado de dependencia',
-              source: _dependencyGradeSelection,
+            )
+                : CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.INITIAL_DEPENDENCE_GRADE,
+              source: StringConst.DEPENDENCE_GRADE_SELECTION,
               value: _dependenceGrade,
-              onChanged: _finished ? null : (value) {
+              onChanged: _finished
+                  ? null
+                  : (value) {
                 _dependenceGrade = value;
               },
               validator: (value) =>
@@ -1038,197 +1238,237 @@ class _FollowReportFormState extends State<FollowReportForm> {
             ),
 
             //Subsection 2.4
-            informSubSectionTitle('2.4 Adicciones'),
+            informSubSectionTitle(StringConst.INITIAL_TITLE_2_4_ADDICTIONS),
             CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
+              labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation2_4,
               onChanged: (value) {
                 _orientation2_4 = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Derivación externa',
-              initialValue: _externalDerivation,
-              onChanged: (value) {
-                _externalDerivation = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _externalDerivation == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _externalDerivation = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                value: _externalDerivation,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _externalDerivation = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                labelText: StringConst.INITIAL_MOTIVE,
+                initialValue: _motive,
+                onChanged: (value) {
+                  _motive = value;
+                },
+                validator: (value) => (value!.isNotEmpty || value != '')
+                    ? null
+                    : StringConst.FORM_GENERIC_ERROR,
+                enabled: !_finished,
+              ),
             ),
 
             //Section 3
-            informSectionTitle('3. Situación legal'),
+            informSectionTitle(StringConst.INITIAL_TITLE_3_LEGAL_SITUATION),
             CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
+              labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation3,
               onChanged: (value) {
                 _orientation3 = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
+            //Internal derivation
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
               childLeft: _internalDerivationLegal == ''
                   ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Derivación interna',
-                source: _yesNoSelection,
-                onChanged: _finished ? null : (value) {
+                labelText: StringConst.INITIAL_INTERNAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _internalDerivationLegal = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Derivación interna',
-                source: _yesNoSelection,
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_INTERNAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
                 value: _internalDerivationLegal,
-                onChanged: _finished ? null : (value) {
+                onChanged: _finished
+                    ? null
+                    : (value) {
                   _internalDerivationLegal = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Derivación externa',
-                initialValue: _externalDerivationLegal,
+              childRight: CustomDatePickerTitle(
+                labelText: StringConst.INITIAL_DERIVATION_DATE,
+                initialValue: _internalDerivationDate,
                 onChanged: (value) {
-                  _externalDerivationLegal = value;
+                  _internalDerivationDate = value;
                 },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
+                validator: (value) =>
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
             CustomTextFormFieldTitle(
-              labelText: 'Representación legal',
-              hintText: 'De oficio, privada, datos de contacto',
+              labelText: StringConst.INITIAL_MOTIVE,
+              initialValue: _internalDerivationMotive,
+              onChanged: (value) {
+                _internalDerivationMotive = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            //Psychosocial derivation
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _psychosocialDerivationLegal == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _psychosocialDerivationLegal = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                value: _psychosocialDerivationLegal,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _psychosocialDerivationLegal = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: CustomDatePickerTitle(
+                labelText: StringConst.INITIAL_DERIVATION_DATE,
+                initialValue: _psychosocialDerivationDate,
+                onChanged: (value) {
+                  _psychosocialDerivationDate = value;
+                },
+                enabled: !_finished,
+                validator: (value) =>
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+            ),
+            SpaceH12(), //TODO check values saved
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_MOTIVE,
+              initialValue: _psychosocialDerivationMotive,
+              onChanged: (value) {
+                _psychosocialDerivationMotive = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            //External derivation
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _externalDerivationLegal == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _externalDerivationLegal = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                value: _externalDerivationLegal,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _externalDerivationLegal = value;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: CustomDatePickerTitle(
+                labelText: StringConst.INITIAL_DERIVATION_DATE,
+                initialValue: _externalDerivationDate,
+                onChanged: (value) {
+                  _externalDerivationDate = value;
+                },
+                enabled: !_finished,
+                validator: (value) =>
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_MOTIVE,
+              initialValue: _externalDerivationMotive,
+              onChanged: (value) {
+                _externalDerivationMotive = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_LEGAL_REPRESENTATION,
+              hintText: StringConst.INITIAL_HINT_LEGAL,
               initialValue: _legalRepresentation,
               onChanged: (value) {
                 _legalRepresentation = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-
-            //Section 4
-            informSectionTitle('4. Situación alojativa'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation4,
-              onChanged: (value) {
-                _orientation4 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: _ownershipType == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Tipo de tenencia',
-                source: _ownershipTypeSelection,
-                onChanged: _finished ? null : (value) {
-                  _ownershipType = value;
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Tipo de tenencia',
-                source: _ownershipTypeSelection,
-                value: _ownershipType,
-                onChanged: _finished ? null : (value) {
-                  _ownershipType = value;
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Ubicación actual de la persona',
-                initialValue: _location,
-                onChanged: (value) {
-                  _location = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Datos de contacto del centro y persona de referencia',
-              initialValue: _centerContact,
-              onChanged: (value) {
-                _centerContact = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            Align(
-                alignment: Alignment.center,
-                child: CustomMultiSelectionRadioList(
-                    options: _optionsSectionFour,
-                    selections: _hostingObservations,
-                    enabled: !_finished)),
-
-            //Section 5
-            informSectionTitle('5. Redes de apoyo'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation5,
-              onChanged: (value) {
-                _orientation5 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Redes de apoyo personales y familiares',
-              initialValue: _informationNetworks,
-              hintText: 'Asociación vecinal, grupo de facebook, whatsap, etc',
-              onChanged: (value) {
-                _informationNetworks = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
@@ -1238,25 +1478,281 @@ class _FollowReportFormState extends State<FollowReportForm> {
               separatorSize: 20,
               contentPadding: EdgeInsets.zero,
               childLeft: CustomTextFormFieldTitle(
-                labelText: 'Redes de apoyo institucionales',
-                initialValue: _institutionNetworks,
+                labelText: StringConst.FOLLOW_PROCESSING_BAG,
+                initialValue: _processingBag,
                 onChanged: (value) {
-                  _institutionNetworks = value;
+                  _processingBag = value;
                 },
+                validator: (value) => (value!.isNotEmpty || value != '')
+                    ? null
+                    : StringConst.FORM_GENERIC_ERROR,
+                enabled: !_finished,
+              ),
+              childRight: CustomDatePickerTitle(
+                labelText: StringConst.INITIAL_DATE,
+                initialValue: _processingBagDate,
+                onChanged: (value) {
+                  _processingBagDate = value;
+                },
+                enabled: !_finished,
                 validator: (value) =>
-                (value!.isNotEmpty || value != '')
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.FOLLOW_ECONOMIC_AMOUNT,
+              initialValue: _economicAmount,
+              onChanged: (value) {
+                _economicAmount = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
+            //Section 4
+            informSectionTitle(StringConst.INITIAL_TITLE_4_HOUSE_SITUATION),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_OBSERVATIONS,
+              initialValue: _orientation4,
+              onChanged: (value) {
+                _orientation4 = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomFlexRowColumn(
+                contentPadding: EdgeInsets.zero,
+                separatorSize: 20,
+                childLeft: _ownershipTypeNotifier.value == ''
+                    ? CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.INITIAL_HOUSE_SITUATION,
+                  source: StringConst.OWNERSHIP_TYPE_SELECTION,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _ownershipTypeNotifier.value = value!;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                )
+                    : CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.INITIAL_HOUSE_SITUATION,
+                  source: StringConst.OWNERSHIP_TYPE_SELECTION,
+                  value: _ownershipTypeNotifier.value,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _ownershipTypeNotifier.value = value!;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
+                childRight: ValueListenableBuilder(
+                  valueListenable: _ownershipTypeNotifier,
+                  builder: (context, value, child){
+                    return _ownershipTypeNotifier.value == 'Con hogar' ?
+                    //Tipo de tenencia (Con hogar)
+                    _ownershipTypeConcreteNotifier.value == ''
+                        ? CustomDropDownButtonFormFieldTittle(
+                      labelText: StringConst.INITIAL_OWNERSHIP_TYPE,
+                      source: StringConst.OWNERSHIP_TYPE_CONCRETE_SELECTION,
+                      onChanged: _finished
+                          ? null
+                          : (value) {
+                        _ownershipTypeConcreteNotifier.value = value!;
+                      },
+                      validator: (value) =>
+                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    )
+                        : CustomDropDownButtonFormFieldTittle(
+                      labelText: StringConst.INITIAL_OWNERSHIP_TYPE,
+                      source: StringConst.OWNERSHIP_TYPE_CONCRETE_SELECTION,
+                      value: _ownershipTypeConcreteNotifier.value,
+                      onChanged: _finished
+                          ? null
+                          : (value) {
+                        _ownershipTypeConcreteNotifier.value = value!;
+                      },
+                      validator: (value) =>
+                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    ) : _ownershipTypeNotifier.value == 'Sin hogar' ?
+                    //Situación sinhogarismo (Sin hogar)
+                    _homelessnessSituationNotifier.value == ''
+                        ? CustomDropDownButtonFormFieldTittle(
+                      labelText: StringConst.INITIAL_HOMELESS_SITUATION,
+                      source: StringConst.HOMELESS_SITUATION_SELECTION,
+                      onChanged: _finished
+                          ? null
+                          : (value) {
+                        _homelessnessSituationNotifier.value = value!;
+                      },
+                      validator: (value) =>
+                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    )
+                        : CustomDropDownButtonFormFieldTittle(
+                      labelText: StringConst.INITIAL_HOMELESS_SITUATION,
+                      source: StringConst.HOMELESS_SITUATION_SELECTION,
+                      value: _homelessnessSituationNotifier.value,
+                      onChanged: _finished
+                          ? null
+                          : (value) {
+                        _homelessnessSituationNotifier.value = value!;
+                      },
+                      validator: (value) =>
+                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    ) :
+                    Container();
+                  },
+                )
+            ),
+            ValueListenableBuilder(
+                valueListenable: _ownershipTypeConcreteNotifier,
+                builder: (context, value, child){
+                  return _ownershipTypeConcreteNotifier.value == 'Otros' ?
+                  Column(
+                    children: [
+                      SpaceH12(),
+                      CustomTextFormFieldTitle(
+                        labelText: StringConst.INITIAL_OTHERS,
+                        initialValue: _ownershipTypeOpen,
+                        onChanged: (value) {
+                          _ownershipTypeOpen = value;
+                        },
+                        validator: (value) => (value!.isNotEmpty || value != '')
+                            ? null
+                            : StringConst.FORM_GENERIC_ERROR,
+                        enabled: !_finished,
+                      ),
+                    ],
+                  ) :
+                  Container();
+                }
+            ),
+            ValueListenableBuilder(
+                valueListenable: _homelessnessSituationNotifier,
+                builder: (context, value, child){
+                  return _homelessnessSituationNotifier.value == 'Otros' ?
+                  Column(
+                    children: [
+                      SpaceH12(),
+                      CustomTextFormFieldTitle(
+                        labelText: StringConst.INITIAL_OTHERS,
+                        initialValue: _homelessnessSituationOpen,
+                        onChanged: (value) {
+                          _homelessnessSituationOpen = value;
+                        },
+                        validator: (value) => (value!.isNotEmpty || value != '')
+                            ? null
+                            : StringConst.FORM_GENERIC_ERROR,
+                        enabled: !_finished,
+                      ),
+                    ],
+                  ) :
+                  Container();
+                }
+            ),
+            SpaceH12(),
+            CustomFlexRowColumn(
+              separatorSize: 20,
+              contentPadding: EdgeInsets.zero,
+              childLeft: CustomTextFormFieldTitle(
+                labelText: StringConst.INITIAL_LIVING_UNIT,
+                hintText: StringConst.INITIAL_LIVING_UNIT_HINT,
+                initialValue: _livingUnit,
+                onChanged: (value) {
+                  _livingUnit = value;
+                },
+                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
-                labelText: 'Conciliación familiar',
+                labelText: StringConst.INITIAL_CENTER_CONTACT,
+                initialValue: _centerContact,
+                onChanged: (value) {
+                  _centerContact = value;
+                },
+                validator: (value) => (value!.isNotEmpty || value != '')
+                    ? null
+                    : StringConst.FORM_GENERIC_ERROR,
+                enabled: !_finished,
+              ),
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_LOCATION,
+              initialValue: _location,
+              onChanged: (value) {
+                _location = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            Align(
+                alignment: Alignment.center,
+                child: CustomMultiSelectionRadioList(
+                    options: StringConst.OPTIONS_SECTION_4,
+                    selections: _hostingObservations,
+                    enabled: !_finished)),
+
+            //Section 5
+            informSectionTitle(StringConst.INITIAL_TITLE_5_SUPPORT),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_OBSERVATIONS,
+              initialValue: _orientation5,
+              onChanged: (value) {
+                _orientation5 = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_INFORMATION_NETWORKS,
+              initialValue: _informationNetworks,
+              hintText: StringConst.INITIAL_INFORMATION_NETWORKS_HINT,
+              onChanged: (value) {
+                _informationNetworks = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomFlexRowColumn(
+              separatorSize: 20,
+              contentPadding: EdgeInsets.zero,
+              childLeft: CustomTextFormFieldTitle(
+                labelText: StringConst.INITIAL_INSTITUTION_NETWORKS,
+                initialValue: _institutionNetworks,
+                onChanged: (value) {
+                  _institutionNetworks = value;
+                },
+                validator: (value) => (value!.isNotEmpty || value != '')
+                    ? null
+                    : StringConst.FORM_GENERIC_ERROR,
+                enabled: !_finished,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                labelText: StringConst.INITIAL_FAMILY_CONCILIATION,
                 initialValue: _familyConciliation,
                 onChanged: (value) {
                   _familyConciliation = value;
                 },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
+                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
@@ -1264,15 +1760,14 @@ class _FollowReportFormState extends State<FollowReportForm> {
             ),
 
             //Section 7
-            informSectionTitle('6. Idiomas'),
+            informSectionTitle(StringConst.INITIAL_TITLE_6_LANGUAGES),
             CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
+              labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation7,
               onChanged: (value) {
                 _orientation7 = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
@@ -1285,47 +1780,404 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     return Container();
                   }
                   final _languagesStream = snapshot.data;
-                  final _languageOptions = _languagesStream!.map<
-                      DropdownMenuItem<String>>((String value) {
+                  final _languageOptions = _languagesStream!
+                      .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
                     );
                   }).toList();
+                  return ValueListenableBuilder(
+                      valueListenable: _languagesNotifier,
+                      builder: (context, value, child)
+                      {
+                        return Column(
+                          children: [
+                            for (LanguageReport language in _languagesNotifier
+                                .value)
+                              Column(
+                                children: [
+                                  CustomFlexRowColumn(
+                                    contentPadding: EdgeInsets.zero,
+                                    separatorSize: 20,
+                                    childLeft: language.name == ''
+                                        ? CustomDropDownButtonFormFieldTittle(
+                                      labelText: StringConst.INITIAL_LANGUAGE,
+                                      source: _languageOptions,
+                                      onChanged: _finished
+                                          ? null
+                                          : (value) {
+                                        _languagesNotifier.value[_languagesNotifier
+                                            .value.indexOf(language)].name = value!;
+                                      },
+                                      validator: (value) =>
+                                      value != null
+                                          ? null
+                                          : StringConst.FORM_GENERIC_ERROR,
+                                    )
+                                        : CustomDropDownButtonFormFieldTittle(
+                                      labelText: StringConst.INITIAL_LANGUAGE,
+                                      value: language.name,
+                                      source: _languageOptions,
+                                      onChanged: _finished
+                                          ? null
+                                          : (value) {
+                                        _languagesNotifier.value[_languagesNotifier
+                                            .value.indexOf(language)].name = value!;
+                                      },
+                                      validator: (value) =>
+                                      value != null
+                                          ? null
+                                          : StringConst.FORM_GENERIC_ERROR,
+                                    ),
+                                    childRight: CustomTextFormFieldTitle(
+                                      labelText:
+                                      StringConst.INITIAL_LANGUAGE_LEVEL,
+                                      initialValue: language.level,
+                                      onChanged: (value) {
+                                        _languagesNotifier.value[_languagesNotifier
+                                            .value.indexOf(language)].level = value;
+                                      },
+                                      validator: (value) =>
+                                      (value!.isNotEmpty || value != '')
+                                          ? null
+                                          : StringConst.FORM_GENERIC_ERROR,
+                                      enabled: !_finished,
+                                    ),
+
+                                  ),
+                                  SpaceH12(),
+                                ],
+                              ),
+
+                          ],
+                        );
+                      }
+                  );
+
+                }),
+            addLanguageButton(),
+
+            //Section 9
+            informSectionTitle(StringConst.INITIAL_TITLE_7_SOCIAL_ATTENTION),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_OBSERVATIONS,
+              initialValue: _orientation9,
+              onChanged: (value) {
+                _orientation9 = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_CENTER_TS,
+              initialValue: _centerTSReference,
+              onChanged: (value) {
+                _centerTSReference = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomFlexRowColumn(
+                contentPadding: EdgeInsets.zero,
+                separatorSize: 20,
+                childLeft: _subsidyBeneficiaryNotifier.value == ''
+                    ? CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.INITIAL_SUBSIDY_BENEFICIARY,
+                  source: StringConst.YES_NO_SELECTION,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _subsidyBeneficiaryNotifier.value = value!;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                )
+                    : CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.INITIAL_SUBSIDY_BENEFICIARY,
+                  source: StringConst.YES_NO_SELECTION,
+                  value: _subsidyBeneficiaryNotifier.value,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _subsidyBeneficiaryNotifier.value = value!;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
+                childRight: ValueListenableBuilder(
+                  valueListenable: _subsidyBeneficiaryNotifier,
+                  builder: (context, value, child){
+                    return _subsidyBeneficiaryNotifier.value == 'Si' ?
+                    CustomTextFormFieldTitle(
+                      labelText: StringConst.INITIAL_NAME_TYPE,
+                      initialValue: _subsidyName,
+                      onChanged: (value) {
+                        _subsidyName = value;
+                      },
+                      validator: (value) => (value!.isNotEmpty || value != '')
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                      enabled: !_finished,
+                    ) :
+                    Container();
+                  },
+                )
+            ),
+            SpaceH12(),
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _socialExclusionCertificateNotifier.value == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_SOCIAL_EXCLUSION_CERTIFICATE,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _socialExclusionCertificateNotifier.value = value!;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_SOCIAL_EXCLUSION_CERTIFICATE,
+                source: StringConst.YES_NO_SELECTION,
+                value: _socialExclusionCertificateNotifier.value,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _socialExclusionCertificateNotifier.value = value!;
+                },
+                validator: (value) =>
+                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: Container(),
+            ),
+            ValueListenableBuilder(
+                valueListenable: _socialExclusionCertificateNotifier,
+                builder: (context, value, child){
+                  return _socialExclusionCertificateNotifier.value == 'Si' ?
+                  Column(
+                    children: [
+                      SpaceH12(),
+                      CustomFlexRowColumn(
+                        contentPadding: EdgeInsets.zero,
+                        separatorSize: 20,
+                        childRight: CustomDatePickerTitle(
+                          labelText: StringConst.INITIAL_DATE,
+                          initialValue: _socialExclusionCertificateDate,
+                          onChanged: (value) {
+                            _socialExclusionCertificateDate = value;
+                          },
+                          enabled: !_finished,
+                          validator: (value) => (value != null)
+                              ? null
+                              : StringConst.FORM_GENERIC_ERROR,
+                        ),
+                        childLeft: CustomTextFormFieldTitle(
+                          labelText: StringConst.INITIAL_SOCIAL_EXCLUSION_OBSERVATIONS,
+                          initialValue: _socialExclusionCertificateObservations,
+                          onChanged: (value) {
+                            _socialExclusionCertificateObservations = value;
+                          },
+                          validator: (value) => (value!.isNotEmpty || value != '')
+                              ? null
+                              : StringConst.FORM_GENERIC_ERROR,
+                          enabled: !_finished,
+                        ),
+                      ),
+                    ],
+                  ) :
+                  Container();
+                }
+            ),
+            //Section 12
+            informSectionTitle(StringConst.INITIAL_TITLE_8_VULNERABILITY),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_OBSERVATIONS,
+              initialValue: _orientation12,
+              onChanged: (value) {
+                _orientation12 = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomMultiSelectionRadioList(
+                options: StringConst.OPTIONS_SECTION_12,
+                selections: _vulnerabilityOptions,
+                enabled: !_finished),
+
+            //Section 13
+            informSectionTitle(StringConst.INITIAL_TITLE_9_WORK),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_OBSERVATIONS,
+              initialValue: _orientation13,
+              onChanged: (value) {
+                _orientation13 = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            _educationLevel == ''
+                ? CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.INITIAL_EDUCATION_LEVEL,
+              source: StringConst.EDUCATIONAL_LEVEL_SELECTION,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _educationLevel = value;
+              },
+              validator: (value) =>
+              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+            )
+                : CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.INITIAL_EDUCATION_LEVEL,
+              source: StringConst.EDUCATIONAL_LEVEL_SELECTION,
+              value: _educationLevel,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _educationLevel = value;
+              },
+              validator: (value) =>
+              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+            ),
+            informSubSectionTitle(StringConst.INITIAL_TITLE_9_2_WORK_SITUATION),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_OBSERVATIONS,
+              initialValue: _orientation13_2,
+              onChanged: (value) {
+                _orientation13_2 = value;
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
+            informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
+            CustomTextFormFieldTitle(
+              labelText:
+              StringConst.INITIAL_COMPETENCIES,
+              initialValue: _competencies,
+              onChanged: (value) {
+                _competencies = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_CONTEXTUALIZATION,
+              initialValue: _contextualization,
+              onChanged: (value) {
+                _contextualization = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_CONNEXION,
+              initialValue: _connexion,
+              onChanged: (value) {
+                _connexion = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
+            informSubSectionTitle(StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_SHORT_TERM,
+              initialValue: _shortTerm,
+              onChanged: (value) {
+                _shortTerm = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_MEDIUM_TERM,
+              initialValue: _mediumTerm,
+              onChanged: (value) {
+                _mediumTerm = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_LONG_TERM,
+              initialValue: _longTerm,
+              onChanged: (value) {
+                _longTerm = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
+            informSubSectionTitle(StringConst.FOLLOW_TITLE_9_5_DEVELOP),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_OBSERVATIONS,
+              initialValue: _orientation9_5,
+              onChanged: (value) {
+                _orientation9_5 = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
+            informSubSectionTitle(StringConst.FOLLOW_FORMATIONS),
+
+            ValueListenableBuilder(
+                valueListenable: _formationsNotifier,
+                builder: (context, value, child)
+                {
                   return Column(
                     children: [
-                      for(LanguageReport language in _languages!)
+                      for (FormationReport formation in _formationsNotifier
+                          .value)
                         Column(
                           children: [
                             CustomFlexRowColumn(
                               contentPadding: EdgeInsets.zero,
                               separatorSize: 20,
-                              childLeft: language.name == ''
-                                  ? CustomDropDownButtonFormFieldTittle(
-                                labelText: 'Idioma',
-                                source: _languageOptions,
-                                onChanged: _finished ? null : (value) {
-                                  language.name = value!;
-                                },
-                                validator: (value) =>
-                                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                              )
-                                  :
-                              CustomDropDownButtonFormFieldTittle(
-                                labelText: 'Idioma',
-                                value: language.name,
-                                source: _languageOptions,
-                                onChanged: _finished ? null : (value) {
-                                  language.name = value!;
-                                },
-                                validator: (value) =>
-                                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                              ),
-                              childRight: CustomTextFormFieldTitle(
-                                labelText: 'Reconocimiento / acreditación - nivel',
-                                initialValue: language.level,
+                              childLeft: CustomTextFormFieldTitle(
+                                labelText:
+                                StringConst.FOLLOW_FORMATION_NAME,
+                                initialValue: formation.name,
                                 onChanged: (value) {
-                                  language.level = value;
+                                  _formationsNotifier.value[_formationsNotifier
+                                      .value.indexOf(formation)].name = value;
                                 },
                                 validator: (value) =>
                                 (value!.isNotEmpty || value != '')
@@ -1333,367 +2185,468 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                     : StringConst.FORM_GENERIC_ERROR,
                                 enabled: !_finished,
                               ),
+                              childRight: formation.type == ''
+                                  ? CustomDropDownButtonFormFieldTittle(
+                                labelText: StringConst.FOLLOW_FORMATION_TYPE,
+                                source: StringConst.FORMATION_TYPE_SELECTION,
+                                onChanged: _finished
+                                    ? null
+                                    : (value) {
+                                  _formationsNotifier.value[_formationsNotifier
+                                      .value.indexOf(formation)].type = value!;
+                                },
+                                validator: (value) =>
+                                value != null
+                                    ? null
+                                    : StringConst.FORM_GENERIC_ERROR,
+                              )
+                                  : CustomDropDownButtonFormFieldTittle(
+                                labelText: StringConst.FOLLOW_FORMATION_TYPE,
+                                value: formation.type,
+                                source: StringConst.FORMATION_TYPE_SELECTION,
+                                onChanged: _finished
+                                    ? null
+                                    : (value) {
+                                  _formationsNotifier.value[_formationsNotifier
+                                      .value.indexOf(formation)].type = value!;
+                                },
+                                validator: (value) =>
+                                value != null
+                                    ? null
+                                    : StringConst.FORM_GENERIC_ERROR,
+                              ),
+                            ),
+                            SpaceH12(),
+                            formation.certification == ''
+                                ? CustomDropDownButtonFormFieldTittle(
+                              labelText: StringConst.FOLLOW_FORMATION_CERTIFICATION,
+                              source: StringConst.YES_NO_SELECTION,
+                              onChanged: _finished
+                                  ? null
+                                  : (value) {
+                                _formationsNotifier.value[_formationsNotifier
+                                    .value.indexOf(formation)].certification = value!;
+                              },
+                              validator: (value) =>
+                              value != null
+                                  ? null
+                                  : StringConst.FORM_GENERIC_ERROR,
+                            )
+                                : CustomDropDownButtonFormFieldTittle(
+                              labelText: StringConst.FOLLOW_FORMATION_CERTIFICATION,
+                              value: formation.certification,
+                              source: StringConst.YES_NO_SELECTION,
+                              onChanged: _finished
+                                  ? null
+                                  : (value) {
+                                _formationsNotifier.value[_formationsNotifier
+                                    .value.indexOf(formation)].certification = value!;
+                              },
+                              validator: (value) =>
+                              value != null
+                                  ? null
+                                  : StringConst.FORM_GENERIC_ERROR,
                             ),
                             SpaceH12(),
                           ],
                         ),
+
                     ],
                   );
                 }
             ),
-            addLanguageButton(),
+            addFormationButton(),
+            SpaceH12(),
 
-            //Section 9
-            informSectionTitle('7. Atención social integral'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation9,
-              onChanged: (value) {
-                _orientation9 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Centro y TS de referencia',
-              initialValue: _centerTSReference,
-              onChanged: (value) {
-                _centerTSReference = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Destinataria de subvención y/o programa de apoyo',
-                initialValue: _subsidyBeneficiary,
-                onChanged: (value) {
-                  _subsidyBeneficiary = value;
-                },
-                validator: (value) =>
-                (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: _socialServicesUser == ''
+              childLeft: _formationBag == ''
                   ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Usuaria',
-                source: _yesNoSelection,
-                onChanged: _finished ? null : (value) {
-                  _socialServicesUser = value;
+                labelText: StringConst.FOLLOW_FORMATION_BAG,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _formationBag = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Usuaria',
-                source: _yesNoSelection,
-                value: _socialServicesUser,
-                onChanged: _finished ? null : (value) {
-                  _socialServicesUser = value;
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.FOLLOW_FORMATION_BAG,
+                source: StringConst.YES_NO_SELECTION,
+                value: _formationBag,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                      _formationBag = value;
                 },
                 validator: (value) =>
                 value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
+              childRight: CustomDatePickerTitle(
+                labelText: StringConst.INITIAL_DATE,
+                initialValue: _formationBagDate,
+                onChanged: (value) {
+                  _formationBagDate = value;
+                },
+                enabled: !_finished,
+                validator: (value) =>
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
             ),
             SpaceH12(),
-            _socialExclusionCertificate == ''
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_MOTIVE,
+              initialValue: _formationBagMotive,
+              onChanged: (value) {
+                _formationBagMotive = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.FOLLOW_ECONOMIC_AMOUNT,
+              initialValue: _formationBagEconomic,
+              onChanged: (value) {
+                _formationBagEconomic = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
+
+            informSubSectionTitle(StringConst.FOLLOW_JOB),
+
+            _laborSituationNotifier.value == ''
                 ? CustomDropDownButtonFormFieldTittle(
-              labelText: 'Certificado de Exclusión Social',
-              source: _yesNoSelection,
-              onChanged: _finished ? null : (value) {
-                _socialExclusionCertificate = value;
+              labelText: StringConst.FOLLOW_JOB_ACHIEVEMENT,
+              source: StringConst.LABOR_SITUATION_SELECTION,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _laborSituationNotifier.value = value!;
               },
               validator: (value) =>
               value != null ? null : StringConst.FORM_GENERIC_ERROR,
             )
-                :
-            CustomDropDownButtonFormFieldTittle(
-              labelText: 'Certificado de Exclusión Social',
-              source: _yesNoSelection,
-              value: _socialExclusionCertificate,
-              onChanged: _finished ? null : (value) {
-                _socialExclusionCertificate = value;
+                : CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.FOLLOW_JOB_ACHIEVEMENT,
+              source: StringConst.LABOR_SITUATION_SELECTION,
+              value: _laborSituationNotifier.value,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _laborSituationNotifier.value = value!;
               },
               validator: (value) =>
               value != null ? null : StringConst.FORM_GENERIC_ERROR,
             ),
 
-            //Section 12
-            informSectionTitle('8. Situación de Vulnerabilidad'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation12,
-              onChanged: (value) {
-                _orientation12 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
+            SpaceH12(),
+            ValueListenableBuilder(
+                valueListenable: _laborSituationNotifier,
+                builder: (context, value, child){
+                  return  _laborSituationNotifier.value == 'Ocupada cuenta ajena' || _laborSituationNotifier.value == 'Ocupada cuenta propia' ? CustomFlexRowColumn(
+                    contentPadding: EdgeInsets.zero,
+                    separatorSize: 20,
+                    childLeft: _tempLabor == ''
+                        ? CustomDropDownButtonFormFieldTittle(
+                      labelText: StringConst.INITIAL_TEMP,
+                      source: StringConst.TEMP_SELECTION,
+                      onChanged: _finished
+                          ? null
+                          : (value) {
+                        _tempLabor = value;
+                      },
+                      validator: (value) => value != null
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                    )
+                        : CustomDropDownButtonFormFieldTittle(
+                      labelText: StringConst.INITIAL_TEMP,
+                      source: StringConst.TEMP_SELECTION,
+                      value: _tempLabor,
+                      onChanged: _finished
+                          ? null
+                          : (value) {
+                        _tempLabor = value;
+                      },
+                      validator: (value) => value != null
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                    ),
+                    childRight: _workingDayLabor == ''
+                        ? CustomDropDownButtonFormFieldTittle(
+                      labelText: StringConst.INITIAL_LABOR_TYPE,
+                      source: StringConst.WORK_DAY_SELECTION,
+                      onChanged: _finished
+                          ? null
+                          : (value) {
+                        _workingDayLabor = value;
+                      },
+                      validator: (value) => value != null
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                    )
+                        : CustomDropDownButtonFormFieldTittle(
+                      labelText: StringConst.INITIAL_LABOR_TYPE,
+                      source: StringConst.WORK_DAY_SELECTION,
+                      value: _workingDayLabor,
+                      onChanged: _finished
+                          ? null
+                          : (value) {
+                        _workingDayLabor = value;
+                      },
+                      validator: (value) => value != null
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                    ),
+                  ) :
+                  Container();
+                }
             ),
             SpaceH12(),
-            CustomMultiSelectionRadioList(options: _optionsSectionTwelve,
-                selections: _vulnerabilityOptions,
-                enabled: !_finished),
-
-            //Section 13
-            informSectionTitle('9. Itinerario formativo laboral'),
-            CustomTextFormFieldTitle(
-              labelText: 'Orientaciones',
-              initialValue: _orientation13,
-              onChanged: (value) {
-                _orientation13 = value;
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomDatePickerTitle(
+                labelText: StringConst.FOLLOW_OBTAIN_DATE,
+                initialValue: _jobObtainDate,
+                onChanged: (value) {
+                  _jobObtainDate = value;
+                },
+                enabled: !_finished,
+                validator: (value) =>
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
+              childRight: CustomDatePickerTitle(
+                labelText: StringConst.FOLLOW_FINISH_DATE,
+                initialValue: _jobFinishDate,
+                onChanged: (value) {
+                  _jobFinishDate = value;
+                },
+                enabled: !_finished,
+                validator: (value) =>
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+              ),
             ),
             SpaceH12(),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: _educationLevel == ''
+              childLeft: _jobUpgrade == ''
                   ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Nivel educativo',
-                source: _educationalLevelSelection,
-                onChanged: _finished ? null : (value) {
-                  _educationLevel = value;
+                labelText: StringConst.FOLLOW_JOB_UPGRADE,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _jobUpgrade = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                validator: (value) => value != null
+                    ? null
+                    : StringConst.FORM_GENERIC_ERROR,
               )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Nivel educativo',
-                source: _educationalLevelSelection,
-                value: _educationLevel,
-                onChanged: _finished ? null : (value) {
-                  _educationLevel = value;
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.FOLLOW_JOB_UPGRADE,
+                source: StringConst.YES_NO_SELECTION,
+                value: _jobUpgrade,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _jobUpgrade = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                validator: (value) => value != null
+                    ? null
+                    : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: _laborSituation == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Situación laboral',
-                source: _laborSituationSelection,
-                onChanged: _finished ? null : (value) {
-                  setStateLaborSituation(value!);
+              childRight: CustomDatePickerTitle(
+                labelText: StringConst.INITIAL_DATE,
+                initialValue: _upgradeDate,
+                onChanged: (value) {
+                  _upgradeDate = value;
                 },
+                enabled: !_finished,
                 validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Situación laboral',
-                source: _laborSituationSelection,
-                value: _laborSituation,
-                onChanged: _finished ? null : (value) {
-                  setStateLaborSituation(value!);
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
-
             SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.FOLLOW_JOB_UPGRADE_MOTIVE,
+              initialValue: _upgradeMotive,
+              onChanged: (value) {
+                _upgradeMotive = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+
+            informSubSectionTitle(StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_OBSERVATIONS,
+              initialValue: _orientation9_6,
+              onChanged: (value) {
+                _orientation9_6 = value ?? '';
+              },
+              validator: (value) => (value!.isNotEmpty || value != '')
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            _postLaborAccompanimentNotifier.value == ''
+                ? CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT,
+              source: StringConst.YES_NO_SELECTION,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _postLaborAccompanimentNotifier.value = value!;
+              },
+              validator: (value) => value != null
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+            )
+                : CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT,
+              source: StringConst.YES_NO_SELECTION,
+              value: _postLaborAccompanimentNotifier.value,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _postLaborAccompanimentNotifier.value = value!;
+              },
+              validator: (value) => value != null
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
+            ),
+            SpaceH12(),
+            ValueListenableBuilder(
+              valueListenable: _postLaborAccompanimentNotifier,
+              builder: (context, value, child){
+                return _postLaborAccompanimentNotifier.value == 'No' ? Column(
+                  children: [
+                    CustomTextFormFieldTitle(
+                      labelText: StringConst.INITIAL_MOTIVE,
+                      initialValue: _postLaborAccompanimentMotive,
+                      onChanged: (value) {
+                        _postLaborAccompanimentMotive = value ?? '';
+                      },
+                      validator: (value) => (value!.isNotEmpty || value != '')
+                          ? null
+                          : StringConst.FORM_GENERIC_ERROR,
+                      enabled: !_finished,
+                    ),
+                    SpaceH12(),
+                  ],
+                ) : Container();
+              }
+            ),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: _laborSituation == 'Activa' ? Container(
-                child: _activeLabor == ''
-                    ? CustomDropDownButtonFormFieldTittle(
-                  labelText: 'Activa',
-                  source: _activeSelection,
-                  onChanged: _finished ? null : (value) {
-                    setStateActiveLabor(value!);
-                  },
-                  validator: (value) =>
-                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                )
-                    :
-                CustomDropDownButtonFormFieldTittle(
-                  labelText: 'Activa',
-                  source: _activeSelection,
-                  value: _activeLabor,
-                  onChanged: _finished ? null : (value) {
-                    setStateActiveLabor(value!);
-                  },
-                  validator: (value) =>
-                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                ),
-              ) : Container(),
-              childRight: _activeLabor == 'Ocupada' ? Container(
-                child: _occupiedLabor == ''
-                    ? CustomDropDownButtonFormFieldTittle(
-                  labelText: 'Ocupada',
-                  source: _occupiedSelection,
-                  onChanged: _finished ? null : (value) {
-                    setStateOccupiedLabor(value!);
-                  },
-                  validator: (value) =>
-                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                )
-                    :
-                CustomDropDownButtonFormFieldTittle(
-                  labelText: 'Ocupada',
-                  source: _occupiedSelection,
-                  value: _occupiedLabor,
-                  onChanged: _finished ? null : (value) {
-                    setStateOccupiedLabor(value!);
-                  },
-                  validator: (value) =>
-                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
-                ),
-              ) : Container(),
-            ),
-
-            SpaceH12(),
-            _occupiedLabor == 'Cuenta ajena' ? CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: _tempLabor == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Temporalidad',
-                source: _tempSelection,
-                onChanged: _finished ? null : (value) {
-                  _tempLabor = value;
+              childLeft: CustomDatePickerTitle(
+                labelText: StringConst.FOLLOW_INIT_DATE,
+                initialValue: _postLaborInitialDate,
+                onChanged: (value) {
+                  _postLaborInitialDate = value;
+                  if(_postLaborInitialDate != null && _postLaborFinalDate != null){
+                    _totalDaysNotifier.value = _postLaborFinalDate!.difference(_postLaborInitialDate!).inDays;
+                    _totalDaysController.text = _totalDaysNotifier.value.toString();
+                  }
                 },
+                enabled: !_finished,
                 validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Temporalidad',
-                source: _tempSelection,
-                value: _tempLabor,
-                onChanged: _finished ? null : (value) {
-                  _tempLabor = value;
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: _workingDayLabor == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: 'Jornada laboral',
-                source: _workDaySelection,
-                onChanged: _finished ? null : (value) {
-                  _workingDayLabor = value;
+              childRight: CustomDatePickerTitle(
+                labelText: StringConst.FOLLOW_END_DATE,
+                initialValue: _postLaborFinalDate,
+                onChanged: (value) {
+                  _postLaborFinalDate = value;
+                  if(_postLaborInitialDate != null && _postLaborFinalDate != null){
+                    _totalDaysNotifier.value = _postLaborFinalDate!.difference(_postLaborInitialDate!).inDays;
+                    _totalDaysController.text = _totalDaysNotifier.value.toString();
+                  }
                 },
+                enabled: !_finished,
                 validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              )
-                  :
-              CustomDropDownButtonFormFieldTittle(
-                labelText: 'Jornada laboral',
-                source: _workDaySelection,
-                value: _workingDayLabor,
-                onChanged: _finished ? null : (value) {
-                  _workingDayLabor = value;
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-            ) : Container(),
-
-            informSubSectionTitle('9.2 Trayectoria B.A.E previa'),
-            CustomTextFormFieldTitle(
-              labelText: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)',
-              initialValue: _competencies,
-              onChanged: (value) {
-                _competencies = value ?? '';
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
             ),
             SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Contextualización del territorio',
-              initialValue: _contextualization,
-              onChanged: (value) {
-                _contextualization = value ?? '';
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
+            ValueListenableBuilder(
+              valueListenable: _totalDaysNotifier,
+              builder: (context, value, child){
+                return CustomTextFormFieldTitle(
+                  labelText: StringConst.FOLLOW_POST_LABOR_TOTAL_DAYS,
+                  controller: _totalDaysController,
+                  enabled: false,
+                );
+              }
             ),
             SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Conexión del entorno',
-              initialValue: _connexion,
-              onChanged: (value) {
-                _connexion = value ?? '';
+            _jobMaintenance == ''
+                ? CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.FOLLOW_JOB_MAINTENANCE,
+              source: StringConst.YES_NO_SELECTION,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _jobMaintenance = value;
               },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
+              validator: (value) => value != null
                   ? null
                   : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
+            )
+                : CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.FOLLOW_JOB_MAINTENANCE,
+              source: StringConst.YES_NO_SELECTION,
+              value: _jobMaintenance,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _jobMaintenance = value;
+              },
+              validator: (value) => value != null
+                  ? null
+                  : StringConst.FORM_GENERIC_ERROR,
             ),
 
-            informSubSectionTitle('9.3 Deseos y expectativas laborales'),
-            CustomTextFormFieldTitle(
-              labelText: 'Corto plazo',
-              initialValue: _shortTerm,
-              onChanged: (value) {
-                _shortTerm = value ?? '';
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
             SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Medio plazo',
-              initialValue: _mediumTerm,
-              onChanged: (value) {
-                _mediumTerm = value ?? '';
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Largo plazo',
-              initialValue: _longTerm,
-              onChanged: (value) {
-                _longTerm = value ?? '';
-              },
-              validator: (value) =>
-              (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
+            ValueListenableBuilder(
+                valueListenable: _techNameNotifier,
+                builder:(context, value, child){
+                  return TextFormField(
+                    controller: _techPersonController,
+                    enabled: false,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                    ),
+                    style: TextStyle(
+                      color: AppColors.turquoiseBlue,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: GoogleFonts.inter().fontFamily,
+                    ),
+                  );
+                }
             ),
 
 
-            _finished ? Container() : Padding(
+            _finished
+                ? Container()
+                : Padding(
               padding: const EdgeInsets.only(top: 40, bottom: 30),
               child: Center(
                 child: Container(
@@ -1701,105 +2654,156 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   width: 250,
                   child: ElevatedButton(
                       onPressed: () async {
-                        database.setFollowReport(
-                            FollowReport(
-                              userId: report.userId,
-                              followReportId: report.followReportId,
-                              subsidy: _subsidy,
-                              orientation1: _orientation1,
-                              arriveDate: _arriveDate,
-                              receptionResources: _receptionResources,
-                              administrativeSituation: _administrativeSituation,
-                              expirationDate: _expirationDate,
-                              orientation2: _orientation2,
-                              healthCard: _healthCard,
-                              medication: _medication,
-                              orientation2_1: _orientation2_1,
-                              rest: _rest,
-                              diagnosis: _diagnosis,
-                              treatment: _treatment,
-                              tracking: _tracking,
-                              psychosocial: _psychosocial,
-                              orientation2_2: _orientation2_2,
-                              disabilityState: _disabilityState,
-                              referenceProfessionalDisability: _referenceProfessionalDisability,
-                              disabilityGrade: _disabilityGrade,
-                              disabilityType: _disabilityType,
-                              granted: _granted,
-                              revisionDate: _revisionDate,
-                              orientation2_3: _orientation2_3,
-                              dependenceState: _dependenceState,
-                              referenceProfessionalDependence: _referenceProfessionalDependence,
-                              dependenceGrade: _dependenceGrade,
-                              orientation2_4: _orientation2_4,
-                              externalDerivation: _externalDerivation,
-                              orientation3: _orientation3,
-                              internalDerivationLegal: _internalDerivationLegal,
-                              externalDerivationLegal: _externalDerivationLegal,
-                              legalRepresentation: _legalRepresentation,
-                              orientation4: _orientation4,
-                              ownershipType: _ownershipType,
-                              location: _location,
-                              centerContact: _centerContact,
-                              hostingObservations: _hostingObservations,
-                              orientation5: _orientation5,
-                              informationNetworks: _informationNetworks,
-                              institutionNetworks: _institutionNetworks,
-                              familyConciliation: _familyConciliation,
-                              orientation7: _orientation7,
-                              languages: _languages,
-                              orientation9: _orientation9,
-                              centerTSReference: _centerTSReference,
-                              subsidyBeneficiary: _subsidyBeneficiary,
-                              socialServicesUser: _socialServicesUser,
-                              socialExclusionCertificate: _socialExclusionCertificate,
-                              orientation12: _orientation12,
-                              vulnerabilityOptions: _vulnerabilityOptions,
-                              orientation13: _orientation13,
-                              educationLevel: _educationLevel,
-                              laborSituation: _laborSituation,
-                              activeLabor: _activeLabor,
-                              occupiedLabor: _occupiedLabor,
-                              tempLabor: _tempLabor,
-                              workingDayLabor: _workingDayLabor,
-                              competencies: _competencies,
-                              contextualization: _contextualization,
-                              connexion: _connexion,
-                              shortTerm: _shortTerm,
-                              mediumTerm: _mediumTerm,
-                              longTerm: _longTerm,
-                              finished: false,
-                            )
-                        );
+                        database.setFollowReport(FollowReport(
+                          userId: report.userId,
+                          followReportId: report.followReportId,
+                          subsidy: _subsidy,
+                          techPerson: _techPerson,
+                          orientation1: _orientation1,
+                          arriveDate: _arriveDate,
+                          receptionResources: _receptionResources,
+                          administrativeExternalResources:
+                          _administrativeExternalResources,
+                          expirationDate: _expirationDate,
+                          adminState: _adminStateNotifier.value,
+                          adminNoThrough: _adminNoThrough,
+                          adminDateAsk: _adminDateAsk,
+                          adminDateResolution: _adminDateResolution,
+                          adminDateConcession: _adminDateConcession,
+                          adminTemp: _adminTempNotifier.value,
+                          adminResidenceWork: _adminResidenceWork,
+                          adminDateRenovation: _adminDateRenovation,
+                          adminResidenceType: _adminResidenceType,
+                          adminJuridicFigure: _adminJuridicFigureNotifier.value,
+                          adminOther: _adminOther,
+                          orientation2: _orientation2,
+                          healthCard: _healthCard,
+                          medication: _medication,
+                          orientation2_1: _orientation2_1,
+                          rest: _rest,
+                          diagnosis: _diagnosis,
+                          treatment: _treatment,
+                          tracking: _tracking,
+                          orientation2_2: _orientation2_2,
+                          disabilityState: _disabilityStateNotifier.value,
+                          referenceProfessionalDisability:
+                          _referenceProfessionalDisability,
+                          disabilityGrade: _disabilityGrade,
+                          disabilityType: _disabilityType,
+                          granted: _grantedNotifier.value,
+                          revisionDate: _revisionDate,
+                          orientation2_3: _orientation2_3,
+                          dependenceState: _dependenceState,
+                          referenceProfessionalDependence:
+                          _referenceProfessionalDependence,
+                          dependenceGrade: _dependenceGrade,
+                          orientation2_4: _orientation2_4,
+                          externalDerivation: _externalDerivation,
+                          motive: _motive,
+                          orientation3: _orientation3,
+                          internalDerivationLegal:
+                          _internalDerivationLegal,
+                          internalDerivationDate: _internalDerivationDate,
+                          internalDerivationMotive: _internalDerivationMotive,
+                          externalDerivationLegal: _externalDerivationLegal,
+                          externalDerivationDate: _externalDerivationDate,
+                          externalDerivationMotive: _externalDerivationMotive,
+                          psychosocialDerivationLegal: _psychosocialDerivationLegal,
+                          psychosocialDerivationDate: _psychosocialDerivationDate,
+                          psychosocialDerivationMotive: _psychosocialDerivationMotive,
+                          legalRepresentation: _legalRepresentation,
+                          processingBag: _processingBag,
+                          processingBagDate: _processingBagDate,
+                          economicAmount: _economicAmount,
+                          orientation4: _orientation4,
+                          ownershipType: _ownershipTypeNotifier.value,
+                          location: _location,
+                          centerContact: _centerContact,
+                          hostingObservations: _hostingObservations,
+                          ownershipTypeOpen: _ownershipTypeOpen,
+                          homelessnessSituation: _homelessnessSituationNotifier.value,
+                          homelessnessSituationOpen: _homelessnessSituationOpen,
+                          livingUnit: _livingUnit,
+                          ownershipTypeConcrete: _ownershipTypeConcreteNotifier.value,
+                          orientation5: _orientation5,
+                          informationNetworks: _informationNetworks,
+                          institutionNetworks: _institutionNetworks,
+                          familyConciliation: _familyConciliation,
+                          orientation7: _orientation7,
+                          languages: _languagesNotifier.value,
+                          orientation9: _orientation9,
+                          centerTSReference: _centerTSReference,
+                          subsidyBeneficiary: _subsidyBeneficiaryNotifier.value,
+                          socialExclusionCertificate:
+                          _socialExclusionCertificateNotifier.value,
+                          subsidyName: _subsidyName,
+                          socialExclusionCertificateDate: _socialExclusionCertificateDate,
+                          socialExclusionCertificateObservations: _socialExclusionCertificateObservations,
+                          orientation12: _orientation12,
+                          vulnerabilityOptions: _vulnerabilityOptions,
+                          orientation13: _orientation13,
+                          orientation13_2: _orientation13_2,
+                          educationLevel: _educationLevel,
+                          laborSituation: _laborSituationNotifier.value,
+                          tempLabor: _tempLabor,
+                          workingDayLabor: _workingDayLabor,
+                          competencies: _competencies,
+                          contextualization: _contextualization,
+                          connexion: _connexion,
+                          shortTerm: _shortTerm,
+                          mediumTerm: _mediumTerm,
+                          longTerm: _longTerm,
+                          orientation9_5: _orientation9_5,
+                          formations: _formationsNotifier.value,
+                          formationBag: _formationBag,
+                          formationBagDate: _formationBagDate,
+                          formationBagMotive: _formationBagMotive,
+                          formationBagEconomic: _formationBagEconomic,
+                          jobObtaining: _jobObtaining,
+                          jobObtainDate: _jobObtainDate,
+                          jobFinishDate: _jobFinishDate,
+                          jobUpgrade: _jobUpgrade,
+                          upgradeMotive: _upgradeMotive,
+                          upgradeDate: _upgradeDate,
+                          orientation9_6: _orientation9_6,
+                          postLaborAccompaniment: _postLaborAccompanimentNotifier.value,
+                          postLaborAccompanimentMotive: _postLaborAccompanimentMotive,
+                          postLaborInitialDate: _postLaborInitialDate,
+                          postLaborFinalDate: _postLaborFinalDate,
+                          postLaborTotalDays: int.parse(_totalDaysController.text),
+                          jobMaintenance: _jobMaintenance,
+                          finished: false,
+                        ));
                         showDialog(
                             context: context,
-                            builder: (context) =>
-                                AlertDialog(
-                                    title: Text('Se ha guardado con exito',
-                                        style: TextStyle(
-                                          color: AppColors.greyDark,
-                                          height: 1.5,
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 16,
-                                        )),
-                                    actions: <Widget>[
-                                      ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                            setStateMenuPage();
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text('Ok',
-                                                style: TextStyle(
-                                                    color: AppColors.black,
-                                                    height: 1.5,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontSize: 14)),
-                                          )),
-                                    ]
-                                )
-                        );
+                            builder: (context) => AlertDialog(
+                                title:
+                                Text('Se ha guardado con exito',
+                                    style: TextStyle(
+                                      color: AppColors.greyDark,
+                                      height: 1.5,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                    )),
+                                actions: <Widget>[
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        setStateMenuPage();
+                                      },
+                                      child: Padding(
+                                        padding:
+                                        const EdgeInsets.all(8.0),
+                                        child: Text('Ok',
+                                            style: TextStyle(
+                                                color:
+                                                AppColors.black,
+                                                height: 1.5,
+                                                fontWeight:
+                                                FontWeight.w400,
+                                                fontSize: 14)),
+                                      )),
+                                ]));
                       },
                       child: Text(
                         'Guardar y seguir más tarde',
@@ -1810,13 +2814,14 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.turquoiseButton,
                         shadowColor: Colors.transparent,
-                      )
-                  ),
+                      )),
                 ),
               ),
             ),
 
-            _finished ? Container() : Center(
+            _finished
+                ? Container()
+                : Center(
               child: Container(
                 height: 50,
                 width: 160,
@@ -1825,148 +2830,226 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       if (!_formKey.currentState!.validate()) {
                         showDialog(
                             context: context,
-                            builder: (context) =>
-                                AlertDialog(
-                                  title: Text('Aún quedan campos por completar',
-                                      style: TextStyle(
-                                        color: AppColors.greyDark,
-                                        height: 1.5,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 16,
-                                      )),
-                                  actions: <Widget>[
-                                    ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text('Ok',
-                                              style: TextStyle(
-                                                  color: AppColors.black,
-                                                  height: 1.5,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 14)),
-                                        )),
-                                  ],
-                                )
-                        );
+                            builder: (context) => AlertDialog(
+                              title: Text(
+                                  'Aún quedan campos por completar',
+                                  style: TextStyle(
+                                    color: AppColors.greyDark,
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  )),
+                              actions: <Widget>[
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Padding(
+                                      padding:
+                                      const EdgeInsets.all(8.0),
+                                      child: Text('Ok',
+                                          style: TextStyle(
+                                              color: AppColors.black,
+                                              height: 1.5,
+                                              fontWeight:
+                                              FontWeight.w400,
+                                              fontSize: 14)),
+                                    )),
+                              ],
+                            ));
                         return;
                       }
                       showDialog(
                           context: context,
-                          builder: (context) =>
-                              AlertDialog(
-                                  title: Text(
-                                      '¿Está seguro de que desea finalizar el informe inicial? \nNo podra volver a modifiar ningun campo',
-                                      style: TextStyle(
-                                        color: AppColors.greyDark,
-                                        height: 1.5,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 16,
-                                      )),
-                                  actions: <Widget>[
-                                    ElevatedButton(
-                                        onPressed: () async {
-                                          database.setFollowReport(
-                                              FollowReport(
-                                                userId: report.userId,
-                                                followReportId: report.followReportId,
-                                                subsidy: _subsidy,
-                                                orientation1: _orientation1,
-                                                arriveDate: _arriveDate,
-                                                receptionResources: _receptionResources,
-                                                administrativeSituation: _administrativeSituation,
-                                                expirationDate: _expirationDate,
-                                                orientation2: _orientation2,
-                                                healthCard: _healthCard,
-                                                medication: _medication,
-                                                orientation2_1: _orientation2_1,
-                                                rest: _rest,
-                                                diagnosis: _diagnosis,
-                                                treatment: _treatment,
-                                                tracking: _tracking,
-                                                psychosocial: _psychosocial,
-                                                orientation2_2: _orientation2_2,
-                                                disabilityState: _disabilityState,
-                                                referenceProfessionalDisability: _referenceProfessionalDisability,
-                                                disabilityGrade: _disabilityGrade,
-                                                disabilityType: _disabilityType,
-                                                granted: _granted,
-                                                revisionDate: _revisionDate,
-                                                orientation2_3: _orientation2_3,
-                                                dependenceState: _dependenceState,
-                                                referenceProfessionalDependence: _referenceProfessionalDependence,
-                                                dependenceGrade: _dependenceGrade,
-                                                orientation2_4: _orientation2_4,
-                                                externalDerivation: _externalDerivation,
-                                                orientation3: _orientation3,
-                                                internalDerivationLegal: _internalDerivationLegal,
-                                                externalDerivationLegal: _externalDerivationLegal,
-                                                legalRepresentation: _legalRepresentation,
-                                                orientation4: _orientation4,
-                                                ownershipType: _ownershipType,
-                                                location: _location,
-                                                centerContact: _centerContact,
-                                                hostingObservations: _hostingObservations,
-                                                orientation5: _orientation5,
-                                                informationNetworks: _informationNetworks,
-                                                institutionNetworks: _institutionNetworks,
-                                                familyConciliation: _familyConciliation,
-                                                orientation7: _orientation7,
-                                                languages: _languages,
-                                                orientation9: _orientation9,
-                                                centerTSReference: _centerTSReference,
-                                                subsidyBeneficiary: _subsidyBeneficiary,
-                                                socialServicesUser: _socialServicesUser,
-                                                socialExclusionCertificate: _socialExclusionCertificate,
-                                                orientation12: _orientation12,
-                                                vulnerabilityOptions: _vulnerabilityOptions,
-                                                orientation13: _orientation13,
-                                                educationLevel: _educationLevel,
-                                                laborSituation: _laborSituation,
-                                                activeLabor: _activeLabor,
-                                                occupiedLabor: _occupiedLabor,
-                                                tempLabor: _tempLabor,
-                                                workingDayLabor: _workingDayLabor,
-                                                competencies: _competencies,
-                                                contextualization: _contextualization,
-                                                connexion: _connexion,
-                                                shortTerm: _shortTerm,
-                                                mediumTerm: _mediumTerm,
-                                                longTerm: _longTerm,
-                                                finished: true,
-                                                completedDate: DateTime.now(),
-                                              )
-                                          );
-                                          Navigator.of(context).pop();
-                                          setStateMenuPage();
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text('Si',
-                                              style: TextStyle(
-                                                  color: AppColors.black,
-                                                  height: 1.5,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 14)),
-                                        )),
-                                    ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text('No',
-                                              style: TextStyle(
-                                                  color: AppColors.black,
-                                                  height: 1.5,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 14)),
-                                        )),
-                                  ]
-                              )
-                      );
+                          builder: (context) => AlertDialog(
+                              title: Text(
+                                  '¿Está seguro de que desea finalizar el informe inicial? \nNo podra volver a modifiar ningun campo',
+                                  style: TextStyle(
+                                    color: AppColors.greyDark,
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  )),
+                              actions: <Widget>[
+                                ElevatedButton(
+                                    onPressed: () async {
+                                      database.setFollowReport(
+                                          FollowReport(
+                                            userId: report.userId,
+                                            followReportId:
+                                            report.followReportId,
+                                            subsidy: _subsidy,
+                                            techPerson: _techPerson,
+                                            orientation1: _orientation1,
+                                            arriveDate: _arriveDate,
+                                            receptionResources:
+                                            _receptionResources,
+                                            administrativeExternalResources:
+                                            _administrativeExternalResources,
+                                            expirationDate:
+                                            _expirationDate,
+                                            adminState: _adminStateNotifier.value,
+                                            adminNoThrough: _adminNoThrough,
+                                            adminDateAsk: _adminDateAsk,
+                                            adminDateResolution: _adminDateResolution,
+                                            adminDateConcession: _adminDateConcession,
+                                            adminTemp: _adminTempNotifier.value,
+                                            adminResidenceWork: _adminResidenceWork,
+                                            adminDateRenovation: _adminDateRenovation,
+                                            adminResidenceType: _adminResidenceType,
+                                            adminJuridicFigure: _adminJuridicFigureNotifier.value,
+                                            adminOther: _adminOther,
+                                            orientation2: _orientation2,
+                                            healthCard: _healthCard,
+                                            medication: _medication,
+                                            orientation2_1:
+                                            _orientation2_1,
+                                            rest: _rest,
+                                            diagnosis: _diagnosis,
+                                            treatment: _treatment,
+                                            tracking: _tracking,
+                                            orientation2_2:
+                                            _orientation2_2,
+                                            disabilityState:
+                                            _disabilityStateNotifier
+                                                .value,
+                                            referenceProfessionalDisability:
+                                            _referenceProfessionalDisability,
+                                            disabilityGrade:
+                                            _disabilityGrade,
+                                            disabilityType:
+                                            _disabilityType,
+                                            granted: _grantedNotifier.value,
+                                            revisionDate: _revisionDate,
+                                            orientation2_3:
+                                            _orientation2_3,
+                                            dependenceState:
+                                            _dependenceState,
+                                            referenceProfessionalDependence:
+                                            _referenceProfessionalDependence,
+                                            dependenceGrade:
+                                            _dependenceGrade,
+                                            orientation2_4:
+                                            _orientation2_4,
+                                            externalDerivation:
+                                            _externalDerivation,
+                                            motive: _motive,
+                                            orientation3: _orientation3,
+                                            internalDerivationLegal:
+                                            _internalDerivationLegal,
+                                            internalDerivationDate: _internalDerivationDate,
+                                            internalDerivationMotive: _internalDerivationMotive,
+                                            externalDerivationLegal: _externalDerivationLegal,
+                                            externalDerivationDate: _externalDerivationDate,
+                                            externalDerivationMotive: _externalDerivationMotive,
+                                            psychosocialDerivationLegal: _psychosocialDerivationLegal,
+                                            psychosocialDerivationDate: _psychosocialDerivationDate,
+                                            psychosocialDerivationMotive: _psychosocialDerivationMotive,
+                                            legalRepresentation:
+                                            _legalRepresentation,
+                                            processingBag: _processingBag,
+                                            processingBagDate: _processingBagDate,
+                                            economicAmount: _economicAmount,
+                                            orientation4: _orientation4,
+                                            ownershipType: _ownershipTypeNotifier.value,
+                                            location: _location,
+                                            centerContact: _centerContact,
+                                            hostingObservations:
+                                            _hostingObservations,
+                                            ownershipTypeOpen: _ownershipTypeOpen,
+                                            homelessnessSituation: _homelessnessSituationNotifier.value,
+                                            homelessnessSituationOpen: _homelessnessSituationOpen,
+                                            livingUnit: _livingUnit,
+                                            ownershipTypeConcrete: _ownershipTypeConcreteNotifier.value,
+                                            orientation5: _orientation5,
+                                            informationNetworks:
+                                            _informationNetworks,
+                                            institutionNetworks:
+                                            _institutionNetworks,
+                                            familyConciliation:
+                                            _familyConciliation,
+                                            orientation7: _orientation7,
+                                            languages: _languagesNotifier.value,
+                                            orientation9: _orientation9,
+                                            centerTSReference:
+                                            _centerTSReference,
+                                            subsidyBeneficiary: _subsidyBeneficiaryNotifier.value,
+                                            socialExclusionCertificate:
+                                            _socialExclusionCertificateNotifier.value,
+                                            subsidyName: _subsidyName,
+                                            socialExclusionCertificateDate: _socialExclusionCertificateDate,
+                                            socialExclusionCertificateObservations: _socialExclusionCertificateObservations,
+                                            orientation12: _orientation12,
+                                            vulnerabilityOptions:
+                                            _vulnerabilityOptions,
+                                            orientation13: _orientation13,
+                                            orientation13_2: _orientation13_2,
+                                            educationLevel:
+                                            _educationLevel,
+                                            laborSituation:
+                                            _laborSituationNotifier.value,
+                                            tempLabor: _tempLabor,
+                                            workingDayLabor:
+                                            _workingDayLabor,
+                                            competencies: _competencies,
+                                            contextualization:
+                                            _contextualization,
+                                            connexion: _connexion,
+                                            shortTerm: _shortTerm,
+                                            mediumTerm: _mediumTerm,
+                                            longTerm: _longTerm,
+                                            orientation9_5: _orientation9_5,
+                                            formations: _formationsNotifier.value,
+                                            formationBag: _formationBag,
+                                            formationBagDate: _formationBagDate,
+                                            formationBagMotive: _formationBagMotive,
+                                            formationBagEconomic: _formationBagEconomic,
+                                            jobObtaining: _jobObtaining,
+                                            jobObtainDate: _jobObtainDate,
+                                            jobFinishDate: _jobFinishDate,
+                                            jobUpgrade: _jobUpgrade,
+                                            upgradeMotive: _upgradeMotive,
+                                            upgradeDate: _upgradeDate,
+                                            orientation9_6: _orientation9_6,
+                                            postLaborAccompaniment: _postLaborAccompanimentNotifier.value,
+                                            postLaborAccompanimentMotive: _postLaborAccompanimentMotive,
+                                            postLaborInitialDate: _postLaborInitialDate,
+                                            postLaborFinalDate: _postLaborFinalDate,
+                                            postLaborTotalDays: int.parse(_totalDaysController.text),
+                                            jobMaintenance: _jobMaintenance,
+                                            finished: true,
+                                            completedDate: DateTime.now(),
+                                          ));
+                                      Navigator.of(context).pop();
+                                      setStateMenuPage();
+                                    },
+                                    child: Padding(
+                                      padding:
+                                      const EdgeInsets.all(8.0),
+                                      child: Text('Si',
+                                          style: TextStyle(
+                                              color: AppColors.black,
+                                              height: 1.5,
+                                              fontWeight:
+                                              FontWeight.w400,
+                                              fontSize: 14)),
+                                    )),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Padding(
+                                      padding:
+                                      const EdgeInsets.all(8.0),
+                                      child: Text('No',
+                                          style: TextStyle(
+                                              color: AppColors.black,
+                                              height: 1.5,
+                                              fontWeight:
+                                              FontWeight.w400,
+                                              fontSize: 14)),
+                                    )),
+                              ]));
                     },
                     child: Text(
                       'Finalizar',
@@ -1977,15 +3060,11 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.turquoiseButton,
                       shadowColor: Colors.transparent,
-                    )
-                ),
+                    )),
               ),
             ),
 
-
             SpaceH40(),
-
-
           ],
         ),
       ),

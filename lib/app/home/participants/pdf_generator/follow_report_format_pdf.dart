@@ -75,7 +75,6 @@ Future<Uint8List> generateFollowReportFile(
         SpaceH12(),
         _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: formatter.format(followReport.arriveDate!) ?? '', content2: followReport.receptionResources ?? ''),
         SpaceH12(),
-        _customItem(title: 'Situación administrativa', content: followReport.administrativeSituation ?? ''),
 
         //Section 2
         _sectionTitle(title: '2. Situación Sanitaria'),
@@ -92,8 +91,7 @@ Future<Uint8List> generateFollowReportFile(
         _customRow(title1: 'Sueño y descanso', title2: 'Diagnostico', content1: followReport.rest ?? '', content2: followReport.diagnosis ?? ''),
         SpaceH12(),
         _customRow(title1: 'Tratamiento', title2: 'Seguimiento', content1: followReport.treatment ?? '', content2: followReport.tracking ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Derivación interna al área psicosocial', content: followReport.psychosocial ?? ''),
+
 
         //Subsection 2.2
         _subSectionTitle(title: '2.2 Discapacidad'),
@@ -171,8 +169,6 @@ Future<Uint8List> generateFollowReportFile(
         SpaceH12(),
         _customItem(title: 'Centro y TS de referencia', content: followReport.centerTSReference ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Destinataria de subvención y/o programa de apoyo', title2: 'Usuaria', content1: followReport.subsidyBeneficiary ?? '', content2: followReport.socialServicesUser ?? ''),
-        SpaceH12(),
         _customItem(title: 'Certificado de Exclusión Social', content: followReport.socialExclusionCertificate ?? ''),
 
         //Section 12
@@ -191,12 +187,6 @@ Future<Uint8List> generateFollowReportFile(
         pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              _customItem(title: 'Activa', content: followReport.activeLabor ?? ''),
-              followReport.activeLabor == 'Ocupada' ? SpaceH12() : pw.Container(),
-              followReport.activeLabor == 'Ocupada' ? _customItem(title: 'Ocuada', content: followReport.occupiedLabor ?? '') : pw.Container(),
-              followReport.occupiedLabor == 'Cuenta ajena' ? SpaceH12() : pw.Container(),
-              followReport.occupiedLabor == 'Cuenta ajena' ? _customRow(title1: 'Temporalidad', title2: 'Jornada', content1: followReport.tempLabor ?? '', content2: followReport.workingDayLabor ?? '') : pw.Container(),
-              followReport.occupiedLabor == 'Cuenta ajena' ? SpaceH12() : pw.Container(),
             ]
         )
             : pw.Container(),
