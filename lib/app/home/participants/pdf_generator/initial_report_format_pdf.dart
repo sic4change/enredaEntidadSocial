@@ -76,9 +76,29 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH12(),
         _customItem(title: 'Situación administrativa', content: initialReport.administrativeExternalResources ?? ''),
 
+        //Subsection 1.1
+        _subSectionTitle(title: StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION),
+        _customItem(title: StringConst.INITIAL_STATE, content: initialReport.adminState ?? ''),
+        SpaceH12(),
+        initialReport.adminState == 'Sin tramitar' ?
+        _customItem(title: 'Sin tramitar', content: initialReport.adminNoThrough ?? '') :
+            initialReport.adminState == 'En trámite' ?
+            _customRow(title1: 'Fecha de solicitud', title2: 'Fecha de resolución', content1: formatter.format(initialReport.adminDateAsk!) ?? '', content2: formatter.format(initialReport.adminDateResolution!) ?? '') :
+            _customItem(title: StringConst.INITIAL_DATE_CONCESSION, content: formatter.format(initialReport.adminDateConcession!)),
+        SpaceH12(),
+        _customRow(title1: StringConst.INITIAL_TEMP, title2: initialReport.adminTemp == 'Inicial' || initialReport.adminTemp == 'Temporal' ? 'Fecha de resolución' : '', content1: initialReport.adminTemp ?? '', content2: initialReport.adminTemp == 'Inicial' || initialReport.adminTemp == 'Temporal' ? formatter.format(initialReport.adminDateRenovation!) ?? '' : ''),
+        SpaceH12(),
+        _customRow(title1: 'Tipo de residencia', title2: StringConst.INITIAL_JURIDIC_FIGURE, content1: initialReport.adminResidenceType ?? '', content2: initialReport.adminJuridicFigure ?? ''),
+        initialReport.adminJuridicFigure == 'Otros' ?pw.Column(
+          children: [
+            SpaceH12(),
+            _customItem(title: StringConst.INITIAL_OTHERS, content: initialReport.adminOther ?? '')
+          ]
+        ) : pw.Container(),
+
         //Section 2
         _sectionTitle(title: '2. Situación Sanitaria'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation2 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2 ?? ''),
         SpaceH12(),
         _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: initialReport.healthCard ?? '', content2: formatter.format(initialReport.expirationDate!) ?? ''),
         SpaceH12(),
@@ -86,7 +106,7 @@ Future<Uint8List> generateInitialReportFile(
 
         //Subsection 2.1
         _subSectionTitle(title: '2.1 Salud Mental'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation2_1 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_1 ?? ''),
         SpaceH12(),
         _customRow(title1: 'Sueño y descanso', title2: 'Diagnostico', content1: initialReport.rest ?? '', content2: initialReport.diagnosis ?? ''),
         SpaceH12(),
@@ -94,7 +114,7 @@ Future<Uint8List> generateInitialReportFile(
 
         //Subsection 2.2
         _subSectionTitle(title: '2.2 Discapacidad'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation2_2 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_2 ?? ''),
         SpaceH12(),
         _customItem(title: 'Estado', content: initialReport.disabilityState ?? ''),
         initialReport.dependenceState == 'Concedida' ?
@@ -108,7 +128,7 @@ Future<Uint8List> generateInitialReportFile(
 
         //Subsection 2.3
         _subSectionTitle(title: '2.3 Dependencia'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation2_3 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_3 ?? ''),
         SpaceH12(),
         _customRow(title1: 'Estado', title2: 'Profesional de referencia', content1: initialReport.dependenceState ?? '', content2: initialReport.referenceProfessionalDependence ?? ''),
         SpaceH12(),
@@ -116,39 +136,62 @@ Future<Uint8List> generateInitialReportFile(
 
         //Subsection 2.4
         _subSectionTitle(title: '2.4 Adicciones'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation2_4 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_4 ?? ''),
         SpaceH12(),
-        _customItem(title: 'Derivación externa', content: initialReport.externalDerivation ?? ''),
+        _customRow(title1: 'Derivación externa', title2: StringConst.INITIAL_MOTIVE, content1: initialReport.externalDerivation ?? '', content2: initialReport.motive ?? ''),
 
         //Section 3
         _sectionTitle(title: '3. Situación legal'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation3 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation3 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación interma', title2: 'Derivación externa', content1: initialReport.internalDerivationLegal ?? '', content2: initialReport.externalDerivationLegal ?? ''),
+        _customRow(title1: 'Derivación interma', title2: StringConst.INITIAL_DERIVATION_DATE, content1: initialReport.internalDerivationLegal ?? '', content2: formatter.format(initialReport.internalDerivationDate!) ?? ''),
+        SpaceH12(),
+        _customItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.internalDerivationMotive ?? ''),
+        SpaceH12(),
+        _customRow(title1: 'Derivación externa', title2: StringConst.INITIAL_DERIVATION_DATE, content1: initialReport.externalDerivationLegal ?? '', content2: formatter.format(initialReport.externalDerivationDate!) ?? ''),
+        SpaceH12(),
+        _customItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.externalDerivationMotive ?? ''),
+        SpaceH12(),
+        _customRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: initialReport.psychosocialDerivationLegal ?? '', content2: formatter.format(initialReport.psychosocialDerivationDate!) ?? ''),
+        SpaceH12(),
+        _customItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.psychosocialDerivationMotive ?? ''),
         SpaceH12(),
         _customItem(title: 'Representación legal', content: initialReport.legalRepresentation ?? ''),
 
         //Section 4
         _sectionTitle(title: 'Situación alojativa'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation4 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation4 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Tipo de tenencia', title2: 'Ubicación actual de la persona', content1: initialReport.ownershipType ?? '', content2: initialReport.location ?? ''),
+        _customRow(title1: 'Situación alojativa', title2: initialReport.ownershipType == 'Con hogar' ? 'Tipo de tenencia' : 'Situación sinhogarismo', content1: initialReport.ownershipType ?? '', content2: initialReport.ownershipType == 'Con hogar' ? (initialReport.ownershipTypeConcrete ?? '') : (initialReport.homelessnessSituation ?? '')),
         SpaceH12(),
-        _customItem(title: 'Datos de contacto del centro y persona de referencia', content: initialReport.centerContact ?? ''),
+        initialReport.ownershipTypeConcrete == 'Otros' ? pw.Column(
+          children: [
+            _customItem(title: StringConst.INITIAL_OTHERS, content: initialReport.ownershipTypeOpen ?? ''),
+            SpaceH12(),
+          ]
+        ) : pw.Container(),
+        initialReport.homelessnessSituation== 'Otros' ? pw.Column(
+            children: [
+              _customItem(title: StringConst.INITIAL_OTHERS, content: initialReport.homelessnessSituationOpen ?? ''),
+              SpaceH12(),
+            ]
+        ) : pw.Container(),
+        _customItem(title: 'Datos de contacto del recurso alojativo', content: initialReport.centerContact ?? ''),
+        _customItem(title: StringConst.INITIAL_LOCATION, content: initialReport.location ?? ''),
         SpaceH12(),
         _customEnumeration(enumeration: initialReport.hostingObservations ?? []),
 
         //Section 5
         _sectionTitle(title: '5. Redes de apoyo'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation5 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation5 ?? ''),
         SpaceH12(),
-        _customItem(title: 'Redes informales', content: initialReport.informationNetworks ?? ''),
+        _customItem(title: 'Redes de apoyo natural', content: initialReport.informationNetworks ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Redes de apoyo institucionales', title2: 'Conciliación familiar', content1: initialReport.institutionNetworks ?? '', content2: initialReport.familyConciliation ?? ''),
+        _customRow(title1: 'Redes de apoyo institucional', title2: 'Conciliación familiar', content1: initialReport.institutionNetworks ?? '', content2: initialReport.familyConciliation ?? ''),
 
         //Section7
         _sectionTitle(title: '6. Idiomas'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation7 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation7 ?? ''),
         SpaceH12(),
         pw.Column(
           children: [
@@ -164,45 +207,77 @@ Future<Uint8List> generateInitialReportFile(
 
         //Section 9
         _sectionTitle(title: '7. Atención social integral'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation9 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation9 ?? ''),
         SpaceH12(),
         _customItem(title: 'Centro y TS de referencia', content: initialReport.centerTSReference ?? ''),
         SpaceH12(),
         _customItem(title: 'Destinataria de subvención y/o programa de apoyo', content: initialReport.subsidyBeneficiary ?? ''),
+        initialReport.subsidyBeneficiary == 'Si' ? pw.Column(
+          children: [
+            _customItem(title: 'Nombre/tipo', content: initialReport.subsidyName ?? ''),
+            SpaceH12(),
+          ]
+        ) : pw.Container(),
         SpaceH12(),
         _customItem(title: 'Certificado de Exclusión Social', content: initialReport.socialExclusionCertificate ?? ''),
+        initialReport.socialExclusionCertificate == 'Si' ? pw.Column(
+            children: [
+              _customRow(title1: StringConst.INITIAL_DATE, title2: 'Observaciones sobre el certificado', content1: formatter.format(initialReport.socialExclusionCertificateDate!) ?? '', content2: initialReport.socialExclusionCertificateObservations ?? ''),
+              SpaceH12(),
+            ]
+        ) : pw.Container(),
 
         //Section 12
         _sectionTitle(title: '8. Situación de Vulnerabilidad'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation12 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation12 ?? ''),
         SpaceH12(),
         _customEnumeration(enumeration: initialReport.vulnerabilityOptions ?? []),
 
         //Section 13
         _sectionTitle(title: '9. Itinerario formativo laboral'),
-        _customItem(title: 'Orientaciones', content: initialReport.orientation13 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation13 ?? ''),
         SpaceH12(),
         _customRow(title1: 'Nivel educativo', title2: 'Situación laboral', content1: initialReport.educationLevel ?? '', content2: initialReport.laborSituation ?? ''),
         SpaceH12(),
-        initialReport.laborSituation == 'Activa' ?
+        initialReport.laborSituation == 'Ocupada cuenta propia' || initialReport.laborSituation == 'Ocupada cuenta ajena' ?
             pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                //TODO
+                _customRow(title1: StringConst.INITIAL_TEMP, title2: 'Tipo jornada', content1: initialReport.tempLabor ?? '', content2: initialReport.workingDayLabor ?? ''),
+                SpaceH12(),
               ]
             )
          : pw.Container(),
+        _subSectionTitle(title: StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
         _customItem(title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: initialReport.competencies ?? ''),
         SpaceH12(),
         _customItem(title: 'Contextualización del territorio', content: initialReport.contextualization ?? ''),
         SpaceH12(),
         _customItem(title: 'Conexión del entorno', content: initialReport.connexion ?? ''),
-        SpaceH12(),
+
+        _subSectionTitle(title: StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
         _customItem(title: 'Corto plazo', content: initialReport.shortTerm ?? ''),
         SpaceH12(),
         _customItem(title: 'Medio plazo', content: initialReport.mediumTerm ?? ''),
         SpaceH12(),
         _customItem(title: 'Largo plazo', content: initialReport.longTerm ?? ''),
+
+        SpaceH12(),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Column(
+              children: [
+                pw.Text('FDO por técnica'),
+              ]
+            ),
+            pw.Column(
+                children: [
+                  pw.Text('FDO por participante'),
+                  pw.Text('Observaciones'),
+                ]
+            )
+          ]
+        ),
         
       ]
     )

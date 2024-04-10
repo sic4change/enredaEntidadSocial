@@ -215,11 +215,22 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               ImagePath.PERSONAL_DOCUMENTATION_VIEW,
               width: 24,
               height: 24,
-            ) : Icon(
-              Icons.add_circle,
-              size: 24,
+            ) : Image.asset(
+              ImagePath.PERSONAL_DOCUMENTATION_NOT_VIEW,
+              width: 24,
+              height: 24,
             ),
-            onPressed: onTap,
+            onPressed: (){
+              if(showSection){
+                var snackBar = SnackBar(content: Text('No se mostrará la sección: $title'));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
+              else if (!showSection){
+                var snackBar = SnackBar(content: Text('Se mostrará la sección: $title'));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
+              onTap();
+            },
           ),
         ],
       ),
@@ -248,11 +259,22 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               ImagePath.PERSONAL_DOCUMENTATION_VIEW,
               width: 24,
               height: 24,
-            ) : Icon(
-              Icons.add_circle,
-              size: 24,
+            ) : Image.asset(
+              ImagePath.PERSONAL_DOCUMENTATION_NOT_VIEW,
+              width: 24,
+              height: 24,
             ),
-            onPressed: onTap,
+            onPressed: (){
+              if(showSubSection){
+                var snackBar = SnackBar(content: Text('No se mostrará la sección: $title'));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
+              else if (!showSubSection){
+                var snackBar = SnackBar(content: Text('Se mostrará la sección: $title'));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
+              onTap();
+            },
           ) : Container(),
         ],
       ),
@@ -388,6 +410,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
     String? _techPerson = report.techPerson ?? widget.user.assignedById;
     String? _addressedTo = report.addressedTo ?? '';
     String? _objectiveDerivation = report.objectiveDerivation ?? '';
+    bool? _fromInitialReport = report.fromInitialReport ?? true;
 
     //Section 1
     String _orientation1 = report.orientation1 ?? '';
@@ -1717,44 +1740,50 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
-            SpaceH12(),
-            CustomFlexRowColumn(
-              separatorSize: 20,
-              contentPadding: EdgeInsets.zero,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: StringConst.FOLLOW_PROCESSING_BAG,
-                initialValue: _processingBag,
-                onChanged: (value) {
-                  _processingBag = value;
-                },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
-              ),
-              childRight: CustomDatePickerTitle(
-                labelText: StringConst.INITIAL_DATE,
-                initialValue: _processingBagDate,
-                onChanged: (value) {
-                  _processingBagDate = value;
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: StringConst.FOLLOW_ECONOMIC_AMOUNT,
-              initialValue: _economicAmount,
-              onChanged: (value) {
-                _economicAmount = value;
-              },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
+
+            !_fromInitialReport ? Column(
+              children: [
+                SpaceH12(),
+                CustomFlexRowColumn(
+                  separatorSize: 20,
+                  contentPadding: EdgeInsets.zero,
+                  childLeft: CustomTextFormFieldTitle(
+                    labelText: StringConst.FOLLOW_PROCESSING_BAG,
+                    initialValue: _processingBag,
+                    onChanged: (value) {
+                      _processingBag = value;
+                    },
+                    validator: (value) => (value!.isNotEmpty || value != '')
+                        ? null
+                        : StringConst.FORM_GENERIC_ERROR,
+                    enabled: !_finished,
+                  ),
+                  childRight: CustomDatePickerTitle(
+                    labelText: StringConst.INITIAL_DATE,
+                    initialValue: _processingBagDate,
+                    onChanged: (value) {
+                      _processingBagDate = value;
+                    },
+                    enabled: !_finished,
+                    validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                ),
+                SpaceH12(),
+                CustomTextFormFieldTitle(
+                  labelText: StringConst.FOLLOW_ECONOMIC_AMOUNT,
+                  initialValue: _economicAmount,
+                  onChanged: (value) {
+                    _economicAmount = value;
+                  },
+                  validator: (value) => (value!.isNotEmpty || value != '')
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                  enabled: !_finished,
+                ),
+              ],
+            ) : Container(),
+
 
             //Section 4
             ValueListenableBuilder(
@@ -2352,6 +2381,102 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               enabled: !_finished,
             ),
 
+            _fromInitialReport ?
+              Column(
+                children: [
+                  SpaceH12(),
+                  _laborSituationNotifier.value == ''
+                      ? CustomDropDownButtonFormFieldTittle(
+                    labelText: StringConst.INITIAL_LABOR_SITUATION,
+                    source: StringConst.LABOR_SITUATION_SELECTION,
+                    onChanged: _finished
+                        ? null
+                        : (value) {
+                      _laborSituationNotifier.value = value!;
+                    },
+                    validator: (value) =>
+                    value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  )
+                      : CustomDropDownButtonFormFieldTittle(
+                    labelText: StringConst.INITIAL_LABOR_SITUATION,
+                    source: StringConst.LABOR_SITUATION_SELECTION,
+                    value: _laborSituationNotifier.value,
+                    onChanged: _finished
+                        ? null
+                        : (value) {
+                      _laborSituationNotifier.value = value!;
+                    },
+                    validator: (value) =>
+                    value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+
+                  SpaceH12(),
+                  ValueListenableBuilder(
+                      valueListenable: _laborSituationNotifier,
+                      builder: (context, value, child){
+                        return  _laborSituationNotifier.value == 'Ocupada cuenta ajena' || _laborSituationNotifier.value == 'Ocupada cuenta propia' ? CustomFlexRowColumn(
+                          contentPadding: EdgeInsets.zero,
+                          separatorSize: 20,
+                          childLeft: _tempLabor == ''
+                              ? CustomDropDownButtonFormFieldTittle(
+                            labelText: StringConst.INITIAL_TEMP,
+                            source: StringConst.TEMP_SELECTION,
+                            onChanged: _finished
+                                ? null
+                                : (value) {
+                              _tempLabor = value;
+                            },
+                            validator: (value) => value != null
+                                ? null
+                                : StringConst.FORM_GENERIC_ERROR,
+                          )
+                              : CustomDropDownButtonFormFieldTittle(
+                            labelText: StringConst.INITIAL_TEMP,
+                            source: StringConst.TEMP_SELECTION,
+                            value: _tempLabor,
+                            onChanged: _finished
+                                ? null
+                                : (value) {
+                              _tempLabor = value;
+                            },
+                            validator: (value) => value != null
+                                ? null
+                                : StringConst.FORM_GENERIC_ERROR,
+                          ),
+                          childRight: _workingDayLabor == ''
+                              ? CustomDropDownButtonFormFieldTittle(
+                            labelText: StringConst.INITIAL_LABOR_TYPE,
+                            source: StringConst.WORK_DAY_SELECTION,
+                            onChanged: _finished
+                                ? null
+                                : (value) {
+                              _workingDayLabor = value;
+                            },
+                            validator: (value) => value != null
+                                ? null
+                                : StringConst.FORM_GENERIC_ERROR,
+                          )
+                              : CustomDropDownButtonFormFieldTittle(
+                            labelText: StringConst.INITIAL_LABOR_TYPE,
+                            source: StringConst.WORK_DAY_SELECTION,
+                            value: _workingDayLabor,
+                            onChanged: _finished
+                                ? null
+                                : (value) {
+                              _workingDayLabor = value;
+                            },
+                            validator: (value) => value != null
+                                ? null
+                                : StringConst.FORM_GENERIC_ERROR,
+                          ),
+                        ) :
+                        Container();
+                      }
+                  ),
+                ],
+              ) :
+              Container(),
+
             ValueListenableBuilder(
                 valueListenable: _allow9Notifier,
                 builder: (context, value, child){
@@ -2447,505 +2572,510 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               enabled: !_finished,
             ),
 
-            ValueListenableBuilder(
-                valueListenable: _allow9Notifier,
-                builder: (context, value, child){
-                  return             ValueListenableBuilder(
-                      valueListenable: _allow9_5Notifier,
-                      builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_5_DEVELOP, _allow9Notifier.value, _allow9_5Notifier.value, (){_allow9_5Notifier.value = !_allow9_5Notifier.value;});
-                      }
-                  );
-                }
-            ),
-            CustomTextFormFieldTitle(
-              labelText: StringConst.INITIAL_OBSERVATIONS,
-              initialValue: _orientation9_5,
-              onChanged: (value) {
-                _orientation9_5 = value ?? '';
-              },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
+            !_fromInitialReport ? Column(
+              children: [
+                ValueListenableBuilder(
+                    valueListenable: _allow9Notifier,
+                    builder: (context, value, child){
+                      return             ValueListenableBuilder(
+                          valueListenable: _allow9_5Notifier,
+                          builder: (context, value, child){
+                            return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_5_DEVELOP, _allow9Notifier.value, _allow9_5Notifier.value, (){_allow9_5Notifier.value = !_allow9_5Notifier.value;});
+                          }
+                      );
+                    }
+                ),
+                CustomTextFormFieldTitle(
+                  labelText: StringConst.INITIAL_OBSERVATIONS,
+                  initialValue: _orientation9_5,
+                  onChanged: (value) {
+                    _orientation9_5 = value ?? '';
+                  },
+                  validator: (value) => (value!.isNotEmpty || value != '')
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                  enabled: !_finished,
+                ),
 
-            informSubSectionTitle(StringConst.FOLLOW_FORMATIONS, false, false, (){}),
+                informSubSectionTitle(StringConst.FOLLOW_FORMATIONS, false, false, (){}),
 
-            ValueListenableBuilder(
-                valueListenable: _formationsNotifier,
-                builder: (context, value, child)
-                {
-                  return Column(
-                    children: [
-                      for (FormationReport formation in _formationsNotifier
-                          .value)
-                        Column(
-                          children: [
-                            CustomFlexRowColumn(
-                              contentPadding: EdgeInsets.zero,
-                              separatorSize: 20,
-                              childLeft: CustomTextFormFieldTitle(
-                                labelText:
-                                StringConst.FOLLOW_FORMATION_NAME,
-                                initialValue: formation.name,
-                                onChanged: (value) {
-                                  _formationsNotifier.value[_formationsNotifier
-                                      .value.indexOf(formation)].name = value;
-                                },
-                                validator: (value) =>
-                                (value!.isNotEmpty || value != '')
-                                    ? null
-                                    : StringConst.FORM_GENERIC_ERROR,
-                                enabled: !_finished,
-                              ),
-                              childRight: formation.type == ''
-                                  ? CustomDropDownButtonFormFieldTittle(
-                                labelText: StringConst.FOLLOW_FORMATION_TYPE,
-                                source: StringConst.FORMATION_TYPE_SELECTION,
-                                onChanged: _finished
-                                    ? null
-                                    : (value) {
-                                  _formationsNotifier.value[_formationsNotifier
-                                      .value.indexOf(formation)].type = value!;
-                                },
-                                validator: (value) =>
-                                value != null
-                                    ? null
-                                    : StringConst.FORM_GENERIC_ERROR,
-                              )
-                                  : CustomDropDownButtonFormFieldTittle(
-                                labelText: StringConst.FOLLOW_FORMATION_TYPE,
-                                value: formation.type,
-                                source: StringConst.FORMATION_TYPE_SELECTION,
-                                onChanged: _finished
-                                    ? null
-                                    : (value) {
-                                  _formationsNotifier.value[_formationsNotifier
-                                      .value.indexOf(formation)].type = value!;
-                                },
-                                validator: (value) =>
-                                value != null
-                                    ? null
-                                    : StringConst.FORM_GENERIC_ERROR,
-                              ),
+                ValueListenableBuilder(
+                    valueListenable: _formationsNotifier,
+                    builder: (context, value, child)
+                    {
+                      return Column(
+                        children: [
+                          for (FormationReport formation in _formationsNotifier
+                              .value)
+                            Column(
+                              children: [
+                                CustomFlexRowColumn(
+                                  contentPadding: EdgeInsets.zero,
+                                  separatorSize: 20,
+                                  childLeft: CustomTextFormFieldTitle(
+                                    labelText:
+                                    StringConst.FOLLOW_FORMATION_NAME,
+                                    initialValue: formation.name,
+                                    onChanged: (value) {
+                                      _formationsNotifier.value[_formationsNotifier
+                                          .value.indexOf(formation)].name = value;
+                                    },
+                                    validator: (value) =>
+                                    (value!.isNotEmpty || value != '')
+                                        ? null
+                                        : StringConst.FORM_GENERIC_ERROR,
+                                    enabled: !_finished,
+                                  ),
+                                  childRight: formation.type == ''
+                                      ? CustomDropDownButtonFormFieldTittle(
+                                    labelText: StringConst.FOLLOW_FORMATION_TYPE,
+                                    source: StringConst.FORMATION_TYPE_SELECTION,
+                                    onChanged: _finished
+                                        ? null
+                                        : (value) {
+                                      _formationsNotifier.value[_formationsNotifier
+                                          .value.indexOf(formation)].type = value!;
+                                    },
+                                    validator: (value) =>
+                                    value != null
+                                        ? null
+                                        : StringConst.FORM_GENERIC_ERROR,
+                                  )
+                                      : CustomDropDownButtonFormFieldTittle(
+                                    labelText: StringConst.FOLLOW_FORMATION_TYPE,
+                                    value: formation.type,
+                                    source: StringConst.FORMATION_TYPE_SELECTION,
+                                    onChanged: _finished
+                                        ? null
+                                        : (value) {
+                                      _formationsNotifier.value[_formationsNotifier
+                                          .value.indexOf(formation)].type = value!;
+                                    },
+                                    validator: (value) =>
+                                    value != null
+                                        ? null
+                                        : StringConst.FORM_GENERIC_ERROR,
+                                  ),
+                                ),
+                                SpaceH12(),
+                                formation.certification == ''
+                                    ? CustomDropDownButtonFormFieldTittle(
+                                  labelText: StringConst.FOLLOW_FORMATION_CERTIFICATION,
+                                  source: StringConst.YES_NO_SELECTION,
+                                  onChanged: _finished
+                                      ? null
+                                      : (value) {
+                                    _formationsNotifier.value[_formationsNotifier
+                                        .value.indexOf(formation)].certification = value!;
+                                  },
+                                  validator: (value) =>
+                                  value != null
+                                      ? null
+                                      : StringConst.FORM_GENERIC_ERROR,
+                                )
+                                    : CustomDropDownButtonFormFieldTittle(
+                                  labelText: StringConst.FOLLOW_FORMATION_CERTIFICATION,
+                                  value: formation.certification,
+                                  source: StringConst.YES_NO_SELECTION,
+                                  onChanged: _finished
+                                      ? null
+                                      : (value) {
+                                    _formationsNotifier.value[_formationsNotifier
+                                        .value.indexOf(formation)].certification = value!;
+                                  },
+                                  validator: (value) =>
+                                  value != null
+                                      ? null
+                                      : StringConst.FORM_GENERIC_ERROR,
+                                ),
+                                SpaceH12(),
+                              ],
                             ),
-                            SpaceH12(),
-                            formation.certification == ''
-                                ? CustomDropDownButtonFormFieldTittle(
-                              labelText: StringConst.FOLLOW_FORMATION_CERTIFICATION,
-                              source: StringConst.YES_NO_SELECTION,
-                              onChanged: _finished
-                                  ? null
-                                  : (value) {
-                                _formationsNotifier.value[_formationsNotifier
-                                    .value.indexOf(formation)].certification = value!;
-                              },
-                              validator: (value) =>
-                              value != null
-                                  ? null
-                                  : StringConst.FORM_GENERIC_ERROR,
-                            )
-                                : CustomDropDownButtonFormFieldTittle(
-                              labelText: StringConst.FOLLOW_FORMATION_CERTIFICATION,
-                              value: formation.certification,
-                              source: StringConst.YES_NO_SELECTION,
-                              onChanged: _finished
-                                  ? null
-                                  : (value) {
-                                _formationsNotifier.value[_formationsNotifier
-                                    .value.indexOf(formation)].certification = value!;
-                              },
-                              validator: (value) =>
-                              value != null
-                                  ? null
-                                  : StringConst.FORM_GENERIC_ERROR,
-                            ),
-                            SpaceH12(),
-                          ],
-                        ),
 
-                    ],
-                  );
-                }
-            ),
-            addFormationButton(),
-            SpaceH12(),
+                        ],
+                      );
+                    }
+                ),
+                addFormationButton(),
+                SpaceH12(),
 
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: _formationBag == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.FOLLOW_FORMATION_BAG,
-                source: StringConst.YES_NO_SELECTION,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _formationBag = value;
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              )
-                  : CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.FOLLOW_FORMATION_BAG,
-                source: StringConst.YES_NO_SELECTION,
-                value: _formationBag,
-                onChanged: _finished
-                    ? null
-                    : (value) {
+                CustomFlexRowColumn(
+                  contentPadding: EdgeInsets.zero,
+                  separatorSize: 20,
+                  childLeft: _formationBag == ''
+                      ? CustomDropDownButtonFormFieldTittle(
+                    labelText: StringConst.FOLLOW_FORMATION_BAG,
+                    source: StringConst.YES_NO_SELECTION,
+                    onChanged: _finished
+                        ? null
+                        : (value) {
                       _formationBag = value;
-                },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-              childRight: CustomDatePickerTitle(
-                labelText: StringConst.INITIAL_DATE,
-                initialValue: _formationBagDate,
-                onChanged: (value) {
-                  _formationBagDate = value;
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: StringConst.INITIAL_MOTIVE,
-              initialValue: _formationBagMotive,
-              onChanged: (value) {
-                _formationBagMotive = value ?? '';
-              },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: StringConst.FOLLOW_ECONOMIC_AMOUNT,
-              initialValue: _formationBagEconomic,
-              onChanged: (value) {
-                _formationBagEconomic = value ?? '';
-              },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
+                    },
+                    validator: (value) =>
+                    value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  )
+                      : CustomDropDownButtonFormFieldTittle(
+                    labelText: StringConst.FOLLOW_FORMATION_BAG,
+                    source: StringConst.YES_NO_SELECTION,
+                    value: _formationBag,
+                    onChanged: _finished
+                        ? null
+                        : (value) {
+                      _formationBag = value;
+                    },
+                    validator: (value) =>
+                    value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                  childRight: CustomDatePickerTitle(
+                    labelText: StringConst.INITIAL_DATE,
+                    initialValue: _formationBagDate,
+                    onChanged: (value) {
+                      _formationBagDate = value;
+                    },
+                    enabled: !_finished,
+                    validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                ),
+                SpaceH12(),
+                CustomTextFormFieldTitle(
+                  labelText: StringConst.INITIAL_MOTIVE,
+                  initialValue: _formationBagMotive,
+                  onChanged: (value) {
+                    _formationBagMotive = value ?? '';
+                  },
+                  validator: (value) => (value!.isNotEmpty || value != '')
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                  enabled: !_finished,
+                ),
+                SpaceH12(),
+                CustomTextFormFieldTitle(
+                  labelText: StringConst.FOLLOW_ECONOMIC_AMOUNT,
+                  initialValue: _formationBagEconomic,
+                  onChanged: (value) {
+                    _formationBagEconomic = value ?? '';
+                  },
+                  validator: (value) => (value!.isNotEmpty || value != '')
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                  enabled: !_finished,
+                ),
 
 
-            informSubSectionTitle(StringConst.FOLLOW_JOB, false, false, (){}),
+                informSubSectionTitle(StringConst.FOLLOW_JOB, false, false, (){}),
 
-            _laborSituationNotifier.value == ''
-                ? CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.FOLLOW_JOB_ACHIEVEMENT,
-              source: StringConst.LABOR_SITUATION_SELECTION,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _laborSituationNotifier.value = value!;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            )
-                : CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.FOLLOW_JOB_ACHIEVEMENT,
-              source: StringConst.LABOR_SITUATION_SELECTION,
-              value: _laborSituationNotifier.value,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _laborSituationNotifier.value = value!;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
+                _laborSituationNotifier.value == ''
+                    ? CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.FOLLOW_JOB_ACHIEVEMENT,
+                  source: StringConst.LABOR_SITUATION_SELECTION,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _laborSituationNotifier.value = value!;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                )
+                    : CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.FOLLOW_JOB_ACHIEVEMENT,
+                  source: StringConst.LABOR_SITUATION_SELECTION,
+                  value: _laborSituationNotifier.value,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _laborSituationNotifier.value = value!;
+                  },
+                  validator: (value) =>
+                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                ),
 
-            SpaceH12(),
-            ValueListenableBuilder(
-                valueListenable: _laborSituationNotifier,
-                builder: (context, value, child){
-                  return  _laborSituationNotifier.value == 'Ocupada cuenta ajena' || _laborSituationNotifier.value == 'Ocupada cuenta propia' ? CustomFlexRowColumn(
-                    contentPadding: EdgeInsets.zero,
-                    separatorSize: 20,
-                    childLeft: _tempLabor == ''
-                        ? CustomDropDownButtonFormFieldTittle(
-                      labelText: StringConst.INITIAL_TEMP,
-                      source: StringConst.TEMP_SELECTION,
-                      onChanged: _finished
-                          ? null
-                          : (value) {
-                        _tempLabor = value;
-                      },
-                      validator: (value) => value != null
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                    )
-                        : CustomDropDownButtonFormFieldTittle(
-                      labelText: StringConst.INITIAL_TEMP,
-                      source: StringConst.TEMP_SELECTION,
-                      value: _tempLabor,
-                      onChanged: _finished
-                          ? null
-                          : (value) {
-                        _tempLabor = value;
-                      },
-                      validator: (value) => value != null
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                    ),
-                    childRight: _workingDayLabor == ''
-                        ? CustomDropDownButtonFormFieldTittle(
-                      labelText: StringConst.INITIAL_LABOR_TYPE,
-                      source: StringConst.WORK_DAY_SELECTION,
-                      onChanged: _finished
-                          ? null
-                          : (value) {
-                        _workingDayLabor = value;
-                      },
-                      validator: (value) => value != null
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                    )
-                        : CustomDropDownButtonFormFieldTittle(
-                      labelText: StringConst.INITIAL_LABOR_TYPE,
-                      source: StringConst.WORK_DAY_SELECTION,
-                      value: _workingDayLabor,
-                      onChanged: _finished
-                          ? null
-                          : (value) {
-                        _workingDayLabor = value;
-                      },
-                      validator: (value) => value != null
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                    ),
-                  ) :
-                  Container();
-                }
-            ),
-            SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomDatePickerTitle(
-                labelText: StringConst.FOLLOW_OBTAIN_DATE,
-                initialValue: _jobObtainDate,
-                onChanged: (value) {
-                  _jobObtainDate = value;
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-              childRight: CustomDatePickerTitle(
-                labelText: StringConst.FOLLOW_FINISH_DATE,
-                initialValue: _jobFinishDate,
-                onChanged: (value) {
-                  _jobFinishDate = value;
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-            ),
-            SpaceH12(),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: _jobUpgrade == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.FOLLOW_JOB_UPGRADE,
-                source: StringConst.YES_NO_SELECTION,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _jobUpgrade = value;
-                },
-                validator: (value) => value != null
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-              )
-                  : CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.FOLLOW_JOB_UPGRADE,
-                source: StringConst.YES_NO_SELECTION,
-                value: _jobUpgrade,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _jobUpgrade = value;
-                },
-                validator: (value) => value != null
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-              ),
-              childRight: CustomDatePickerTitle(
-                labelText: StringConst.INITIAL_DATE,
-                initialValue: _upgradeDate,
-                onChanged: (value) {
-                  _upgradeDate = value;
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: StringConst.FOLLOW_JOB_UPGRADE_MOTIVE,
-              initialValue: _upgradeMotive,
-              onChanged: (value) {
-                _upgradeMotive = value ?? '';
-              },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
+                SpaceH12(),
+                ValueListenableBuilder(
+                    valueListenable: _laborSituationNotifier,
+                    builder: (context, value, child){
+                      return  _laborSituationNotifier.value == 'Ocupada cuenta ajena' || _laborSituationNotifier.value == 'Ocupada cuenta propia' ? CustomFlexRowColumn(
+                        contentPadding: EdgeInsets.zero,
+                        separatorSize: 20,
+                        childLeft: _tempLabor == ''
+                            ? CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.INITIAL_TEMP,
+                          source: StringConst.TEMP_SELECTION,
+                          onChanged: _finished
+                              ? null
+                              : (value) {
+                            _tempLabor = value;
+                          },
+                          validator: (value) => value != null
+                              ? null
+                              : StringConst.FORM_GENERIC_ERROR,
+                        )
+                            : CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.INITIAL_TEMP,
+                          source: StringConst.TEMP_SELECTION,
+                          value: _tempLabor,
+                          onChanged: _finished
+                              ? null
+                              : (value) {
+                            _tempLabor = value;
+                          },
+                          validator: (value) => value != null
+                              ? null
+                              : StringConst.FORM_GENERIC_ERROR,
+                        ),
+                        childRight: _workingDayLabor == ''
+                            ? CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.INITIAL_LABOR_TYPE,
+                          source: StringConst.WORK_DAY_SELECTION,
+                          onChanged: _finished
+                              ? null
+                              : (value) {
+                            _workingDayLabor = value;
+                          },
+                          validator: (value) => value != null
+                              ? null
+                              : StringConst.FORM_GENERIC_ERROR,
+                        )
+                            : CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.INITIAL_LABOR_TYPE,
+                          source: StringConst.WORK_DAY_SELECTION,
+                          value: _workingDayLabor,
+                          onChanged: _finished
+                              ? null
+                              : (value) {
+                            _workingDayLabor = value;
+                          },
+                          validator: (value) => value != null
+                              ? null
+                              : StringConst.FORM_GENERIC_ERROR,
+                        ),
+                      ) :
+                      Container();
+                    }
+                ),
+                SpaceH12(),
+                CustomFlexRowColumn(
+                  contentPadding: EdgeInsets.zero,
+                  separatorSize: 20,
+                  childLeft: CustomDatePickerTitle(
+                    labelText: StringConst.FOLLOW_OBTAIN_DATE,
+                    initialValue: _jobObtainDate,
+                    onChanged: (value) {
+                      _jobObtainDate = value;
+                    },
+                    enabled: !_finished,
+                    validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                  childRight: CustomDatePickerTitle(
+                    labelText: StringConst.FOLLOW_FINISH_DATE,
+                    initialValue: _jobFinishDate,
+                    onChanged: (value) {
+                      _jobFinishDate = value;
+                    },
+                    enabled: !_finished,
+                    validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                ),
+                SpaceH12(),
+                CustomFlexRowColumn(
+                  contentPadding: EdgeInsets.zero,
+                  separatorSize: 20,
+                  childLeft: _jobUpgrade == ''
+                      ? CustomDropDownButtonFormFieldTittle(
+                    labelText: StringConst.FOLLOW_JOB_UPGRADE,
+                    source: StringConst.YES_NO_SELECTION,
+                    onChanged: _finished
+                        ? null
+                        : (value) {
+                      _jobUpgrade = value;
+                    },
+                    validator: (value) => value != null
+                        ? null
+                        : StringConst.FORM_GENERIC_ERROR,
+                  )
+                      : CustomDropDownButtonFormFieldTittle(
+                    labelText: StringConst.FOLLOW_JOB_UPGRADE,
+                    source: StringConst.YES_NO_SELECTION,
+                    value: _jobUpgrade,
+                    onChanged: _finished
+                        ? null
+                        : (value) {
+                      _jobUpgrade = value;
+                    },
+                    validator: (value) => value != null
+                        ? null
+                        : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                  childRight: CustomDatePickerTitle(
+                    labelText: StringConst.INITIAL_DATE,
+                    initialValue: _upgradeDate,
+                    onChanged: (value) {
+                      _upgradeDate = value;
+                    },
+                    enabled: !_finished,
+                    validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                ),
+                SpaceH12(),
+                CustomTextFormFieldTitle(
+                  labelText: StringConst.FOLLOW_JOB_UPGRADE_MOTIVE,
+                  initialValue: _upgradeMotive,
+                  onChanged: (value) {
+                    _upgradeMotive = value ?? '';
+                  },
+                  validator: (value) => (value!.isNotEmpty || value != '')
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                  enabled: !_finished,
+                ),
 
-            ValueListenableBuilder(
-                valueListenable: _allow9Notifier,
-                builder: (context, value, child){
-                  return             ValueListenableBuilder(
-                      valueListenable: _allow9_6Notifier,
-                      builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT, _allow9Notifier.value, _allow9_6Notifier.value, (){_allow9_6Notifier.value = !_allow9_6Notifier.value;});
+                ValueListenableBuilder(
+                    valueListenable: _allow9Notifier,
+                    builder: (context, value, child){
+                      return             ValueListenableBuilder(
+                          valueListenable: _allow9_6Notifier,
+                          builder: (context, value, child){
+                            return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT, _allow9Notifier.value, _allow9_6Notifier.value, (){_allow9_6Notifier.value = !_allow9_6Notifier.value;});
+                          }
+                      );
+                    }
+                ),
+                CustomTextFormFieldTitle(
+                  labelText: StringConst.INITIAL_OBSERVATIONS,
+                  initialValue: _orientation9_6,
+                  onChanged: (value) {
+                    _orientation9_6 = value ?? '';
+                  },
+                  validator: (value) => (value!.isNotEmpty || value != '')
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                  enabled: !_finished,
+                ),
+                SpaceH12(),
+                _postLaborAccompanimentNotifier.value == ''
+                    ? CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT,
+                  source: StringConst.YES_NO_SELECTION,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _postLaborAccompanimentNotifier.value = value!;
+                  },
+                  validator: (value) => value != null
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                )
+                    : CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT,
+                  source: StringConst.YES_NO_SELECTION,
+                  value: _postLaborAccompanimentNotifier.value,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _postLaborAccompanimentNotifier.value = value!;
+                  },
+                  validator: (value) => value != null
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                ),
+                SpaceH12(),
+                ValueListenableBuilder(
+                    valueListenable: _postLaborAccompanimentNotifier,
+                    builder: (context, value, child){
+                      return _postLaborAccompanimentNotifier.value == 'No' ? Column(
+                        children: [
+                          CustomTextFormFieldTitle(
+                            labelText: StringConst.INITIAL_MOTIVE,
+                            initialValue: _postLaborAccompanimentMotive,
+                            onChanged: (value) {
+                              _postLaborAccompanimentMotive = value ?? '';
+                            },
+                            validator: (value) => (value!.isNotEmpty || value != '')
+                                ? null
+                                : StringConst.FORM_GENERIC_ERROR,
+                            enabled: !_finished,
+                          ),
+                          SpaceH12(),
+                        ],
+                      ) : Container();
+                    }
+                ),
+                CustomFlexRowColumn(
+                  contentPadding: EdgeInsets.zero,
+                  separatorSize: 20,
+                  childLeft: CustomDatePickerTitle(
+                    labelText: StringConst.FOLLOW_INIT_DATE,
+                    initialValue: _postLaborInitialDate,
+                    onChanged: (value) {
+                      _postLaborInitialDate = value;
+                      if(_postLaborInitialDate != null && _postLaborFinalDate != null){
+                        _totalDaysNotifier.value = _postLaborFinalDate!.difference(_postLaborInitialDate!).inDays;
+                        _totalDaysController.text = _totalDaysNotifier.value.toString();
                       }
-                  );
-                }
-            ),
-            CustomTextFormFieldTitle(
-              labelText: StringConst.INITIAL_OBSERVATIONS,
-              initialValue: _orientation9_6,
-              onChanged: (value) {
-                _orientation9_6 = value ?? '';
-              },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            _postLaborAccompanimentNotifier.value == ''
-                ? CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT,
-              source: StringConst.YES_NO_SELECTION,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _postLaborAccompanimentNotifier.value = value!;
-              },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-            )
-                : CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT,
-              source: StringConst.YES_NO_SELECTION,
-              value: _postLaborAccompanimentNotifier.value,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _postLaborAccompanimentNotifier.value = value!;
-              },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-            ),
-            SpaceH12(),
-            ValueListenableBuilder(
-              valueListenable: _postLaborAccompanimentNotifier,
-              builder: (context, value, child){
-                return _postLaborAccompanimentNotifier.value == 'No' ? Column(
-                  children: [
-                    CustomTextFormFieldTitle(
-                      labelText: StringConst.INITIAL_MOTIVE,
-                      initialValue: _postLaborAccompanimentMotive,
-                      onChanged: (value) {
-                        _postLaborAccompanimentMotive = value ?? '';
-                      },
-                      validator: (value) => (value!.isNotEmpty || value != '')
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                      enabled: !_finished,
-                    ),
-                    SpaceH12(),
-                  ],
-                ) : Container();
-              }
-            ),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomDatePickerTitle(
-                labelText: StringConst.FOLLOW_INIT_DATE,
-                initialValue: _postLaborInitialDate,
-                onChanged: (value) {
-                  _postLaborInitialDate = value;
-                  if(_postLaborInitialDate != null && _postLaborFinalDate != null){
-                    _totalDaysNotifier.value = _postLaborFinalDate!.difference(_postLaborInitialDate!).inDays;
-                    _totalDaysController.text = _totalDaysNotifier.value.toString();
-                  }
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-              childRight: CustomDatePickerTitle(
-                labelText: StringConst.FOLLOW_END_DATE,
-                initialValue: _postLaborFinalDate,
-                onChanged: (value) {
-                  _postLaborFinalDate = value;
-                  if(_postLaborInitialDate != null && _postLaborFinalDate != null){
-                    _totalDaysNotifier.value = _postLaborFinalDate!.difference(_postLaborInitialDate!).inDays;
-                    _totalDaysController.text = _totalDaysNotifier.value.toString();
-                  }
-                },
-                enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-            ),
-            SpaceH12(),
-            ValueListenableBuilder(
-              valueListenable: _totalDaysNotifier,
-              builder: (context, value, child){
-                return CustomTextFormFieldTitle(
-                  labelText: StringConst.FOLLOW_POST_LABOR_TOTAL_DAYS,
-                  controller: _totalDaysController,
-                  enabled: false,
-                );
-              }
-            ),
-            SpaceH12(),
-            _jobMaintenance == ''
-                ? CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.FOLLOW_JOB_MAINTENANCE,
-              source: StringConst.YES_NO_SELECTION,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _jobMaintenance = value;
-              },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-            )
-                : CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.FOLLOW_JOB_MAINTENANCE,
-              source: StringConst.YES_NO_SELECTION,
-              value: _jobMaintenance,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _jobMaintenance = value;
-              },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
-            ),
+                    },
+                    enabled: !_finished,
+                    validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                  childRight: CustomDatePickerTitle(
+                    labelText: StringConst.FOLLOW_END_DATE,
+                    initialValue: _postLaborFinalDate,
+                    onChanged: (value) {
+                      _postLaborFinalDate = value;
+                      if(_postLaborInitialDate != null && _postLaborFinalDate != null){
+                        _totalDaysNotifier.value = _postLaborFinalDate!.difference(_postLaborInitialDate!).inDays;
+                        _totalDaysController.text = _totalDaysNotifier.value.toString();
+                      }
+                    },
+                    enabled: !_finished,
+                    validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                  ),
+                ),
+                SpaceH12(),
+                ValueListenableBuilder(
+                    valueListenable: _totalDaysNotifier,
+                    builder: (context, value, child){
+                      return CustomTextFormFieldTitle(
+                        labelText: StringConst.FOLLOW_POST_LABOR_TOTAL_DAYS,
+                        controller: _totalDaysController,
+                        enabled: false,
+                      );
+                    }
+                ),
+                SpaceH12(),
+                _jobMaintenance == ''
+                    ? CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.FOLLOW_JOB_MAINTENANCE,
+                  source: StringConst.YES_NO_SELECTION,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _jobMaintenance = value;
+                  },
+                  validator: (value) => value != null
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                )
+                    : CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.FOLLOW_JOB_MAINTENANCE,
+                  source: StringConst.YES_NO_SELECTION,
+                  value: _jobMaintenance,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    _jobMaintenance = value;
+                  },
+                  validator: (value) => value != null
+                      ? null
+                      : StringConst.FORM_GENERIC_ERROR,
+                ),
+              ],
+            ) : Container(),
+
 
             SpaceH12(),
             ValueListenableBuilder(

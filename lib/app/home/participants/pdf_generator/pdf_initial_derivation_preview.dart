@@ -2,16 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/closure_report_pdf_page.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/follow_report_pdf_page.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/initial_report_pdf_page.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/ipil_pdf_page.dart';
-import 'package:enreda_empresas/app/models/certificationRequest.dart';
-import 'package:enreda_empresas/app/models/closureReport.dart';
-import 'package:enreda_empresas/app/models/experience.dart';
-import 'package:enreda_empresas/app/models/followReport.dart';
-import 'package:enreda_empresas/app/models/initialReport.dart';
-import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/home/participants/pdf_generator/derivation_report_pdf_page.dart';
+import 'package:enreda_empresas/app/models/derivationReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
@@ -24,15 +16,15 @@ import 'package:printing/printing.dart';
 import 'data.dart';
 
 
-class MyClosureReport extends StatefulWidget {
-  const MyClosureReport({
+class MyDerivationReport extends StatefulWidget {
+  const MyDerivationReport({
     Key? key,
     required this.user,
-    required this.closureReport,
+    required this.derivationReport,
   }) : super(key: key);
 
   final UserEnreda user;
-  final ClosureReport closureReport;
+  final DerivationReport derivationReport;
 
   @override
   MyAppState createState() {
@@ -40,7 +32,7 @@ class MyClosureReport extends StatefulWidget {
   }
 }
 
-class MyAppState extends State<MyClosureReport> with SingleTickerProviderStateMixin {
+class MyAppState extends State<MyDerivationReport> with SingleTickerProviderStateMixin {
 
   int _tab = 0;
   TabController? _tabController;
@@ -63,7 +55,7 @@ class MyAppState extends State<MyClosureReport> with SingleTickerProviderStateMi
 
     _tabController = TabController(
       vsync: this,
-      length: examplesClosureReport.length,
+      length: examplesDerivationReport.length,
       initialIndex: _tab,
     );
     _tabController!.addListener(() {
@@ -106,7 +98,7 @@ class MyAppState extends State<MyClosureReport> with SingleTickerProviderStateMi
 
     final appDocDir = await getApplicationDocumentsDirectory();
     final appDocPath = appDocDir.path;
-    final file = File('$appDocPath/myClosureReport.pdf');
+    final file = File('$appDocPath/myDerivationReport.pdf');
     print('Save as file ${file.path} ...');
     await file.writeAsBytes(bytes);
     await OpenFile.open(file.path);
@@ -135,14 +127,14 @@ class MyAppState extends State<MyClosureReport> with SingleTickerProviderStateMi
         iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
         actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
-        title: CustomTextBoldCenter(title: 'Reporte de cierre de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
+        title: CustomTextBoldCenter(title: 'Reporte de derivación de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 22.0),
         bottom: TabBar(
           controller: _tabController,
-          tabs: examplesClosureReport.map((e) => CustomTextBold(title: e.name,)).toList(),
+          tabs: examplesDerivationReport.map((e) => CustomTextBold(title: e.name,)).toList(),
           labelColor: Colors.white,
           labelStyle: TextStyle(fontSize: 20),
           isScrollable: true,
@@ -150,11 +142,11 @@ class MyAppState extends State<MyClosureReport> with SingleTickerProviderStateMi
       ),
       body: PdfPreview(
         maxPageWidth: 700,
-        build: (format) => examplesClosureReport[_tab].builder(
+        build: (format) => examplesDerivationReport[_tab].builder(
           format,
           _data,
           widget.user!,
-          widget.closureReport,
+          widget.derivationReport,
         ),
         actions: actions,
         canDebug: false,
