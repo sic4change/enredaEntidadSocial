@@ -230,7 +230,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               CustomTextBoldTitle(
-                  title: StringConst.PERSONAL_DOCUMENTATION.toUpperCase()),
+                  title: StringConst.SOCIAL_REPORTS.toUpperCase()),
               Theme(
                 data: Theme.of(context).copyWith(
                   dividerTheme: DividerThemeData(
