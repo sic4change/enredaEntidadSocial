@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui_web';
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
@@ -22,6 +23,8 @@ import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:html' as html;
+import 'package:path/path.dart' as p;
+import 'package:pdf/widgets.dart' as pw;
 
 class ParticipantDocumentationPage extends StatefulWidget {
   ParticipantDocumentationPage({required this.participantUser, super.key});
@@ -236,7 +239,15 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
                   onPressed: () async {
                     var data = await http.get(Uri.parse(document.document));
                     var pdfData = data.bodyBytes;
-                    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+                    var extension = p.extension(document.document).substring(0,4);
+                    print(extension);
+                    if(extension != '.pdf'){
+                      _printNotPDF(document.document);
+                    }
+                    else {
+                      await Printing.layoutPdf(
+                          onLayout: (PdfPageFormat format) async => pdfData);
+                    }
                   },
                 ),
                 SpaceW8(),
@@ -294,6 +305,20 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
         ],
       ),
     );
+  }
+
+  Future<void> _printNotPDF(String path) async{
+    final doc = pw.Document();
+    final netImage = await networkImage(path);
+    doc.addPage(pw.Page(
+      build: (pw.Context context) {
+        return pw.Center(
+          child: pw.Image(netImage),
+        );
+
+      })
+    );
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => doc.save());
   }
 
   Future<void> _showSaveDialog(int order) async{
