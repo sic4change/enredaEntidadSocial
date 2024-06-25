@@ -555,8 +555,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                             _subsidy = value;
                           },
-                    validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+/*                    validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                   )
                 : CustomDropDownButtonFormFieldTittle(
                     labelText:
@@ -568,9 +568,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                             _subsidy = value;
                           },
-                    validator: (value) => (value!.isNotEmpty || value != '')
+/*                    validator: (value) => (value!.isNotEmpty || value != '')
                         ? null
-                        : StringConst.FORM_GENERIC_ERROR,
+                        : StringConst.FORM_GENERIC_ERROR,*/
                   ),
 
             //Section 1
@@ -581,9 +581,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation1 = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              //validator: (value) => (value!.isNotEmpty || value != '')
+              //    ? null
+              //    : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -597,8 +597,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   _arriveDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+/*                validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,*/
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: 'Recursos de Acogida',
@@ -606,9 +606,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _receptionResources = value ?? '';
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+/*                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
             ),
@@ -620,9 +620,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _administrativeSituation = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+/*              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
 
@@ -634,9 +634,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation2 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+/*              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -652,8 +652,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _healthCard = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+/*                      validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     )
                   : CustomDropDownButtonFormFieldTittle(
                       labelText: 'Tarjeta sanitaria',
@@ -664,8 +664,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _healthCard = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+/*                      validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     ),
               childRight: CustomDatePickerTitle(
                 labelText: 'Fecha de caducidad',
@@ -674,8 +674,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   _expirationDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+/*                validator: (value) =>
+                    (value != null) ? null : StringConst.FORM_GENERIC_ERROR,*/
               ),
             ),
             SpaceH12(),
@@ -685,9 +685,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _medication = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+/*              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             //Subsection 2.1
@@ -698,9 +698,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation2_1 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+/*              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -713,9 +713,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _rest = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+/*                validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
               childRight: _diagnosis == ''
@@ -727,8 +727,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _diagnosis = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+ /*                     validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     )
                   : CustomDropDownButtonFormFieldTittle(
                       labelText: 'Diagnóstico',
@@ -739,8 +739,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _diagnosis = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+/*                      validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     ),
             ),
             SpaceH12(),
@@ -753,9 +753,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _treatment = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+             /*   validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
@@ -764,10 +764,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _tracking = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+              /*  validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
+                enabled: !_finished,*/
               ),
             ),
             SpaceH12(),
@@ -780,8 +780,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                             _psychosocial = value;
                           },
-                    validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                 /*   validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                   )
                 : CustomDropDownButtonFormFieldTittle(
                     labelText: 'Derivación interna al área psicosocial',
@@ -792,8 +792,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                             _psychosocial = value;
                           },
-                    validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                   /* validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                   ),
 
             //Subsection 2.2
@@ -804,9 +804,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation2_2 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+            /*  validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -825,9 +825,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                   : (value) {
                                       _disabilityStateNotifier.value = value!;
                                     },
-                              validator: (value) => value != null
+                            /*  validator: (value) => value != null
                                   ? null
-                                  : StringConst.FORM_GENERIC_ERROR,
+                                  : StringConst.FORM_GENERIC_ERROR,*/
                             )
                           : CustomDropDownButtonFormFieldTittle(
                               labelText: 'Estado',
@@ -842,9 +842,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                         _revisionDate = null;
                                       }
                                     },
-                              validator: (value) => value != null
+                           /*   validator: (value) => value != null
                                   ? null
-                                  : StringConst.FORM_GENERIC_ERROR,
+                                  : StringConst.FORM_GENERIC_ERROR,*/
                             ),
                       SpaceH12(),
                       _disabilityStateNotifier.value == 'Concedida'
@@ -865,9 +865,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                         : (value) {
                                       _grantedNotifier.value = value!;
                                     },
-                                    validator: (value) => value != null
+                               /*     validator: (value) => value != null
                                         ? null
-                                        : StringConst.FORM_GENERIC_ERROR,
+                                        : StringConst.FORM_GENERIC_ERROR,*/
                                   )
                                       : CustomDropDownButtonFormFieldTittle(
                                     labelText: 'Concedida',
@@ -878,9 +878,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                         : (value) {
                                       _grantedNotifier.value = value!;
                                     },
-                                    validator: (value) => value != null
+                                /*    validator: (value) => value != null
                                         ? null
-                                        : StringConst.FORM_GENERIC_ERROR,
+                                        : StringConst.FORM_GENERIC_ERROR,*/
                                   ),
 
 
@@ -893,9 +893,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                         _revisionDate = value;
                                       },
                                       enabled: !_finished,
-                                      validator: (value) => (value != null)
+                               /*       validator: (value) => (value != null)
                                           ? null
-                                          : StringConst.FORM_GENERIC_ERROR,
+                                          : StringConst.FORM_GENERIC_ERROR,*/
                                     )
                                   : Container(),
                             );
@@ -915,9 +915,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _referenceProfessionalDisability = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
 
@@ -934,8 +934,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _disabilityGrade = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    /*  validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     )
                   : CustomDropDownButtonFormFieldTittle(
                       labelText: 'Grado de discapacidad',
@@ -946,8 +946,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _disabilityGrade = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                   /*   validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     ),
               childRight: _disabilityType == ''
                   ? CustomDropDownButtonFormFieldTittle(
@@ -958,8 +958,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _disabilityType = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                   /*   validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     )
                   : CustomDropDownButtonFormFieldTittle(
                       labelText: 'Tipo de discapacidad',
@@ -970,8 +970,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _disabilityType = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                   /*   validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     ),
             ),
 
@@ -983,9 +983,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation2_3 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+            /*  validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1001,8 +1001,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _dependenceState = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    /*  validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     )
                   : CustomDropDownButtonFormFieldTittle(
                       labelText: 'Estado',
@@ -1013,8 +1013,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _dependenceState = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                     /* validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     ),
               childRight: CustomTextFormFieldTitle(
                 labelText: 'Profesional de referencia',
@@ -1022,9 +1022,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _referenceProfessionalDependence = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+              /*  validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
             ),
@@ -1038,8 +1038,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                             _dependenceGrade = value;
                           },
-                    validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                 /*   validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                   )
                 : CustomDropDownButtonFormFieldTittle(
                     labelText: 'Grado de dependencia',
@@ -1050,8 +1050,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                             _dependenceGrade = value;
                           },
-                    validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                   /* validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                   ),
 
             //Subsection 2.4
@@ -1062,9 +1062,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation2_4 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+           /*   validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1074,9 +1074,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _externalDerivation = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+            /*  validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
 
@@ -1088,9 +1088,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation3 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1106,8 +1106,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _internalDerivationLegal = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    /*  validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     )
                   : CustomDropDownButtonFormFieldTittle(
                       labelText: 'Derivación interna',
@@ -1118,8 +1118,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _internalDerivationLegal = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    /*  validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     ),
               childRight: CustomTextFormFieldTitle(
                 labelText: 'Derivación externa',
@@ -1127,9 +1127,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _externalDerivationLegal = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+               /* validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
             ),
@@ -1141,9 +1141,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _legalRepresentation = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
 
@@ -1155,9 +1155,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation4 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+            /*  validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1173,8 +1173,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _ownershipType = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    /*  validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     )
                   : CustomDropDownButtonFormFieldTittle(
                       labelText: 'Tipo de tenencia',
@@ -1185,8 +1185,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _ownershipType = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                     /* validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     ),
               childRight: CustomTextFormFieldTitle(
                 labelText: 'Ubicación actual de la persona',
@@ -1194,9 +1194,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _location = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+               /* validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
             ),
@@ -1207,9 +1207,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _centerContact = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1228,9 +1228,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation5 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1241,9 +1241,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _informationNetworks = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1256,9 +1256,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _institutionNetworks = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+              /*  validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
@@ -1267,9 +1267,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _familyConciliation = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+               /* validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
             ),
@@ -1282,9 +1282,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation7 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1325,10 +1325,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                     _languagesNotifier.value[_languagesNotifier
                                         .value.indexOf(language)].name = value!;
                                   },
-                                  validator: (value) =>
+                                /*  validator: (value) =>
                                   value != null
                                       ? null
-                                      : StringConst.FORM_GENERIC_ERROR,
+                                      : StringConst.FORM_GENERIC_ERROR,*/
                                 )
                                     : CustomDropDownButtonFormFieldTittle(
                                   labelText: 'Idioma',
@@ -1340,10 +1340,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                     _languagesNotifier.value[_languagesNotifier
                                         .value.indexOf(language)].name = value!;
                                   },
-                                  validator: (value) =>
+                                /*  validator: (value) =>
                                   value != null
                                       ? null
-                                      : StringConst.FORM_GENERIC_ERROR,
+                                      : StringConst.FORM_GENERIC_ERROR,*/
                                 ),
                                 childRight: CustomTextFormFieldTitle(
                                   labelText:
@@ -1353,10 +1353,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                     _languagesNotifier.value[_languagesNotifier
                                         .value.indexOf(language)].level = value;
                                   },
-                                  validator: (value) =>
+                               /*   validator: (value) =>
                                   (value!.isNotEmpty || value != '')
                                       ? null
-                                      : StringConst.FORM_GENERIC_ERROR,
+                                      : StringConst.FORM_GENERIC_ERROR,*/
                                   enabled: !_finished,
                                 ),
 
@@ -1381,9 +1381,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation9 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+/*              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1393,9 +1393,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _centerTSReference = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+           /*   validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1408,9 +1408,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 onChanged: (value) {
                   _subsidyBeneficiary = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
+             /*   validator: (value) => (value!.isNotEmpty || value != '')
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                    : StringConst.FORM_GENERIC_ERROR,*/
                 enabled: !_finished,
               ),
               childRight: _socialServicesUser == ''
@@ -1422,8 +1422,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _socialServicesUser = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                    /*  validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     )
                   : CustomDropDownButtonFormFieldTittle(
                       labelText: 'Usuaria',
@@ -1434,8 +1434,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           : (value) {
                               _socialServicesUser = value;
                             },
-                      validator: (value) =>
-                          value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                     /* validator: (value) =>
+                          value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                     ),
             ),
             SpaceH12(),
@@ -1448,8 +1448,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                             _socialExclusionCertificate = value;
                           },
-                    validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  /*  validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                   )
                 : CustomDropDownButtonFormFieldTittle(
                     labelText: 'Certificado de Exclusión Social',
@@ -1460,8 +1460,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                             _socialExclusionCertificate = value;
                           },
-                    validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                 /*   validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                   ),
 
             //Section 12
@@ -1472,9 +1472,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation12 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1491,9 +1491,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _orientation13 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1514,8 +1514,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                             : (value) {
                           _educationLevel = value;
                         },
-                        validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      /*  validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                       )
                           : CustomDropDownButtonFormFieldTittle(
                         labelText: 'Nivel educativo',
@@ -1526,8 +1526,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                             : (value) {
                           _educationLevel = value;
                         },
-                        validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                       /* validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                       ),
                       childRight: _laborSituationNotifier.value == ''
                           ? CustomDropDownButtonFormFieldTittle(
@@ -1538,8 +1538,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                             : (value) {
                           _laborSituationNotifier.value = value!;
                         },
-                        validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                       /* validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                       )
                           : CustomDropDownButtonFormFieldTittle(
                         labelText: 'Situación laboral',
@@ -1550,8 +1550,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
                             : (value) {
                           _laborSituationNotifier.value = value!;
                         },
-                        validator: (value) =>
-                        value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      /*  validator: (value) =>
+                        value != null ? null : StringConst.FORM_GENERIC_ERROR,*/
                       ),
                     ),
 
@@ -1574,9 +1574,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                   : (value) {
                                 _activeLaborNotifier.value = value!;
                               },
-                              validator: (value) => value != null
+                            /*  validator: (value) => value != null
                                   ? null
-                                  : StringConst.FORM_GENERIC_ERROR,
+                                  : StringConst.FORM_GENERIC_ERROR,*/
                             )
                                 : CustomDropDownButtonFormFieldTittle(
                               labelText: 'Activa',
@@ -1587,9 +1587,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                   : (value) {
                                 _activeLaborNotifier.value = value!;
                               },
-                              validator: (value) => value != null
+                             /* validator: (value) => value != null
                                   ? null
-                                  : StringConst.FORM_GENERIC_ERROR,
+                                  : StringConst.FORM_GENERIC_ERROR,*/
                             ),
                           )
                               : Container(),
@@ -1604,9 +1604,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                   : (value) {
                                 _occupiedLaborNotifier.value = value!;
                               },
-                              validator: (value) => value != null
+                             /* validator: (value) => value != null
                                   ? null
-                                  : StringConst.FORM_GENERIC_ERROR,
+                                  : StringConst.FORM_GENERIC_ERROR,*/
                             )
                                 : CustomDropDownButtonFormFieldTittle(
                               labelText: 'Ocupada',
@@ -1617,9 +1617,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                   : (value) {
                                 _occupiedLaborNotifier.value = value!;
                               },
-                              validator: (value) => value != null
+                           /*   validator: (value) => value != null
                                   ? null
-                                  : StringConst.FORM_GENERIC_ERROR,
+                                  : StringConst.FORM_GENERIC_ERROR,*/
                             ),
                           )
                               : Container(),
@@ -1650,9 +1650,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                       _tempLabor = value;
                     },
-                    validator: (value) => value != null
+                  /*  validator: (value) => value != null
                         ? null
-                        : StringConst.FORM_GENERIC_ERROR,
+                        : StringConst.FORM_GENERIC_ERROR,*/
                   )
                       : CustomDropDownButtonFormFieldTittle(
                     labelText: 'Temporalidad',
@@ -1663,9 +1663,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                       _tempLabor = value;
                     },
-                    validator: (value) => value != null
+                  /*  validator: (value) => value != null
                         ? null
-                        : StringConst.FORM_GENERIC_ERROR,
+                        : StringConst.FORM_GENERIC_ERROR,*/
                   ),
                   childRight: _workingDayLabor == ''
                       ? CustomDropDownButtonFormFieldTittle(
@@ -1676,9 +1676,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                       _workingDayLabor = value;
                     },
-                    validator: (value) => value != null
+                  /*  validator: (value) => value != null
                         ? null
-                        : StringConst.FORM_GENERIC_ERROR,
+                        : StringConst.FORM_GENERIC_ERROR,*/
                   )
                       : CustomDropDownButtonFormFieldTittle(
                     labelText: 'Jornada laboral',
@@ -1689,9 +1689,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         : (value) {
                       _workingDayLabor = value;
                     },
-                    validator: (value) => value != null
+                  /*  validator: (value) => value != null
                         ? null
-                        : StringConst.FORM_GENERIC_ERROR,
+                        : StringConst.FORM_GENERIC_ERROR,*/
                   ),
                 )
                     : Container();
@@ -1706,9 +1706,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _competencies = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+            /*  validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1718,9 +1718,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _contextualization = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+            /*  validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1730,9 +1730,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _connexion = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
 
@@ -1743,9 +1743,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _shortTerm = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1755,9 +1755,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _mediumTerm = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+/*              validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1767,9 +1767,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               onChanged: (value) {
                 _longTerm = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
+             /* validator: (value) => (value!.isNotEmpty || value != '')
                   ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+                  : StringConst.FORM_GENERIC_ERROR,*/
               enabled: !_finished,
             ),
 
