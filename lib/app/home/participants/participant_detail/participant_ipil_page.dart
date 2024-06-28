@@ -15,11 +15,21 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_widgets/custom_drop_down_button_form_field_title_check.dart';
+
 class ParticipantIPILPage extends StatelessWidget {
   ParticipantIPILPage({required this.participantUser, super.key});
 
   final UserEnreda participantUser;
   String? techNameComplete;
+
+  List<DropdownMenuItem<String>> _source =
+  ['Si', 'No', 'Caducidad'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -363,6 +373,10 @@ class ParticipantIPILPage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                Padding(
+                                  padding: EdgeInsets.only(left:  Responsive.isDesktop(context)?50:30, right: 35, bottom: 30),
+                                  child: CheckboxDropdown()
+                                )
                               ],
                             ) :
                             Padding(
