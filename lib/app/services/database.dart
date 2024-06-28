@@ -12,6 +12,7 @@ import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/contact.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/dedication.dart';
+import 'package:enreda_empresas/app/models/derivationReport.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
@@ -139,6 +140,9 @@ abstract class Database {
      Stream<FollowReport> followReportsStreamByUserId(String? userId);
      Future<void> setFollowReport(FollowReport followReport);
      Future<void> addFollowReport(FollowReport followReport);
+     Stream<DerivationReport> derivationReportsStreamByUserId(String? userId);
+     Future<void> setDerivationReport(DerivationReport derivationReport);
+     Future<void> addDerivationReport(DerivationReport derivationReport);
 }
 
 class FirestoreDatabase implements Database {
@@ -966,6 +970,25 @@ class FirestoreDatabase implements Database {
   @override
   Future<void> addFollowReport(FollowReport followReport) =>
       _service.addData(path: APIPath.followReports(), data: followReport.toMap());
+
+  @override
+  Stream<DerivationReport> derivationReportsStreamByUserId(String? userId) {
+    return _service.documentStreamByField(
+      path: APIPath.derivationReports(),
+      builder: (data, documentId) => DerivationReport.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('userId', isEqualTo: userId),
+    );
+  }
+
+  @override
+  Future<void> setDerivationReport(DerivationReport derivationReport) {
+    return _service.updateData(
+        path: APIPath.derivationReport(derivationReport.derivationReportId!), data: derivationReport.toMap());
+  }
+
+  @override
+  Future<void> addDerivationReport(DerivationReport derivationReport) =>
+      _service.addData(path: APIPath.derivationReports(), data: derivationReport.toMap());
 
 }
 

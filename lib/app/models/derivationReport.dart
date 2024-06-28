@@ -1,14 +1,18 @@
+import 'package:enreda_empresas/app/models/formationReport.dart';
 import 'package:enreda_empresas/app/models/languageReport.dart';
 
-class InitialReport {
-  InitialReport({
-    this.initialReportId,
+class DerivationReport {
+  DerivationReport({
+    this.derivationReportId,
     this.userId,
     this.finished,
     this.completedDate,
+    this.fromInitialReport,
 
     this.subsidy,
     this.techPerson,
+    this.addressedTo,
+    this.objectiveDerivation,
 
     //Section 1
     this.orientation1,
@@ -74,6 +78,9 @@ class InitialReport {
     this.psychosocialDerivationDate,
     this.psychosocialDerivationMotive,
     this.legalRepresentation,
+    this.processingBag,
+    this.processingBagDate,
+    this.economicAmount,
 
     //Section 4
     this.orientation4,
@@ -124,18 +131,65 @@ class InitialReport {
     this.longTerm,
     this.orientation13_2,
 
+    //Section 9.5
+    this.orientation9_5,
+    this.formations,
+    this.formationBag,
+    this.formationBagDate,
+    this.formationBagMotive,
+    this.formationBagEconomic,
+    this.jobObtaining,
+    this.jobObtainDate,
+    this.jobFinishDate,
+    this.jobUpgrade,
+    this.upgradeMotive,
+    this.upgradeDate,
+    this.orientation9_6,
+    this.postLaborAccompaniment,
+    this.postLaborAccompanimentMotive,
+    this.postLaborInitialDate,
+    this.postLaborFinalDate,
+    this.postLaborTotalDays,
+    this.jobMaintenance,
+
+
+    //Allow see
+    this.allow1,
+    this.allow1_1,
+    this.allow2,
+    this.allow2_1,
+    this.allow2_2,
+    this.allow2_3,
+    this.allow2_4,
+    this.allow3,
+    this.allow4,
+    this.allow5,
+    this.allow6,
+    this.allow7,
+    this.allow8,
+    this.allow9,
+    this.allow9_2,
+    this.allow9_3,
+    this.allow9_4,
+    this.allow9_5,
+    this.allow9_6,
+
 
   });
 
   //Basic
-  final String? initialReportId;
+  final String? derivationReportId;
   final String? userId;
   final bool? finished;
   final DateTime? completedDate;
+  final bool? fromInitialReport;
 
   //Pre-Sections
   final String? subsidy;
   final String? techPerson;
+  final String? addressedTo;
+  final String? objectiveDerivation;
+
 
   //Section 1
   final String? orientation1;
@@ -202,6 +256,9 @@ class InitialReport {
   final DateTime? psychosocialDerivationDate;
   final String? psychosocialDerivationMotive;
   final String? legalRepresentation;
+  final String? processingBag;
+  final DateTime? processingBagDate;
+  final String? economicAmount;
 
   //Section 4
   final String? orientation4;
@@ -252,10 +309,50 @@ class InitialReport {
   final String? longTerm;
   final String? orientation13_2;
 
+  //Section 9.5
+  final String? orientation9_5;
+  final List<FormationReport>? formations;
+  final String? formationBag;
+  final DateTime? formationBagDate;
+  final String? formationBagMotive;
+  final String? formationBagEconomic;
+  final String? jobObtaining;
+  final DateTime? jobObtainDate;
+  final DateTime? jobFinishDate;
+  final String? jobUpgrade;
+  final String? upgradeMotive;
+  final DateTime? upgradeDate;
+  final String? orientation9_6;
+  final String? postLaborAccompaniment;
+  final String? postLaborAccompanimentMotive;
+  final DateTime? postLaborInitialDate;
+  final DateTime? postLaborFinalDate;
+  final int? postLaborTotalDays;
+  final String? jobMaintenance;
+
+  //Allow see
+  late bool? allow1 = true;
+  late bool? allow1_1 = true;
+  late bool? allow2 = true;
+  late bool? allow2_1 = true;
+  late bool? allow2_2 = true;
+  late bool? allow2_3 = true;
+  late bool? allow2_4 = true;
+  late bool? allow3 = true;
+  late bool? allow4 = true;
+  late bool? allow5 = true;
+  late bool? allow6 = true;
+  late bool? allow7 = true;
+  late bool? allow8 = true;
+  late bool? allow9 = true;
+  late bool? allow9_2 = true;
+  late bool? allow9_3 = true;
+  late bool? allow9_4 = true;
+  late bool? allow9_5 = true;
+  late bool? allow9_6 = true;
 
 
-
-  factory InitialReport.fromMap(Map<String, dynamic> data, String documentId) {
+  factory DerivationReport.fromMap(Map<String, dynamic> data, String documentId) {
     List<String> hostingObservations = [];
     if (data['hostingObservations'] != null) {
       List<dynamic> list = data['hostingObservations'];
@@ -285,10 +382,24 @@ class InitialReport {
       });
     }
 
-    return InitialReport(
+    List<FormationReport> formations = [];
+    if (data['formations'] != null) {
+      data['formations'].forEach((formation) {
+        final formationsFirestore = formation as Map<String, dynamic>;
+        formations.add(
+            FormationReport(
+              name: formationsFirestore['name'] ?? '',
+              type: formationsFirestore['type'] ?? '',
+              certification: formationsFirestore['certification'] ?? '',
+            )
+        );
+      });
+    }
 
-        //Basic
-      initialReportId: data['initialReportId'],
+    return DerivationReport(
+
+      //Basic
+      derivationReportId: data['derivationReportId'],
       userId: data['userId'],
       finished: data['finished'],
       completedDate: data['completedDate'] != null ? data['completedDate'].toDate() : null,
@@ -296,6 +407,9 @@ class InitialReport {
       //Pre-Sections
       subsidy: data['subsidy'],
       techPerson: data['techPerson'],
+      addressedTo: data['addressedTo'],
+      objectiveDerivation: data['objectiveDerivation'],
+      fromInitialReport: data['fromInitialReport'],
 
       //Section 1
       orientation1: data['orientation1'],
@@ -361,6 +475,9 @@ class InitialReport {
       psychosocialDerivationDate: data['psychosocialDerivationDate'] != null ? data['psychosocialDerivationDate'].toDate() : null,
       psychosocialDerivationMotive: data['psychosocialDerivationMotive'],
       legalRepresentation: data['legalRepresentation'],
+      processingBag: data['processingBag'],
+      processingBagDate: data['processingBagDate'] != null ? data['processingBagDate'].toDate() : null,
+      economicAmount: data['economicAmount'],
 
       //Section 4
       orientation4: data['orientation4'],
@@ -411,6 +528,49 @@ class InitialReport {
       mediumTerm: data['mediumTerm'],
       longTerm: data['longTerm'],
       orientation13_2: data['orientation13_2'],
+
+      //Section 9.5
+      orientation9_5: data['orientation9_5'],
+      formations: formations,
+      formationBag: data['formationBag'],
+      formationBagDate: data['formationBagDate'] != null ? data['formationBagDate'].toDate() : null,
+      formationBagMotive: data['formationBagMotive'],
+      formationBagEconomic: data['formationBagEconomic'],
+      jobObtaining: data['jobObtaining'],
+      jobObtainDate: data['jobObtainDate'] != null ? data['jobObtainDate'].toDate() : null,
+      jobFinishDate: data['jobFinishDate'] != null ? data['jobFinishDate'].toDate() : null,
+      jobUpgrade: data['jobUpgrade'],
+      upgradeMotive: data['upgradeMotive'],
+      upgradeDate: data['upgradeDate'] != null ? data['upgradeDate'].toDate() : null,
+      orientation9_6: data['orientation9_6'],
+      postLaborAccompaniment: data['postLaborAccompaniment'],
+      postLaborAccompanimentMotive: data['postLaborAccompanimentMotive'],
+      postLaborInitialDate: data['postLaborInitialDate'] != null ? data['postLaborInitialDate'].toDate() : null,
+      postLaborFinalDate: data['postLaborFinalDate'] != null ? data['postLaborFinalDate'].toDate() : null,
+      postLaborTotalDays: data['postLaborTotalDays'],
+      jobMaintenance: data['jobMaintenance'],
+
+      //Allow see
+      allow1: data['allow1'],
+      allow1_1: data['allow1_1'],
+      allow2: data['allow2'],
+      allow2_1: data['allow2_1'],
+      allow2_2: data['allow2_2'],
+      allow2_3: data['allow2_3'],
+      allow2_4: data['allow2_4'],
+      allow3: data['allow3'],
+      allow4: data['allow4'],
+      allow5: data['allow5'],
+      allow6: data['allow6'],
+      allow7: data['allow7'],
+      allow8: data['allow8'],
+      allow9: data['allow9'],
+      allow9_2: data['allow9_2'],
+      allow9_3: data['allow9_3'],
+      allow9_4: data['allow9_4'],
+      allow9_5: data['allow9_5'],
+      allow9_6: data['allow9_6'],
+
     );
   }
 
@@ -418,14 +578,14 @@ class InitialReport {
   bool operator ==(Object other){
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is InitialReport &&
-            other.initialReportId == initialReportId);
+            other is DerivationReport &&
+            other.derivationReportId == derivationReportId);
   }
 
   Map<String, dynamic> toMap() {
     return {
 
-      'initialReportId': initialReportId,
+      'derivationReportId': derivationReportId,
       'userId': userId,
       'finished': finished,
       'completedDate': completedDate,
@@ -433,6 +593,9 @@ class InitialReport {
       //Pre-Sections
       'subsidy': subsidy,
       'techPerson': techPerson,
+      'addressedTo': addressedTo,
+      'objectiveDerivation': objectiveDerivation,
+      'fromInitialReport': fromInitialReport,
 
       //Section 1
       'orientation1': orientation1,
@@ -498,6 +661,9 @@ class InitialReport {
       'psychosocialDerivationDate': psychosocialDerivationDate,
       'psychosocialDerivationMotive': psychosocialDerivationMotive,
       'legalRepresentation': legalRepresentation,
+      'processingBag': processingBag,
+      'processingBagDate': processingBagDate,
+      'economicAmount': economicAmount,
 
       //Section 4
       'orientation4': orientation4,
@@ -549,6 +715,49 @@ class InitialReport {
       'mediumTerm': mediumTerm,
       'longTerm': longTerm,
       'orientation13_2': orientation13_2,
+
+      //Section 9.5
+      'orientation9_5': orientation9_5,
+      'formations': formations != null ? formations!.map((e) => e.toMap()).toList() : [],
+      'formationBag': formationBag,
+      'formationBagDate': formationBagDate,
+      'formationBagMotive': formationBagMotive,
+      'formationBagEconomic': formationBagEconomic,
+      'jobObtaining': jobObtaining,
+      'jobObtainDate': jobObtainDate,
+      'jobFinishDate': jobFinishDate,
+      'jobUpgrade': jobUpgrade,
+      'upgradeMotive': upgradeMotive,
+      'upgradeDate': upgradeDate,
+      'orientation9_6': orientation9_6,
+      'postLaborAccompaniment': postLaborAccompaniment,
+      'postLaborAccompanimentMotive': postLaborAccompanimentMotive,
+      'postLaborInitialDate': postLaborInitialDate,
+      'postLaborFinalDate': postLaborFinalDate,
+      'postLaborTotalDays': postLaborTotalDays,
+      'jobMaintenance': jobMaintenance,
+
+      //Allow see
+      'allow1': allow1,
+      'allow1_1': allow1_1,
+      'allow2': allow2,
+      'allow2_1': allow2_1,
+      'allow2_2': allow2_2,
+      'allow2_3': allow2_3,
+      'allow2_4': allow2_4,
+      'allow3': allow3,
+      'allow4': allow4,
+      'allow5': allow5,
+      'allow6': allow6,
+      'allow7': allow7,
+      'allow8': allow8,
+      'allow9': allow9,
+      'allow9_2': allow9_2,
+      'allow9_3': allow9_3,
+      'allow9_4': allow9_4,
+      'allow9_5': allow9_5,
+      'allow9_6': allow9_6,
+
 
     };
   }

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class StringConst {
   //strings
   static const String APP_NAME = "enREDa";
@@ -606,4 +608,365 @@ class StringConst {
   static const String FORM_ENTITY_UPDATED = "La entidad social fue actualizada exitosamente.";
   static const String FORM_CAMERA = "Cámara";
   static const String FORM_GALLERY = "Galería";
+
+  //Initial Report
+  static const String INITIAL_SUBSIDY = 'Subvención a la que el/la participante está imputado/a';
+  static const String INITIAL_TECH_PERSON = 'Técnica de referencia';
+  static const String INITIAL_TITLE1_ITINERARY = '1. Itinerario en España';
+  static const String INITIAL_OBSERVATIONS = 'Observaciones';
+  static const String INITIAL_ARRIVE_DATE = 'Fecha de llegada a España';
+  static const String INITIAL_RECEPTION_RESOURCES = 'Recursos de acogida';
+  static const String INITIAL_EXTERNAL_RESOURCES = 'Recursos externos de apoyo';
+  static const String INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION = '1.1 Situación administrativa';
+  static const String INITIAL_STATE = 'Estado';
+  static const String INITIAL_DATE_CONCESSION = 'Fecha de concesión';
+  static const String INITIAL_DATE_ASK = 'Fecha de solicitud';
+  static const String INITIAL_DATE_RESOLUTION = 'Fecha de resolución';
+  static const String INITIAL_TEMP = 'Temporalidad';
+  static const String INITIAL_DATE_RENOVATION = 'Fecha de renovación';
+  static const String INITIAL_JURIDIC_FIGURE = 'Figura jurídica de acceso';
+  static const String INITIAL_RESIDENCE_TYPE = 'Tipo de residencia';
+  static const String INITIAL_OTHERS = 'Otros';
+  static const String INITIAL_TITLE2_SANITARY = '2. Situación Sanitaria';
+  static const String INITIAL_HEALTH_CARD = 'Tarjeta sanitaria';
+  static const String INITIAL_EXPIRATION_DATE = 'Fecha de caducidad';
+  static const String INITIAL_MEDICATION = 'Medicación/Tratamiento';
+  static const String INITIAL_TITLE_2_1_MENTAL_HEALTH = '2.1 Salud mental';
+  static const String INITIAL_REST = 'Sueño y descanso';
+  static const String INITIAL_DIAGNOSIS = 'Diagnóstico';
+  static const String INITIAL_TREATMENT = 'Tratamiento';
+  static const String INITIAL_TRACKING = 'Seguimiento';
+  static const String INITIAL_TITLE_2_2_DISABILITY = '2.2 Discapacidad';
+  static const String INITIAL_GRANTED = 'Concedida';
+  static const String INITIAL_DATE = 'Fecha';
+  static const String INITIAL_REFERENCE_PROFESSIONAL = 'Profesional de referencia';
+  static const String INITIAL_DISABILITY_GRADE = 'Grado de discapacidad';
+  static const String INITIAL_DISABILITY_TYPE = 'Tipo de discapacidad';
+  static const String INITIAL_TITLE_2_3_DEPENDENCE = '2.3 Dependencia';
+  static const String INITIAL_DEPENDENCE_GRADE = 'Grado de dependencia';
+  static const String INITIAL_TITLE_2_4_ADDICTIONS = '2.4 Adicciones';
+  static const String INITIAL_EXTERNAL_DERIVATION = 'Derivación externa';
+  static const String INITIAL_MOTIVE = 'Motivo';
+  static const String INITIAL_TITLE_3_LEGAL_SITUATION = '3. Situación legal';
+  static const String INITIAL_INTERNAL_DERIVATION = 'Derivación interna';
+  static const String INITIAL_DERIVATION_DATE = 'Fecha de derivación';
+  static const String INITIAL_PSYCHOSOCIAL_DERIVATION = 'Derivación interna al área psicosocial';
+  static const String INITIAL_LEGAL_REPRESENTATION = 'Representación legal';
+  static const String INITIAL_HINT_LEGAL = 'De oficio, privada, datos de contacto';
+  static const String INITIAL_TITLE_4_HOUSE_SITUATION = '4. Situación alojativa';
+  static const String INITIAL_HOUSE_SITUATION = 'Situación alojativa';
+  static const String INITIAL_OWNERSHIP_TYPE = 'Tipo de tenencia';
+  static const String INITIAL_HOMELESS_SITUATION = 'Situación sinhogarismo';
+  static const String INITIAL_LIVING_UNIT = 'Unidad de convivencia';
+  static const String INITIAL_LIVING_UNIT_HINT = 'Parentesco y relación de convivencia';
+  static const String INITIAL_CENTER_CONTACT = 'Datos de contacto del recurso alojativo';
+  static const String INITIAL_LOCATION = 'Ubicación actual de la persona';
+  static const String INITIAL_TITLE_5_SUPPORT = '5. Redes de apoyo';
+  static const String INITIAL_INFORMATION_NETWORKS = 'Redes de apoyo natural';
+  static const String INITIAL_INFORMATION_NETWORKS_HINT = 'Familia, amigos, vecinos, etc.';
+  static const String INITIAL_INSTITUTION_NETWORKS = 'Redes de apoyo institucional';
+  static const String INITIAL_FAMILY_CONCILIATION = 'Conciliación familiar';
+  static const String INITIAL_TITLE_6_LANGUAGES = '6. Idiomas';
+  static const String INITIAL_LANGUAGE = 'Idioma';
+  static const String INITIAL_LANGUAGE_LEVEL = 'Reconocimiento / acreditación - nivel';
+  static const String INITIAL_TITLE_7_SOCIAL_ATTENTION = '7. Atención social integral';
+  static const String INITIAL_CENTER_TS = 'Centro y TS de referencia';
+  static const String INITIAL_SUBSIDY_BENEFICIARY = 'Destinataria de subvención y/o programa de apoyo';
+  static const String INITIAL_NAME_TYPE = 'Nombre/tipo';
+  static const String INITIAL_SOCIAL_EXCLUSION_CERTIFICATE = 'Certificado de Exclusión Social';
+  static const String INITIAL_SOCIAL_EXCLUSION_OBSERVATIONS = 'Observaciones sobre el certificado';
+  static const String INITIAL_TITLE_8_VULNERABILITY = '8. Situación de Vulnerabilidad';
+  static const String INITIAL_TITLE_9_WORK = '9. Itinerario formativo laboral';
+  static const String INITIAL_EDUCATION_LEVEL = 'Nivel educativo';
+  static const String INITIAL_TITLE_9_2_WORK_SITUATION = '9.2 Situación laboral';
+  static const String INITIAL_LABOR_SITUATION = 'Situación laboral';
+  static const String INITIAL_LABOR_TYPE = 'Tipo laboral';
+  static const String INITIAL_TITLE_9_3_TRAJECTORY = '9.3 Trayectoria B.A.E previa';
+  static const String INITIAL_COMPETENCIES = 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)';
+  static const String INITIAL_CONTEXTUALIZATION = 'Contextualización del territorio';
+  static const String INITIAL_CONNEXION = 'Conexión del entorno';
+  static const String INITIAL_TITLE_9_4_EXPECTATIONS = '9.4 Deseos y expectativas laborales';
+  static const String INITIAL_SHORT_TERM = 'Corto plazo: 1-3 meses';
+  static const String INITIAL_MEDIUM_TERM = 'Medio plazo: 3-6 meses';
+  static const String INITIAL_LONG_TERM = 'Largo plazo: 6-12 meses';
+
+  static const String FOLLOW_PROCESSING_BAG = 'Bolsa de tramitación';
+  static const String FOLLOW_ECONOMIC_AMOUNT = 'Cuantia económica';
+  static const String FOLLOW_TITLE_9_5_DEVELOP = '9.5 Desarrollo del tinerario formativo';
+  static const String FOLLOW_FORMATIONS = 'Formaciones';
+  static const String FOLLOW_FORMATION_NAME = 'Nombre de la formación';
+  static const String FOLLOW_FORMATION_TYPE = 'Tipo de formación';
+  static const String FOLLOW_FORMATION_CERTIFICATION = 'Certificación';
+  static const String FOLLOW_FORMATION_BAG = 'Bolsa de formación';
+  static const String FOLLOW_JOB = 'Empleo';
+  static const String FOLLOW_JOB_ACHIEVEMENT = 'Obtención de empleo';
+  static const String FOLLOW_OBTAIN_DATE = 'Fecha de obtención';
+  static const String FOLLOW_FINISH_DATE = 'Fecha de finalización';
+  static const String FOLLOW_JOB_UPGRADE = 'Mejora laboral';
+  static const String FOLLOW_JOB_UPGRADE_MOTIVE = 'Motivos de la mejora';
+  static const String FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT = '9.6 Acompañamiento post-laboral';
+  static const String FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT = 'Acompañamiento post-laboral';
+  static const String FOLLOW_INIT_DATE = 'Fecha de inicio';
+  static const String FOLLOW_END_DATE = 'Fecha de fin';
+  static const String FOLLOW_POST_LABOR_TOTAL_DAYS = 'Total de días';
+  static const String FOLLOW_JOB_MAINTENANCE = 'Mantenimiento del empleo obtenido';
+  static const String CLOSURE_TITLE_10 = '10. Cierre de la intervención';
+  static const String CLOSURE_CLOSE_MOTIVE = 'Motivo de cierre';
+  static const String CLOSURE_CLOSE_MOTIVE_DETAIL = 'Detalle del motivo';
+  static const String DERIVATION_ADDRESSED = 'Dirigido a:';
+  static const String DERIVATION_OBJECTIVE = 'Con el objetivo de:';
+
+  static List<DropdownMenuItem<String>> YES_NO_SELECTION =
+  ['Si', 'No'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> SUBSIDY_SELECTION = [
+    '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS',
+    '529775_SICFCH - Acompañamiento, tecnología y colaboración: 3 claves en el camino hacia el empleo joven',
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> ADMIN_STATE_SELECTION =
+  ['Sin tramitar', 'En trámite', 'Concedida'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> ADMIN_TEMP_SELECTION =
+  ['Inicial', 'Temporal', 'Temporal larga duración', 'Permanente'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> ADMIN_RESIDENCE_TYPE_SELECTION =
+  ['Ciudadanía de la unión', 'Residencia familiar de la unión', 'Residencia temporal no lucrativa',
+    'Residencia por reagrupación familiar (hab trabajar)', 'Residencia temporal y trabajo por cuenta ajena',
+    'Residencia temporal y trabajo por cuenta ajena (duración determinada)',
+    'Residencia temporal y trabajo por cuenta propia',
+    'Residencia Temporal y Trabajo en Prestaciones Transnacionales'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> ADMIN_JURIDIC_FIGUR_SELECTION =
+  ['Menores tutelados', 'Protección Internacional', 'Protección subsidiaria',
+    'Razones humanitarias', 'Arraigo laboral',
+    'Arraigo formativo',
+    'Arraigo social',
+    'Arraigo familiar', 'Vdg', 'Colaboración con autoridades públicas',
+    'Colaboración contra redes de trata o víctima de trata',
+    'Visado de residencia', 'Visado de residencia y trabajo', 'Estancia por estudios',
+    'Otros'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> HEALTH_CARD_SELECTION =
+  ['Si', 'No', 'Caducidad'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> STATE_SELECTION = [
+    'En trámite',
+    'Concedida',
+    'No aplica'
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> GRANTED_SELECTION = [
+    'Revisable',
+    'Definitiva'
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> DISABILITY_GRADE_SELECTION =
+  ['>33%', '<33%'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> DISABILITY_TYPE_SELECTION = [
+    'Sensorial',
+    'Intelectual',
+    'Psíquica',
+    'Física',
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> DEPENDENCE_GRADE_SELECTION =
+  ['I', 'II', 'III'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> DEPENDENCE_STATE_SELECTION = [
+    'Sin tramitar',
+    'En trámite',
+    'Concedida',
+    'No aplicable'
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> OWNERSHIP_TYPE_SELECTION =
+  ['Con hogar', 'Sin hogar'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> OWNERSHIP_TYPE_CONCRETE_SELECTION =
+  ['Alquiler', 'Propiedad', 'Otros'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> HOMELESS_SITUATION_SELECTION =
+  ['Situación de calle', 'Ocupación', 'Recurso alojativo', 'Otros'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static const List<String> OPTIONS_SECTION_4 = [
+    'Luz',
+    'Gas',
+    'Hacinamiento',
+    'Accesibilidad',
+    'Agua corriente',
+    'Baño',
+    'Agua caliente',
+    'Mobiliario básico'
+  ];
+
+  static const List<String> OPTIONS_SECTION_12 = [
+    'Barrera ideomática',
+    'Situación sinhogarismo',
+    'Colectivo LGTBI',
+    'Salud mental grave',
+    'Joven ex tutelado/a',
+    'Responsabilidades familiares',
+    'Madre monomarental',
+    'Minoría étnica',
+    'Falta de red de apoyo',
+    'Violencia de Género',
+    'Adicciones',
+    'Rularidad'
+  ];
+
+  static List<DropdownMenuItem<String>> EDUCATIONAL_LEVEL_SELECTION = [
+    '1er ciclo 2ria (Max CINE 0-2)',
+    '2do ciclo 2ria (CINE 3) o postsecundaria (CINE 4)',
+    'Superior o 3ria (CINE 5 a 8)',
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> LABOR_SITUATION_SELECTION = [
+    'Ocupada cuenta propia', 'Ocupada cuenta ajena', 'Desempleada larga duración', 'Desempleada corta duración',
+    'Inactiva',
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> TEMP_SELECTION = [
+    'Contrato indefinido',
+    'Contrato temporal',
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> WORK_DAY_SELECTION = [
+    'Completa',
+    'Parcial/Voluntaria',
+    'Parcial/Involuntaria'
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> FORMATION_TYPE_SELECTION = [
+    'Oficial',
+    'No oficial',
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+  static List<DropdownMenuItem<String>> CLOSURE_MOTIVE_SELECTION = [
+    'Baja voluntaria',
+    'Obtención de empleo o mejora',
+    'Baja involuntaria',
+  ].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
+
+
+
+
+
+
+
+
+
+
 }

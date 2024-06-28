@@ -115,6 +115,7 @@ class ImagePath {
   //Personal documentation
   static const String PERSONAL_DOCUMENTATION_DELETE = '$imageDir/icon-eliminar-entidad.png';
   static const String PERSONAL_DOCUMENTATION_VIEW = '$imageDir/icon-ver-entidad.png';
+  static const String PERSONAL_DOCUMENTATION_NOT_VIEW = '$imageDir/icon-no-ver-entidad.png';
   static const String PERSONAL_DOCUMENTATION_ADD = '$imageDir/icon-add-entidad.png';
   static const String PERSONAL_DOCUMENTATION_DOWNLOAD = '$imageDir/icon-descargar-entidad.png';
 

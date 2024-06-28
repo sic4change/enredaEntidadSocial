@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:enreda_empresas/app/home/participants/pdf_generator/data.dart';
@@ -6,6 +7,7 @@ import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
+import 'package:enreda_empresas/app/models/formationReport.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -75,11 +77,31 @@ Future<Uint8List> generateFollowReportFile(
         SpaceH12(),
         _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: formatter.format(followReport.arriveDate!) ?? '', content2: followReport.receptionResources ?? ''),
         SpaceH12(),
-        _customItem(title: 'Situación administrativa', content: followReport.administrativeSituation ?? ''),
+        _customItem(title: 'Situación administrativa', content: followReport.administrativeExternalResources ?? ''),
+
+        //Subsection 1.1
+        _subSectionTitle(title: StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION),
+        _customItem(title: StringConst.INITIAL_STATE, content: followReport.adminState ?? ''),
+        SpaceH12(),
+        followReport.adminState == 'Sin tramitar' ?
+        _customItem(title: 'Sin tramitar', content: followReport.adminNoThrough ?? '') :
+        followReport.adminState == 'En trámite' ?
+        _customRow(title1: 'Fecha de solicitud', title2: 'Fecha de resolución', content1: formatter.format(followReport.adminDateAsk!) ?? '', content2: formatter.format(followReport.adminDateResolution!) ?? '') :
+        _customItem(title: StringConst.INITIAL_DATE_CONCESSION, content: formatter.format(followReport.adminDateConcession!)),
+        SpaceH12(),
+        _customRow(title1: StringConst.INITIAL_TEMP, title2: followReport.adminTemp == 'Inicial' || followReport.adminTemp == 'Temporal' ? 'Fecha de resolución' : '', content1: followReport.adminTemp ?? '', content2: followReport.adminTemp == 'Inicial' || followReport.adminTemp == 'Temporal' ? formatter.format(followReport.adminDateRenovation!) ?? '' : ''),
+        SpaceH12(),
+        _customRow(title1: 'Tipo de residencia', title2: StringConst.INITIAL_JURIDIC_FIGURE, content1: followReport.adminResidenceType ?? '', content2: followReport.adminJuridicFigure ?? ''),
+        followReport.adminJuridicFigure == 'Otros' ?pw.Column(
+            children: [
+              SpaceH12(),
+              _customItem(title: StringConst.INITIAL_OTHERS, content: followReport.adminOther ?? '')
+            ]
+        ) : pw.Container(),
 
         //Section 2
         _sectionTitle(title: '2. Situación Sanitaria'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation2 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation2 ?? ''),
         SpaceH12(),
         _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: followReport.healthCard ?? '', content2: formatter.format(followReport.expirationDate!) ?? ''),
         SpaceH12(),
@@ -87,17 +109,15 @@ Future<Uint8List> generateFollowReportFile(
 
         //Subsection 2.1
         _subSectionTitle(title: '2.1 Salud Mental'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation2_1 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation2_1 ?? ''),
         SpaceH12(),
         _customRow(title1: 'Sueño y descanso', title2: 'Diagnostico', content1: followReport.rest ?? '', content2: followReport.diagnosis ?? ''),
         SpaceH12(),
         _customRow(title1: 'Tratamiento', title2: 'Seguimiento', content1: followReport.treatment ?? '', content2: followReport.tracking ?? ''),
-        SpaceH12(),
-        _customItem(title: 'Derivación interna al área psicosocial', content: followReport.psychosocial ?? ''),
 
         //Subsection 2.2
         _subSectionTitle(title: '2.2 Discapacidad'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation2_2 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation2_2 ?? ''),
         SpaceH12(),
         _customItem(title: 'Estado', content: followReport.disabilityState ?? ''),
         followReport.dependenceState == 'Concedida' ?
@@ -111,7 +131,7 @@ Future<Uint8List> generateFollowReportFile(
 
         //Subsection 2.3
         _subSectionTitle(title: '2.3 Dependencia'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation2_3 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation2_3 ?? ''),
         SpaceH12(),
         _customRow(title1: 'Estado', title2: 'Profesional de referencia', content1: followReport.dependenceState ?? '', content2: followReport.referenceProfessionalDependence ?? ''),
         SpaceH12(),
@@ -119,39 +139,66 @@ Future<Uint8List> generateFollowReportFile(
 
         //Subsection 2.4
         _subSectionTitle(title: '2.4 Adicciones'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation2_4 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation2_4 ?? ''),
         SpaceH12(),
-        _customItem(title: 'Derivación externa', content: followReport.externalDerivation ?? ''),
+        _customRow(title1: 'Derivación externa', title2: StringConst.INITIAL_MOTIVE, content1: followReport.externalDerivation ?? '', content2: followReport.motive ?? ''),
 
         //Section 3
         _sectionTitle(title: '3. Situación legal'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation3 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation3 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación interma', title2: 'Derivación externa', content1: followReport.internalDerivationLegal ?? '', content2: followReport.externalDerivationLegal ?? ''),
+        _customRow(title1: 'Derivación interma', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.internalDerivationLegal ?? '', content2: formatter.format(followReport.internalDerivationDate!) ?? ''),
+        SpaceH12(),
+        _customItem(title: StringConst.INITIAL_MOTIVE, content: followReport.internalDerivationMotive ?? ''),
+        SpaceH12(),
+        _customRow(title1: 'Derivación externa', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.externalDerivationLegal ?? '', content2: formatter.format(followReport.externalDerivationDate!) ?? ''),
+        SpaceH12(),
+        _customItem(title: StringConst.INITIAL_MOTIVE, content: followReport.externalDerivationMotive ?? ''),
+        SpaceH12(),
+        _customRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.psychosocialDerivationLegal ?? '', content2: formatter.format(followReport.psychosocialDerivationDate!) ?? ''),
+        SpaceH12(),
+        _customItem(title: StringConst.INITIAL_MOTIVE, content: followReport.psychosocialDerivationMotive ?? ''),
         SpaceH12(),
         _customItem(title: 'Representación legal', content: followReport.legalRepresentation ?? ''),
+        SpaceH12(),
+        _customRow(title1: 'Bolsa de tramitación', title2: StringConst.INITIAL_DATE, content1: followReport.processingBag ?? '', content2: formatter.format(followReport.processingBagDate!) ?? ''),
+        SpaceH12(),
+        _customItem(title: 'Cuantia económica', content: followReport.economicAmount ?? ''),
 
         //Section 4
         _sectionTitle(title: 'Situación alojativa'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation4 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation4 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Tipo de tenencia', title2: 'Ubicación actual de la persona', content1: followReport.ownershipType ?? '', content2: followReport.location ?? ''),
+        _customRow(title1: 'Situación alojativa', title2: followReport.ownershipType == 'Con hogar' ? 'Tipo de tenencia' : 'Situación sinhogarismo', content1: followReport.ownershipType ?? '', content2: followReport.ownershipType == 'Con hogar' ? (followReport.ownershipTypeConcrete ?? '') : (followReport.homelessnessSituation ?? '')),
         SpaceH12(),
-        _customItem(title: 'Datos de contacto del centro y persona de referencia', content: followReport.centerContact ?? ''),
+        followReport.ownershipTypeConcrete == 'Otros' ? pw.Column(
+            children: [
+              _customItem(title: StringConst.INITIAL_OTHERS, content: followReport.ownershipTypeOpen ?? ''),
+              SpaceH12(),
+            ]
+        ) : pw.Container(),
+        followReport.homelessnessSituation== 'Otros' ? pw.Column(
+            children: [
+              _customItem(title: StringConst.INITIAL_OTHERS, content: followReport.homelessnessSituationOpen ?? ''),
+              SpaceH12(),
+            ]
+        ) : pw.Container(),
+        _customItem(title: 'Datos de contacto del recurso alojativo', content: followReport.centerContact ?? ''),
+        _customItem(title: StringConst.INITIAL_LOCATION, content: followReport.location ?? ''),
         SpaceH12(),
         _customEnumeration(enumeration: followReport.hostingObservations ?? []),
 
         //Section 5
         _sectionTitle(title: '5. Redes de apoyo'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation5 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation5 ?? ''),
         SpaceH12(),
-        _customItem(title: 'Redes informales', content: followReport.informationNetworks ?? ''),
+        _customItem(title: 'Redes de apoyo natural', content: followReport.informationNetworks ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Redes de apoyo institucionales', title2: 'Conciliación familiar', content1: followReport.institutionNetworks ?? '', content2: followReport.familyConciliation ?? ''),
+        _customRow(title1: 'Redes de apoyo institucional', title2: 'Conciliación familiar', content1: followReport.institutionNetworks ?? '', content2: followReport.familyConciliation ?? ''),
 
         //Section7
         _sectionTitle(title: '6. Idiomas'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation7 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation7 ?? ''),
         SpaceH12(),
         pw.Column(
             children: [
@@ -167,50 +214,122 @@ Future<Uint8List> generateFollowReportFile(
 
         //Section 9
         _sectionTitle(title: '7. Atención social integral'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation9 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation9 ?? ''),
         SpaceH12(),
         _customItem(title: 'Centro y TS de referencia', content: followReport.centerTSReference ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Destinataria de subvención y/o programa de apoyo', title2: 'Usuaria', content1: followReport.subsidyBeneficiary ?? '', content2: followReport.socialServicesUser ?? ''),
+        _customItem(title: 'Destinataria de subvención y/o programa de apoyo', content: followReport.subsidyBeneficiary ?? ''),
+        followReport.subsidyBeneficiary == 'Si' ? pw.Column(
+            children: [
+              _customItem(title: 'Nombre/tipo', content: followReport.subsidyName ?? ''),
+              SpaceH12(),
+            ]
+        ) : pw.Container(),
         SpaceH12(),
         _customItem(title: 'Certificado de Exclusión Social', content: followReport.socialExclusionCertificate ?? ''),
+        followReport.socialExclusionCertificate == 'Si' ? pw.Column(
+            children: [
+              _customRow(title1: StringConst.INITIAL_DATE, title2: 'Observaciones sobre el certificado', content1: formatter.format(followReport.socialExclusionCertificateDate!) ?? '', content2: followReport.socialExclusionCertificateObservations ?? ''),
+              SpaceH12(),
+            ]
+        ) : pw.Container(),
 
         //Section 12
         _sectionTitle(title: '8. Situación de Vulnerabilidad'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation12 ?? ''),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation12 ?? ''),
         SpaceH12(),
         _customEnumeration(enumeration: followReport.vulnerabilityOptions ?? []),
 
         //Section 13
         _sectionTitle(title: '9. Itinerario formativo laboral'),
-        _customItem(title: 'Orientaciones', content: followReport.orientation13 ?? ''),
-        SpaceH12(),
-        _customRow(title1: 'Nivel educativo', title2: 'Situación laboral', content1: followReport.educationLevel ?? '', content2: followReport.laborSituation ?? ''),
-        SpaceH12(),
-        followReport.laborSituation == 'Activa' ?
-        pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              _customItem(title: 'Activa', content: followReport.activeLabor ?? ''),
-              followReport.activeLabor == 'Ocupada' ? SpaceH12() : pw.Container(),
-              followReport.activeLabor == 'Ocupada' ? _customItem(title: 'Ocuada', content: followReport.occupiedLabor ?? '') : pw.Container(),
-              followReport.occupiedLabor == 'Cuenta ajena' ? SpaceH12() : pw.Container(),
-              followReport.occupiedLabor == 'Cuenta ajena' ? _customRow(title1: 'Temporalidad', title2: 'Jornada', content1: followReport.tempLabor ?? '', content2: followReport.workingDayLabor ?? '') : pw.Container(),
-              followReport.occupiedLabor == 'Cuenta ajena' ? SpaceH12() : pw.Container(),
-            ]
-        )
-            : pw.Container(),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation13 ?? ''),
+        _subSectionTitle(title: StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
         _customItem(title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: followReport.competencies ?? ''),
         SpaceH12(),
         _customItem(title: 'Contextualización del territorio', content: followReport.contextualization ?? ''),
         SpaceH12(),
         _customItem(title: 'Conexión del entorno', content: followReport.connexion ?? ''),
-        SpaceH12(),
+
+        _subSectionTitle(title: StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
         _customItem(title: 'Corto plazo', content: followReport.shortTerm ?? ''),
         SpaceH12(),
         _customItem(title: 'Medio plazo', content: followReport.mediumTerm ?? ''),
         SpaceH12(),
         _customItem(title: 'Largo plazo', content: followReport.longTerm ?? ''),
+
+        //Subsection 9.5
+        _subSectionTitle(title: StringConst.FOLLOW_TITLE_9_5_DEVELOP),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation9_5 ?? ''),
+        _subSectionTitle(title: StringConst.FOLLOW_FORMATIONS),
+        pw.Column(
+            children: [
+              for(FormationReport formation in followReport.formations ?? [])
+                pw.Column(
+                    children: [
+                      _customRow(title1: 'Nombre de la formación', title2: 'Tipo de formación', content1: formation.name, content2: formation.type),
+                      SpaceH12(),
+                      _customItem(title: 'Certificación', content: formation.certification),
+                      SpaceH12(),
+                    ]
+                )
+            ]
+        ),
+        _customRow(title1: 'Bolsa de formación', title2: StringConst.INITIAL_DATE, content1: followReport.formationBag ?? '', content2: formatter.format(followReport.formationBagDate!) ?? ''),
+        SpaceH12(),
+        _customRow(title1: StringConst.INITIAL_MOTIVE, title2: StringConst.FOLLOW_ECONOMIC_AMOUNT, content1: followReport.formationBagMotive ?? '', content2: followReport.formationBagEconomic ?? ''),
+
+        _subSectionTitle(title: 'Empleo'),
+        _customRow(title1: 'Nivel educativo', title2: 'Situación laboral', content1: followReport.educationLevel ?? '', content2: followReport.laborSituation ?? ''),
+        SpaceH12(),
+        followReport.laborSituation == 'Ocupada cuenta propia' || followReport.laborSituation == 'Ocupada cuenta ajena' ?
+        pw.Column(
+            children: [
+              _customRow(title1: StringConst.INITIAL_TEMP, title2: 'Tipo jornada', content1: followReport.tempLabor ?? '', content2: followReport.workingDayLabor ?? ''),
+              SpaceH12(),
+            ]
+        )
+            : pw.Container(),
+        _customRow(title1: 'Fecha de obtención', title2: 'Fecha de finalización', content1: formatter.format(followReport.jobObtainDate!) ?? '', content2: formatter.format(followReport.jobFinishDate!) ?? ''),
+        SpaceH12(),
+        _customRow(title1: 'Mejora laboral', title2: 'Motivo de mejora', content1: followReport.jobUpgrade ?? '', content2: followReport.upgradeMotive ?? ''),
+        SpaceH12(),
+        _customItem(title: StringConst.INITIAL_DATE, content: formatter.format(followReport.upgradeDate!) ?? '' ),
+
+        _subSectionTitle(title: StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
+        _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation9_6 ?? ''),
+        SpaceH12(),
+        _customItem(title: 'Acompañamiento post-laboral', content: followReport.postLaborAccompaniment ?? ''),
+        followReport.postLaborAccompaniment == 'No' ?
+            pw.Column(
+              children: [
+                SpaceH12(),
+                _customItem(title: StringConst.INITIAL_MOTIVE, content: followReport.postLaborAccompanimentMotive ?? ''),
+              ]
+            ): pw.Container(),
+        SpaceH12(),
+        _customRow(title1: StringConst.FOLLOW_INIT_DATE, title2: StringConst.FOLLOW_END_DATE, content1: formatter.format(followReport.postLaborInitialDate!) ?? '', content2: formatter.format(followReport.postLaborFinalDate!) ?? ''),
+        SpaceH12(),
+        _customItem(title: 'Total de días', content: followReport.postLaborTotalDays.toString() ?? ''),
+        SpaceH12(),
+        _customItem(title: 'Mantenimiento del empleo obtenido', content: followReport.jobMaintenance ?? ''),
+
+        SpaceH12(),
+        pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Column(
+                  children: [
+                    pw.Text('FDO por técnica'),
+                  ]
+              ),
+              pw.Column(
+                  children: [
+                    pw.Text('FDO por participante'),
+                    pw.Text('Observaciones'),
+                  ]
+              )
+            ]
+        ),
         
       ]
     )
