@@ -20,7 +20,13 @@ import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/ipilConnectionTerritory.dart';
+import 'package:enreda_empresas/app/models/ipilContextualization.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/ipilInterviews.dart';
+import 'package:enreda_empresas/app/models/ipilObjectives.dart';
+import 'package:enreda_empresas/app/models/ipilReinforcement.dart';
+import 'package:enreda_empresas/app/models/ipilResults.dart';
 import 'package:enreda_empresas/app/models/keepLearningOption.dart';
 import 'package:enreda_empresas/app/models/organization.dart';
 import 'package:enreda_empresas/app/models/region.dart';
@@ -126,6 +132,7 @@ abstract class Database {
      Future<void> updateIpilEntryContent(IpilEntry ipilEntry, String content);
      Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date);
      Future<void> deleteIpilEntry(IpilEntry ipilEntry);
+     Future<void> setIpilEntry(IpilEntry ipilEntry);
      Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
      Future<void> uploadPersonalDocument(UserEnreda user, Uint8List data, String name, PersonalDocument document, int position);
      Stream<InitialReport> initialReportsStreamByUserId(String? userId);
@@ -143,6 +150,14 @@ abstract class Database {
      Stream<DerivationReport> derivationReportsStreamByUserId(String? userId);
      Future<void> setDerivationReport(DerivationReport derivationReport);
      Future<void> addDerivationReport(DerivationReport derivationReport);
+     Stream<List<IpilReinforcement>> ipilReinforcementStream();
+     Stream<List<IpilContextualization>> ipilContextualizationStream();
+     Stream<List<IpilConnectionTerritory>> ipilConnectionTerritoryStream();
+     Stream<List<IpilInterviews>> ipilInterviewsStream();
+     Stream<List<IpilResults>> ipilResultsStream();
+     Stream<IpilObjectives> ipilObjectivesStreamByUserId(String userId);
+     Future<void> setIpilObjectives(IpilObjectives ipilObjectives);
+     Future<void> addIpilObjectives(IpilObjectives ipilObjectives);
 }
 
 class FirestoreDatabase implements Database {
@@ -861,6 +876,12 @@ class FirestoreDatabase implements Database {
       _service.deleteData(path: APIPath.ipilEntryById(ipilEntry.ipilId!));
 
   @override
+  Future<void> setIpilEntry(IpilEntry ipilEntry) {
+    return _service.updateData(
+        path: APIPath.ipilEntryById(ipilEntry.ipilId!), data: ipilEntry.toMap());
+  }
+
+  @override
   Stream<List<PersonalDocumentType>> personalDocumentTypeStream() => _service.collectionStream(
     path: APIPath.personalDocumentType(),
     queryBuilder: (query) => query.where('personalDocId', isNotEqualTo: null),
@@ -989,6 +1010,66 @@ class FirestoreDatabase implements Database {
   @override
   Future<void> addDerivationReport(DerivationReport derivationReport) =>
       _service.addData(path: APIPath.derivationReports(), data: derivationReport.toMap());
+
+  @override
+  Stream<List<IpilReinforcement>> ipilReinforcementStream() => _service.collectionStream(
+    path: APIPath.ipilReinforcement(),
+    queryBuilder: (query) => query.where('ipilReinforcementId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilReinforcement.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<List<IpilContextualization>> ipilContextualizationStream() => _service.collectionStream(
+    path: APIPath.ipilContextualization(),
+    queryBuilder: (query) => query.where('ipilContextualizationId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilContextualization.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<List<IpilConnectionTerritory>> ipilConnectionTerritoryStream() => _service.collectionStream(
+    path: APIPath.ipilConnectionTerritory(),
+    queryBuilder: (query) => query.where('ipilConnectionTerritoryId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilConnectionTerritory.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<List<IpilInterviews>> ipilInterviewsStream() => _service.collectionStream(
+    path: APIPath.ipilInterviews(),
+    queryBuilder: (query) => query.where('ipilInterviewsId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilInterviews.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<List<IpilResults>> ipilResultsStream() => _service.collectionStream(
+    path: APIPath.ipilResults(),
+    queryBuilder: (query) => query.where('ipilResultsId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilResults.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<IpilObjectives> ipilObjectivesStreamByUserId(String userId) {
+    return _service.documentStreamByField(
+      path: APIPath.ipilObjectives(),
+      builder: (data, documentId) => IpilObjectives.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('userId', isEqualTo: userId),
+    );
+  }
+
+  @override
+  Future<void> setIpilObjectives(IpilObjectives ipilObjectives) {
+    return _service.updateData(
+        path: APIPath.ipilObjective(ipilObjectives.ipilObjectivesId!), data: ipilObjectives.toMap());
+  }
+
+  @override
+  Future<void> addIpilObjectives(IpilObjectives ipilObjectives) async {
+      await _service.addData(path: APIPath.ipilObjectives(), data: ipilObjectives.toMap());
+  }
 
 }
 

@@ -50,6 +50,7 @@ class UserEnreda {
     this.followReportId,
     this.derivationReportId,
     this.nationality,
+    this.ipilObjectivesId,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -204,6 +205,7 @@ class UserEnreda {
     final String? followReportId = data['followReportId'];
     final String? derivationReportId = data['derivationReportId'];
     final String? nationality = data['nationality'] ?? '';
+    final String? ipilObjectivesId = data['ipilObjectivesId'];
 
     return UserEnreda(
       email: email,
@@ -248,6 +250,7 @@ class UserEnreda {
       followReportId: followReportId,
       derivationReportId: derivationReportId,
       nationality: nationality,
+      ipilObjectivesId: ipilObjectivesId,
     );
   }
 
@@ -293,6 +296,7 @@ class UserEnreda {
   final String? followReportId;
   final String? derivationReportId;
   final String? nationality;
+  final String? ipilObjectivesId;
 
   @override
   bool operator ==(Object other){
@@ -342,6 +346,7 @@ class UserEnreda {
       'followReportId': followReportId,
       'derivationReportId': derivationReportId,
       'nationality' : nationality,
+      'ipilObjectivesId': ipilObjectivesId,
     };
   }
 
@@ -390,6 +395,7 @@ class UserEnreda {
     String? followReportId,
     String? derivationReportId,
     String? nationality,
+    String? ipilObjectivesId,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -432,6 +438,7 @@ class UserEnreda {
       followReportId: followReportId ?? this.followReportId,
       derivationReportId: derivationReportId ?? this.derivationReportId,
       nationality: nationality ?? this.nationality,
+      ipilObjectivesId: ipilObjectivesId ?? this.ipilObjectivesId,
     );
   }
 

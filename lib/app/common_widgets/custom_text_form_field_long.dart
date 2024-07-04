@@ -1,5 +1,6 @@
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomTextFormFieldLong extends StatelessWidget {
   const CustomTextFormFieldLong({
@@ -38,11 +39,11 @@ class CustomTextFormFieldLong extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Text(
             labelText,
-            style: textTheme.button?.copyWith(
-              height: 1.5,
-              color: AppColors.greyDark,
-              fontWeight: FontWeight.w700,
-              fontSize: fontSize,
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: GoogleFonts.outfit().fontFamily,
+              fontWeight: FontWeight.w500,
+              color: AppColors.turquoiseBlue,
             ),
           ),
         ),

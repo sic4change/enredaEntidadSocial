@@ -4,20 +4,32 @@ import 'package:google_fonts/google_fonts.dart';
 import '../values/values.dart';
 
 class CheckboxDropdown extends StatefulWidget {
+  const CheckboxDropdown({super.key, required this.title, required this.options, required this.onTapItem});
+
+  final String title;
+  final List<DropdownItem> options;
+  final Function(bool, String) onTapItem;
   @override
   _CheckboxDropdownState createState() => _CheckboxDropdownState();
 }
 
 class _CheckboxDropdownState extends State<CheckboxDropdown> {
-  List<DropdownItem> items = [
-    DropdownItem(title: 'Item 1'),
-    DropdownItem(title: 'Item 2'),
-    DropdownItem(title: 'Item 3'),
-    DropdownItem(title: 'Item 4'),
-  ];
 
   bool _isDropdownOpened = false;
   String _textSelection = "Selecciona una o varias opciones";
+  
+  @override
+  void initState() {
+    if(widget.options != []){
+      _textSelection = "";
+      for(var element in widget.options){
+        if(element.isSelected){
+          _textSelection == '' ? _textSelection += '${element.title}' : _textSelection += ', ${element.title}';
+        }
+      }
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +37,7 @@ class _CheckboxDropdownState extends State<CheckboxDropdown> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Fortalecimiento de competencias",
+        Text(widget.title,
           style: TextStyle(
             fontSize: 16,
             fontFamily: GoogleFonts.outfit().fontFamily,
@@ -73,7 +85,7 @@ class _CheckboxDropdownState extends State<CheckboxDropdown> {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Column(
-              children: items.map((item) {
+              children: widget.options.map((item) {
                 return CheckboxListTile(
                   controlAffinity: ListTileControlAffinity.leading,
                   checkColor: Colors.white,
@@ -89,10 +101,11 @@ class _CheckboxDropdownState extends State<CheckboxDropdown> {
                   ),
                   value: item.isSelected,
                   onChanged: (bool? value) {
+                    widget.onTapItem(value!, item.title);
                     setState(() {
-                      item.isSelected = value!;
+                      item.isSelected = value;
                       _textSelection = "";
-                      for(var element in items){
+                      for(var element in widget.options){
                         if(element.isSelected){
                           _textSelection == '' ? _textSelection += '${element.title}' : _textSelection += ', ${element.title}';
                         }
@@ -110,7 +123,7 @@ class _CheckboxDropdownState extends State<CheckboxDropdown> {
 
   bool _someElementSelected(){
     bool atLeastOne = false;
-    for(var element in items){
+    for(var element in widget.options){
       if(element.isSelected){
         atLeastOne = true;
       }

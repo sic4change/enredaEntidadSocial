@@ -76,4 +76,11 @@ class APIPath {
   static String followReport(String followReportId) => 'followReports/$followReportId';
   static String derivationReports() => 'derivationReports';
   static String derivationReport(String derivationReportId) => 'derivationReports/$derivationReportId';
+  static String ipilReinforcement() => 'ipilReinforcement';
+  static String ipilContextualization() => 'ipilContextualization';
+  static String ipilConnectionTerritory() => 'ipilConnectionTerritory';
+  static String ipilInterviews() => 'ipilInterviews';
+  static String ipilResults() => 'ipilResults';
+  static String ipilObjectives() => 'ipilObjectives';
+  static String ipilObjective(String ipilObjectivesId) => 'ipilObjectives/$ipilObjectivesId';
 }

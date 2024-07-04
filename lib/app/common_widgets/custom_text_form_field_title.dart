@@ -85,6 +85,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
           ),
         ),
       ),
+      maxLines: null,
       controller: controller,
       initialValue: initialValue,
       validator: validator,
