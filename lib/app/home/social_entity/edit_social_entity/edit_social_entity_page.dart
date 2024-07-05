@@ -45,13 +45,11 @@ class EditSocialEntity extends StatefulWidget {
 class _EditSocialEntityState extends State<EditSocialEntity> {
   late SocialEntity socialEntity;
   final _formKey = GlobalKey<FormState>();
-  final _formKeyLogo = GlobalKey<FormState>();
   bool isLoading = false;
   int currentStep = 0;
   String? _socialEntityId;
   String? _socialEntityName;
   String? _socialEntityActionScope;
-  String? _photo;
   String? _category;
   String? _subCategory;
   String? _geographicZone;
@@ -98,7 +96,6 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     _socialEntityId = globals.currentSocialEntity?.socialEntityId;
     _socialEntityName = globals.currentSocialEntity?.name;
     _socialEntityActionScope = globals.currentSocialEntity?.actionScope;
-    _photo = globals.currentSocialEntity?.photo;
     _category = globals.currentSocialEntity?.category ?? '';
     _subCategory = globals.currentSocialEntity?.subCategory ?? '';
     _geographicZone = globals.currentSocialEntity?.geographicZone ?? '';
@@ -158,6 +155,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       contactBtnWidthLg,
       md: contactBtnWidthMd,
     );
+    final database = Provider.of<Database>(context, listen: false);
     return Center(
       child: Container(
         height: Responsive.isMobile(context) ||
@@ -176,7 +174,15 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildLogo(context),
+              StreamBuilder<SocialEntity>(
+                  stream: database.socialEntityStream(_socialEntityId),
+                  builder: (context, snapshot) {
+                    if(snapshot.hasData && snapshot.data!.photo != null){
+                      final photoUrl = snapshot.data!.photo ?? '';
+                      return _buildLogo(context, photoUrl);
+                    } else return Container();
+                  }
+              ),
               _buildForm(context),
               Container(
                 height: Sizes.kDefaultPaddingDouble * 2,
@@ -215,94 +221,96 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     );
   }
 
-  Widget _buildLogo(BuildContext context) {
-    return Form(
-      key: _formKeyLogo,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: InkWell(
-            mouseCursor: MaterialStateMouseCursor.clickable,
-            onTap: () => !kIsWeb
-                ? _displayPickImageDialog()
-                : _onImageButtonPressed(ImageSource.gallery),
-            child: Container(
-              width: 100,
-              height: 100,
-              color: Colors.transparent,
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(120),
-                    ),
-                    child: !kIsWeb
-                        ? ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(60)),
-                            child: Center(
-                              child: _photo == ""
-                                  ? Container(
-                                      color: Colors.transparent,
-                                      height: 100,
-                                      width: 100,
-                                      child:
-                                          Image.asset(ImagePath.IMAGE_DEFAULT),
-                                    )
-                                  : CachedNetworkImage(
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                      alignment: Alignment.center,
-                                      imageUrl: _photo!),
-                            ),
-                          )
-                        : ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(60)),
-                            child: Center(
-                              child: _photo == ""
-                                  ? Container(
-                                      color: Colors.transparent,
-                                      height: 100,
-                                      width: 100,
-                                      child:
-                                          Image.asset(ImagePath.IMAGE_DEFAULT),
-                                    )
-                                  : FadeInImage.assetNetwork(
-                                      placeholder: ImagePath.IMAGE_DEFAULT,
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                      image: _photo!,
-                                    ),
-                            ),
+  Widget _buildLogo(BuildContext context, String photoUrl) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: InkWell(
+          mouseCursor: MaterialStateMouseCursor.clickable,
+          onTap: () => !kIsWeb
+              ? _displayPickImageDialog()
+              : _onImageButtonPressed(ImageSource.gallery),
+          child: Container(
+            width: 100,
+            height: 100,
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primary020,
+                      )
+                  ),
+                  child: !kIsWeb
+                      ? ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(60)),
+                          child: Center(
+                            child: photoUrl == ""
+                                ? Container(
+                                    color: Colors.transparent,
+                                    height: 100,
+                                    width: 100,
+                                    child:
+                                        Image.asset(ImagePath.IMAGE_DEFAULT),
+                                  )
+                                : CachedNetworkImage(
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.center,
+                                    imageUrl: photoUrl),
                           ),
-                  ),
-                  Positioned(
-                    left: 6,
-                    top: 6,
-                    child: Container(
-                      padding: const EdgeInsets.all(2.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.turquoiseBlue, width: 1.0),
-                      ),
-                      child: const Icon(
-                        Icons.mode_edit_outlined,
-                        size: 22,
-                        color: AppColors.turquoiseBlue,
-                      ),
+                        )
+                      : ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(60)),
+                          child: Center(
+                            child: photoUrl == ""
+                                ? Container(
+                                    color: Colors.transparent,
+                                    height: 100,
+                                    width: 100,
+                                    child:
+                                        Image.asset(ImagePath.IMAGE_DEFAULT),
+                                  )
+                                : FadeInImage.assetNetwork(
+                                    placeholder: ImagePath.IMAGE_DEFAULT,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    image: photoUrl,
+                                  ),
+                          ),
+                        ),
+                ),
+                Positioned(
+                  left: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(2.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.turquoiseBlue, width: 1.0),
+                    ),
+                    child: const Icon(
+                      Icons.mode_edit_outlined,
+                      size: 22,
+                      color: AppColors.turquoiseBlue,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
-      ]),
-    );
+      ),
+    ]);
   }
 
   Widget _buildForm(BuildContext context) {

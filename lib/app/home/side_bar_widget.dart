@@ -35,6 +35,24 @@ class _SideBarWidgetState extends State<SideBarWidget> {
     });
   }
 
+  void _setSelectedIndexParticipants() {
+    setState(() {
+      WebHome.goToParticipants();
+    });
+  }
+
+  void _setSelectedIndexEntities() {
+    setState(() {
+      WebHome.goToEntities();
+    });
+  }
+
+  void _setSelectedIndexResources() {
+    setState(() {
+      WebHome.goResources();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
@@ -144,10 +162,10 @@ class _SideBarWidgetState extends State<SideBarWidget> {
       },
       items: [
         SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PANEL), width: 20,), label: 'Panel de control', onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PARTICIPANTS), width: 20,), label: 'Participantes', onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_RESOURCES), width: 20,), label: 'Mis recursos' , onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PARTICIPANTS), width: 20,), label: 'Participantes', onTap: _setSelectedIndexParticipants),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_RESOURCES), width: 20,), label: 'Mis recursos' , onTap: _setSelectedIndexResources),
         SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_TOOLS), width: 20,), label: 'Caja de herramientas' , onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_ENTITY), width: 20,), label: 'Directorio Entidades', onTap: _setSelectedIndexToOne)
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_ENTITY), width: 20,), label: 'Directorio Entidades', onTap: _setSelectedIndexEntities)
       ],
     );
   }

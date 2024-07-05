@@ -3,10 +3,19 @@ part of values;
 class AppColors {
   static const Color primaryColor = Color(0xFF00CCCC);
   //Shades of primary color
+  static const Color primary050 = Color(0xFFEDFAF9);
+  static const Color primary100 = Color(0xFFA7E4E1);
   static const Color primary200 = Color(0xFF00CCCC);
   static const Color primary300 = Color(0xFF00CCCC);
-  static const Color primary100 = Color(0xFFA7E4E1);
-  static const Color primary050 = Color(0xFFEDFAF9);
+  static const Color primary400 = Color(0xFF00D0CE);
+  static const Color primary500 = Color(0xFF18C5C1);
+  static const Color primary600 = Color(0xFF0BCCC6);
+  static const Color primary900 = Color(0xFF054D5E);
+  static const Color primary060 = Color(0xFFB5F0F0);
+  static const Color primary040 = Color(0xFFCCFAF0);
+  static const Color primary030 = Color(0xFFDBF1F1);
+  static const Color primary020 = Color(0xFFCDDBDF);
+  static const Color primary010 = Color(0xFFEEFAFA);
   static const Color secondaryColor = Color(0xfffcfcff);
 
   //accent Colors

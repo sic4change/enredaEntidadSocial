@@ -28,6 +28,11 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
   late UserEnreda socialEntityUser;
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_bodyWidget.isEmpty) {
       _bodyWidget = [
@@ -36,41 +41,37 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
       ];
     }
 
-    return RoundedContainer(
-        contentPadding: EdgeInsets.all(0.0),
-        child: Align(
-        alignment: Alignment.topLeft,
-        child: SingleChildScrollView(
-          child: ValueListenableBuilder<int>(
-              valueListenable: ParticipantsListPage.selectedIndex,
-              builder: (context, selectedIndex, child) {
-                return Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: Responsive.isDesktop(context)? Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble,
-                        top: Responsive.isDesktop(context)? Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble,),
-                      child: Row(
-                        children: [
-                          InkWell(
-                              onTap: () => {
-                                setState(() {
-                                  ParticipantsListPage.selectedIndex.value = 0;
-                                })
-                              },
-                              child: selectedIndex != 0 ? CustomTextMedium(text: 'Participantes ') :
-                              CustomTextMediumBold(text: 'Participantes ') ),
-                          selectedIndex == 1 ? CustomTextMediumBold(text:'> ${globals.currentParticipant!.firstName} ${globals.currentParticipant!.lastName}') : Container()
-                        ],
-                      ),
+    return ValueListenableBuilder<int>(
+        valueListenable: ParticipantsListPage.selectedIndex,
+        builder: (context, selectedIndex, child) {
+          return RoundedContainer(
+            contentPadding: EdgeInsets.symmetric(horizontal: Sizes.mainPadding, vertical: 0),
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                Container(
+                  height: 50,
+                  child: Row(
+                    children: [
+                      InkWell(
+                          onTap: () => {
+                            setState(() {
+                              ParticipantsListPage.selectedIndex.value = 0;
+                            })
+                          },
+                          child: selectedIndex != 0 ? CustomTextMedium(text: 'Participantes ') :
+                          CustomTextMediumBold(text: 'Participantes ') ),
+                      selectedIndex == 1 ? CustomTextMediumBold(text:'> ${globals.currentParticipant!.firstName} ${globals.currentParticipant!.lastName}') : Container()
+                    ],
+                  ),
+                ),
+                Container(
+                    margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
+                    child: _bodyWidget[selectedIndex]),
+              ],
                     ),
-                    _bodyWidget[selectedIndex],
-                  ],
-              );
-            }
-          ),
-        ),
-      ),
+          );
+      }
     );
   }
 
@@ -103,12 +104,11 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     u.assignedEntityId == socialEntityUser.socialEntityId!
                         && u.assignedById != socialEntityUser.userId).toList();
 
-                    return Padding(
-                      padding: EdgeInsets.all(Responsive.isDesktop(context)?
-                      Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble),
+                    return SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          SpaceH12(),
                           Text(StringConst.MY_PARTICIPANTS,
                             style: textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,

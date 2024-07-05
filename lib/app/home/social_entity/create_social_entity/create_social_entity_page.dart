@@ -196,70 +196,92 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
             height: 50.0,
             width: 160,
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
-            onPressed: () async {
-              // Validate returns true if the form is valid, or false otherwise.
-              if (_formKey.currentState!.validate() && _formKeyContactPerson.currentState!.validate()) {
-                _formKey.currentState!.save();
-                _formKeyContactPerson.currentState!.save();
-
-                final address = Address(
-                  city: _cityId,
-                  country: _countryId,
-                  province: _provinceId,
-                  postalCode: _postalCode,
-                );
-
-                SocialEntity finalSocialEntity = SocialEntity(
-                  name: _entityName!,
-                  actionScope: _actionScope,
-                  types: _entityTypes,
-                  category: _category,
-                  subCategory: _subCategory,
-                  entityPhone: _entityPhone,
-                  entityMobilePhone: _entityMobilePhone,
-                  geographicZone: _geographicZone,
-                  subGeographicZone: _subGeographicZone,
-                  website: _url,
-                  email: _email,
-                  linkedin: _linkedin,
-                  twitter: _twitter,
-                  otherSocialMedia: _otherSocialMedia,
-                  contactName: _contactName,
-                  contactEmail: _contactEmail,
-                  contactPhone: _contactPhone,
-                  contactMobilePhone: _contactMobilePhone,
-                  contactPosition: _contactPosition,
-                  contactChoiceGrade: _contactChoiceGrade,
-                  contactKOL: _contactKOL,
-                  contactProject: _contactProject,
-                  trust: true, //TODO asignarlo de otra forma
-                  address: address
-                );
-
-                try {
-                  final database = Provider.of<Database>(context, listen: false);
-                  await database.addSocialEntity(finalSocialEntity);
-                  await showAlertDialog(
-                  context,
-                  title: StringConst.CREATE_PARTICIPANT_SUCCESS,
-                  content: "",
-                  defaultActionText: StringConst.FORM_ACCEPT,
-                  );
-                  WebHome.goToControlPanel();
-                } on FirebaseException catch (e) {
-                  showExceptionAlertDialog(context,
-                      title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));
-                }
-              }
-            },
+            onPressed: _submit,
           ),
         ),
       ],
     );
   }
 
+  Future<void> _submit() async {
+
+    if (_validateAndSaveForm() == false) {
+      await showAlertDialog(context,
+          title: StringConst.FORM_ENTITY_ERROR,
+          content: StringConst.FORM_ENTITY_CHECK,
+          defaultActionText: StringConst.CLOSE);
+    }
+
+    if (_validateAndSaveForm()) {
+
+      _formKey.currentState!.save();
+      _formKeyContactPerson.currentState!.save();
+
+      final address = Address(
+        city: _cityId,
+        country: _countryId,
+        province: _provinceId,
+        postalCode: _postalCode,
+      );
+
+      SocialEntity finalSocialEntity = SocialEntity(
+          name: _entityName!,
+          actionScope: _actionScope,
+          types: _entityTypes,
+          category: _category,
+          subCategory: _subCategory,
+          entityPhone: _entityPhone,
+          entityMobilePhone: _entityMobilePhone,
+          geographicZone: _geographicZone,
+          subGeographicZone: _subGeographicZone,
+          website: _url,
+          email: _email,
+          linkedin: _linkedin,
+          twitter: _twitter,
+          otherSocialMedia: _otherSocialMedia,
+          contactName: _contactName,
+          contactEmail: _contactEmail,
+          contactPhone: _contactPhone,
+          contactMobilePhone: _contactMobilePhone,
+          contactPosition: _contactPosition,
+          contactChoiceGrade: _contactChoiceGrade,
+          contactKOL: _contactKOL,
+          contactProject: _contactProject,
+          trust: true, //TODO asignarlo de otra forma
+          address: address
+      );
+
+      try {
+        final database = Provider.of<Database>(context, listen: false);
+        await database.addSocialEntity(finalSocialEntity);
+        await showAlertDialog(
+          context,
+          title: StringConst.CREATE_ENTITY,
+          content: StringConst.CREATE_PARTICIPANT_SUCCESS,
+          defaultActionText: StringConst.FORM_ACCEPT,
+        );
+        WebHome.goToEntities();
+      } on FirebaseException catch (e) {
+        showExceptionAlertDialog(context,
+            title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));
+      }
+
+    }
+  }
+
+  bool _validateAndSaveForm() {
+    if (_formKey.currentState != null &&
+        _formKey.currentState!.validate() &&
+        _formKeyContactPerson.currentState != null &&
+        _formKeyContactPerson.currentState!.validate()) {
+        _formKey.currentState?.save();
+        _formKeyContactPerson.currentState?.save();
+      return true;
+    }
+    return false;
+  }
+
   Widget _buildFormNewEntity(BuildContext context){
-    final database = Provider.of<Database>(context, listen: false);
     double fontSize = responsiveSize(context, 14, 16, md: 15);
     return Form(
       key: _formKey,

@@ -746,7 +746,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
         await showAlertDialog(
           context,
           title: StringConst.CREATE_PARTICIPANT_SUCCESS,
-          content: "",
+          content: StringConst.CREATE_PARTICIPANT_SUCCESS,
           defaultActionText: StringConst.FORM_ACCEPT,
         );
         //WebHome.goToControlPanel();
