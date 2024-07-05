@@ -1,15 +1,7 @@
-import 'package:enreda_empresas/app/home/participants/participant_detail/closure_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_documentation_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_ipil_page.dart';
-import 'dart:html' as html;
-import 'dart:io';
-import 'dart:math';
-import 'package:enreda_empresas/app/home/participants/participant_detail/initial_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
-import 'package:enreda_empresas/app/models/initialReport.dart';
-import 'package:http/http.dart' as http;
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
@@ -74,8 +66,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     return SingleChildScrollView(
       controller: ScrollController(),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Responsive.isDesktop(context)? _buildHeaderWeb(context, user): _buildHeaderMobile(context, user),
           SpaceH20(),
@@ -127,8 +119,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     return Wrap(
       spacing: 20.0,
       runSpacing: 20.0,
-      children: List<Widget>.generate(
-        5,
+      children: List<Widget>.generate(5,
             (int index) {
           return ChoiceChip(
             shape: RoundedRectangleBorder(

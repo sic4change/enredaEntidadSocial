@@ -531,6 +531,8 @@ class StringConst {
   static const String CREATE_PARTICIPANT = "Crear participante";
   static const String CALL = "Llamar";
   static const String CREATE_PARTICIPANT_SUCCESS = "¡El perfil ha sido creado con éxito!";
+  static const String CREATE_ENTITY = "Entidad creada";
+  static const String CREATE_ENTITY_SUCCESS = "¡La entidad ha sido creada con éxito!";
   static const String FORM_UNEMPLOYED = "Busco trabajo";
   static const String FORM_MOTIVATION = "Motivaciones";
   static const String FORM_ABILITIES = "¿Qué aspectos crees que tienes que reforzar?";
@@ -542,6 +544,8 @@ class StringConst {
   static const String FORM_DEDICATION = "¿Tienes claro a lo que te gustaría dedicarte?";
   static const String FORM_BELONG_ORGANIZATION = "Organización o entidad a la que pertenece";
   static const String FORM_BELONG_ORGANIZATION_ERROR = "La organización no puede estar vacía";
+  static const String FORM_ENTITY_ERROR = 'Hay algún error en el formulario';
+  static const String FORM_ENTITY_CHECK = 'Por favor, revisa los campos marcados en rojo.';
   static const String INITIAL_FORM = "Ficha de ingreso";
   static const String INITIAL_FORM_DATA = "Datos del formulario inicial";
   static const String RESOURCES_JOINED = "Se ha inscrito en los siguientes recursos:";

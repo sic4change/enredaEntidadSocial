@@ -37,27 +37,30 @@ class WebHome extends StatefulWidget {
   static ValueNotifier<int> selectedIndex = ValueNotifier(2);
 
   static goToControlPanel() {
-    WebHome.selectedIndex.value = 2;
+    WebHome.selectedIndex.value = 2; // Select empty Container
     WebHome.controller.selectIndex(0);
   }
 
   static goToParticipants() {
-    WebHome.selectedIndex.value = 2;
+    WebHome.selectedIndex.value = 2; // Select empty Container
     WebHome.controller.selectIndex(1);
+    ParticipantsListPage.selectedIndex.value = 0;
   }
 
   static goToEntities() {
-    WebHome.selectedIndex.value = 2;
+    WebHome.selectedIndex.value = 2; // Select empty Container
     WebHome.controller.selectIndex(4);
+    EntityDirectoryPage.selectedIndex.value = 0;
   }
 
   static goResources() {
-    WebHome.selectedIndex.value = 2;
+    WebHome.selectedIndex.value = 2; // Select empty Container
     WebHome.controller.selectIndex(2);
+    MyResourcesListPage.selectedIndex.value = 0;
   }
 
   static goToolBox() {
-    WebHome.selectedIndex.value = 2;
+    WebHome.selectedIndex.value = 2; // Select empty Container
     WebHome.controller.selectIndex(3);
   }
 
@@ -143,7 +146,7 @@ class _WebHomeState extends State<WebHome> {
                   children: [
                     Image.asset(
                       ImagePath.LOGO,
-                      height: 24,
+                      height: 50,
                     ),
                     !isSmallScreen ? _buildMyCompanyName(context, socialEntity) : Container(),
                   ],
@@ -216,7 +219,7 @@ class _WebHomeState extends State<WebHome> {
           child: Text(' &  ${socialEntity.name}',
               style: textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.penBlue,
+                color: AppColors.primary900,
                 fontSize: 16.0,)
           ),
         ),

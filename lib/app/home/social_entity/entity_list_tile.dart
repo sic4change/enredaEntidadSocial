@@ -62,7 +62,7 @@ class _EntityListTileState extends State<EntityListTile> {
                       mouseCursor: MaterialStateMouseCursor.clickable,
                       onTap: widget.onTap,
                       child: Container(
-                        height: 270,
+                        height: 276,
                         width: 335,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(17),
@@ -78,7 +78,6 @@ class _EntityListTileState extends State<EntityListTile> {
                             color: Colors.white
                         ),
                         child: Column(
-                          //mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Padding(
@@ -93,12 +92,17 @@ class _EntityListTileState extends State<EntityListTile> {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 40, bottom: 18),
-                              child: Text(
-                                name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 18,
+                              padding: const EdgeInsets.only(top: 40, bottom: 10, left: 5, right: 5),
+                              child: Container(
+                                height: 40,
+                                alignment:  Alignment.center,
+                                child: Text(
+                                  name,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
                             ),
@@ -204,26 +208,34 @@ class _EntityListTileState extends State<EntityListTile> {
                     ),
                     Positioned(
                       top: -27,
-                      child: currentSocialEntity.photo == '' ? Container() :
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(60)),
-                        child: Center(
-                          child: currentSocialEntity.photo == ""
-                              ? Container(
-                                  color: Colors.transparent,
-                                  height: 100,
-                                  width: 100,
-                                  child: Image.asset(
-                                      ImagePath.IMAGE_DEFAULT),
-                                )
-                              : FadeInImage.assetNetwork(
-                                  placeholder: ImagePath.IMAGE_DEFAULT,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                  image: currentSocialEntity.photo!,
-                                ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primary020,
+                            )
+                        ),
+                        child: ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(60)),
+                          child: Center(
+                            child: currentSocialEntity.photo == ""
+                                ? Container(
+                                    color: Colors.transparent,
+                                    height: 100,
+                                    width: 100,
+                                    child: Image.asset(
+                                        ImagePath.IMAGE_DEFAULT),
+                                  )
+                                : FadeInImage.assetNetwork(
+                                    placeholder: ImagePath.IMAGE_DEFAULT,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    image: currentSocialEntity.photo!,
+                                  ),
+                          ),
                         ),
                       ),
                     ),

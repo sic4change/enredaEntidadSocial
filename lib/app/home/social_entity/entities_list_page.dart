@@ -168,6 +168,7 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
             return SingleChildScrollView(
               controller: ScrollController(),
               child: Wrap(
+                alignment: WrapAlignment.center,
                 children: [
                   for(SocialEntity currentSocialEntity in socialEntities)
                     _showSocialEntity(currentSocialEntity, tags, finalSocialEntities) ?
