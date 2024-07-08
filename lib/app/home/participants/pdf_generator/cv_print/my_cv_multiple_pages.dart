@@ -1,12 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_page.dart';
-import 'package:enreda_empresas/app/models/certificationRequest.dart';
-import 'package:enreda_empresas/app/models/experience.dart';
-import 'package:enreda_empresas/app/models/language.dart';
-import 'package:enreda_empresas/app/models/userEnreda.dart';
-import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
@@ -14,10 +8,16 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../../../../models/certificationRequest.dart';
+import '../../../../models/experience.dart';
+import '../../../../models/language.dart';
+import '../../../../models/userEnreda.dart';
+import '../../../../values/values.dart';
+import 'cv_multiple_pages.dart';
 import 'data.dart';
 
-class MyCv extends StatefulWidget {
-  const MyCv({
+class MyCvMultiplePages extends StatefulWidget {
+  const MyCvMultiplePages({
     Key? key,
     required this.user,
     required this.city,
@@ -27,10 +27,6 @@ class MyCv extends StatefulWidget {
     required this.myPersonalExperiences,
     required this.myEducation,
     required this.mySecondaryEducation,
-    required this.idSelectedDateEducation,
-    required this.idSelectedDateSecondaryEducation,
-    required this.idSelectedDateExperience,
-    required this.idSelectedDatePersonalExperience,
     required this.competenciesNames,
     required this.languagesNames,
     required this.aboutMe,
@@ -50,10 +46,6 @@ class MyCv extends StatefulWidget {
   final List<Experience>? myPersonalExperiences;
   final List<Experience>? myEducation;
   final List<Experience>? mySecondaryEducation;
-  final List<String>? idSelectedDateEducation;
-  final List<String>? idSelectedDateSecondaryEducation;
-  final List<String>? idSelectedDateExperience;
-  final List<String>? idSelectedDatePersonalExperience;
   final List<String> competenciesNames;
   final List<Language> languagesNames;
   final String? aboutMe;
@@ -70,7 +62,7 @@ class MyCv extends StatefulWidget {
   }
 }
 
-class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
+class MyAppState extends State<MyCvMultiplePages> with SingleTickerProviderStateMixin {
 
   int _tab = 0;
   TabController? _tabController;
@@ -93,7 +85,7 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
 
     _tabController = TabController(
       vsync: this,
-      length: examples.length,
+      length: examplesMultiplePages.length,
       initialIndex: _tab,
     );
     _tabController!.addListener(() {
@@ -112,7 +104,7 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
   void _showPrintedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        backgroundColor: AppColors.turquoiseBlue,
+        backgroundColor: AppColors.primary020,
         content: Text('Documento impreso con éxito'),
       ),
     );
@@ -121,7 +113,7 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
   void _showSharedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        backgroundColor: AppColors.turquoiseBlue,
+        backgroundColor: AppColors.primary020,
         content: Text('Documento compartido con éxito'),
       ),
     );
@@ -163,23 +155,23 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         backgroundColor: AppColors.primary100,
         foregroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
+        iconTheme: const IconThemeData(color: AppColors.primary900,),
         title: const Text('Mi Currículum'),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.turquoiseBlue,
+            color: AppColors.primary900,
             fontSize: 22.0),
         bottom: TabBar(
           controller: _tabController,
-          tabs: examples.map<Tab>((e) => Tab(text: e.name)).toList(),
-          labelColor: AppColors.bluePetrol,
+          tabs: examplesMultiplePages.map<Tab>((e) => Tab(text: e.name)).toList(),
+          labelColor: AppColors.primary900,
           labelStyle: TextStyle(fontSize: 20),
           isScrollable: true,
         ),
       ),
       body: PdfPreview(
         maxPageWidth: 700,
-        build: (format) => examples[_tab].builder(
+        build: (format) => examplesMultiplePages[_tab].builder(
             format,
             _data,
             widget.user!,
@@ -190,10 +182,6 @@ class MyAppState extends State<MyCv> with SingleTickerProviderStateMixin {
             widget.myPersonalExperiences,
             widget.myEducation!,
             widget.mySecondaryEducation,
-            widget.idSelectedDateEducation,
-            widget.idSelectedDateSecondaryEducation,
-            widget.idSelectedDateExperience,
-            widget.idSelectedDatePersonalExperience,
             widget.competenciesNames,
             widget.languagesNames,
             widget.aboutMe,

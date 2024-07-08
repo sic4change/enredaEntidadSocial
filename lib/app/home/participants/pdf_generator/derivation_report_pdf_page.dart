@@ -6,7 +6,7 @@ import 'package:enreda_empresas/app/models/derivationReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
-import 'data.dart';
+import 'cv_print/data.dart';
 
 import 'package:enreda_empresas/app/home/participants/pdf_generator/derivation_report_format_pdf.dart'
 if (dart.library.html) 'package:enreda_empresas/app/home/participants/pdf_generator/derivation_report_format_pdf.dart' as my_worker;

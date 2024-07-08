@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_page.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';

@@ -502,6 +502,7 @@ class StringConst {
   static const String NO_EDUCATION = 'Todavía no has añadido ninguna formación. ¡Chatea con nuestro asistente para añadir una!';
   static const String NO_EXPERIENCE = 'Todavía no has añadido ninguna experiencia. ¡Chatea con nuestro asistente para añadir una!';
   static const String NO_REFERENCES = 'Todavía no cuentas con ninguna referencia personal. ¡Certifica tus competencias!';
+  static const String ADD_MORE_EXPERIENCES_SUGGESTION = 'Te recomendamos añadir al menos 2 experiencias profesionales y evalúar o certificar 3 competencias para que tu CV quede más enriquecido';
 
   // Profile
   static const String MY_PROFILE = 'Mi perfil';
@@ -568,6 +569,7 @@ class StringConst {
   static const String TECHNICAL_NAME = "Nombre de la técnica";
   static const String START_HERE = "Comienza aquí...";
   static const String GOALS_MONITORING = "Objetivos y seguimiento:";
+  static const String PERSONAL_DATA_LAW = 'Según la Ley Orgánica 15/1999 de Protección de Datos Personales, autorizo a la empresa al uso y tratamiento de mis datos con fines exclusivamente de selección de personal y bolsas de empleo.';
 
   //Create entity errors
   static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';

@@ -146,7 +146,7 @@ class _WebHomeState extends State<WebHome> {
                   children: [
                     Image.asset(
                       ImagePath.LOGO,
-                      height: 50,
+                      height: Responsive.isMobile(context) ? 35 : 50,
                     ),
                     !isSmallScreen ? _buildMyCompanyName(context, socialEntity) : Container(),
                   ],
