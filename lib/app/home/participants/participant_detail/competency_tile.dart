@@ -1,25 +1,27 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:enreda_empresas/app/models/competency.dart';
-import 'package:enreda_empresas/app/utils/responsive.dart';
-import 'package:enreda_empresas/app/values/strings.dart';
-import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../common_widgets/precached_avatar.dart';
+import '../../../models/competency.dart';
+import '../../../utils/responsive.dart';
+import '../../../values/strings.dart';
+import '../../../values/values.dart';
 
 class CompetencyTile extends StatelessWidget {
-  const CompetencyTile({Key? key, required this.competency, this.status = StringConst.BADGE_CERTIFIED, this.mini = false}) : super(key: key);
+  const CompetencyTile({Key? key, required this.competency, this.status = StringConst.BADGE_CERTIFIED, this.mini = false, this.medium = false, this.height = 60.0}) : super(key: key);
   final Competency competency;
   final String status;
   final bool mini;
+  final bool medium;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     var containerWidth = Responsive.isMobile(context) || Responsive.isTablet(context) ? 135.0: 220.0;
-    var containerHeight = Responsive.isMobile(context) || Responsive.isTablet(context) ? 160.0: 250.0;
+    var containerHeight = Responsive.isMobile(context) || Responsive.isTablet(context) ? 160.0: 260.0;
     var imageWidth = Responsive.isMobile(context) || Responsive.isTablet(context) ? 120.0: 180.0;
     var textContainerHeight = Responsive.isMobile(context) || Responsive.isTablet(context) ? 40.0: 50.0;
-    var fontSize = Responsive.isMobile(context) || Responsive.isTablet(context) ? 11.0: 16.0;
+    var fontSize = 13.0;
     final textTheme = Theme.of(context).textTheme;
 
     if (mini){
@@ -27,29 +29,42 @@ class CompetencyTile extends StatelessWidget {
       containerHeight /= Responsive.isMobile(context) || Responsive.isTablet(context) ? 1.6 : 1.8;
       imageWidth /= 1.6;
       textContainerHeight /= 1.65;
-      fontSize /= 1.6;
+      fontSize /= 1.4;
+    }
+
+    if (medium){
+      containerWidth /= 1.3;
+      containerHeight /= Responsive.isMobile(context) || Responsive.isTablet(context) ? 1.6 : 1.8;
+      imageWidth /= 1;
+      textContainerHeight /= 1.65;
+      fontSize /= 1.1;
     }
 
     return Container(
       width: containerWidth,
-      height: containerHeight,
+      //height: containerHeight,
       child: Column(
         children: [
           Container(
-            height: textContainerHeight,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  competency.name.toUpperCase(),
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  style: textTheme.bodyText1?.copyWith(
-                      overflow: TextOverflow.ellipsis,
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkGray),
+                Container(
+                  padding: EdgeInsets.all(4.0),
+                  alignment: Alignment.center,
+                  height: height,
+                  child: Text(
+                    competency.name.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    maxLines: 3,
+                    style: textTheme.bodySmall?.copyWith(
+                        overflow: TextOverflow.ellipsis,
+                        fontSize: fontSize,
+                        height: 1.2,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkGray),
+                  ),
                 ),
               ],
             ),
@@ -66,10 +81,10 @@ class CompetencyTile extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 imageUrl: competency.badgesImages[status]!)
-          : PrecacheCompetencyCard(
+                : PrecacheCompetencyCard(
               imageUrl: competency.badgesImages[status]!,
               imageWidth: imageWidth,
-            )
+            ),
         ],
       ),
     );

@@ -2,7 +2,6 @@ import 'package:enreda_empresas/app/home/participants/participant_detail/partici
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_documentation_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_ipil_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
@@ -16,7 +15,6 @@ import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -104,10 +102,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
         children: [
           _buildHeaderMobile(context, user!),
           SpaceH20(),
-          Padding(
-            padding: const EdgeInsets.only(left: Sizes.kDefaultPaddingDouble),
-            child: _buildMenuSelectorChips(context, user),
-          ),
+          _buildMenuSelectorChips(context, user),
           SpaceH20(),
           _currentPage!,
         ],
@@ -137,7 +132,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
             label: Text(_menuOptions[index]),
             selected: _value == _menuOptions[index],
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             showCheckmark: false,
             onSelected: (bool selected) {
               setState(() {
@@ -233,7 +228,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.chatDarkGray,
                                 fontFamily: GoogleFonts.outfit().fontFamily,
-                                fontSize: 35,
+                                fontSize: 30,
                                 ),
                             ),
                           ),
@@ -250,7 +245,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                       (techName != '' || techLastName != '') ?
                         Text('Técnica de referencia: $techName $techLastName') :
                         _bottomAddTech(socialEntityUser),
-                      SpaceH40(),
+                      SpaceH20(),
                       Row(
                         children: [
                           Row(
@@ -338,130 +333,78 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   Widget _buildHeaderMobile(BuildContext context, UserEnreda user) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(120),
-                    ),
-                    child:
-                    !kIsWeb ? ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(60)),
-                      child:
-                      Center(
-                        child:
-                        user?.photo == "" ?
-                        Container(
-                          color:  Colors.transparent,
-                          height: Responsive.isMobile(context) ? 90 : 120,
-                          width: Responsive.isMobile(context) ? 90 : 120,
-                          child: Image.asset(ImagePath.USER_DEFAULT),
-                        ):
-                        CachedNetworkImage(
-                            width: Responsive.isMobile(context) ? 90 : 120,
-                            height: Responsive.isMobile(context) ? 90 : 120,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.center,
-                            imageUrl: user?.photo ?? ""),
-                      ),
-                    ):
-                    ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(60)),
-                      child:
-                      Center(
-                        child:
-                        user?.photo == "" ?
-                        Container(
-                          color:  Colors.transparent,
-                          height: Responsive.isMobile(context) ? 90 : 120,
-                          width: Responsive.isMobile(context) ? 90 : 120,
-                          child: Image.asset(ImagePath.USER_DEFAULT),
-                        ):
-                        FadeInImage.assetNetwork(
-                          placeholder: ImagePath.USER_DEFAULT,
-                          width: Responsive.isMobile(context) ? 90 : 120,
-                          height: Responsive.isMobile(context) ? 90 : 120,
-                          fit: BoxFit.cover,
-                          image: user?.photo ?? "",
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${user!.firstName} ${user.lastName}',
-                        maxLines: 2,
-                        style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold, color: AppColors.chatDarkGray, overflow: TextOverflow.ellipsis),
-                      ),
-                      SpaceH8(),
-                      Text(
-                        '${user.educationName}'.toUpperCase(),
-                        maxLines: 2,
-                        style: textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold, color: AppColors.penBlue, overflow: TextOverflow.ellipsis),
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.mail,
-                            color: AppColors.darkGray,
-                            size: 14.0,
-                          ),
-                          const SpaceW4(),
-                          CustomTextSmall(text: user.email,),
-                        ],
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.phone,
-                            color: AppColors.darkGray,
-                            size: 14.0,
-                          ),
-                          const SpaceW4(),
-                          CustomTextSmall(text: user.phone ?? '',)
-                        ],
-                      ),
-                      _buildMyLocation(context, user),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(60)),
+          child:
+          user.photo == "" ?
+          Container(
+            color:  Colors.transparent,
+            height: Responsive.isMobile(context) ? 90 : 120,
+            width: Responsive.isMobile(context) ? 90 : 120,
+            child: Image.asset(ImagePath.USER_DEFAULT),
+          ) :
+          FadeInImage.assetNetwork(
+            placeholder: ImagePath.USER_DEFAULT,
+            width: Responsive.isMobile(context) ? 90 : 120,
+            height: Responsive.isMobile(context) ? 90 : 120,
+            fit: BoxFit.cover,
+            image: user.photo ?? "",
           ),
-          SpaceH40(),
-          Center(
-            child: AddYellowButton(
-              text: StringConst.INVITE_RESOURCE,
-              onPressed: () => showDialog(
-                  context: context,
-                  builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
+        ),
+        SpaceH30(),
+        Text(
+          '${user.firstName} ${user.lastName}',
+          maxLines: 2,
+          style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold, color: AppColors.primary900, overflow: TextOverflow.ellipsis),
+        ),
+        SpaceH8(),
+        Text(
+          '${user.educationName}'.toUpperCase(),
+          maxLines: 2,
+          style: textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.bold, color: AppColors.primary900, overflow: TextOverflow.ellipsis),
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.mail,
+              color: AppColors.darkGray,
+              size: 14.0,
             ),
+            const SpaceW4(),
+            CustomTextSmall(text: user.email,),
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.phone,
+              color: AppColors.darkGray,
+              size: 14.0,
+            ),
+            const SpaceW4(),
+            CustomTextSmall(text: user.phone ?? '',)
+          ],
+        ),
+        _buildMyLocation(context, user),
+        SpaceH40(),
+        Center(
+          child: AddYellowButton(
+            text: StringConst.INVITE_RESOURCE,
+            onPressed: () => showDialog(
+                context: context,
+                builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
           ),
-        ],
-      ),
+        ),
+        SpaceH20(),
+      ],
     );
   }
 

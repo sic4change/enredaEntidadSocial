@@ -75,7 +75,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
 
   Widget _buildBodyMobile(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -109,14 +109,14 @@ class ParticipantControlPanelPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (Responsive.isDesktop(context))
-              Image.asset(ImagePath.GAMIFICATION_LOGO, height: 160.0,),
+              Image.asset(ImagePath.GAMIFICATION_LOGO, height: 100.0,),
             if (Responsive.isDesktop(context))
               SpaceW8(),
             Expanded(
               child: Column(
                 children: [
                   GamificationSlider(
-                    height: Responsive.isDesktop(context)? 20.0: 10.0,
+                    height: 10,
                     value: participantUser.gamificationFlags.length,
                   ),
                   SpaceH20(),
@@ -130,8 +130,8 @@ class ParticipantControlPanelPage extends StatelessWidget {
                           children: [
                             GamificationItem(
                               imagePath: ImagePath.GAMIFICATION_CHAT_ICON,
-                              progress: (participantUser.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? 100:0,
-                              title: (participantUser.gamificationFlags[UserEnreda.FLAG_CHAT]?? false)? "CHAT INICIADO": "CHAT NO INICIADO",
+                              progress: (participantUser.gamificationFlags[UserEnreda.FLAG_CHAT]?? false) ? 100 : 0,
+                              title: (participantUser.gamificationFlags[UserEnreda.FLAG_CHAT]?? false) ? "CHAT INICIADO": "CHAT NO INICIADO",
                             ),
                             GamificationItem(
                               imagePath: ImagePath.GAMIFICATION_PILL_ICON,
@@ -606,13 +606,12 @@ class ParticipantControlPanelPage extends StatelessWidget {
                     context,
                     content: Container(
                         height: MediaQuery.sizeOf(context).height * 0.85,
-                        width: Responsive.isDesktop(context)? MediaQuery.sizeOf(context).width * 0.6: MediaQuery.sizeOf(context).width * 0.9,
-                        child: MyCurriculumPage(user: participantUser)),
+                        width: Responsive.isDesktop(context) ? MediaQuery.sizeOf(context).width * 0.6: MediaQuery.sizeOf(context).width,
+                        child: MyCurriculumPage()),
                   ),
                   child: Transform.scale(
                     scale:0.3,
                     child: MyCurriculumPage(
-                      user: participantUser,
                       mini: true,
                     ),
                     alignment: Alignment.topLeft,),

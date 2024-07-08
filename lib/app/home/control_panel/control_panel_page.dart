@@ -300,7 +300,6 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
           children: [
             Container(
                 margin: const EdgeInsets.only(top: 10.0, right: 0, left: 0, bottom: 10.0,),
-                height: Responsive.isDesktopS(context) ? 300 : 255,
                 decoration: BoxDecoration(
                   color: Colors.white,
                 ),
@@ -312,7 +311,7 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                       child: Text('Hola ${widget.user?.firstName},',
                         style: textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: Responsive.isMobile(context) ? 30 : 42.0,
+                            fontSize: Responsive.isMobile(context) ? 20 : 30.0,
                             color: AppColors.turquoiseBlue),),
                     ),
                     Padding(
@@ -320,17 +319,13 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                       child: Text(StringConst.WELCOME_COMPANY,
                         style: textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: Responsive.isMobile(context) ? 30 : 42.0,
+                            fontSize: Responsive.isMobile(context) ? 20 : 30.0,
                             color: Colors.black),),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 20.0),
-                      child: Text(StringConst.WELCOME_TEXT,
-                        style: textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.normal,
-                            fontSize: Responsive.isMobile(context) ? 15 : 18.0,
-                            color: AppColors.greyAlt),),
-                    )
+                      child: CustomTextSmall(text: StringConst.WELCOME_TEXT,),
+                    ),
                   ],
                 )
             ),

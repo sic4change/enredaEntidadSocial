@@ -10,6 +10,7 @@ import 'package:sidebarx/sidebarx.dart';
 
 import '../common_widgets/precached_avatar.dart';
 import '../common_widgets/spaces.dart';
+import '../utils/responsive.dart';
 import '../values/strings.dart';
 
 class SideBarWidget extends StatefulWidget {
@@ -123,7 +124,7 @@ class _SideBarWidgetState extends State<SideBarWidget> {
                 isSmallScreen ? SpaceH20() : Container(),
                 isSmallScreen ? Image.asset(
                   ImagePath.LOGO,
-                  height: 20,
+                  height: Responsive.isMobile(context) ? 35 : 20,
                 ) : Container(),
                 SpaceH30(),
                 Column(

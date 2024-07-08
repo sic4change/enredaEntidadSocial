@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:typed_data';
 
-import 'package:enreda_empresas/app/home/participants/pdf_generator/data.dart';
+import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_print/data.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/derivationReport.dart';
