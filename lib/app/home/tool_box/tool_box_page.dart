@@ -54,6 +54,8 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
         valueListenable: ToolBoxPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
+            borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
+            margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
             contentPadding: EdgeInsets.all(Responsive.isDesktop(context)? Sizes.kDefaultPaddingDouble*2: Sizes.kDefaultPaddingDouble,) ,
             child: Stack(
               children: [

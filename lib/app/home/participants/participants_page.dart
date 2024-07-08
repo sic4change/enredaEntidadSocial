@@ -45,6 +45,8 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         valueListenable: ParticipantsListPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
+            borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
+            margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
             contentPadding: EdgeInsets.symmetric(horizontal: Sizes.mainPadding, vertical: 0),
             child: Stack(
               alignment: Alignment.topCenter,
