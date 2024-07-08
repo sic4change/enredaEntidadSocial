@@ -1,5 +1,6 @@
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/tool_box/pdf_preview.dart';
 import 'package:enreda_empresas/app/utils/functions.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
@@ -37,7 +38,8 @@ class EnredaMethodologyPage extends StatelessWidget {
                   ),
                   Divider(color: AppColors.greyLight2.withOpacity(0.3),),
                   Padding(
-                    padding: const EdgeInsets.only(left: 30.0, right: 30.0, top: 10.0),
+                    padding: Responsive.isMobile(context) ? const EdgeInsets.all(8.0) :
+                      const EdgeInsets.only(left: 30.0, right: 30.0, top: 10.0),
                     child: InkWell(
                       onTap: () async {
                         Navigator.push(
@@ -62,7 +64,7 @@ class EnredaMethodologyPage extends StatelessWidget {
                               padding: Responsive.isMobile(context) ? const EdgeInsets.all(4.0) : const EdgeInsets.all(20.0),
                               child: CustomTextSmallOverflow(text: StringConst.MANUAL_METHODOLOGY),
                             )),
-                            Spacer(),
+                            Responsive.isMobile(context) ? const SpaceW8() : Spacer(),
                             Padding(
                               padding: Responsive.isMobile(context) ? const EdgeInsets.all(4.0) : const EdgeInsets.all(20.0),
                               child: Icon(Icons.remove_red_eye_outlined, color: AppColors.greyDark2,),

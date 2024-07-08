@@ -81,7 +81,7 @@ class _ResourceListTileState extends State<ResourceListTile> {
                                   maxLines: 1,
                                   softWrap: false,
                                   style: textTheme.labelMedium?.copyWith(
-                                    color: AppColors.lilac,
+                                    color: AppColors.primary900,
                                     letterSpacing: 0.5,
                                     height: 1.5,
                                     fontWeight: FontWeight.w600,

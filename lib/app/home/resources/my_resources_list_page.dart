@@ -47,9 +47,10 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
         valueListenable: MyResourcesListPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
-            contentPadding: Responsive.isMobile(context) ?
-            EdgeInsets.all(Sizes.mainPadding) :
-            EdgeInsets.all(Sizes.kDefaultPaddingDouble * 2),
+            borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
+            margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+            contentPadding: Responsive.isMobile(context) ? EdgeInsets.only(left: Sizes.kDefaultPaddingDouble / 2) :
+              EdgeInsets.all(Sizes.kDefaultPaddingDouble * 2),
             child: Stack(
               children: [
                 Flex(

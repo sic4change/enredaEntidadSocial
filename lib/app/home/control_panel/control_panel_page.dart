@@ -295,6 +295,8 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
   Widget myWelcomePageMobile(BuildContext context){
     final textTheme = Theme.of(context).textTheme;
     return RoundedContainer(
+      borderColor: Colors.transparent,
+      margin: EdgeInsets.zero,
       child: SingleChildScrollView(
         child: Column(
           children: [

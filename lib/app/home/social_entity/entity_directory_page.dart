@@ -49,9 +49,11 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
         valueListenable: EntityDirectoryPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
+            borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
+            margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
             contentPadding: Responsive.isMobile(context) ?
-            EdgeInsets.all(Sizes.mainPadding) :
-            EdgeInsets.all(Sizes.kDefaultPaddingDouble * 2),
+              EdgeInsets.all(Sizes.mainPadding) :
+              EdgeInsets.all(Sizes.kDefaultPaddingDouble * 2),
             child: Stack(
               children: [
                 Flex(

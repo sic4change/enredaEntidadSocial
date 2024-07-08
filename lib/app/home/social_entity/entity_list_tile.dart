@@ -168,6 +168,8 @@ class _EntityListTileState extends State<EntityListTile> {
                                     padding: const EdgeInsets.only(left: 8),
                                     child: Text(
                                       location,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
@@ -183,6 +185,7 @@ class _EntityListTileState extends State<EntityListTile> {
                               padding: const EdgeInsets.only(bottom: 18),
                               child: Container(
                                 width: 290,
+                                padding: const EdgeInsets.only(left: 8, right: 8),
                                 child: OutlinedButton(
                                     onPressed: (){
                                       launchURL(web);

@@ -11,6 +11,7 @@ import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
@@ -120,6 +121,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                         return ListItemBuilderGrid<Resource>(
                           snapshot: snapshot,
                           fitSmallerLayout: false,
+                          mainAxisExtentValue : Responsive.isMobile(context)? 191.0 : 248,
                           itemBuilder: (context, resource) {
                             if (!snapshot.hasData) {
                               return const Center(
@@ -206,6 +208,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                         return ListItemBuilderGrid<Resource>(
                           snapshot: snapshot,
                           fitSmallerLayout: false,
+                          mainAxisExtentValue : Responsive.isMobile(context)? 191.0 : 248,
                           itemBuilder: (context, resource) {
                             if (!snapshot.hasData) {
                               return const Center(
@@ -340,6 +343,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                 return ListItemBuilderGrid<Resource>(
                   snapshot: snapshot,
                   fitSmallerLayout: false,
+                  mainAxisExtentValue : Responsive.isMobile(context)? 191.0 : 248,
                   itemBuilder: (context, resource) {
                     if (!snapshot.hasData) {
                       return const Center(
@@ -414,6 +418,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                 return ListItemBuilderGrid<Resource>(
                   snapshot: snapshot,
                   fitSmallerLayout: false,
+                  mainAxisExtentValue : Responsive.isMobile(context)? 191.0 : 248,
                   itemBuilder: (context, resource) {
                     if (!snapshot.hasData) {
                       return const Center(
