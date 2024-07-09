@@ -757,7 +757,7 @@ class StringConst {
   }).toList();
 
   static List<DropdownMenuItem<String>> ADMIN_RESIDENCE_TYPE_SELECTION =
-  ['Ciudadanía de la unión', 'Residencia familiar de la unión', 'Residencia temporal no lucrativa',
+  ['Ciudadanía de la unión', 'Residencia familiar de la unión', 'Residencia temporal no autorizada a trabajar',
     'Residencia por reagrupación familiar (hab trabajar)', 'Residencia temporal y trabajo por cuenta ajena',
     'Residencia temporal y trabajo por cuenta ajena (duración determinada)',
     'Residencia temporal y trabajo por cuenta propia',
