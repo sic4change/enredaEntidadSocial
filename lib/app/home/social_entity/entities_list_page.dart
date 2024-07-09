@@ -8,6 +8,7 @@ import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/algolia_search.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -53,36 +54,42 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(height: Sizes.mainPadding,),
-          FilterTextFieldRow(
-            searchTextController: _queryController,
-            onPressed: () async {
-              var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
-              setState((){
-                finalSocialEntities = fetchUsers;
-              });
+          Padding(
+            padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
+            child: FilterTextFieldRow(
+              searchTextController: _queryController,
+              onPressed: () async {
+                var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
+                setState((){
+                  finalSocialEntities = fetchUsers;
+                });
 
-            },
-            onFieldSubmitted: (value) async {
-              setStateIfMounted(() {
-                filterResource.searchText = _queryController.text;
-              });
-              var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
-              setState((){
-                finalSocialEntities = fetchUsers;
-              });
-            },
-            clearFilter: (){
-              setState(() {
-                _queryController.clear();
-                finalSocialEntities.clear();
-                _clearFilter();
-              });
+              },
+              onFieldSubmitted: (value) async {
+                setStateIfMounted(() {
+                  filterResource.searchText = _queryController.text;
+                });
+                var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
+                setState((){
+                  finalSocialEntities = fetchUsers;
+                });
+              },
+              clearFilter: (){
+                setState(() {
+                  _queryController.clear();
+                  finalSocialEntities.clear();
+                  _clearFilter();
+                });
 
-            },
-            hintText: '',
+              },
+              hintText: '',
+            ),
           ),
           SizedBox(height: Sizes.mainPadding,),
-          chipFilter(),
+          Padding(
+            padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
+            child: chipFilter(),
+          ),
           Container(
               margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
               child: _buildEntitiesStream(context, tags)),

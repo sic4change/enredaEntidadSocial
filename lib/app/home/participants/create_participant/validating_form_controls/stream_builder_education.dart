@@ -33,7 +33,7 @@ Widget streamBuilderDropdownEducation (BuildContext context, Education? selected
                   StringConst.FORM_EDUCATION,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: textTheme.button?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
                     color: AppColors.greyDark,
                     fontWeight: FontWeight.w700,
@@ -46,6 +46,7 @@ Widget streamBuilderDropdownEducation (BuildContext context, Education? selected
                 child: DropdownButtonFormField(
                   value: selectedEducation,
                   items: educationItems,
+                  isExpanded: true,
                   onChanged: (value) => functionToWriteBackThings(value),
                   validator: (value) => selectedEducation != null ? null : StringConst.FORM_MOTIVATION_ERROR,
                   decoration: InputDecoration(
@@ -71,7 +72,7 @@ Widget streamBuilderDropdownEducation (BuildContext context, Education? selected
                       ),
                     ),
                   ),
-                  style: textTheme.button?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                     height: 1.4,
                     color: AppColors.greyDark,
                     fontWeight: FontWeight.w400,

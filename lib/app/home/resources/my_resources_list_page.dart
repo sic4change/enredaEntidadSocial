@@ -49,7 +49,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
           return RoundedContainer(
             borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
             margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
-            contentPadding: Responsive.isMobile(context) ? EdgeInsets.only(left: Sizes.kDefaultPaddingDouble / 2) :
+            contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) :
               EdgeInsets.all(Sizes.kDefaultPaddingDouble * 2),
             child: Stack(
               children: [
@@ -60,6 +60,8 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                   children: [
                     Container(
                       height: 50,
+                      padding: Responsive.isMobile(context) ? EdgeInsets.only(left: Sizes.kDefaultPaddingDouble / 2) :
+                        EdgeInsets.zero,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -108,8 +110,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                 ),
                 Container(
                     margin: selectedIndex != 0 && Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 2) :
-                    Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 6) :
-                    EdgeInsets.only(top: Sizes.mainPadding * 3),
+                    Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 6, left: Sizes.mainPadding / 2) : EdgeInsets.only(top: Sizes.mainPadding * 3),
                     child: bodyWidget[selectedIndex]),
               ],
             ),

@@ -1,14 +1,7 @@
-import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
-import 'package:enreda_empresas/app/common_widgets/custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
-import 'package:enreda_empresas/app/common_widgets/user_avatar.dart';
-import 'package:enreda_empresas/app/home/resources/list_item_builder.dart';
-import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
-import 'package:enreda_empresas/app/home/resources/resource_detail/box_item_data.dart';
-import 'package:enreda_empresas/app/home/resources/resource_detail/invite_users_page.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_dialog.dart';
 import 'package:enreda_empresas/app/home/social_entity/entity_detail/box_social_entity_contact.dart';
 import 'package:enreda_empresas/app/home/social_entity/entity_detail/box_social_network_data.dart';
@@ -16,9 +9,7 @@ import 'package:enreda_empresas/app/home/social_entity/entity_directory_page.dar
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/province.dart';
-import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
-import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
@@ -26,7 +17,6 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
@@ -103,16 +93,15 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
         children: [
           Container(
             constraints: BoxConstraints(
-              maxWidth: Responsive.isMobile(context) ? MediaQuery.of(context).size.width * 0.75 :
+              maxWidth: Responsive.isMobile(context) ? MediaQuery.of(context).size.width - 4  :
               MediaQuery.of(context).size.width * 0.5,
             ),
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
-              color: Colors.white,
               border: Border.all(
-                  color: AppColors.greyLight2.withOpacity(0.2),
+                  color: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight2.withOpacity(0.2),
                   width: 1),
-              borderRadius: BorderRadius.circular(Consts.padding),
+              borderRadius: Responsive.isMobile(context) ? BorderRadius.zero : BorderRadius.circular(Consts.padding),
             ),
             child: Column(
               children: [
@@ -122,11 +111,11 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                       image: AssetImage(ImagePath.RECTANGLE_SOCIAL_ENTITY),
                       fit: BoxFit.cover,
                     ),
-                    borderRadius: BorderRadius.only(
+                    borderRadius: Responsive.isMobile(context) ? BorderRadius.zero : BorderRadius.only(
                         bottomRight: Radius.circular(Consts.padding),
                         bottomLeft: Radius.circular(Consts.padding)),
                   ),
-                  margin: const EdgeInsets.symmetric(horizontal: 20.0),
+                  margin: Responsive.isMobile(context) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                       children: [
                         Responsive.isMobile(context)

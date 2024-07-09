@@ -191,6 +191,9 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     );
 
     return RoundedContainer(
+        borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
+        margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+        contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
         child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -603,7 +606,10 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           RoundedContainer(
-            width: MediaQuery.of(context).size.width * 0.6,
+            width: Responsive.isMobile(context) ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width * 0.6,
+            margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+            contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+            borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
             child: unemployedRevisionForm(
               context,
               _firstName!,
@@ -749,7 +755,6 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           content: StringConst.CREATE_PARTICIPANT_SUCCESS,
           defaultActionText: StringConst.FORM_ACCEPT,
         );
-        //WebHome.goToControlPanel();
         WebHome.goToParticipants();
       } on FirebaseException catch (e) {
         showExceptionAlertDialog(context,

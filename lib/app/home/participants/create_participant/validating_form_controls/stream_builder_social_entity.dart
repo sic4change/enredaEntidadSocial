@@ -31,7 +31,7 @@ Widget streamBuilderForSocialEntity (BuildContext context, SocialEntity? selecte
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text(
                       StringConst.FORM_SOCIAL_ENTITY,
-                      style: textTheme.button?.copyWith(
+                      style: textTheme.bodySmall?.copyWith(
                         height: 1.5,
                         color: AppColors.greyDark,
                         fontWeight: FontWeight.w700,
@@ -44,6 +44,7 @@ Widget streamBuilderForSocialEntity (BuildContext context, SocialEntity? selecte
                     child: DropdownButtonFormField(
                       value: selectedSocialEntity,
                       items: socialEntityItems,
+                      isExpanded: true,
                       onChanged: (value) => functionToWriteBackThings(value),
                       //validator: validator,
                       decoration: InputDecoration(
@@ -69,7 +70,7 @@ Widget streamBuilderForSocialEntity (BuildContext context, SocialEntity? selecte
                           ),
                         ),
                       ),
-                      style: textTheme.button?.copyWith(
+                      style: textTheme.bodySmall?.copyWith(
                         height: 1.4,
                         color: AppColors.greyDark,
                         fontWeight: FontWeight.w400,

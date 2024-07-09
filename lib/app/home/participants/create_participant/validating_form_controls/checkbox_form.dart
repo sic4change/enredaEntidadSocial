@@ -33,7 +33,7 @@ Widget checkboxForm(BuildContext context, _checkFieldKey, bool _isChecked, funct
                         fontSize: fontSize,
                       ),),
                     TextButton(
-                        onPressed: () => launchURL(StringConst.PRIVACY_URL),
+                        onPressed: () => launchURL(StringConst.POLICIES_URL),
                         child: Flex(
                           direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                           crossAxisAlignment: CrossAxisAlignment.start,
