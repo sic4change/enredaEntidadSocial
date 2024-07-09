@@ -701,64 +701,6 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
       padding: const EdgeInsets.symmetric(horizontal: 35.0, vertical: 40),
       child: Column(
         children: [
-          Container(
-            height: 50,
-            width: 150,
-            child: ElevatedButton(
-                onPressed: () async {
-                    showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                            title: Text(StringConst.SAVE_SUCCEED,
-                                style: TextStyle(
-                                  color: AppColors.greyDark,
-                                  height: 1.5,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
-                                )),
-                            actions: <Widget>[
-                              ElevatedButton(
-                                  onPressed: (){
-                                    database.setIpilObjectives(IpilObjectives(
-                                      ipilObjectivesId: ipilObjectives.ipilObjectivesId,
-                                      userId: ipilObjectives.userId,
-                                      monthShort1: short1.text,
-                                      monthShort2: short2.text,
-                                      monthShort3: short3.text,
-                                      monthMedium1: medium1.text,
-                                      monthMedium2: medium2.text,
-                                      monthMedium3: medium3.text,
-                                      monthLong1: long1.text,
-                                      monthLong2: long2.text,
-                                      monthLong3: long3.text,
-                                    ));
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(StringConst.OK,
-                                        style: TextStyle(
-                                            color: AppColors.black,
-                                            height: 1.5,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 14)),
-                                  )),
-                            ]
-                        )
-                    );
-                  },
-                child: Text(
-                  StringConst.SAVE,
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.turquoiseButton,
-                  shadowColor: Colors.transparent,
-                )
-            ),
-          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -825,6 +767,65 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                 controller: long3,
               ),
             ],
+          ),
+          SpaceH30(),
+          Container(
+            height: 50,
+            width: 150,
+            child: ElevatedButton(
+                onPressed: () async {
+                  showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                          title: Text(StringConst.SAVE_SUCCEED,
+                              style: TextStyle(
+                                color: AppColors.greyDark,
+                                height: 1.5,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                              )),
+                          actions: <Widget>[
+                            ElevatedButton(
+                                onPressed: (){
+                                  database.setIpilObjectives(IpilObjectives(
+                                    ipilObjectivesId: ipilObjectives.ipilObjectivesId,
+                                    userId: ipilObjectives.userId,
+                                    monthShort1: short1.text,
+                                    monthShort2: short2.text,
+                                    monthShort3: short3.text,
+                                    monthMedium1: medium1.text,
+                                    monthMedium2: medium2.text,
+                                    monthMedium3: medium3.text,
+                                    monthLong1: long1.text,
+                                    monthLong2: long2.text,
+                                    monthLong3: long3.text,
+                                  ));
+                                  Navigator.of(context).pop();
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(StringConst.OK,
+                                      style: TextStyle(
+                                          color: AppColors.black,
+                                          height: 1.5,
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14)),
+                                )),
+                          ]
+                      )
+                  );
+                },
+                child: Text(
+                  StringConst.SAVE,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.turquoiseButton,
+                  shadowColor: Colors.transparent,
+                )
+            ),
           ),
         ],
       ),

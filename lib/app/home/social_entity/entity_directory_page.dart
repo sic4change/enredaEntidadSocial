@@ -51,8 +51,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
           return RoundedContainer(
             borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
             margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
-            contentPadding: Responsive.isMobile(context) ?
-              EdgeInsets.all(Sizes.mainPadding) :
+            contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) :
               EdgeInsets.all(Sizes.kDefaultPaddingDouble * 2),
             child: Stack(
               children: [
@@ -63,6 +62,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                   children: [
                     Container(
                       height: 50,
+                      padding: Responsive.isMobile(context) ? EdgeInsets.only(left: Sizes.mainPadding) : EdgeInsets.all(0),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -111,7 +111,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                 ),
                 Container(
                     margin: selectedIndex != 0 && Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 2) :
-                    Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 6) :
+                    Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 5) :
                     EdgeInsets.only(top: Sizes.mainPadding * 3),
                     child: bodyWidget[selectedIndex]),
               ],

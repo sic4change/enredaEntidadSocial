@@ -34,7 +34,6 @@ class _ResourceListTileState extends State<ResourceListTile> {
     double fontSize = responsiveSize(context, 12, 17, md: 15);
     double fontSizeS = responsiveSize(context, 12, 14, md: 13);
     double sidePadding = responsiveSize(context, 15, 20, md: 17);
-    final auth = Provider.of<AuthBase>(context, listen: false);
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Container(
@@ -246,7 +245,8 @@ class _ResourceListTileState extends State<ResourceListTile> {
                           Spacer(),
                           Container(
                               margin: const EdgeInsets.only(left: 15.0),
-                              child: buildShare(context, widget.resource, AppColors.greyAlt)
+                              child: buildShare(
+                                  context, widget.resource, AppColors.darkGray, AppColors.greyTxtAlt, Colors.transparent),
                           ),
                           SizedBox(width: 15,)
                         ],

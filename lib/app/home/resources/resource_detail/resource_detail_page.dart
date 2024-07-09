@@ -119,14 +119,16 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                                 selectedCompetencies = {};
                                                 globals.selectedCompetenciesCurrentResource = {};
                                                 globals.competenciesNamesCurrentResource = '';
-                                                return _buildResourceDetail(context, resource);
+                                                return Responsive.isMobile(context) ? _buildResourceDetailMobile(context, resource) :
+                                                  _buildResourceDetailWeb(context, resource);
                                               }
                                               if (snapshotCompetencies.hasData) {
                                                 selectedCompetencies = snapshotCompetencies.data!.toSet();
                                                 globals.selectedCompetenciesCurrentResource = snapshotCompetencies.data!.toSet();
                                                 globals.competenciesNamesCurrentResource = 
                                                     selectedCompetencies.map((item) => item.name).join(' / ');
-                                                return _buildResourceDetail(context, resource);
+                                                return Responsive.isMobile(context) ? _buildResourceDetailMobile(context, resource) :
+                                                  _buildResourceDetailWeb(context, resource);
                                               }
                                               return Container();
                                             }
@@ -145,7 +147,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
         });
   }
 
-  Widget _buildResourceDetail(BuildContext context, Resource resource) {
+  Widget _buildResourceDetailWeb(BuildContext context, Resource resource) {
     TextTheme textTheme = Theme.of(context).textTheme;
     double fontSizeTitle = responsiveSize(context, 14, 22, md: 18);
     double fontSizePromotor = responsiveSize(context, 12, 16, md: 14);
@@ -175,12 +177,12 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                         constraints: BoxConstraints(
                           maxWidth: resource.organizer == widget.socialEntityId
                               ? MediaQuery.of(context).size.width
-                              : MediaQuery.of(context).size.width * 0.6,
+                              : MediaQuery.of(context).size.width * 0.5,
                         ),
                         decoration: BoxDecoration(
                           shape: BoxShape.rectangle,
                           border: Border.all(
-                              color: AppColors.greyLight2.withOpacity(0.2),
+                              color: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight2.withOpacity(0.2),
                               width: 1),
                           borderRadius: BorderRadius.circular(Consts.padding),
                         ),
@@ -298,7 +300,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
 
                                           ),
                                         ),
-                                        buildShareButton(context, resource, AppColors.darkGray),
+                                        buildShare(context, resource, AppColors.darkGray, AppColors.darkGray, Colors.white),
                                         SizedBox(width: 10),
                                       ],
                                     ) : SizedBox(height: 30,),
@@ -371,6 +373,147 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildResourceDetailMobile(BuildContext context, Resource resource) {
+    TextTheme textTheme = Theme.of(context).textTheme;
+    double fontSizeTitle = responsiveSize(context, 14, 22, md: 18);
+    double fontSizePromotor = responsiveSize(context, 12, 16, md: 14);
+    return SingleChildScrollView(
+      child: Container(
+        margin: MediaQuery.of(context).size.width >= 1200 ?
+        EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.1) : EdgeInsets.zero,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.rectangle,
+          border: Border.all(
+              color: Responsive.isMobile(context) ? Colors.transparent :AppColors.greyLight2.withOpacity(0.2),
+              width: Responsive.isMobile(context) ? 0 : 1),
+          borderRadius: BorderRadius.circular(Sizes.MARGIN_16),
+        ),
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(ImagePath.RECTANGLE_RESOURCE),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Spacer(),
+                        Container(
+                            height: 50,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                                  child: InkWell(
+                                    onTap: () => {
+                                      setState(() {
+                                        MyResourcesListPage.selectedIndex.value = 3;
+                                      })
+                                    },
+                                    child: Icon(
+                                      Icons.edit_outlined,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                                  child: InkWell(
+                                    onTap: () => _confirmDeleteResource(context, resource),
+                                    child: Icon(
+                                      Icons.delete_outline,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                ),
+                                buildShare(context, resource, AppColors.darkGray, AppColors.white, Colors.transparent),
+                                SpaceW8(),
+                              ],
+                            ))
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Spacer(),
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: resource.organizerImage == null || resource.organizerImage!.isEmpty ? Container() :
+                          Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(width: 1.0, color: AppColors.greyLight),
+                                borderRadius: BorderRadius.circular(100,),
+                                color: AppColors.greyLight),
+                            child: CircleAvatar(
+                              radius: Responsive.isMobile(context) ? 28 : 40,
+                              backgroundColor: AppColors.white,
+                              backgroundImage: NetworkImage(resource.organizerImage!),
+                            ),
+                          ),
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10, right: 30.0, left: 30.0),
+                      child: Text(
+                        resource.title.toUpperCase(),
+                        textAlign: TextAlign.center,
+                        maxLines:
+                        Responsive.isMobile(context) ? 2 : 1,
+                        style: textTheme.bodySmall?.copyWith(
+                          letterSpacing: 1.2,
+                          color: AppColors.white,
+                          height: 1.5,
+                          fontWeight: FontWeight.w300,
+                          fontSize: fontSizeTitle,
+                        ),
+                      ),
+                    ),
+                    SpaceH4(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            resource.promotor != null
+                                ? resource.promotor != ""
+                                ? resource.promotor!
+                                : resource.organizerName!
+                                : resource.organizerName!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              letterSpacing: 1.2,
+                              fontSize: fontSizePromotor,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SpaceH20(),
+                    _buildBoxes(resource),
+                    SpaceH20(),
+                  ]
+              ),
+            ),
+            _buildDetailResource(context, resource),
+          ],
+        ),
       ),
     );
   }
@@ -483,56 +626,79 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
   Widget _buildBoxes(Resource resource) {
     List<BoxItemData> boxItemData = [
       BoxItemData(
-          icon: Icons.card_travel,
+          icon: Image.asset(Responsive.isMobile(context) ? ImagePath.ICON_MODALITY_YELLOW
+              : ImagePath.ICON_MODALITY),
           title: StringConst.RESOURCE_TYPE,
           contact: '${resource.resourceCategoryName}'
       ),
       BoxItemData(
-        icon: Icons.location_on_outlined,
+        icon: Image.asset(Responsive.isMobile(context) ? ImagePath.ICON_PLACE_YELLOW
+            : ImagePath.ICON_PLACE),
         title: StringConst.LOCATION,
-        contact: '${resource.countryName}',
+        contact: getLocationText(resource)!,
       ),
       BoxItemData(
-        icon: Icons.card_travel,
+        icon: Image.asset(Responsive.isMobile(context) ? ImagePath.ICON_MODALITY_YELLOW
+            : ImagePath.ICON_MODALITY),
         title: StringConst.MODALITY,
         contact: '${resource.modality}',
       ),
       BoxItemData(
-        icon: Icons.people,
+        icon: Image.asset(Responsive.isMobile(context) ? ImagePath.ICON_SEATS_YELLOW
+            : ImagePath.ICON_SEATS),
         title: StringConst.CAPACITY,
         contact: '${resource.capacity}',
       ),
       BoxItemData(
-        icon: Icons.calendar_month_outlined,
+        icon: Image.asset(Responsive.isMobile(context) ? ImagePath.ICON_DATE_YELLOW
+            : ImagePath.ICON_DATE),
         title: StringConst.DATE,
         contact: '${DateFormat('dd/MM/yyyy').format(resource.start!)} - ${DateFormat('dd/MM/yyyy').format(resource.end!)}',
       ),
-      BoxItemData(
-        icon: Icons.list_alt,
+      if (resource.contractType != null && resource.contractType != '') BoxItemData(
+        icon: Image.asset(Responsive.isMobile(context) ? ImagePath.ICON_CONTRACT_YELLOW
+            : ImagePath.ICON_CONTRACT),
         title: StringConst.CONTRACT_TYPE,
         contact: resource.contractType != null && resource.contractType != ''  ? '${resource.contractType}' : 'Sin especificar',
       ),
-      BoxItemData(
-        icon: Icons.alarm,
+      if (resource.temporality != null && resource.temporality != '') BoxItemData(
+        icon: Image.asset(Responsive.isMobile(context) ? ImagePath.ICON_CONTRACT_YELLOW
+            : ImagePath.ICON_CONTRACT),
         title: StringConst.FORM_SCHEDULE,
         contact: resource.temporality != null && resource.temporality != ''  ? '${resource.temporality}' :  'Sin especificar',
       ),
-      BoxItemData(
-        icon: Icons.currency_exchange,
+      if (resource.salary != null && resource.salary != '') BoxItemData(
+        icon: Image.asset(Responsive.isMobile(context) ? ImagePath.ICON_CURRENCY_YELLOW
+            : ImagePath.ICON_CURRENCY),
         title: StringConst.SALARY,
         contact: resource.salary != null && resource.salary != ''  ? '${resource.salary}' :  'Sin especificar',
       ),
     ];
     const int crossAxisCount = 2; // The number of columns in the grid
     const double maxCrossAxisExtent = 250;
-    const double mainAxisExtent = 60;
+    const double mainAxisExtent = 70;
     const double childAspectRatio = 6 / 2;
     const double crossAxisSpacing = 10;
     const double mainAxisSpacing = 10;
     int rowCount = (boxItemData.length / crossAxisCount).ceil();
     double gridHeight = rowCount * mainAxisExtent + (rowCount - 1) * mainAxisSpacing;
-    double gridHeightD = rowCount * mainAxisExtent + (rowCount - 15) * mainAxisSpacing;
-    return SizedBox(
+    double gridHeightD = rowCount * mainAxisExtent + (rowCount - 9) * mainAxisSpacing;
+    return Responsive.isMobile(context) ?
+    SizedBox(
+      height: gridHeight * 0.85,
+      child: ListView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          scrollDirection: Axis.vertical,
+          itemCount: boxItemData.length,
+          itemBuilder: (BuildContext context, index) {
+            return BoxItem(
+              icon: boxItemData[index].icon,
+              title: boxItemData[index].title,
+              contact: boxItemData[index].contact,
+            );
+          }),
+    ) :
+    SizedBox(
       height: Responsive.isDesktop(context) ? gridHeightD : gridHeight,
       child: GridView.builder(
           physics: NeverScrollableScrollPhysics(),
@@ -641,4 +807,50 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
       });
     }
   }
+
+  String? getLocationText(Resource resource) {
+    switch (resource.modality) {
+      case StringConst.FACE_TO_FACE:
+      case StringConst.BLENDED:
+        {
+          if (resource.cityName != null) {
+            return '${resource.cityName}, ${resource.provinceName}, ${resource.countryName}';
+          }
+
+          if (resource.cityName == null && resource.provinceName != null) {
+            return '${resource.provinceName}, ${resource.countryName}';
+          }
+
+          if (resource.provinceName == null && resource.countryName != null) {
+            return resource.countryName!;
+          }
+
+          if (resource.provinceName != null) {
+            return resource.provinceName!;
+          } else if (resource.countryName != null) {
+            return resource.countryName!;
+          }
+          return resource.modality;
+        }
+
+      case StringConst.ONLINE_FOR_COUNTRY:
+      /*return StringConst.ONLINE_FOR_COUNTRY
+            .replaceAll('país', resource.countryName!);*/
+
+      case StringConst.ONLINE_FOR_PROVINCE:
+      /*return StringConst.ONLINE_FOR_PROVINCE.replaceAll(
+            'provincia', '${resource.provinceName!}, ${resource.countryName!}');*/
+
+      case StringConst.ONLINE_FOR_CITY:
+      /*return StringConst.ONLINE_FOR_CITY.replaceAll('ciudad',
+            '${resource.cityName!}, ${resource.provinceName!}, ${resource.countryName!}');*/
+
+      case StringConst.ONLINE:
+        return StringConst.ONLINE;
+
+      default:
+        return resource.modality;
+    }
+  }
+
 }

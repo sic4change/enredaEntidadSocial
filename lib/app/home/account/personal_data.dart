@@ -30,6 +30,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../utils/responsive.dart';
+
 class PersonalData extends StatefulWidget {
   const PersonalData({Key? key}) : super(key: key);
 
@@ -86,6 +88,10 @@ class _PersonalDataState extends State<PersonalData> {
                   _birthday = _birthday ?? userEnreda?.birthday;
                   _postalCode = userEnreda?.address?.postalCode ?? '';
                   return RoundedContainer(
+                      borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
+                      margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+                      contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2) :
+                        EdgeInsets.all(Sizes.kDefaultPaddingDouble),
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
@@ -567,7 +573,7 @@ class _PersonalDataState extends State<PersonalData> {
                   padding: const EdgeInsets.all(10.0),
                   child: InkWell(
                     child: const Text('Política de privacidad'),
-                    onTap: () => launchURL(StringConst.PRIVACY_URL),
+                    onTap: () => launchURL(StringConst.POLICIES_URL),
                   ),
                 ),
                 Padding(

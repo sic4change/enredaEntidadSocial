@@ -206,7 +206,7 @@ class StringConst {
   static const String FIND_ME = "Find me on..";
 
   //URL Links
-  static const String PRIVACY_URL = "https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/politicas.html?alt=media&token=374df99b-04fc-4f19-9a03-4bcbbc08a55b";
+  static const String POLICIES_URL = "https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/pagina-politicas.html?alt=media&token=3f1ed44d-b0e2-4e51-8266-1ad608604eba";
   static const String BEHANCE_URL = "https://www.behance.net/";
   static const String DRIBBLE_URL = "https://dribbble.com/";
   static const String LINKED_IN_URL = "https://www.linkedin.com/company/sic4change/";
@@ -214,7 +214,7 @@ class StringConst {
   static const String GITHUB_URL = "https://github.com/";
   static const String FACEBOOK_URL = "https://www.facebook.com/EnREDaEmpleo/";
   static const String TWITTER_URL = "https://twitter.com/sic4change";
-  static const String USE_CONDITIONS_URL = "https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/condiciones.html?alt=media&token=95f2b0f5-cd12-4a43-80a6-0cb32788f380";
+  static const String USE_CONDITIONS_URL = "https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/pagina-condiciones.html?alt=media&token=a2dc50e8-fc48-46a4-afff-2eb326e63821";
   static const String ADMIN_WEB_URL = 'https://enreda-d3b41.firebaseapp.com/#/login';
   static const String WEB_APP_URL = 'https://enredawebapp.web.app/';
   static const String WEB_APP_URL_ACCESS = 'https://enredawebapp.web.app/access';

@@ -30,6 +30,18 @@ class ImagePath {
   static const String EDIT_RESOURCE = '$imageDir/icon-editar.png';
   static const String DELETE_RESOURCE = '$imageDir/icon-eliminar.png';
   static const String RECTANGLE_RESOURCE = '$imageDir/background-recursos.png';
+  static const String ICON_CONTRACT = '$imageDir/contract-icon.png';
+  static const String ICON_CONTRACT_YELLOW = '$imageDir/contract-icon-yellow.png';
+  static const String ICON_CURRENCY = '$imageDir/currency-icon.png';
+  static const String ICON_CURRENCY_YELLOW = '$imageDir/currency-icon-yellow.png';
+  static const String ICON_DATE = '$imageDir/date-icon.png';
+  static const String ICON_DATE_YELLOW = '$imageDir/date-icon-yellow.png';
+  static const String ICON_MODALITY = '$imageDir/modality-icon.png';
+  static const String ICON_MODALITY_YELLOW = '$imageDir/modality-icon-yellow.png';
+  static const String ICON_PLACE = '$imageDir/place-icon.png';
+  static const String ICON_PLACE_YELLOW = '$imageDir/place-icon-yellow.png';
+  static const String ICON_SEATS = '$imageDir/seats-icon.png';
+  static const String ICON_SEATS_YELLOW = '$imageDir/seats-icon-yellow.png';
 
   //Competencies
   static const String EMPTY_BADGE_SAMPLE = '$imageDir/empty_900x503.png';
