@@ -393,57 +393,58 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
               ),
             ),
             SizedBox(height: 20,),
-            Stack(
-              children: [
-                Container(
-                  height: Responsive.isDesktopS(context) ? 200 : 150,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary100,
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 30.0, top: 30),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: Responsive.isDesktopS(context) ? 200 : 150,
-                          child: Text('Directorio Entidades',
-                            style: textTheme.displaySmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: Responsive.isMobile(context) ? 25 : 35.0,
-                                color: AppColors.white),),
-                        ),
-                        SizedBox(height: 20,),
-                        InkWell(
-                            onTap: () {
-                              setState(() {
-                                WebHome.goToEntities();
-                              });
-                            },
-                            child: CustomTextBold(title: 'Ver más')),
-                      ],
+            InkWell(
+              onTap: () {
+                setState(() {
+                  WebHome.goToEntities();
+                });
+              },
+              child: Stack(
+                children: [
+                  Container(
+                    height: Responsive.isDesktopS(context) ? 200 : 150,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary100,
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 30.0, top: 30),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: Responsive.isDesktopS(context) ? 200 : 150,
+                            child: Text('Directorio Entidades',
+                              style: textTheme.displaySmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Responsive.isMobile(context) ? 25 : 35.0,
+                                  color: AppColors.white),),
+                          ),
+                          SizedBox(height: 20,),
+                          CustomTextBold(title: 'Ver más'),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        WebHome.goToEntities();
-                      });
-                    },
-                    child: Container(
-                        width: 150,
-                        child: Image.asset(ImagePath.CONTROL_PANEL_CALENDAR)),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          WebHome.goToEntities();
+                        });
+                      },
+                      child: Container(
+                          width: 150,
+                          child: Image.asset(ImagePath.CONTROL_PANEL_CALENDAR)),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             SizedBox(height: 40,),
             MyParticipantsScrollPage(),
