@@ -597,7 +597,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
                   style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: Responsive.isDesktop(context) ? 18 : 14.0,
-                    color: AppColors.penBlue,
+                    color: AppColors.primary900,
                   ),
                 ),
                 SpaceH20(),

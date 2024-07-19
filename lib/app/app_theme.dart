@@ -129,7 +129,7 @@ class AppTheme {
       fontStyle: FontStyle.normal,
       fontWeight: _regular,
     ),
-    labelMedium: GoogleFonts.ibmPlexMono(
+    labelMedium: GoogleFonts.outfit(
       fontSize: Sizes.TEXT_SIZE_16,
       color: AppColors.black,
       fontStyle: FontStyle.normal,

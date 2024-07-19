@@ -46,8 +46,9 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
             borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
-            margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
-            contentPadding: EdgeInsets.symmetric(horizontal: Sizes.mainPadding, vertical: 0),
+            margin: Responsive.isMobile(context) ? EdgeInsets.all(20) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+            contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) :
+            EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble * 2, vertical: Sizes.kDefaultPaddingDouble),
             child: Stack(
               alignment: Alignment.topCenter,
               children: [
@@ -68,8 +69,9 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                   ),
                 ),
                 Container(
-                    margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
-                    child: _bodyWidget[selectedIndex]),
+                  height: double.infinity,
+                  margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
+                  child: _bodyWidget[selectedIndex]),
               ],
                     ),
           );

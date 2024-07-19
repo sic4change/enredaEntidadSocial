@@ -21,6 +21,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../utils/adaptative.dart';
+import '../../../utils/responsive.dart';
 import 'participant_social_reports_page.dart';
 
 class ClosureReportForm extends StatefulWidget {
@@ -105,56 +107,42 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
   Widget closureReport(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
 
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-        child: Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: AppColors.greyBorder)
+    return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              IconButton(
+                onPressed: setStateMenuPage,
+                icon: Icon(Icons.arrow_back_rounded),
+                iconSize: 30,
+                color: AppColors.turquoiseBlue,
+              ),
+              SpaceW8(),
+              CustomTextBoldTitle(
+                  title: 'Informe de cierre de caso'.toUpperCase()),
+            ],
           ),
-          child:
-          Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 50, vertical: 15.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      IconButton(
-                        onPressed: setStateMenuPage,
-                        icon: Icon(Icons.arrow_back_rounded),
-                        iconSize: 30,
-                        color: AppColors.turquoiseBlue,
-                      ),
-                      SpaceW8(),
-                      CustomTextBoldTitle(
-                          title: 'Informe de cierre de caso'.toUpperCase()),
-                    ],
-                  ),
-                ),
-                Divider(color: AppColors.greyBorder,),
-                StreamBuilder<ClosureReport>(
-                    stream: database.closureReportsStreamByUserId(user.userId),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        ClosureReport closureReportSaved = snapshot.data!;
-                        return completeClosureForm(
-                            context, closureReportSaved, user);
-                      }
-                      else {
-                        if (user.closureReportId == null) {
-                          database.addClosureReport(widget.closureReport!);
-                        }
-                        return Container(
-                          height: 300,
-                        );
-                      }
-                    }
-                ),
-              ]
+          Divider(color: AppColors.greyBorder,),
+          StreamBuilder<ClosureReport>(
+              stream: database.closureReportsStreamByUserId(user.userId),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  ClosureReport closureReportSaved = snapshot.data!;
+                  return completeClosureForm(
+                      context, closureReportSaved, user);
+                }
+                else {
+                  if (user.closureReportId == null) {
+                    database.addClosureReport(widget.closureReport!);
+                  }
+                  return Container(
+                    height: 300,
+                  );
+                }
+              }
           ),
-        )
+        ]
     );
   }
 
@@ -547,8 +535,13 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     String? _motiveCloseDetail = report.motiveCloseDetail ?? '';
     DateTime? _closeDate = report.closeDate;
 
+    final textTheme = Theme.of(context).textTheme;
+    double fontSize = responsiveSize(context, 13, 20, md: 16);
+    double fontSizeSubTitle = responsiveSize(context, 14, 18, md: 15);
+
     return Padding(
-      padding: const EdgeInsets.only(left: 50, right: 30),
+      padding: Responsive.isMobile(context) ? const EdgeInsets.symmetric(horizontal: 10)
+          : const EdgeInsets.only(left: 50, right: 30),
       child: Form(
         key: _formKey,
         child: Column(
@@ -1741,7 +1734,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             Align(
                 alignment: Alignment.center,
-                child: CustomMultiSelectionRadioList(
+                child: CustomMultiSelectionCheckBoxList(
                     options: StringConst.OPTIONS_SECTION_4,
                     selections: _hostingObservations,
                     enabled: !_finished)),
@@ -2053,7 +2046,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               enabled: !_finished,
             ),
             SpaceH12(),
-            CustomMultiSelectionRadioList(
+            CustomMultiSelectionCheckBoxList(
                 options: StringConst.OPTIONS_SECTION_12,
                 selections: _vulnerabilityOptions,
                 enabled: !_finished),
@@ -2888,32 +2881,52 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                                title:
-                                Text('Se ha guardado con exito',
-                                    style: TextStyle(
-                                      color: AppColors.greyDark,
-                                      height: 1.5,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16,
-                                    )),
+                                backgroundColor: AppColors.primary050,
+                                titlePadding:
+                                Responsive.isMobile(context) ? const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0, bottom: 10.0) :
+                                const EdgeInsets.only(top: 50.0, left: 50.0, right: 50.0, bottom: 10.0),
+                                contentPadding:
+                                Responsive.isMobile(context) ? const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0) :
+                                const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 30.0),
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Se ha guardado con exito',
+                                        style: textTheme.titleLarge?.copyWith(
+                                          color: AppColors.primary900,
+                                          fontSize: fontSize,
+                                          height: 1.5,
+                                        )),
+                                  ],
+                                ),
                                 actions: <Widget>[
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        setStateMenuPage();
-                                      },
-                                      child: Padding(
-                                        padding:
-                                        const EdgeInsets.all(8.0),
-                                        child: Text('Ok',
-                                            style: TextStyle(
-                                                color:
-                                                AppColors.black,
-                                                height: 1.5,
-                                                fontWeight:
-                                                FontWeight.w400,
-                                                fontSize: 14)),
-                                      )),
+                                  Padding(
+                                    padding: const EdgeInsets.all(20.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              setStateMenuPage();
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text('Aceptar',
+                                                  style: TextStyle(
+                                                      color: AppColors.white,
+                                                      height: 1.5,
+                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: 14)),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primaryColor,
+                                              shadowColor: Colors.transparent,
+                                            )
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ]));
                       },
                       child: Text(
@@ -2942,14 +2955,93 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: Text(
-                                  'Aún quedan campos por completar',
-                                  style: TextStyle(
-                                    color: AppColors.greyDark,
-                                    height: 1.5,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                  )),
+                              backgroundColor: AppColors.primary050,
+                              titlePadding:
+                              Responsive.isMobile(context) ? const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0, bottom: 10.0) :
+                              const EdgeInsets.only(top: 50.0, left: 50.0, right: 50.0, bottom: 10.0),
+                              contentPadding:
+                              Responsive.isMobile(context) ? const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0) :
+                              const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 30.0),
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                      'Aún quedan campos por completar',
+                                      style: textTheme.titleLarge?.copyWith(
+                                          color: AppColors.primary900,
+                                          height: 1.5,
+                                          fontSize: fontSizeSubTitle)),
+                                ],
+                              ),
+                              content: Text('Rellena los campos marcados en rojo.',
+                                  style: textTheme.headlineLarge?.copyWith(
+                                      color: AppColors.primary900,
+                                      height: 1.5,
+                                      fontSize: fontSizeSubTitle)),
+                              actions: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 20.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Padding(
+                                            padding:
+                                            const EdgeInsets.all(8.0),
+                                            child: Text('Aceptar',
+                                                style: TextStyle(
+                                                    color: AppColors.white,
+                                                    height: 1.5,
+                                                    fontWeight:
+                                                    FontWeight.w400,
+                                                    fontSize: 14)),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primaryColor,
+                                            shadowColor: Colors.transparent,
+                                          )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ));
+                        return;
+                      }
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                              backgroundColor: AppColors.primary050,
+                              titlePadding:
+                              Responsive.isMobile(context) ? const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0, bottom: 10.0) :
+                              const EdgeInsets.only(top: 50.0, left: 50.0, right: 50.0, bottom: 10.0),
+                              contentPadding:
+                              Responsive.isMobile(context) ? const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0) :
+                              const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 30.0),
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('¿Está seguro de que desea finalizar el Informe de Cierre?',
+                                      style: textTheme.titleLarge?.copyWith(
+                                        color: AppColors.primary900,
+                                        fontSize: fontSize,
+                                        height: 1.5,
+                                      )),
+                                ],
+                              ),
+                              content: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('No podrá volver a modificar ningún campo.',
+                                      style: textTheme.headlineLarge?.copyWith(
+                                          color: AppColors.primary900,
+                                          height: 1.5,
+                                          fontSize: fontSizeSubTitle)),
+                                ],
+                              ),
                               actions: <Widget>[
                                 ElevatedButton(
                                     onPressed: () {
@@ -2958,30 +3050,19 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                                     child: Padding(
                                       padding:
                                       const EdgeInsets.all(8.0),
-                                      child: Text('Ok',
+                                      child: Text('Cancelar',
                                           style: TextStyle(
-                                              color: AppColors.black,
+                                              color: AppColors.white,
                                               height: 1.5,
                                               fontWeight:
                                               FontWeight.w400,
                                               fontSize: 14)),
-                                    )),
-                              ],
-                            ));
-                        return;
-                      }
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                              title: Text(
-                                  '¿Está seguro de que desea finalizar el informe inicial? \nNo podra volver a modifiar ningun campo',
-                                  style: TextStyle(
-                                    color: AppColors.greyDark,
-                                    height: 1.5,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                  )),
-                              actions: <Widget>[
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryColor,
+                                      shadowColor: Colors.transparent,
+                                    )
+                                ),
                                 ElevatedButton(
                                     onPressed: () async {
                                       database.setClosureReport(
@@ -3141,29 +3222,19 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                                     child: Padding(
                                       padding:
                                       const EdgeInsets.all(8.0),
-                                      child: Text('Si',
+                                      child: Text('Finalizar',
                                           style: TextStyle(
-                                              color: AppColors.black,
+                                              color: AppColors.white,
                                               height: 1.5,
                                               fontWeight:
                                               FontWeight.w400,
                                               fontSize: 14)),
-                                    )),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Padding(
-                                      padding:
-                                      const EdgeInsets.all(8.0),
-                                      child: Text('No',
-                                          style: TextStyle(
-                                              color: AppColors.black,
-                                              height: 1.5,
-                                              fontWeight:
-                                              FontWeight.w400,
-                                              fontSize: 14)),
-                                    )),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryColor,
+                                      shadowColor: Colors.transparent,
+                                    )
+                                ),
                               ]));
                     },
                     child: Text(

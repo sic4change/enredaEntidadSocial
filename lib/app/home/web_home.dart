@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sidebarx/sidebarx.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 
 class WebHome extends StatefulWidget {
@@ -109,8 +110,9 @@ class _WebHomeState extends State<WebHome> {
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                                 if (snapshot.hasData) {
-                                  var organization = snapshot.data!;
-                                  return _buildContent(context, organization, user, profilePic, userName);
+                                  var socialEntity = snapshot.data!;
+                                  globals.currentUserSocialEntity = socialEntity;
+                                  return _buildContent(context, socialEntity, user, profilePic, userName);
                                 }
                                 return const Center(child: CircularProgressIndicator());
                               });

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class CustomMultiSelectionRadioList extends StatefulWidget {
-  const CustomMultiSelectionRadioList({
+class CustomMultiSelectionCheckBoxList extends StatefulWidget {
+  const CustomMultiSelectionCheckBoxList({
     super.key,
     required this.options,
     required this.selections,
@@ -13,25 +13,24 @@ class CustomMultiSelectionRadioList extends StatefulWidget {
   final bool? enabled;
 
   @override
-  State<CustomMultiSelectionRadioList> createState() => _CustomMultiSelectionRadioListState();
+  State<CustomMultiSelectionCheckBoxList> createState() => _CustomMultiSelectionCheckBoxListState();
 }
 
-class _CustomMultiSelectionRadioListState extends State<CustomMultiSelectionRadioList> {
+class _CustomMultiSelectionCheckBoxListState extends State<CustomMultiSelectionCheckBoxList> {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      alignment: WrapAlignment.spaceEvenly,
+      alignment: WrapAlignment.start,
       direction: Axis.horizontal,
       children: <Widget>[
         for(var option in widget.options)
           SizedBox(
             width: 280,
-            child: RadioListTile<String>(
+            child: CheckboxListTile(
               title: Text(option),
               selected: widget.selections.contains(option),
-              value: option,
-              groupValue: widget.selections.contains(option) ? option : '',
-              toggleable: true,
+              checkColor: Colors.white,
+              value: widget.selections.contains(option) ? true : false,
               onChanged: (value){
                 setState(() {
                   if(!(widget.enabled ?? true)) return;

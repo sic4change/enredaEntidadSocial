@@ -3,28 +3,31 @@ import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_
 import 'package:enreda_empresas/app/common_widgets/custom_multi_selection_radio_list.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
-import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
-import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
 import 'package:enreda_empresas/app/models/formationReport.dart';
 import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
-import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
+
+import '../../../utils/adaptative.dart';
+import '../../../utils/responsive.dart';
 
 class FollowReportForm extends StatefulWidget {
-  const FollowReportForm({super.key, required this.user, this.followReport});
+  const FollowReportForm({super.key, required this.user,
+    //this.followReport
+  });
 
   final UserEnreda user;
-  final FollowReport? followReport;
+  //final FollowReport? followReport;
 
   @override
   State<FollowReportForm> createState() => _FollowReportFormState();
@@ -69,24 +72,146 @@ class _FollowReportFormState extends State<FollowReportForm> {
   final TextEditingController _techPersonController = TextEditingController();
   final TextEditingController _totalDaysController = TextEditingController();
 
+  late UserEnreda userEnreda;
+
   @override
   void initState() {
-    currentPage = followReport(context, widget.user);
+    //currentPage = followReport(context, widget.user);
     _totalDaysController.text = '0';
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return currentPage;
+    final database = Provider.of<Database>(context, listen: false);
+    return SingleChildScrollView(
+      child: StreamBuilder<UserEnreda>(
+          stream: database.userEnredaStreamByUserId(widget.user.userId),
+          builder: (context, snapshot) {
+            if(!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.hasData) {
+              userEnreda = snapshot.data!;
+              if(userEnreda.followReportId == null) {
+                database.addFollowReport(
+                   FollowReport(
+                      userId: globals.currentInitialReportUser.userId,
+                      subsidy: globals.currentInitialReportUser.subsidy,
+                      techPerson: globals.currentInitialReportUser.techPerson,
+                      orientation1: globals.currentInitialReportUser.orientation1,
+                      arriveDate: globals.currentInitialReportUser.arriveDate,
+                      receptionResources: globals.currentInitialReportUser.receptionResources,
+                      administrativeExternalResources: globals.currentInitialReportUser.administrativeExternalResources,
+                      expirationDate: globals.currentInitialReportUser.expirationDate,
+                      adminState: globals.currentInitialReportUser.adminState,
+                      adminNoThrough: globals.currentInitialReportUser.adminNoThrough,
+                      adminDateAsk: globals.currentInitialReportUser.adminDateAsk,
+                      adminDateResolution: globals.currentInitialReportUser.adminDateResolution,
+                      adminDateConcession: globals.currentInitialReportUser.adminDateConcession,
+                      adminTemp: globals.currentInitialReportUser.adminTemp,
+                      adminResidenceWork: globals.currentInitialReportUser.adminResidenceWork,
+                      adminDateRenovation: globals.currentInitialReportUser.adminDateRenovation,
+                      adminResidenceType: globals.currentInitialReportUser.adminResidenceType,
+                      adminJuridicFigure: globals.currentInitialReportUser.adminJuridicFigure,
+                      adminOther: globals.currentInitialReportUser.adminOther,
+                      orientation2: globals.currentInitialReportUser.orientation2,
+                      healthCard: globals.currentInitialReportUser.healthCard,
+                      medication: globals.currentInitialReportUser.medication,
+                      orientation2_1: globals.currentInitialReportUser.orientation2_1,
+                      rest: globals.currentInitialReportUser.rest,
+                      diagnosis: globals.currentInitialReportUser.diagnosis,
+                      treatment: globals.currentInitialReportUser.treatment,
+                      tracking: globals.currentInitialReportUser.tracking,
+                      orientation2_2: globals.currentInitialReportUser.orientation2_2,
+                      disabilityState: globals.currentInitialReportUser.disabilityState,
+                      referenceProfessionalDisability: globals.currentInitialReportUser.referenceProfessionalDisability,
+                      disabilityGrade: globals.currentInitialReportUser.disabilityGrade,
+                      disabilityType: globals.currentInitialReportUser.disabilityType,
+                      granted: globals.currentInitialReportUser.granted,
+                      revisionDate: globals.currentInitialReportUser.revisionDate,
+                      orientation2_3: globals.currentInitialReportUser.orientation2_3,
+                      dependenceState: globals.currentInitialReportUser.dependenceState,
+                      referenceProfessionalDependence: globals.currentInitialReportUser.referenceProfessionalDependence,
+                      dependenceGrade: globals.currentInitialReportUser.dependenceGrade,
+                      orientation2_4: globals.currentInitialReportUser.orientation2_4,
+                      externalDerivation: globals.currentInitialReportUser.externalDerivation,
+                      motive: globals.currentInitialReportUser.motive,
+                      orientation3: globals.currentInitialReportUser.orientation3,
+                      internalDerivationLegal: globals.currentInitialReportUser.internalDerivationLegal,
+                      internalDerivationDate: globals.currentInitialReportUser.internalDerivationDate,
+                      internalDerivationMotive: globals.currentInitialReportUser.internalDerivationMotive,
+                      externalDerivationLegal: globals.currentInitialReportUser.externalDerivationLegal,
+                      externalDerivationDate: globals.currentInitialReportUser.externalDerivationDate,
+                      externalDerivationMotive: globals.currentInitialReportUser.externalDerivationMotive,
+                      psychosocialDerivationLegal: globals.currentInitialReportUser.psychosocialDerivationLegal,
+                      psychosocialDerivationDate: globals.currentInitialReportUser.psychosocialDerivationDate,
+                      psychosocialDerivationMotive: globals.currentInitialReportUser.psychosocialDerivationMotive,
+                      legalRepresentation: globals.currentInitialReportUser.legalRepresentation,
+                      orientation4: globals.currentInitialReportUser.orientation4,
+                      ownershipType: globals.currentInitialReportUser.ownershipType,
+                      location: globals.currentInitialReportUser.location,
+                      centerContact: globals.currentInitialReportUser.centerContact,
+                      hostingObservations: globals.currentInitialReportUser.hostingObservations,
+                      ownershipTypeOpen: globals.currentInitialReportUser.ownershipTypeOpen,
+                      homelessnessSituation: globals.currentInitialReportUser.homelessnessSituation,
+                      homelessnessSituationOpen: globals.currentInitialReportUser.homelessnessSituationOpen,
+                      livingUnit: globals.currentInitialReportUser.livingUnit,
+                      ownershipTypeConcrete: globals.currentInitialReportUser.ownershipTypeConcrete,
+                      orientation5: globals.currentInitialReportUser.orientation5,
+                      informationNetworks: globals.currentInitialReportUser.informationNetworks,
+                      institutionNetworks: globals.currentInitialReportUser.institutionNetworks,
+                      familyConciliation: globals.currentInitialReportUser.familyConciliation,
+                      orientation7: globals.currentInitialReportUser.orientation7,
+                      languages: globals.currentInitialReportUser.languages,
+                      orientation9: globals.currentInitialReportUser.orientation9,
+                      centerTSReference: globals.currentInitialReportUser.centerTSReference,
+                      subsidyBeneficiary: globals.currentInitialReportUser.subsidyBeneficiary,
+                      socialExclusionCertificate: globals.currentInitialReportUser.socialExclusionCertificate,
+                      subsidyName: globals.currentInitialReportUser.subsidyName,
+                      socialExclusionCertificateDate: globals.currentInitialReportUser.socialExclusionCertificateDate,
+                      socialExclusionCertificateObservations: globals.currentInitialReportUser.socialExclusionCertificateObservations,
+                      orientation12: globals.currentInitialReportUser.orientation12,
+                      vulnerabilityOptions: globals.currentInitialReportUser.vulnerabilityOptions,
+                      orientation13: globals.currentInitialReportUser.orientation13,
+                      orientation13_2: globals.currentInitialReportUser.orientation13_2,
+                      educationLevel: globals.currentInitialReportUser.educationLevel,
+                      tempLabor: globals.currentInitialReportUser.tempLabor,
+                      workingDayLabor: globals.currentInitialReportUser.workingDayLabor,
+                      competencies: globals.currentInitialReportUser.competencies,
+                      contextualization: globals.currentInitialReportUser.contextualization,
+                      connexion: globals.currentInitialReportUser.connexion,
+                      shortTerm: globals.currentInitialReportUser.shortTerm,
+                      mediumTerm: globals.currentInitialReportUser.mediumTerm,
+                      longTerm: globals.currentInitialReportUser.longTerm,
+                      finished: false,
+                    ));
+                return SingleChildScrollView(
+                  child: Container(
+                    child: followReport(context, userEnreda),
+                  ),
+                );
+              }
+            }
+            return SingleChildScrollView(
+              child: Container(
+                child: followReport(context, userEnreda),
+              ),
+            );
+          }
+          ),
+    );
+    //return ;
   }
 
-  void setStateMenuPage() {
-    setState(() {
-      currentPage = ParticipantSocialReportPage(
-          participantUser: widget.user, context: context);
-    });
-  }
+  // void setStateMenuPage() {
+  //   setState(() {
+  //     currentPage = ParticipantSocialReportPage(
+  //         participantUser: widget.user, context: context);
+  //   });
+  // }
 
   void _addLanguage(){
     final newLanguages = List<LanguageReport>.from(_languagesNotifier.value)..add(LanguageReport(name: '', level: ''));
@@ -101,56 +226,49 @@ class _FollowReportFormState extends State<FollowReportForm> {
 
   Widget followReport(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
-
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-        child: Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: AppColors.greyBorder)
-          ),
-          child:
-          Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 50, vertical: 15.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      IconButton(
-                        onPressed: setStateMenuPage,
-                        icon: Icon(Icons.arrow_back_rounded),
-                        iconSize: 30,
-                        color: AppColors.turquoiseBlue,
-                      ),
-                      SpaceW8(),
-                      CustomTextBoldTitle(
-                          title: 'Informe de seguimiento'.toUpperCase()),
-                    ],
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: AppColors.greyBorder)
+      ),
+      child:
+      Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 50, vertical: 15.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  IconButton(
+                    //onPressed: setStateMenuPage,
+                    onPressed: () => setState(() {
+                      ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+                    }),
+                    icon: Icon(Icons.arrow_back_rounded),
+                    iconSize: 30,
+                    color: AppColors.turquoiseBlue,
                   ),
-                ),
-                Divider(color: AppColors.greyBorder,),
-                StreamBuilder<FollowReport>(
-                    stream: database.followReportsStreamByUserId(user.userId),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        FollowReport followReportSaved = snapshot.data!;
-                        return completeFollowForm(context, followReportSaved);
-                      }
-                      else {
-                        if (user.followReportId == null) {
-                          database.addFollowReport(widget.followReport!);
-                        }
-                        return Container(
-                          height: 300,
-                        );
-                      }
-                    }
-                ),
-              ]
-          ),
-        )
+                  SpaceW8(),
+                  CustomTextBoldTitle(
+                      title: 'Informe de Seguimiento'.toUpperCase()),
+                ],
+              ),
+            ),
+            Divider(color: AppColors.greyBorder,),
+            //completeFollowForm(context, followReportSaved, user),
+            StreamBuilder<FollowReport>(
+                stream: database.followReportsStreamByUserId(userEnreda.userId),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    FollowReport followReportSaved = snapshot.data!;
+                    return completeFollowForm(context, followReportSaved, userEnreda);
+                  }
+                  return Container();
+                }
+            ),
+          ]
+      ),
     );
   }
 
@@ -306,15 +424,17 @@ class _FollowReportFormState extends State<FollowReportForm> {
     );
   }
 
-  Widget completeFollowForm(BuildContext context, FollowReport report) {
+  Widget completeFollowForm(BuildContext context, FollowReport report, UserEnreda userEnreda) {
     final database = Provider.of<Database>(context, listen: false);
     final _formKey = GlobalKey<FormState>();
-
+    final textTheme = Theme.of(context).textTheme;
+    double fontSize = responsiveSize(context, 13, 20, md: 16);
+    double fontSizeSubTitle = responsiveSize(context, 14, 18, md: 15);
     bool _finished = report.finished ?? false;
 
     //Pre-Selection
     String? _subsidy = report.subsidy ?? '';
-    String? _techPerson = report.techPerson ?? widget.user.assignedById;
+    String? _techPerson = report.techPerson ?? userEnreda.assignedById;
 
     //Section 1
     String _orientation1 = report.orientation1 ?? '';
@@ -524,8 +644,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   : (value) {
                 _subsidy = value;
               },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) =>
+              // value != null ? null : StringConst.FORM_GENERIC_ERROR,
             )
                 : CustomDropDownButtonFormFieldTittle(
               labelText:
@@ -537,9 +657,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   : (value) {
                 _subsidy = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
             ),
             SpaceH12(),
             StreamBuilder<UserEnreda>(
@@ -568,9 +688,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation1 = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -584,8 +704,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _arriveDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_RECEPTION_RESOURCES,
@@ -593,9 +713,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _receptionResources = value ?? '';
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
             ),
@@ -606,9 +726,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _administrativeExternalResources = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -627,8 +747,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _adminStateNotifier.value = value!;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText:
@@ -640,9 +760,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _adminStateNotifier.value = value!;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: ValueListenableBuilder(
                   valueListenable: _adminStateNotifier,
@@ -654,9 +774,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       onChanged: (value) {
                         _adminNoThrough = value;
                       },
-                      validator: (value) => (value!.isNotEmpty || value != '')
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) => (value!.isNotEmpty || value != '')
+                      //     ? null
+                      //     : StringConst.FORM_GENERIC_ERROR,
                       enabled: !_finished,
                     ) : //Open Field
                     _adminStateNotifier.value == 'Concedida' ?
@@ -667,9 +787,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                         _adminDateConcession = value;
                       },
                       enabled: !_finished,
-                      validator: (value) => (value != null)
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) => (value != null)
+                      //     ? null
+                      //     : StringConst.FORM_GENERIC_ERROR,
                     ) : //Fecha concesion
                     Container();
                   }
@@ -692,9 +812,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                             _adminDateAsk = value;
                           },
                           enabled: !_finished,
-                          validator: (value) => (value != null)
-                              ? null
-                              : StringConst.FORM_GENERIC_ERROR,
+                          // validator: (value) => (value != null)
+                          //     ? null
+                          //     : StringConst.FORM_GENERIC_ERROR,
                         ),
                         childRight: CustomDatePickerTitle(
                           labelText: StringConst.INITIAL_DATE_RESOLUTION,
@@ -703,9 +823,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                             _adminDateResolution = value;
                           },
                           enabled: !_finished,
-                          validator: (value) => (value != null)
-                              ? null
-                              : StringConst.FORM_GENERIC_ERROR,
+                          // validator: (value) => (value != null)
+                          //     ? null
+                          //     : StringConst.FORM_GENERIC_ERROR,
                         ),
                       ),
                     ],
@@ -725,8 +845,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       : (value) {
                     _adminTempNotifier.value = value!;
                   },
-                  validator: (value) =>
-                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  // validator: (value) =>
+                  // value != null ? null : StringConst.FORM_GENERIC_ERROR,
                 )
                     : CustomDropDownButtonFormFieldTittle(
                   labelText: StringConst.INITIAL_TEMP,
@@ -737,8 +857,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       : (value) {
                     _adminTempNotifier.value = value!;
                   },
-                  validator: (value) =>
-                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  // validator: (value) =>
+                  // value != null ? null : StringConst.FORM_GENERIC_ERROR,
                 ),
                 childRight: ValueListenableBuilder(
                   valueListenable: _adminTempNotifier,
@@ -751,9 +871,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                         _adminDateRenovation = value;
                       },
                       enabled: !_finished,
-                      validator: (value) => (value != null)
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) => (value != null)
+                      //     ? null
+                      //     : StringConst.FORM_GENERIC_ERROR,
                     ) : Container();
                   },
                 )
@@ -771,8 +891,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _adminJuridicFigureNotifier.value = value!;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_JURIDIC_FIGURE,
@@ -783,8 +903,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _adminJuridicFigureNotifier.value = value!;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childLeft: _adminResidenceType == ''
                   ? CustomDropDownButtonFormFieldTittle(
@@ -795,8 +915,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _adminResidenceType = value!;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_RESIDENCE_TYPE,
@@ -807,8 +927,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _adminResidenceType = value!;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             ValueListenableBuilder(
@@ -823,9 +943,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                         onChanged: (value) {
                           _adminOther = value;
                         },
-                        validator: (value) => (value!.isNotEmpty || value != '')
-                            ? null
-                            : StringConst.FORM_GENERIC_ERROR,
+                        // validator: (value) => (value!.isNotEmpty || value != '')
+                        //     ? null
+                        //     : StringConst.FORM_GENERIC_ERROR,
                         enabled: !_finished,
                       ),
                     ],
@@ -842,9 +962,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation2 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -860,8 +980,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _healthCard = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_HEALTH_CARD,
@@ -872,8 +992,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _healthCard = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitle(
                 labelText: StringConst.INITIAL_EXPIRATION_DATE,
@@ -882,8 +1002,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _expirationDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -893,9 +1013,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _medication = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             //Subsection 2.1
@@ -906,9 +1026,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation2_1 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -921,9 +1041,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _rest = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
               childRight: _diagnosis == ''
@@ -935,8 +1055,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _diagnosis = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_DIAGNOSIS,
@@ -947,8 +1067,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _diagnosis = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -961,9 +1081,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _treatment = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
@@ -972,9 +1092,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _tracking = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
             ),
@@ -987,9 +1107,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation2_2 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1076,9 +1196,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                   _revisionDate = value;
                                 },
                                 enabled: !_finished,
-                                validator: (value) => (value != null)
-                                    ? null
-                                    : StringConst.FORM_GENERIC_ERROR,
+                                // validator: (value) => (value != null)
+                                //     ? null
+                                //     : StringConst.FORM_GENERIC_ERROR,
                               )
                                   : Container(),
                             );
@@ -1098,9 +1218,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _referenceProfessionalDisability = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -1117,8 +1237,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _disabilityGrade = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_DISABILITY_GRADE,
@@ -1129,8 +1249,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _disabilityGrade = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: _disabilityType == ''
                   ? CustomDropDownButtonFormFieldTittle(
@@ -1141,8 +1261,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _disabilityType = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_DISABILITY_TYPE,
@@ -1153,8 +1273,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _disabilityType = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
 
@@ -1166,9 +1286,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation2_3 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1184,8 +1301,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _dependenceState = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_STATE,
@@ -1196,45 +1311,36 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _dependenceState = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomTextFormFieldTitle(
-                labelText: StringConst.INITIAL_REFERENCE_PROFESSIONAL,
-                initialValue: _referenceProfessionalDependence,
-                onChanged: (value) {
-                  _referenceProfessionalDependence = value;
-                },
-                validator: (value) => (value!.isNotEmpty || value != '')
+              childRight: _dependenceGrade == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_DEPENDENCE_GRADE,
+                source: StringConst.DEPENDENCE_GRADE_SELECTION,
+                onChanged: _finished
                     ? null
-                    : StringConst.FORM_GENERIC_ERROR,
-                enabled: !_finished,
+                    : (value) {
+                  _dependenceGrade = value;
+                },
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_DEPENDENCE_GRADE,
+                source: StringConst.DEPENDENCE_GRADE_SELECTION,
+                value: _dependenceGrade,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _dependenceGrade = value;
+                },
               ),
             ),
             SpaceH12(),
-            _dependenceGrade == ''
-                ? CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.INITIAL_DEPENDENCE_GRADE,
-              source: StringConst.DEPENDENCE_GRADE_SELECTION,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _dependenceGrade = value;
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_REFERENCE_PROFESSIONAL,
+              initialValue: _referenceProfessionalDependence,
+              onChanged: (value) {
+                _referenceProfessionalDependence = value;
               },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            )
-                : CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.INITIAL_DEPENDENCE_GRADE,
-              source: StringConst.DEPENDENCE_GRADE_SELECTION,
-              value: _dependenceGrade,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _dependenceGrade = value;
-              },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
             ),
 
             //Subsection 2.4
@@ -1245,9 +1351,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation2_4 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1263,8 +1369,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _externalDerivation = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
@@ -1275,8 +1381,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _externalDerivation = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_MOTIVE,
@@ -1284,9 +1390,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _motive = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
             ),
@@ -1299,9 +1405,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation3 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1318,8 +1424,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _internalDerivationLegal = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_INTERNAL_DERIVATION,
@@ -1330,8 +1436,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _internalDerivationLegal = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitle(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
@@ -1340,8 +1446,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _internalDerivationDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -1351,9 +1457,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _internalDerivationMotive = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1370,8 +1476,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _psychosocialDerivationLegal = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
@@ -1382,8 +1488,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _psychosocialDerivationLegal = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitle(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
@@ -1392,8 +1498,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _psychosocialDerivationDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(), //TODO check values saved
@@ -1403,9 +1509,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _psychosocialDerivationMotive = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1422,8 +1528,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _externalDerivationLegal = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
@@ -1434,8 +1540,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _externalDerivationLegal = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitle(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
@@ -1444,8 +1550,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _externalDerivationDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -1455,9 +1561,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _externalDerivationMotive = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1468,9 +1574,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _legalRepresentation = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1483,9 +1589,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _processingBag = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
               childRight: CustomDatePickerTitle(
@@ -1495,8 +1601,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _processingBagDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -1506,9 +1612,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _economicAmount = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -1520,9 +1626,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation4 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1567,8 +1673,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           : (value) {
                         _ownershipTypeConcreteNotifier.value = value!;
                       },
-                      validator: (value) =>
-                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) =>
+                      // value != null ? null : StringConst.FORM_GENERIC_ERROR,
                     )
                         : CustomDropDownButtonFormFieldTittle(
                       labelText: StringConst.INITIAL_OWNERSHIP_TYPE,
@@ -1579,8 +1685,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           : (value) {
                         _ownershipTypeConcreteNotifier.value = value!;
                       },
-                      validator: (value) =>
-                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) =>
+                      // value != null ? null : StringConst.FORM_GENERIC_ERROR,
                     ) : _ownershipTypeNotifier.value == 'Sin hogar' ?
                     //Situación sinhogarismo (Sin hogar)
                     _homelessnessSituationNotifier.value == ''
@@ -1592,8 +1698,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           : (value) {
                         _homelessnessSituationNotifier.value = value!;
                       },
-                      validator: (value) =>
-                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) =>
+                      // value != null ? null : StringConst.FORM_GENERIC_ERROR,
                     )
                         : CustomDropDownButtonFormFieldTittle(
                       labelText: StringConst.INITIAL_HOMELESS_SITUATION,
@@ -1604,8 +1710,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           : (value) {
                         _homelessnessSituationNotifier.value = value!;
                       },
-                      validator: (value) =>
-                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) =>
+                      // value != null ? null : StringConst.FORM_GENERIC_ERROR,
                     ) :
                     Container();
                   },
@@ -1624,9 +1730,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                         onChanged: (value) {
                           _ownershipTypeOpen = value;
                         },
-                        validator: (value) => (value!.isNotEmpty || value != '')
-                            ? null
-                            : StringConst.FORM_GENERIC_ERROR,
+                        // validator: (value) => (value!.isNotEmpty || value != '')
+                        //     ? null
+                        //     : StringConst.FORM_GENERIC_ERROR,
                         enabled: !_finished,
                       ),
                     ],
@@ -1647,9 +1753,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                         onChanged: (value) {
                           _homelessnessSituationOpen = value;
                         },
-                        validator: (value) => (value!.isNotEmpty || value != '')
-                            ? null
-                            : StringConst.FORM_GENERIC_ERROR,
+                        // validator: (value) => (value!.isNotEmpty || value != '')
+                        //     ? null
+                        //     : StringConst.FORM_GENERIC_ERROR,
                         enabled: !_finished,
                       ),
                     ],
@@ -1668,9 +1774,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _livingUnit = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
@@ -1679,9 +1785,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _centerContact = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
             ),
@@ -1692,15 +1798,15 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _location = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
             Align(
                 alignment: Alignment.center,
-                child: CustomMultiSelectionRadioList(
+                child: CustomMultiSelectionCheckBoxList(
                     options: StringConst.OPTIONS_SECTION_4,
                     selections: _hostingObservations,
                     enabled: !_finished)),
@@ -1713,9 +1819,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation5 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1726,9 +1832,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _informationNetworks = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1741,9 +1847,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _institutionNetworks = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
@@ -1752,9 +1858,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 onChanged: (value) {
                   _familyConciliation = value;
                 },
-                validator: (value) => (value!.isNotEmpty || value != '')
-                    ? null
-                    : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) => (value!.isNotEmpty || value != '')
+                //     ? null
+                //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
             ),
@@ -1767,9 +1873,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation7 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1810,10 +1916,10 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                         _languagesNotifier.value[_languagesNotifier
                                             .value.indexOf(language)].name = value!;
                                       },
-                                      validator: (value) =>
-                                      value != null
-                                          ? null
-                                          : StringConst.FORM_GENERIC_ERROR,
+                                      // validator: (value) =>
+                                      // value != null
+                                      //     ? null
+                                      //     : StringConst.FORM_GENERIC_ERROR,
                                     )
                                         : CustomDropDownButtonFormFieldTittle(
                                       labelText: StringConst.INITIAL_LANGUAGE,
@@ -1825,10 +1931,10 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                         _languagesNotifier.value[_languagesNotifier
                                             .value.indexOf(language)].name = value!;
                                       },
-                                      validator: (value) =>
-                                      value != null
-                                          ? null
-                                          : StringConst.FORM_GENERIC_ERROR,
+                                      // validator: (value) =>
+                                      // value != null
+                                      //     ? null
+                                      //     : StringConst.FORM_GENERIC_ERROR,
                                     ),
                                     childRight: CustomTextFormFieldTitle(
                                       labelText:
@@ -1838,10 +1944,10 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                         _languagesNotifier.value[_languagesNotifier
                                             .value.indexOf(language)].level = value;
                                       },
-                                      validator: (value) =>
-                                      (value!.isNotEmpty || value != '')
-                                          ? null
-                                          : StringConst.FORM_GENERIC_ERROR,
+                                      // validator: (value) =>
+                                      // (value!.isNotEmpty || value != '')
+                                      //     ? null
+                                      //     : StringConst.FORM_GENERIC_ERROR,
                                       enabled: !_finished,
                                     ),
 
@@ -1858,7 +1964,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 }),
             addLanguageButton(),
 
-            //Section 9
+            //Section 7
             informSectionTitle(StringConst.INITIAL_TITLE_7_SOCIAL_ATTENTION),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
@@ -1866,9 +1972,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation9 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1878,9 +1981,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _centerTSReference = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -1896,8 +1996,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       : (value) {
                     _subsidyBeneficiaryNotifier.value = value!;
                   },
-                  validator: (value) =>
-                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  // validator: (value) =>
+                  // value != null ? null : StringConst.FORM_GENERIC_ERROR,
                 )
                     : CustomDropDownButtonFormFieldTittle(
                   labelText: StringConst.INITIAL_SUBSIDY_BENEFICIARY,
@@ -1908,8 +2008,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       : (value) {
                     _subsidyBeneficiaryNotifier.value = value!;
                   },
-                  validator: (value) =>
-                  value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                  // validator: (value) =>
+                  // value != null ? null : StringConst.FORM_GENERIC_ERROR,
                 ),
                 childRight: ValueListenableBuilder(
                   valueListenable: _subsidyBeneficiaryNotifier,
@@ -1921,9 +2021,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       onChanged: (value) {
                         _subsidyName = value;
                       },
-                      validator: (value) => (value!.isNotEmpty || value != '')
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) => (value!.isNotEmpty || value != '')
+                      //     ? null
+                      //     : StringConst.FORM_GENERIC_ERROR,
                       enabled: !_finished,
                     ) :
                     Container();
@@ -1943,8 +2043,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _socialExclusionCertificateNotifier.value = value!;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.INITIAL_SOCIAL_EXCLUSION_CERTIFICATE,
@@ -1955,8 +2055,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _socialExclusionCertificateNotifier.value = value!;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: Container(),
             ),
@@ -1977,9 +2077,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                             _socialExclusionCertificateDate = value;
                           },
                           enabled: !_finished,
-                          validator: (value) => (value != null)
-                              ? null
-                              : StringConst.FORM_GENERIC_ERROR,
+                          // validator: (value) => (value != null)
+                          //     ? null
+                          //     : StringConst.FORM_GENERIC_ERROR,
                         ),
                         childLeft: CustomTextFormFieldTitle(
                           labelText: StringConst.INITIAL_SOCIAL_EXCLUSION_OBSERVATIONS,
@@ -1987,9 +2087,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           onChanged: (value) {
                             _socialExclusionCertificateObservations = value;
                           },
-                          validator: (value) => (value!.isNotEmpty || value != '')
-                              ? null
-                              : StringConst.FORM_GENERIC_ERROR,
+                          // validator: (value) => (value!.isNotEmpty || value != '')
+                          //     ? null
+                          //     : StringConst.FORM_GENERIC_ERROR,
                           enabled: !_finished,
                         ),
                       ),
@@ -2006,18 +2106,18 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation12 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
-            CustomMultiSelectionRadioList(
+            CustomMultiSelectionCheckBoxList(
                 options: StringConst.OPTIONS_SECTION_12,
                 selections: _vulnerabilityOptions,
                 enabled: !_finished),
 
-            //Section 13
+            //Section 9
             informSectionTitle(StringConst.INITIAL_TITLE_9_WORK),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
@@ -2025,9 +2125,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation13 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -2040,8 +2137,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   : (value) {
                 _educationLevel = value;
               },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
             )
                 : CustomDropDownButtonFormFieldTittle(
               labelText: StringConst.INITIAL_EDUCATION_LEVEL,
@@ -2052,8 +2147,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   : (value) {
                 _educationLevel = value;
               },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) =>
+              // value != null ? null : StringConst.FORM_GENERIC_ERROR,
             ),
             informSubSectionTitle(StringConst.INITIAL_TITLE_9_2_WORK_SITUATION),
             CustomTextFormFieldTitle(
@@ -2062,9 +2157,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation13_2 = value;
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -2076,9 +2168,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _competencies = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -2088,9 +2177,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _contextualization = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -2100,9 +2189,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _connexion = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -2113,9 +2202,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _shortTerm = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -2125,9 +2214,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _mediumTerm = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -2137,9 +2226,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _longTerm = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -2150,9 +2239,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation9_5 = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -2270,8 +2359,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                   _formationBag = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
                 labelText: StringConst.FOLLOW_FORMATION_BAG,
@@ -2282,8 +2371,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     : (value) {
                       _formationBag = value;
                 },
-                validator: (value) =>
-                value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitle(
                 labelText: StringConst.INITIAL_DATE,
@@ -2292,8 +2381,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _formationBagDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -2303,9 +2392,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _formationBagMotive = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -2315,9 +2404,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _formationBagEconomic = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -2423,8 +2512,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _jobObtainDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitle(
                 labelText: StringConst.FOLLOW_FINISH_DATE,
@@ -2433,8 +2522,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _jobFinishDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -2474,8 +2563,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   _upgradeDate = value;
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -2485,9 +2574,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _upgradeMotive = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
 
@@ -2498,9 +2587,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               onChanged: (value) {
                 _orientation9_6 = value ?? '';
               },
-              validator: (value) => (value!.isNotEmpty || value != '')
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => (value!.isNotEmpty || value != '')
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -2513,9 +2602,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   : (value) {
                 _postLaborAccompanimentNotifier.value = value!;
               },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => value != null
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
             )
                 : CustomDropDownButtonFormFieldTittle(
               labelText: StringConst.FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT,
@@ -2526,9 +2615,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   : (value) {
                 _postLaborAccompanimentNotifier.value = value!;
               },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => value != null
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
             ),
             SpaceH12(),
             ValueListenableBuilder(
@@ -2542,9 +2631,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       onChanged: (value) {
                         _postLaborAccompanimentMotive = value ?? '';
                       },
-                      validator: (value) => (value!.isNotEmpty || value != '')
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
+                      // validator: (value) => (value!.isNotEmpty || value != '')
+                      //     ? null
+                      //     : StringConst.FORM_GENERIC_ERROR,
                       enabled: !_finished,
                     ),
                     SpaceH12(),
@@ -2566,8 +2655,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   }
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitle(
                 labelText: StringConst.FOLLOW_END_DATE,
@@ -2580,8 +2669,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   }
                 },
                 enabled: !_finished,
-                validator: (value) =>
-                (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
+                // validator: (value) =>
+                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             SpaceH12(),
@@ -2605,9 +2694,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   : (value) {
                 _jobMaintenance = value;
               },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => value != null
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
             )
                 : CustomDropDownButtonFormFieldTittle(
               labelText: StringConst.FOLLOW_JOB_MAINTENANCE,
@@ -2618,9 +2707,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   : (value) {
                 _jobMaintenance = value;
               },
-              validator: (value) => value != null
-                  ? null
-                  : StringConst.FORM_GENERIC_ERROR,
+              // validator: (value) => value != null
+              //     ? null
+              //     : StringConst.FORM_GENERIC_ERROR,
             ),
 
             SpaceH12(),
@@ -2777,32 +2866,53 @@ class _FollowReportFormState extends State<FollowReportForm> {
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                                title:
-                                Text('Se ha guardado con exito',
-                                    style: TextStyle(
-                                      color: AppColors.greyDark,
-                                      height: 1.5,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16,
-                                    )),
+                                backgroundColor: AppColors.primary050,
+                                titlePadding:
+                                Responsive.isMobile(context) ? const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0, bottom: 10.0) :
+                                const EdgeInsets.only(top: 50.0, left: 50.0, right: 50.0, bottom: 10.0),
+                                contentPadding:
+                                Responsive.isMobile(context) ? const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0) :
+                                const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 30.0),
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Se ha guardado con exito',
+                                        style: textTheme.titleLarge?.copyWith(
+                                          color: AppColors.primary900,
+                                          fontSize: fontSize,
+                                          height: 1.5,
+                                        )),
+                                  ],
+                                ),
                                 actions: <Widget>[
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        setStateMenuPage();
-                                      },
-                                      child: Padding(
-                                        padding:
-                                        const EdgeInsets.all(8.0),
-                                        child: Text('Ok',
-                                            style: TextStyle(
-                                                color:
-                                                AppColors.black,
-                                                height: 1.5,
-                                                fontWeight:
-                                                FontWeight.w400,
-                                                fontSize: 14)),
-                                      )),
+                                  Padding(
+                                    padding: const EdgeInsets.all(20.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+                                              //setStateMenuPage();
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text('Aceptar',
+                                                  style: TextStyle(
+                                                      color: AppColors.white,
+                                                      height: 1.5,
+                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: 14)),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primaryColor,
+                                              shadowColor: Colors.transparent,
+                                            )
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ]));
                       },
                       child: Text(
@@ -2831,14 +2941,93 @@ class _FollowReportFormState extends State<FollowReportForm> {
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: Text(
-                                  'Aún quedan campos por completar',
-                                  style: TextStyle(
-                                    color: AppColors.greyDark,
-                                    height: 1.5,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                  )),
+                              backgroundColor: AppColors.primary050,
+                              titlePadding:
+                              Responsive.isMobile(context) ? const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0, bottom: 10.0) :
+                              const EdgeInsets.only(top: 50.0, left: 50.0, right: 50.0, bottom: 10.0),
+                              contentPadding:
+                              Responsive.isMobile(context) ? const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0) :
+                              const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 30.0),
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                      'Aún quedan campos por completar',
+                                      style: textTheme.titleLarge?.copyWith(
+                                          color: AppColors.primary900,
+                                          height: 1.5,
+                                          fontSize: fontSizeSubTitle)),
+                                ],
+                              ),
+                              content: Text('Rellena los campos marcados en rojo.',
+                                  style: textTheme.headlineLarge?.copyWith(
+                                      color: AppColors.primary900,
+                                      height: 1.5,
+                                      fontSize: fontSizeSubTitle)),
+                              actions: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 20.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Padding(
+                                            padding:
+                                            const EdgeInsets.all(8.0),
+                                            child: Text('Aceptar',
+                                                style: TextStyle(
+                                                    color: AppColors.white,
+                                                    height: 1.5,
+                                                    fontWeight:
+                                                    FontWeight.w400,
+                                                    fontSize: 14)),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primaryColor,
+                                            shadowColor: Colors.transparent,
+                                          )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ));
+                        return;
+                      }
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                              backgroundColor: AppColors.primary050,
+                              titlePadding:
+                              Responsive.isMobile(context) ? const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0, bottom: 10.0) :
+                              const EdgeInsets.only(top: 50.0, left: 50.0, right: 50.0, bottom: 10.0),
+                              contentPadding:
+                              Responsive.isMobile(context) ? const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0) :
+                              const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 30.0),
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('¿Está seguro de que desea finalizar el Informe de Seguimiento?',
+                                      style: textTheme.titleLarge?.copyWith(
+                                        color: AppColors.primary900,
+                                        fontSize: fontSize,
+                                        height: 1.5,
+                                      )),
+                                ],
+                              ),
+                              content: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('No podrá volver a modificar ningún campo.',
+                                      style: textTheme.headlineLarge?.copyWith(
+                                          color: AppColors.primary900,
+                                          height: 1.5,
+                                          fontSize: fontSizeSubTitle)),
+                                ],
+                              ),
                               actions: <Widget>[
                                 ElevatedButton(
                                     onPressed: () {
@@ -2847,30 +3036,19 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                     child: Padding(
                                       padding:
                                       const EdgeInsets.all(8.0),
-                                      child: Text('Ok',
+                                      child: Text('Cancelar',
                                           style: TextStyle(
-                                              color: AppColors.black,
+                                              color: AppColors.white,
                                               height: 1.5,
                                               fontWeight:
                                               FontWeight.w400,
                                               fontSize: 14)),
-                                    )),
-                              ],
-                            ));
-                        return;
-                      }
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                              title: Text(
-                                  '¿Está seguro de que desea finalizar el informe inicial? \nNo podra volver a modifiar ningun campo',
-                                  style: TextStyle(
-                                    color: AppColors.greyDark,
-                                    height: 1.5,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                  )),
-                              actions: <Widget>[
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryColor,
+                                      shadowColor: Colors.transparent,
+                                    )
+                                ),
                                 ElevatedButton(
                                     onPressed: () async {
                                       database.setFollowReport(
@@ -3021,34 +3199,25 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                             completedDate: DateTime.now(),
                                           ));
                                       Navigator.of(context).pop();
-                                      setStateMenuPage();
+                                      ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+                                      //setStateMenuPage();
                                     },
                                     child: Padding(
                                       padding:
                                       const EdgeInsets.all(8.0),
-                                      child: Text('Si',
+                                      child: Text('Finalizar',
                                           style: TextStyle(
-                                              color: AppColors.black,
+                                              color: AppColors.white,
                                               height: 1.5,
                                               fontWeight:
                                               FontWeight.w400,
                                               fontSize: 14)),
-                                    )),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Padding(
-                                      padding:
-                                      const EdgeInsets.all(8.0),
-                                      child: Text('No',
-                                          style: TextStyle(
-                                              color: AppColors.black,
-                                              height: 1.5,
-                                              fontWeight:
-                                              FontWeight.w400,
-                                              fontSize: 14)),
-                                    )),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryColor,
+                                      shadowColor: Colors.transparent,
+                                    )
+                                ),
                               ]));
                     },
                     child: Text(

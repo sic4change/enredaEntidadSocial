@@ -531,7 +531,8 @@ class StringConst {
   static const String GO_PROFILE = "Ver perfil";
   static const String CREATE_PARTICIPANT = "Crear participante";
   static const String CALL = "Llamar";
-  static const String CREATE_PARTICIPANT_SUCCESS = "¡El perfil ha sido creado con éxito!";
+  static const String CREATE_PARTICIPANT_TITLE = "¡Enorabuena!";
+  static const String CREATE_PARTICIPANT_SUCCESS = "El perfil ha sido creado con éxito";
   static const String CREATE_ENTITY = "Entidad creada";
   static const String CREATE_ENTITY_SUCCESS = "¡La entidad ha sido creada con éxito!";
   static const String FORM_UNEMPLOYED = "Busco trabajo";
@@ -660,7 +661,7 @@ class StringConst {
   static const String INITIAL_LEGAL_REPRESENTATION = 'Representación legal';
   static const String INITIAL_HINT_LEGAL = 'De oficio, privada, datos de contacto';
   static const String INITIAL_TITLE_4_HOUSE_SITUATION = '4. Situación alojativa';
-  static const String INITIAL_HOUSE_SITUATION = 'Situación alojativa';
+  static const String INITIAL_HOUSE_SITUATION = 'Situación alojativa con variante';
   static const String INITIAL_OWNERSHIP_TYPE = 'Tipo de tenencia';
   static const String INITIAL_HOMELESS_SITUATION = 'Situación sinhogarismo';
   static const String INITIAL_LIVING_UNIT = 'Unidad de convivencia';
@@ -685,7 +686,7 @@ class StringConst {
   static const String INITIAL_TITLE_9_WORK = '9. Itinerario formativo laboral';
   static const String INITIAL_EDUCATION_LEVEL = 'Nivel educativo';
   static const String INITIAL_TITLE_9_2_WORK_SITUATION = '9.2 Situación laboral';
-  static const String INITIAL_LABOR_SITUATION = 'Situación laboral';
+  static const String INITIAL_LABOR_SITUATION = 'Situación laboral inicial';
   static const String INITIAL_LABOR_TYPE = 'Tipo laboral';
   static const String INITIAL_TITLE_9_3_TRAJECTORY = '9.3 Trayectoria B.A.E previa';
   static const String INITIAL_COMPETENCIES = 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)';
@@ -757,7 +758,7 @@ class StringConst {
   }).toList();
 
   static List<DropdownMenuItem<String>> ADMIN_RESIDENCE_TYPE_SELECTION =
-  ['Ciudadanía de la unión', 'Residencia familiar de la unión', 'Residencia temporal no autorizada a trabajar',
+  ['Ciudadanía de la unión', 'Residencia familiar de la unión', 'Residencia temporal que no autoriza a trabajar',
     'Residencia por reagrupación familiar (hab trabajar)', 'Residencia temporal y trabajo por cuenta ajena',
     'Residencia temporal y trabajo por cuenta ajena (duración determinada)',
     'Residencia temporal y trabajo por cuenta propia',
@@ -899,7 +900,7 @@ class StringConst {
     'Falta de red de apoyo',
     'Violencia de Género',
     'Adicciones',
-    'Rularidad'
+    'Ruralidad'
   ];
 
   static List<DropdownMenuItem<String>> EDUCATIONAL_LEVEL_SELECTION = [

@@ -494,8 +494,8 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
         final checkAgreeDownload = user?.checkAgreeCV ?? false;
         if(!checkAgreeDownload){
           showAlertDialog(context,
-              title: 'Error',
-              content: 'Por favor, acepta las condiciones antes de continuar',
+              title: 'Aviso importante',
+              content: 'El participante debe autorizar el uso y tratamiento de datos personales antes de continuar',
               defaultActionText: 'Aceptar'
           );
           return;
@@ -523,41 +523,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
               myCustomReferences: myCustomReferences,
               myMaxEducation: myMaxEducation?.label ?? '',
             );
-              // MyCvModelsPage(
-              //   user: user!,
-              //   city: city!,
-              //   province: province!,
-              //   country: country!,
-              //   myCustomAboutMe: myCustomAboutMe,
-              //   myCustomEmail: myCustomEmail,
-              //   myCustomPhone: myCustomPhone,
-              //   myExperiences: myExperiences!,
-              //   myCustomExperiences: myCustomExperiences,
-              //   mySelectedExperiences: mySelectedExperiences,
-              //   myPersonalExperiences: myPersonalExperiences,
-              //   myPersonalSelectedExperiences: myPersonalSelectedExperiences,
-              //   myPersonalCustomExperiences: myPersonalCustomExperiences,
-              //   myEducation: myEducation!,
-              //   myCustomEducation: myCustomEducation,
-              //   mySelectedEducation: mySelectedEducation,
-              //   mySecondaryEducation: mySecondaryEducation,
-              //   mySecondaryCustomEducation: mySecondaryCustomEducation,
-              //   mySecondarySelectedEducation: mySecondarySelectedEducation,
-              //   competenciesNames: competenciesNames,
-              //   myCustomCompetencies: myCustomCompetencies,
-              //   mySelectedCompetencies: mySelectedCompetencies,
-              //   myCustomDataOfInterest: myCustomDataOfInterest,
-              //   mySelectedDataOfInterest: mySelectedDataOfInterest,
-              //   myCustomLanguages: myCustomLanguages,
-              //   mySelectedLanguages: mySelectedLanguages,
-              //   myCustomCity: myCustomCity,
-              //   myCustomProvince: myCustomProvince,
-              //   myCustomCountry: myCustomCountry,
-              //   myReferences: myReferences!,
-              //   myCustomReferences: myCustomReferences,
-              //   mySelectedReferences: mySelectedReferences,
-              //   myMaxEducation: myMaxEducation?.label??"",
-              // );
+
           }),
         );
       },
