@@ -23,11 +23,9 @@ import '../../../utils/responsive.dart';
 
 class FollowReportForm extends StatefulWidget {
   const FollowReportForm({super.key, required this.user,
-    //this.followReport
   });
 
   final UserEnreda user;
-  //final FollowReport? followReport;
 
   @override
   State<FollowReportForm> createState() => _FollowReportFormState();
@@ -76,7 +74,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
 
   @override
   void initState() {
-    //currentPage = followReport(context, widget.user);
     _totalDaysController.text = '0';
     super.initState();
   }
@@ -206,13 +203,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
     //return ;
   }
 
-  // void setStateMenuPage() {
-  //   setState(() {
-  //     currentPage = ParticipantSocialReportPage(
-  //         participantUser: widget.user, context: context);
-  //   });
-  // }
-
   void _addLanguage(){
     final newLanguages = List<LanguageReport>.from(_languagesNotifier.value)..add(LanguageReport(name: '', level: ''));
     _languagesNotifier.value = newLanguages;
@@ -222,7 +212,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
     final newFormations = List<FormationReport>.from(_formationsNotifier.value)..add(FormationReport(name: '', type: '', certification: ''));
     _formationsNotifier.value = newFormations;
   }
-
 
   Widget followReport(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
@@ -241,7 +230,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   IconButton(
-                    //onPressed: setStateMenuPage,
                     onPressed: () => setState(() {
                       ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                     }),
@@ -256,7 +244,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
               ),
             ),
             Divider(color: AppColors.greyBorder,),
-            //completeFollowForm(context, followReportSaved, user),
             StreamBuilder<FollowReport>(
                 stream: database.followReportsStreamByUserId(userEnreda.userId),
                 builder: (context, snapshot) {

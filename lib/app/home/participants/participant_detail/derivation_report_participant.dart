@@ -23,11 +23,9 @@ import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class DerivationReportForm extends StatefulWidget {
   const DerivationReportForm({super.key, required this.user,
-    //this.derivationReport
   });
 
   final UserEnreda user;
-  //final DerivationReport? derivationReport;
 
   @override
   State<DerivationReportForm> createState() => _DerivationReportFormState();
@@ -115,7 +113,6 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
 
   @override
   void initState() {
-    //currentPage = derivationReport(context, widget.user);
     _totalDaysController.text = '0';
     super.initState();
   }
@@ -360,15 +357,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
           }
       ),
     );
-    //return currentPage;
   }
-
-  // void setStateMenuPage() {
-  //   setState(() {
-  //     currentPage = ParticipantSocialReportPage(
-  //         participantUser: widget.user, context: context);
-  //   });
-  // }
 
   void _addLanguage(){
     final newLanguages = List<LanguageReport>.from(_languagesNotifier.value)..add(LanguageReport(name: '', level: ''));
@@ -398,7 +387,6 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 IconButton(
-                  //onPressed: setStateMenuPage,
                   onPressed: () => setState(() {
                     ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                   }),
@@ -422,23 +410,6 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   return Container();
                 }
             ),
-            // StreamBuilder<DerivationReport>(
-            //     stream: database.derivationReportsStreamByUserId(user.userId),
-            //     builder: (context, snapshot) {
-            //       if (snapshot.hasData) {
-            //         DerivationReport derivationReportSaved = snapshot.data!;
-            //         return completeDerivationForm(context, derivationReportSaved);
-            //       }
-            //       else {
-            //         if (user.derivationReportId == null) {
-            //           database.addDerivationReport(widget.derivationReport!);
-            //         }
-            //         return Container(
-            //           height: 300,
-            //         );
-            //       }
-            //     }
-            // ),
           ]
       ),
     );

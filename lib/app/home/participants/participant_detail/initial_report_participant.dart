@@ -63,22 +63,13 @@ class _InitialReportFormState extends State<InitialReportForm> {
 
   @override
   void initState() {
-    //currentPage = initialReport(context, widget.user);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    //return currentPage;
     return initialReport(context, widget.user);
   }
-
-  // void setStateMenuPage() {
-  //   setState(() {
-  //     currentPage = ParticipantSocialReportPage(
-  //         participantUser: widget.user, context: context);
-  //   });
-  // }
 
   void _addLanguage(){
     final newLanguages = List<LanguageReport>.from(_languagesNotifier.value)..add(LanguageReport(name: '', level: ''));
