@@ -23,10 +23,10 @@ import 'participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class ClosureReportForm extends StatefulWidget {
-  const ClosureReportForm({super.key, required this.user, this.closureReport});
+  const ClosureReportForm({super.key, required this.user,
+  });
 
   final UserEnreda user;
-  final ClosureReport? closureReport;
 
   @override
   State<ClosureReportForm> createState() => _ClosureReportFormState();
@@ -73,16 +73,8 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
 
   late UserEnreda userEnreda;
 
-  // void setStateMenuPage() {
-  //   setState(() {
-  //     currentPage = ParticipantSocialReportPage(
-  //         participantUser: widget.user, context: context);
-  //   });
-  // }
-
   @override
   void initState() {
-    //currentPage = closureReport(context, widget.user);
     _totalDaysController.text = '0';
     super.initState();
   }
@@ -335,7 +327,6 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
-                //onPressed: setStateMenuPage,
                 onPressed: () => setState(() {
                   ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                 }),
@@ -359,24 +350,6 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                 return Container();
               }
           ),
-          // StreamBuilder<ClosureReport>(
-          //     stream: database.closureReportsStreamByUserId(user.userId),
-          //     builder: (context, snapshot) {
-          //       if (snapshot.hasData) {
-          //         ClosureReport closureReportSaved = snapshot.data!;
-          //         return completeClosureForm(
-          //             context, closureReportSaved, user);
-          //       }
-          //       else {
-          //         if (user.closureReportId == null) {
-          //           database.addClosureReport(widget.closureReport!);
-          //         }
-          //         return Container(
-          //           height: 300,
-          //         );
-          //       }
-          //     }
-          // ),
         ]
     );
   }
