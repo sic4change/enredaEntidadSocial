@@ -302,7 +302,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               await database.setUserEnreda(participantUser);
             },
             child: Text(
-              'Asignar este participante',
+              'Asignarme este participante',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontFamily: GoogleFonts.inter().fontFamily,

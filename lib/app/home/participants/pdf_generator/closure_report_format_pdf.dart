@@ -2,25 +2,16 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_print/data.dart';
-import 'package:enreda_empresas/app/models/certificationRequest.dart';
-import 'package:enreda_empresas/app/models/closureReport.dart';
-import 'package:enreda_empresas/app/models/experience.dart';
-import 'package:enreda_empresas/app/models/closureReport.dart';
 import 'package:enreda_empresas/app/models/closureReport.dart';
 import 'package:enreda_empresas/app/models/formationReport.dart';
-import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
-import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show NetworkAssetBundle, rootBundle;
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-
-
 
 const PdfColor lilac = PdfColor.fromInt(0xFF6768AB);
 const PdfColor lightLilac = PdfColor.fromInt(0xFFF4F5FB);
@@ -30,6 +21,7 @@ const PdfColor greyDark = PdfColor.fromInt(0xFF44494B);
 const PdfColor green = PdfColor.fromInt(0xF0DA1A0);
 const PdfColor black = PdfColor.fromInt(0xF44494B);
 const PdfColor white = PdfColor.fromInt(0xFFFFFFFF);
+const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
 const leftWidth = 230.0;
 const rightWidth = 350.0;
 final DateFormat formatter = DateFormat('dd/MM/yyyy');
@@ -42,29 +34,24 @@ Future<Uint8List> generateClosureReportFile(
     ) async {
   final doc = pw.Document(title: 'Reporte de cierre');
 
-  var url = user?.profilePic?.src ?? "";
-
-
-  PdfPageFormat format1 = format.applyMargin(
-      left: 0,
-      top: 0,
+  format = format.applyMargin(
+      left: 2.0 * PdfPageFormat.cm,
+      top: 3.0 * PdfPageFormat.cm,
       right: 2.0 * PdfPageFormat.cm,
-      bottom: 2.0 * PdfPageFormat.cm);
-/*
-  final pageTheme = await _myPageTheme(format1, myPhoto, profileImage);
+      bottom: 3.0 * PdfPageFormat.cm);
+
+  final pageTheme = await _myPageTheme(format);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
-  List<String>? dataOfInterest = myDataOfInterest;
-  List<String>? languages = languagesNames;*/
 
   doc.addPage(
     pw.MultiPage(
-      //pageTheme: pageTheme,
+      pageTheme: pageTheme,
       build: (pw.Context context) => [
         pw.Text(
           'Reporte de cierre de ${user.firstName} ${user.lastName}',
-          style: pw.TextStyle(
-            fontSize: 23,
-          )
+            style: pw.Theme.of(context)
+                .defaultTextStyle
+                .copyWith(fontWeight: pw.FontWeight.bold, fontSize: 16, color: primary900)
         ),
         pw.SizedBox(
           height: 30,
@@ -75,7 +62,7 @@ Future<Uint8List> generateClosureReportFile(
         _sectionTitle(title: '1. Itinerario en España'),
         _customItem(title: 'Orinetaciones', content: closureReport.orientation1 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: formatter.format(closureReport.arriveDate!) ?? '', content2: closureReport.receptionResources ?? ''),
+        _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: closureReport.arriveDate == null ? '' : formatter.format(closureReport.arriveDate!), content2: closureReport.receptionResources ?? ''),
         SpaceH12(),
         _customItem(title: 'Situación administrativa', content: closureReport.administrativeExternalResources ?? ''),
 
@@ -86,10 +73,10 @@ Future<Uint8List> generateClosureReportFile(
         closureReport.adminState == 'Sin tramitar' ?
         _customItem(title: 'Sin tramitar', content: closureReport.adminNoThrough ?? '') :
         closureReport.adminState == 'En trámite' ?
-        _customRow(title1: 'Fecha de solicitud', title2: 'Fecha de resolución', content1: formatter.format(closureReport.adminDateAsk!) ?? '', content2: formatter.format(closureReport.adminDateResolution!) ?? '') :
-        _customItem(title: StringConst.INITIAL_DATE_CONCESSION, content: formatter.format(closureReport.adminDateConcession!)),
+        _customRow(title1: 'Fecha de solicitud', title2: 'Fecha de resolución', content1: closureReport.adminDateAsk == null ? '' : formatter.format(closureReport.adminDateAsk!), content2: closureReport.adminDateResolution == null ? '' : formatter.format(closureReport.adminDateResolution!)) :
+        _customItem(title: StringConst.INITIAL_DATE_CONCESSION, content: closureReport.adminDateConcession == null ? '' : formatter.format(closureReport.adminDateConcession!)),
         SpaceH12(),
-        _customRow(title1: StringConst.INITIAL_TEMP, title2: closureReport.adminTemp == 'Inicial' || closureReport.adminTemp == 'Temporal' ? 'Fecha de resolución' : '', content1: closureReport.adminTemp ?? '', content2: closureReport.adminTemp == 'Inicial' || closureReport.adminTemp == 'Temporal' ? formatter.format(closureReport.adminDateRenovation!) ?? '' : ''),
+        _customRow(title1: StringConst.INITIAL_TEMP, title2: closureReport.adminTemp == 'Inicial' || closureReport.adminTemp == 'Temporal' ? 'Fecha de resolución' : '', content1: closureReport.adminTemp ?? '', content2: closureReport.adminTemp == 'Inicial' || closureReport.adminTemp == 'Temporal' ? closureReport.adminDateRenovation == null ? '' : formatter.format(closureReport.adminDateRenovation!) : ''),
         SpaceH12(),
         _customRow(title1: 'Tipo de residencia', title2: StringConst.INITIAL_JURIDIC_FIGURE, content1: closureReport.adminResidenceType ?? '', content2: closureReport.adminJuridicFigure ?? ''),
         closureReport.adminJuridicFigure == 'Otros' ?pw.Column(
@@ -103,7 +90,7 @@ Future<Uint8List> generateClosureReportFile(
         _sectionTitle(title: '2. Situación Sanitaria'),
         _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation2 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: closureReport.healthCard ?? '', content2: formatter.format(closureReport.expirationDate!) ?? ''),
+        _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: closureReport.healthCard ?? '', content2: closureReport.expirationDate == null ? '' : formatter.format(closureReport.expirationDate!)),
         SpaceH12(),
         _customItem(title: 'Medicación/Tratamiento', content: closureReport.medication ?? ''),
 
@@ -121,7 +108,7 @@ Future<Uint8List> generateClosureReportFile(
         SpaceH12(),
         _customItem(title: 'Estado', content: closureReport.disabilityState ?? ''),
         closureReport.dependenceState == 'Concedida' ?
-        _customRow(title1: 'Concedida', title2: 'Fecha', content1: closureReport.granted ?? '', content2: formatter.format(closureReport.revisionDate!) ?? '') :
+        _customRow(title1: 'Concedida', title2: 'Fecha', content1: closureReport.granted ?? '', content2: closureReport.revisionDate == null ? '' : formatter.format(closureReport.revisionDate!)) :
         pw.Container(),
         closureReport.dependenceState == 'Concedida' ? SpaceH12() : pw.Container(),
         SpaceH12(),
@@ -147,21 +134,21 @@ Future<Uint8List> generateClosureReportFile(
         _sectionTitle(title: '3. Situación legal'),
         _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation3 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación interma', title2: StringConst.INITIAL_DERIVATION_DATE, content1: closureReport.internalDerivationLegal ?? '', content2: formatter.format(closureReport.internalDerivationDate!) ?? ''),
+        _customRow(title1: 'Derivación interma', title2: StringConst.INITIAL_DERIVATION_DATE, content1: closureReport.internalDerivationLegal ?? '', content2: closureReport.internalDerivationDate == null ? '' :  formatter.format(closureReport.internalDerivationDate!)),
         SpaceH12(),
         _customItem(title: StringConst.INITIAL_MOTIVE, content: closureReport.internalDerivationMotive ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación externa', title2: StringConst.INITIAL_DERIVATION_DATE, content1: closureReport.externalDerivationLegal ?? '', content2: formatter.format(closureReport.externalDerivationDate!) ?? ''),
+        _customRow(title1: 'Derivación externa', title2: StringConst.INITIAL_DERIVATION_DATE, content1: closureReport.externalDerivationLegal ?? '', content2: closureReport.externalDerivationDate == null ? '' : formatter.format(closureReport.externalDerivationDate!)),
         SpaceH12(),
         _customItem(title: StringConst.INITIAL_MOTIVE, content: closureReport.externalDerivationMotive ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: closureReport.psychosocialDerivationLegal ?? '', content2: formatter.format(closureReport.psychosocialDerivationDate!) ?? ''),
+        _customRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: closureReport.psychosocialDerivationLegal ?? '', content2: closureReport.psychosocialDerivationDate == null ? '' : formatter.format(closureReport.psychosocialDerivationDate!)),
         SpaceH12(),
         _customItem(title: StringConst.INITIAL_MOTIVE, content: closureReport.psychosocialDerivationMotive ?? ''),
         SpaceH12(),
         _customItem(title: 'Representación legal', content: closureReport.legalRepresentation ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Bolsa de tramitación', title2: StringConst.INITIAL_DATE, content1: closureReport.processingBag ?? '', content2: formatter.format(closureReport.processingBagDate!) ?? ''),
+        _customRow(title1: 'Bolsa de tramitación', title2: StringConst.INITIAL_DATE, content1: closureReport.processingBag ?? '', content2: closureReport.processingBagDate == null ? '' : formatter.format(closureReport.processingBagDate!)),
         SpaceH12(),
         _customItem(title: 'Cuantia económica', content: closureReport.economicAmount ?? ''),
 
@@ -186,7 +173,11 @@ Future<Uint8List> generateClosureReportFile(
         _customItem(title: 'Datos de contacto del recurso alojativo', content: closureReport.centerContact ?? ''),
         _customItem(title: StringConst.INITIAL_LOCATION, content: closureReport.location ?? ''),
         SpaceH12(),
-        _customEnumeration(enumeration: closureReport.hostingObservations ?? []),
+        for (var data in closureReport.hostingObservations!)
+          _BlockSimpleList(
+            title: data,
+            color: grey,
+          ),
 
         //Section 5
         _sectionTitle(title: '5. Redes de apoyo'),
@@ -229,7 +220,7 @@ Future<Uint8List> generateClosureReportFile(
         _customItem(title: 'Certificado de Exclusión Social', content: closureReport.socialExclusionCertificate ?? ''),
         closureReport.socialExclusionCertificate == 'Si' ? pw.Column(
             children: [
-              _customRow(title1: StringConst.INITIAL_DATE, title2: 'Observaciones sobre el certificado', content1: formatter.format(closureReport.socialExclusionCertificateDate!) ?? '', content2: closureReport.socialExclusionCertificateObservations ?? ''),
+              _customRow(title1: StringConst.INITIAL_DATE, title2: 'Observaciones sobre el certificado', content1: closureReport.socialExclusionCertificateDate == null ? '' : formatter.format(closureReport.socialExclusionCertificateDate!), content2: closureReport.socialExclusionCertificateObservations ?? ''),
               SpaceH12(),
             ]
         ) : pw.Container(),
@@ -238,7 +229,11 @@ Future<Uint8List> generateClosureReportFile(
         _sectionTitle(title: '8. Situación de Vulnerabilidad'),
         _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation12 ?? ''),
         SpaceH12(),
-        _customEnumeration(enumeration: closureReport.vulnerabilityOptions ?? []),
+        for (var data in closureReport.vulnerabilityOptions!)
+          _BlockSimpleList(
+            title: data,
+            color: grey,
+          ),
 
         //Section 13
         _sectionTitle(title: '9. Itinerario formativo laboral'),
@@ -274,7 +269,7 @@ Future<Uint8List> generateClosureReportFile(
                 )
             ]
         ),
-        _customRow(title1: 'Bolsa de formación', title2: StringConst.INITIAL_DATE, content1: closureReport.formationBag ?? '', content2: formatter.format(closureReport.formationBagDate!) ?? ''),
+        _customRow(title1: 'Bolsa de formación', title2: StringConst.INITIAL_DATE, content1: closureReport.formationBag ?? '', content2: closureReport.formationBagDate == null ? '' : formatter.format(closureReport.formationBagDate!)),
         SpaceH12(),
         _customRow(title1: StringConst.INITIAL_MOTIVE, title2: StringConst.FOLLOW_ECONOMIC_AMOUNT, content1: closureReport.formationBagMotive ?? '', content2: closureReport.formationBagEconomic ?? ''),
 
@@ -289,11 +284,11 @@ Future<Uint8List> generateClosureReportFile(
             ]
         )
             : pw.Container(),
-        _customRow(title1: 'Fecha de obtención', title2: 'Fecha de finalización', content1: formatter.format(closureReport.jobObtainDate!) ?? '', content2: formatter.format(closureReport.jobFinishDate!) ?? ''),
+        _customRow(title1: 'Fecha de obtención', title2: 'Fecha de finalización', content1: closureReport.jobObtainDate == null ? '' : formatter.format(closureReport.jobObtainDate!), content2: closureReport.jobFinishDate == null ? '' : formatter.format(closureReport.jobFinishDate!)),
         SpaceH12(),
         _customRow(title1: 'Mejora laboral', title2: 'Motivo de mejora', content1: closureReport.jobUpgrade ?? '', content2: closureReport.upgradeMotive ?? ''),
         SpaceH12(),
-        _customItem(title: StringConst.INITIAL_DATE, content: formatter.format(closureReport.upgradeDate!) ?? '' ),
+        _customItem(title: StringConst.INITIAL_DATE, content: closureReport.upgradeDate == null ? '' : formatter.format(closureReport.upgradeDate!)),
 
         _subSectionTitle(title: StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
         _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation9_6 ?? ''),
@@ -307,7 +302,7 @@ Future<Uint8List> generateClosureReportFile(
             ]
         ): pw.Container(),
         SpaceH12(),
-        _customRow(title1: StringConst.FOLLOW_INIT_DATE, title2: StringConst.FOLLOW_END_DATE, content1: formatter.format(closureReport.postLaborInitialDate!) ?? '', content2: formatter.format(closureReport.postLaborFinalDate!) ?? ''),
+        _customRow(title1: StringConst.FOLLOW_INIT_DATE, title2: StringConst.FOLLOW_END_DATE, content1: closureReport.postLaborInitialDate == null ? '' :  formatter.format(closureReport.postLaborInitialDate!), content2: closureReport.postLaborFinalDate == null ? '' : formatter.format(closureReport.postLaborFinalDate!)),
         SpaceH12(),
         _customItem(title: 'Total de días', content: closureReport.postLaborTotalDays.toString() ?? ''),
         SpaceH12(),
@@ -317,7 +312,7 @@ Future<Uint8List> generateClosureReportFile(
         SpaceH12(),
         _customItem(title: StringConst.CLOSURE_CLOSE_MOTIVE, content: closureReport.motiveClose ?? ''),
         SpaceH12(),
-        _customRow(title1: StringConst.CLOSURE_CLOSE_MOTIVE_DETAIL, title2: StringConst.INITIAL_DATE, content1: closureReport.motiveCloseDetail ?? '', content2: formatter.format(closureReport.closeDate!) ?? ''),
+        _customRow(title1: StringConst.CLOSURE_CLOSE_MOTIVE_DETAIL, title2: StringConst.INITIAL_DATE, content1: closureReport.motiveCloseDetail ?? '', content2: closureReport.closeDate == null ? '' : formatter.format(closureReport.closeDate!)),
 
         SpaceH12(),
         pw.Row(
@@ -346,18 +341,12 @@ pw.Widget SpaceH12(){
   return pw.SizedBox(height: 12);
 }
 
-Future<pw.PageTheme> _myPageTheme(PdfPageFormat format, bool myPhoto, profileImageWeb) async {
-  format = format.applyMargin(
-      left: 2.0 * PdfPageFormat.cm,
-      top: 3.0 * PdfPageFormat.cm,
-      right: 2.0 * PdfPageFormat.cm,
-      bottom: 2.0 * PdfPageFormat.cm);
+Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
   return pw.PageTheme(
     pageFormat: format,
-    margin: pw.EdgeInsets.only(top: 70, left: 0.0, right: 20, bottom: 10),
     theme: pw.ThemeData.withFont(
-      base: await PdfGoogleFonts.latoRegular(),
-      bold: await PdfGoogleFonts.alataRegular(),
+      base: await PdfGoogleFonts.interLight(),
+      bold: await PdfGoogleFonts.interMedium(),
       icons: await PdfGoogleFonts.materialIcons(),
     ),
     buildBackground: (pw.Context context) {
@@ -367,12 +356,6 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format, bool myPhoto, profileIma
           children: [
             pw.Container(
               margin: const pw.EdgeInsets.only(left: 30.0, right: 30, top: 60, bottom: 60),
-              width: 200,
-              decoration: pw.BoxDecoration(
-                color: green,
-                borderRadius: pw.BorderRadius.all(pw.Radius.circular(20)),
-                shape: pw.BoxShape.rectangle,
-              ),
               child: pw.Positioned(
                 child: pw.Container(),
                 left: 0,
@@ -393,7 +376,7 @@ class _customRow extends pw.StatelessWidget {
     required this.title2,
     required this.content1,
     required this.content2,
-});
+  });
   final String title1;
   final String content1;
   final String title2;
@@ -404,29 +387,33 @@ class _customRow extends pw.StatelessWidget {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: <pw.Widget>[
           pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.start,
-            children: <pw.Widget>[
-              pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(title1, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                    pw.SizedBox(width: 170),
-                    pw.Text(content1)
-                  ]
-              ),
-              pw.SizedBox(
-                width: 50,
-              ),
-              pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(title2, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                    pw.Text(content2)
-                  ]
-              ),
-            ]
+              mainAxisAlignment: pw.MainAxisAlignment.start,
+              children: <pw.Widget>[
+                pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(title1, style: pw.Theme.of(context)
+                          .defaultTextStyle
+                          .copyWith(fontWeight: pw.FontWeight.normal, color: black)),
+                      pw.SizedBox(width: 170),
+                      pw.Text(content1)
+                    ]
+                ),
+                pw.SizedBox(
+                  width: 50,
+                ),
+                pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(title2, style: pw.Theme.of(context)
+                          .defaultTextStyle
+                          .copyWith(fontWeight: pw.FontWeight.normal, color: black)),
+                      pw.Text(content2)
+                    ]
+                ),
+              ]
           ),
-      ]
+        ]
     );
   }
 }
@@ -438,33 +425,18 @@ class _customItem extends pw.StatelessWidget {
   });
   final String title;
   final String content;
-  
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-        pw.Text(content)
-      ]
-    );
-  }
-}
-
-class _customEnumeration extends pw.StatelessWidget {
-  _customEnumeration({
-    required this.enumeration,
-  });
-  final List<String> enumeration;
 
   @override
   pw.Widget build(pw.Context context) {
     return pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          for(String element in enumeration)
-            if(enumeration.last != element) pw.Text(element),
-            pw.Text(enumeration.last),
+          pw.Text(title,
+              style: pw.Theme.of(context)
+                  .defaultTextStyle
+                  .copyWith(fontWeight: pw.FontWeight.normal, color: black)
+          ),
+          pw.Text(content)
         ]
     );
   }
@@ -482,7 +454,11 @@ class _sectionTitle extends pw.StatelessWidget {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.SizedBox(height: 30),
-          pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+          pw.Text(title,
+              style: pw.Theme.of(context)
+                  .defaultTextStyle
+                  .copyWith(fontWeight: pw.FontWeight.bold, fontSize: 16, color: primary900)
+          ),
           pw.SizedBox(height: 15),
         ]
     );
@@ -501,217 +477,14 @@ class _subSectionTitle extends pw.StatelessWidget {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.SizedBox(height: 20),
-          pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+          pw.Text(title,
+              style: pw.Theme.of(context)
+                  .defaultTextStyle
+                  .copyWith(fontWeight: pw.FontWeight.normal, fontSize: 14, color: primary900)
+          ),
           pw.SizedBox(height: 12),
         ]
     );
-  }
-}
-
-
-class _Block extends pw.StatelessWidget {
-  _Block({
-    this.title,
-    this.descriptionDate,
-    this.descriptionPlace,
-  });
-
-  final String? title;
-  final String? descriptionDate;
-  final String? descriptionPlace;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: <pw.Widget>[
-          pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-                title != null ? pw.Expanded(
-                  child: pw.Text(
-                      title!.toUpperCase(),
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.bold,
-                          color: grey)),
-                ) : pw.Container()
-              ]),
-          pw.Container(
-            child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: <pw.Widget>[
-                  pw.Text(descriptionDate!,
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.normal,
-                          color: grey)),
-                ]),
-          ),
-          pw.Container(
-            child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: <pw.Widget>[
-                  pw.Text(descriptionPlace!,
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.normal,
-                          color: grey)),
-                ]),
-          ),
-          pw.SizedBox(height: 8),
-        ]);
-  }
-}
-
-class _Category extends pw.StatelessWidget {
-  _Category({required this.title, required this.color});
-
-  final String title;
-  final PdfColor color;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Container(
-      alignment: pw.Alignment.centerLeft,
-      padding: const pw.EdgeInsets.only(bottom: 4),
-      child: pw.Text(
-          title.toUpperCase(),
-          textScaleFactor: 1,
-          style: pw.Theme.of(context)
-              .defaultTextStyle
-              .copyWith(
-              fontWeight: pw.FontWeight.bold,
-              color: color)),
-    );
-  }
-}
-
-class _Percent extends pw.StatelessWidget {
-  _Percent({
-    required this.size,
-    required this.value,
-    required this.title,
-  });
-
-  final double size;
-
-  final double value;
-
-  final pw.Widget title;
-
-  static const fontSize = 1.2;
-
-  PdfColor get color => lilac;
-
-  static const backgroundColor = PdfColors.grey300;
-
-  static const strokeWidth = 5.0;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    final widgets = <pw.Widget>[
-      pw.Container(
-        width: size,
-        height: size,
-        child: pw.Stack(
-          alignment: pw.Alignment.center,
-          fit: pw.StackFit.expand,
-          children: <pw.Widget>[
-            pw.Center(
-              child: pw.Text(
-                '${(value * 100).round().toInt()}%',
-                textScaleFactor: fontSize,
-              ),
-            ),
-            pw.CircularProgressIndicator(
-              value: value,
-              backgroundColor: backgroundColor,
-              color: color,
-              strokeWidth: strokeWidth,
-            ),
-          ],
-        ),
-      )
-    ];
-
-    widgets.add(title);
-
-    return pw.Column(children: widgets);
-  }
-}
-
-class _UrlText extends pw.StatelessWidget {
-  _UrlText(this.text, this.url);
-
-  final String text;
-  final String url;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.UrlLink(
-        destination: url,
-        child: pw.Text(text,
-            textScaleFactor: 0.8,
-            style: pw.Theme.of(context)
-                .defaultTextStyle
-                .copyWith(
-                fontWeight: pw.FontWeight.normal,
-                color: white))
-    );
-  }
-}
-
-class _BlockSimple extends pw.StatelessWidget {
-  _BlockSimple({
-    this.title,
-    this.description,
-  });
-
-  final String? title;
-  final String? description;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: <pw.Widget>[
-          pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-                title != null ? pw.Expanded(
-                  child:
-                  pw.Text(
-                      title!.toUpperCase(),
-                      textScaleFactor: 1,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.bold,
-                          color: green)),
-                ) : pw.Container()
-              ]),
-          pw.Container(
-            child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: <pw.Widget>[
-                  description != null ? pw.Text(description!,
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.normal,
-                          color: grey)) : pw.Container(),
-                ]),
-          ),
-          pw.SizedBox(height: 5),
-        ]);
   }
 }
 
@@ -753,145 +526,6 @@ class _BlockSimpleList extends pw.StatelessWidget {
               ]),
           pw.SizedBox(height: 5),
         ]);
-  }
-}
-
-class _BlockSimpleListLabel extends pw.StatelessWidget {
-  _BlockSimpleListLabel({
-    this.title,
-    this.color
-  });
-
-  final String? title;
-  final PdfColor? color;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: <pw.Widget>[
-          pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-                title != null ? pw.Expanded(
-                  child:
-                  pw.Text(
-                      title!.toUpperCase(),
-                      textScaleFactor: 0.7,
-                      textAlign: pw.TextAlign.center,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(fontWeight: pw.FontWeight.normal, color: color)),
-                ) : pw.Container()
-              ]),
-          pw.SizedBox(height: 5),
-        ]);
-  }
-}
-
-class _CategoryLabel extends pw.StatelessWidget {
-  _CategoryLabel({
-    required this.title,
-    required this.color,
-  });
-
-  final String title;
-  final PdfColor color;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Container(
-      decoration: const pw.BoxDecoration(
-        color: PdfColors.white,
-        borderRadius: pw.BorderRadius.all(pw.Radius.circular(10)),
-      ),
-      margin: const pw.EdgeInsets.only(bottom: 10, top: 10),
-      padding: const pw.EdgeInsets.fromLTRB(20, 4, 20, 5),
-      child: pw.Text(
-          title.toUpperCase(),
-          textScaleFactor: 1,
-          style: pw.Theme.of(context)
-              .defaultTextStyle
-              .copyWith(fontWeight: pw.FontWeight.normal, color: color)
-      ),
-    );
-  }
-}
-
-class _BlockIcon extends pw.StatelessWidget {
-  _BlockIcon({
-    this.title,
-    this.description1,
-    this.description2,
-    this.description3,
-  });
-
-  final String? title;
-  final String? description1;
-  final String? description2;
-  final String? description3;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: <pw.Widget>[
-        pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: <pw.Widget>[
-              title != null ? pw.Expanded(
-                child: pw.Text(
-                    title!,
-                    textScaleFactor: 0.9,
-                    style: pw.Theme.of(context)
-                        .defaultTextStyle
-                        .copyWith(
-                        fontWeight: pw.FontWeight.bold,
-                        color: white)),
-              ) : pw.Container()
-            ]),
-        pw.SizedBox(height: 2),
-        pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: <pw.Widget>[
-              description1 != null ? pw.Expanded(
-                child: pw.Text(
-                    description1!.toUpperCase(),
-                    textScaleFactor: 0.8,
-                    style: pw.Theme.of(context)
-                        .defaultTextStyle
-                        .copyWith(
-                        fontWeight: pw.FontWeight.bold,
-                        color: white)),
-              ) : pw.Container()
-            ]),
-        pw.SizedBox(height: 2),
-        description2 != "" ?
-        pw.Row(
-          children: [
-            pw.Icon(pw.IconData(0xe0be), size: 10.0, color:white),
-            pw.SizedBox(width: 4),
-            _UrlText(description2!, 'mailto: $description1')
-          ],
-        ) : pw.Container(),
-        pw.SizedBox(height: 4),
-        description3 != "" ?
-        pw.Row(
-            children: [
-              pw.Icon(pw.IconData(0xe0b0), size: 10.0, color:white),
-              pw.SizedBox(width: 4),
-              pw.Text(description3!,
-                  textScaleFactor: 0.8,
-                  style: pw.Theme.of(context)
-                      .defaultTextStyle
-                      .copyWith(
-                      fontWeight: pw.FontWeight.normal,
-                      color: white)) ,
-            ]
-        ) : pw.Container(),
-        pw.SizedBox(height: 7),
-      ],
-    );
   }
 }
 

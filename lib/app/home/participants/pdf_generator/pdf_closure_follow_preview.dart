@@ -3,15 +3,7 @@ import 'dart:io';
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/closure_report_pdf_page.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/follow_report_pdf_page.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/initial_report_pdf_page.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/ipil_pdf_page.dart';
-import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/closureReport.dart';
-import 'package:enreda_empresas/app/models/experience.dart';
-import 'package:enreda_empresas/app/models/followReport.dart';
-import 'package:enreda_empresas/app/models/initialReport.dart';
-import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
@@ -158,6 +150,7 @@ class MyAppState extends State<MyClosureReport> with SingleTickerProviderStateMi
         ),
         actions: actions,
         canDebug: false,
+        initialPageFormat: PdfPageFormat.a4,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
       ),

@@ -45,8 +45,8 @@ Widget streamBuilderForSocialEntity (BuildContext context, SocialEntity? selecte
                       value: selectedSocialEntity,
                       items: socialEntityItems,
                       isExpanded: true,
-                      onChanged: (value) => functionToWriteBackThings(value),
-                      //validator: validator,
+                      //onChanged: (value) => functionToWriteBackThings(value),
+                      onChanged: null,
                       decoration: InputDecoration(
                         errorStyle: TextStyle(height: 0.01),
                         focusedBorder: OutlineInputBorder(

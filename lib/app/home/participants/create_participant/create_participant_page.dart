@@ -58,6 +58,7 @@ import 'package:provider/provider.dart';
 
 import 'validating_form_controls/stream_builder_nation.dart';
 import 'validating_form_controls/stream_builder_social_entity.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 const double contactBtnWidthLg = 200.0;
 const double contactBtnWidthSm = 120.0;
@@ -176,6 +177,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     _nationality = '';
     nationalityName = '';
     keepLearningOptionsNames = '';
+    selectedSocialEntity = globals.currentUserSocialEntity;
   }
 
   @override
@@ -373,12 +375,9 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                 contentPadding: EdgeInsets.all(0.0),
                 separatorSize: Sizes.kDefaultPaddingDouble,
                 childLeft: streamBuilderForCity(context, selectedCountry, selectedProvince, selectedCity, _buildCityStreamBuilder_setState),
-                //childLeft: Container(),
                 childRight: CustomTextFormFieldTitle(
                     labelText: StringConst.FORM_POSTAL_CODE,
                     initialValue: _postalCode!,
-                    /*validator: (value) =>
-                      value!.isNotEmpty ? null : StringConst.POSTAL_CODE_ERROR,*/
                     onSaved: _postalCode_setState
                 ),
               ),
@@ -751,7 +750,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
         await database.addUnemployedUser(unemployedUser);
         await showAlertDialog(
           context,
-          title: StringConst.CREATE_PARTICIPANT_SUCCESS,
+          title: StringConst.CREATE_PARTICIPANT_TITLE,
           content: StringConst.CREATE_PARTICIPANT_SUCCESS,
           defaultActionText: StringConst.FORM_ACCEPT,
         );

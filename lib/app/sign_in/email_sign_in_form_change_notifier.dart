@@ -1,6 +1,7 @@
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/sign_in/email_sign_in_change_model.dart';
 import 'package:enreda_empresas/app/sign_up/socialEntityUser/social_entity_registering.dart';
@@ -264,9 +265,7 @@ class _EmailSignInFormChangeNotifierState
   Future<void> _submit() async {
     try {
       await model.submit();
-      //CupertinoScaffold.controller.index = 3;
-      GoRouter.of(context).go(StringConst.PATH_HOME);
-      //context.canPop() ? context.pop() : context.go(StringConst.PATH_HOME);
+      WebHome.goToControlPanel();
     } on FirebaseAuthException catch (e) {
       showExceptionAlertDialog(
         context,

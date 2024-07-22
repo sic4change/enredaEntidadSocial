@@ -42,6 +42,8 @@ class CustomDropDownButtonFormFieldTittle extends StatelessWidget {
         Container(
           height: 50,
           child: DropdownButtonFormField(
+            isExpanded: true,
+            isDense: true,
             value: value,
             items: source,
             onChanged: onChanged,

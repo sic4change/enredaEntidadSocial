@@ -1,6 +1,10 @@
 library globals;
 
+import 'package:enreda_empresas/app/models/closureReport.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
+import 'package:enreda_empresas/app/models/derivationReport.dart';
+import 'package:enreda_empresas/app/models/followReport.dart';
+import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -15,5 +19,10 @@ Set<Interest> selectedInterestsCurrentResource = {};
 Set<Competency> selectedCompetenciesCurrentResource = {};
 List<String> interestsCurrentResource = [];
 UserEnreda? currentParticipant;
-UserEnreda? currentSocialEntityUser;
-SocialEntity? currentSocialEntity;
+UserEnreda? currentSocialEntityUser; // this is the user that is logged
+SocialEntity? currentUserSocialEntity; // this is the social entity that the user is belonging
+SocialEntity? currentSocialEntity; // this is the social entity that is selected
+InitialReport currentInitialReportUser = InitialReport();
+FollowReport currentFollowReportUser = FollowReport();
+DerivationReport currentDerivationReportUser = DerivationReport();
+ClosureReport currentClosureReportUser = ClosureReport();
