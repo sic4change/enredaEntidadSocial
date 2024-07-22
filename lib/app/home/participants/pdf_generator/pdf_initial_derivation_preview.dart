@@ -15,7 +15,6 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'cv_print/data.dart';
 
-
 class MyDerivationReport extends StatefulWidget {
   const MyDerivationReport({
     Key? key,
@@ -150,6 +149,7 @@ class MyAppState extends State<MyDerivationReport> with SingleTickerProviderStat
         ),
         actions: actions,
         canDebug: false,
+        initialPageFormat: PdfPageFormat.a4,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
       ),

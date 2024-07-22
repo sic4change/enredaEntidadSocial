@@ -1673,8 +1673,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           : (value) {
                         _ownershipTypeConcreteNotifier.value = value!;
                       },
-                      // validator: (value) =>
-                      // value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      validator: (value) =>
+                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
                     )
                         : CustomDropDownButtonFormFieldTittle(
                       labelText: StringConst.INITIAL_OWNERSHIP_TYPE,
@@ -1685,8 +1685,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           : (value) {
                         _ownershipTypeConcreteNotifier.value = value!;
                       },
-                      // validator: (value) =>
-                      // value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      validator: (value) =>
+                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
                     ) : _ownershipTypeNotifier.value == 'Sin hogar' ?
                     //Situación sinhogarismo (Sin hogar)
                     _homelessnessSituationNotifier.value == ''
@@ -1698,8 +1698,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           : (value) {
                         _homelessnessSituationNotifier.value = value!;
                       },
-                      // validator: (value) =>
-                      // value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      validator: (value) =>
+                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
                     )
                         : CustomDropDownButtonFormFieldTittle(
                       labelText: StringConst.INITIAL_HOMELESS_SITUATION,
@@ -1710,8 +1710,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           : (value) {
                         _homelessnessSituationNotifier.value = value!;
                       },
-                      // validator: (value) =>
-                      // value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                      validator: (value) =>
+                      value != null ? null : StringConst.FORM_GENERIC_ERROR,
                     ) :
                     Container();
                   },

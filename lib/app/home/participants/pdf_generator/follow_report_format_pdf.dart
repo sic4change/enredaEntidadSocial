@@ -1,20 +1,13 @@
 import 'dart:async';
-import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_print/data.dart';
-import 'package:enreda_empresas/app/models/certificationRequest.dart';
-import 'package:enreda_empresas/app/models/experience.dart';
-import 'package:enreda_empresas/app/models/followReport.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
 import 'package:enreda_empresas/app/models/formationReport.dart';
-import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
-import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show NetworkAssetBundle, rootBundle;
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -30,6 +23,7 @@ const PdfColor greyDark = PdfColor.fromInt(0xFF44494B);
 const PdfColor green = PdfColor.fromInt(0xF0DA1A0);
 const PdfColor black = PdfColor.fromInt(0xF44494B);
 const PdfColor white = PdfColor.fromInt(0xFFFFFFFF);
+const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
 const leftWidth = 230.0;
 const rightWidth = 350.0;
 final DateFormat formatter = DateFormat('dd/MM/yyyy');
@@ -42,29 +36,25 @@ Future<Uint8List> generateFollowReportFile(
     ) async {
   final doc = pw.Document(title: 'Reporte de seguimiento');
 
-  var url = user?.profilePic?.src ?? "";
-
-
-  PdfPageFormat format1 = format.applyMargin(
-      left: 0,
-      top: 0,
+  format = format.applyMargin(
+      left: 2.0 * PdfPageFormat.cm,
+      top: 3.0 * PdfPageFormat.cm,
       right: 2.0 * PdfPageFormat.cm,
-      bottom: 2.0 * PdfPageFormat.cm);
-/*
-  final pageTheme = await _myPageTheme(format1, myPhoto, profileImage);
+      bottom: 3.0 * PdfPageFormat.cm);
+
+  final pageTheme = await _myPageTheme(format);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
-  List<String>? dataOfInterest = myDataOfInterest;
-  List<String>? languages = languagesNames;*/
+
 
   doc.addPage(
     pw.MultiPage(
-      //pageTheme: pageTheme,
+      pageTheme: pageTheme,
       build: (pw.Context context) => [
         pw.Text(
           'Reporte de seguimiento de ${user.firstName} ${user.lastName}',
-          style: pw.TextStyle(
-            fontSize: 23,
-          )
+            style: pw.Theme.of(context)
+                .defaultTextStyle
+                .copyWith(fontWeight: pw.FontWeight.bold, fontSize: 16, color: primary900)
         ),
         pw.SizedBox(
           height: 30,
@@ -75,7 +65,7 @@ Future<Uint8List> generateFollowReportFile(
         _sectionTitle(title: '1. Itinerario en España'),
         _customItem(title: 'Orinetaciones', content: followReport.orientation1 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: formatter.format(followReport.arriveDate!) ?? '', content2: followReport.receptionResources ?? ''),
+        _customRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1:  followReport.arriveDate == null ? '' : formatter.format(followReport.arriveDate!), content2: followReport.receptionResources ?? ''),
         SpaceH12(),
         _customItem(title: 'Situación administrativa', content: followReport.administrativeExternalResources ?? ''),
 
@@ -86,10 +76,10 @@ Future<Uint8List> generateFollowReportFile(
         followReport.adminState == 'Sin tramitar' ?
         _customItem(title: 'Sin tramitar', content: followReport.adminNoThrough ?? '') :
         followReport.adminState == 'En trámite' ?
-        _customRow(title1: 'Fecha de solicitud', title2: 'Fecha de resolución', content1: formatter.format(followReport.adminDateAsk!) ?? '', content2: formatter.format(followReport.adminDateResolution!) ?? '') :
-        _customItem(title: StringConst.INITIAL_DATE_CONCESSION, content: formatter.format(followReport.adminDateConcession!)),
+        _customRow(title1: 'Fecha de solicitud', title2: 'Fecha de resolución', content1: followReport.adminDateAsk == null ? '' : formatter.format(followReport.adminDateAsk!), content2: followReport.adminDateResolution == null ? '' : formatter.format(followReport.adminDateResolution!)) :
+        _customItem(title: StringConst.INITIAL_DATE_CONCESSION, content: followReport.adminDateConcession == null ? '' : formatter.format(followReport.adminDateConcession!)),
         SpaceH12(),
-        _customRow(title1: StringConst.INITIAL_TEMP, title2: followReport.adminTemp == 'Inicial' || followReport.adminTemp == 'Temporal' ? 'Fecha de resolución' : '', content1: followReport.adminTemp ?? '', content2: followReport.adminTemp == 'Inicial' || followReport.adminTemp == 'Temporal' ? formatter.format(followReport.adminDateRenovation!) ?? '' : ''),
+        _customRow(title1: StringConst.INITIAL_TEMP, title2: followReport.adminTemp == 'Inicial' || followReport.adminTemp == 'Temporal' ? 'Fecha de resolución' : '', content1: followReport.adminTemp ?? '', content2: followReport.adminTemp == 'Inicial' || followReport.adminTemp == 'Temporal' ?  followReport.adminDateRenovation == null ? '' : formatter.format(followReport.adminDateRenovation!) : ''),
         SpaceH12(),
         _customRow(title1: 'Tipo de residencia', title2: StringConst.INITIAL_JURIDIC_FIGURE, content1: followReport.adminResidenceType ?? '', content2: followReport.adminJuridicFigure ?? ''),
         followReport.adminJuridicFigure == 'Otros' ?pw.Column(
@@ -103,7 +93,7 @@ Future<Uint8List> generateFollowReportFile(
         _sectionTitle(title: '2. Situación Sanitaria'),
         _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation2 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: followReport.healthCard ?? '', content2: formatter.format(followReport.expirationDate!) ?? ''),
+        _customRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: followReport.healthCard ?? '', content2: followReport.expirationDate == null ? '' : formatter.format(followReport.expirationDate!)),
         SpaceH12(),
         _customItem(title: 'Medicación/Tratamiento', content: followReport.medication ?? ''),
 
@@ -121,7 +111,7 @@ Future<Uint8List> generateFollowReportFile(
         SpaceH12(),
         _customItem(title: 'Estado', content: followReport.disabilityState ?? ''),
         followReport.dependenceState == 'Concedida' ?
-        _customRow(title1: 'Concedida', title2: 'Fecha', content1: followReport.granted ?? '', content2: formatter.format(followReport.revisionDate!) ?? '') :
+        _customRow(title1: 'Concedida', title2: 'Fecha', content1: followReport.granted ?? '', content2: followReport.revisionDate == null ? '' : formatter.format(followReport.revisionDate!)) :
         pw.Container(),
         followReport.dependenceState == 'Concedida' ? SpaceH12() : pw.Container(),
         SpaceH12(),
@@ -147,21 +137,21 @@ Future<Uint8List> generateFollowReportFile(
         _sectionTitle(title: '3. Situación legal'),
         _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation3 ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación interma', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.internalDerivationLegal ?? '', content2: formatter.format(followReport.internalDerivationDate!) ?? ''),
+        _customRow(title1: 'Derivación interma', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.internalDerivationLegal ?? '', content2: followReport.internalDerivationDate == null ? '' : formatter.format(followReport.internalDerivationDate!)),
         SpaceH12(),
         _customItem(title: StringConst.INITIAL_MOTIVE, content: followReport.internalDerivationMotive ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación externa', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.externalDerivationLegal ?? '', content2: formatter.format(followReport.externalDerivationDate!) ?? ''),
+        _customRow(title1: 'Derivación externa', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.externalDerivationLegal ?? '', content2: followReport.externalDerivationDate == null ? '' : formatter.format(followReport.externalDerivationDate!)),
         SpaceH12(),
         _customItem(title: StringConst.INITIAL_MOTIVE, content: followReport.externalDerivationMotive ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.psychosocialDerivationLegal ?? '', content2: formatter.format(followReport.psychosocialDerivationDate!) ?? ''),
+        _customRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: followReport.psychosocialDerivationLegal ?? '', content2: followReport.psychosocialDerivationDate == null ? '' : formatter.format(followReport.psychosocialDerivationDate!)),
         SpaceH12(),
         _customItem(title: StringConst.INITIAL_MOTIVE, content: followReport.psychosocialDerivationMotive ?? ''),
         SpaceH12(),
         _customItem(title: 'Representación legal', content: followReport.legalRepresentation ?? ''),
         SpaceH12(),
-        _customRow(title1: 'Bolsa de tramitación', title2: StringConst.INITIAL_DATE, content1: followReport.processingBag ?? '', content2: formatter.format(followReport.processingBagDate!) ?? ''),
+        _customRow(title1: 'Bolsa de tramitación', title2: StringConst.INITIAL_DATE, content1: followReport.processingBag ?? '', content2: followReport.processingBagDate == null ? '' : formatter.format(followReport.processingBagDate!)),
         SpaceH12(),
         _customItem(title: 'Cuantia económica', content: followReport.economicAmount ?? ''),
 
@@ -186,7 +176,11 @@ Future<Uint8List> generateFollowReportFile(
         _customItem(title: 'Datos de contacto del recurso alojativo', content: followReport.centerContact ?? ''),
         _customItem(title: StringConst.INITIAL_LOCATION, content: followReport.location ?? ''),
         SpaceH12(),
-        _customEnumeration(enumeration: followReport.hostingObservations ?? []),
+        for (var data in followReport.hostingObservations!)
+          _BlockSimpleList(
+            title: data,
+            color: grey,
+          ),
 
         //Section 5
         _sectionTitle(title: '5. Redes de apoyo'),
@@ -229,7 +223,7 @@ Future<Uint8List> generateFollowReportFile(
         _customItem(title: 'Certificado de Exclusión Social', content: followReport.socialExclusionCertificate ?? ''),
         followReport.socialExclusionCertificate == 'Si' ? pw.Column(
             children: [
-              _customRow(title1: StringConst.INITIAL_DATE, title2: 'Observaciones sobre el certificado', content1: formatter.format(followReport.socialExclusionCertificateDate!) ?? '', content2: followReport.socialExclusionCertificateObservations ?? ''),
+              _customRow(title1: StringConst.INITIAL_DATE, title2: 'Observaciones sobre el certificado', content1: followReport.socialExclusionCertificateDate == null ? '' : formatter.format(followReport.socialExclusionCertificateDate!), content2: followReport.socialExclusionCertificateObservations ?? ''),
               SpaceH12(),
             ]
         ) : pw.Container(),
@@ -238,7 +232,11 @@ Future<Uint8List> generateFollowReportFile(
         _sectionTitle(title: '8. Situación de Vulnerabilidad'),
         _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation12 ?? ''),
         SpaceH12(),
-        _customEnumeration(enumeration: followReport.vulnerabilityOptions ?? []),
+        for (var data in followReport.vulnerabilityOptions!)
+          _BlockSimpleList(
+            title: data,
+            color: grey,
+          ),
 
         //Section 13
         _sectionTitle(title: '9. Itinerario formativo laboral'),
@@ -274,7 +272,7 @@ Future<Uint8List> generateFollowReportFile(
                 )
             ]
         ),
-        _customRow(title1: 'Bolsa de formación', title2: StringConst.INITIAL_DATE, content1: followReport.formationBag ?? '', content2: formatter.format(followReport.formationBagDate!) ?? ''),
+        _customRow(title1: 'Bolsa de formación', title2: StringConst.INITIAL_DATE, content1: followReport.formationBag ?? '', content2: followReport.formationBagDate == null ? '' : formatter.format(followReport.formationBagDate!)),
         SpaceH12(),
         _customRow(title1: StringConst.INITIAL_MOTIVE, title2: StringConst.FOLLOW_ECONOMIC_AMOUNT, content1: followReport.formationBagMotive ?? '', content2: followReport.formationBagEconomic ?? ''),
 
@@ -289,11 +287,11 @@ Future<Uint8List> generateFollowReportFile(
             ]
         )
             : pw.Container(),
-        _customRow(title1: 'Fecha de obtención', title2: 'Fecha de finalización', content1: formatter.format(followReport.jobObtainDate!) ?? '', content2: formatter.format(followReport.jobFinishDate!) ?? ''),
+        _customRow(title1: 'Fecha de obtención', title2: 'Fecha de finalización', content1: followReport.jobObtainDate == null ? '' : formatter.format(followReport.jobObtainDate!), content2: followReport.jobFinishDate == null ? '' : formatter.format(followReport.jobFinishDate!)),
         SpaceH12(),
         _customRow(title1: 'Mejora laboral', title2: 'Motivo de mejora', content1: followReport.jobUpgrade ?? '', content2: followReport.upgradeMotive ?? ''),
         SpaceH12(),
-        _customItem(title: StringConst.INITIAL_DATE, content: formatter.format(followReport.upgradeDate!) ?? '' ),
+        _customItem(title: StringConst.INITIAL_DATE, content: followReport.upgradeDate == null ? '' : formatter.format(followReport.upgradeDate!)),
 
         _subSectionTitle(title: StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
         _customItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation9_6 ?? ''),
@@ -307,9 +305,9 @@ Future<Uint8List> generateFollowReportFile(
               ]
             ): pw.Container(),
         SpaceH12(),
-        _customRow(title1: StringConst.FOLLOW_INIT_DATE, title2: StringConst.FOLLOW_END_DATE, content1: formatter.format(followReport.postLaborInitialDate!) ?? '', content2: formatter.format(followReport.postLaborFinalDate!) ?? ''),
+        _customRow(title1: StringConst.FOLLOW_INIT_DATE, title2: StringConst.FOLLOW_END_DATE, content1: followReport.postLaborInitialDate == null ? '' : formatter.format(followReport.postLaborInitialDate!), content2: followReport.postLaborFinalDate == null ? '' : formatter.format(followReport.postLaborFinalDate!)),
         SpaceH12(),
-        _customItem(title: 'Total de días', content: followReport.postLaborTotalDays.toString() ?? ''),
+        _customItem(title: 'Total de días', content: followReport.postLaborTotalDays != null ? '' : followReport.postLaborTotalDays.toString()),
         SpaceH12(),
         _customItem(title: 'Mantenimiento del empleo obtenido', content: followReport.jobMaintenance ?? ''),
 
@@ -341,18 +339,12 @@ pw.Widget SpaceH12(){
   return pw.SizedBox(height: 12);
 }
 
-Future<pw.PageTheme> _myPageTheme(PdfPageFormat format, bool myPhoto, profileImageWeb) async {
-  format = format.applyMargin(
-      left: 2.0 * PdfPageFormat.cm,
-      top: 3.0 * PdfPageFormat.cm,
-      right: 2.0 * PdfPageFormat.cm,
-      bottom: 2.0 * PdfPageFormat.cm);
+Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
   return pw.PageTheme(
     pageFormat: format,
-    margin: pw.EdgeInsets.only(top: 70, left: 0.0, right: 20, bottom: 10),
     theme: pw.ThemeData.withFont(
-      base: await PdfGoogleFonts.latoRegular(),
-      bold: await PdfGoogleFonts.alataRegular(),
+      base: await PdfGoogleFonts.interLight(),
+      bold: await PdfGoogleFonts.interMedium(),
       icons: await PdfGoogleFonts.materialIcons(),
     ),
     buildBackground: (pw.Context context) {
@@ -362,12 +354,6 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format, bool myPhoto, profileIma
           children: [
             pw.Container(
               margin: const pw.EdgeInsets.only(left: 30.0, right: 30, top: 60, bottom: 60),
-              width: 200,
-              decoration: pw.BoxDecoration(
-                color: green,
-                borderRadius: pw.BorderRadius.all(pw.Radius.circular(20)),
-                shape: pw.BoxShape.rectangle,
-              ),
               child: pw.Positioned(
                 child: pw.Container(),
                 left: 0,
@@ -388,7 +374,7 @@ class _customRow extends pw.StatelessWidget {
     required this.title2,
     required this.content1,
     required this.content2,
-});
+  });
   final String title1;
   final String content1;
   final String title2;
@@ -399,29 +385,33 @@ class _customRow extends pw.StatelessWidget {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: <pw.Widget>[
           pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.start,
-            children: <pw.Widget>[
-              pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(title1, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                    pw.SizedBox(width: 170),
-                    pw.Text(content1)
-                  ]
-              ),
-              pw.SizedBox(
-                width: 50,
-              ),
-              pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(title2, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                    pw.Text(content2)
-                  ]
-              ),
-            ]
+              mainAxisAlignment: pw.MainAxisAlignment.start,
+              children: <pw.Widget>[
+                pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(title1, style: pw.Theme.of(context)
+                          .defaultTextStyle
+                          .copyWith(fontWeight: pw.FontWeight.normal, color: black)),
+                      pw.SizedBox(width: 170),
+                      pw.Text(content1)
+                    ]
+                ),
+                pw.SizedBox(
+                  width: 50,
+                ),
+                pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(title2, style: pw.Theme.of(context)
+                          .defaultTextStyle
+                          .copyWith(fontWeight: pw.FontWeight.normal, color: black)),
+                      pw.Text(content2)
+                    ]
+                ),
+              ]
           ),
-      ]
+        ]
     );
   }
 }
@@ -433,33 +423,18 @@ class _customItem extends pw.StatelessWidget {
   });
   final String title;
   final String content;
-  
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-        pw.Text(content)
-      ]
-    );
-  }
-}
-
-class _customEnumeration extends pw.StatelessWidget {
-  _customEnumeration({
-    required this.enumeration,
-  });
-  final List<String> enumeration;
 
   @override
   pw.Widget build(pw.Context context) {
     return pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          for(String element in enumeration)
-            if(enumeration.last != element) pw.Text(element),
-            pw.Text(enumeration.last),
+          pw.Text(title,
+              style: pw.Theme.of(context)
+                  .defaultTextStyle
+                  .copyWith(fontWeight: pw.FontWeight.normal, color: black)
+          ),
+          pw.Text(content)
         ]
     );
   }
@@ -477,7 +452,11 @@ class _sectionTitle extends pw.StatelessWidget {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.SizedBox(height: 30),
-          pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+          pw.Text(title,
+              style: pw.Theme.of(context)
+                  .defaultTextStyle
+                  .copyWith(fontWeight: pw.FontWeight.bold, fontSize: 16, color: primary900)
+          ),
           pw.SizedBox(height: 15),
         ]
     );
@@ -496,217 +475,14 @@ class _subSectionTitle extends pw.StatelessWidget {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.SizedBox(height: 20),
-          pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+          pw.Text(title,
+              style: pw.Theme.of(context)
+                  .defaultTextStyle
+                  .copyWith(fontWeight: pw.FontWeight.normal, fontSize: 14, color: primary900)
+          ),
           pw.SizedBox(height: 12),
         ]
     );
-  }
-}
-
-
-class _Block extends pw.StatelessWidget {
-  _Block({
-    this.title,
-    this.descriptionDate,
-    this.descriptionPlace,
-  });
-
-  final String? title;
-  final String? descriptionDate;
-  final String? descriptionPlace;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: <pw.Widget>[
-          pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-                title != null ? pw.Expanded(
-                  child: pw.Text(
-                      title!.toUpperCase(),
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.bold,
-                          color: grey)),
-                ) : pw.Container()
-              ]),
-          pw.Container(
-            child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: <pw.Widget>[
-                  pw.Text(descriptionDate!,
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.normal,
-                          color: grey)),
-                ]),
-          ),
-          pw.Container(
-            child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: <pw.Widget>[
-                  pw.Text(descriptionPlace!,
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.normal,
-                          color: grey)),
-                ]),
-          ),
-          pw.SizedBox(height: 8),
-        ]);
-  }
-}
-
-class _Category extends pw.StatelessWidget {
-  _Category({required this.title, required this.color});
-
-  final String title;
-  final PdfColor color;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Container(
-      alignment: pw.Alignment.centerLeft,
-      padding: const pw.EdgeInsets.only(bottom: 4),
-      child: pw.Text(
-          title.toUpperCase(),
-          textScaleFactor: 1,
-          style: pw.Theme.of(context)
-              .defaultTextStyle
-              .copyWith(
-              fontWeight: pw.FontWeight.bold,
-              color: color)),
-    );
-  }
-}
-
-class _Percent extends pw.StatelessWidget {
-  _Percent({
-    required this.size,
-    required this.value,
-    required this.title,
-  });
-
-  final double size;
-
-  final double value;
-
-  final pw.Widget title;
-
-  static const fontSize = 1.2;
-
-  PdfColor get color => lilac;
-
-  static const backgroundColor = PdfColors.grey300;
-
-  static const strokeWidth = 5.0;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    final widgets = <pw.Widget>[
-      pw.Container(
-        width: size,
-        height: size,
-        child: pw.Stack(
-          alignment: pw.Alignment.center,
-          fit: pw.StackFit.expand,
-          children: <pw.Widget>[
-            pw.Center(
-              child: pw.Text(
-                '${(value * 100).round().toInt()}%',
-                textScaleFactor: fontSize,
-              ),
-            ),
-            pw.CircularProgressIndicator(
-              value: value,
-              backgroundColor: backgroundColor,
-              color: color,
-              strokeWidth: strokeWidth,
-            ),
-          ],
-        ),
-      )
-    ];
-
-    widgets.add(title);
-
-    return pw.Column(children: widgets);
-  }
-}
-
-class _UrlText extends pw.StatelessWidget {
-  _UrlText(this.text, this.url);
-
-  final String text;
-  final String url;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.UrlLink(
-        destination: url,
-        child: pw.Text(text,
-            textScaleFactor: 0.8,
-            style: pw.Theme.of(context)
-                .defaultTextStyle
-                .copyWith(
-                fontWeight: pw.FontWeight.normal,
-                color: white))
-    );
-  }
-}
-
-class _BlockSimple extends pw.StatelessWidget {
-  _BlockSimple({
-    this.title,
-    this.description,
-  });
-
-  final String? title;
-  final String? description;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: <pw.Widget>[
-          pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-                title != null ? pw.Expanded(
-                  child:
-                  pw.Text(
-                      title!.toUpperCase(),
-                      textScaleFactor: 1,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.bold,
-                          color: green)),
-                ) : pw.Container()
-              ]),
-          pw.Container(
-            child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: <pw.Widget>[
-                  description != null ? pw.Text(description!,
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(
-                          fontWeight: pw.FontWeight.normal,
-                          color: grey)) : pw.Container(),
-                ]),
-          ),
-          pw.SizedBox(height: 5),
-        ]);
   }
 }
 
@@ -748,145 +524,6 @@ class _BlockSimpleList extends pw.StatelessWidget {
               ]),
           pw.SizedBox(height: 5),
         ]);
-  }
-}
-
-class _BlockSimpleListLabel extends pw.StatelessWidget {
-  _BlockSimpleListLabel({
-    this.title,
-    this.color
-  });
-
-  final String? title;
-  final PdfColor? color;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: <pw.Widget>[
-          pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-                title != null ? pw.Expanded(
-                  child:
-                  pw.Text(
-                      title!.toUpperCase(),
-                      textScaleFactor: 0.7,
-                      textAlign: pw.TextAlign.center,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(fontWeight: pw.FontWeight.normal, color: color)),
-                ) : pw.Container()
-              ]),
-          pw.SizedBox(height: 5),
-        ]);
-  }
-}
-
-class _CategoryLabel extends pw.StatelessWidget {
-  _CategoryLabel({
-    required this.title,
-    required this.color,
-  });
-
-  final String title;
-  final PdfColor color;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Container(
-      decoration: const pw.BoxDecoration(
-        color: PdfColors.white,
-        borderRadius: pw.BorderRadius.all(pw.Radius.circular(10)),
-      ),
-      margin: const pw.EdgeInsets.only(bottom: 10, top: 10),
-      padding: const pw.EdgeInsets.fromLTRB(20, 4, 20, 5),
-      child: pw.Text(
-          title.toUpperCase(),
-          textScaleFactor: 1,
-          style: pw.Theme.of(context)
-              .defaultTextStyle
-              .copyWith(fontWeight: pw.FontWeight.normal, color: color)
-      ),
-    );
-  }
-}
-
-class _BlockIcon extends pw.StatelessWidget {
-  _BlockIcon({
-    this.title,
-    this.description1,
-    this.description2,
-    this.description3,
-  });
-
-  final String? title;
-  final String? description1;
-  final String? description2;
-  final String? description3;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: <pw.Widget>[
-        pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: <pw.Widget>[
-              title != null ? pw.Expanded(
-                child: pw.Text(
-                    title!,
-                    textScaleFactor: 0.9,
-                    style: pw.Theme.of(context)
-                        .defaultTextStyle
-                        .copyWith(
-                        fontWeight: pw.FontWeight.bold,
-                        color: white)),
-              ) : pw.Container()
-            ]),
-        pw.SizedBox(height: 2),
-        pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: <pw.Widget>[
-              description1 != null ? pw.Expanded(
-                child: pw.Text(
-                    description1!.toUpperCase(),
-                    textScaleFactor: 0.8,
-                    style: pw.Theme.of(context)
-                        .defaultTextStyle
-                        .copyWith(
-                        fontWeight: pw.FontWeight.bold,
-                        color: white)),
-              ) : pw.Container()
-            ]),
-        pw.SizedBox(height: 2),
-        description2 != "" ?
-        pw.Row(
-          children: [
-            pw.Icon(pw.IconData(0xe0be), size: 10.0, color:white),
-            pw.SizedBox(width: 4),
-            _UrlText(description2!, 'mailto: $description1')
-          ],
-        ) : pw.Container(),
-        pw.SizedBox(height: 4),
-        description3 != "" ?
-        pw.Row(
-            children: [
-              pw.Icon(pw.IconData(0xe0b0), size: 10.0, color:white),
-              pw.SizedBox(width: 4),
-              pw.Text(description3!,
-                  textScaleFactor: 0.8,
-                  style: pw.Theme.of(context)
-                      .defaultTextStyle
-                      .copyWith(
-                      fontWeight: pw.FontWeight.normal,
-                      color: white)) ,
-            ]
-        ) : pw.Container(),
-        pw.SizedBox(height: 7),
-      ],
-    );
   }
 }
 

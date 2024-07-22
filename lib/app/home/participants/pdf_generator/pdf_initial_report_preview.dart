@@ -149,11 +149,12 @@ class MyAppState extends State<MyInitialReport> with SingleTickerProviderStateMi
         build: (format) => examplesInitialReport[_tab].builder(
           format,
           _data,
-          widget.user!,
+          widget.user,
           widget.initialReport,
         ),
         actions: actions,
         canDebug: false,
+        initialPageFormat: PdfPageFormat.a4,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
       ),
