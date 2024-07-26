@@ -42,7 +42,6 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   String? techNameComplete;
   List<String> _menuOptions = [
     "Seguimiento", "Objetivos"];
-  Widget? _currentPage;
   String? _value;
   var bodyWidget = <Widget>[];
 
@@ -58,7 +57,6 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
 
   @override
   Widget build(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
     return ValueListenableBuilder<int>(
         valueListenable: ParticipantIPILPage.selectedIndexIpils,
         builder: (context, selectedIndex, child) {
@@ -204,16 +202,16 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                           height: 24,
                         ),
                         onPressed: () async {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //       builder: (context) =>
-                          //           MyIpilEntries(
-                          //             user: widget.participantUser,
-                          //             ipilEntries: ipilEntries,
-                          //             techName: techNameComplete!,
-                          //           )),
-                          // );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    MyIpilEntries(
+                                      user: widget.participantUser,
+                                      ipilEntries: ipilEntries,
+                                      techName: techNameComplete!,
+                                    )),
+                          );
                         },
                       ),
                     ],
