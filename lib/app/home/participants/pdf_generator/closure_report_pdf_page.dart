@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:enreda_empresas/app/models/closureReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'cv_print/data.dart';
@@ -11,7 +12,7 @@ import 'package:enreda_empresas/app/home/participants/pdf_generator/closure_repo
 if (dart.library.html) 'package:enreda_empresas/app/home/participants/pdf_generator/closure_report_format_pdf.dart' as my_worker;
 
 const examplesClosureReport = <Example>[
-  !kIsWeb ? Example('Reporte de cierre', 'closure_report_format_pdf.dart', my_worker.generateClosureReportFile) : Example('Reporte de cierre', 'closure_report_format_pdf.dart', my_worker.generateClosureReportFile),
+  !kIsWeb ? Example(StringConst.CLOSURE_REPORT, 'closure_report_format_pdf.dart', my_worker.generateClosureReportFile) : Example(StringConst.CLOSURE_REPORT, 'closure_report_format_pdf.dart', my_worker.generateClosureReportFile),
 ];
 
 typedef LayoutCallbackWithData = Future<Uint8List> Function(

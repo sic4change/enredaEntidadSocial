@@ -28,7 +28,7 @@ Future<Uint8List> generateClosureReportFile(
     UserEnreda user,
     ClosureReport closureReport,
     ) async {
-  final doc = pw.Document(title: 'Reporte de cierre');
+  final doc = pw.Document(title: StringConst.CLOSURE_REPORT);
 
   format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,
@@ -57,7 +57,7 @@ Future<Uint8List> generateClosureReportFile(
       },
       build: (pw.Context context) => [
         pw.Text(
-          'Reporte de cierre de ${user.firstName} ${user.lastName}',
+          'Informe de cierre de ${user.firstName} ${user.lastName}',
             style: pw.Theme.of(context)
                 .defaultTextStyle
                 .copyWith(fontWeight: pw.FontWeight.bold, fontSize: 16, color: primary900)

@@ -28,7 +28,7 @@ Future<Uint8List> generateDerivationReportFile(
     UserEnreda user,
     DerivationReport derivationReport,
     ) async {
-  final doc = pw.Document(title: 'Reporte de seguimiento');
+  final doc = pw.Document(title: StringConst.DERIVATION_REPORT);
 
   format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,
@@ -57,7 +57,7 @@ Future<Uint8List> generateDerivationReportFile(
       },
       build: (pw.Context context) => [
         pw.Text(
-          'Reporte de derivación de ${user.firstName} ${user.lastName}',
+          'Informe de derivación de ${user.firstName} ${user.lastName}',
             style: pw.Theme.of(context)
                 .defaultTextStyle
                 .copyWith(fontWeight: pw.FontWeight.bold, fontSize: 16, color: primary900)

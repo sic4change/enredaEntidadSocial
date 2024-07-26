@@ -560,6 +560,10 @@ class StringConst {
   static const String ADD_DOCUMENTS = "Añadir documentos";
   static const String IPIL = "IPIL";
   static const String SOCIAL_REPORTS = "Informes sociales";
+  static const String INITIAL_REPORT = "Informe inicial";
+  static const String FOLLOW_REPORT = "Informe de seguimiento";
+  static const String DERIVATION_REPORT = "Informe de derivación";
+  static const String CLOSURE_REPORT = "Informe de cierre";
   static const String QUESTIONNAIRES = "Cuestionarios";
   static const String EMPTY_FORM_ERROR = "Tiene varios campos vacíos";
   static const String WANNA_REMOVE = "¿Desea borrarlos?";
