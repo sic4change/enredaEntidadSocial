@@ -570,6 +570,8 @@ class StringConst {
   static const String TECHNICAL_NAME = "Nombre de la técnica";
   static const String START_HERE = "Comienza aquí...";
   static const String GOALS_MONITORING = "Objetivos y seguimiento:";
+  static const String ADD_IPIL_ENTRY = "Crear nuevo IPIL";
+  static const String DOWNLOAD_ALL = "Descargar todos";
   static const String PERSONAL_DATA_LAW = 'Según la Ley Orgánica 15/1999 de Protección de Datos Personales, autorizo a la empresa al uso y tratamiento de mis datos con fines exclusivamente de selección de personal y bolsas de empleo.';
 
   //Create entity errors

@@ -111,6 +111,7 @@ class ImagePath {
   static const String ICON_RESOURCES = '$imageDir/icon-recursos-entidad.png';
   static const String ICON_SESSIONS = '$imageDir/icon-sesiones-entidad.png';
   static const String ICON_TOOLS = '$imageDir/icon-caja-entidad.png';
+  static const String DOWNLOAD_FILLED = '$imageDir/download-icon.png';
 
   // Participant details
   static const String GAMIFICATION_LOGO = '$imageDir/gamification_logo.png';

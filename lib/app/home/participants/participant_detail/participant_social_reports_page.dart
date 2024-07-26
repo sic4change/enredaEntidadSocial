@@ -138,8 +138,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(color: AppColors.greyBorder),
                             ),
-                            child:
-                            Column(
+                            child: Column(
                                 children: [
                                   _buildHeader(
                                           user,
@@ -156,7 +155,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                                         noneAreSet == true ?
                                           globals.currentSocialEntityUser?.userId == participantAssignedUserId ?
                                         EmptyList(
-                                            title: 'Todavía no has creaoo ningún informe social.',
+                                            title: 'Todavía no has creado ningún informe social.',
                                             subtitle: 'Crea el Informe Inicial.',
                                             imagePath: ImagePath.EMPTY_LiST_ICON,
                                             onPressed: () {
