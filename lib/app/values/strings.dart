@@ -698,7 +698,7 @@ class StringConst {
   static const String INITIAL_LONG_TERM = 'Largo plazo: 6-12 meses';
 
   static const String FOLLOW_PROCESSING_BAG = 'Bolsa de tramitación';
-  static const String FOLLOW_ECONOMIC_AMOUNT = 'Cuantia económica';
+  static const String FOLLOW_ECONOMIC_AMOUNT = 'Cuantía económica';
   static const String FOLLOW_TITLE_9_5_DEVELOP = '9.5 Desarrollo del tinerario formativo';
   static const String FOLLOW_FORMATIONS = 'Formaciones';
   static const String FOLLOW_FORMATION_NAME = 'Nombre de la formación';

@@ -16,19 +16,10 @@ import 'common_widgets/bottom_signatures.dart';
 import 'common_widgets/doc_theme.dart';
 import 'common_widgets/text_formats.dart';
 
-
-
-const PdfColor lilac = PdfColor.fromInt(0xFF6768AB);
-const PdfColor lightLilac = PdfColor.fromInt(0xFFF4F5FB);
-const PdfColor blue = PdfColor.fromInt(0xFF002185);
 const PdfColor grey = PdfColor.fromInt(0xFF535A5F);
-const PdfColor greyDark = PdfColor.fromInt(0xFF44494B);
-const PdfColor green = PdfColor.fromInt(0xF0DA1A0);
 const PdfColor black = PdfColor.fromInt(0xF44494B);
 const PdfColor white = PdfColor.fromInt(0xFFFFFFFF);
 const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
-const leftWidth = 230.0;
-const rightWidth = 350.0;
 final DateFormat formatter = DateFormat('dd/MM/yyyy');
 
 Future<Uint8List> generateFollowReportFile(
@@ -45,13 +36,26 @@ Future<Uint8List> generateFollowReportFile(
       right: 2.0 * PdfPageFormat.cm,
       bottom: 3.0 * PdfPageFormat.cm);
 
-  final pageTheme = await MyPageTheme(format);
+  final bool isMdm = followReport.subsidy == '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS' ? true : false;
+
+  final pageTheme = await MyPageTheme(format, isMdm);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
 
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
+        footer: (pw.Context context) {
+              return pw.Container(
+                  alignment: pw.Alignment.centerRight,
+                  margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
+                  child: pw.Text(
+                      'Pág. ${context.pageNumber} de ${context.pagesCount}',
+                      textScaleFactor: 0.8,
+                      style: pw.Theme.of(context)
+                          .defaultTextStyle
+                          .copyWith(color: PdfColors.grey)));
+        },
       build: (pw.Context context) => [
         pw.Text(
           'Reporte de seguimiento de ${user.firstName} ${user.lastName}',
