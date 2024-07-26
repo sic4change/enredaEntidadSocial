@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/services.dart' show NetworkAssetBundle, rootBundle;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -16,9 +16,9 @@ const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
 const leftWidth = 230.0;
 const rightWidth = 350.0;
 
-Future<pw.PageTheme> MyPageTheme(PdfPageFormat format) async {
-  final bgShape = await rootBundle.loadString('assets/images/polygon.svg');
-  final bgShape2 = await rootBundle.loadString('assets/images/polygon2.svg');
+Future<pw.PageTheme> MyPageTheme(PdfPageFormat format, bool isMdm) async {
+  final bgShape2 = isMdm ? await rootBundle.loadString('assets/images/logos-mdm.svg') :
+    await rootBundle.loadString('assets/images/logos-fse.svg');
   return pw.PageTheme(
     pageFormat: format,
     theme: pw.ThemeData.withFont(
@@ -27,29 +27,41 @@ Future<pw.PageTheme> MyPageTheme(PdfPageFormat format) async {
       icons: await PdfGoogleFonts.materialIcons(),
     ),
     buildBackground: (pw.Context context) {
-      if (context.pageNumber > 1) {
-        return pw.FullPage(
-          ignoreMargins: true,
-          child: pw.Stack(
-            children: [
-              pw.Positioned(
-                child: pw.SvgImage(svg: bgShape2),
-                left: 0,
-                top: 10,
-              ),
-            ],
-          ),
-        );
-      }
+      // if (context.pageNumber > 1) {
+      //   return pw.FullPage(
+      //     ignoreMargins: true,
+      //     child: pw.Stack(
+      //       children: [
+      //         pw.Positioned(
+      //           child: pw.SvgImage(svg: bgShape2),
+      //           left: 0,
+      //           top: 10,
+      //         ),
+      //       ],
+      //     ),
+      //   );
+      // }
       return pw.FullPage(
         ignoreMargins: true,
         child: pw.Stack(
           children: [
             pw.Positioned(
-              child: pw.SvgImage(svg: bgShape),
-              left: 0,
-              top: 10,
-            ),
+              left: 10,
+              top: 30,
+              right: 10,
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.center,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  pw.Container(
+                    width: 550,
+                    decoration: pw.BoxDecoration(
+                      shape: pw.BoxShape.rectangle,
+                    ),
+                    child: pw.SvgImage(svg: bgShape2),
+                  ),
+                ],)
+              ),
           ],
         ),
       );

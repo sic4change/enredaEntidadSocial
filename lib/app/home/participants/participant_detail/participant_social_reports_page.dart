@@ -25,6 +25,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
+import '../../../common_widgets/empty-list.dart';
 
 enum SampleItem { itemOne, itemTwo, itemThree, itemFour }
 
@@ -46,6 +47,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
   var bodyWidget = <Widget>[];
   String? participantAssignedUserId;
   late InitialReport initialReport = InitialReport();
+  bool? noneAreSet;
 
   @override
   void initState() {
@@ -98,6 +100,9 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
             if(user.derivationReportId != null){
               totalReports++;
             }
+            noneAreSet = [user.initialReportId, user.followReportId,
+              user.derivationReportId, user.closureReportId]
+                .every((id) => id == null);
           }else{
             user = widget.participantUser;
           }
@@ -157,6 +162,19 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                                   ),
                                   Column(
                                     children: [
+                                        noneAreSet == true ?
+                                          globals.currentSocialEntityUser?.userId == participantAssignedUserId ?
+                                        EmptyList(
+                                            title: 'Todavía no has creaoo ningún informe social.',
+                                            subtitle: 'Crea el Informe Inicial.',
+                                            imagePath: ImagePath.EMPTY_LiST_ICON,
+                                            onPressed: () {
+                                                ParticipantSocialReportPage.selectedIndexInforms.value = 1;
+                                            }
+                                        ) : EmptyList(
+                                              title: 'No hay informes creados.',
+                                              imagePath: ImagePath.EMPTY_LiST_ICON,
+                                          ) : Container(),
                                         if(user.initialReportId != null)
                                            _documentTile(
                                               context,

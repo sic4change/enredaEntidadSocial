@@ -130,6 +130,7 @@ class ImagePath {
   static const String PERSONAL_DOCUMENTATION_NOT_VIEW = '$imageDir/icon-no-ver-entidad.png';
   static const String PERSONAL_DOCUMENTATION_ADD = '$imageDir/icon-add-entidad.png';
   static const String PERSONAL_DOCUMENTATION_DOWNLOAD = '$imageDir/icon-descargar-entidad.png';
+  static const String EMPTY_LiST_ICON = '$imageDir/empty-list.png';
 
   //Control Panel
   static const String CONTROL_PANEL = '$imageDir/panelcontrol-min.png';
