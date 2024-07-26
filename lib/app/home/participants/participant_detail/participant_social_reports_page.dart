@@ -68,7 +68,6 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
         builder: (context, selectedIndex, child) {
           return SingleChildScrollView(
             child: Container(
-                margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
                 child: bodyWidget[selectedIndex]),
           );
         }
@@ -135,7 +134,6 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             derivationReportUser = snapshot.data!;
                           }
                           return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 20),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(color: AppColors.greyBorder),
@@ -144,13 +142,6 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             Column(
                                 children: [
                                   _buildHeader(
-                                          // () {
-                                          //   if (user.closureReportId == null) {
-                                          //     setState(() {
-                                          //       currentPage = ClosureReportForm(user: widget.participantUser);
-                                          //     });
-                                          //   }
-                                          // },
                                           user,
                                           initialReportUser,
                                           followReportUser,

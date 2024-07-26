@@ -216,6 +216,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
   Widget followReport(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
     return Container(
+      padding: Responsive.isMobile(context) ? EdgeInsets.zero : EdgeInsets.symmetric(vertical: 15),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           border: Border.all(color: AppColors.greyBorder)
@@ -223,25 +224,23 @@ class _FollowReportFormState extends State<FollowReportForm> {
       child:
       Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 50, vertical: 15.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  IconButton(
-                    onPressed: () => setState(() {
-                      ParticipantSocialReportPage.selectedIndexInforms.value = 0;
-                    }),
-                    icon: Icon(Icons.arrow_back_rounded),
-                    iconSize: 30,
-                    color: AppColors.turquoiseBlue,
-                  ),
-                  SpaceW8(),
-                  CustomTextBoldTitle(
-                      title: 'Informe de Seguimiento'.toUpperCase()),
-                ],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SpaceW8(),
+                IconButton(
+                  onPressed: () => setState(() {
+                    ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+                  }),
+                  icon: Icon(Icons.arrow_back_rounded),
+                  iconSize: 30,
+                  color: AppColors.turquoiseBlue,
+                ),
+                SpaceW8(),
+                CustomTextBoldTitle(
+                    title: 'Informe de Seguimiento'.toUpperCase()),
+              ],
             ),
             Divider(color: AppColors.greyBorder,),
             StreamBuilder<FollowReport>(
