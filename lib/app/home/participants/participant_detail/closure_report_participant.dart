@@ -321,36 +321,44 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
   Widget closureReport(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
 
-    return Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              IconButton(
-                onPressed: () => setState(() {
-                  ParticipantSocialReportPage.selectedIndexInforms.value = 0;
-                }),
-                icon: Icon(Icons.arrow_back_rounded),
-                iconSize: 30,
-                color: AppColors.turquoiseBlue,
-              ),
-              SpaceW8(),
-              CustomTextBoldTitle(
-                  title: 'Informe de cierre de caso'.toUpperCase()),
-            ],
-          ),
-          Divider(color: AppColors.greyBorder,),
-          StreamBuilder<ClosureReport>(
-              stream: database.closureReportsStreamByUserId(userEnreda.userId),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  ClosureReport closureReportSaved = snapshot.data!;
-                  return completeClosureForm(context, closureReportSaved, userEnreda);
+    return Container(
+      padding: Responsive.isMobile(context) ? EdgeInsets.zero : EdgeInsets.symmetric(vertical: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: AppColors.greyBorder)
+      ),
+      child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: () => setState(() {
+                    ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+                  }),
+                  icon: Icon(Icons.arrow_back_rounded),
+                  iconSize: 30,
+                  color: AppColors.turquoiseBlue,
+                ),
+                SpaceW8(),
+                CustomTextBoldTitle(
+                    title: 'Informe de cierre de caso'.toUpperCase()),
+              ],
+            ),
+            Divider(color: AppColors.greyBorder,),
+            StreamBuilder<ClosureReport>(
+                stream: database.closureReportsStreamByUserId(userEnreda.userId),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    ClosureReport closureReportSaved = snapshot.data!;
+                    return completeClosureForm(context, closureReportSaved, userEnreda);
+                  }
+                  return Container();
                 }
-                return Container();
-              }
-          ),
-        ]
+            ),
+          ]
+      ),
     );
   }
 

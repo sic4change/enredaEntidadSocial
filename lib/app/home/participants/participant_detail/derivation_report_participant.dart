@@ -374,7 +374,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
     final database = Provider.of<Database>(context, listen: false);
 
     return Container(
-      margin: EdgeInsets.only(top: 20),
+      padding: Responsive.isMobile(context) ? EdgeInsets.zero : EdgeInsets.symmetric(vertical: 15),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           border: Border.all(color: AppColors.greyBorder)
@@ -382,10 +382,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
       child:
       Column(
           children: [
-            SizedBox(height: 10,),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SpaceW8(),
                 IconButton(
                   onPressed: () => setState(() {
                     ParticipantSocialReportPage.selectedIndexInforms.value = 0;

@@ -79,67 +79,63 @@ class _InitialReportFormState extends State<InitialReportForm> {
   Widget initialReport(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
 
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-        child: Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: AppColors.greyBorder)),
-          child: Column(children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 50, vertical: 15.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () => setState(() {
-                      ParticipantSocialReportPage.selectedIndexInforms.value = 0;
-                    }),
-                    icon: Icon(Icons.arrow_back_rounded),
-                    iconSize: 30,
-                    color: AppColors.turquoiseBlue,
-                  ),
-                  SpaceW8(),
-                  CustomTextBoldTitle(title: 'Informe inicial'.toUpperCase()),
-                ],
-              ),
+    return Container(
+      padding: Responsive.isMobile(context) ? EdgeInsets.zero : EdgeInsets.symmetric(vertical: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: AppColors.greyBorder)),
+      child: Column(children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SpaceW8(),
+            IconButton(
+              onPressed: () => setState(() {
+                ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+              }),
+              icon: Icon(Icons.arrow_back_rounded),
+              iconSize: 30,
+              color: AppColors.turquoiseBlue,
             ),
-            Divider(
-              color: AppColors.greyBorder,
-            ),
-            StreamBuilder(
-                stream: database.userEnredaStreamByUserId(user.userId),
-                builder: (context, snapshotUser) {
-                  if (snapshotUser.hasData) {
-                    UserEnreda userStream = snapshotUser.data!;
-                    return StreamBuilder<InitialReport>(
-                        stream: database.initialReportsStreamByUserId(user.userId),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            initialReportSaved = snapshot.data!;
-                            return completeInitialForm(
-                                context, initialReportSaved);
-                          }
-                          else {
-                            if (userStream.initialReportId == null) {
-                              database.addInitialReport(InitialReport(
-                                userId: user.userId,
-                              ));
-                            }
-                            return Container(
-                              height: 300,
-                            );
-                          }
-                        });
-                  }
-                  return Container(
-                    height: 300,
-                  );
-                }),
-          ]),
-        ));
+            SpaceW8(),
+            CustomTextBoldTitle(title: 'Informe inicial'.toUpperCase()),
+          ],
+        ),
+        Divider(
+          color: AppColors.greyBorder,
+        ),
+        StreamBuilder(
+            stream: database.userEnredaStreamByUserId(user.userId),
+            builder: (context, snapshotUser) {
+              if (snapshotUser.hasData) {
+                UserEnreda userStream = snapshotUser.data!;
+                return StreamBuilder<InitialReport>(
+                    stream: database.initialReportsStreamByUserId(user.userId),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        initialReportSaved = snapshot.data!;
+                        return completeInitialForm(
+                            context, initialReportSaved);
+                      }
+                      else {
+                        if (userStream.initialReportId == null) {
+                          database.addInitialReport(InitialReport(
+                            userId: user.userId,
+                          ));
+                        }
+                        return Container(
+                          height: 300,
+                        );
+                      }
+                    });
+              }
+              return Container(
+                height: 300,
+              );
+            }),
+      ]),
+    );
   }
 
   Widget informSectionTitle(String title) {
