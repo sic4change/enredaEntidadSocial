@@ -28,7 +28,7 @@ Future<Uint8List> generateInitialReportFile(
     UserEnreda user,
     InitialReport initialReport,
     ) async {
-  final doc = pw.Document(title: 'Reporte inicial');
+  final doc = pw.Document(title: StringConst.INITIAL_REPORT);
 
   format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,
@@ -57,7 +57,7 @@ Future<Uint8List> generateInitialReportFile(
       },
       build: (pw.Context context) => [
         pw.Text(
-          'Reporte inicial de ${user.firstName} ${user.lastName}',
+          'Informe inicial de ${user.firstName} ${user.lastName}',
           textAlign: pw.TextAlign.center,
           style: pw.Theme.of(context)
               .defaultTextStyle

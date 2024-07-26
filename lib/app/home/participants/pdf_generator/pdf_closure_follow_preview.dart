@@ -127,7 +127,7 @@ class MyAppState extends State<MyClosureReport> with SingleTickerProviderStateMi
         iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
         actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
-        title: CustomTextBoldCenter(title: 'Reporte de cierre de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
+        title: CustomTextBoldCenter(title: 'Informe de cierre de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,

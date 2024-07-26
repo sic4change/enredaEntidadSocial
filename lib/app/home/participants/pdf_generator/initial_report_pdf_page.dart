@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'cv_print/data.dart';
@@ -14,7 +15,7 @@ import 'package:enreda_empresas/app/home/participants/pdf_generator/initial_repo
 if (dart.library.html) 'package:enreda_empresas/app/home/participants/pdf_generator/initial_report_format_pdf.dart' as my_worker;
 
 const examplesInitialReport = <Example>[
-  !kIsWeb ? Example('Reporte inicial', 'initial_report_format_pdf.dart', my_worker.generateInitialReportFile) : Example('Reporte inicial', 'initial_report_format_pdf.dart', my_worker.generateInitialReportFile),
+  !kIsWeb ? Example(StringConst.INITIAL_REPORT, 'initial_report_format_pdf.dart', my_worker.generateInitialReportFile) : Example(StringConst.INITIAL_REPORT, 'initial_report_format_pdf.dart', my_worker.generateInitialReportFile),
 ];
 
 typedef LayoutCallbackWithData = Future<Uint8List> Function(

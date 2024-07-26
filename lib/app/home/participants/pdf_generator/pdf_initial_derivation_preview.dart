@@ -126,7 +126,7 @@ class MyAppState extends State<MyDerivationReport> with SingleTickerProviderStat
         iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
         actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
-        title: CustomTextBoldCenter(title: 'Reporte de derivación de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
+        title: CustomTextBoldCenter(title: 'Informe de derivación de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,

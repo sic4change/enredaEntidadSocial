@@ -131,7 +131,7 @@ class MyAppState extends State<MyInitialReport> with SingleTickerProviderStateMi
         iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
         actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
-        title: CustomTextBoldCenter(title: 'Reporte inicial de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
+        title: CustomTextBoldCenter(title: 'Informe inicial de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,

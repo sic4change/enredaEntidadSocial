@@ -28,7 +28,7 @@ Future<Uint8List> generateFollowReportFile(
     UserEnreda user,
     FollowReport followReport,
     ) async {
-  final doc = pw.Document(title: 'Reporte de seguimiento');
+  final doc = pw.Document(title: StringConst.FOLLOW_REPORT);
 
   format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,
@@ -58,7 +58,7 @@ Future<Uint8List> generateFollowReportFile(
         },
       build: (pw.Context context) => [
         pw.Text(
-          'Reporte de seguimiento de ${user.firstName} ${user.lastName}',
+          'Informe de seguimiento de ${user.firstName} ${user.lastName}',
             style: pw.Theme.of(context)
                 .defaultTextStyle
                 .copyWith(fontWeight: pw.FontWeight.bold, fontSize: 16, color: primary900)
