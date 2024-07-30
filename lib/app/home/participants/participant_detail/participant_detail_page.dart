@@ -1,6 +1,6 @@
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_control_panel_page.dart';
-import 'package:enreda_empresas/app/home/participants/participant_detail/participant_documentation_page.dart';
-import 'package:enreda_empresas/app/home/participants/participant_detail/participant_ipil_page.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/participant_documentation_page.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/ipils/participant_ipil_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';

@@ -26,7 +26,7 @@ import '../../../values/values.dart';
 import '../experience_tile.dart';
 import '../pdf_generator/cv_print/my_cv_multiple_pages.dart';
 import '../reference_tile.dart';
-import 'competency_tile.dart';
+import 'competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class MyCurriculumPage extends StatefulWidget {

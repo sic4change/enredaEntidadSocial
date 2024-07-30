@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/initial_report_pdf_page.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/ipil_pdf_page.dart';
+import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/ipil_pdf_page.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';

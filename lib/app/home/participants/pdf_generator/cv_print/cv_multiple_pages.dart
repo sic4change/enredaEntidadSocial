@@ -8,15 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import '../../../../models/certificationRequest.dart';
 
-// import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_print/resume2_mobile.dart'
-// if (dart.library.html) 'package:enreda_empresas/app/home/participants/pdf_generator/cv_print/resume2_mobile.dart' as my_cv;
-
 import 'data.dart';
 
-var examplesMultiplePages = <Example>[
-  //!kIsWeb ? Example('CV', 'resume2_mobile.dart', my_cv.generateResume2) : Example('CV', 'resume2_web.dart', my_cv.generateResume2),
-  Example('CV', 'resume2_web.dart', generateResume2),
-];
+var examplesMultiplePages = <Example>[Example('CV', 'resume2_web.dart', generateResume2)];
 
 typedef LayoutCallbackWithData = Future<Uint8List> Function(
     PdfPageFormat pageFormat,

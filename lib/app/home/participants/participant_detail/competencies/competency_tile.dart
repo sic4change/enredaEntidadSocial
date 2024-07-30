@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../../../common_widgets/precached_avatar.dart';
-import '../../../models/competency.dart';
-import '../../../utils/responsive.dart';
-import '../../../values/strings.dart';
-import '../../../values/values.dart';
+import '../../../../common_widgets/precached_avatar.dart';
+import '../../../../models/competency.dart';
+import '../../../../utils/responsive.dart';
+import '../../../../values/strings.dart';
+import '../../../../values/values.dart';
 
 class CompetencyTile extends StatelessWidget {
   const CompetencyTile({Key? key, required this.competency, this.status = StringConst.BADGE_CERTIFIED, this.mini = false, this.medium = false, this.height = 60.0}) : super(key: key);

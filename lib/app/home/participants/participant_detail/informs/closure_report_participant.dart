@@ -17,9 +17,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../../utils/adaptative.dart';
-import '../../../utils/responsive.dart';
-import 'participant_social_reports_page.dart';
+import '../../../../utils/adaptative.dart';
+import '../../../../utils/responsive.dart';
+import '../participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class ClosureReportForm extends StatefulWidget {

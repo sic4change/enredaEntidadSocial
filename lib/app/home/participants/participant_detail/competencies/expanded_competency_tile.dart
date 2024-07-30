@@ -1,4 +1,4 @@
-import 'package:enreda_empresas/app/home/participants/participant_detail/competency_tile.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';

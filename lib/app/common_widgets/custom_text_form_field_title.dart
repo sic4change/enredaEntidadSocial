@@ -15,6 +15,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
     this.enabled = true,
     this.height,
     this.controller,
+    this.color = AppColors.greyDark,
   });
 
   final String labelText;
@@ -27,6 +28,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
   final bool enabled;
   final double? height;
   final TextEditingController? controller;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +40,9 @@ class CustomTextFormFieldTitle extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Text(
             labelText,
-            style: textTheme.button?.copyWith(
+            style: textTheme.bodySmall?.copyWith(
               height: 1.5,
-              color: AppColors.greyDark,
+              color: color,
               fontWeight: FontWeight.w700,
               fontSize: fontSize,
             ),

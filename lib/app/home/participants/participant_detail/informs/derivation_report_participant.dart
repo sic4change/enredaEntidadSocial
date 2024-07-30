@@ -17,8 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../../utils/adaptative.dart';
-import '../../../utils/responsive.dart';
+import '../../../../utils/adaptative.dart';
+import '../../../../utils/responsive.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class DerivationReportForm extends StatefulWidget {

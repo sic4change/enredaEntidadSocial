@@ -98,25 +98,29 @@ class CustomText extends StatelessWidget {
 
 class CustomTextBold extends StatelessWidget {
 
-  const CustomTextBold({super.key,  required this.title, this.color = AppColors.greyAlt, this.height = 1.5});
+  const CustomTextBold({super.key,  required this.title, this.color = AppColors.greyAlt, this.height = 1.5, this.padding = EdgeInsets.zero});
   final String title;
   final Color color;
   final double height;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
     double fontSize = responsiveSize(context, 14, 15, md: 14);
     TextTheme textTheme = Theme.of(context).textTheme;
-    return Text(
-      title,
-      style: textTheme.bodySmall?.copyWith(
-          color: color,
-          height: height,
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold
+    return Padding(
+      padding: padding,
+      child: Text(
+        title,
+        style: textTheme.bodySmall?.copyWith(
+            color: color,
+            height: height,
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
       ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
     );
   }
 }
