@@ -5,7 +5,7 @@ import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/show_custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
-import 'package:enreda_empresas/app/home/participants/participant_detail/competency_tile.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/my_curriculum_page.dart';
 import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/competency.dart';

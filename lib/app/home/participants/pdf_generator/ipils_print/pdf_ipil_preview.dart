@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
-import 'package:enreda_empresas/app/home/participants/pdf_generator/ipil_pdf_page.dart';
+import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/ipil_pdf_page.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
@@ -15,7 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'cv_print/data.dart';
+import '../cv_print/data.dart';
 
 
 class MyIpilEntries extends StatefulWidget {
@@ -131,7 +131,7 @@ class MyAppState extends State<MyIpilEntries> with SingleTickerProviderStateMixi
         iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
         actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
-        title: CustomTextBoldCenter(title: 'Mi lista de ipils', color: AppColors.turquoiseBlue,),
+        title: CustomTextBoldCenter(title: 'Mi lista de IPILs', color: AppColors.turquoiseBlue,),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -149,12 +149,13 @@ class MyAppState extends State<MyIpilEntries> with SingleTickerProviderStateMixi
         build: (format) => examplesIpil[_tab].builder(
           format,
           _data,
-          widget.user!,
+          widget.user,
           widget.ipilEntries,
           widget.techName,
         ),
         actions: actions,
         canDebug: false,
+        initialPageFormat: PdfPageFormat.a4,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
       ),

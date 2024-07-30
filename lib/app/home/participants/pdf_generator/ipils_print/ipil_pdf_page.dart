@@ -1,18 +1,14 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/ipil_format_pdf.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
-import 'cv_print/data.dart';
+import '../cv_print/data.dart';
 
-import 'package:enreda_empresas/app/home/participants/pdf_generator/ipil_format_pdf.dart'
-if (dart.library.html) 'package:enreda_empresas/app/home/participants/pdf_generator/ipil_format_pdf.dart' as my_worker;
-
-const examplesIpil = <Example>[
-  !kIsWeb ? Example('IPIL', 'ipil_format_pdf.dart', my_worker.generateIpilFile) : Example('IPIL', 'ipil_format_pdf.dart', my_worker.generateIpilFile),
-];
+const examplesIpil = <Example>[Example('IPIL', 'ipil_format_pdf.dart', generateIpilFile),];
 
 typedef LayoutCallbackWithData = Future<Uint8List> Function(
     PdfPageFormat pageFormat,

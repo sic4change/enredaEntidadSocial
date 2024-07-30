@@ -16,8 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../../utils/adaptative.dart';
-import '../../../utils/responsive.dart';
+import '../../../../utils/adaptative.dart';
+import '../../../../utils/responsive.dart';
 
 class InitialReportForm extends StatefulWidget {
   const InitialReportForm({super.key, required this.user});

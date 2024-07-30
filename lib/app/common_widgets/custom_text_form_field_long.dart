@@ -2,6 +2,8 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'custom_text.dart';
+
 class CustomTextFormFieldLong extends StatelessWidget {
   const CustomTextFormFieldLong({
     super.key,
@@ -31,21 +33,12 @@ class CustomTextFormFieldLong extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
-          child: Text(
-            labelText,
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: GoogleFonts.outfit().fontFamily,
-              fontWeight: FontWeight.w500,
-              color: AppColors.turquoiseBlue,
-            ),
-          ),
+          child: CustomTextBold(title: labelText, color: AppColors.primary900,),
         ),
         textField(context),
       ],
@@ -58,18 +51,25 @@ class CustomTextFormFieldLong extends StatelessWidget {
       maxLines: 12,
       minLines: 1,
       decoration: InputDecoration(
-        contentPadding: EdgeInsets.all(5),
+        contentPadding: EdgeInsets.all(8),
         hintText: hintText,
+        hintStyle:  textTheme.bodySmall?.copyWith(
+          height: 1.5,
+          color: AppColors.grey300,
+          fontWeight: FontWeight.w300,
+          fontStyle: FontStyle.italic,
+          fontSize: fontSize,
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: BorderSide(
-            color: Colors.transparent,
+            color: AppColors.greyUltraLight,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: BorderSide(
-            color: Colors.transparent,
+            color: AppColors.greyUltraLight,
             width: 1.0,
           ),
         ),
@@ -88,9 +88,8 @@ class CustomTextFormFieldLong extends StatelessWidget {
       onChanged: onChanged,
       onFieldSubmitted: onFieldSubmitted,
       //onTapOutside: onTapOutside,
-
       enabled: enabled,
-      style: textTheme.button?.copyWith(
+      style: textTheme.bodySmall?.copyWith(
         height: 1.5,
         color: AppColors.greyDark,
         fontWeight: FontWeight.w400,

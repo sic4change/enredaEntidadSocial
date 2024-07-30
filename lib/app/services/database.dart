@@ -151,9 +151,13 @@ abstract class Database {
      Future<void> setDerivationReport(DerivationReport derivationReport);
      Future<void> addDerivationReport(DerivationReport derivationReport);
      Stream<List<IpilReinforcement>> ipilReinforcementStream();
+     Stream<List<IpilReinforcement>> ipilReinforcementStreamByUser(List<String> idList);
      Stream<List<IpilContextualization>> ipilContextualizationStream();
+     Stream<List<IpilContextualization>> ipilContextualizationStreamByUser(List<String> idList);
      Stream<List<IpilConnectionTerritory>> ipilConnectionTerritoryStream();
+     Stream<List<IpilConnectionTerritory>> ipilConnectionTerritoryStreamByUser(List<String> idList);
      Stream<List<IpilInterviews>> ipilInterviewsStream();
+     Stream<List<IpilInterviews>> ipilInterviewsStreamByUser(List<String> idList);
      Stream<List<IpilResults>> ipilResultsStream();
      Stream<IpilObjectives> ipilObjectivesStreamByUserId(String userId);
      Future<void> setIpilObjectives(IpilObjectives ipilObjectives);
@@ -1018,6 +1022,79 @@ class FirestoreDatabase implements Database {
     builder: (data, documentId) => IpilReinforcement.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
+
+  @override
+  Stream<List<IpilReinforcement>> ipilReinforcementStreamByUser(List<String?> reinforcementIdList) async* {
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilReinforcement());
+    final batches = <Future<List<IpilReinforcement>>>[];
+
+    for (var i = 0; i < reinforcementIdList.length; i += 10) {
+      final batch = reinforcementIdList.sublist(i, i + 10 < reinforcementIdList.length ? i + 10 : reinforcementIdList.length);
+      final futureBatch = collectionPath
+          .where('ipilReinforcementId', whereIn: batch)
+          .get()
+          .then((results) => results.docs.map<IpilReinforcement>((result) => IpilReinforcement.fromMap(result.data(), result.id)).toList());
+      batches.add(futureBatch);
+    }
+    final results = await Future.wait(batches);
+    var combinedResults = results.expand((i) => i).toSet().toList();
+    yield combinedResults;
+  }
+
+  @override
+  Stream<List<IpilContextualization>> ipilContextualizationStreamByUser(List<String?> contextualizationIdList) async* {
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilContextualization());
+    final batches = <Future<List<IpilContextualization>>>[];
+
+    for (var i = 0; i < contextualizationIdList.length; i += 10) {
+      final batch = contextualizationIdList.sublist(i, i + 10 < contextualizationIdList.length ? i + 10 : contextualizationIdList.length);
+      final futureBatch = collectionPath
+          .where('ipilContextualizationId', whereIn: batch)
+          .get()
+          .then((results) => results.docs.map<IpilContextualization>((result) => IpilContextualization.fromMap(result.data(), result.id)).toList());
+      batches.add(futureBatch);
+    }
+    final results = await Future.wait(batches);
+    var combinedResults = results.expand((i) => i).toSet().toList();
+    yield combinedResults;
+  }
+
+  @override
+  Stream<List<IpilConnectionTerritory>> ipilConnectionTerritoryStreamByUser(List<String?> connectionTerritoryIdList) async* {
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilConnectionTerritory());
+    final batches = <Future<List<IpilConnectionTerritory>>>[];
+
+    for (var i = 0; i < connectionTerritoryIdList.length; i += 10) {
+      final batch = connectionTerritoryIdList.sublist(i, i + 10 < connectionTerritoryIdList.length ? i + 10 : connectionTerritoryIdList.length);
+      final futureBatch = collectionPath
+          .where('ipilConnectionTerritoryId', whereIn: batch)
+          .get()
+          .then((results) => results.docs.map<IpilConnectionTerritory>((result) => IpilConnectionTerritory.fromMap(result.data(), result.id)).toList());
+      batches.add(futureBatch);
+    }
+    final results = await Future.wait(batches);
+    var combinedResults = results.expand((i) => i).toSet().toList();
+    yield combinedResults;
+  }
+
+  @override
+  Stream<List<IpilInterviews>> ipilInterviewsStreamByUser(List<String?> interviewsIdList) async* {
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilInterviews());
+    final batches = <Future<List<IpilInterviews>>>[];
+
+    for (var i = 0; i < interviewsIdList.length; i += 10) {
+      final batch = interviewsIdList.sublist(i, i + 10 < interviewsIdList.length ? i + 10 : interviewsIdList.length);
+      final futureBatch = collectionPath
+          .where('ipilInterviewsId', whereIn: batch)
+          .get()
+          .then((results) => results.docs.map<IpilInterviews>((result) => IpilInterviews.fromMap(result.data(), result.id)).toList());
+      batches.add(futureBatch);
+    }
+    final results = await Future.wait(batches);
+    var combinedResults = results.expand((i) => i).toSet().toList();
+    yield combinedResults;
+  }
+
 
   @override
   Stream<List<IpilContextualization>> ipilContextualizationStream() => _service.collectionStream(

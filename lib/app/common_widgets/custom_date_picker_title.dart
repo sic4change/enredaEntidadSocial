@@ -14,6 +14,7 @@ class CustomDatePickerTitle extends StatelessWidget {
     this.validator,
     this.initialValue,
     this.enabled,
+    this.color = AppColors.greyDark,
 
   });
   final String labelText;
@@ -23,6 +24,7 @@ class CustomDatePickerTitle extends StatelessWidget {
   final String ?Function(DateTime?)? validator;
   final DateTime? initialValue;
   final bool? enabled;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +44,9 @@ class CustomDatePickerTitle extends StatelessWidget {
                 SpaceW12(),
                 Text(
                   labelText,
-                  style: textTheme.button?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
-                    color: AppColors.greyDark,
+                    color: color,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),

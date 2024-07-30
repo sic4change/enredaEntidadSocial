@@ -248,7 +248,7 @@ Future<Uint8List> generateInitialReportFile(
         SectionTitle(title: '9. Itinerario formativo laboral'),
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation13 ?? ''),
         SpaceH5(),
-        CustomRow(title1: 'Nivel educativo', title2: 'Situación laboral', content1: initialReport.educationLevel ?? '', content2: initialReport.laborSituation ?? ''),
+        CustomRow(title1: 'Nivel educativo', title2: 'Situación laboral inicial', content1: initialReport.educationLevel ?? '', content2: initialReport.laborSituation ?? ''),
         SpaceH5(),
         initialReport.laborSituation == 'Ocupada cuenta propia' || initialReport.laborSituation == 'Ocupada cuenta ajena' ?
             pw.Column(

@@ -1,10 +1,10 @@
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
-import 'package:enreda_empresas/app/home/participants/participant_detail/closure_report_participant.dart';
-import 'package:enreda_empresas/app/home/participants/participant_detail/derivation_report_participant.dart';
-import 'package:enreda_empresas/app/home/participants/participant_detail/follow_report_participant.dart';
-import 'package:enreda_empresas/app/home/participants/participant_detail/initial_report_participant.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/informs/closure_report_participant.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/informs/derivation_report_participant.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/informs/follow_report_participant.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/informs/initial_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_closure_follow_preview.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_derivation_preview.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_follow_preview.dart';

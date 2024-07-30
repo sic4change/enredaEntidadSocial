@@ -18,8 +18,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
-import '../../../utils/adaptative.dart';
-import '../../../utils/responsive.dart';
+import '../../../../utils/adaptative.dart';
+import '../../../../utils/responsive.dart';
 
 class FollowReportForm extends StatefulWidget {
   const FollowReportForm({super.key, required this.user,
