@@ -235,7 +235,7 @@ class _EntityListTileState extends State<EntityListTile> {
                                     placeholder: ImagePath.IMAGE_DEFAULT,
                                     width: 100,
                                     height: 100,
-                                    fit: BoxFit.cover,
+                                    fit: BoxFit.fitWidth,
                                     image: currentSocialEntity.photo!,
                                   ),
                           ),
