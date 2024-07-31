@@ -11,6 +11,7 @@ class IpilEntry {
     required this.userId,
     required this.date,
     this.reinforcement,
+    this.reinforcementsText,
     this.contextualization,
     this.connectionTerritory,
     this.interviews,
@@ -22,7 +23,8 @@ class IpilEntry {
   final String? techId;
   final String userId;
   late DateTime date;
-  late  List<String>? reinforcement;
+  late List<String>? reinforcement;
+  late List<String>? reinforcementsText;
   late List<String>? contextualization;
   late List<String>? connectionTerritory;
   late List<String>? interviews;
