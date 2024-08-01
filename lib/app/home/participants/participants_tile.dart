@@ -89,8 +89,8 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                             width: 80,
                             color: AppColors.pink600,
                             child: Center(child: Text(
-                              '${(widget.user.firstName??'-').substring(0, 1)} '
-                              '${(widget.user.lastName??'-').substring(0, 1)}',
+                              '${(widget.user.firstName??'-').toUpperCase().substring(0, 1)} '
+                              '${(widget.user.lastName??'-').toUpperCase().substring(0, 1)}',
                               style: textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.white,

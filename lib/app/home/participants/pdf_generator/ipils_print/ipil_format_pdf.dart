@@ -20,11 +20,7 @@ Future<Uint8List> generateIpilFile(
     ) async {
   final doc = pw.Document(title: 'Mis IPILs');
   const PdfColor grey = PdfColor.fromInt(0xFF535A5F);
-  const PdfColor black = PdfColor.fromInt(0xF44494B);
-  const PdfColor white = PdfColor.fromInt(0xFFFFFFFF);
   const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
-  final DateFormat formatter = DateFormat('dd/MM/yyyy');
-
   final pageTheme = await MyIpilPageTheme(format, false);
 
   doc.addPage(
@@ -34,12 +30,8 @@ Future<Uint8List> generateIpilFile(
         return pw.Container(
             alignment: pw.Alignment.centerRight,
             margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
-            child: pw.Text(
-                'Pág. ${context.pageNumber} de ${context.pagesCount}',
-                textScaleFactor: 0.8,
-                style: pw.Theme.of(context)
-                    .defaultTextStyle
-                    .copyWith(color: grey)));
+            child: SmallText(text: 'Pág. ${context.pageNumber} de ${context.pagesCount}'),
+        );
       },
       build: (pw.Context context) => [
         pw.Text(
@@ -49,17 +41,15 @@ Future<Uint8List> generateIpilFile(
               .defaultTextStyle
               .copyWith(fontWeight: pw.FontWeight.bold, color: primary900)
         ),
-        pw.SizedBox(
-          height: 30,
-        ),
+        pw.SizedBox(height: 20),
         for(IpilEntry ipil in ipilEntries!)
           (ipil.content != null && ipil.content != '') ? _IpilEntry(ipil: ipil, techName: techName) : pw.Container(),
+        pw.SizedBox(height: 10),
       ]
     )
   );
   return doc.save();
 }
-
 
 class _IpilEntry extends pw.StatelessWidget {
   _IpilEntry({
@@ -69,74 +59,93 @@ class _IpilEntry extends pw.StatelessWidget {
 
   final IpilEntry ipil;
   final String techName;
-
+  final DateFormat formatter = DateFormat('dd/MM/yyyy');
   @override
   pw.Widget build(pw.Context context) {
     return pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: <pw.Widget>[
+          pw.SizedBox(height: 10),
           pw.Row(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: <pw.Widget>[
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                  pw.Text('Fecha',
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(fontWeight: pw.FontWeight.bold, color: primary900)),
-                  pw.Text('${ipil.date.day}/${ipil.date.month}/${ipil.date.year}',
-                      textScaleFactor: 0.8,
-                      style: pw.Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(fontWeight: pw.FontWeight.normal, color: grey)
-                  )
+                    SmallText(text: 'Fecha',
+                        fontWeight: pw.FontWeight.bold, color: primary900),
+                    SmallText(text: formatter.format(ipil.date.toLocal()),),
                   ]
                 ),
-                pw.SizedBox(
-                  width: 50,
-                ),
+                pw.SizedBox(width: 50,),
                 pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Nombre de la técnica',
-                          textScaleFactor: 0.8,
-                          style: pw.Theme.of(context)
-                              .defaultTextStyle
-                              .copyWith(fontWeight: pw.FontWeight.bold, color: primary900)),
-                      pw.Text('$techName',
-                          textScaleFactor: 0.8,
-                          style: pw.Theme.of(context)
-                              .defaultTextStyle
-                              .copyWith(fontWeight: pw.FontWeight.normal, color: grey)
-                      )
+                      SmallText(text: 'Nombre de la técnica',
+                          fontWeight: pw.FontWeight.bold, color: primary900),
+                      SmallText(text: '$techName'),
                     ]
                 ),
               ]
           ),
-          pw.SizedBox(height: 15),
+          pw.SizedBox(height: 10),
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('Seguimiento:',
-                  textScaleFactor: 0.8,
-                  style: pw.Theme.of(context)
-                      .defaultTextStyle
-                      .copyWith(fontWeight: pw.FontWeight.bold, color: primary900)),
-              pw.Text(
-                  '${ipil.content}',
-                  textScaleFactor: 0.8,
-                  style: pw.Theme.of(context)
-                      .defaultTextStyle
-                      .copyWith(fontWeight: pw.FontWeight.normal, color: grey)
-              ),
+              SmallText(text: 'Seguimiento',
+                  fontWeight: pw.FontWeight.bold, color: primary900),
+              SmallText(text: '${ipil.content}'),
             ]
           ),
-          pw.SizedBox(height: 20),
+          pw.SizedBox(height: 10),
+          (ipil.reinforcement != null && ipil.reinforcement!.isNotEmpty ) ?
+            SmallText(text: 'Fortalecimiento de las competencias',
+                fontWeight: pw.FontWeight.bold, color: primary900) : pw.Container(),
+          if (ipil.reinforcementsText != null && ipil.reinforcementsText!.isNotEmpty)
+            SmallText(text: ipil.reinforcementsText!),
+          pw.SizedBox(height: 5),
+          (ipil.contextualization != null && ipil.contextualization!.isNotEmpty ) ?
+          SmallText(text: 'Contextualización',
+              fontWeight: pw.FontWeight.bold, color: primary900) : pw.Container(),
+          if (ipil.contextualizationText != null && ipil.contextualizationText!.isNotEmpty)
+            SmallText(text: ipil.contextualizationText!),
+          pw.SizedBox(height: 5),
+          (ipil.connectionTerritory != null && ipil.connectionTerritory!.isNotEmpty ) ?
+          SmallText(text: 'Conexión con el territorio',
+              fontWeight: pw.FontWeight.bold, color: primary900) : pw.Container(),
+          if (ipil.connectionTerritoryText != null && ipil.connectionTerritoryText!.isNotEmpty)
+            SmallText(text: ipil.connectionTerritoryText!),
+          pw.SizedBox(height: 5),
+          (ipil.interviews != null && ipil.interviews!.isNotEmpty ) ?
+          SmallText(text: 'Entrevistas',
+              fontWeight: pw.FontWeight.bold, color: primary900) : pw.Container(),
+          if (ipil.interviewsText != null && ipil.interviewsText!.isNotEmpty)
+            SmallText(text: ipil.interviewsText!),
+          pw.SizedBox(height: 8),
           pw.Divider(color: grey, thickness: 0.5),
-          pw.SizedBox(height: 20)
         ]);
   }
 }
 
+class SmallText extends pw.StatelessWidget {
+  SmallText({
+    required this.text,
+    this.color = grey,
+    this.fontWeight = pw.FontWeight.normal,
+  });
+
+  final String text;
+  final PdfColor? color;
+  final pw.FontWeight? fontWeight;
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return pw.Text(
+        text,
+        textScaleFactor: 0.8,
+        style: pw.Theme.of(context)
+            .defaultTextStyle
+            .copyWith(fontWeight: fontWeight, color: color)
+    );
+  }
+}

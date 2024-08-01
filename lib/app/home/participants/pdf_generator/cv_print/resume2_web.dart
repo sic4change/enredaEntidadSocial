@@ -15,7 +15,6 @@ import 'package:http/http.dart';
 
 import 'data.dart';
 
-
 const PdfColor lilac = PdfColor.fromInt(0xF8A6A83);
 const PdfColor lightLilac = PdfColor.fromInt(0xFFF4F5FB);
 const PdfColor blue = PdfColor.fromInt(0xFF002185);

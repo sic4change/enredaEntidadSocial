@@ -23,6 +23,7 @@ import '../../../../services/auth.dart';
 import '../../../../services/database.dart';
 import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
+import '../../../resources/list_item_builder.dart';
 
 class CreateIpilForm extends StatefulWidget {
   const CreateIpilForm({super.key, required this.participantUser});
@@ -64,7 +65,6 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
 
   Widget createIpilForm(){
     final database = Provider.of<Database>(context, listen: false);
-    final auth = Provider.of<AuthBase>(context, listen: false);
     return Container(
       padding: Responsive.isMobile(context) ? EdgeInsets.all(10) : EdgeInsets.all(20),
       margin:  Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(20),
@@ -202,7 +202,6 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
                   else{
                     return Container();
                   }
-
                 }
             ),
             StreamBuilder<List<IpilConnectionTerritory>>(
@@ -309,8 +308,16 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
     );
   }
 
-  Future<void> _submit() async {
+  bool _validateAndSaveForm() {
+    if (_formKey.currentState != null &&
+        _formKey.currentState!.validate()) {
+      _formKey.currentState?.save();
+      return true;
+    }
+    return false;
+  }
 
+  Future<void> _submit() async {
     if (_validateAndSaveForm() == false) {
       await showAlertDialog(context,
           title: StringConst.FORM_ENTITY_ERROR,
@@ -347,15 +354,5 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
       }
 
     }
-  }
-
-
-  bool _validateAndSaveForm() {
-    if (_formKey.currentState != null &&
-        _formKey.currentState!.validate()) {
-      _formKey.currentState?.save();
-      return true;
-    }
-    return false;
   }
 }
