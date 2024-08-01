@@ -2,19 +2,24 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/pdf_ipil_preview.dart';
+import 'package:enreda_empresas/app/models/ipilConnectionTerritory.dart';
+import 'package:enreda_empresas/app/models/ipilContextualization.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/ipilInterviews.dart';
 import 'package:enreda_empresas/app/models/ipilObjectives.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../common_widgets/alert_dialog.dart';
 import '../../../../common_widgets/empty-list.dart';
 import '../../../../common_widgets/enreda_button.dart';
+import '../../../../models/ipilReinforcement.dart';
 import '../../../resources/list_item_builder.dart';
 import 'create_ipil_form.dart';
 import 'expandable_ipil.dart';
@@ -34,6 +39,12 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
     "Seguimiento", "Objetivos"];
   String? _value;
   var bodyWidget = <Widget>[];
+  List<IpilEntry> ipilEntriesPage = [];
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -137,83 +148,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
           if (!snapshot.hasData) return Container();
           if (snapshot.hasData) {
             List<IpilEntry> ipilEntries = snapshot.data!;
-            return Column(
-              children: [
-                Padding(
-                  padding: Responsive.isMobile(context) ? EdgeInsets.symmetric(horizontal: 8.0)
-                      : EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                  child: Row(
-                    children: [
-                      EnredaButtonIconSmall(
-                        buttonTitle: StringConst.ADD_IPIL_ENTRY,
-                        buttonColor: AppColors.greySearch,
-                        titleColor: AppColors.primary900,
-                        widget: Icon(
-                          Icons.add_circle_outlined,
-                          color: AppColors.turquoiseBlue,
-                          size: 24,
-                        ),
-                        onPressed: () {
-                          if(widget.participantUser.assignedById == null ||
-                              widget.participantUser.assignedById == ''){
-                            showAlertDialog(
-                              context,
-                              title: 'Aviso',
-                              content: 'Este participante no tiene técnica asignada, para crear un IPIL asigne una técnica.',
-                              defaultActionText: 'Aceptar',
-                            );
-                            return;
-                          }
-                          setState(() {
-                            ParticipantIPILPage.selectedIndexIpils.value = 2;
-                          });
-                        },
-                      ),
-                      SizedBox(width: 20,),
-                      EnredaButtonIconSmall(
-                        buttonTitle: StringConst.DOWNLOAD_ALL,
-                        buttonColor: AppColors.greySearch,
-                        titleColor: AppColors.primary900,
-                        widget: Image.asset(
-                          ImagePath.DOWNLOAD_FILLED,
-                          width: 24,
-                          height: 24,
-                        ),
-                        onPressed: () async {
-                          if(ipilEntries.isEmpty || ipilEntries.length == 0){
-                            showAlertDialog(
-                              context,
-                              title: 'Aviso',
-                              content: 'Este participante aún no tiene IPILs creados.',
-                              defaultActionText: 'Aceptar',
-                            );
-                            return;
-                          }
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    MyIpilEntries(
-                                      user: widget.participantUser,
-                                      ipilEntries: ipilEntries,
-                                      techName: techNameComplete!,
-                                    )),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(color: AppColors.greyBorder,),
-                SpaceH8(),
-                ipilEntries.isEmpty ? EmptyList(
-                  title: 'No hay IPILs creados.',
-                  imagePath: ImagePath.EMPTY_LiST_ICON,
-                ) :
-                listIpils(),
-                SizedBox(height: 20),
-              ],
-            );
+            return followPageDetail(ipilEntries);
           } else {
             return Container();
           }
@@ -221,46 +156,187 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
     );
   }
 
+  Widget followPageDetail(List<IpilEntry> ipilEntries) {
+    return Column(
+      children: [
+        Padding(
+          padding: Responsive.isMobile(context) ? EdgeInsets.symmetric(horizontal: 8.0)
+              : EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+          child: Row(
+            children: [
+              EnredaButtonIconSmall(
+                buttonTitle: StringConst.ADD_IPIL_ENTRY,
+                buttonColor: AppColors.greySearch,
+                titleColor: AppColors.primary900,
+                widget: Icon(
+                  Icons.add_circle_outlined,
+                  color: AppColors.turquoiseBlue,
+                  size: 24,
+                ),
+                onPressed: () {
+                  if(widget.participantUser.assignedById == null ||
+                      widget.participantUser.assignedById == ''){
+                    showAlertDialog(
+                      context,
+                      title: 'Aviso',
+                      content: 'Este participante no tiene técnica asignada, para crear un IPIL asigne una técnica.',
+                      defaultActionText: 'Aceptar',
+                    );
+                    return;
+                  }
+                  setState(() {
+                    ParticipantIPILPage.selectedIndexIpils.value = 2;
+                  });
+                },
+              ),
+              SizedBox(width: 20,),
+              EnredaButtonIconSmall(
+                buttonTitle: StringConst.DOWNLOAD_ALL,
+                buttonColor: AppColors.greySearch,
+                titleColor: AppColors.primary900,
+                widget: Image.asset(
+                  ImagePath.DOWNLOAD_FILLED,
+                  width: 24,
+                  height: 24,
+                ),
+                onPressed: () async {
+                  if(ipilEntries.isEmpty || ipilEntries.length == 0){
+                    showAlertDialog(
+                      context,
+                      title: 'Aviso',
+                      content: 'Este participante aún no tiene IPILs creados.',
+                      defaultActionText: 'Aceptar',
+                    );
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            MyIpilEntries(
+                              user: widget.participantUser,
+                              ipilEntries: ipilEntriesPage,
+                              techName: techNameComplete!,
+                            )),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        Divider(color: AppColors.greyBorder,),
+        SpaceH8(),
+        ipilEntries.isEmpty ? EmptyList(
+          title: 'No hay IPILs creados.',
+          imagePath: ImagePath.EMPTY_LiST_ICON,
+        ) :
+        listIpils(),
+        SizedBox(height: 20),
+      ],
+    );
+  }
+
   Widget listIpils(){
     final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<List<IpilEntry>>(
-        stream: database.getIpilEntriesByUserStream(widget.participantUser.userId!),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return Container();
-          if (snapshot.hasData) {
-            return ListItemBuilder<IpilEntry>(
-              snapshot: snapshot,
-              itemBuilder: (context, ipilEntry) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                      child: CircularProgressIndicator());
-                }
-                return StreamBuilder<UserEnreda>(
-                    stream: database.userEnredaStreamByUserId(ipilEntry.techId),
-                    builder: (context, snapshot) {
-                      if(snapshot.hasData){
-                        String techName = snapshot.data?.firstName ?? '';
-                        String techLastName = snapshot.data?.lastName ?? '';
-                        techNameComplete = '$techName $techLastName';
-                        return ExpandableIpilEntryTile(
-                          ipilEntry: ipilEntry,
-                          techNameComplete: techNameComplete!,
-                          participantUser: widget.participantUser,
-                        );
-                      }
-                      else{
-                        return Container(
-                        );
-                      }
-                    }
-                );
+      stream: database.getIpilEntriesByUserStream(widget.participantUser.userId!),
+      builder: (context, entriesSnapshot) {
+        if (!entriesSnapshot.hasData) return Container();
+        ipilEntriesPage = entriesSnapshot.data!;
+        return ListItemBuilder<IpilEntry>(
+          snapshot: entriesSnapshot,
+          itemBuilder: (context, ipilEntry) {
+            return _buildIpilReinforcementStream(ipilEntry, database);
+          },
+        );
+      },
+    );
+  }
 
-              },
-            );
-          } else {
-            return Container();
+  Widget _buildIpilReinforcementStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilReinforcement>>(
+      stream: database.ipilReinforcementStreamByUser(ipilEntry.reinforcement ?? []),
+      builder: (context, reinforcementSnapshot) {
+        if (!reinforcementSnapshot.hasData) return Container();
+        List<String> reinforcementList = [];
+        for(IpilReinforcement ipilReinforcement in reinforcementSnapshot.data!){
+          if(!reinforcementList.contains(ipilReinforcement.label)){
+            reinforcementList.add(ipilReinforcement.label);
           }
         }
+        ipilEntry.reinforcementsText = reinforcementList.join(', ');
+        return _buildIpilContextualizationStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildIpilContextualizationStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilContextualization>>(
+      stream: database.ipilContextualizationStreamByUser(ipilEntry.contextualization ?? []),
+      builder: (context, contextualizationSnapshot) {
+        if (!contextualizationSnapshot.hasData) return Container();
+        List<String> contextualizationList = [];;
+        for(IpilContextualization ipilContextualization in contextualizationSnapshot.data!){
+          if(!contextualizationList.contains(ipilContextualization.label)){
+            contextualizationList.add(ipilContextualization.label);
+          }
+        }
+        ipilEntry.contextualizationText = contextualizationList.join(', ');
+        return _buildIpilConnectionTerritoryStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildIpilConnectionTerritoryStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilConnectionTerritory>>(
+      stream: database.ipilConnectionTerritoryStreamByUser(ipilEntry.connectionTerritory ?? []),
+      builder: (context, connectionTerritorySnapshot) {
+        if (!connectionTerritorySnapshot.hasData) return Container();
+        List<String> connectionTerritoryList = [];;
+        for(IpilConnectionTerritory ipilConnectionTerritory in connectionTerritorySnapshot.data!){
+          if(!connectionTerritoryList.contains(ipilConnectionTerritory.label)){
+            connectionTerritoryList.add(ipilConnectionTerritory.label);
+          }
+        }
+        ipilEntry.connectionTerritoryText = connectionTerritoryList.join(', ');
+        return _buildIpilInterviewsStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildIpilInterviewsStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilInterviews>>(
+      stream: database.ipilInterviewsStreamByUser(ipilEntry.interviews ?? []),
+      builder: (context, interviewsSnapshot) {
+        if (!interviewsSnapshot.hasData) return Container();
+        List<String> interviewsList = [];;
+        for(IpilInterviews ipilInterviews in interviewsSnapshot.data!){
+          if(!interviewsList.contains(ipilInterviews.label)){
+            interviewsList.add(ipilInterviews.label);
+          }
+        }
+        ipilEntry.interviewsText = interviewsList.join(', ');
+        return _buildUserEnredaStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildUserEnredaStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<UserEnreda>(
+      stream: database.userEnredaStreamByUserId(ipilEntry.techId),
+      builder: (context, userSnapshot) {
+        if (!userSnapshot.hasData) return Container();
+
+        String techName = userSnapshot.data?.firstName ?? '';
+        String techLastName = userSnapshot.data?.lastName ?? '';
+        techNameComplete = '$techName $techLastName';
+
+        return ExpandableIpilEntryTile(
+          ipilEntry: ipilEntry,
+          techNameComplete: techNameComplete,
+          participantUser: widget.participantUser,
+        );
+      },
     );
   }
 

@@ -13,8 +13,11 @@ class IpilEntry {
     this.reinforcement,
     this.reinforcementsText,
     this.contextualization,
+    this.contextualizationText,
     this.connectionTerritory,
+    this.connectionTerritoryText,
     this.interviews,
+    this.interviewsText,
     this.results,
   });
 
@@ -24,34 +27,17 @@ class IpilEntry {
   final String userId;
   late DateTime date;
   late List<String>? reinforcement;
-  late List<String>? reinforcementsText;
+  late String? reinforcementsText;
   late List<String>? contextualization;
+  late String? contextualizationText;
   late List<String>? connectionTerritory;
+  late String? connectionTerritoryText;
   late List<String>? interviews;
+  late String? interviewsText;
   late List<String>? results;
 
   factory IpilEntry.fromMap(Map<String, dynamic> data, String documentId) {
-/*
-    final IpilReinforcement? reinforcement = new IpilReinforcement(
-        label: data['reinforcement']['label'],
-        order: data['reinforcement']['order']
-    );
 
-    final IpilContextualization? contextualization = new IpilContextualization(
-        label: data['contextualization']['label'],
-        order: data['contextualization']['order']
-    );
-
-    final IpilConnectionTerritory? connectionTerritory = new IpilConnectionTerritory(
-        label: data['connectionTerritory']['label'],
-        order: data['connectionTerritory']['order']
-    );
-
-    final IpilInterviews? interviews = new IpilInterviews(
-        label: data['interviews']['label'],
-        order: data['interviews']['order']
-    );
- */
     List<String> reinforcements = [];
     if (data['reinforcement'] != null) {
       data['reinforcement'].forEach((reinforcement) {reinforcements.add(reinforcement.toString());});
@@ -84,9 +70,13 @@ class IpilEntry {
       userId: data['userId'],
       date: data['date'].toDate(),
       reinforcement: reinforcements,
+      reinforcementsText: data['reinforcementsText'] ?? '',
       contextualization: contextualizations,
+      contextualizationText: data['contextualizationText']  ?? '',
       connectionTerritory: connectionTerritories,
+      connectionTerritoryText: data['connectionTerritoryText']  ?? '',
       interviews: interviews,
+      interviewsText: data['interviewsText'] ?? '',
       results: results,
     );
   }
@@ -107,9 +97,13 @@ class IpilEntry {
       'userId': userId,
       'date': date,
       'reinforcement': reinforcement,
+      'reinforcementsText': reinforcementsText,
       'contextualization': contextualization,
+      'contextualizationText': contextualizationText,
       'connectionTerritory': connectionTerritory,
+      'connectionTerritoryText': connectionTerritoryText,
       "interviews": interviews,
+      "interviewsText": interviewsText,
       'results': results,
     };
   }
