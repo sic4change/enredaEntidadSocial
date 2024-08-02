@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 class GamificationItem extends StatelessWidget {
   const GamificationItem({
     super.key,
-    this.size = 160,
+    this.size = 100,
     this.progress = 0,
     this.progressText,
-    this.imageSize = 100,
+    this.imageSize = 90,
     required this.imagePath,
     required this.title,
   });
@@ -22,12 +22,11 @@ class GamificationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-
     return Column(
       children: [
         CircularSeekBar(
-          height: !Responsive.isDesktop(context)? size/2:size,
-          width: !Responsive.isDesktop(context)? size/2:size,
+          height: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? size * 0.7 : size * 1.5,
+          width: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? size * 0.7 : size * 1.5,
           startAngle: 45,
           sweepAngle: 270,
           progress: progress,
@@ -42,40 +41,40 @@ class GamificationItem extends StatelessWidget {
           animDurationMillis: 1500,
           interactive: false,
           child: Padding(
-            padding: EdgeInsets.only(top: !Responsive.isDesktop(context)?4.0: 8.0),
+            padding: EdgeInsets.only(top: !Responsive.isDesktop(context)? 4.0 : 10.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                if (progressText != null) SizedBox(height: 10,),
                 Image.asset(
                   imagePath,
-                  width: !Responsive.isDesktop(context)? imageSize/2.8:imageSize,
-                  height: !Responsive.isDesktop(context)? imageSize/2.8:imageSize,
+                  width: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? imageSize/2.8 : imageSize,
+                  height: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? imageSize/2.8 : imageSize,
                 ),
-                if (!Responsive.isDesktop(context))
-                  SpaceH4(),
+                if (!Responsive.isDesktop(context)) SpaceH4(),
                 if (progressText != null)
                   Text(
                     progressText!,
                     style: textTheme.titleLarge?.copyWith(
                       color: AppColors.turquoiseBlue,
-                      fontSize: !Responsive.isDesktop(context)? textTheme.titleLarge!.fontSize!/1.8:textTheme.titleLarge!.fontSize!,
+                      fontSize: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? textTheme.titleLarge!.fontSize!/1.8:textTheme.titleLarge!.fontSize!,
                     ),
                   ),
-                if (progressText == null)
-                  SpaceH8(),
+                // if (progressText == null)
+                //   SpaceH8(),
               ],
             ),
           ),
         ),
         Container(
-          width: !Responsive.isDesktop(context)? (size/2) + 20:size + 40,
+          width: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? (size * 0.7) + 20 : size + 40,
           child: Text(
             title,
             textAlign: TextAlign.center,
             style: textTheme.bodySmall?.copyWith(
               color: AppColors.turquoiseBlue,
-              fontSize: !Responsive.isDesktop(context)? textTheme.bodySmall!.fontSize!/1.2:textTheme.bodySmall!.fontSize!,
+              fontSize: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? textTheme.bodySmall!.fontSize!/1.2:textTheme.bodySmall!.fontSize!,
             ),
           ),
         ),

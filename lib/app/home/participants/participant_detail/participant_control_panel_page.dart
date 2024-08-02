@@ -1,5 +1,6 @@
 import 'package:circular_seek_bar/circular_seek_bar.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_text_title.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
@@ -42,7 +43,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildGamificationSection(context),
-          SpaceH20(),
+          SpaceH40(),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -106,10 +107,14 @@ class ParticipantControlPanelPage extends StatelessWidget {
         CustomTextBoldTitle(title: StringConst.GAMIFICATION),
         SpaceH8(),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (Responsive.isDesktop(context))
-              Image.asset(ImagePath.GAMIFICATION_LOGO, height: 100.0,),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Image.asset(ImagePath.GAMIFICATION_LOGO,
+                  height: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? 80 : 180.0,),
+              ),
             if (Responsive.isDesktop(context))
               SpaceW8(),
             Expanded(
@@ -124,8 +129,8 @@ class ParticipantControlPanelPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Wrap(
-                          spacing: Responsive.isDesktop(context)? 12.0:4.0,
-                          runSpacing: Responsive.isDesktop(context)? 12.0:4.0,
+                          spacing: Responsive.isDesktop(context) ? 8.0 : 4.0,
+                          runSpacing: Responsive.isDesktop(context) ? 8.0 : 4.0,
                           alignment: WrapAlignment.spaceEvenly,
                           children: [
                             GamificationItem(
@@ -185,47 +190,128 @@ class ParticipantControlPanelPage extends StatelessWidget {
   Widget _buildInitialFormSection(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
-    double fontSize = responsiveSize(context, 15, 18, md: 16);
+    double fontSize = responsiveSize(context, 12, 16, md: 15);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomTextBoldTitle(title: StringConst.INITIAL_FORM),
-        SpaceH20(),
-        RoundedContainer(
-          margin: EdgeInsets.all(0.0),
-          contentPadding: EdgeInsets.all(0.0),
-          borderColor: AppColors.greyAlt.withOpacity(0.15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
-                child: CustomTextMediumBold(text: StringConst.INITIAL_FORM_DATA),
-              ),
-              Divider(color: AppColors.greyAlt.withOpacity(0.15),),
-              Padding(
-                padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    StreamBuilder<List<Ability>>(
-                        stream: database.abilityStream(),
-                        builder: (context, snapshot) {
-                          String abilitiesString = "";
-                          if (snapshot.hasData) {
-                            participantUser.abilities!.forEach((abilityId) {
-                              final abilityName = snapshot.data!.firstWhere((a) => abilityId == a.abilityId).name;
-                              abilitiesString = "$abilitiesString$abilityName, ";
-                            });
-                            if (abilitiesString.isNotEmpty) {
-                              abilitiesString = abilitiesString.substring(0, abilitiesString.lastIndexOf(","));
-                            }
-                          }
+    return RoundedContainer(
+      margin: EdgeInsets.all(0.0),
+      contentPadding: EdgeInsets.all(0.0),
+      borderColor: AppColors.greyAlt.withOpacity(0.15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: Sizes.kDefaultPaddingDouble, top: Sizes.kDefaultPaddingDouble),
+            child: CustomTextBoldTitle(title: StringConst.INITIAL_FORM_DATA),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                StreamBuilder<List<Ability>>(
+                    stream: database.abilityStream(),
+                    builder: (context, snapshot) {
+                      String abilitiesString = "";
+                      if (snapshot.hasData) {
+                        participantUser.abilities!.forEach((abilityId) {
+                          final abilityName = snapshot.data!.firstWhere((a) => abilityId == a.abilityId).name;
+                          abilitiesString = "$abilitiesString$abilityName, ";
+                        });
+                        if (abilitiesString.isNotEmpty) {
+                          abilitiesString = abilitiesString.substring(0, abilitiesString.lastIndexOf(","));
+                        }
+                      }
+                      return RichText(
+                        text: TextSpan(
+                          text: "${StringConst.FORM_ABILITIES_REV}: ",
+                          style: textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.turquoiseBlue,
+                            height: 1.5,
+                            fontSize: fontSize,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: abilitiesString,
+                              style: textTheme.bodySmall?.copyWith(
+                                fontSize: fontSize,
+                              ),)
+                          ],
+                        ),
+                      );
+                    }
+                ),
+                SpaceH12(),
+                RichText(
+                  text: TextSpan(
+                    text: "${StringConst.FORM_DEDICATION_REV}: ",
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.turquoiseBlue,
+                      height: 1.5,
+                      fontSize: fontSize,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: participantUser.motivation?.dedication?.label??"",
+                        style: textTheme.bodySmall?.copyWith(
+                          fontSize: fontSize,
+                        ),)
+                    ],
+                  ),
+                ),
+                SpaceH12(),
+                RichText(
+                  text: TextSpan(
+                    text: "${StringConst.FORM_TIME_SEARCHING_REV}: ",
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.turquoiseBlue,
+                      height: 1.5,
+                      fontSize: fontSize,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: participantUser.motivation?.timeSearching?.label??"",
+                        style: textTheme.bodySmall?.copyWith(
+                          fontSize: fontSize,
+                        ),)
+                    ],
+                  ),
+                ),
+                SpaceH12(),
+                RichText(
+                  text: TextSpan(
+                    text: "${StringConst.FORM_TIME_SPENT_WEEKLY_REV}: ",
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.turquoiseBlue,
+                      height: 1.5,
+                      fontSize: fontSize,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: participantUser.motivation?.timeSpentWeekly?.label??"",
+                        style: textTheme.bodySmall?.copyWith(
+                          fontSize: fontSize,
+                        ),)
+                    ],
+                  ),
+                ),
+                SpaceH12(),
+                StreamBuilder(
+                    stream: database.educationStream(),
+                    builder: (context, snapshotEducations) {
+                      Education? myMaxEducation;
+                      if (snapshotEducations.hasData) {
+                        final educations = snapshotEducations.data!;
+
+                        if (participantUser.educationId!.isNotEmpty) {
+                          myMaxEducation = educations.firstWhere((e) => e.educationId == participantUser.educationId, orElse: () => Education(label: "", value: "", order: 0));
                           return RichText(
                             text: TextSpan(
-                              text: "${StringConst.FORM_ABILITIES_REV}: ",
-                              style: textTheme.bodyMedium?.copyWith(
+                              text: "${StringConst.FORM_EDUCATION_REV}: ",
+                              style: textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.turquoiseBlue,
                                 height: 1.5,
@@ -233,224 +319,135 @@ class ParticipantControlPanelPage extends StatelessWidget {
                               ),
                               children: [
                                 TextSpan(
-                                  text: abilitiesString,
-                                  style: textTheme.bodyMedium?.copyWith(
+                                  text: myMaxEducation.label??"",
+                                  style: textTheme.bodySmall?.copyWith(
                                     fontSize: fontSize,
                                   ),)
                               ],
                             ),
                           );
-                        }
-                    ),
-                    SpaceH12(),
-                    RichText(
-                      text: TextSpan(
-                        text: "${StringConst.FORM_DEDICATION_REV}: ",
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.turquoiseBlue,
-                          height: 1.5,
-                          fontSize: fontSize,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: participantUser.motivation?.dedication?.label??"",
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontSize: fontSize,
-                            ),)
-                        ],
-                      ),
-                    ),
-                    SpaceH12(),
-                    RichText(
-                      text: TextSpan(
-                        text: "${StringConst.FORM_TIME_SEARCHING_REV}: ",
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.turquoiseBlue,
-                          height: 1.5,
-                          fontSize: fontSize,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: participantUser.motivation?.timeSearching?.label??"",
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontSize: fontSize,
-                            ),)
-                        ],
-                      ),
-                    ),
-                    SpaceH12(),
-                    RichText(
-                      text: TextSpan(
-                        text: "${StringConst.FORM_TIME_SPENT_WEEKLY_REV}: ",
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.turquoiseBlue,
-                          height: 1.5,
-                          fontSize: fontSize,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: participantUser.motivation?.timeSpentWeekly?.label??"",
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontSize: fontSize,
-                            ),)
-                        ],
-                      ),
-                    ),
-                    SpaceH12(),
-                    StreamBuilder(
-                        stream: database.educationStream(),
-                        builder: (context, snapshotEducations) {
-                          Education? myMaxEducation;
-                          if (snapshotEducations.hasData) {
-                            final educations = snapshotEducations.data!;
-
-                            if (participantUser.educationId!.isNotEmpty) {
-                              myMaxEducation = educations.firstWhere((e) => e.educationId == participantUser.educationId, orElse: () => Education(label: "", value: "", order: 0));
-                              return RichText(
-                                text: TextSpan(
-                                  text: "${StringConst.FORM_EDUCATION_REV}: ",
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.turquoiseBlue,
-                                    height: 1.5,
-                                    fontSize: fontSize,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: myMaxEducation.label??"",
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        fontSize: fontSize,
-                                      ),)
-                                  ],
-                                ),
-                              );
-                            } else {
-                              return StreamBuilder(
-                                  stream: database.myExperiencesStream(participantUser.userId ?? ''),
-                                  builder: (context, snapshotExperiences) {
-                                    if (snapshotEducations.hasData && snapshotExperiences.hasData) {
-                                      final myEducationalExperiencies = snapshotExperiences.data!
-                                          .where((experience) => experience.type == 'Formativa')
-                                          .toList();
-                                      if (myEducationalExperiencies.isNotEmpty) {
-                                        final areEduactions = myEducationalExperiencies.any((exp) => exp.education != null && exp.education!.isNotEmpty);
-                                        if (areEduactions) {
-                                          final myEducations = educations.where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label)).toList();
-                                          myEducations.sort((a, b) => a.order.compareTo(b.order));
-                                          if(myEducations.isNotEmpty){
-                                            myMaxEducation = myEducations.first;
-                                          } else {
-                                            myMaxEducation = Education(label: "", value: "", order: 0);
-                                          }
-                                        } else {
-                                          myMaxEducation = Education(label: "", value: "", order: 0);
-                                        }
-                                        return RichText(
-                                          text: TextSpan(
-                                            text: "${StringConst.FORM_EDUCATION_REV}: ",
-                                            style: textTheme.bodyMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.turquoiseBlue,
-                                              height: 1.5,
-                                              fontSize: fontSize,
-                                            ),
-                                            children: [
-                                              TextSpan(
-                                                text: myMaxEducation?.label??"",
-                                                style: textTheme.bodyMedium?.copyWith(
-                                                  fontSize: fontSize,
-                                                ),)
-                                            ],
-                                          ),
-                                        );
+                        } else {
+                          return StreamBuilder(
+                              stream: database.myExperiencesStream(participantUser.userId ?? ''),
+                              builder: (context, snapshotExperiences) {
+                                if (snapshotEducations.hasData && snapshotExperiences.hasData) {
+                                  final myEducationalExperiencies = snapshotExperiences.data!
+                                      .where((experience) => experience.type == 'Formativa')
+                                      .toList();
+                                  if (myEducationalExperiencies.isNotEmpty) {
+                                    final areEduactions = myEducationalExperiencies.any((exp) => exp.education != null && exp.education!.isNotEmpty);
+                                    if (areEduactions) {
+                                      final myEducations = educations.where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label)).toList();
+                                      myEducations.sort((a, b) => a.order.compareTo(b.order));
+                                      if(myEducations.isNotEmpty){
+                                        myMaxEducation = myEducations.first;
                                       } else {
-                                        return Container();
+                                        myMaxEducation = Education(label: "", value: "", order: 0);
                                       }
                                     } else {
-                                      return Container();
+                                      myMaxEducation = Education(label: "", value: "", order: 0);
                                     }
-                                  });
-                            }
-                          } else {
-                            return Container();
-                          }
-                        }),
-                    SpaceH12(),
-                    StreamBuilder<List<Interest>>(
-                        stream: database.interestStream(),
-                        builder: (context, snapshot) {
-                          String interestsString = "";
-                          if (snapshot.hasData) {
-                            participantUser.interests.forEach((interestId) {
-                              final interestName = snapshot.data!.firstWhere((i) => interestId == i.interestId).name;
-                              interestsString = "$interestsString$interestName, ";
-                            });
-                            if (interestsString.isNotEmpty) {
-                              interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
-                            }}
-                          return RichText(
-                            text: TextSpan(
-                              text: "${StringConst.FORM_INTERESTS}: ",
-                              style: textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.turquoiseBlue,
-                                height: 1.5,
+                                    return RichText(
+                                      text: TextSpan(
+                                        text: "${StringConst.FORM_EDUCATION_REV}: ",
+                                        style: textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.turquoiseBlue,
+                                          height: 1.5,
+                                          fontSize: fontSize,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: myMaxEducation?.label??"",
+                                            style: textTheme.bodySmall?.copyWith(
+                                              fontSize: fontSize,
+                                            ),)
+                                        ],
+                                      ),
+                                    );
+                                  } else {
+                                    return Container();
+                                  }
+                                } else {
+                                  return Container();
+                                }
+                              });
+                        }
+                      } else {
+                        return Container();
+                      }
+                    }),
+                SpaceH12(),
+                StreamBuilder<List<Interest>>(
+                    stream: database.interestStream(),
+                    builder: (context, snapshot) {
+                      String interestsString = "";
+                      if (snapshot.hasData) {
+                        participantUser.interests.forEach((interestId) {
+                          final interestName = snapshot.data!.firstWhere((i) => interestId == i.interestId).name;
+                          interestsString = "$interestsString$interestName, ";
+                        });
+                        if (interestsString.isNotEmpty) {
+                          interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
+                        }}
+                      return RichText(
+                        text: TextSpan(
+                          text: "${StringConst.FORM_INTERESTS}: ",
+                          style: textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.turquoiseBlue,
+                            height: 1.5,
+                            fontSize: fontSize,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: interestsString,
+                              style: textTheme.bodySmall?.copyWith(
                                 fontSize: fontSize,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: interestsString,
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    fontSize: fontSize,
-                                  ),)
-                              ],
-                            ),
-                          );
-                        }),
-                    SpaceH12(),
-                    StreamBuilder<List<SpecificInterest>>(
-                        stream: database.specificInterestsStream(),
-                        builder: (context, snapshot) {
-                          String specificInterestsString = "";
-                          if (snapshot.hasData) {
-                            participantUser.specificInterests.forEach((specificInterestId) {
-                              final specificInterestName = snapshot.data!.firstWhere((s) => specificInterestId == s.specificInterestId).name;
-                              specificInterestsString = "$specificInterestsString$specificInterestName, ";
-                            });
-                            if (specificInterestsString.isNotEmpty) {
-                              specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
-                            }
-                          }
+                              ),)
+                          ],
+                        ),
+                      );
+                    }),
+                SpaceH12(),
+                StreamBuilder<List<SpecificInterest>>(
+                    stream: database.specificInterestsStream(),
+                    builder: (context, snapshot) {
+                      String specificInterestsString = "";
+                      if (snapshot.hasData) {
+                        participantUser.specificInterests.forEach((specificInterestId) {
+                          final specificInterestName = snapshot.data!.firstWhere((s) => specificInterestId == s.specificInterestId).name;
+                          specificInterestsString = "$specificInterestsString$specificInterestName, ";
+                        });
+                        if (specificInterestsString.isNotEmpty) {
+                          specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
+                        }
+                      }
 
-                          return RichText(
-                            text: TextSpan(
-                              text: "${StringConst.FORM_SPECIFIC_INTERESTS}: ",
-                              style: textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.turquoiseBlue,
-                                height: 1.5,
+                      return RichText(
+                        text: TextSpan(
+                          text: "${StringConst.FORM_SPECIFIC_INTERESTS}: ",
+                          style: textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.turquoiseBlue,
+                            height: 1.5,
+                            fontSize: fontSize,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: specificInterestsString,
+                              style: textTheme.bodySmall?.copyWith(
                                 fontSize: fontSize,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: specificInterestsString,
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    fontSize: fontSize,
-                                  ),)
-                              ],
-                            ),
-                          );
-                        }),
-                    SpaceH12(),
-                  ],
-                ),
-              ),
-            ],),
-        ),
-      ],
+                              ),)
+                          ],
+                        ),
+                      );
+                    }),
+                SpaceH12(),
+              ],
+            ),
+          ),
+        ],),
     );
   }
 
@@ -574,17 +571,13 @@ class ParticipantControlPanelPage extends StatelessWidget {
   }
 
   Widget _buildCvSection(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomTextBoldTitle(title: StringConst.CV),
-        SpaceH20(),
         RoundedContainer(
           margin: EdgeInsets.all(0.0),
-          height: 450.0,
           width: 340.0,
+          height: 365.0,
           borderColor: AppColors.greyAlt.withOpacity(0.15),
           child: SingleChildScrollView(
             physics: NeverScrollableScrollPhysics(),
@@ -592,15 +585,11 @@ class ParticipantControlPanelPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  StringConst.MY_CV,
-                  style: textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: Responsive.isDesktop(context) ? 18 : 14.0,
-                    color: AppColors.primary900,
-                  ),
+                Row(
+                  children: [
+                    CustomTextBoldTitle(title: StringConst.MY_CV),
+                  ],
                 ),
-                SpaceH20(),
                 InkWell(
                   onTap: () => showCustomDialog(
                     context,
@@ -610,7 +599,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
                         child: MyCurriculumPage()),
                   ),
                   child: Transform.scale(
-                    scale:0.3,
+                    scale: 0.3,
                     child: MyCurriculumPage(
                       mini: true,
                     ),
@@ -638,7 +627,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
           }
           return RoundedContainer(
             margin: EdgeInsets.all(0.0),
-            //height: 420.0,
+            height: 420.0,
             width: 340.0,
             borderColor: AppColors.greyAlt.withOpacity(0.15),
             child: Column (
