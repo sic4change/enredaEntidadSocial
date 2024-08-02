@@ -80,6 +80,10 @@ class APIPath {
   static String ipilContextualization() => 'ipilContextualization';
   static String ipilConnectionTerritory() => 'ipilConnectionTerritory';
   static String ipilInterviews() => 'ipilInterviews';
+  static String ipilObtainingEmployment() => 'ipilObtainingEmployment';
+  static String ipilImprovingEmployment() => 'ipilImprovingEmployment';
+  static String ipilPostWorkSupport() => 'ipilPostWorkSupport';
+  static String ipilCoordination() => 'ipilCoordination';
   static String ipilResults() => 'ipilResults';
   static String ipilObjectives() => 'ipilObjectives';
   static String ipilObjective(String ipilObjectivesId) => 'ipilObjectives/$ipilObjectivesId';

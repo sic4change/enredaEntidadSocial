@@ -411,6 +411,9 @@ class StringConst {
   static const String FORM_SOCIAL_ENTITY = 'Organización o entidad a la que pertenece';
   static const String FORM_NATIONALITY = "Nacionalidad";
   static const String FORM_GOALS = 'Objetivos';
+  static const String FORM_WARNING = "Aviso";
+  static const String FORM_NO_IPIL = "Este participante aún no tiene IPILs creados.";
+  static const String FORM_NO_IPILS = "Todavía no has creado ningún IPIL.";
 
   static const List<String> RESOURCE_TYPES = [
     'Oferta de empleo',
@@ -579,6 +582,18 @@ class StringConst {
   static const String ADD_IPIL_ENTRY = "Crear nuevo IPIL";
   static const String DOWNLOAD_ALL = "Descargar todos";
   static const String PERSONAL_DATA_LAW = 'Según la Ley Orgánica 15/1999 de Protección de Datos Personales, autorizo a la empresa al uso y tratamiento de mis datos con fines exclusivamente de selección de personal y bolsas de empleo.';
+  static const String IPIL_FOLLOW = "Seguimiento";
+  static const String IPIL_REINFORCEMENT = "Fortalecimiento de las competencias";
+  static const String IPIL_CONTEXTUALIZATION = "Contextualización";
+  static const String IPIL_CONNECTION_TERRITORY = "Conexión con el territorio";
+  static const String IPIL_INTERVIEWS = "Entrevistas";
+  static const String IPIL_OBTAINING_EMPLOYMENT = "Obtención de empleo";
+  static const String IPIL_IMPROVING_EMPLOYMENT = "Mejora de empleo";
+  static const String IPIL_COORDINATION = "Coordinación";
+  static const String IPIL_POST_WORK_SUPPORT = "Acompañamiento Post-laboral";
+  static const String IPIL_CREATE = "Crear nuevo IPIL";
+  static const String IPIL_WARNING_TECHNICAL = "Este participante no tiene técnica asignada, para crear un IPIL asigne una técnica.";
+  static const String IPIL_GOALS_MONITORING_PLACEHOLDER = 'Por favor, utiliza este espacio para documentar los detalles de la entrevista. Incluye las impresiones generales, avances del participante, y una descripción de los eventos y cambios ocurridos desde la última entrevista. Anota también cualquier objetivo o plan de acción acordado para las próximas semanas.';
 
   //Create entity errors
   static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';

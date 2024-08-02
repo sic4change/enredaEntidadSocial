@@ -3,6 +3,10 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/ipils/participant_ipil_page.dart';
+import 'package:enreda_empresas/app/models/ipilCoordination.dart';
+import 'package:enreda_empresas/app/models/ipilImprovementEmployment.dart';
+import 'package:enreda_empresas/app/models/ipilObtainingEmployment.dart';
+import 'package:enreda_empresas/app/models/ipilPostWorkSupport.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
@@ -42,6 +46,15 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
   late List<String> connectionTerritory;
   late List<String> interviews;
   String? content;
+  String? _selectedObtainingEmployment;
+  String? _selectedImprovingEmployment;
+  String? _selectedCoordination;
+  String? _selectedPostWorkSupport;
+  List<String> userConnectionTerritory = [];
+  List<String> userContextualization = [];
+  List<String> userReinforcement = [];
+  List<String> userInterviews = [];
+
 
   @override
   void dispose() {
@@ -56,6 +69,10 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
     connectionTerritory = [];
     interviews = [];
     content = '';
+    _selectedObtainingEmployment = '';
+    _selectedImprovingEmployment = '';
+    _selectedCoordination = '';
+    _selectedPostWorkSupport = '';
   }
 
   @override
@@ -86,7 +103,7 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
         key: _formKey,
         child: Column(
           children: [
-            CustomTextMediumBold(text: 'Crear nuevo IPIL'),
+            CustomTextMediumBold(text: StringConst.IPIL_CREATE),
             const SizedBox(height: 20),
             CustomFlexRowColumn(
               childRight: StreamBuilder<UserEnreda>(
@@ -131,7 +148,7 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
               padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
               child: CustomTextFormFieldLong(
                 labelText: StringConst.GOALS_MONITORING,
-                hintText: 'Por favor, utiliza este espacio para documentar los detalles de la entrevista. Incluye las impresiones generales, avances del participante, y una descripción de los eventos y cambios ocurridos desde la última entrevista. Anota también cualquier objetivo o plan de acción acordado para las próximas semanas.',
+                hintText: StringConst.IPIL_GOALS_MONITORING_PLACEHOLDER,
                 initialValue: content,
                 validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
                 enabled: true,
@@ -143,7 +160,6 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
             StreamBuilder<List<IpilReinforcement>>(
                 stream: database.ipilReinforcementStream(),
                 builder: (context, snapshot) {
-                  List<String> userReinforcement = [];
                   if (snapshot.hasData){
                     List<IpilReinforcement> reinforcementOptions =  snapshot.data!;
                     List<DropdownItem> reinforcementOptionsDropdown = [];
@@ -153,17 +169,19 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
                           isSelected: userReinforcement.contains(element.ipilReinforcementId)));
                     });
                     return CheckboxDropdown(
-                      title: "Fortalecimiento de las competencias",
+                      title: StringConst.IPIL_REINFORCEMENT,
                       options: reinforcementOptionsDropdown,
                       onTapItem: (value, title){
-                        IpilReinforcement itemSelected = reinforcementOptions.firstWhere((element) => element.label == title);
-                        if(value){
-                          userReinforcement.add(itemSelected.ipilReinforcementId!);
-                        }
-                        else{
-                          userReinforcement.removeWhere((element) => element == itemSelected.ipilReinforcementId);
-                        }
-                        reinforcement = userReinforcement;
+                        setState(() {
+                          IpilReinforcement itemSelected = reinforcementOptions.firstWhere((element) => element.label == title);
+                          if(value){
+                            userReinforcement.add(itemSelected.ipilReinforcementId!);
+                          }
+                          else{
+                            userReinforcement.removeWhere((element) => element == itemSelected.ipilReinforcementId);
+                          }
+                          reinforcement = userReinforcement;
+                        });
                       },
                     );
                   }
@@ -175,7 +193,6 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
             StreamBuilder<List<IpilContextualization>>(
                 stream: database.ipilContextualizationStream(),
                 builder: (context, snapshot) {
-                  List<String> userContextualization = [];
                   if (snapshot.hasData){
                     List<IpilContextualization> contextualizationOptions =  snapshot.data!;
                     List<DropdownItem> contextualizationOptionsDropdown = [];
@@ -185,17 +202,19 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
                           isSelected: userContextualization.contains(element.ipilContextualizationId)));
                     });
                     return CheckboxDropdown(
-                      title: "Contextualización",
+                      title: StringConst.IPIL_CONTEXTUALIZATION,
                       options: contextualizationOptionsDropdown,
                       onTapItem: (value, title){
-                        IpilContextualization itemSelected = contextualizationOptions.firstWhere((element) => element.label == title);
-                        if(value){
-                          userContextualization.add(itemSelected.ipilContextualizationId!);
-                        }
-                        else{
-                          userContextualization.removeWhere((element) => element == itemSelected.ipilContextualizationId);
-                        }
-                        contextualization = userContextualization;
+                        setState(() {
+                          IpilContextualization itemSelected = contextualizationOptions.firstWhere((element) => element.label == title);
+                          if(value){
+                            userContextualization.add(itemSelected.ipilContextualizationId!);
+                          }
+                          else{
+                            userContextualization.removeWhere((element) => element == itemSelected.ipilContextualizationId);
+                          }
+                          contextualization = userContextualization;
+                        });
                       },
                     );
                   }
@@ -205,66 +224,221 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
                 }
             ),
             StreamBuilder<List<IpilConnectionTerritory>>(
-                stream: database.ipilConnectionTerritoryStream(),
-                builder: (context, snapshot) {
-                  List<String> userConnectionTerritory = [];
-                  if (snapshot.hasData){
-                    List<IpilConnectionTerritory> connectionTerritoryOptions =  snapshot.data!;
-                    List<DropdownItem> connectionTerritoryOptionsDropdown = [];
-                    connectionTerritoryOptions.forEach((element) {
-                      connectionTerritoryOptionsDropdown.add(DropdownItem(title:
-                      element.label,
-                          isSelected: userConnectionTerritory.contains(element.ipilConnectionTerritoryId)));
-                    });
-                    return CheckboxDropdown(
-                      title: "Conexión con el territorio",
-                      options: connectionTerritoryOptionsDropdown,
-                      onTapItem: (value, title){
+              stream: database.ipilConnectionTerritoryStream(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<IpilConnectionTerritory> connectionTerritoryOptions = snapshot.data!;
+                  List<DropdownItem> connectionTerritoryOptionsDropdown = [];
+                  for (var element in connectionTerritoryOptions) {
+                    connectionTerritoryOptionsDropdown.add(DropdownItem(
+                      title: element.label,
+                      isSelected: userConnectionTerritory.contains(element.ipilConnectionTerritoryId),
+                    ));
+                  }
+                  return CheckboxDropdown(
+                    title: StringConst.IPIL_CONNECTION_TERRITORY,
+                    options: connectionTerritoryOptionsDropdown,
+                    onTapItem: (value, title) {
+                      setState(() {
                         IpilConnectionTerritory itemSelected = connectionTerritoryOptions.firstWhere((element) => element.label == title);
-                        if(value){
+                        if (value) {
                           userConnectionTerritory.add(itemSelected.ipilConnectionTerritoryId!);
-                        }
-                        else{
+                        } else {
                           userConnectionTerritory.removeWhere((element) => element == itemSelected.ipilConnectionTerritoryId);
                         }
                         connectionTerritory = userConnectionTerritory;
-                      },
+                      });
+                    },
+                  );
+                } else {
+                  return Container(); // Placeholder for loading state
+                }
+              },
+            ),
+            StreamBuilder<List<IpilInterviews>>(
+              stream: database.ipilInterviewsStream(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<IpilInterviews> interviewsOptions = snapshot.data!;
+                  List<DropdownItem> interviewsOptionsDropdown = [];
+                  for (var element in interviewsOptions) {
+                    interviewsOptionsDropdown.add(DropdownItem(
+                      title: element.label,
+                      isSelected: userInterviews.contains(element.ipilInterviewsId),
+                    ));
+                  }
+                  return CheckboxDropdown(
+                    title: StringConst.IPIL_INTERVIEWS,
+                    options: interviewsOptionsDropdown,
+                    onTapItem: (value, title) {
+                      setState(() {
+                        IpilInterviews itemSelected = interviewsOptions.firstWhere((element) => element.label == title);
+                        if (value) {
+                          userInterviews.add(itemSelected.ipilInterviewsId!);
+                        } else {
+                          userInterviews.removeWhere((element) => element == itemSelected.ipilInterviewsId);
+                        }
+                        interviews = userInterviews;
+                      });
+                    },
+                  );
+                } else {
+                  return Container(); // Placeholder for loading state
+                }
+              },
+            ),
+            StreamBuilder<List<IpilObtainingEmployment>>(
+                stream: database.ipilObtainingEmploymentStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData){
+                    List<IpilObtainingEmployment> options =  snapshot.data!;
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CustomTextBold(title: StringConst.IPIL_OBTAINING_EMPLOYMENT, color: AppColors.primary900,),
+                          Wrap(
+                            direction: Axis.horizontal,
+                            children: options.map((option) {
+                              return Container(
+                                width: 200,
+                                child: RadioListTile<String>(
+                                  title: CustomTextSmall(text: option.label),
+                                  value: option.ipilObtainingEmploymentId!,
+                                  groupValue: _selectedObtainingEmployment,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      _selectedObtainingEmployment = value;
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
                     );
                   }
                   else{
                     return Container();
                   }
-
                 }
             ),
-            StreamBuilder<List<IpilInterviews>>(
-                stream: database.ipilInterviewsStream(),
+            StreamBuilder<List<IpilImprovingEmployment>>(
+                stream: database.ipilImprovingEmploymentStream(),
                 builder: (context, snapshot) {
-                  List<String> userInterviews = [];
                   if (snapshot.hasData){
-                    List<IpilInterviews> interviewsOptions =  snapshot.data!;
-                    List<DropdownItem> interviewsOptionsDropdown = [];
-                    interviewsOptions.forEach((element) {
-                      interviewsOptionsDropdown.add(DropdownItem(title:
-                      element.label,
-                          isSelected: userInterviews.contains(element.ipilInterviewsId)));
-                    });
-                    return CheckboxDropdown(
-                      title: "Entrevistas",
-                      options: interviewsOptionsDropdown,
-                      onTapItem: (value, title){
-                        IpilInterviews itemSelected = interviewsOptions.firstWhere((element) => element.label == title);
-                        if(value){
-                          userInterviews.add(itemSelected.ipilInterviewsId!);
-                        }
-                        else{
-                          userInterviews.removeWhere((element) => element == itemSelected.ipilInterviewsId);
-                        }
-                        interviews = userInterviews;
-                      },
+                    List<IpilImprovingEmployment> options =  snapshot.data!;
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CustomTextBold(title: StringConst.IPIL_IMPROVING_EMPLOYMENT, color: AppColors.primary900,),
+                          Wrap(
+                            direction: Axis.horizontal,
+                            children: options.map((option) {
+                              return Container(
+                                width: 200,
+                                child: RadioListTile<String>(
+                                  title: CustomTextSmall(text: option.label),
+                                  value: option.ipilImprovingEmploymentId!,
+                                  groupValue: _selectedImprovingEmployment,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      _selectedImprovingEmployment = value;
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
                     );
                   }
                   else{
+                    return Container();
+                  }
+                }
+            ),
+            StreamBuilder<List<IpilCoordination>>(
+                stream: database.ipilCoordinationStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData){
+                    List<IpilCoordination> options =  snapshot.data!;
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CustomTextBold(title: StringConst.IPIL_COORDINATION, color: AppColors.primary900,),
+                          Wrap(
+                            direction: Axis.horizontal,
+                            children: options.map((option) {
+                              return Container(
+                                width: 200,
+                                child: RadioListTile<String>(
+                                  title: CustomTextSmall(text: option.label),
+                                  value: option.ipilCoordinationId!,
+                                  groupValue: _selectedCoordination,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      _selectedCoordination = value;
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  else{
+                    return Container();
+                  }
+                }
+            ),
+            StreamBuilder<List<IpilPostWorkSupport>>(
+                stream: database.ipilPostWorkSupportStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData){
+                    List<IpilPostWorkSupport> options =  snapshot.data!;
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CustomTextBold(title: StringConst.IPIL_POST_WORK_SUPPORT, color: AppColors.primary900,),
+                          Wrap(
+                            direction: Axis.horizontal,
+                            children: options.map((option) {
+                              return Container(
+                                width: 200,
+                                child: RadioListTile<String>(
+                                  title: CustomTextSmall(text: option.label),
+                                  value: option.ipilPostWorkSupportId!,
+                                  groupValue: _selectedPostWorkSupport,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      _selectedPostWorkSupport = value;
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  else {
                     return Container();
                   }
                 }
@@ -276,7 +450,7 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     EnredaButton(
-                      buttonTitle: 'Cancelar',
+                      buttonTitle: StringConst.CANCEL,
                       buttonColor: AppColors.turquoise,
                       titleColor: Colors.white,
                       height: 50.0,
@@ -290,7 +464,7 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
                     ),
                     SizedBox(width: 20),
                     EnredaButton(
-                      buttonTitle: 'Guardar',
+                      buttonTitle: StringConst.SAVE,
                       buttonColor: AppColors.turquoise,
                       titleColor: Colors.white,
                       height: 50.0,
@@ -324,7 +498,6 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
           content: StringConst.FORM_ENTITY_CHECK,
           defaultActionText: StringConst.CLOSE);
     }
-
     if (_validateAndSaveForm()) {
       _formKey.currentState!.save();
       IpilEntry newIpilEntry = IpilEntry(
@@ -336,6 +509,10 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
         connectionTerritory: connectionTerritory,
         contextualization: contextualization,
         reinforcement: reinforcement,
+        obtainingEmployment: _selectedObtainingEmployment,
+        improvingEmployment: _selectedImprovingEmployment,
+        coordination: _selectedCoordination,
+        postWorkSupport: _selectedPostWorkSupport,
       );
 
       try {
@@ -352,7 +529,6 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
         showExceptionAlertDialog(context,
             title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));
       }
-
     }
   }
 }

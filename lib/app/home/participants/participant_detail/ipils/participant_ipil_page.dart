@@ -4,9 +4,13 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/pdf_ipil_preview.dart';
 import 'package:enreda_empresas/app/models/ipilConnectionTerritory.dart';
 import 'package:enreda_empresas/app/models/ipilContextualization.dart';
+import 'package:enreda_empresas/app/models/ipilCoordination.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/ipilImprovementEmployment.dart';
 import 'package:enreda_empresas/app/models/ipilInterviews.dart';
 import 'package:enreda_empresas/app/models/ipilObjectives.dart';
+import 'package:enreda_empresas/app/models/ipilObtainingEmployment.dart';
+import 'package:enreda_empresas/app/models/ipilPostWorkSupport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
@@ -36,7 +40,7 @@ class ParticipantIPILPage extends StatefulWidget {
 class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   String? techNameComplete;
   List<String> _menuOptions = [
-    "Seguimiento", "Objetivos"];
+    StringConst.IPIL_FOLLOW, StringConst.FORM_GOALS];
   String? _value;
   var bodyWidget = <Widget>[];
   List<IpilEntry> ipilEntriesPage = [];
@@ -127,7 +131,6 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                   ),
                 ),
                 Divider(color: AppColors.greyBorder,),
-                //Save button
                 SingleChildScrollView(
                   child: Container(
                       child: bodyWidget[selectedIndex]),
@@ -178,9 +181,9 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                       widget.participantUser.assignedById == ''){
                     showAlertDialog(
                       context,
-                      title: 'Aviso',
-                      content: 'Este participante no tiene técnica asignada, para crear un IPIL asigne una técnica.',
-                      defaultActionText: 'Aceptar',
+                      title: StringConst.FORM_WARNING,
+                      content: StringConst.IPIL_WARNING_TECHNICAL,
+                      defaultActionText: StringConst.FORM_ACCEPT,
                     );
                     return;
                   }
@@ -203,9 +206,9 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                   if(ipilEntries.isEmpty || ipilEntries.length == 0){
                     showAlertDialog(
                       context,
-                      title: 'Aviso',
-                      content: 'Este participante aún no tiene IPILs creados.',
-                      defaultActionText: 'Aceptar',
+                      title: StringConst.FORM_WARNING,
+                      content: StringConst.FORM_NO_IPIL,
+                      defaultActionText: StringConst.FORM_ACCEPT,
                     );
                     return;
                   }
@@ -227,8 +230,24 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
         Divider(color: AppColors.greyBorder,),
         SpaceH8(),
         ipilEntries.isEmpty ? EmptyList(
-          title: 'No hay IPILs creados.',
+          title: StringConst.FORM_NO_IPILS,
           imagePath: ImagePath.EMPTY_LiST_ICON,
+          buttonTitle: StringConst.ADD_IPIL_ENTRY,
+          onPressed: () {
+            if(widget.participantUser.assignedById == null ||
+                widget.participantUser.assignedById == ''){
+              showAlertDialog(
+                context,
+                title: StringConst.FORM_WARNING,
+                content: StringConst.IPIL_WARNING_TECHNICAL,
+                defaultActionText: StringConst.FORM_ACCEPT,
+              );
+              return;
+            }
+            setState(() {
+              ParticipantIPILPage.selectedIndexIpils.value = 2;
+            });
+          },
         ) :
         listIpils(),
         SizedBox(height: 20),
@@ -275,7 +294,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
       stream: database.ipilContextualizationStreamByUser(ipilEntry.contextualization ?? []),
       builder: (context, contextualizationSnapshot) {
         if (!contextualizationSnapshot.hasData) return Container();
-        List<String> contextualizationList = [];;
+        List<String> contextualizationList = [];
         for(IpilContextualization ipilContextualization in contextualizationSnapshot.data!){
           if(!contextualizationList.contains(ipilContextualization.label)){
             contextualizationList.add(ipilContextualization.label);
@@ -292,7 +311,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
       stream: database.ipilConnectionTerritoryStreamByUser(ipilEntry.connectionTerritory ?? []),
       builder: (context, connectionTerritorySnapshot) {
         if (!connectionTerritorySnapshot.hasData) return Container();
-        List<String> connectionTerritoryList = [];;
+        List<String> connectionTerritoryList = [];
         for(IpilConnectionTerritory ipilConnectionTerritory in connectionTerritorySnapshot.data!){
           if(!connectionTerritoryList.contains(ipilConnectionTerritory.label)){
             connectionTerritoryList.add(ipilConnectionTerritory.label);
@@ -309,13 +328,57 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
       stream: database.ipilInterviewsStreamByUser(ipilEntry.interviews ?? []),
       builder: (context, interviewsSnapshot) {
         if (!interviewsSnapshot.hasData) return Container();
-        List<String> interviewsList = [];;
+        List<String> interviewsList = [];
         for(IpilInterviews ipilInterviews in interviewsSnapshot.data!){
           if(!interviewsList.contains(ipilInterviews.label)){
             interviewsList.add(ipilInterviews.label);
           }
         }
         ipilEntry.interviewsText = interviewsList.join(', ');
+        return _buildIpilObtainingEmploymentStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildIpilObtainingEmploymentStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<IpilObtainingEmployment>(
+      stream: database.ipilObtainingEmploymentStreamByUser(ipilEntry.obtainingEmployment ?? ""),
+      builder: (context, obtainingEmploymentsSnapshot) {
+        ipilEntry.obtainingEmploymentText =
+        obtainingEmploymentsSnapshot.hasData ? obtainingEmploymentsSnapshot.data?.label ?? '' : '';
+        return _buildIpilImprovingEmploymentStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildIpilImprovingEmploymentStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<IpilImprovingEmployment>(
+      stream: database.ipilImprovingEmploymentStreamByUser(ipilEntry.improvingEmployment ?? ""),
+      builder: (context, improvingEmploymentsSnapshot) {
+        ipilEntry.improvingEmploymentText =
+        improvingEmploymentsSnapshot.hasData ? improvingEmploymentsSnapshot.data?.label ?? '' : '';
+        return _buildCoordinationEmploymentStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildCoordinationEmploymentStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<IpilCoordination>(
+      stream: database.ipilCoordinationStreamByUser(ipilEntry.coordination ?? ""),
+      builder: (context, coordinationSnapshot) {
+        ipilEntry.coordinationText =
+        coordinationSnapshot.hasData ? coordinationSnapshot.data?.label ?? '' : '';
+        return _buildPostWorkSupportStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildPostWorkSupportStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<IpilPostWorkSupport>(
+      stream: database.ipilPostWorkSupportStreamByUser(ipilEntry.postWorkSupport ?? ""),
+      builder: (context, postWorkSupportSnapshot) {
+        ipilEntry.postWorkSupportText =
+        postWorkSupportSnapshot.hasData ? postWorkSupportSnapshot.data?.label ?? '' : '';
         return _buildUserEnredaStream(ipilEntry, database);
       },
     );
