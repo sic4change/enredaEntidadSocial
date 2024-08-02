@@ -6,11 +6,12 @@ import '../values/values.dart';
 
 class EmptyList extends StatelessWidget {
   const EmptyList(
-      {Key? key, required this.title, this.subtitle, required this.imagePath, this.onPressed})
+      {Key? key, required this.title, this.subtitle, required this.imagePath, this.onPressed, this.buttonTitle = "Empieza ahora"})
       : super(key: key);
   final String title;
   final String? subtitle;
   final String imagePath;
+  final String? buttonTitle;
   final VoidCallback? onPressed;
 
   @override
@@ -60,7 +61,7 @@ class EmptyList extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
                 child: Text(
-                  'Empieza ahora',
+                  buttonTitle!,
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Colors.white,

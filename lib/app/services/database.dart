@@ -25,6 +25,7 @@ import 'package:enreda_empresas/app/models/ipilContextualization.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/ipilInterviews.dart';
 import 'package:enreda_empresas/app/models/ipilObjectives.dart';
+import 'package:enreda_empresas/app/models/ipilPostWorkSupport.dart';
 import 'package:enreda_empresas/app/models/ipilReinforcement.dart';
 import 'package:enreda_empresas/app/models/ipilResults.dart';
 import 'package:enreda_empresas/app/models/keepLearningOption.dart';
@@ -51,6 +52,10 @@ import 'package:enreda_empresas/app/services/api_path.dart';
 import 'package:enreda_empresas/app/services/firestore_service.dart';
 import 'package:enreda_empresas/app/models/resourcePicture.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+
+import '../models/ipilCoordination.dart';
+import '../models/ipilImprovementEmployment.dart';
+import '../models/ipilObtainingEmployment.dart';
 
 abstract class Database {
      Stream<List<Resource>> resourcesStream();
@@ -158,6 +163,14 @@ abstract class Database {
      Stream<List<IpilConnectionTerritory>> ipilConnectionTerritoryStreamByUser(List<String> idList);
      Stream<List<IpilInterviews>> ipilInterviewsStream();
      Stream<List<IpilInterviews>> ipilInterviewsStreamByUser(List<String> idList);
+     Stream<List<IpilObtainingEmployment>> ipilObtainingEmploymentStream();
+     Stream<List<IpilImprovingEmployment>> ipilImprovingEmploymentStream();
+     Stream<List<IpilPostWorkSupport>> ipilPostWorkSupportStream();
+     Stream<List<IpilCoordination>> ipilCoordinationStream();
+     Stream<IpilObtainingEmployment> ipilObtainingEmploymentStreamByUser(String obtainingEmploymentId);
+     Stream<IpilImprovingEmployment> ipilImprovingEmploymentStreamByUser(String improvingEmploymentId);
+     Stream<IpilCoordination> ipilCoordinationStreamByUser(String coordinationId);
+     Stream<IpilPostWorkSupport> ipilPostWorkSupportStreamByUser(String postWorkSupportId);
      Stream<List<IpilResults>> ipilResultsStream();
      Stream<IpilObjectives> ipilObjectivesStreamByUserId(String userId);
      Future<void> setIpilObjectives(IpilObjectives ipilObjectives);
@@ -1015,13 +1028,6 @@ class FirestoreDatabase implements Database {
   Future<void> addDerivationReport(DerivationReport derivationReport) =>
       _service.addData(path: APIPath.derivationReports(), data: derivationReport.toMap());
 
-  @override
-  Stream<List<IpilReinforcement>> ipilReinforcementStream() => _service.collectionStream(
-    path: APIPath.ipilReinforcement(),
-    queryBuilder: (query) => query.where('ipilReinforcementId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilReinforcement.fromMap(data, documentId),
-    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
-  );
 
   @override
   Stream<List<IpilReinforcement>> ipilReinforcementStreamByUser(List<String?> reinforcementIdList) async* {
@@ -1095,6 +1101,13 @@ class FirestoreDatabase implements Database {
     yield combinedResults;
   }
 
+  @override
+  Stream<List<IpilReinforcement>> ipilReinforcementStream() => _service.collectionStream(
+    path: APIPath.ipilReinforcement(),
+    queryBuilder: (query) => query.where('ipilReinforcementId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilReinforcement.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
 
   @override
   Stream<List<IpilContextualization>> ipilContextualizationStream() => _service.collectionStream(
@@ -1119,6 +1132,74 @@ class FirestoreDatabase implements Database {
     builder: (data, documentId) => IpilInterviews.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
+
+  @override
+  Stream<List<IpilObtainingEmployment>> ipilObtainingEmploymentStream() => _service.collectionStream(
+    path: APIPath.ipilObtainingEmployment(),
+    queryBuilder: (query) => query.where('ipilObtainingEmploymentId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilObtainingEmployment.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<IpilObtainingEmployment> ipilObtainingEmploymentStreamByUser(String? obtainingEmploymentId) {
+    return _service.documentStreamByField(
+      path: APIPath.ipilObtainingEmployment(),
+      builder: (data, documentId) => IpilObtainingEmployment.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('ipilObtainingEmploymentId', isEqualTo: obtainingEmploymentId),
+    );
+  }
+
+  @override
+  Stream<List<IpilImprovingEmployment>> ipilImprovingEmploymentStream() => _service.collectionStream(
+    path: APIPath.ipilImprovingEmployment(),
+    queryBuilder: (query) => query.where('ipilImprovingEmploymentId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilImprovingEmployment.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<IpilImprovingEmployment> ipilImprovingEmploymentStreamByUser(String? improvingEmploymentId) {
+    return _service.documentStreamByField(
+      path: APIPath.ipilImprovingEmployment(),
+      builder: (data, documentId) => IpilImprovingEmployment.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('ipilImprovingEmploymentId', isEqualTo: improvingEmploymentId),
+    );
+  }
+
+  @override
+  Stream<List<IpilPostWorkSupport>> ipilPostWorkSupportStream() => _service.collectionStream(
+    path: APIPath.ipilPostWorkSupport(),
+    queryBuilder: (query) => query.where('ipilPostWorkSupportId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilPostWorkSupport.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<IpilPostWorkSupport> ipilPostWorkSupportStreamByUser(String? postWorkSupportId) {
+    return _service.documentStreamByField(
+      path: APIPath.ipilPostWorkSupport(),
+      builder: (data, documentId) => IpilPostWorkSupport.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('ipilPostWorkSupportId', isEqualTo: postWorkSupportId),
+    );
+  }
+
+  @override
+  Stream<List<IpilCoordination>> ipilCoordinationStream() => _service.collectionStream(
+    path: APIPath.ipilCoordination(),
+    queryBuilder: (query) => query.where('ipilCoordinationId', isNotEqualTo: null),
+    builder: (data, documentId) => IpilCoordination.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<IpilCoordination> ipilCoordinationStreamByUser(String? coordinationId) {
+    return _service.documentStreamByField(
+      path: APIPath.ipilCoordination(),
+      builder: (data, documentId) => IpilCoordination.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('ipilCoordinationId', isEqualTo: coordinationId),
+    );
+  }
 
   @override
   Stream<List<IpilResults>> ipilResultsStream() => _service.collectionStream(

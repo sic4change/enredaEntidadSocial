@@ -18,6 +18,14 @@ class IpilEntry {
     this.connectionTerritoryText,
     this.interviews,
     this.interviewsText,
+    this.obtainingEmployment,
+    this.obtainingEmploymentText,
+    this.improvingEmployment,
+    this.improvingEmploymentText,
+    this.coordination,
+    this.coordinationText,
+    this.postWorkSupport,
+    this.postWorkSupportText,
     this.results,
   });
 
@@ -34,6 +42,14 @@ class IpilEntry {
   late String? connectionTerritoryText;
   late List<String>? interviews;
   late String? interviewsText;
+  late String? obtainingEmployment;
+  late String? obtainingEmploymentText;
+  late String? improvingEmployment;
+  late String? improvingEmploymentText;
+  late String? coordination;
+  late String? coordinationText;
+  late String? postWorkSupport;
+  late String? postWorkSupportText;
   late List<String>? results;
 
   factory IpilEntry.fromMap(Map<String, dynamic> data, String documentId) {
@@ -77,6 +93,14 @@ class IpilEntry {
       connectionTerritoryText: data['connectionTerritoryText']  ?? '',
       interviews: interviews,
       interviewsText: data['interviewsText'] ?? '',
+      obtainingEmployment: data['obtainingEmployment'] ?? '',
+      obtainingEmploymentText: data['obtainingEmploymentText'] ?? '',
+      improvingEmployment: data['improvingEmployment'] ?? '',
+      improvingEmploymentText: data['improvingEmploymentText'] ?? '',
+      coordination: data['coordination'] ?? '',
+      coordinationText: data['coordinationText'] ?? '',
+      postWorkSupport: data['postWorkSupport'] ?? '',
+      postWorkSupportText: data['postWorkSupportText'] ?? '',
       results: results,
     );
   }
@@ -104,6 +128,14 @@ class IpilEntry {
       'connectionTerritoryText': connectionTerritoryText,
       "interviews": interviews,
       "interviewsText": interviewsText,
+      "obtainingEmployment": obtainingEmployment,
+      "obtainingEmploymentText": obtainingEmploymentText,
+      "improvingEmployment": improvingEmployment,
+      "improvingEmploymentText": improvingEmploymentText,
+      "coordination": coordination,
+      "coordinationText": coordinationText,
+      "postWorkSupport": postWorkSupport,
+      "postWorkSupportText": postWorkSupportText,
       'results': results,
     };
   }

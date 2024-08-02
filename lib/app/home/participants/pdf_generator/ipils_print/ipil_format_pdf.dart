@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_print/data.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -41,9 +42,10 @@ Future<Uint8List> generateIpilFile(
               .defaultTextStyle
               .copyWith(fontWeight: pw.FontWeight.bold, color: primary900)
         ),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 10),
         for(IpilEntry ipil in ipilEntries!)
-          (ipil.content != null && ipil.content != '') ? _IpilEntry(ipil: ipil, techName: techName) : pw.Container(),
+          (ipil.content != null && ipil.content != '') ?
+          _IpilEntry(ipil: ipil, techName: techName) : pw.Container(),
         pw.SizedBox(height: 10),
       ]
     )
@@ -69,64 +71,69 @@ class _IpilEntry extends pw.StatelessWidget {
           pw.Row(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: <pw.Widget>[
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    SmallText(text: 'Fecha',
-                        fontWeight: pw.FontWeight.bold, color: primary900),
-                    SmallText(text: formatter.format(ipil.date.toLocal()),),
-                  ]
-                ),
+                BlockText(title: StringConst.DATE, text: formatter.format(ipil.date.toLocal())),
                 pw.SizedBox(width: 50,),
-                pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      SmallText(text: 'Nombre de la técnica',
-                          fontWeight: pw.FontWeight.bold, color: primary900),
-                      SmallText(text: '$techName'),
-                    ]
-                ),
+                BlockText(title: StringConst.TECHNICAL_NAME, text: '$techName'),
               ]
           ),
           pw.SizedBox(height: 10),
-          pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              SmallText(text: 'Seguimiento',
-                  fontWeight: pw.FontWeight.bold, color: primary900),
-              SmallText(text: '${ipil.content}'),
-            ]
-          ),
-          pw.SizedBox(height: 10),
-          (ipil.reinforcement != null && ipil.reinforcement!.isNotEmpty ) ?
-            SmallText(text: 'Fortalecimiento de las competencias',
-                fontWeight: pw.FontWeight.bold, color: primary900) : pw.Container(),
+
+          BlockText(title: StringConst.IPIL_FOLLOW, text: ipil.content!),
+
           if (ipil.reinforcementsText != null && ipil.reinforcementsText!.isNotEmpty)
-            SmallText(text: ipil.reinforcementsText!),
-          pw.SizedBox(height: 5),
-          (ipil.contextualization != null && ipil.contextualization!.isNotEmpty ) ?
-          SmallText(text: 'Contextualización',
-              fontWeight: pw.FontWeight.bold, color: primary900) : pw.Container(),
+            BlockText(title: StringConst.IPIL_REINFORCEMENT, text: ipil.reinforcementsText!),
+
           if (ipil.contextualizationText != null && ipil.contextualizationText!.isNotEmpty)
-            SmallText(text: ipil.contextualizationText!),
-          pw.SizedBox(height: 5),
-          (ipil.connectionTerritory != null && ipil.connectionTerritory!.isNotEmpty ) ?
-          SmallText(text: 'Conexión con el territorio',
-              fontWeight: pw.FontWeight.bold, color: primary900) : pw.Container(),
+            BlockText(title: StringConst.IPIL_CONTEXTUALIZATION, text: ipil.contextualizationText!),
+
           if (ipil.connectionTerritoryText != null && ipil.connectionTerritoryText!.isNotEmpty)
-            SmallText(text: ipil.connectionTerritoryText!),
-          pw.SizedBox(height: 5),
-          (ipil.interviews != null && ipil.interviews!.isNotEmpty ) ?
-          SmallText(text: 'Entrevistas',
-              fontWeight: pw.FontWeight.bold, color: primary900) : pw.Container(),
+            BlockText(title: StringConst.IPIL_CONNECTION_TERRITORY, text: ipil.connectionTerritoryText!),
+
           if (ipil.interviewsText != null && ipil.interviewsText!.isNotEmpty)
-            SmallText(text: ipil.interviewsText!),
+            BlockText(title: StringConst.IPIL_INTERVIEWS, text: ipil.interviewsText!),
+
+          if (ipil.obtainingEmploymentText != null && ipil.obtainingEmploymentText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_OBTAINING_EMPLOYMENT, text: ipil.obtainingEmploymentText!),
+
+          if (ipil.improvingEmploymentText != null && ipil.improvingEmploymentText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_IMPROVING_EMPLOYMENT, text: ipil.improvingEmploymentText!),
+
+          if (ipil.coordinationText != null && ipil.coordinationText!.isNotEmpty )
+            BlockText(title: StringConst.IPIL_COORDINATION, text: ipil.coordinationText!),
+
+          if (ipil.postWorkSupportText != null && ipil.postWorkSupportText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_POST_WORK_SUPPORT, text: ipil.postWorkSupportText!),
+
           pw.SizedBox(height: 8),
           pw.Divider(color: grey, thickness: 0.5),
         ]);
   }
 }
 
+class BlockText extends pw.StatelessWidget {
+  BlockText({
+    required this.title,
+    required this.text,
+  });
+
+  final String title;
+  final String text;
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return pw.Column(
+      mainAxisAlignment: pw.MainAxisAlignment.start,
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.SizedBox(height: 5),
+        SmallText(text: title,
+            fontWeight: pw.FontWeight.bold, color: primary900),
+        SmallText(text: text,
+            fontWeight: pw.FontWeight.normal, color: grey),
+      ]
+    );
+  }
+}
 class SmallText extends pw.StatelessWidget {
   SmallText({
     required this.text,
