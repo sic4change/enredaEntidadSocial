@@ -1,8 +1,10 @@
 import 'dart:io';
-import 'dart:ui_web';
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/expandable_document_category.dart';
+import 'package:enreda_empresas/app/home/resources/list_item_builder.dart';
+import 'package:enreda_empresas/app/models/documentCategory.dart';
 import 'package:enreda_empresas/app/models/personalDocument.dart';
 import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -14,6 +16,7 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -41,70 +44,91 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
   @override
   Widget build(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
-    late int documentsCount = 0;
-
     return StreamBuilder<UserEnreda>(
         stream: database.userEnredaStreamByUserId(widget.participantUser.userId),
         builder: (context, snapshot) {
             if(snapshot.hasData){
               _userDocuments = snapshot.data!.personalDocuments;
             }
-            return StreamBuilder<List<PersonalDocumentType>>(
-                stream: database.personalDocumentTypeStream(),
-                builder: (context, snapshot) {
-                  if(snapshot.hasData){
-
-                    snapshot.data!.forEach((element) {
-                      bool containsDocument = false;
-                      _userDocuments.forEach((item) {
-                        if(item.name == element.title){
-                          containsDocument = true;
-                        }
-                      });
-                      if(!containsDocument){
-                        _userDocuments.add(PersonalDocument(name: element.title, order: snapshot.data!.indexOf(element), document: ''));
-                      }
-
-                    });
-                    _userDocuments.sort((a, b) {
-                      return a.order.compareTo(b.order);
-                    },);
-
-                    documentsCount = _userDocuments.length;
-
-                  }
-                  return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)? 50.0: 20.0, vertical: 30),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(color: AppColors.greyBorder)
-                        ),
-                        child:
-                        Column(
-                            children: [
-                              if (Responsive.isDesktop(context) && !Responsive.isDesktopS(context))
-                                _buildHeaderDesktop(() => _showSaveDialog(documentsCount++)),
-                              if (!Responsive.isDesktop(context) || Responsive.isDesktopS(context))
-                                _buildHeaderMobile(() => _showSaveDialog(documentsCount++)),
-                              Divider(
-                                color: AppColors.greyBorder,
-                                height: 0,
-                              ),
-                              Column(
-                                  children: [
-                                    for( var document in _userDocuments)
-                                      _documentTile(context, document, widget.participantUser),
-                                  ]
-                              )
-                            ]
-                        ),
-                      )
-                  );
-                }
-            );
+            return documentCategoriesList();
           }
       );
+  }
+
+  Widget documentCategoriesList(){
+    final database = Provider.of<Database>(context, listen: false);
+    return StreamBuilder<List<DocumentCategory>>(
+      stream: database.documentCategoriesStream(),
+      builder: (context, documentCategoriesSnapshot) {
+        if (!documentCategoriesSnapshot.hasData) return Container();
+        List<DocumentCategory> documentCategoriesList = documentCategoriesSnapshot.data!;
+        return ListItemBuilder<DocumentCategory>(
+          snapshot: documentCategoriesSnapshot,
+          itemBuilder: (context, documentCategory) {
+            return ExpandableDocCategoryTile(documentCategory: documentCategory);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildHeader() {
+    final database = Provider.of<Database>(context, listen: false);
+    late int documentsCount = 0;
+    return StreamBuilder<List<PersonalDocumentType>>(
+        stream: database.personalDocumentTypeStream(),
+        builder: (context, snapshot) {
+          if(snapshot.hasData){
+
+            snapshot.data!.forEach((element) {
+              bool containsDocument = false;
+              _userDocuments.forEach((item) {
+                if(item.name == element.title){
+                  containsDocument = true;
+                }
+              });
+              if(!containsDocument){
+                _userDocuments.add(PersonalDocument(name: element.title, order: snapshot.data!.indexOf(element), document: ''));
+              }
+
+            });
+            _userDocuments.sort((a, b) {
+              return a.order.compareTo(b.order);
+            },);
+
+            documentsCount = _userDocuments.length;
+
+          }
+          return Padding(
+              padding: EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)? 50.0: 20.0, vertical: 30),
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: AppColors.greyBorder)
+                ),
+                child:
+                Column(
+                    children: [
+                      if (Responsive.isDesktop(context) && !Responsive.isDesktopS(context))
+                        _buildHeaderDesktop(() => _showSaveDialog(documentsCount++)),
+                      if (!Responsive.isDesktop(context) || Responsive.isDesktopS(context))
+                        _buildHeaderMobile(() => _showSaveDialog(documentsCount++)),
+                      Divider(
+                        color: AppColors.greyBorder,
+                        height: 0,
+                      ),
+                      Column(
+                          children: [
+                            for( var document in _userDocuments)
+                              _documentTile(context, document, widget.participantUser),
+                          ]
+                      )
+                    ]
+                ),
+              )
+          );
+        }
+    );
   }
 
   Widget _buildHeaderDesktop(VoidCallback onTap) {

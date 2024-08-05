@@ -53,6 +53,7 @@ import 'package:enreda_empresas/app/services/firestore_service.dart';
 import 'package:enreda_empresas/app/models/resourcePicture.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+import '../models/documentCategory.dart';
 import '../models/ipilCoordination.dart';
 import '../models/ipilImprovementEmployment.dart';
 import '../models/ipilObtainingEmployment.dart';
@@ -112,6 +113,9 @@ abstract class Database {
      Stream<List<CompetencySubCategory>> competenciesSubCategoriesStream();
      Stream<List<CertificationRequest>> myCertificationRequestStream(String userId);
      Stream<List<SocialEntitiesType>> socialEntitiesTypeStream();
+     Stream<List<DocumentCategory>> documentCategoriesStream();
+     Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
+     Stream<List<PersonalDocumentType>> personalDocumentTypeByIdStream(String categoryId);
      Future<void> setUserEnreda(UserEnreda userEnreda);
      Future<void> deleteUser(UserEnreda userEnreda);
      Future<void> uploadUserAvatar(String userId, Uint8List data);
@@ -138,7 +142,6 @@ abstract class Database {
      Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date);
      Future<void> deleteIpilEntry(IpilEntry ipilEntry);
      Future<void> setIpilEntry(IpilEntry ipilEntry);
-     Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
      Future<void> uploadPersonalDocument(UserEnreda user, Uint8List data, String name, PersonalDocument document, int position);
      Stream<InitialReport> initialReportsStreamByUserId(String? userId);
      Future<void> setInitialReport(InitialReport initialReport);
@@ -622,6 +625,17 @@ class FirestoreDatabase implements Database {
       );
 
   @override
+  Stream<List<PersonalDocumentType>> personalDocumentTypeByIdStream(String? categoryId) =>
+      _service.collectionStream(
+        path: APIPath.personalDocumentType(),
+        queryBuilder: (query) =>
+            query.where('documentCategoryId', isEqualTo: categoryId),
+        builder: (data, documentId) =>
+            PersonalDocumentType.fromMap(data, documentId),
+        sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+      );
+
+  @override
   Stream<List<SpecificInterest>> specificInterestsStream() => _service.collectionStream(
     path: APIPath.specificInterests(),
     queryBuilder: (query) => query.where('name', isNotEqualTo: null),
@@ -903,6 +917,14 @@ class FirestoreDatabase implements Database {
     path: APIPath.personalDocumentType(),
     queryBuilder: (query) => query.where('personalDocId', isNotEqualTo: null),
     builder: (data, documentId) => PersonalDocumentType.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+  );
+
+  @override
+  Stream<List<DocumentCategory>> documentCategoriesStream() => _service.collectionStream(
+    path: APIPath.documentCategories(),
+    queryBuilder: (query) => query.where('title', isNotEqualTo: null),
+    builder: (data, documentId) => DocumentCategory.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 

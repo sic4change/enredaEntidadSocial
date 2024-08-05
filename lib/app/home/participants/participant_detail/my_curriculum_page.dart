@@ -9,6 +9,7 @@ import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_star_rating_null_safety/smooth_star_rating_null_safety.dart';
@@ -20,6 +21,8 @@ import '../../../common_widgets/precached_avatar.dart';
 import '../../../common_widgets/show_custom_dialog.dart';
 import '../../../common_widgets/spaces.dart';
 import '../../../models/city.dart';
+import '../../../utils/adaptative.dart';
+import '../../../utils/functions.dart';
 import '../../../utils/responsive.dart';
 import '../../../values/strings.dart';
 import '../../../values/values.dart';
@@ -912,25 +915,45 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
   }
 
   Widget _buildFinalCheck(BuildContext context, UserEnreda? user){
-    final textTheme = Theme.of(context).textTheme;
     final bool checkFinal = user?.checkAgreeCV ?? false;
-    return Row(
+    TextTheme textTheme = Theme.of(context).textTheme;
+    double fontSize = responsiveSize(context, 12, 14, md: 13);
+    return  Row(
       children: [
         IconButton(
-            icon: Icon(checkFinal ? Icons.check_box : Icons.crop_square),
-            color: AppColors.darkGray,
-            iconSize: 20.0,
-            onPressed: (){}),
-        Expanded(
-          child: Text(
-            StringConst.PERSONAL_DATA_LAW,
-            maxLines: 5,
-            softWrap: true,
-            style: textTheme.titleMedium?.copyWith(
-                fontSize: Responsive.isDesktop(context) ? 13 : 12,
-                color: AppColors.darkGray),
-          ),
+          icon: Icon(checkFinal ? Icons.check_box : Icons.crop_square),
+          color: AppColors.primary900,
+          iconSize: 20.0,
+          onPressed: () {}, // Empty function can be a const
         ),
+        Flexible(
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: StringConst.PERSONAL_DATA_LAW,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: AppColors.primary900,
+                    height: 1.5,
+                    fontSize: fontSize,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      launchURL(StringConst.PERSONAL_DATA_LAW_PDF);
+                    },
+                ),
+                TextSpan(
+                  text: StringConst.PERSONAL_DATA_LAW_TEXT,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.primary900,
+                    height: 1.5,
+                    fontSize: fontSize,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
       ],
     );
   }

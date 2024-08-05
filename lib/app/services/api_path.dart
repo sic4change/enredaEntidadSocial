@@ -3,6 +3,7 @@ class APIPath {
   static String resources() => 'resources';
   static String resourcesCategories() => 'resourcesCategories';
   static String resourcesTypes() => 'resourcesTypes';
+  static String documentCategories() => 'documentCategories';
   static String resourceType(String resourceType) => 'resourcesTypes/$resourceType';
   static String resourceCategory(String resourceCategory) => 'resourcesCategories/$resourceCategory';
   static String socialEntity(String socialEntityId) => 'socialEntities/$socialEntityId';

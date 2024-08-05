@@ -581,7 +581,9 @@ class StringConst {
   static const String GOALS_MONITORING = "Seguimiento:";
   static const String ADD_IPIL_ENTRY = "Crear nuevo IPIL";
   static const String DOWNLOAD_ALL = "Descargar todos";
-  static const String PERSONAL_DATA_LAW = 'Según la Ley Orgánica 15/1999 de Protección de Datos Personales, autorizo a la empresa al uso y tratamiento de mis datos con fines exclusivamente de selección de personal y bolsas de empleo.';
+  static const String PERSONAL_DATA_LAW_PDF = 'https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/BOE-A-2018-16673-consolidado.pdf?alt=media&token=5a8ee31a-1288-487c-8dd6-1de1eed79860';
+  static const String PERSONAL_DATA_LAW = 'Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales';
+  static const String PERSONAL_DATA_LAW_TEXT = ', autorizo a la empresa al uso y tratamiento de mis datos con fines exclusivamente de selección de personal y bolsas de empleo.';
   static const String IPIL_FOLLOW = "Seguimiento";
   static const String IPIL_REINFORCEMENT = "Fortalecimiento de las competencias";
   static const String IPIL_CONTEXTUALIZATION = "Contextualización";
