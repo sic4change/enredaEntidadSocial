@@ -3,6 +3,7 @@ import 'package:enreda_empresas/app/models/documentCategory.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../models/userEnreda.dart';
 import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
 import 'documentCategoryTile.dart';
@@ -11,8 +12,10 @@ class ExpandableDocCategoryTile extends StatefulWidget {
   const ExpandableDocCategoryTile({
     Key? key,
     required this.documentCategory,
+    required this.participantUser,
   }) : super(key: key);
   final DocumentCategory documentCategory;
+  final UserEnreda participantUser;
 
   @override
   State<ExpandableDocCategoryTile> createState() =>
@@ -45,36 +48,35 @@ class _ExpandableDocCategoryTileState extends State<ExpandableDocCategoryTile> {
       child: Stack(
         children: [
           Container(
-            margin: Responsive.isMobile(context) ? EdgeInsets.only(bottom: 20) : EdgeInsets.only(
-                top: 4.0, left: 4.0, right: 4.0, bottom: 10),
-            padding: Responsive.isMobile(context) ?
-            EdgeInsets.symmetric(horizontal: 8.0, vertical: 10) :
-            EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-            decoration: BoxDecoration(
-                color: AppColors.greySearch,
-                shape: BoxShape.rectangle,
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 0.0,
-                    offset: Offset(0.0, 1.0),
-                  ),
-                ]),
             child: ExpandablePanel(
-              controller: controller,
-              header: CustomTextBold(title: '${(widget.documentCategory.name)}', color: AppColors.primary900),
-              expanded: DocumentCategoryTile(
-                documentCategory: widget.documentCategory,
-              ),
-              collapsed: Container(),
-              theme: ExpandableThemeData(
+              theme:  ExpandableThemeData(
                 hasIcon: false,
               ),
+              controller: controller,
+              header: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      color: AppColors.greySearch,
+                      padding: Responsive.isMobile(context) ? const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0) :
+                      const EdgeInsets.symmetric(horizontal: 50.0, vertical: 16.0),
+                      child: CustomTextChip(text: '${(widget.documentCategory.name)}', color: AppColors.primary900),
+                    ),
+                    Divider(thickness: 1, height: 0, color: AppColors.greyDropMenuBorder,),
+                  ],
+                ),
+              ),
+              expanded: DocumentCategoryTile(
+                documentCategory: widget.documentCategory,
+                participantUser: widget.participantUser,
+              ),
+              collapsed: Container(),
             ),
           ),
           Positioned(
-              bottom: Responsive.isMobile(context) ? 25 : 15,
-              right: Responsive.isMobile(context) ?  10 : 40,
+              top: Responsive.isMobile(context) ? 5 : 15,
+              right: Responsive.isMobile(context) ?  10 : 35,
               child: Row(
                 children: [
                   Container(

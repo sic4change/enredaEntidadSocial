@@ -50,12 +50,17 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
             if(snapshot.hasData){
               _userDocuments = snapshot.data!.personalDocuments;
             }
-            return documentCategoriesList();
+            return Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: AppColors.greyBorder)
+                ),
+                child: documentCategoriesList(widget.participantUser));
           }
       );
   }
 
-  Widget documentCategoriesList(){
+  Widget documentCategoriesList(UserEnreda participantUser) {
     final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<List<DocumentCategory>>(
       stream: database.documentCategoriesStream(),
@@ -65,7 +70,7 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
         return ListItemBuilder<DocumentCategory>(
           snapshot: documentCategoriesSnapshot,
           itemBuilder: (context, documentCategory) {
-            return ExpandableDocCategoryTile(documentCategory: documentCategory);
+            return ExpandableDocCategoryTile(documentCategory: documentCategory, participantUser: participantUser);
           },
         );
       },

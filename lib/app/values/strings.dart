@@ -561,7 +561,7 @@ class StringConst {
   static const String PERSONAL_DOCUMENTATION = "Documentación personal";
   static const String DOCUMENTATION = "Documentación";
   static const String COMPLETED = "Completada";
-  static const String SET_DOCUMENT_NAME = "Introduce el nombre del documento";
+  static const String SET_DOCUMENT_NAME = "Añadir un nuevo documento a:  ";
   static const String ADD_DOCUMENTS = "Añadir documentos";
   static const String IPIL = "IPIL";
   static const String SOCIAL_REPORTS = "Informes sociales";
