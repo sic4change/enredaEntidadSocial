@@ -8,7 +8,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
-import 'package:enreda_empresas/app/models/personalDocument.dart';
+import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -38,7 +38,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   String? _value;
   late UserEnreda participantUser, socialEntityUser;
 
-  List<PersonalDocument> _userDocuments = [];
   String? techNameComplete;
 
   @override

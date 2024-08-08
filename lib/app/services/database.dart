@@ -31,7 +31,7 @@ import 'package:enreda_empresas/app/models/ipilResults.dart';
 import 'package:enreda_empresas/app/models/keepLearningOption.dart';
 import 'package:enreda_empresas/app/models/organization.dart';
 import 'package:enreda_empresas/app/models/region.dart';
-import 'package:enreda_empresas/app/models/personalDocument.dart';
+import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -115,7 +115,8 @@ abstract class Database {
      Stream<List<SocialEntitiesType>> socialEntitiesTypeStream();
      Stream<List<DocumentCategory>> documentCategoriesStream();
      Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
-     Stream<List<PersonalDocumentType>> personalDocumentTypeByIdStream(String categoryId);
+     Stream<List<PersonalDocumentType>> documentSubCategoriesByCategoryStream(String categoryId);
+     Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user);
      Future<void> setUserEnreda(UserEnreda userEnreda);
      Future<void> deleteUser(UserEnreda userEnreda);
      Future<void> uploadUserAvatar(String userId, Uint8List data);
@@ -142,7 +143,7 @@ abstract class Database {
      Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date);
      Future<void> deleteIpilEntry(IpilEntry ipilEntry);
      Future<void> setIpilEntry(IpilEntry ipilEntry);
-     Future<void> uploadPersonalDocument(UserEnreda user, Uint8List data, String name, PersonalDocument document, int position);
+     Future<void> uploadPersonalDocument(String userId, String fileName, Uint8List data, DocumentationParticipant document);
      Stream<InitialReport> initialReportsStreamByUserId(String? userId);
      Future<void> setInitialReport(InitialReport initialReport);
      Future<void> addInitialReport(InitialReport initialReport);
@@ -625,7 +626,7 @@ class FirestoreDatabase implements Database {
       );
 
   @override
-  Stream<List<PersonalDocumentType>> personalDocumentTypeByIdStream(String? categoryId) =>
+  Stream<List<PersonalDocumentType>> documentSubCategoriesByCategoryStream(String? categoryId) =>
       _service.collectionStream(
         path: APIPath.personalDocumentType(),
         queryBuilder: (query) =>
@@ -634,6 +635,30 @@ class FirestoreDatabase implements Database {
             PersonalDocumentType.fromMap(data, documentId),
         sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
       );
+
+  // @override
+  // Stream<List<PersonalDocument>> documentationParticipantBySubCategoryStream(String userId) => _service.collectionStream(
+  //       path: APIPath.documentationParticipants(),
+  //       queryBuilder: (query) => query.where('userId', isEqualTo: userId),
+  //           // query.where('documentCategoryId', isEqualTo: documentSubCategory.documentCategoryId)
+  //           //      .where('documentSubCategoryId', isEqualTo: documentSubCategory.documentSubCategoryId)
+  //           //      .where('userId', isEqualTo: userId),
+  //       builder: (data, documentId) =>
+  //           PersonalDocument.fromMap(data, documentId),
+  //       sort: (lhs, rhs) => lhs.createDate.compareTo(rhs.createDate),
+  // );
+
+  @override
+  Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user) => _service.collectionStream(
+    path: APIPath.documentationParticipants(),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null)
+                                  .where('documentSubCategoryId', isEqualTo: documentSubCategory.personalDocId)
+                                  .where('documentCategoryId', isEqualTo: documentSubCategory.documentCategoryId)
+                                  .where('userId', isEqualTo: user.userId)
+    ,
+    builder: (data, documentId) => DocumentationParticipant.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
 
   @override
   Stream<List<SpecificInterest>> specificInterestsStream() => _service.collectionStream(
@@ -929,23 +954,30 @@ class FirestoreDatabase implements Database {
   );
 
   @override
-  Future<void> uploadPersonalDocument(UserEnreda user, Uint8List data, String name, PersonalDocument document, int position) async {
+  Future<void> uploadPersonalDocument(String userId, String fileName, Uint8List data, DocumentationParticipant document) async {
     var firebaseStorageRef =
-    FirebaseStorage.instance.ref().child('users/${user.userId}/personalDocuments/$name');
+    FirebaseStorage.instance.ref().child('users/$userId/files/$fileName');
     UploadTask uploadTask = firebaseStorageRef.putData(data);
     TaskSnapshot taskSnapshot = await uploadTask;
-    taskSnapshot.ref.getDownloadURL().then(
-          (value) async => {
-          if(user.personalDocuments.contains(document)){
-            user.personalDocuments.remove(document),
+    await taskSnapshot.ref.getDownloadURL().then(
+       (value) {
+        _service.addDataFile(path: APIPath.documentationParticipants(), data: {
+          "file": {
+            'src': '$value',
+            'title': '$fileName',
           },
-          user.personalDocuments.add(
-              PersonalDocument(
-                name: document.name,
-                order: document.order,
-                document: value)
-              ),
-          await setUserEnreda(user),
+          "userId": userId,
+          "name": document.name,
+          // "createDate": document.createDate,
+          // "renovationDate": document.renovationDate,
+          // "documentCategoryId": document.documentCategoryId,
+          // "documentSubCategoryId": document.documentSubCategoryId,
+        },).then((value) => _service.updateData(
+            path: APIPath.oneDocumentationParticipant(value),
+            data: {
+              "documentationParticipantId": value,
+            })
+        );
       },
     );
   }

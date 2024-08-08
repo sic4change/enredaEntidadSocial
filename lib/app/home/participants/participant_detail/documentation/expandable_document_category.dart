@@ -80,11 +80,11 @@ class _ExpandableDocCategoryTileState extends State<ExpandableDocCategoryTile> {
               child: Row(
                 children: [
                   Container(
-                      width: 30,
-                      height: 30,
+                      width: Responsive.isMobile(context) ? 26 : 30,
+                      height: Responsive.isMobile(context) ? 26 : 30,
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.greyBorder, width: 1),
+                          //border: Border.all(color: AppColors.greyBorder, width: 1),
                           color: Colors.white,
                           shape: BoxShape.circle),
                       child: Image.asset(

@@ -1,4 +1,4 @@
-import 'package:enreda_empresas/app/models/personalDocument.dart';
+import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:flutter/material.dart';
@@ -54,19 +54,19 @@ bool isEmailValid(String email) =>
         .hasMatch(email);
 
 
-Future<void> setPersonalDocument({
-  required BuildContext context,
-  required PersonalDocument document,
-  required UserEnreda user,
-}) async {
-  final database = Provider.of<Database>(context, listen: false);
-  //In case user already has a document with that name, remove and replace it
-  if(user.personalDocuments.contains(document)){
-    user.personalDocuments.remove(document);
-  }
-  //When update a document with negative order, delete it without replacing it
-  if(document.order >= 0) {
-    user.personalDocuments.add(document);
-  }
-  await database.setUserEnreda(user);
-}
+// Future<void> setPersonalDocument({
+//   required BuildContext context,
+//   required PersonalDocument document,
+//   required UserEnreda user,
+// }) async {
+//   final database = Provider.of<Database>(context, listen: false);
+//   //In case user already has a document with that name, remove and replace it
+//   if(user.personalDocuments.contains(document)){
+//     user.personalDocuments.remove(document);
+//   }
+//   //When update a document with negative order, delete it without replacing it
+//   if(document.order >= 0) {
+//     user.personalDocuments.add(document);
+//   }
+//   await database.setUserEnreda(user);
+// }

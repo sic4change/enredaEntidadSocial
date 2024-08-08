@@ -272,6 +272,7 @@ class StringConst {
   static const String ENTER = 'Entrar';
   static const String CANCEL = 'Cancelar';
   static const String ADD = 'Añadir';
+  static const String ADD_DOC = 'Añadir documento';
   static const String CLOSE = 'Cerrar';
   static const String SAVE = 'Guardar';
   static const String ONLY_USERS_ALERT = 'Solo los usuarios registrados pueden acceder a los recursos internos. ¿Desea entrar como usuario registrado?';
@@ -539,7 +540,9 @@ class StringConst {
   static const String CREATE_ENTITY = "Entidad creada";
   static const String CREATE_ENTITY_SUCCESS = "¡La entidad ha sido creada con éxito!";
   static const String CREATE_IPIL = "IPIL creado";
+  static const String CREATE_DOCUMENT = "Documento creado";
   static const String CREATE_IPIL_SUCCESS = "¡El IPIL ha sido creado con éxito!";
+  static const String CREATE_DOC_SUCCESS = "¡El Documento ha sido creado con éxito!";
   static const String FORM_UNEMPLOYED = "Busco trabajo";
   static const String FORM_MOTIVATION = "Motivaciones";
   static const String FORM_ABILITIES = "¿Qué aspectos crees que tienes que reforzar?";
@@ -551,8 +554,10 @@ class StringConst {
   static const String FORM_DEDICATION = "¿Tienes claro a lo que te gustaría dedicarte?";
   static const String FORM_BELONG_ORGANIZATION = "Organización o entidad a la que pertenece";
   static const String FORM_BELONG_ORGANIZATION_ERROR = "La organización no puede estar vacía";
-  static const String FORM_ENTITY_ERROR = 'Hay algún error en el formulario';
+  static const String FORM_ENTITY_ERROR = 'Hay algún campo faltante en el formulario';
   static const String FORM_ENTITY_CHECK = 'Por favor, revisa los campos marcados en rojo.';
+  static const String FORM_MISSING_DOCUMENT_TITLE = 'Falta añadir un nuevo documento.';
+  static const String FORM_MISSING_DOCUMENT = 'Añadir documento';
   static const String INITIAL_FORM = "Ficha de ingreso";
   static const String INITIAL_FORM_DATA = "Datos del formulario inicial";
   static const String RESOURCES_JOINED = "Se ha inscrito en los siguientes recursos:";
@@ -562,6 +567,9 @@ class StringConst {
   static const String DOCUMENTATION = "Documentación";
   static const String COMPLETED = "Completada";
   static const String SET_DOCUMENT_NAME = "Añadir un nuevo documento a:  ";
+  static const String DOCUMENT_NAME = "Nombre del documento";
+  static const String CREATION_DOCUMENT = "Fecha de creación";
+  static const String RENOVATION_DOCUMENT = "Fecha de renovación";
   static const String ADD_DOCUMENTS = "Añadir documentos";
   static const String IPIL = "IPIL";
   static const String SOCIAL_REPORTS = "Informes sociales";

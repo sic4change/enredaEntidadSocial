@@ -11,6 +11,12 @@ class FirestoreService {
     await reference.add(data);
   }
 
+  Future<String> addDataFile(
+      {required String path, Map<String, dynamic>? data}) async {
+    final CollectionReference<Map<String, dynamic>?> reference = FirebaseFirestore.instance.collection(path);
+    return await reference.add(data).then((value) => value.id);
+  }
+
   Future<void> updateData(
       {required String path, required Map<String, dynamic> data}) async {
     final reference = FirebaseFirestore.instance.doc(path);
@@ -21,26 +27,6 @@ class FirestoreService {
     final reference = FirebaseFirestore.instance.doc(path);
     await reference.delete();
   }
-
-  // Stream<List<T>> collectionStream<T>({
-  //   required String path,
-  //   required T Function(Map<String, dynamic> data, String documentId) builder,
-  //   required Query Function(Query theQueryReceivedAsParameter) queryBuilder,
-  //   required int Function(T lhs, T rhs) sort,
-  // }) {
-  //   Query instancedQuery = FirebaseFirestore.instance.collection(path);
-  //   Query filteredQuery = queryBuilder(instancedQuery);
-  //   final snapshots = filteredQuery.snapshots();
-  //   return snapshots.map((snapshot) {
-  //
-  //     final result = snapshot.docs
-  //         .map((snapshot) => builder(snapshot.data() as Map<String, dynamic>, snapshot.id))
-  //         .where((value) => value != null)
-  //         .toList();
-  //     result.sort(sort);
-  //     return result;
-  //   });
-  // }
 
   Stream<List<T>> collectionStream<T>({
     required String path,

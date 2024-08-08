@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
@@ -9,33 +10,18 @@ class EmptyContent extends StatelessWidget {
   }) : super(key: key);
   final String title;
   final String message;
+  final MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center;
 
   @override
   Widget build(BuildContext context) {
-    TextTheme textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: EdgeInsets.only(left: Sizes.mainPadding, right: Sizes.mainPadding),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: mainAxisAlignment,
           children: <Widget>[
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.greyTxtAlt,
-                fontWeight: FontWeight.w800,
-                height: 1.5,
-              ),
-            ),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.penBlue,
-                height: 1.5,
-              ),
-            ),
+            CustomTextSmallBold(title: title, color: AppColors.primary900,),
+            CustomTextSmall(text: message, color: AppColors.primary900,)
           ],
         ),
       ),

@@ -64,7 +64,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
                 children: [
                   _buildCvSection(context),
                   SpaceH40(),
-                  _buildDocumetationSection(context),
+                  //_buildDocumetationSection(context),
                 ],
               ),
             ],
@@ -90,7 +90,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
           SpaceH20(),
           _buildCvSection(context),
           SpaceH20(),
-          _buildDocumetationSection(context),
+          //_buildDocumetationSection(context),
         ],
       ),
     );
@@ -612,70 +612,70 @@ class ParticipantControlPanelPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDocumetationSection(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
-    double maxValue = 10;
-    double value = 0;
-    return StreamBuilder<List<PersonalDocumentType>>(
-        stream: database.personalDocumentTypeStream(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            maxValue = snapshot.data!.length.toDouble();
-            value = participantUser.personalDocuments.where((userDocument) =>
-                userDocument.document.isNotEmpty && snapshot.data!.any((document) => document.title == userDocument.name)
-            ).length.toDouble();
-          }
-          return RoundedContainer(
-            margin: EdgeInsets.all(0.0),
-            height: 420.0,
-            width: 340.0,
-            borderColor: AppColors.greyAlt.withOpacity(0.15),
-            child: Column (
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomTextBoldTitle(title: StringConst.DOCUMENTATION),
-                SpaceH20(),
-                Stack(
-                  children: [
-                    Center(
-                      child: CircularSeekBar(
-                        height: 260,
-                        width: 260,
-                        startAngle: 45,
-                        sweepAngle: 270,
-                        progress: value,
-                        maxProgress: maxValue,
-                        barWidth: 15,
-                        progressColor: AppColors.darkYellow,
-                        innerThumbStrokeWidth: 15,
-                        innerThumbColor: AppColors.darkYellow,
-                        outerThumbColor: Colors.transparent,
-                        trackColor: AppColors.lightYellow,
-                        strokeCap: StrokeCap.round,
-                        animation: true,
-                        animDurationMillis: 1500,
-                      ),
-                    ),
-                    Center(
-                      child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 40.0),
-                              child: Image.asset(ImagePath.PARTICIPANT_DOCUMENTATION_ICON, width:220,),
-                            ),
-                            CustomTextBoldTitle(title: "${(value/maxValue)*100}%"),
-                            CustomTextMediumBold(text: StringConst.COMPLETED.toUpperCase()),
-                          ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-      }
-    );
-  }
+  // Widget _buildDocumetationSection(BuildContext context) {
+  //   final database = Provider.of<Database>(context, listen: false);
+  //   double maxValue = 10;
+  //   double value = 0;
+  //   return StreamBuilder<List<PersonalDocumentType>>(
+  //       stream: database.personalDocumentTypeStream(),
+  //       builder: (context, snapshot) {
+  //         if (snapshot.hasData) {
+  //           maxValue = snapshot.data!.length.toDouble();
+  //           value = participantUser.personalDocuments.where((userDocument) =>
+  //               userDocument.document.isNotEmpty && snapshot.data!.any((document) => document.title == userDocument.name)
+  //           ).length.toDouble();
+  //         }
+  //         return RoundedContainer(
+  //           margin: EdgeInsets.all(0.0),
+  //           height: 420.0,
+  //           width: 340.0,
+  //           borderColor: AppColors.greyAlt.withOpacity(0.15),
+  //           child: Column (
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               CustomTextBoldTitle(title: StringConst.DOCUMENTATION),
+  //               SpaceH20(),
+  //               Stack(
+  //                 children: [
+  //                   Center(
+  //                     child: CircularSeekBar(
+  //                       height: 260,
+  //                       width: 260,
+  //                       startAngle: 45,
+  //                       sweepAngle: 270,
+  //                       progress: value,
+  //                       maxProgress: maxValue,
+  //                       barWidth: 15,
+  //                       progressColor: AppColors.darkYellow,
+  //                       innerThumbStrokeWidth: 15,
+  //                       innerThumbColor: AppColors.darkYellow,
+  //                       outerThumbColor: Colors.transparent,
+  //                       trackColor: AppColors.lightYellow,
+  //                       strokeCap: StrokeCap.round,
+  //                       animation: true,
+  //                       animDurationMillis: 1500,
+  //                     ),
+  //                   ),
+  //                   Center(
+  //                     child: Column(
+  //                         children: [
+  //                           Padding(
+  //                             padding: const EdgeInsets.only(left: 40.0),
+  //                             child: Image.asset(ImagePath.PARTICIPANT_DOCUMENTATION_ICON, width:220,),
+  //                           ),
+  //                           CustomTextBoldTitle(title: "${(value/maxValue)*100}%"),
+  //                           CustomTextMediumBold(text: StringConst.COMPLETED.toUpperCase()),
+  //                         ],
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ),
+  //         );
+  //     }
+  //   );
+  // }
 
   Widget _buildResourcesSection(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);

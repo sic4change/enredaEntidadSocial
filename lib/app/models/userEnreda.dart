@@ -3,7 +3,7 @@ import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interestsUserEnreda.dart';
 import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
-import 'package:enreda_empresas/app/models/personalDocument.dart';
+import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
 
 class UserEnreda {
@@ -44,7 +44,7 @@ class UserEnreda {
     this.motivation,
     this.educationId,
     this.checkAgreeCV,
-    this.personalDocuments = const [],
+    //this.personalDocuments = const [],
     this.initialReportId,
     this.closureReportId,
     this.followReportId,
@@ -175,19 +175,20 @@ class UserEnreda {
       });
     }
 
-    List<PersonalDocument> personalDocuments = [];
-    if (data['personalDocuments'] != null) {
-      data['personalDocuments'].forEach((personalDocument) {
-        final personalDocumentsFirestore = personalDocument as Map<String, dynamic>;
-        personalDocuments.add(
-            PersonalDocument(
-              name: personalDocumentsFirestore['name'] ?? '',
-              order: personalDocumentsFirestore['order'] ?? 0,
-              document: personalDocumentsFirestore['document'] ?? '',
-            )
-        );
-      });
-    }
+    // List<PersonalDocument> personalDocuments = [];
+    // if (data['personalDocuments'] != null) {
+    //   data['personalDocuments'].forEach((personalDocument) {
+    //     final personalDocumentsFirestore = personalDocument as Map<String, dynamic>;
+    //     personalDocuments.add(
+    //         PersonalDocument(
+    //           name: personalDocumentsFirestore['name'] ?? '',
+    //           order: personalDocumentsFirestore['order'] ?? 0,
+    //           document: personalDocumentsFirestore['document'] ?? '',
+    //           createDate: personalDocumentsFirestore['createDate'] != null ? DateTime.parse(personalDocumentsFirestore['createDate']) : DateTime.now(),
+    //         )
+    //     );
+    //   });
+    // }
 
     late String? assignedById = data['assignedById']?? "";
     final String? assignedEntityId = data['assignedEntityId']?? "";
@@ -244,7 +245,7 @@ class UserEnreda {
       resourcesAccessCount: resourcesAccessCount,
       motivation: motivation,
       checkAgreeCV: checkAgreeCV,
-      personalDocuments: personalDocuments,
+      //personalDocuments: personalDocuments,
       initialReportId: initialReportId,
       closureReportId: closureReportId,
       followReportId: followReportId,
@@ -290,7 +291,7 @@ class UserEnreda {
   final int? resourcesAccessCount;
   final Motivation? motivation;
   final bool? checkAgreeCV;
-  final List<PersonalDocument> personalDocuments;
+  //final List<PersonalDocument> personalDocuments;
   final String? initialReportId;
   final String? closureReportId;
   final String? followReportId;
@@ -340,7 +341,7 @@ class UserEnreda {
       'resourcesAccessCount': resourcesAccessCount,
       'motivation': motivation?.toMap(),
       'checkAgreeCV': checkAgreeCV,
-      'personalDocuments': personalDocuments.map((e) => e.toMap()).toList(),
+      //'personalDocuments': personalDocuments.map((e) => e.toMap()).toList(),
       'initialReportId': initialReportId,
       'closureReportId': closureReportId,
       'followReportId': followReportId,
@@ -389,7 +390,7 @@ class UserEnreda {
     int? resourcesAccessCount,
     Motivation? motivation,
     bool? checkAgreeCV,
-    List<PersonalDocument>? personalDocuments,
+    //List<PersonalDocument>? personalDocuments,
     String? initialReportId,
     String? closureReportId,
     String? followReportId,
@@ -432,7 +433,7 @@ class UserEnreda {
       resourcesAccessCount: resourcesAccessCount,
       motivation: motivation,
       checkAgreeCV: checkAgreeCV ?? this.checkAgreeCV,
-      personalDocuments: personalDocuments ?? this.personalDocuments,
+      //personalDocuments: personalDocuments ?? this.personalDocuments,
       initialReportId: initialReportId ?? this.initialReportId,
       closureReportId: closureReportId ?? this.closureReportId,
       followReportId: followReportId ?? this.followReportId,
