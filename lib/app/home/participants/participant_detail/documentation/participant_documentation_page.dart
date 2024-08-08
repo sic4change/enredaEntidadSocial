@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'dart:ui_web';
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
-import 'package:enreda_empresas/app/models/personalDocument.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/expandable_document_category.dart';
+import 'package:enreda_empresas/app/home/resources/list_item_builder.dart';
+import 'package:enreda_empresas/app/models/documentCategory.dart';
 import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -14,6 +15,7 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,76 +38,97 @@ class ParticipantDocumentationPage extends StatefulWidget {
 }
 
 class _ParticipantDocumentationPageState extends State<ParticipantDocumentationPage> {
-  List<PersonalDocument> _userDocuments = [];
-
   @override
   Widget build(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
-    late int documentsCount = 0;
-
     return StreamBuilder<UserEnreda>(
         stream: database.userEnredaStreamByUserId(widget.participantUser.userId),
         builder: (context, snapshot) {
-            if(snapshot.hasData){
-              _userDocuments = snapshot.data!.personalDocuments;
-            }
-            return StreamBuilder<List<PersonalDocumentType>>(
-                stream: database.personalDocumentTypeStream(),
-                builder: (context, snapshot) {
-                  if(snapshot.hasData){
-
-                    snapshot.data!.forEach((element) {
-                      bool containsDocument = false;
-                      _userDocuments.forEach((item) {
-                        if(item.name == element.title){
-                          containsDocument = true;
-                        }
-                      });
-                      if(!containsDocument){
-                        _userDocuments.add(PersonalDocument(name: element.title, order: snapshot.data!.indexOf(element), document: ''));
-                      }
-
-                    });
-                    _userDocuments.sort((a, b) {
-                      return a.order.compareTo(b.order);
-                    },);
-
-                    documentsCount = _userDocuments.length;
-
-                  }
-                  return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)? 50.0: 20.0, vertical: 30),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(color: AppColors.greyBorder)
-                        ),
-                        child:
-                        Column(
-                            children: [
-                              if (Responsive.isDesktop(context) && !Responsive.isDesktopS(context))
-                                _buildHeaderDesktop(() => _showSaveDialog(documentsCount++)),
-                              if (!Responsive.isDesktop(context) || Responsive.isDesktopS(context))
-                                _buildHeaderMobile(() => _showSaveDialog(documentsCount++)),
-                              Divider(
-                                color: AppColors.greyBorder,
-                                height: 0,
-                              ),
-                              Column(
-                                  children: [
-                                    for( var document in _userDocuments)
-                                      _documentTile(context, document, widget.participantUser),
-                                  ]
-                              )
-                            ]
-                        ),
-                      )
-                  );
-                }
-            );
+            return Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(15.0), topRight: Radius.circular(15.0)),
+                    border: Border.all(color: AppColors.greyBorder)
+                ),
+                child: documentCategoriesList(widget.participantUser));
           }
       );
   }
+
+  Widget documentCategoriesList(UserEnreda participantUser) {
+    final database = Provider.of<Database>(context, listen: false);
+    return StreamBuilder<List<DocumentCategory>>(
+      stream: database.documentCategoriesStream(),
+      builder: (context, documentCategoriesSnapshot) {
+        if (!documentCategoriesSnapshot.hasData) return Container();
+        List<DocumentCategory> documentCategoriesList = documentCategoriesSnapshot.data!;
+        return ListItemBuilder<DocumentCategory>(
+          snapshot: documentCategoriesSnapshot,
+          itemBuilder: (context, documentCategory) {
+            return ExpandableDocCategoryTile(documentCategory: documentCategory, participantUser: participantUser);
+          },
+        );
+      },
+    );
+  }
+
+  // Widget _buildHeader() {
+  //   final database = Provider.of<Database>(context, listen: false);
+  //   late int documentsCount = 0;
+  //   return StreamBuilder<List<PersonalDocumentType>>(
+  //       stream: database.personalDocumentTypeStream(),
+  //       builder: (context, snapshot) {
+  //         // if(snapshot.hasData){
+  //         //
+  //         //   snapshot.data!.forEach((element) {
+  //         //     bool containsDocument = false;
+  //         //     _userDocuments.forEach((item) {
+  //         //       if(item.name == element.title){
+  //         //         containsDocument = true;
+  //         //       }
+  //         //     });
+  //         //     if(!containsDocument){
+  //         //       //_userDocuments.add(PersonalDocument(name: element.title, order: snapshot.data!.indexOf(element), document: ''));
+  //         //     }
+  //         //
+  //         //   });
+  //         //   _userDocuments.sort((a, b) {
+  //         //     return a.order.compareTo(b.order);
+  //         //   },);
+  //         //
+  //         //   documentsCount = _userDocuments.length;
+  //         //
+  //         // }
+  //         return Padding(
+  //             padding: EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)? 50.0: 20.0, vertical: 30),
+  //             child: Container(
+  //               decoration: BoxDecoration(
+  //                   borderRadius: BorderRadius.circular(15),
+  //                   border: Border.all(color: AppColors.greyBorder)
+  //               ),
+  //               child:
+  //               Column(
+  //                   children: [
+  //                     if (Responsive.isDesktop(context) && !Responsive.isDesktopS(context))
+  //                       _buildHeaderDesktop(() => _showSaveDialog(documentsCount++)),
+  //                     if (!Responsive.isDesktop(context) || Responsive.isDesktopS(context))
+  //                       _buildHeaderMobile(() => _showSaveDialog(documentsCount++)),
+  //                     Divider(
+  //                       color: AppColors.greyBorder,
+  //                       height: 0,
+  //                     ),
+  //                     Column(
+  //                         children: [
+  //                           for( var document in _userDocuments)
+  //                             _documentTile(context, document, widget.participantUser),
+  //                         ]
+  //                     )
+  //                   ]
+  //               ),
+  //             )
+  //         );
+  //       }
+  //   );
+  // }
 
   Widget _buildHeaderDesktop(VoidCallback onTap) {
     return Padding(
@@ -182,130 +205,130 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
     );
   }
 
-  Widget _documentTile(BuildContext context, PersonalDocument document, UserEnreda user){
-    bool paridad  = _userDocuments.indexOf(document) % 2 == 0;
-    final database = Provider.of<Database>(context, listen: false);
-
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: paridad ? AppColors.greySearch : AppColors.white,
-        borderRadius: _userDocuments.indexOf(document) == _userDocuments.length-1 ?
-        BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)) :
-        BorderRadius.all(Radius.circular(0)),
-        //border: Border.all(color: AppColors.greyBorder),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: Responsive.isDesktop(context)? 50.0: 16.0),
-              child: Text(
-                document.name,
-                style: TextStyle(
-                  fontFamily: GoogleFonts.inter().fontFamily,
-                  fontWeight: FontWeight.w500,
-                  fontSize: Responsive.isDesktop(context)? 16:12,
-                  color: AppColors.chatDarkGray,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 30),
-            child: document.document != '' ? Row(
-              children: [
-                IconButton(
-                  icon: Image.asset(
-                    ImagePath.PERSONAL_DOCUMENTATION_DELETE,
-                    width: 20,
-                    height: 20,
-                  ),
-                  onPressed: (){
-                    setPersonalDocument(context: context, document: PersonalDocument(name: document.name, order: -1, document: ''), user: user);
-                    setState(() {
-
-                    });
-                  },
-                ),
-                SpaceW8(),
-                IconButton(
-                  icon: Image.asset(
-                    ImagePath.PERSONAL_DOCUMENTATION_VIEW,
-                    width: 20,
-                    height: 20,
-                  ),
-                  onPressed: () async {
-                    var data = await http.get(Uri.parse(document.document));
-                    var pdfData = data.bodyBytes;
-                    var extension = p.extension(document.document).substring(0,4);
-                    print(extension);
-                    if(extension != '.pdf'){
-                      _printNotPDF(document.document);
-                    }
-                    else {
-                      await Printing.layoutPdf(
-                          onLayout: (PdfPageFormat format) async => pdfData);
-                    }
-                  },
-                ),
-                SpaceW8(),
-                IconButton(
-                  icon: Image.asset(
-                    ImagePath.PERSONAL_DOCUMENTATION_DOWNLOAD,
-                    width: 20,
-                    height: 20,
-                  ),
-                  onPressed: () async {
-                    final ref = FirebaseStorage.instance.refFromURL(document.document);
-                    if(kIsWeb){
-                      html.AnchorElement anchorElement = html.AnchorElement(href: document.document);
-                      anchorElement.download = document.name;
-                      anchorElement.click();
-                    }else{
-                      final dir = await getApplicationDocumentsDirectory();
-                      final file = File('${dir.path}/${ref.name}');
-                      await ref.writeToFile(file);
-                    }
-                  },
-                ),
-              ],
-            ) :
-            IconButton(
-              icon: Image.asset(
-                ImagePath.PERSONAL_DOCUMENTATION_ADD,
-                width: 20,
-                height: 20,
-              ),
-              onPressed: () async {
-                PlatformFile? pickedFile;
-
-                var result;
-                if(kIsWeb){
-                  result = await FilePickerWeb.platform.pickFiles();
-                }else{
-                  result = await FilePicker.platform.pickFiles();
-                }
-                if(result == null) return;
-                pickedFile = result.files.first;
-                Uint8List fileBytes = pickedFile!.bytes!;
-                String fileName = pickedFile.name;
-
-                await database.uploadPersonalDocument(
-                  user,
-                  fileBytes,
-                  fileName,
-                  document,
-                  user.personalDocuments.indexOf(document),
-                );
-              },
-            ),
-          )
-        ],
-      ),
-    );
-  }
+  // Widget _documentTile(BuildContext context, PersonalDocument document, UserEnreda user){
+  //   bool paridad  = _userDocuments.indexOf(document) % 2 == 0;
+  //   final database = Provider.of<Database>(context, listen: false);
+  //
+  //   return Container(
+  //     height: 50,
+  //     decoration: BoxDecoration(
+  //       color: paridad ? AppColors.greySearch : AppColors.white,
+  //       borderRadius: _userDocuments.indexOf(document) == _userDocuments.length-1 ?
+  //       BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)) :
+  //       BorderRadius.all(Radius.circular(0)),
+  //       //border: Border.all(color: AppColors.greyBorder),
+  //     ),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         Expanded(
+  //           child: Padding(
+  //             padding: EdgeInsets.only(left: Responsive.isDesktop(context)? 50.0: 16.0),
+  //             child: Text(
+  //               document.name,
+  //               style: TextStyle(
+  //                 fontFamily: GoogleFonts.inter().fontFamily,
+  //                 fontWeight: FontWeight.w500,
+  //                 fontSize: Responsive.isDesktop(context)? 16:12,
+  //                 color: AppColors.chatDarkGray,
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //         Padding(
+  //           padding: const EdgeInsets.only(right: 30),
+  //           child: document.document != '' ? Row(
+  //             children: [
+  //               IconButton(
+  //                 icon: Image.asset(
+  //                   ImagePath.PERSONAL_DOCUMENTATION_DELETE,
+  //                   width: 20,
+  //                   height: 20,
+  //                 ),
+  //                 onPressed: (){
+  //                   //setPersonalDocument(context: context, document: PersonalDocument(name: document.name, order: -1, document: ''), user: user);
+  //                   setState(() {
+  //
+  //                   });
+  //                 },
+  //               ),
+  //               SpaceW8(),
+  //               IconButton(
+  //                 icon: Image.asset(
+  //                   ImagePath.PERSONAL_DOCUMENTATION_VIEW,
+  //                   width: 20,
+  //                   height: 20,
+  //                 ),
+  //                 onPressed: () async {
+  //                   var data = await http.get(Uri.parse(document.document));
+  //                   var pdfData = data.bodyBytes;
+  //                   var extension = p.extension(document.document).substring(0,4);
+  //                   print(extension);
+  //                   if(extension != '.pdf'){
+  //                     _printNotPDF(document.document);
+  //                   }
+  //                   else {
+  //                     await Printing.layoutPdf(
+  //                         onLayout: (PdfPageFormat format) async => pdfData);
+  //                   }
+  //                 },
+  //               ),
+  //               SpaceW8(),
+  //               IconButton(
+  //                 icon: Image.asset(
+  //                   ImagePath.PERSONAL_DOCUMENTATION_DOWNLOAD,
+  //                   width: 20,
+  //                   height: 20,
+  //                 ),
+  //                 onPressed: () async {
+  //                   final ref = FirebaseStorage.instance.refFromURL(document.document);
+  //                   if(kIsWeb){
+  //                     html.AnchorElement anchorElement = html.AnchorElement(href: document.document);
+  //                     anchorElement.download = document.name;
+  //                     anchorElement.click();
+  //                   }else{
+  //                     final dir = await getApplicationDocumentsDirectory();
+  //                     final file = File('${dir.path}/${ref.name}');
+  //                     await ref.writeToFile(file);
+  //                   }
+  //                 },
+  //               ),
+  //             ],
+  //           ) :
+  //           IconButton(
+  //             icon: Image.asset(
+  //               ImagePath.PERSONAL_DOCUMENTATION_ADD,
+  //               width: 20,
+  //               height: 20,
+  //             ),
+  //             onPressed: () async {
+  //               PlatformFile? pickedFile;
+  //
+  //               var result;
+  //               if(kIsWeb){
+  //                 result = await FilePickerWeb.platform.pickFiles();
+  //               }else{
+  //                 result = await FilePicker.platform.pickFiles();
+  //               }
+  //               if(result == null) return;
+  //               pickedFile = result.files.first;
+  //               Uint8List fileBytes = pickedFile!.bytes!;
+  //               String fileName = pickedFile.name;
+  //
+  //               // await database.uploadPersonalDocument(
+  //               //   user,
+  //               //   fileBytes,
+  //               //   fileName,
+  //               //   document,
+  //               //   user.personalDocuments.indexOf(document),
+  //               // );
+  //             },
+  //           ),
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Future<void> _printNotPDF(String path) async{
     final doc = pw.Document();
@@ -321,63 +344,63 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
     await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => doc.save());
   }
 
-  Future<void> _showSaveDialog(int order) async{
-    showDialog(
-        context: context,
-        builder: (context){
-          TextEditingController newDocument = TextEditingController();
-          GlobalKey<FormState> addDocumentKey = GlobalKey<FormState>();
-          return AlertDialog(
-            title: Text(StringConst.SET_DOCUMENT_NAME),
-            content: Form(
-              key: addDocumentKey,
-              child: TextFormField(
-                controller: newDocument,
-                validator: (value){
-                  bool used = false;
-                  if(value!.isEmpty) return StringConst.FORM_GENERIC_ERROR;
-                  _userDocuments.forEach((element) {
-                    if(element.name.toUpperCase() == value.toUpperCase()){
-                      used = true;
-                    }
-                  });
-                  return used ? StringConst.NAME_IN_USE : null;
-                }
-              ),
-            ),
-            actions: <Widget>[
-              ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop((false)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(StringConst.CANCEL,
-                        style: TextStyle(
-                            color: AppColors.black,
-                            height: 1.5,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14)),
-                  )),
-              ElevatedButton(
-                  onPressed: (){
-                    if(addDocumentKey.currentState!.validate()){
-                      setPersonalDocument(
-                          context: context,
-                          document: PersonalDocument(name: newDocument.text, order: order, document: ''),
-                          user: widget.participantUser);
-                      Navigator.of(context).pop((true));
-                    }},
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(StringConst.ADD,
-                        style: TextStyle(
-                            color: AppColors.black,
-                            height: 1.5,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14)),
-                  )),
-            ],
-          );
-        }
-    );
-  }
+  // Future<void> _showSaveDialog(int order) async{
+  //   showDialog(
+  //       context: context,
+  //       builder: (context){
+  //         TextEditingController newDocument = TextEditingController();
+  //         GlobalKey<FormState> addDocumentKey = GlobalKey<FormState>();
+  //         return AlertDialog(
+  //           title: Text(StringConst.SET_DOCUMENT_NAME),
+  //           content: Form(
+  //             key: addDocumentKey,
+  //             child: TextFormField(
+  //               controller: newDocument,
+  //               validator: (value){
+  //                 bool used = false;
+  //                 if(value!.isEmpty) return StringConst.FORM_GENERIC_ERROR;
+  //                 _userDocuments.forEach((element) {
+  //                   if(element.name.toUpperCase() == value.toUpperCase()){
+  //                     used = true;
+  //                   }
+  //                 });
+  //                 return used ? StringConst.NAME_IN_USE : null;
+  //               }
+  //             ),
+  //           ),
+  //           actions: <Widget>[
+  //             ElevatedButton(
+  //                 onPressed: () => Navigator.of(context).pop((false)),
+  //                 child: Padding(
+  //                   padding: const EdgeInsets.all(8.0),
+  //                   child: Text(StringConst.CANCEL,
+  //                       style: TextStyle(
+  //                           color: AppColors.black,
+  //                           height: 1.5,
+  //                           fontWeight: FontWeight.w400,
+  //                           fontSize: 14)),
+  //                 )),
+  //             ElevatedButton(
+  //                 onPressed: (){
+  //                   // if(addDocumentKey.currentState!.validate()){
+  //                   //   setPersonalDocument(
+  //                   //       context: context,
+  //                   //       document: PersonalDocument(name: newDocument.text, order: order, document: ''),
+  //                   //       user: widget.participantUser);
+  //                   //   Navigator.of(context).pop((true));}
+  //                   },
+  //                 child: Padding(
+  //                   padding: const EdgeInsets.all(8.0),
+  //                   child: Text(StringConst.ADD,
+  //                       style: TextStyle(
+  //                           color: AppColors.black,
+  //                           height: 1.5,
+  //                           fontWeight: FontWeight.w400,
+  //                           fontSize: 14)),
+  //                 )),
+  //           ],
+  //         );
+  //       }
+  //   );
+  // }
 }

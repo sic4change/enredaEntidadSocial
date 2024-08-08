@@ -3,6 +3,7 @@ class APIPath {
   static String resources() => 'resources';
   static String resourcesCategories() => 'resourcesCategories';
   static String resourcesTypes() => 'resourcesTypes';
+  static String documentCategories() => 'documentCategories';
   static String resourceType(String resourceType) => 'resourcesTypes/$resourceType';
   static String resourceCategory(String resourceCategory) => 'resourcesCategories/$resourceCategory';
   static String socialEntity(String socialEntityId) => 'socialEntities/$socialEntityId';
@@ -64,6 +65,8 @@ class APIPath {
   static String ipilEntry() => 'ipilEntry';
   static String ipilEntryById(String? ipilId) => 'ipilEntry/$ipilId';
   static String personalDocumentType() => 'personalDocumentType';
+  static String documentationParticipants() => 'documentationParticipants';
+  static String oneDocumentationParticipant(String fileId) => 'documentationParticipants/$fileId';
   static String personalDocumentUser(String userId) => 'users/$userId';
   static String initialReports() => 'initialReports';
   static String initialReport(String initialReportId) => 'initialReports/$initialReportId';

@@ -147,6 +147,29 @@ class CustomTextSmall extends StatelessWidget {
   }
 }
 
+class CustomTextSmallBold extends StatelessWidget {
+
+  CustomTextSmallBold({ required this.title, this.color = AppColors.greyTxtAlt });
+  final String title;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 12, 15, md: 14);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Text(
+      title,
+      style: textTheme.titleSmall?.copyWith(
+          height: 1.5,
+          color: color,
+          fontSize: fontSize
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
 class CustomTextChip extends StatelessWidget {
   const CustomTextChip({super.key,  required this.text, required this.color});
   final String text;
@@ -356,6 +379,27 @@ class CustomTextButton extends StatelessWidget {
         color: color,
         fontSize: fontSize,
         fontWeight: FontWeight.w500
+      ),
+    );
+  }
+}
+
+class CustomTextSpan extends StatelessWidget {
+
+  const CustomTextSpan({super.key,  required this.text, this.color = AppColors.white});
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 14, 16, md: 15);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Text(
+      text,
+      style: textTheme.bodySmall?.copyWith(
+          color: color,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w500
       ),
     );
   }

@@ -64,6 +64,8 @@ class CustomDatePickerTitle extends StatelessWidget {
               format: DateFormat('dd/MM/yyyy'),
               decoration: InputDecoration(
                 hintText: hintText,
+                filled: true,
+                fillColor: Colors.white,
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5.0),
                   borderSide: BorderSide(
