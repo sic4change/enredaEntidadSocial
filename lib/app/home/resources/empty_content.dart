@@ -15,7 +15,7 @@ class EmptyContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: Sizes.mainPadding, right: Sizes.mainPadding),
+      padding: EdgeInsets.only(left: Sizes.mainPadding, right: Sizes.mainPadding, bottom: Sizes.mainPadding),
       child: Center(
         child: Column(
           mainAxisAlignment: mainAxisAlignment,

@@ -968,10 +968,10 @@ class FirestoreDatabase implements Database {
           },
           "userId": userId,
           "name": document.name,
-          // "createDate": document.createDate,
-          // "renovationDate": document.renovationDate,
-          // "documentCategoryId": document.documentCategoryId,
-          // "documentSubCategoryId": document.documentSubCategoryId,
+          "createDate": document.createDate,
+          "renovationDate": document.renovationDate,
+          "documentCategoryId": document.documentCategoryId,
+          "documentSubCategoryId": document.documentSubCategoryId,
         },).then((value) => _service.updateData(
             path: APIPath.oneDocumentationParticipant(value),
             data: {
