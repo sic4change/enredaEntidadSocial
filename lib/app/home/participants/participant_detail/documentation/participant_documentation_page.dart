@@ -38,20 +38,15 @@ class ParticipantDocumentationPage extends StatefulWidget {
 }
 
 class _ParticipantDocumentationPageState extends State<ParticipantDocumentationPage> {
-  //List<PersonalDocument> _userDocuments = [];
-
   @override
   Widget build(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<UserEnreda>(
         stream: database.userEnredaStreamByUserId(widget.participantUser.userId),
         builder: (context, snapshot) {
-            // if(snapshot.hasData){
-            //   _userDocuments = snapshot.data!.personalDocuments;
-            // }
             return Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(15.0), topRight: Radius.circular(15.0)),
                     border: Border.all(color: AppColors.greyBorder)
                 ),
                 child: documentCategoriesList(widget.participantUser));

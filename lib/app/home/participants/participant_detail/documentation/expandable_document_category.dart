@@ -58,7 +58,12 @@ class _ExpandableDocCategoryTileState extends State<ExpandableDocCategoryTile> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                      color: AppColors.greySearch,
+                      decoration: BoxDecoration(
+                        borderRadius: widget.documentCategory.order == 1 ?
+                          BorderRadius.only(topLeft: Radius.circular(15.0), topRight: Radius.circular(15.0)) :
+                          BorderRadius.circular(0.0),
+                        color: AppColors.greySearch,
+                      ),
                       padding: Responsive.isMobile(context) ? const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0) :
                       const EdgeInsets.symmetric(horizontal: 50.0, vertical: 16.0),
                       child: CustomTextChip(text: '${(widget.documentCategory.name)}', color: AppColors.primary900),

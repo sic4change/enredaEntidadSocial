@@ -87,7 +87,10 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             height: 0,
           ),
           SpaceH24(),
-          _currentPage!,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
+            child: _currentPage!,
+          ),
         ],
       ),
     );
