@@ -49,7 +49,22 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(15.0), topRight: Radius.circular(15.0)),
                     border: Border.all(color: AppColors.greyBorder)
                 ),
-                child: documentCategoriesList(widget.participantUser));
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: Responsive.isMobile(context) ? EdgeInsets.only(left: 20.0 , top: 10)
+                          : EdgeInsets.only(left: 40, top: 15, bottom: 5),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          CustomTextBoldTitle(title: StringConst.PERSONAL_DOCUMENTATION.toUpperCase()),
+                        ],
+                      ),
+                    ),
+                    Divider(color: AppColors.greyBorder, height: 0,),
+                    documentCategoriesList(widget.participantUser),
+                  ],
+                ));
           }
       );
   }
