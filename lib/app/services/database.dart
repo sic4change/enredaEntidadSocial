@@ -117,6 +117,7 @@ abstract class Database {
      Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
      Stream<List<PersonalDocumentType>> documentSubCategoriesByCategoryStream(String categoryId);
      Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user);
+
      Future<void> setUserEnreda(UserEnreda userEnreda);
      Future<void> deleteUser(UserEnreda userEnreda);
      Future<void> uploadUserAvatar(String userId, Uint8List data);
@@ -179,6 +180,7 @@ abstract class Database {
      Stream<IpilObjectives> ipilObjectivesStreamByUserId(String userId);
      Future<void> setIpilObjectives(IpilObjectives ipilObjectives);
      Future<void> addIpilObjectives(IpilObjectives ipilObjectives);
+     Future<void> deleteDocumentationParticipant(DocumentationParticipant document);
 }
 
 class FirestoreDatabase implements Database {
@@ -636,18 +638,6 @@ class FirestoreDatabase implements Database {
         sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
       );
 
-  // @override
-  // Stream<List<PersonalDocument>> documentationParticipantBySubCategoryStream(String userId) => _service.collectionStream(
-  //       path: APIPath.documentationParticipants(),
-  //       queryBuilder: (query) => query.where('userId', isEqualTo: userId),
-  //           // query.where('documentCategoryId', isEqualTo: documentSubCategory.documentCategoryId)
-  //           //      .where('documentSubCategoryId', isEqualTo: documentSubCategory.documentSubCategoryId)
-  //           //      .where('userId', isEqualTo: userId),
-  //       builder: (data, documentId) =>
-  //           PersonalDocument.fromMap(data, documentId),
-  //       sort: (lhs, rhs) => lhs.createDate.compareTo(rhs.createDate),
-  // );
-
   @override
   Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user) => _service.collectionStream(
     path: APIPath.documentationParticipants(),
@@ -659,6 +649,10 @@ class FirestoreDatabase implements Database {
     builder: (data, documentId) => DocumentationParticipant.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
   );
+
+  @override
+  Future<void> deleteDocumentationParticipant(DocumentationParticipant document) =>
+      _service.deleteData(path: APIPath.oneDocumentationParticipant(document.documentationParticipantId!));
 
   @override
   Stream<List<SpecificInterest>> specificInterestsStream() => _service.collectionStream(

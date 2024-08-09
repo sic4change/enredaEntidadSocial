@@ -1,5 +1,6 @@
 import 'dart:html';
 
+import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/popup_menu_actions.dart';
 import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,9 @@ import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
 import '../../../resources/list_item_builder.dart';
 import 'add_documents_form.dart';
+import 'custom_menu_entry.dart';
+import 'menu_item.dart';
+import 'menu_items.dart';
 
 class DocumentCategoryTile extends StatefulWidget {
   const DocumentCategoryTile({
@@ -117,13 +121,27 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
                     SizedBox(width: 5),
                     CustomTextSmall(text: documentParticipant.name),
                     Spacer(),
-                    InkWell(
-                      onTap: () {
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        width: Responsive.isMobile(context) ? 25 : 30,
-                        child: Icon(Icons.more_horiz, color: AppColors.primary900,)),
+                    Container(
+                      alignment: Alignment.center,
+                      width: Responsive.isMobile(context) ? 25 : 30,
+                      child: PopupMenuButton<MenuItem>(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                        surfaceTintColor: Colors.white,
+                        iconColor: AppColors.primary900,
+                        padding: EdgeInsets.zero,
+                        icon: Icon(Icons.more_horiz, color: AppColors.primary900,),
+                        offset: Offset.fromDirection(0.6, 100),
+                        iconSize: 30,
+                        tooltip: documentParticipant.name,
+                        onSelected: (item) => onSelected(context, item, documentSubCategory, participantUser, documentParticipant),
+                        itemBuilder: (context) => [
+                          CustomPopupMenuEntry(child: null, documentationParticipant: documentParticipant),
+                          ...MenuItems.getItemOpen(context).map(buildItem).toList(),
+                          ...MenuItems.getItemDownload(context).map(buildItem).toList(),
+                          ...MenuItems.getItemEdit(context).map(buildItem).toList(),
+                          ...MenuItems.getItemDelete(context).map(buildItemRed).toList(),
+                        ],
+                      ),
                     ),
                   ],
                 ),

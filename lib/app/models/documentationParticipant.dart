@@ -60,6 +60,7 @@ class DocumentationParticipant {
     required this.documentCategoryId,
     required this.documentSubCategoryId,
     this.renovationDate,
+    this.urlDocument,
   });
 
   final String? documentationParticipantId;
@@ -69,8 +70,16 @@ class DocumentationParticipant {
   final DateTime? renovationDate;
   final String documentCategoryId;
   final String documentSubCategoryId;
+  final String? urlDocument;
 
   factory DocumentationParticipant.fromMap(Map<String, dynamic> data, String documentId) {
+
+    String? urlDocument;
+    try {
+      urlDocument = data['file']['src'];
+    } catch (e) {
+      urlDocument = '';
+    }
 
     return DocumentationParticipant(
       documentationParticipantId: data['documentationParticipantId'],
@@ -80,6 +89,7 @@ class DocumentationParticipant {
       documentCategoryId: data['documentCategoryId'],
       documentSubCategoryId: data['documentSubCategoryId'],
       renovationDate: data['renovationDate'] != null ? DateTime.parse(data['renovationDate'].toDate().toString()) : null,
+      urlDocument: urlDocument
     );
   }
 
@@ -99,7 +109,8 @@ class DocumentationParticipant {
       'createDate': createDate,
       'renovationDate': renovationDate,
       'documentCategoryId': documentCategoryId,
-      'documentSubCategoryId': documentSubCategoryId
+      'documentSubCategoryId': documentSubCategoryId,
+      'urlDocument': urlDocument
     };
   }
 }

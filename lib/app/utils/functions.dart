@@ -1,9 +1,11 @@
 import 'package:enreda_empresas/app/models/documentationParticipant.dart';
-import 'package:enreda_empresas/app/models/userEnreda.dart';
-import 'package:enreda_empresas/app/services/database.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
+import 'package:pdf/widgets.dart' as pw;
 
 const kDuration = Duration(milliseconds: 600);
 
@@ -24,6 +26,38 @@ Future<void> launchURL(url) async {
   }
 }
 
+Future<void> openFile(DocumentationParticipant documentParticipant) async{
+  final url = documentParticipant.urlDocument;
+  if (url == null) {
+    throw ArgumentError('URL cannot be null');
+  }
+  var response = await http.get(Uri.parse(url));
+  if (response.statusCode != 200) {
+    throw Exception('Failed to load document');
+  }
+  var pdfData = response.bodyBytes;
+  var extension = p.extension(url).substring(0,4);
+  if(extension != '.pdf'){
+    printNotPDF(url);
+  }
+  else {
+    await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfData);
+  }
+}
+
+Future<void> printNotPDF(String path) async{
+  final doc = pw.Document();
+  final netImage = await networkImage(path);
+  doc.addPage(pw.Page(
+      build: (pw.Context context) {
+        return pw.Center(
+          child: pw.Image(netImage),
+        );
+      })
+  );
+  await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => doc.save());
+}
 
 scrollToSection(BuildContext context) {
   Scrollable.ensureVisible(
@@ -53,20 +87,3 @@ bool isEmailValid(String email) =>
     RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
         .hasMatch(email);
 
-
-// Future<void> setPersonalDocument({
-//   required BuildContext context,
-//   required PersonalDocument document,
-//   required UserEnreda user,
-// }) async {
-//   final database = Provider.of<Database>(context, listen: false);
-//   //In case user already has a document with that name, remove and replace it
-//   if(user.personalDocuments.contains(document)){
-//     user.personalDocuments.remove(document);
-//   }
-//   //When update a document with negative order, delete it without replacing it
-//   if(document.order >= 0) {
-//     user.personalDocuments.add(document);
-//   }
-//   await database.setUserEnreda(user);
-// }
