@@ -47,7 +47,8 @@ class EnredaMethodologyPage extends StatelessWidget {
                           MaterialPageRoute(
                               builder: (context) =>
                                   MyPreviewPdf(
-                                    url: StringConst.MANUAL_METHODOLOGY_PDF
+                                    url: StringConst.MANUAL_METHODOLOGY_PDF,
+                                    title: StringConst.MANUAL_METHODOLOGY,
                                   )),
                         );
                       },

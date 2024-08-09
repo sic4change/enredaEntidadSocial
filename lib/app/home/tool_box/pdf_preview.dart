@@ -17,9 +17,11 @@ class MyPreviewPdf extends StatefulWidget {
   const MyPreviewPdf({
     Key? key,
     required this.url,
+    required this.title,
   }) : super(key: key);
 
   final String? url;
+  final String title;
 
   @override
   MyAppState createState() {
@@ -80,7 +82,7 @@ class MyAppState extends State<MyPreviewPdf> with SingleTickerProviderStateMixin
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(child: CustomTextBold(title: StringConst.MANUAL_METHODOLOGY,)),
+            Tab(child: CustomTextBold(title: widget.title,)),
           ],
           labelColor: Colors.white,
           labelStyle: TextStyle(fontSize: 20),

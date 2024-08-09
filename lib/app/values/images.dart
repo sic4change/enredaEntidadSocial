@@ -133,6 +133,10 @@ class ImagePath {
   static const String PERSONAL_DOCUMENTATION_ADD = '$imageDir/icon-add-entidad.png';
   static const String PERSONAL_DOCUMENTATION_DOWNLOAD = '$imageDir/icon-descargar-entidad.png';
   static const String EMPTY_LiST_ICON = '$imageDir/empty-list.png';
+  static const String ICON_CLOUD = '$imageDir/cloud.png';
+  static const String ICON_EDIT = '$imageDir/edit.png';
+  static const String ICON_EYE = '$imageDir/eye.png';
+  static const String ICON_TRASH = '$imageDir/trash.png';
 
   //Control Panel
   static const String CONTROL_PANEL = '$imageDir/panelcontrol-min.png';

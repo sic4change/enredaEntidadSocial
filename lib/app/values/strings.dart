@@ -582,6 +582,8 @@ class StringConst {
   static const String WANNA_REMOVE = "¿Desea borrarlos?";
   static const String NO = "No";
   static const String YES = "Sí";
+  static const String OPEN = "Abrir";
+  static const String EDIT = "Editar";
   static const String SAVE_SUCCEED = "Se ha guardado con éxito";
   static const String DATE_ERROR = "Fecha no válida";
   static const String TECHNICAL_NAME = "Nombre de la técnica";
@@ -589,6 +591,7 @@ class StringConst {
   static const String GOALS_MONITORING = "Seguimiento:";
   static const String ADD_IPIL_ENTRY = "Crear nuevo IPIL";
   static const String DOWNLOAD_ALL = "Descargar todos";
+  static const String DOWNLOAD_PDF = "Descargar";
   static const String PERSONAL_DATA_LAW_PDF = 'https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/BOE-A-2018-16673-consolidado.pdf?alt=media&token=5a8ee31a-1288-487c-8dd6-1de1eed79860';
   static const String PERSONAL_DATA_LAW = 'Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales';
   static const String PERSONAL_DATA_LAW_TEXT = ', autorizo a la empresa al uso y tratamiento de mis datos con fines exclusivamente de selección de personal y bolsas de empleo.';
@@ -604,6 +607,8 @@ class StringConst {
   static const String IPIL_CREATE = "Crear nuevo IPIL";
   static const String IPIL_WARNING_TECHNICAL = "Este participante no tiene técnica asignada, para crear un IPIL asigne una técnica.";
   static const String IPIL_GOALS_MONITORING_PLACEHOLDER = 'Por favor, utiliza este espacio para documentar los detalles de la entrevista. Incluye las impresiones generales, avances del participante, y una descripción de los eventos y cambios ocurridos desde la última entrevista. Anota también cualquier objetivo o plan de acción acordado para las próximas semanas.';
+  static const String DELETE_DOCUMENT = 'Si pulsa en "Aceptar" se procederá a la eliminación del documento.\nEsta acción no se podrá deshacer. ¿Está seguro que quiere continuar?';
+
 
   //Create entity errors
   static const String FORM_GENERIC_ERROR = 'Es obligatorio rellenar este campo';
