@@ -4,6 +4,7 @@ import 'package:enreda_empresas/app/home/participants/participant_detail/documen
 import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -72,7 +73,7 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
                                             context: context,
                                             builder: (context){
                                               return AddDocumentsForm(
-                                                participantDocument: documentSubCategory,
+                                                documentSubCategory: documentSubCategory,
                                                 participantUser: widget.participantUser,);
                                             }
                                         );
@@ -103,6 +104,7 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
 
   Widget documentationParticipantBySubCategory(PersonalDocumentType documentSubCategory, UserEnreda participantUser) {
     final database = Provider.of<Database>(context, listen: false);
+    final DateFormat formatter = DateFormat('dd/MM/yyyy');
     return StreamBuilder<List<DocumentationParticipant>>(
       stream: database.documentationParticipantBySubCategoryStream(documentSubCategory, participantUser),
       builder: (context, documentationParticipantSnapshot) {
@@ -114,12 +116,23 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
             snapshot: documentationParticipantSnapshot,
             itemBuilder: (context, documentParticipant) {
               return Container(
-                height: Responsive.isMobile(context) ? 25 : 30,
+                height: 30,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Icon(Icons.file_copy_outlined, color: AppColors.greyAlt, size: 20.0,),
-                    SizedBox(width: 5),
-                    CustomTextSmall(text: documentParticipant.name),
+                    Container(
+                        alignment: Alignment.centerLeft,
+                        width: Responsive.isMobile(context) ? 150 : Responsive.isDesktopS(context) ? 200 : 350,
+                        height: 30,
+                        child: CustomTextSmall(text: documentParticipant.name, height: 1,)),
+                    Spacer(),
+                    Container(
+                        width: 85,
+                        child: CustomTextSmall(text: formatter.format(documentParticipant.createDate), color: AppColors.primary900,)),
+                    Spacer(),
+                    documentParticipant.renovationDate == null ? Container(width: 85,) :
+                      CustomTextSmall(text: formatter.format(documentParticipant.renovationDate!), color: AppColors.primary900,),
                     Spacer(),
                     Container(
                       alignment: Alignment.center,

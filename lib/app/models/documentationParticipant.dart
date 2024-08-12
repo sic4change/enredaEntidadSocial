@@ -1,56 +1,3 @@
-// class PersonalDocument {
-//   PersonalDocument({
-//     required this.personalDocumentId,
-//     required this.userId,
-//     required this.name,
-//     required this.createDate,
-//     required this.documentCategoryId,
-//     required this.documentSubCategoryId,
-//     this.renovationDate,
-//   });
-//
-//   final String personalDocumentId;
-//   final String userId;
-//   final String name;
-//   final DateTime createDate;
-//   final DateTime? renovationDate;
-//   final String documentCategoryId;
-//   final String documentSubCategoryId;
-//
-//   factory PersonalDocument.fromMap(Map<String, dynamic> data, String documentId) {
-//     return PersonalDocument(
-//       name: data['name'] ?? "",
-//       userId: data['userId'] ?? "",
-//       personalDocumentId: documentId,
-//       documentCategoryId: data['documentCategoryId'] ?? '',
-//       documentSubCategoryId: data['documentSubCategoryId'] ?? '',
-//       createDate: data['createDate'] != null ? DateTime.parse(data['createDate']) : DateTime.now(),
-//       renovationDate: data['renovationDate'] != null ? DateTime.parse(data['renovationDate']) : null,
-//     );
-//   }
-//
-//   @override
-//   bool operator ==(Object other){
-//     return identical(this, other) ||
-//         (other.runtimeType == runtimeType &&
-//             other is PersonalDocument &&
-//             other.personalDocumentId == personalDocumentId);
-//   }
-//
-//   Map<String, dynamic> toMap() {
-//     return {
-//       'name': name,
-//       'userId': userId,
-//       'personalDocumentId': personalDocumentId,
-//       'createDate': createDate.toIso8601String(),
-//       'renovationDate': renovationDate?.toIso8601String(),
-//       'documentCategoryId': documentCategoryId,
-//       'documentSubCategoryId': documentSubCategoryId
-//     };
-//   }
-// }
-
-
 class DocumentationParticipant {
   DocumentationParticipant({
     this.documentationParticipantId,
@@ -61,6 +8,8 @@ class DocumentationParticipant {
     required this.documentSubCategoryId,
     this.renovationDate,
     this.urlDocument,
+    this.nameDocument,
+    this.createdBy,
   });
 
   final String? documentationParticipantId;
@@ -71,6 +20,8 @@ class DocumentationParticipant {
   final String documentCategoryId;
   final String documentSubCategoryId;
   final String? urlDocument;
+  final String? nameDocument;
+  final String? createdBy;
 
   factory DocumentationParticipant.fromMap(Map<String, dynamic> data, String documentId) {
 
@@ -81,15 +32,24 @@ class DocumentationParticipant {
       urlDocument = '';
     }
 
+    String? nameDocument;
+    try {
+      nameDocument = data['file']['title'];
+    } catch (e) {
+      nameDocument = '';
+    }
+
     return DocumentationParticipant(
       documentationParticipantId: data['documentationParticipantId'],
       name: data['name'],
       userId: data['userId'],
+      createdBy: data['createdBy'],
       createDate: DateTime.parse(data['createDate'].toDate().toString()),
       documentCategoryId: data['documentCategoryId'],
       documentSubCategoryId: data['documentSubCategoryId'],
       renovationDate: data['renovationDate'] != null ? DateTime.parse(data['renovationDate'].toDate().toString()) : null,
-      urlDocument: urlDocument
+      urlDocument: urlDocument,
+      nameDocument: nameDocument,
     );
   }
 
@@ -106,11 +66,35 @@ class DocumentationParticipant {
       'documentationParticipantId': documentationParticipantId,
       'name': name,
       'userId': userId,
+      'createdBy': createdBy,
       'createDate': createDate,
       'renovationDate': renovationDate,
       'documentCategoryId': documentCategoryId,
       'documentSubCategoryId': documentSubCategoryId,
-      'urlDocument': urlDocument
     };
   }
+
+  DocumentationParticipant copyWith({
+    String? documentationParticipantId,
+    String? name,
+    String? userId,
+    String? createdBy,
+    DateTime? createDate,
+    DateTime? renovationDate,
+    String? documentCategoryId,
+    String? documentSubCategoryId,
+
+  }) {
+    return DocumentationParticipant(
+        documentationParticipantId: documentationParticipantId?? this.documentationParticipantId,
+        name: name?? this.name,
+        userId: userId?? this.userId,
+        createdBy: createdBy?? this.createdBy,
+        createDate: createDate?? this.createDate,
+        documentCategoryId: documentCategoryId?? this.documentCategoryId,
+        documentSubCategoryId: documentSubCategoryId?? this.documentSubCategoryId,
+        renovationDate: renovationDate?? this.renovationDate,
+    );
+  }
+
 }

@@ -117,6 +117,7 @@ abstract class Database {
      Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
      Stream<List<PersonalDocumentType>> documentSubCategoriesByCategoryStream(String categoryId);
      Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user);
+     Stream<DocumentationParticipant> documentationParticipantStream(String documentId);
 
      Future<void> setUserEnreda(UserEnreda userEnreda);
      Future<void> deleteUser(UserEnreda userEnreda);
@@ -144,7 +145,9 @@ abstract class Database {
      Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date);
      Future<void> deleteIpilEntry(IpilEntry ipilEntry);
      Future<void> setIpilEntry(IpilEntry ipilEntry);
-     Future<void> uploadPersonalDocument(String userId, String fileName, Uint8List data, DocumentationParticipant document);
+     Future<void> addDocumentationParticipant(String userId, String fileName, Uint8List data, DocumentationParticipant document);
+     Future<void> editFileDocumentationParticipant(String userId, String fileName, Uint8List data, DocumentationParticipant document);
+     Future<void> updateDocumentationParticipant(DocumentationParticipant document);
      Stream<InitialReport> initialReportsStreamByUserId(String? userId);
      Future<void> setInitialReport(InitialReport initialReport);
      Future<void> addInitialReport(InitialReport initialReport);
@@ -638,21 +641,6 @@ class FirestoreDatabase implements Database {
         sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
       );
 
-  @override
-  Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user) => _service.collectionStream(
-    path: APIPath.documentationParticipants(),
-    queryBuilder: (query) => query.where('name', isNotEqualTo: null)
-                                  .where('documentSubCategoryId', isEqualTo: documentSubCategory.personalDocId)
-                                  .where('documentCategoryId', isEqualTo: documentSubCategory.documentCategoryId)
-                                  .where('userId', isEqualTo: user.userId)
-    ,
-    builder: (data, documentId) => DocumentationParticipant.fromMap(data, documentId),
-    sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
-  );
-
-  @override
-  Future<void> deleteDocumentationParticipant(DocumentationParticipant document) =>
-      _service.deleteData(path: APIPath.oneDocumentationParticipant(document.documentationParticipantId!));
 
   @override
   Stream<List<SpecificInterest>> specificInterestsStream() => _service.collectionStream(
@@ -948,7 +936,26 @@ class FirestoreDatabase implements Database {
   );
 
   @override
-  Future<void> uploadPersonalDocument(String userId, String fileName, Uint8List data, DocumentationParticipant document) async {
+  Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user) => _service.collectionStream(
+    path: APIPath.documentationParticipants(),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null)
+        .where('documentSubCategoryId', isEqualTo: documentSubCategory.personalDocId)
+        .where('documentCategoryId', isEqualTo: documentSubCategory.documentCategoryId)
+        .where('userId', isEqualTo: user.userId)
+    ,
+    builder: (data, documentId) => DocumentationParticipant.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
+
+  @override
+  Stream<DocumentationParticipant> documentationParticipantStream(String documentId) =>
+      _service.documentStream<DocumentationParticipant>(
+        path: APIPath.oneDocumentationParticipant(documentId),
+        builder: (data, documentId) => DocumentationParticipant.fromMap(data, documentId),
+      );
+
+  @override
+  Future<void> addDocumentationParticipant(String userId, String fileName, Uint8List data, DocumentationParticipant document) async {
     var firebaseStorageRef =
     FirebaseStorage.instance.ref().child('users/$userId/files/$fileName');
     UploadTask uploadTask = firebaseStorageRef.putData(data);
@@ -966,6 +973,7 @@ class FirestoreDatabase implements Database {
           "renovationDate": document.renovationDate,
           "documentCategoryId": document.documentCategoryId,
           "documentSubCategoryId": document.documentSubCategoryId,
+          "createdBy": document.createdBy
         },).then((value) => _service.updateData(
             path: APIPath.oneDocumentationParticipant(value),
             data: {
@@ -975,6 +983,40 @@ class FirestoreDatabase implements Database {
       },
     );
   }
+
+  @override
+  Future<void> editFileDocumentationParticipant(String userId, String fileName, Uint8List data, DocumentationParticipant document) async {
+    try {
+      var firebaseStorageRef = FirebaseStorage.instance.ref().child('users/$userId/files/$fileName');
+      UploadTask uploadTask = firebaseStorageRef.putData(data);
+
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+      await _service.updateData(
+        path: APIPath.oneDocumentationParticipant(document.documentationParticipantId!),
+        data: {
+          "file": {
+            'src': '$downloadUrl',
+            'title': '$fileName',
+          },
+          "name": document.name,
+          "createDate": document.createDate,
+          "renovationDate": document.renovationDate,
+        }
+      );    
+    } catch (e) {
+      print('An error occurred: $e');
+    }
+  }
+
+  @override
+  Future<void> updateDocumentationParticipant(DocumentationParticipant document) => _service.updateData(
+      path: APIPath.oneDocumentationParticipant(document.documentationParticipantId!), data: document.toMap());
+
+  @override
+  Future<void> deleteDocumentationParticipant(DocumentationParticipant document) =>
+      _service.deleteData(path: APIPath.oneDocumentationParticipant(document.documentationParticipantId!));
 
   @override
   Stream<InitialReport> initialReportsStreamByUserId(String? userId) {
