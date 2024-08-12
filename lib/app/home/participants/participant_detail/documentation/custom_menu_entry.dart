@@ -31,12 +31,13 @@ class _CustomPopupMenuEntryState extends PopupMenuItemState<MenuItem, CustomPopu
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 50,
-        alignment: Alignment.centerLeft,
+        height: 60,
+        width: 180,
+        alignment: Alignment.center,
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 5.0),
               child: CustomTextSmall(text: widget.documentationParticipant.name, color: AppColors.primary900,),
             ),
             Divider(color: AppColors.primaryText2, thickness: 0, height: 0,),

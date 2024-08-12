@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/default_cache.dart';
 import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,19 +26,21 @@ import '../../../../values/strings.dart';
 import '../../../../values/values.dart';
 import 'files_picker.dart';
 
-class AddDocumentsForm extends StatefulWidget {
-  AddDocumentsForm({Key? key,
-    required this.documentSubCategory,
+class EditDocumentsForm extends StatefulWidget {
+  EditDocumentsForm({Key? key,
+    required this.documentationParticipant,
     required this.participantUser}) : super(key: key);
 
-  final PersonalDocumentType documentSubCategory;
+  final DocumentationParticipant documentationParticipant;
   final UserEnreda participantUser;
 
   @override
-  _AddDocumentsFormState createState() => _AddDocumentsFormState();
+  _EditDocumentsFormState createState() => _EditDocumentsFormState();
 }
 
-class _AddDocumentsFormState extends State<AddDocumentsForm> {
+class _EditDocumentsFormState extends State<EditDocumentsForm> {
+  late DocumentationParticipant documentationParticipant;
+  String? _documentationParticipantId;
   List<FileData> filesList = [];
   final _formKey = GlobalKey<FormState>();
   TextEditingController textEditingControllerDateInput = TextEditingController();
@@ -45,6 +48,33 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
   late String _formattedBDate;
   DateTime _creationDate = new DateTime.now();
   DateTime? _renovationDate;
+  DocumentationParticipant? documentationParticipantFromStorage;
+  bool isFileRemoved = false;
+
+  Future<void> loadDocumentationParticipantData(BuildContext context) async {
+    final database = Provider.of<Database>(context, listen: false);
+
+    DocumentationParticipant documentationParticipant = widget.documentationParticipant;
+    _documentationParticipantId = documentationParticipant.documentationParticipantId;
+    _documentName = documentationParticipant.name;
+    _creationDate = documentationParticipant.createDate;
+    _renovationDate = documentationParticipant.renovationDate;
+
+    documentationParticipantFromStorage = await database.documentationParticipantStream(widget.documentationParticipant.documentationParticipantId!).first;
+
+    var file = await DefaultCacheManager().getSingleFile(documentationParticipant.urlDocument!);
+    final data = file.readAsBytesSync();
+    setState(() {
+      filesList.add(FileData(documentationParticipant.nameDocument!, data, file));
+    });
+
+  }
+
+  @override
+  void initState() {
+    loadDocumentationParticipantData(context);
+    super.initState();
+  }
 
   void pickFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -65,6 +95,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
   void deleteFile(FileData file) {
     setState(() {
       filesList.removeWhere((f) => f == file);
+      isFileRemoved = true;
     });
   }
 
@@ -84,7 +115,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
               CustomTextBoldCenter(
                 title: StringConst.SET_DOCUMENT_NAME, color: AppColors.primary900,),
               CustomTextBoldCenter(
-                title: '${widget.documentSubCategory.title}', color: AppColors.primary900,),
+                title: '${widget.documentationParticipant.name}', color: AppColors.primary900,),
               SizedBox(height: 20,),
               filesList.length == 0 ? FilesPicker(
                 context: context,
@@ -108,6 +139,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
               SizedBox(height: 20,),
               CustomTextFormFieldTitle(
                 labelText: StringConst.DOCUMENT_NAME,
+                initialValue: _documentName,
                 validator: (value) =>
                 value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
                 onSaved: (value) => _documentName = value!,
@@ -128,6 +160,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
               SizedBox(height: 20,),
               CustomDatePickerTitle(
                 labelText: StringConst.RENOVATION_DOCUMENT,
+                initialValue: _renovationDate,
                 onChanged: (value){
                   _formattedBDate = DateFormat('dd-MM-yyyy').format(value!);
                   setState(() {
@@ -162,7 +195,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
                       onPressed: () => _submit(),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(StringConst.ADD_DOC,
+                        child: Text(StringConst.EDIT_DOC,
                             style: textTheme.bodySmall?.copyWith(
                                 color: AppColors.white,
                                 height: 1.5,
@@ -208,20 +241,23 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
         name: _documentName,
         createDate: _creationDate,
         renovationDate: _renovationDate,
-        documentationParticipantId: '',
-        documentCategoryId: widget.documentSubCategory.documentCategoryId,
-        documentSubCategoryId: widget.documentSubCategory.personalDocId,
+        documentationParticipantId: _documentationParticipantId,
+        documentCategoryId: widget.documentationParticipant.documentCategoryId,
+        documentSubCategoryId: widget.documentationParticipant.documentSubCategoryId,
         createdBy: auth.currentUser!.uid,
       );
       try {
         final database = Provider.of<Database>(context, listen: false);
-        filesList.forEach((file) async {
-          await database.addDocumentationParticipant(widget.participantUser.userId!, file.name, file.data!, document);
-        });
+        if (isFileRemoved = true) {
+          filesList.forEach((file) async {
+            await database.editFileDocumentationParticipant(widget.participantUser.userId!, file.name, file.data!, document);
+          });
+        }
+        await database.updateDocumentationParticipant(document);
         await showAlertDialog(
           context,
-          title: StringConst.CREATE_DOCUMENT,
-          content: StringConst.CREATE_DOC_SUCCESS,
+          title: StringConst.UPDATED_DOCUMENT,
+          content: StringConst.UPDATED_DOC_SUCCESS,
           defaultActionText: StringConst.FORM_ACCEPT,
         );
         Navigator.of(context).pop();

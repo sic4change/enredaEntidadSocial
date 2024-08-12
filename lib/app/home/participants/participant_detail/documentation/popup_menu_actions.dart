@@ -12,7 +12,7 @@ import '../../../../services/database.dart';
 import '../../../../utils/functions.dart';
 import '../../../../values/strings.dart';
 import '../../../../values/values.dart';
-import 'add_documents_form.dart';
+import 'edit_documents_form.dart';
 import 'menu_item.dart';
 import 'menu_items.dart';
 
@@ -30,8 +30,8 @@ void onSelected(
     showDialog(
         context: context,
         builder: (context){
-          return AddDocumentsForm(
-            participantDocument: documentSubCategory,
+          return EditDocumentsForm(
+            documentationParticipant: documentParticipant,
             participantUser: participantUser,);
         }
     );
