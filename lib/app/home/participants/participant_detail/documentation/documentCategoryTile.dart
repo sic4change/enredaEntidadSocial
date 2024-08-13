@@ -1,6 +1,7 @@
 import 'dart:html';
 
 import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/popup_menu_actions.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/user_profile_picture.dart';
 import 'package:enreda_empresas/app/models/personalDocumentType.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import '../../../../models/documentCategory.dart';
 import '../../../../models/documentationParticipant.dart';
+import '../../../../services/auth.dart';
 import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
 import '../../../resources/list_item_builder.dart';
@@ -104,6 +106,7 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
 
   Widget documentationParticipantBySubCategory(PersonalDocumentType documentSubCategory, UserEnreda participantUser) {
     final database = Provider.of<Database>(context, listen: false);
+    final auth = Provider.of<AuthBase>(context, listen: false);
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
     return StreamBuilder<List<DocumentationParticipant>>(
       stream: database.documentationParticipantBySubCategoryStream(documentSubCategory, participantUser),
@@ -134,6 +137,18 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
                     documentParticipant.renovationDate == null ? Container(width: 85,) :
                       CustomTextSmall(text: formatter.format(documentParticipant.renovationDate!), color: AppColors.primary900,),
                     Spacer(),
+                    StreamBuilder<UserEnreda>(
+                        stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) return Container();
+                          if (snapshot.hasData) {
+                            UserEnreda user = snapshot.data!;
+                            String _photo = user.photo ?? '';
+                            return UserProfilePicture(context, _photo);
+                          }
+                          return Container();
+                        }),
+                    Spacer(),
                     Container(
                       alignment: Alignment.center,
                       width: Responsive.isMobile(context) ? 25 : 30,
@@ -162,9 +177,7 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
             },
           );
         };
-        return Container(
-          child: Text('no data'),
-        );
+        return Container();
       },
     );
   }
