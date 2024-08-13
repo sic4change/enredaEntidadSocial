@@ -1,5 +1,6 @@
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/values.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomTextTitle extends StatelessWidget {
@@ -401,6 +402,37 @@ class CustomTextSpan extends StatelessWidget {
           fontSize: fontSize,
           fontWeight: FontWeight.w500
       ),
+    );
+  }
+}
+
+class CustomTextSmallIcon extends StatelessWidget {
+
+  const CustomTextSmallIcon({super.key,  required this.text, this.height = 1.5, this.color = AppColors.primary900});
+  final String text;
+  final double height;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = responsiveSize(context, 12, 15, md: 14);
+    TextTheme textTheme = Theme.of(context).textTheme;
+    return Row(
+      children: [
+        Text(
+          text,
+          style: textTheme.bodySmall?.copyWith(
+            color: color,
+            height: height,
+            fontSize: fontSize,
+          ),
+        ),
+        SizedBox(width: 5,),
+        Container(
+            padding: const EdgeInsets.only(top: 3),
+            alignment: Alignment.center,
+            child: Image.asset(ImagePath.ARROW_DOWN_2, height: 8, width: 8,)),
+      ],
     );
   }
 }

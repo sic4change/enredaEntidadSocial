@@ -99,6 +99,7 @@ class ImagePath {
   static const String ICON_COMPETENCIES = '$imageDir/icon-competencias.png';
   static const String ICON_FAV_BLUE = '$imageDir/icon-fav-blue.png';
   static const String ARROW_DOWN = '$imageDir/arrow_down.png';
+  static const String ARROW_DOWN_2 = '$imageDir/arrow_down_2.png';
   static const String ARROW_UP = '$imageDir/arrow_up.png';
   static const String ARROW_BACK = '$imageDir/arrow_back.png';
   static const String ARROW_FORWARD = '$imageDir/arrow_forward.png';
