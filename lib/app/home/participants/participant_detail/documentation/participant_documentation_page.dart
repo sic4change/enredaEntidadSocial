@@ -30,13 +30,13 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
             return Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(15.0), topRight: Radius.circular(15.0)),
-                    border: Border.all(color: AppColors.greyBorder)
+                    border: Responsive.isMobile(context) ? Border.all(color: Colors.transparent) : Border.all(color: AppColors.greyBorder)
                 ),
                 child: Column(
                   children: [
                     Padding(
-                      padding: Responsive.isMobile(context) ? EdgeInsets.only(left: 20.0 , top: 10)
-                          : EdgeInsets.only(left: 50, top: 15, bottom: 5),
+                      padding: Responsive.isMobile(context) ? EdgeInsets.only(left: 0.0 , top: 10, bottom: 15)
+                          : EdgeInsets.only(left: 50, top: 15, bottom: 15),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -48,37 +48,46 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
                     Container(
                       alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: Responsive.isMobile(context) ? EdgeInsets.only(left: 20.0, top: 10, bottom: 10)
+                        padding: Responsive.isMobile(context) ? EdgeInsets.only(left: 0.0, top: 10, bottom: 10)
                             : EdgeInsets.only(left: 50, top: 10, bottom: 10),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                                width: Responsive.isMobile(context) ? 170 : Responsive.isDesktopS(context) ? 220 : 370,
-                                child: CustomTextSmallIcon(text: 'Nombre del documento')),
+                                width: Responsive.isMobile(context) ? 160 : Responsive.isDesktopS(context) ? 220 : 370,
+                                child: CustomTextSmallIcon(text: StringConst.DOC_NAME)),
                             Spacer(),
                             Container(
-                                width: 85,
-                                child: CustomTextSmallIcon(text: 'Creado el')),
+                                width: Responsive.isMobile(context) ? 70 : 85,
+                                child: CustomTextSmallIcon(text: StringConst.CREATION_DATE)),
                             Spacer(),
                             Container(
-                                width: 88,
-                                child: CustomTextSmallIcon(text: 'Renovar el')),
+                                width: Responsive.isMobile(context) ? 70 : 88,
+                                child: CustomTextSmallIcon(text: StringConst.RENEW_DATE)),
                             Spacer(),
-                            Container(
+                            Responsive.isMobile(context) ? Container() : Container(
                                 width: 94,
                                 child: CustomTextSmallIcon(text: 'Creado por')),
                             Spacer(),
                             Container(
-                              width: Responsive.isMobile(context) ? 25 : 30,
+                              width: Responsive.isMobile(context) ? 0 : 30,
                             ),
                           ],
                         ),
                       ),
                     ),
                     Divider(color: AppColors.greyBorder, height: 0,),
-                    documentCategoriesList(widget.participantUser),
+                    Container(
+                      color: Colors.white,
+                      margin: Responsive.isMobile(context) ? const EdgeInsets.only(top: 0) : const EdgeInsets.only(top: 0),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            documentCategoriesList(widget.participantUser),
+                          ],
+                        ),
+                      )),
                   ],
                 ));
           }

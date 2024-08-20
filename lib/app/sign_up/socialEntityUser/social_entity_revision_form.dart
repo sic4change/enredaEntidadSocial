@@ -37,7 +37,7 @@ Widget socialEntityRevisionForm(
       const SizedBox(height: Sizes.kDefaultPaddingDouble),
       Text(
         StringConst.FORM_ACCEPTANCE,
-        style: textTheme.bodyText1?.copyWith(
+        style: textTheme.bodySmall?.copyWith(
           height: 1.5,
           color: AppColors.greyDark,
           fontWeight: FontWeight.w700,

@@ -569,11 +569,15 @@ class StringConst {
   static const String PERSONAL_DOCUMENTATION = "Documentación personal";
   static const String DOCUMENTATION = "Documentación";
   static const String COMPLETED = "Completada";
-  static const String SET_DOCUMENT_NAME = "Añadir un nuevo documento a:  ";
+  static const String SET_DOCUMENT_NAME = "Añadir documento:  ";
+  static const String EDIT_DOCUMENT_TITLE = "Editar documento:  ";
   static const String DOCUMENT_NAME = "Nombre del documento";
   static const String CREATION_DOCUMENT = "Fecha de creación";
   static const String RENOVATION_DOCUMENT = "Fecha de renovación";
   static const String ADD_DOCUMENTS = "Añadir documentos";
+  static const String CREATION_DATE = "Creado";
+  static const String RENEW_DATE = "Renovar";
+  static const String DOC_NAME = "Nombre del documento";
   static const String IPIL = "IPIL";
   static const String SOCIAL_REPORTS = "Informes sociales";
   static const String INITIAL_REPORT = "Informe inicial";

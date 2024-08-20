@@ -930,7 +930,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<DocumentCategory>> documentCategoriesStream() => _service.collectionStream(
     path: APIPath.documentCategories(),
-    queryBuilder: (query) => query.where('title', isNotEqualTo: null),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null),
     builder: (data, documentId) => DocumentCategory.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
@@ -938,11 +938,8 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user) => _service.collectionStream(
     path: APIPath.documentationParticipants(),
-    queryBuilder: (query) => query.where('name', isNotEqualTo: null)
-        .where('documentSubCategoryId', isEqualTo: documentSubCategory.personalDocId)
-        .where('documentCategoryId', isEqualTo: documentSubCategory.documentCategoryId)
-        .where('userId', isEqualTo: user.userId)
-    ,
+    queryBuilder: (query) => query.where('userId', isEqualTo: user.userId)
+        .where('documentSubCategoryId', isEqualTo: documentSubCategory.personalDocId),
     builder: (data, documentId) => DocumentationParticipant.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
   );

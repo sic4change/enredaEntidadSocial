@@ -79,7 +79,7 @@ Widget streamBuilderDropdownResourcePictureCreate (BuildContext context, Resourc
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            labelStyle: textTheme.button?.copyWith(
+            labelStyle: textTheme.bodySmall?.copyWith(
               height: 1.5,
               color: AppColors.greyDark,
               fontWeight: FontWeight.w400,
@@ -99,7 +99,7 @@ Widget streamBuilderDropdownResourcePictureCreate (BuildContext context, Resourc
               ),
             ),
           ),
-          style: textTheme.button?.copyWith(
+          style: textTheme.bodySmall?.copyWith(
             height: 1.5,
             fontWeight: FontWeight.w400,
             color: AppColors.greyDark,

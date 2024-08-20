@@ -267,7 +267,7 @@ Future<void> _unemployedSignOut(BuildContext context) async {
                   ),
                   const SpaceH20(),
                   Text(StringConst.ARENT_YOU_SOCIAL_ENTITY,
-                      style: textTheme.bodyText1?.copyWith(
+                      style: textTheme.bodySmall?.copyWith(
                         color: AppColors.greyDark,
                         height: 1.5,
                         fontWeight: FontWeight.w800,

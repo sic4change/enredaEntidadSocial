@@ -59,20 +59,20 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
             child: FilterTextFieldRow(
               searchTextController: _queryController,
               onPressed: () async {
-                var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
-                setState((){
-                  finalSocialEntities = fetchUsers;
-                });
+                // var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
+                // setState((){
+                //   finalSocialEntities = fetchUsers;
+                // });
 
               },
               onFieldSubmitted: (value) async {
                 setStateIfMounted(() {
                   filterResource.searchText = _queryController.text;
                 });
-                var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
-                setState((){
-                  finalSocialEntities = fetchUsers;
-                });
+                // var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
+                // setState((){
+                //   finalSocialEntities = fetchUsers;
+                // });
               },
               clearFilter: (){
                 setState(() {

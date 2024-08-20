@@ -21,6 +21,7 @@ import '../../../../models/userEnreda.dart';
 import '../../../../services/auth.dart';
 import '../../../../services/database.dart';
 import '../../../../utils/adaptative.dart';
+import '../../../../utils/responsive.dart';
 import '../../../../values/strings.dart';
 import '../../../../values/values.dart';
 import 'files_picker.dart';
@@ -75,7 +76,8 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
     return AlertDialog(
       content: Container(
         width: 500,
-        height: 550,
+        height: Responsive.isMobile(context) ? MediaQuery.of(context).size.height * 0.9 : 560,
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -137,7 +139,8 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
                 },
               ),
               SizedBox(height: 20,),
-              Row(
+              Flex(
+                direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
@@ -155,6 +158,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
                                 fontSize: fontSizeButton)),
                       )),
                   SizedBox(width: 20,),
+                  SizedBox(height: 20,),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,

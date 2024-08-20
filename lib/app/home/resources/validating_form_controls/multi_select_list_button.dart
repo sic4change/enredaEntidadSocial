@@ -58,7 +58,7 @@ class _MultiSelectListDialogState<V> extends State<MultiSelectListDialog<V>> {
     TextTheme textTheme = Theme.of(context).textTheme;
     double fontSize = responsiveSize(context, 14, 18, md: 15);
     return AlertDialog(
-      title: Text(StringConst.FORM_SELECT, style: textTheme.bodyText2?.copyWith(
+      title: Text(StringConst.FORM_SELECT, style: textTheme.bodySmall?.copyWith(
         height: 1.5,
         fontWeight: FontWeight.w700,
         fontSize: fontSize,
@@ -74,7 +74,7 @@ class _MultiSelectListDialogState<V> extends State<MultiSelectListDialog<V>> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-                        child: Text(items[0].title, style: textTheme.bodyText1?.copyWith(
+                        child: Text(items[0].title, style: textTheme.bodySmall?.copyWith(
                           height: 1.5,
                           color: AppColors.primaryColor,
                           fontWeight: FontWeight.w700,
@@ -114,7 +114,7 @@ class _MultiSelectListDialogState<V> extends State<MultiSelectListDialog<V>> {
     return CheckboxListTile(
       value: checked,
       title: Text(item.label,
-        style: textTheme.button?.copyWith(
+        style: textTheme.bodySmall?.copyWith(
           height: 1.5,
           color: AppColors.greyDark,
           fontWeight: FontWeight.w400,

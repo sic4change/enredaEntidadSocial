@@ -36,7 +36,7 @@ Widget streamBuilderForCountryCreate (BuildContext context, Country? selectedCou
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            labelStyle: textTheme.button?.copyWith(
+            labelStyle: textTheme.bodySmall?.copyWith(
               height: 1.5,
               color: AppColors.greyDark,
               fontWeight: FontWeight.w400,
@@ -56,7 +56,7 @@ Widget streamBuilderForCountryCreate (BuildContext context, Country? selectedCou
               ),
             ),
           ),
-          style: textTheme.button?.copyWith(
+          style: textTheme.bodySmall?.copyWith(
             height: 1.5,
             fontWeight: FontWeight.w400,
             color: AppColors.greyDark,

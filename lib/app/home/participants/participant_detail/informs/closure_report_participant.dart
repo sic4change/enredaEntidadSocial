@@ -460,7 +460,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Text(
               title,
-              style: textTheme.button?.copyWith(
+              style: textTheme.bodySmall?.copyWith(
                 height: 1.5,
                 color: AppColors.greyDark,
                 fontWeight: FontWeight.w700,

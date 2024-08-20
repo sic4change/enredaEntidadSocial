@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../../models/userEnreda.dart';
 import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
-import 'documentCategoryTile.dart';
+import 'document_category_tile.dart';
 
 class ExpandableDocCategoryTile extends StatefulWidget {
   const ExpandableDocCategoryTile({
@@ -59,7 +59,7 @@ class _ExpandableDocCategoryTileState extends State<ExpandableDocCategoryTile> {
                   children: [
                     Container(
                       color: AppColors.greySearch,
-                      padding: Responsive.isMobile(context) ? const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0) :
+                      padding: Responsive.isMobile(context) ? const EdgeInsets.symmetric(horizontal: 0.0, vertical: 10.0) :
                       const EdgeInsets.symmetric(horizontal: 50.0, vertical: 16.0),
                       child: CustomTextChip(text: '${(widget.documentCategory.name)}', color: AppColors.primary900),
                     ),
@@ -76,7 +76,7 @@ class _ExpandableDocCategoryTileState extends State<ExpandableDocCategoryTile> {
           ),
           Positioned(
               top: Responsive.isMobile(context) ? 5 : 15,
-              right: Responsive.isMobile(context) ?  10 : 35,
+              right: Responsive.isMobile(context) ?  0 : 35,
               child: Row(
                 children: [
                   Container(
@@ -91,7 +91,7 @@ class _ExpandableDocCategoryTileState extends State<ExpandableDocCategoryTile> {
                         imagePath,
                         color: AppColors.primary900,
                       )),
-                  SizedBox(width: 20),
+                  Responsive.isMobile(context) ? Container() : SizedBox(width: 20),
                 ],
               )),
         ],

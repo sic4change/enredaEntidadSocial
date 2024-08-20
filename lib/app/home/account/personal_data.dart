@@ -278,7 +278,7 @@ class _PersonalDataState extends State<PersonalData> {
                 showFlagDialog: true,
               ),
               focusColor: AppColors.turquoise,
-              labelStyle: textTheme.button?.copyWith(
+              labelStyle: textTheme.bodySmall?.copyWith(
                 height: 1.5,
                 color: AppColors.greyDark,
                 fontWeight: FontWeight.w400,
@@ -306,7 +306,7 @@ class _PersonalDataState extends State<PersonalData> {
             onSaved: (value) => this._phone = _phoneCode + ' ' + value!,
             textCapitalization: TextCapitalization.sentences,
             keyboardType: TextInputType.phone,
-            style: textTheme.button?.copyWith(
+            style: textTheme.bodySmall?.copyWith(
               height: 1.5,
               color: AppColors.greyDark,
               fontWeight: FontWeight.w400,
@@ -480,18 +480,18 @@ class _PersonalDataState extends State<PersonalData> {
         uiSettings: [
           WebUiSettings(
               context: context,
-              presentStyle: CropperPresentStyle.dialog,
-              boundary: const CroppieBoundary(
-                width: 400,
-                height: 400,
-              ),
-              viewPort:
-              const CroppieViewPort(width: 300, height: 300, type: 'circle',),
-              enableExif: true,
-              enableZoom: true,
-              showZoomer: true,
-              enableResize: false,
-              mouseWheelZoom: true,
+              // presentStyle: CropperPresentStyle.dialog,
+              // boundary: const CroppieBoundary(
+              //   width: 400,
+              //   height: 400,
+              // ),
+              // viewPort:
+              // const CroppieViewPort(width: 300, height: 300, type: 'circle',),
+              // enableExif: true,
+              // enableZoom: true,
+              // showZoomer: true,
+              // enableResize: false,
+              // mouseWheelZoom: true,
               translations: WebTranslations(
                 title: 'Recortar imagen',
                 rotateLeftTooltip: 'Rotar 90 grados a la izquierda',
@@ -642,7 +642,7 @@ class _PersonalDataState extends State<PersonalData> {
         builder: (context) {
           return AlertDialog(
             title: Text('Ayudanos a mejorar',
-              style: textTheme.button?.copyWith(
+              style: textTheme.bodySmall?.copyWith(
                 height: 1.5,
                 color: AppColors.greyDark,
                 fontWeight: FontWeight.w700,
@@ -656,12 +656,12 @@ class _PersonalDataState extends State<PersonalData> {
               controller: _textFieldController,
               decoration: InputDecoration(
                 hintText: "Escribe tus sugerencias",
-                hintStyle: textTheme.button?.copyWith(
+                hintStyle: textTheme.bodySmall?.copyWith(
                   color: AppColors.greyDark,
                   height: 1.5,
                   fontWeight: FontWeight.w400,
                 ),),
-              style: textTheme.button?.copyWith(
+              style: textTheme.bodySmall?.copyWith(
                 height: 1.5,
                 color: AppColors.greyDark,
                 fontWeight: FontWeight.w400,),

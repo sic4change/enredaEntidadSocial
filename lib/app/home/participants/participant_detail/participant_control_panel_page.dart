@@ -513,7 +513,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
                                                     .BADGE_VALIDATED
                                                 ? 'EVALUADA'
                                                 : 'CERTIFICADA',
-                                            style: textTheme.bodyText1
+                                            style: textTheme.bodySmall
                                                 ?.copyWith(
                                                 fontSize: 12.0,
                                                 fontWeight: FontWeight.w500)),

@@ -259,7 +259,7 @@ Widget customDatePickerTitle(BuildContext context, DateTime time, String labelTe
             SpaceW12(),
             Text(
               labelText,
-              style: textTheme.button?.copyWith(
+              style: textTheme.bodySmall?.copyWith(
                 height: 1.5,
                 color: AppColors.greyDark,
                 fontWeight: FontWeight.w700,
@@ -328,7 +328,7 @@ Widget customTextFormFieldName(BuildContext context, String formValue, String la
       fillColor: Colors.white,
       labelText: labelText,
       focusColor: AppColors.primaryColor,
-      labelStyle: textTheme.button?.copyWith(
+      labelStyle: textTheme.bodySmall?.copyWith(
         height: 1.5,
         color: AppColors.greyDark,
         fontWeight: FontWeight.w400,
@@ -354,7 +354,7 @@ Widget customTextFormFieldName(BuildContext context, String formValue, String la
     onSaved: (String? val) => {functionSetState(val)},
     textCapitalization: TextCapitalization.sentences,
     keyboardType: TextInputType.name,
-    style: textTheme.button?.copyWith(
+    style: textTheme.bodySmall?.copyWith(
       height: 1.5,
       color: AppColors.greyDark,
       fontWeight: FontWeight.w400,

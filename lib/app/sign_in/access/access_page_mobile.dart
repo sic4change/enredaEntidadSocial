@@ -44,7 +44,7 @@ class _AccessPageMobileState extends State<AccessPageMobile> {
             const SpaceH4(),
             kIsWeb ? Text(
               StringConst.BETTER_FROM_APPS,
-              style: textTheme.bodyText2,
+              style: textTheme.bodySmall,
             ) : Container(),
           ],
         ),

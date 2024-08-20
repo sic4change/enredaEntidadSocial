@@ -33,7 +33,7 @@ Widget streamBuilderForProvince (BuildContext context, Country? selectedCountry,
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
                   StringConst.FORM_PROVINCE,
-                  style: textTheme.button?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
                     color: AppColors.greyDark,
                     fontWeight: FontWeight.w700,
@@ -72,7 +72,7 @@ Widget streamBuilderForProvince (BuildContext context, Country? selectedCountry,
                       ),
                     ),
                   ),
-                  style: textTheme.button?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                     height: 1.4,
                     color: AppColors.greyDark,
                     fontWeight: FontWeight.w400,
