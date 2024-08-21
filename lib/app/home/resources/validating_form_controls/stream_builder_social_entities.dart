@@ -11,7 +11,7 @@ Widget streamBuilderDropdownSocialEntities (BuildContext context, SocialEntity? 
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
   return StreamBuilder<List<SocialEntity>>(
-      stream: database.filterSocialEntityStream(socialEntityId),
+      stream: database.socialEntityByIdStream(socialEntityId),
       builder: (context, snapshotSocialEntities){
 
         List<DropdownMenuItem<SocialEntity>> socialEntityItems = [];

@@ -30,24 +30,27 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
+import '../../../models/externalSocialEntity.dart';
+
 const double contactBtnWidthLg = 200.0;
 const double contactBtnWidthSm = 100.0;
 const double contactBtnWidthMd = 140.0;
 
 class EditSocialEntity extends StatefulWidget {
   EditSocialEntity(
-      {Key? key}) : super(key: key);
+      {Key? key, required this.socialEntityId}) : super(key: key);
+  final String? socialEntityId;
 
   @override
   State<EditSocialEntity> createState() => _EditSocialEntityState();
 }
 
 class _EditSocialEntityState extends State<EditSocialEntity> {
-  late SocialEntity socialEntity;
+  late ExternalSocialEntity externalSocialEntity;
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
   int currentStep = 0;
-  String? _socialEntityId;
+  String? _externalSocialEntityId;
   String? _socialEntityName;
   String? _socialEntityActionScope;
   String? _category;
@@ -88,45 +91,49 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   List<String> choiceGrade = ['Alto', 'Intermedio', 'Bajo'];
   List<String> yesNo = ['Si', 'No'];
   final ImagePicker _imagePicker = ImagePicker();
+  DateTime? _createdAt;
+  String? _createdBy;
 
   @override
   void initState() {
     super.initState();
-    socialEntity = globals.currentSocialEntity!;
-    _socialEntityId = globals.currentSocialEntity?.socialEntityId;
-    _socialEntityName = globals.currentSocialEntity?.name;
-    _socialEntityActionScope = globals.currentSocialEntity?.actionScope;
-    _category = globals.currentSocialEntity?.category ?? '';
-    _subCategory = globals.currentSocialEntity?.subCategory ?? '';
-    _geographicZone = globals.currentSocialEntity?.geographicZone ?? '';
-    _subGeographicZone = globals.currentSocialEntity?.subGeographicZone ?? '';
-    _website = globals.currentSocialEntity?.website ?? '';
-    _website = globals.currentSocialEntity?.website ?? '';
-    _entityPhone = globals.currentSocialEntity?.entityPhone ?? '';
-    _entityMobilePhone = globals.currentSocialEntity?.entityMobilePhone ?? '';
-    _contactPhone = globals.currentSocialEntity?.contactPhone ?? '';
-    _contactMobilePhone = globals.currentSocialEntity?.contactMobilePhone ?? '';
-    _entityLandlinePhoneCode = globals.currentSocialEntity?.entityPhone == null || globals.currentSocialEntity?.entityPhone == '' ? '+34' : '${globals.currentSocialEntity?.entityPhone?[0]}${globals.currentSocialEntity?.entityPhone?[1]}${globals.currentSocialEntity?.entityPhone?[2]}';
-    _entityMobilePhoneCode = globals.currentSocialEntity?.entityMobilePhone == null || globals.currentSocialEntity?.entityMobilePhone == '' ? '+34' : '${globals.currentSocialEntity?.entityMobilePhone?[0]}${globals.currentSocialEntity?.entityMobilePhone?[1]}${globals.currentSocialEntity?.entityMobilePhone?[2]}';
-    _contactLandlinePhoneCode = globals.currentSocialEntity?.contactPhone == null || globals.currentSocialEntity?.contactPhone == '' ? '+34' : '${globals.currentSocialEntity?.contactPhone?[0]}${globals.currentSocialEntity?.contactPhone?[1]}${globals.currentSocialEntity?.contactPhone?[2]}';
-    _contactMobilePhoneCode = globals.currentSocialEntity?.contactMobilePhone == null || globals.currentSocialEntity?.contactMobilePhone == ''? '+34' : '${globals.currentSocialEntity?.contactMobilePhone?[0]}${globals.currentSocialEntity?.contactMobilePhone?[1]}${globals.currentSocialEntity?.contactMobilePhone?[2]}';
-    _postalCode = globals.currentSocialEntity?.address?.postalCode ?? '';
-    _countryId = globals.currentSocialEntity?.address?.country ?? '';
-    _provinceId = globals.currentSocialEntity?.address?.province ?? '';
-    _cityId = globals.currentSocialEntity?.address?.city ?? '';
-    _email = globals.currentSocialEntity?.email ?? '';
-    _linkedin = globals.currentSocialEntity?.linkedin ?? '';
-    _twitter = globals.currentSocialEntity?.twitter ?? '';
-    _otherSocialMedia = globals.currentSocialEntity?.otherSocialMedia ?? '';
-    _contactName = globals.currentSocialEntity?.contactName ?? '';
-    _contactEmail = globals.currentSocialEntity?.contactEmail ?? '';
-    _contactPosition = globals.currentSocialEntity?.contactPosition ?? '';
-    _contactChoiceGrade = globals.currentSocialEntity?.contactChoiceGrade ?? '';
-    _contactKOL = globals.currentSocialEntity?.contactKOL ?? '';
-    _contactProject = globals.currentSocialEntity?.contactProject ?? '';
-    _signedAgreements = globals.currentSocialEntity?.signedAgreements ?? '';
-    _entityTypes = globals.currentSocialEntity?.types ?? [];
-    _trust = globals.currentSocialEntity?.trust ?? false;
+    externalSocialEntity = globals.currentExternalSocialEntity!;
+    _externalSocialEntityId = globals.currentExternalSocialEntity?.externalSocialEntityId;
+    _socialEntityName = globals.currentExternalSocialEntity?.name;
+    _socialEntityActionScope = globals.currentExternalSocialEntity?.actionScope;
+    _category = globals.currentExternalSocialEntity?.category ?? '';
+    _subCategory = globals.currentExternalSocialEntity?.subCategory ?? '';
+    _geographicZone = globals.currentExternalSocialEntity?.geographicZone ?? '';
+    _subGeographicZone = globals.currentExternalSocialEntity?.subGeographicZone ?? '';
+    _website = globals.currentExternalSocialEntity?.website ?? '';
+    _website = globals.currentExternalSocialEntity?.website ?? '';
+    _entityPhone = globals.currentExternalSocialEntity?.entityPhone ?? '';
+    _entityMobilePhone = globals.currentExternalSocialEntity?.entityMobilePhone ?? '';
+    _contactPhone = globals.currentExternalSocialEntity?.contactPhone ?? '';
+    _contactMobilePhone = globals.currentExternalSocialEntity?.contactMobilePhone ?? '';
+    _entityLandlinePhoneCode = globals.currentExternalSocialEntity?.entityPhone == null || globals.currentExternalSocialEntity?.entityPhone == '' ? '+34' : '${globals.currentExternalSocialEntity?.entityPhone?[0]}${globals.currentExternalSocialEntity?.entityPhone?[1]}${globals.currentExternalSocialEntity?.entityPhone?[2]}';
+    _entityMobilePhoneCode = globals.currentExternalSocialEntity?.entityMobilePhone == null || globals.currentExternalSocialEntity?.entityMobilePhone == '' ? '+34' : '${globals.currentExternalSocialEntity?.entityMobilePhone?[0]}${globals.currentExternalSocialEntity?.entityMobilePhone?[1]}${globals.currentExternalSocialEntity?.entityMobilePhone?[2]}';
+    _contactLandlinePhoneCode = globals.currentExternalSocialEntity?.contactPhone == null || globals.currentExternalSocialEntity?.contactPhone == '' ? '+34' : '${globals.currentExternalSocialEntity?.contactPhone?[0]}${globals.currentExternalSocialEntity?.contactPhone?[1]}${globals.currentExternalSocialEntity?.contactPhone?[2]}';
+    _contactMobilePhoneCode = globals.currentExternalSocialEntity?.contactMobilePhone == null || globals.currentExternalSocialEntity?.contactMobilePhone == ''? '+34' : '${globals.currentExternalSocialEntity?.contactMobilePhone?[0]}${globals.currentExternalSocialEntity?.contactMobilePhone?[1]}${globals.currentExternalSocialEntity?.contactMobilePhone?[2]}';
+    _postalCode = globals.currentExternalSocialEntity?.address?.postalCode ?? '';
+    _countryId = globals.currentExternalSocialEntity?.address?.country ?? '';
+    _provinceId = globals.currentExternalSocialEntity?.address?.province ?? '';
+    _cityId = globals.currentExternalSocialEntity?.address?.city ?? '';
+    _email = globals.currentExternalSocialEntity?.email ?? '';
+    _linkedin = globals.currentExternalSocialEntity?.linkedin ?? '';
+    _twitter = globals.currentExternalSocialEntity?.twitter ?? '';
+    _otherSocialMedia = globals.currentExternalSocialEntity?.otherSocialMedia ?? '';
+    _contactName = globals.currentExternalSocialEntity?.contactName ?? '';
+    _contactEmail = globals.currentExternalSocialEntity?.contactEmail ?? '';
+    _contactPosition = globals.currentExternalSocialEntity?.contactPosition ?? '';
+    _contactChoiceGrade = globals.currentExternalSocialEntity?.contactChoiceGrade ?? '';
+    _contactKOL = globals.currentExternalSocialEntity?.contactKOL ?? '';
+    _contactProject = globals.currentExternalSocialEntity?.contactProject ?? '';
+    _signedAgreements = globals.currentExternalSocialEntity?.signedAgreements ?? '';
+    _entityTypes = globals.currentExternalSocialEntity?.types ?? [];
+    _trust = globals.currentExternalSocialEntity?.trust ?? false;
+    _createdAt = globals.currentExternalSocialEntity?.createdAt ?? DateTime.now();
+    _createdBy = globals.currentExternalSocialEntity?.createdBy ?? '';
   }
 
   @override
@@ -175,7 +182,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
           child: Column(
             children: [
               StreamBuilder<SocialEntity>(
-                  stream: database.socialEntityStream(_socialEntityId),
+                  stream: database.socialEntityStream(_externalSocialEntityId),
                   builder: (context, snapshot) {
                     if(snapshot.hasData && snapshot.data!.photo != null){
                       final photoUrl = snapshot.data!.photo ?? '';
@@ -226,7 +233,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       Padding(
         padding: const EdgeInsets.all(20.0),
         child: InkWell(
-          mouseCursor: MaterialStateMouseCursor.clickable,
+          mouseCursor: WidgetStateMouseCursor.clickable,
           onTap: () => !kIsWeb
               ? _displayPickImageDialog()
               : _onImageButtonPressed(ImageSource.gallery),
@@ -391,27 +398,27 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
             ),
             CustomFlexRowColumn(
               childLeft: streamBuilderForCountry(context, selectedCountry,
-                  buildCountryStreamBuilderSetState, socialEntity),
+                  buildCountryStreamBuilderSetState, externalSocialEntity),
               childRight: streamBuilderForProvince(
                   context,
                   selectedCountry == null
-                      ? socialEntity.address?.country
+                      ? externalSocialEntity.address?.country
                       : selectedCountry?.countryId,
                   selectedProvince,
                   buildProvinceStreamBuilderSetState,
-                  socialEntity)),
+                  externalSocialEntity)),
             CustomFlexRowColumn(
               childLeft: streamBuilderForCity(
                   context,
                   selectedCountry == null
-                      ? socialEntity.address?.country
+                      ? externalSocialEntity.address?.country
                       : selectedCountry?.countryId,
                   selectedProvince == null
-                      ? socialEntity.address?.province
+                      ? externalSocialEntity.address?.province
                       : selectedProvince?.provinceId,
                   selectedCity,
                   buildCityStreamBuilderSetState,
-                  socialEntity),
+                  externalSocialEntity),
               childRight: customTextFormFieldNotValidator(context, _postalCode!,
                   StringConst.FORM_POSTAL_CODE, postalCodeSetState),
             ),
@@ -694,7 +701,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
         setState(() async {
           final database = Provider.of<Database>(context, listen: false);
           await database.uploadLogoAvatar(
-              _socialEntityId!, await pickedFile.readAsBytes());
+              _externalSocialEntityId!, await pickedFile.readAsBytes());
         });
       }
     } catch (e) {
@@ -775,8 +782,9 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       city: _cityId,
       place: _postalCode,
     );
-    final editedSocialEntity = SocialEntity(
-      socialEntityId: _socialEntityId,
+    final externalSocialEntity = ExternalSocialEntity(
+      externalSocialEntityId: _externalSocialEntityId,
+      associatedSocialEntityId: widget.socialEntityId!,
       name: _socialEntityName!,
       actionScope: _socialEntityActionScope,
       category: _category!,
@@ -801,12 +809,14 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       contactPhone: _contactPhone,
       contactMobilePhone: _contactMobilePhone,
       signedAgreements: _signedAgreements,
-      trust: _trust
+      trust: _trust,
+      createdAt:_createdAt!,
+      createdBy: _createdBy!,
     );
     try {
       final database = Provider.of<Database>(context, listen: false);
       setState(() => isLoading = true);
-      await database.setSocialEntity(editedSocialEntity);
+      await database.setExternalSocialEntity(externalSocialEntity);
       setState(() => isLoading = false);
       showAlertDialog(
         context,

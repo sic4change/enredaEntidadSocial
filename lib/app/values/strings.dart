@@ -623,6 +623,13 @@ class StringConst {
   static const String CANNOT_LOAD_DATA = 'No se pudo cargar los datos';
   static const String NAME_IN_USE = 'Nombre en uso';
 
+  //Side drawer
+  static const String DRAWER_CONTROL_PANEL = 'Panel de control';
+  static const String DRAWER_PARTICIPANTS = 'Participantes';
+  static const String DRAWER_MY_RESOURCES = 'Mis recursos';
+  static const String DRAWER_TOOLS = 'Caja de herramientas';
+  static const String DRAWER_ENTITIES = 'Agenda';
+
   //ToolBox
   static const String TOOL_BOX = 'Caja de herramientas ';
   static const String ENREDA_METHODOLOGY = 'Metodología Enreda';

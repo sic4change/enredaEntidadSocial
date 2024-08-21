@@ -9,10 +9,11 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/externalSocialEntity.dart';
+
 class EntityListTile extends StatefulWidget {
-  const EntityListTile({Key? key, required this.socialEntity, required this.filter, required this.onTap}) : super(key: key);
-  final SocialEntity? socialEntity;
-  final List<String>? filter;
+  const EntityListTile({Key? key, required this.socialEntity, required this.onTap}) : super(key: key);
+  final ExternalSocialEntity? socialEntity;
   final VoidCallback? onTap;
 
   @override
@@ -22,10 +23,10 @@ class EntityListTile extends StatefulWidget {
 class _EntityListTileState extends State<EntityListTile> {
   @override
   Widget build(BuildContext context) {
-    return _buildEntityContainer(widget.socialEntity!, widget.filter!);
+    return _buildEntityContainer(widget.socialEntity!);
   }
 
-  Widget _buildEntityContainer(SocialEntity currentSocialEntity, List<String> filter){
+  Widget _buildEntityContainer(ExternalSocialEntity currentSocialEntity){
     final database = Provider.of<Database>(context, listen: false);
     String name = currentSocialEntity.name;
     String email = currentSocialEntity.email ?? '';

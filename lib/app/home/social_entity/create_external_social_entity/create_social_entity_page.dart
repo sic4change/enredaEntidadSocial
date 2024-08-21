@@ -14,6 +14,7 @@ import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
+import 'package:enreda_empresas/app/models/externalSocialEntity.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -29,14 +30,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-class CreateSocialEntityPage extends StatefulWidget {
-  const CreateSocialEntityPage({Key? key}) : super(key: key);
+import '../../../services/auth.dart';
+
+class CreateExternalSocialEntityPage extends StatefulWidget {
+  const CreateExternalSocialEntityPage({Key? key, required this.socialEntityId}) : super(key: key);
+  final String? socialEntityId;
 
   @override
-  _CreateSocialEntityPageState createState() => _CreateSocialEntityPageState();
+  _CreateExternalSocialEntityPageState createState() => _CreateExternalSocialEntityPageState();
 }
 
-class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
+class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEntityPage> {
   final _formKey = GlobalKey<FormState>();
   final _formKeyContactPerson = GlobalKey<FormState>();
 
@@ -58,6 +62,7 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
   late String countryName;
   late String provinceName;
   late String cityName;
+  String? createdBy;
 
   //Country codes for phone numbers
   String entityPhoneCode = '+34';
@@ -99,8 +104,6 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
   @override
   void initState() {
     super.initState();
-
-    //New values
     _entityName = '';
     _actionScope = '';
     _entityTypes = [];
@@ -164,7 +167,7 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
         Padding(
           padding: const EdgeInsets.only(bottom: Sizes.MARGIN_20),
           child: Text(
-            'Datos de la entidad',
+            'Datos de la entidad externa',
             style: textTheme.titleMedium!.copyWith(
               color: AppColors.turquoiseBlue,
               fontWeight: FontWeight.w300,
@@ -204,7 +207,8 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
   }
 
   Future<void> _submit() async {
-
+    final database = Provider.of<Database>(context, listen: false);
+    final auth = Provider.of<AuthBase>(context, listen: false);
     if (_validateAndSaveForm() == false) {
       await showAlertDialog(context,
           title: StringConst.FORM_ENTITY_ERROR,
@@ -224,7 +228,9 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
         postalCode: _postalCode,
       );
 
-      SocialEntity finalSocialEntity = SocialEntity(
+      ExternalSocialEntity externalSocialEntity = ExternalSocialEntity(
+          associatedSocialEntityId: widget.socialEntityId!,
+          createdBy: auth.currentUser!.uid,
           name: _entityName!,
           actionScope: _actionScope,
           types: _entityTypes,
@@ -248,12 +254,12 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
           contactKOL: _contactKOL,
           contactProject: _contactProject,
           trust: true, //TODO asignarlo de otra forma
-          address: address
+          address: address,
+          createdAt: DateTime.now(),
       );
 
       try {
-        final database = Provider.of<Database>(context, listen: false);
-        await database.addSocialEntity(finalSocialEntity);
+        await database.addExternalSocialEntity(externalSocialEntity);
         await showAlertDialog(
           context,
           title: StringConst.CREATE_ENTITY,
@@ -289,7 +295,7 @@ class _CreateSocialEntityPageState extends State<CreateSocialEntityPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomTextFormFieldTitle(
-            labelText: 'Nombre de la entidad',
+            labelText: 'Nombre de la entidad externa',
             onChanged: (value){
               setState(() {
                 _entityName = value;

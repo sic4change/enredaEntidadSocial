@@ -1,12 +1,11 @@
 class FilterResource {
   String searchText;
-  //List<String> resourceTypes;
-  List<String> resourceCategories;
+  List<String> externalSocialEntityTypesIds;
 
 
   FilterResource(
       this.searchText,
-      //this.resourceTypes,
-      this.resourceCategories);
+      this.externalSocialEntityTypesIds,
+      );
 
 }

@@ -19,6 +19,7 @@ import '../../../../models/userEnreda.dart';
 import '../../../../services/auth.dart';
 import '../../../../services/database.dart';
 import '../../../../utils/adaptative.dart';
+import '../../../../utils/responsive.dart';
 import '../../../../values/strings.dart';
 import '../../../../values/values.dart';
 import 'files_picker.dart';
@@ -103,7 +104,7 @@ class _EditDocumentsFormState extends State<EditDocumentsForm> {
     return AlertDialog(
       content: Container(
         width: 500,
-        height: 560,
+        height: Responsive.isMobile(context) ? MediaQuery.of(context).size.height : 560,
         padding: const EdgeInsets.all(10.0),
         child: Form(
           key: _formKey,
@@ -168,7 +169,8 @@ class _EditDocumentsFormState extends State<EditDocumentsForm> {
                 },
               ),
               SizedBox(height: 20,),
-              Row(
+              Flex(
+                direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
@@ -186,6 +188,7 @@ class _EditDocumentsFormState extends State<EditDocumentsForm> {
                                 fontSize: fontSizeButton)),
                       )),
                   SizedBox(width: 20,),
+                  SizedBox(height: 20,),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
