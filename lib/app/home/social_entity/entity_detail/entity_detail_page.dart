@@ -21,6 +21,7 @@ import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 import '../../../models/externalSocialEntity.dart';
+import '../../../services/auth.dart';
 import '../../../utils/functions.dart';
 import 'social_entity_category_stream.dart';
 
@@ -51,8 +52,9 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
 
   Widget _buildResourcePage(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
-    return StreamBuilder<ExternalSocialEntity>(
-      stream: database.externalSocialEntityByIdStream(globals.currentExternalSocialEntity!.externalSocialEntityId),
+    return globals.currentExternalSocialEntity!.externalSocialEntityId == null ? const Center(child: CircularProgressIndicator()) :
+    StreamBuilder<ExternalSocialEntity>(
+      stream: database.externalSocialEntityByIdStream(globals.currentExternalSocialEntity!.externalSocialEntityId!),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(
@@ -60,18 +62,18 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
         }
         final externalSocialEntity = snapshot.data!;
         return StreamBuilder<Country>(
-            stream: database.countryStream(externalSocialEntity.country),
+            stream: database.countryStream(externalSocialEntity.address?.country),
             builder: (context, snapshot) {
               final country = snapshot.data;
               externalSocialEntity.countryName = country == null ? '' : country.name;
               return StreamBuilder<Province>(
-                stream: database.provinceStream(externalSocialEntity.province),
+                stream: database.provinceStream(externalSocialEntity.address?.province),
                 builder: (context, snapshot) {
                   final province = snapshot.data;
                   externalSocialEntity.provinceName = province == null ? '' : province.name;
                   return StreamBuilder<City>(
                       stream: database
-                          .cityStream(externalSocialEntity.city),
+                          .cityStream(externalSocialEntity.address?.city),
                       builder: (context, snapshot) {
                         final city = snapshot.data;
                         externalSocialEntity.cityName = city == null ? '' : city.name;
@@ -86,6 +88,7 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
 
   Widget _buildResourceDetail(BuildContext context, ExternalSocialEntity externalSocialEntity) {
     TextTheme textTheme = Theme.of(context).textTheme;
+    final auth = Provider.of<AuthBase>(context, listen: false);
     double fontSizeTitle = responsiveSize(context, 14, 22, md: 18);
     double fontSizePromotor = responsiveSize(context, 12, 16, md: 14);
     return SingleChildScrollView(
@@ -178,7 +181,7 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
                             ),
                           ],
                         ),
-                        externalSocialEntity.associatedSocialEntityId == widget.socialEntityId ? Row(
+                        auth.currentUser?.uid == externalSocialEntity.createdBy ? Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Padding(
@@ -351,15 +354,15 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
         externalSocialEntity.contactKOL == null || externalSocialEntity.contactKOL == '' ? Container() :
         CustomTextSmallColor(text: externalSocialEntity.contactKOL!),
 
-        externalSocialEntity.contactProject == null || externalSocialEntity.contactProject == '' ? Container() :
-        CustomTextBold(title: StringConst.CONTACT_PROJECT.toUpperCase(), color: AppColors.turquoiseBlue,),
-        externalSocialEntity.contactProject == null || externalSocialEntity.contactProject == '' ? Container() :
-        CustomTextSmallColor(text: externalSocialEntity.contactProject!),
-
         externalSocialEntity.signedAgreements == null || externalSocialEntity.signedAgreements == '' ? Container() :
         CustomTextBold(title: StringConst.FORM_ENTITY_SIGNED_AGREEMENTS.toUpperCase(), color: AppColors.turquoiseBlue,),
         externalSocialEntity.signedAgreements == null || externalSocialEntity.signedAgreements == '' ? Container() :
         CustomTextSmallColor(text: externalSocialEntity.signedAgreements!),
+
+        externalSocialEntity.contactProject == null || externalSocialEntity.contactProject == '' ? Container() :
+        CustomTextBold(title: StringConst.CONTACT_PROJECT.toUpperCase(), color: AppColors.turquoiseBlue,),
+        externalSocialEntity.contactProject == null || externalSocialEntity.contactProject == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.contactProject!),
       ],
     );
   }
@@ -466,10 +469,8 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
 
   Future<void> _confirmDeleteSocialEntity(BuildContext context, ExternalSocialEntity externalSocialEntity) async {
     final didRequestSignOut = await showAlertDialog(context,
-        title: 'Eliminar entidad social: ${externalSocialEntity.name} ',
-        content: 'Si pulsa en Aceptar se procederá a la eliminación completa '
-            'de la entidad social, esta acción no se podrá deshacer, '
-            '¿Está seguro que quiere continuar?',
+        title: 'Eliminar contacto: ${externalSocialEntity.name} ',
+        content: StringConst.DELETE_DOCUMENT,
         cancelActionText: 'Cancelar',
         defaultActionText: 'Aceptar');
     if (didRequestSignOut == true) {

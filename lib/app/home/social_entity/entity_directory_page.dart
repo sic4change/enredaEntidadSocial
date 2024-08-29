@@ -26,7 +26,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
   @override
   void initState() {
     bodyWidget = [
-      EntitiesListPage(),
+      EntitiesListPage(socialEntityId: widget.socialEntity.socialEntityId),
       CreateExternalSocialEntityPage(socialEntityId: widget.socialEntity.socialEntityId),
       ExternalEntityDetailPage(socialEntityId: widget.socialEntity.socialEntityId),
       EditSocialEntity(socialEntityId: widget.socialEntity.socialEntityId)

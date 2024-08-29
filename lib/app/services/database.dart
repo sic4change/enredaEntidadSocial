@@ -70,10 +70,10 @@ abstract class Database {
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
      Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId);
      Stream<List<SocialEntity>> socialEntitiesStream();
-     Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter);
+     Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter, String socialEntityId);
      Stream<List<SocialEntity>> socialEntityByIdStream(String socialEntityId);
      Stream<SocialEntity> socialEntityStream(String? socialEntityId);
-     Stream<ExternalSocialEntity> externalSocialEntityByIdStream(String? externalSocialEntityId);
+     Stream<ExternalSocialEntity> externalSocialEntityByIdStream(String externalSocialEntityId);
      Stream<UserEnreda> mentorStream(String mentorId);
      Stream<UserEnreda?> userStreamByEmail(String? email);
      Stream<List<Country>> countriesStream();
@@ -207,7 +207,7 @@ class FirestoreDatabase implements Database {
 
   @override
   Future<void> deleteExternalSocialEntity(ExternalSocialEntity socialEntity) =>
-      _service.deleteData(path: APIPath.socialEntity(socialEntity.externalSocialEntityId!));
+      _service.deleteData(path: APIPath.externalSocialEntity(socialEntity.externalSocialEntityId!));
 
   @override
   Future<void> setExternalSocialEntity(ExternalSocialEntity externalSocialEntity) => _service.updateData(
@@ -281,11 +281,11 @@ class FirestoreDatabase implements Database {
     );
 
   @override
-  Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter) {
+  Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter, String socialEntityId) {
     return _service.filteredCollectionStream(
       path: APIPath.externalSocialEntities(),
       queryBuilder: (query) {
-        query = query.where('trust', isEqualTo: true);
+        query = query.where('trust', isEqualTo: true).where('associatedSocialEntityId', isEqualTo: socialEntityId);
         return query;
       },
       builder: (data, documentId) {
@@ -345,9 +345,9 @@ class FirestoreDatabase implements Database {
         );
 
   @override
-  Stream<ExternalSocialEntity> externalSocialEntityByIdStream(String? externalSocialEntityId) =>
+  Stream<ExternalSocialEntity> externalSocialEntityByIdStream(String externalSocialEntityId) =>
       _service.documentStream<ExternalSocialEntity>(
-        path: APIPath.externalSocialEntity(externalSocialEntityId!),
+        path: APIPath.externalSocialEntity(externalSocialEntityId),
         builder: (data, documentId) => ExternalSocialEntity.fromMap(data, documentId),
       );
 
@@ -791,12 +791,12 @@ class FirestoreDatabase implements Database {
   @override
   Future<void> uploadLogoAvatar(String socialEntityId, Uint8List data) async {
     var firebaseStorageRef =
-    FirebaseStorage.instance.ref().child('socialEntities/$socialEntityId/logoPic');
+    FirebaseStorage.instance.ref().child('externalSocialEntities/$socialEntityId/logoPic');
     UploadTask uploadTask = firebaseStorageRef.putData(data);
     TaskSnapshot taskSnapshot = await uploadTask;
     taskSnapshot.ref.getDownloadURL().then(
           (value) => {
-        _service.updateData(path: APIPath.logoSocialEntity(socialEntityId), data: {
+        _service.updateData(path: APIPath.externalSocialEntity(socialEntityId), data: {
           "logoPic": {
             'src': '$value',
             'title': 'photo.jpg',

@@ -50,7 +50,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
   int currentStep = 0;
-  String? _externalSocialEntityId;
+  late String _externalSocialEntityId;
   String? _socialEntityName;
   String? _socialEntityActionScope;
   String? _category;
@@ -98,7 +98,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   void initState() {
     super.initState();
     externalSocialEntity = globals.currentExternalSocialEntity!;
-    _externalSocialEntityId = globals.currentExternalSocialEntity?.externalSocialEntityId;
+    _externalSocialEntityId = globals.currentExternalSocialEntity?.externalSocialEntityId ?? '';
     _socialEntityName = globals.currentExternalSocialEntity?.name;
     _socialEntityActionScope = globals.currentExternalSocialEntity?.actionScope;
     _category = globals.currentExternalSocialEntity?.category ?? '';
@@ -181,13 +181,14 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              StreamBuilder<SocialEntity>(
-                  stream: database.socialEntityStream(_externalSocialEntityId),
+              StreamBuilder<ExternalSocialEntity>(
+                  stream: database.externalSocialEntityByIdStream(_externalSocialEntityId),
                   builder: (context, snapshot) {
-                    if(snapshot.hasData && snapshot.data!.photo != null){
-                      final photoUrl = snapshot.data!.photo ?? '';
-                      return _buildLogo(context, photoUrl);
-                    } else return Container();
+                    if(!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final photoUrl = snapshot.data!.photo;
+                    return _buildLogo(context, photoUrl!);
                   }
               ),
               _buildForm(context),
@@ -496,7 +497,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
             ),
             CustomFlexRowColumn(
               childLeft: customTextFormField(context, _signedAgreements!,
-                  StringConst.FORM_ENTITY_SIGNED_AGREEMENTS, StringConst.FORM_COMPANY_ERROR, contactProjectSetState),
+                  StringConst.FORM_ENTITY_SIGNED_AGREEMENTS, StringConst.FORM_COMPANY_ERROR, signedAgreementsSetState),
               childRight: customTextFormField(context, _contactProject!,
                   StringConst.FORM_CONTACT_PROJECT, StringConst.FORM_COMPANY_ERROR, contactProjectSetState),
             ),
@@ -570,6 +571,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   void _onChangeContactMobileCode(CountryCode countryCode) {
     _contactMobilePhoneCode = countryCode.toString();
   }
+
   void _onSavedContactMobilePhone(String? value) {
     setState(() {
       this._contactMobilePhone = _contactMobilePhoneCode + ' ' + value!;
@@ -610,6 +612,10 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
 
   void contactProjectSetState(String? val) {
     setState(() => _contactProject = val!);
+  }
+
+  void signedAgreementsSetState(String? val) {
+    setState(() => _signedAgreements = val!);
   }
 
   void buildCountryStreamBuilderSetState(Country? country) {
@@ -701,7 +707,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
         setState(() async {
           final database = Provider.of<Database>(context, listen: false);
           await database.uploadLogoAvatar(
-              _externalSocialEntityId!, await pickedFile.readAsBytes());
+              _externalSocialEntityId, await pickedFile.readAsBytes());
         });
       }
     } catch (e) {

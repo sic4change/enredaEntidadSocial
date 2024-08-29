@@ -7,7 +7,7 @@ import '../../values/values.dart';
 
 
 class FilterTextFieldRow extends StatefulWidget {
-  const FilterTextFieldRow(
+  FilterTextFieldRow(
       {Key? key,
         required this.searchTextController,
         required this.onFieldSubmitted,
@@ -21,35 +21,51 @@ class FilterTextFieldRow extends StatefulWidget {
   final void Function(String) onFieldSubmitted;
   final void Function() onPressed;
   final void Function() clearFilter;
-  final String hintText;
+  late String hintText;
 
   @override
   State<FilterTextFieldRow> createState() => _FilterTextFieldRowState();
 }
+
 
 class _FilterTextFieldRowState extends State<FilterTextFieldRow> {
   bool _isClearTextVisible = false;
 
   FocusNode _focusNode = FocusNode();
 
+  void setStateIfMounted(f) {
+    if (mounted) setState(f);
+  }
+
   @override
   void initState() {
     widget.searchTextController.addListener(() {
       if (widget.searchTextController.text.isNotEmpty && !_isClearTextVisible) {
-        setState(() {
+        setStateIfMounted(() {
           _isClearTextVisible = true;
         });
       } else if (widget.searchTextController.text.isEmpty &&
           _isClearTextVisible) {
-        setState(() {
+        setStateIfMounted(() {
           _isClearTextVisible = false;
+        });
+      }
+    });
+
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus && widget.hintText.isNotEmpty) {
+        setStateIfMounted(() {
+          widget.hintText = '';
+        });
+      } else if (!_focusNode.hasFocus && widget.hintText.isEmpty) {
+        setStateIfMounted(() {
+          widget.hintText = widget.hintText;
         });
       }
     });
 
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -68,7 +84,6 @@ class _FilterTextFieldRowState extends State<FilterTextFieldRow> {
                   child: TextFormField(
                     onFieldSubmitted: widget.onFieldSubmitted,
                     textInputAction: TextInputAction.done,
-                    textAlignVertical: TextAlignVertical.center,
                     focusNode: _focusNode,
                     decoration: InputDecoration(
                       hintText: widget.hintText,

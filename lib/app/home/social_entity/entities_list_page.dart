@@ -15,7 +15,8 @@ import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import '../../models/externalSocialEntity.dart';
 
 class EntitiesListPage extends StatefulWidget {
-  const EntitiesListPage({Key? key}) : super(key: key);
+  const EntitiesListPage({Key? key, required this.socialEntityId}) : super(key: key);
+  final String? socialEntityId;
 
   @override
   State<EntitiesListPage> createState() => _EntitiesListPageState();
@@ -24,10 +25,8 @@ class EntitiesListPage extends StatefulWidget {
 class _EntitiesListPageState extends State<EntitiesListPage> {
 
   List<SocialEntitiesType> socialEntityTypes = [];
-  final _queryController = TextEditingController();
   final _searchTextController = TextEditingController();
   FilterResource filterResource = FilterResource("", []);
-  String get searchQuery => _queryController.text;
   List<SocialEntity> finalSocialEntities = [];
   bool create = false;  //Choose between show list of social entities or create form
 
@@ -63,7 +62,7 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
           Padding(
             padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
             child: FilterTextFieldRow(
-              searchTextController: _queryController,
+              searchTextController: _searchTextController,
               onPressed: () async {
                 filterResource.searchText = _searchTextController.text;
               },
@@ -125,7 +124,7 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
   Widget _buildEntitiesStream(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<List<ExternalSocialEntity>>(
-        stream: database.filteredExternalSocialEntitiesStream(filterResource),
+        stream: database.filteredExternalSocialEntitiesStream(filterResource, widget.socialEntityId!),
         builder: (context, snapshot) {
           if(snapshot.hasData) {
             final List<ExternalSocialEntity> socialEntities = snapshot.data!.toList();

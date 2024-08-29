@@ -8,7 +8,7 @@ class SearchRoundedContainer extends StatelessWidget {
       this.height,
       this.margin,
       this.padding =
-          const EdgeInsets.only(left: 20.0, top: 0.0, right: 8.0, bottom: 0.0)})
+          const EdgeInsets.only(left: 20.0, top: 0.0, right: 8.0, bottom: 10.0)})
       : super(key: key);
   final Widget child;
   final EdgeInsets padding;

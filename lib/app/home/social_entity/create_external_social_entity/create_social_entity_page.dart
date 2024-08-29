@@ -31,6 +31,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../../services/auth.dart';
+import '../entity_directory_page.dart';
 
 class CreateExternalSocialEntityPage extends StatefulWidget {
   const CreateExternalSocialEntityPage({Key? key, required this.socialEntityId}) : super(key: key);
@@ -51,7 +52,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
   String? _geographicZone, _subGeographicZone;
   String? _url;
   String? _email, _linkedin, _twitter, _otherSocialMedia;
-  String? _contactName, _contactEmail, _contactPosition, _contactChoiceGrade, _contactKOL, _contactProject;
+  String? _contactName, _contactEmail, _contactPosition, _contactChoiceGrade, _contactKOL, _contactProject, _signedAgreements;
   Country? selectedCountry;
   Province? selectedProvince;
   City? selectedCity;
@@ -126,6 +127,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
     _contactChoiceGrade = '';
     _contactKOL = '';
     _contactProject = '';
+    _signedAgreements = '';
     _countryId = null;
     _provinceId = null;
     _cityId = null;
@@ -253,6 +255,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
           contactChoiceGrade: _contactChoiceGrade,
           contactKOL: _contactKOL,
           contactProject: _contactProject,
+          signedAgreements: _signedAgreements,
           trust: true, //TODO asignarlo de otra forma
           address: address,
           createdAt: DateTime.now(),
@@ -266,7 +269,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
           content: StringConst.CREATE_PARTICIPANT_SUCCESS,
           defaultActionText: StringConst.FORM_ACCEPT,
         );
-        WebHome.goToEntities();
+        EntityDirectoryPage.selectedIndex.value = 0;
       } on FirebaseException catch (e) {
         showExceptionAlertDialog(context,
             title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));
@@ -558,7 +561,10 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
                 labelText: 'Acuerdos firmados',
-                enabled: false,
+                onChanged: (value){
+                  _signedAgreements = value;
+                },
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: 'Proyecto o programa',
