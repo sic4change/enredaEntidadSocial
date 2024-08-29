@@ -79,7 +79,7 @@ class _CompanyPageState extends State<CompanyPage> {
                     children: [
                       Text(
                         _currentPageTitle,
-                        style: textTheme.bodyText1?.copyWith(
+                        style: textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppColors.penBlue,
                             fontSize: 16.0),

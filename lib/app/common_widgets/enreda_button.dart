@@ -64,7 +64,7 @@ class EnredaButton extends StatelessWidget {
       return Text(
         buttonTitle,
         style: titleStyle ??
-            textTheme.button?.copyWith(
+            textTheme.bodySmall?.copyWith(
               color: titleColor,
               fontSize: textSize,
               letterSpacing: 1.1,

@@ -458,7 +458,7 @@ class _EditResourceState extends State<EditResource> {
                     labelText: StringConst.FORM_COMPETENCIES_CATEGORIES,
                     hintText: StringConst.FORM_COMPETENCIES_CATEGORIES,
                     hintMaxLines: 2,
-                    labelStyle: textTheme.bodyText1?.copyWith(
+                    labelStyle: textTheme.bodySmall?.copyWith(
                       color: AppColors.greyDark,
                       height: 1.5,
                       fontWeight: FontWeight.w400,
@@ -481,7 +481,7 @@ class _EditResourceState extends State<EditResource> {
                   onTap: () => {_showMultiSelectCompetenciesCategories(context) },
                   maxLines: 2,
                   readOnly: true,
-                  style: textTheme.button?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
                     color: AppColors.greyDark,
                     fontWeight: FontWeight.w400,
@@ -495,7 +495,7 @@ class _EditResourceState extends State<EditResource> {
                     fillColor: Colors.white,
                     labelText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
                     hintText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
-                    labelStyle: textTheme.bodyText1?.copyWith(
+                    labelStyle: textTheme.bodySmall?.copyWith(
                       color: AppColors.greyDark,
                       height: 1.5,
                       fontWeight: FontWeight.w400,
@@ -518,7 +518,7 @@ class _EditResourceState extends State<EditResource> {
                   onTap: () => {_showMultiSelectCompetenciesSubCategories(context) },
                   maxLines: 2,
                   readOnly: true,
-                  style: textTheme.button?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
                     color: AppColors.greyDark,
                     fontWeight: FontWeight.w400,
@@ -531,7 +531,7 @@ class _EditResourceState extends State<EditResource> {
                 controller: textEditingControllerCompetencies,
                 decoration: InputDecoration(
                   labelText: StringConst.FORM_COMPETENCIES,
-                  labelStyle: textTheme.bodyText1?.copyWith(
+                  labelStyle: textTheme.bodySmall?.copyWith(
                     color: AppColors.greyDark,
                     height: 1.5,
                     fontWeight: FontWeight.w400,
@@ -554,7 +554,7 @@ class _EditResourceState extends State<EditResource> {
                 onTap: () => {_showMultiSelectCompetencies(context) },
                 maxLines: 2,
                 readOnly: true,
-                style: textTheme.button?.copyWith(
+                style: textTheme.bodySmall?.copyWith(
                   height: 1.5,
                   color: AppColors.greyDark,
                   fontWeight: FontWeight.w400,

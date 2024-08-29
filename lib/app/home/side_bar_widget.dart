@@ -162,11 +162,11 @@ class _SideBarWidgetState extends State<SideBarWidget> {
         );
       },
       items: [
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PANEL), width: 20,), label: 'Panel de control', onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PARTICIPANTS), width: 20,), label: 'Participantes', onTap: _setSelectedIndexParticipants),
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_RESOURCES), width: 20,), label: 'Mis recursos' , onTap: _setSelectedIndexResources),
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_TOOLS), width: 20,), label: 'Caja de herramientas' , onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_ENTITY), width: 20,), label: 'Directorio Entidades', onTap: _setSelectedIndexEntities)
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PANEL), width: 20,), label: StringConst.DRAWER_CONTROL_PANEL, onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PARTICIPANTS), width: 20,), label: StringConst.DRAWER_PARTICIPANTS, onTap: _setSelectedIndexParticipants),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_RESOURCES), width: 20,), label: StringConst.DRAWER_MY_RESOURCES , onTap: _setSelectedIndexResources),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_TOOLS), width: 20,), label: StringConst.DRAWER_TOOLS , onTap: _setSelectedIndexToOne),
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_ENTITY), width: 20,), label: StringConst.DRAWER_ENTITIES, onTap: _setSelectedIndexEntities)
       ],
     );
   }

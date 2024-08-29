@@ -20,18 +20,20 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
+import '../../../models/externalSocialEntity.dart';
+import '../../../services/auth.dart';
 import '../../../utils/functions.dart';
 import 'social_entity_category_stream.dart';
 
-class EntityDetailPage extends StatefulWidget {
-  const EntityDetailPage({Key? key, required this.socialEntityId}) : super(key: key);
+class ExternalEntityDetailPage extends StatefulWidget {
+  const ExternalEntityDetailPage({Key? key, required this.socialEntityId}) : super(key: key);
   final String? socialEntityId;
 
   @override
-  State<EntityDetailPage> createState() => _EntityDetailPageState();
+  State<ExternalEntityDetailPage> createState() => _ExternalEntityDetailPageState();
 }
 
-class _EntityDetailPageState extends State<EntityDetailPage> {
+class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
 
   @override
   void initState() {
@@ -45,36 +47,37 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildResourcePage(context, globals.currentSocialEntity! );
+    return _buildResourcePage(context);
   }
 
-  Widget _buildResourcePage(BuildContext context, SocialEntity entity) {
+  Widget _buildResourcePage(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
-    return StreamBuilder<SocialEntity>(
-      stream: database.socialEntityStream(globals.currentSocialEntity!.socialEntityId),
+    return globals.currentExternalSocialEntity!.externalSocialEntityId == null ? const Center(child: CircularProgressIndicator()) :
+    StreamBuilder<ExternalSocialEntity>(
+      stream: database.externalSocialEntityByIdStream(globals.currentExternalSocialEntity!.externalSocialEntityId!),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(
               child: CircularProgressIndicator());
         }
-        final socialEntity = snapshot.data!;
+        final externalSocialEntity = snapshot.data!;
         return StreamBuilder<Country>(
-            stream: database.countryStream(socialEntity.country),
+            stream: database.countryStream(externalSocialEntity.address?.country),
             builder: (context, snapshot) {
               final country = snapshot.data;
-              socialEntity.countryName = country == null ? '' : country.name;
+              externalSocialEntity.countryName = country == null ? '' : country.name;
               return StreamBuilder<Province>(
-                stream: database.provinceStream(socialEntity.province),
+                stream: database.provinceStream(externalSocialEntity.address?.province),
                 builder: (context, snapshot) {
                   final province = snapshot.data;
-                  socialEntity.provinceName = province == null ? '' : province.name;
+                  externalSocialEntity.provinceName = province == null ? '' : province.name;
                   return StreamBuilder<City>(
                       stream: database
-                          .cityStream(socialEntity.city),
+                          .cityStream(externalSocialEntity.address?.city),
                       builder: (context, snapshot) {
                         final city = snapshot.data;
-                        socialEntity.cityName = city == null ? '' : city.name;
-                        return _buildResourceDetail(context, socialEntity);
+                        externalSocialEntity.cityName = city == null ? '' : city.name;
+                        return _buildResourceDetail(context, externalSocialEntity);
                       });
                 },
               );
@@ -83,8 +86,9 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
     );
   }
 
-  Widget _buildResourceDetail(BuildContext context, SocialEntity socialEntity) {
+  Widget _buildResourceDetail(BuildContext context, ExternalSocialEntity externalSocialEntity) {
     TextTheme textTheme = Theme.of(context).textTheme;
+    final auth = Provider.of<AuthBase>(context, listen: false);
     double fontSizeTitle = responsiveSize(context, 14, 22, md: 18);
     double fontSizePromotor = responsiveSize(context, 12, 16, md: 14);
     return SingleChildScrollView(
@@ -121,8 +125,8 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                         Responsive.isMobile(context)
                             ? const SpaceH8()
                             : const SpaceH20(),
-                        socialEntity.photo == null ||
-                            socialEntity.photo!.isEmpty
+                        externalSocialEntity.photo == null ||
+                            externalSocialEntity.photo!.isEmpty
                             ? Container()
                             : Align(
                                 alignment: Alignment.topCenter,
@@ -139,14 +143,14 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                                     Responsive.isMobile(context) ? 28 : 40,
                                     backgroundColor: AppColors.white,
                                     backgroundImage:
-                                    NetworkImage(socialEntity.photo!),
+                                    NetworkImage(externalSocialEntity.photo!),
                                   ),
                                 ),
                               ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10, right: 30.0, left: 30.0),
                           child: Text(
-                            socialEntity.name,
+                            externalSocialEntity.name,
                             textAlign: TextAlign.center,
                             maxLines:
                             Responsive.isMobile(context) ? 2 : 1,
@@ -165,7 +169,7 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              socialEntity.actionScope!,
+                              externalSocialEntity.actionScope!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -177,7 +181,7 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                             ),
                           ],
                         ),
-                        socialEntity.socialEntityId == widget.socialEntityId ? Row(
+                        auth.currentUser?.uid == externalSocialEntity.createdBy ? Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Padding(
@@ -201,7 +205,7 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
                               child: EnredaButtonIcon(
-                                onPressed: () => _confirmDeleteSocialEntity(context, socialEntity),
+                                onPressed: () => _confirmDeleteSocialEntity(context, externalSocialEntity),
                                 buttonColor: Colors.white,
                                 padding: const EdgeInsets.all(0),
                                 width: 80,
@@ -220,20 +224,20 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
                       ]
                   ),
                 ),
-                _buildSocialEntityContactBoxes(socialEntity),
+                _buildSocialEntityContactBoxes(externalSocialEntity),
                 SizedBox(height: 15,),
-                _buildDetailSocialEntity(context, socialEntity),
-                socialEntity.website == null || socialEntity.website == '' ? Container() :
+                _buildDetailSocialEntity(context, externalSocialEntity),
+                externalSocialEntity.website == null || externalSocialEntity.website == '' ? Container() :
                 Padding(
                   padding: const EdgeInsets.only(bottom: 18),
                   child: Container(
                     width: 290,
                     child: OutlinedButton(
                         onPressed: (){
-                          launchURL(socialEntity.website!);
+                          launchURL(externalSocialEntity.website!);
                         },
                         child: Text(
-                          socialEntity.website!,
+                          externalSocialEntity.website!,
                           style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
@@ -255,7 +259,7 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
     );
   }
 
-  Widget _buildDetailSocialEntity(BuildContext context, SocialEntity socialEntity) {
+  Widget _buildDetailSocialEntity(BuildContext context, ExternalSocialEntity socialEntity) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -268,114 +272,114 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
     );
   }
 
-  Widget _buildInformationSocialEntity(BuildContext context, SocialEntity socialEntity) {
+  Widget _buildInformationSocialEntity(BuildContext context, ExternalSocialEntity externalSocialEntity) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        socialEntity.actionScope == null || socialEntity.actionScope == '' ? Container() :
+        externalSocialEntity.actionScope == null || externalSocialEntity.actionScope == '' ? Container() :
         CustomTextBold(title: StringConst.ACTION_SCOPE.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.actionScope == null || socialEntity.actionScope == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.actionScope!,),
+        externalSocialEntity.actionScope == null || externalSocialEntity.actionScope == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.actionScope!,),
 
-        socialEntity.types == null || socialEntity.types!.isEmpty ? Container() :
+        externalSocialEntity.types == null || externalSocialEntity.types!.isEmpty ? Container() :
         CustomTextBold(title: StringConst.TYPES.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.types == null || socialEntity.types!.isEmpty ? Container() :
+        externalSocialEntity.types == null || externalSocialEntity.types!.isEmpty ? Container() :
         Padding(
           padding: const EdgeInsets.only(bottom: 10.0),
-          child: TypesBySocialEntity(typesIdList: socialEntity.types!,),
+          child: TypesBySocialEntity(typesIdList: externalSocialEntity.types!,),
         ),
 
-        socialEntity.category == null || socialEntity.category == '' ? Container() :
+        externalSocialEntity.category == null || externalSocialEntity.category == '' ? Container() :
         CustomTextBold(title: StringConst.CATEGORY.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.category == null || socialEntity.category == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.category!,),
+        externalSocialEntity.category == null || externalSocialEntity.category == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.category!,),
 
-        socialEntity.subCategory == null || socialEntity.subCategory == '' ?  Container() :
+        externalSocialEntity.subCategory == null || externalSocialEntity.subCategory == '' ?  Container() :
         CustomTextBold(title: StringConst.SUB_CATEGORY.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.subCategory == null || socialEntity.subCategory == '' ?  Container() :
-        CustomTextSmallColor(text: socialEntity.subCategory!,),
+        externalSocialEntity.subCategory == null || externalSocialEntity.subCategory == '' ?  Container() :
+        CustomTextSmallColor(text: externalSocialEntity.subCategory!,),
 
-        socialEntity.geographicZone == null || socialEntity.geographicZone == '' ? Container() :
+        externalSocialEntity.geographicZone == null || externalSocialEntity.geographicZone == '' ? Container() :
         CustomTextBold(title: StringConst.ZONE.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.geographicZone == null || socialEntity.geographicZone == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.geographicZone!,),
+        externalSocialEntity.geographicZone == null || externalSocialEntity.geographicZone == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.geographicZone!,),
 
-        socialEntity.subGeographicZone == null || socialEntity.subGeographicZone == '' ? Container() :
+        externalSocialEntity.subGeographicZone == null || externalSocialEntity.subGeographicZone == '' ? Container() :
         CustomTextBold(title: StringConst.SUB_ZONE.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.subGeographicZone == null || socialEntity.subGeographicZone == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.subGeographicZone!,),
+        externalSocialEntity.subGeographicZone == null || externalSocialEntity.subGeographicZone == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.subGeographicZone!,),
 
-        socialEntity.twitter == null || socialEntity.twitter == '' &&
-        socialEntity.linkedin == null || socialEntity.linkedin == '' &&
-        socialEntity.otherSocialMedia == null || socialEntity.otherSocialMedia == '' ? Container() :
+        externalSocialEntity.twitter == null || externalSocialEntity.twitter == '' &&
+        externalSocialEntity.linkedin == null || externalSocialEntity.linkedin == '' &&
+        externalSocialEntity.otherSocialMedia == null || externalSocialEntity.otherSocialMedia == '' ? Container() :
         CustomTextBold(title: StringConst.SOCIAL_NETWORK.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.twitter == null || socialEntity.twitter == '' &&
-            socialEntity.linkedin == null || socialEntity.linkedin == '' &&
-            socialEntity.otherSocialMedia == null || socialEntity.otherSocialMedia == '' ? Container() :
-        _buildSocialNetworkBoxes(socialEntity),
+        externalSocialEntity.twitter == null || externalSocialEntity.twitter == '' &&
+            externalSocialEntity.linkedin == null || externalSocialEntity.linkedin == '' &&
+            externalSocialEntity.otherSocialMedia == null || externalSocialEntity.otherSocialMedia == '' ? Container() :
+        _buildSocialNetworkBoxes(externalSocialEntity),
         SizedBox(height: 20,),
 
 
-        socialEntity.contactName == null || socialEntity.contactName == '' &&
-        socialEntity.contactPhone == null || socialEntity.contactPhone == '' &&
-        socialEntity.contactEmail == null || socialEntity.contactEmail == '' &&
-        socialEntity.contactPosition == null || socialEntity.contactPosition == '' &&
-        socialEntity.contactChoiceGrade == null || socialEntity.contactChoiceGrade == '' &&
-        socialEntity.contactKOL == null || socialEntity.contactKOL == '' &&
-        socialEntity.contactProject == null || socialEntity.contactProject == '' ? Container() :
+        externalSocialEntity.contactName == null || externalSocialEntity.contactName == '' &&
+        externalSocialEntity.contactPhone == null || externalSocialEntity.contactPhone == '' &&
+        externalSocialEntity.contactEmail == null || externalSocialEntity.contactEmail == '' &&
+        externalSocialEntity.contactPosition == null || externalSocialEntity.contactPosition == '' &&
+        externalSocialEntity.contactChoiceGrade == null || externalSocialEntity.contactChoiceGrade == '' &&
+        externalSocialEntity.contactKOL == null || externalSocialEntity.contactKOL == '' &&
+        externalSocialEntity.contactProject == null || externalSocialEntity.contactProject == '' ? Container() :
         CustomTextMediumBold(text: StringConst.CONTACT_INFORMATION.toUpperCase(),),
 
-        socialEntity.contactName == null || socialEntity.contactName == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.contactName!, padding: const EdgeInsets.only(bottom: 10.0),),
+        externalSocialEntity.contactName == null || externalSocialEntity.contactName == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.contactName!, padding: const EdgeInsets.only(bottom: 10.0),),
 
-        socialEntity.contactPhone == null || socialEntity.contactPhone == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.contactPhone!, padding: const EdgeInsets.only(bottom: 10.0), height: 0,),
+        externalSocialEntity.contactPhone == null || externalSocialEntity.contactPhone == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.contactPhone!, padding: const EdgeInsets.only(bottom: 10.0), height: 0,),
 
-        socialEntity.contactEmail == null || socialEntity.contactEmail == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.contactEmail!),
+        externalSocialEntity.contactEmail == null || externalSocialEntity.contactEmail == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.contactEmail!),
 
-        socialEntity.contactPosition == null || socialEntity.contactPosition == '' ? Container() :
+        externalSocialEntity.contactPosition == null || externalSocialEntity.contactPosition == '' ? Container() :
         CustomTextBold(title: StringConst.CONTACT_POSITION.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.contactPosition == null || socialEntity.contactPosition == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.contactPosition!),
+        externalSocialEntity.contactPosition == null || externalSocialEntity.contactPosition == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.contactPosition!),
 
-        socialEntity.contactChoiceGrade == null || socialEntity.contactChoiceGrade == '' ? Container() :
+        externalSocialEntity.contactChoiceGrade == null || externalSocialEntity.contactChoiceGrade == '' ? Container() :
         CustomTextBold(title: StringConst.CONTACT_CHOICE_GRADE.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.contactChoiceGrade == null || socialEntity.contactChoiceGrade == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.contactChoiceGrade!),
+        externalSocialEntity.contactChoiceGrade == null || externalSocialEntity.contactChoiceGrade == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.contactChoiceGrade!),
 
-        socialEntity.contactKOL == null || socialEntity.contactKOL == '' ? Container() :
+        externalSocialEntity.contactKOL == null || externalSocialEntity.contactKOL == '' ? Container() :
         CustomTextBold(title: StringConst.CONTACT_OPINION_LEADER.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.contactKOL == null || socialEntity.contactKOL == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.contactKOL!),
+        externalSocialEntity.contactKOL == null || externalSocialEntity.contactKOL == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.contactKOL!),
 
-        socialEntity.contactProject == null || socialEntity.contactProject == '' ? Container() :
-        CustomTextBold(title: StringConst.CONTACT_PROJECT.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.contactProject == null || socialEntity.contactProject == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.contactProject!),
-
-        socialEntity.signedAgreements == null || socialEntity.signedAgreements == '' ? Container() :
+        externalSocialEntity.signedAgreements == null || externalSocialEntity.signedAgreements == '' ? Container() :
         CustomTextBold(title: StringConst.FORM_ENTITY_SIGNED_AGREEMENTS.toUpperCase(), color: AppColors.turquoiseBlue,),
-        socialEntity.signedAgreements == null || socialEntity.signedAgreements == '' ? Container() :
-        CustomTextSmallColor(text: socialEntity.signedAgreements!),
+        externalSocialEntity.signedAgreements == null || externalSocialEntity.signedAgreements == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.signedAgreements!),
+
+        externalSocialEntity.contactProject == null || externalSocialEntity.contactProject == '' ? Container() :
+        CustomTextBold(title: StringConst.CONTACT_PROJECT.toUpperCase(), color: AppColors.turquoiseBlue,),
+        externalSocialEntity.contactProject == null || externalSocialEntity.contactProject == '' ? Container() :
+        CustomTextSmallColor(text: externalSocialEntity.contactProject!),
       ],
     );
   }
 
-  Widget _buildSocialNetworkBoxes(SocialEntity socialEntity) {
+  Widget _buildSocialNetworkBoxes(ExternalSocialEntity externalSocialEntity) {
     List<BoxSocialNetworkData> boxItemDataNetwork = [
       BoxSocialNetworkData(
           icon: FontAwesomeIcons.twitter,
-          title: socialEntity.twitter!,
+          title: externalSocialEntity.twitter!,
       ),
       BoxSocialNetworkData(
         icon: FontAwesomeIcons.linkedin,
-        title: socialEntity.linkedin!,
+        title: externalSocialEntity.linkedin!,
       ),
       BoxSocialNetworkData(
         icon: FontAwesomeIcons.facebook,
-        title: socialEntity.otherSocialMedia!,
+        title: externalSocialEntity.otherSocialMedia!,
       ),
     ];
     const int crossAxisCount = 2; // The number of columns in the grid
@@ -407,20 +411,20 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
     );
   }
 
-  Widget _buildSocialEntityContactBoxes(SocialEntity socialEntity) {
+  Widget _buildSocialEntityContactBoxes(ExternalSocialEntity externalSocialEntity) {
     List<BoxSocialEntityContactData> boxItemDataSocialEntity = [
       BoxSocialEntityContactData(
         icon: Icons.email,
-        title: socialEntity.email!,
-        onPressed: () { launchURL('mailto:${socialEntity.email}?subject=Contacto ${socialEntity.name}');},
+        title: externalSocialEntity.email!,
+        onPressed: () { launchURL('mailto:${externalSocialEntity.email}?subject=Contacto ${externalSocialEntity.name}');},
       ),
       BoxSocialEntityContactData(
         icon: FontAwesomeIcons.phone,
-        title: socialEntity.entityPhone!,
+        title: externalSocialEntity.entityPhone!,
       ),
       BoxSocialEntityContactData(
         icon: FontAwesomeIcons.locationPin,
-        title: '${socialEntity.countryName!}, ${socialEntity.provinceName}, ${socialEntity.cityName!}',
+        title: '${externalSocialEntity.countryName!}, ${externalSocialEntity.provinceName}, ${externalSocialEntity.cityName!}',
       ),
     ];
     const int crossAxisCount = 2; // The number of columns in the grid
@@ -454,25 +458,23 @@ class _EntityDetailPageState extends State<EntityDetailPage> {
     );
   }
 
-  Future<void> _deleteSocialEntity(BuildContext context, SocialEntity socialEntity) async {
+  Future<void> _deleteSocialEntity(BuildContext context, ExternalSocialEntity externalSocialEntity) async {
     try {
       final database = Provider.of<Database>(context, listen: false);
-      await database.deleteSocialEntity(socialEntity);
+      await database.deleteExternalSocialEntity(externalSocialEntity);
     } catch (e) {
       print(e.toString());
     }
   }
 
-  Future<void> _confirmDeleteSocialEntity(BuildContext context, SocialEntity socialEntity) async {
+  Future<void> _confirmDeleteSocialEntity(BuildContext context, ExternalSocialEntity externalSocialEntity) async {
     final didRequestSignOut = await showAlertDialog(context,
-        title: 'Eliminar entidad social: ${socialEntity.name} ',
-        content: 'Si pulsa en Aceptar se procederá a la eliminación completa '
-            'de la entidad social, esta acción no se podrá deshacer, '
-            '¿Está seguro que quiere continuar?',
+        title: 'Eliminar contacto: ${externalSocialEntity.name} ',
+        content: StringConst.DELETE_DOCUMENT,
         cancelActionText: 'Cancelar',
         defaultActionText: 'Aceptar');
     if (didRequestSignOut == true) {
-      _deleteSocialEntity(context, socialEntity);
+      _deleteSocialEntity(context, externalSocialEntity);
       setState(() {
         EntityDirectoryPage.selectedIndex.value = 0;
       });

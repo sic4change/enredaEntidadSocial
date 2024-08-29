@@ -569,11 +569,15 @@ class StringConst {
   static const String PERSONAL_DOCUMENTATION = "Documentación personal";
   static const String DOCUMENTATION = "Documentación";
   static const String COMPLETED = "Completada";
-  static const String SET_DOCUMENT_NAME = "Añadir un nuevo documento a:  ";
+  static const String SET_DOCUMENT_NAME = "Añadir documento:  ";
+  static const String EDIT_DOCUMENT_TITLE = "Editar documento:  ";
   static const String DOCUMENT_NAME = "Nombre del documento";
   static const String CREATION_DOCUMENT = "Fecha de creación";
   static const String RENOVATION_DOCUMENT = "Fecha de renovación";
   static const String ADD_DOCUMENTS = "Añadir documentos";
+  static const String CREATION_DATE = "Creado";
+  static const String RENEW_DATE = "Renovar";
+  static const String DOC_NAME = "Nombre del documento";
   static const String IPIL = "IPIL";
   static const String SOCIAL_REPORTS = "Informes sociales";
   static const String INITIAL_REPORT = "Informe inicial";
@@ -618,6 +622,13 @@ class StringConst {
   static const String SOMETHING_WRONG = 'Algo fue mal';
   static const String CANNOT_LOAD_DATA = 'No se pudo cargar los datos';
   static const String NAME_IN_USE = 'Nombre en uso';
+
+  //Side drawer
+  static const String DRAWER_CONTROL_PANEL = 'Panel de control';
+  static const String DRAWER_PARTICIPANTS = 'Participantes';
+  static const String DRAWER_MY_RESOURCES = 'Mis recursos';
+  static const String DRAWER_TOOLS = 'Caja de herramientas';
+  static const String DRAWER_ENTITIES = 'Agenda';
 
   //ToolBox
   static const String TOOL_BOX = 'Caja de herramientas ';

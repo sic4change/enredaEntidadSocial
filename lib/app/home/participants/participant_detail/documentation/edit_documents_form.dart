@@ -2,13 +2,11 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/default_cache.dart';
-import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
 
 import '../../../../common_widgets/alert_dialog.dart';
 import '../../../../common_widgets/custom_date_picker_title.dart';
@@ -17,11 +15,11 @@ import '../../../../common_widgets/custom_text_form_field_title.dart';
 import '../../../../common_widgets/show_exception_alert_dialog.dart';
 import '../../../../models/file_data.dart';
 import '../../../../models/documentationParticipant.dart';
-import '../../../../models/personalDocumentType.dart';
 import '../../../../models/userEnreda.dart';
 import '../../../../services/auth.dart';
 import '../../../../services/database.dart';
 import '../../../../utils/adaptative.dart';
+import '../../../../utils/responsive.dart';
 import '../../../../values/strings.dart';
 import '../../../../values/values.dart';
 import 'files_picker.dart';
@@ -106,14 +104,15 @@ class _EditDocumentsFormState extends State<EditDocumentsForm> {
     return AlertDialog(
       content: Container(
         width: 500,
-        height: 550,
+        height: Responsive.isMobile(context) ? MediaQuery.of(context).size.height : 560,
+        padding: const EdgeInsets.all(10.0),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               CustomTextBoldCenter(
-                title: StringConst.SET_DOCUMENT_NAME, color: AppColors.primary900,),
+                title: StringConst.EDIT_DOCUMENT_TITLE, color: AppColors.primary900,),
               CustomTextBoldCenter(
                 title: '${widget.documentationParticipant.name}', color: AppColors.primary900,),
               SizedBox(height: 20,),
@@ -170,7 +169,8 @@ class _EditDocumentsFormState extends State<EditDocumentsForm> {
                 },
               ),
               SizedBox(height: 20,),
-              Row(
+              Flex(
+                direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
@@ -188,6 +188,7 @@ class _EditDocumentsFormState extends State<EditDocumentsForm> {
                                 fontSize: fontSizeButton)),
                       )),
                   SizedBox(width: 20,),
+                  SizedBox(height: 20,),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,

@@ -59,7 +59,7 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: Responsive.isMobile(context) ? const EdgeInsets.only(left: 20.0, right: 31.0) :
+                            padding: Responsive.isMobile(context) ? const EdgeInsets.only(left: 0.0, right: 0.0) :
                             const EdgeInsets.symmetric(horizontal: 55.0, vertical: 0.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -106,8 +106,7 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
 
   Widget documentationParticipantBySubCategory(PersonalDocumentType documentSubCategory, UserEnreda participantUser) {
     final database = Provider.of<Database>(context, listen: false);
-    final auth = Provider.of<AuthBase>(context, listen: false);
-    final DateFormat formatter = DateFormat('dd/MM/yyyy');
+    final DateFormat formatter = Responsive.isMobile(context) ? DateFormat('dd/MM') : DateFormat('dd/MM/yyyy');
     return StreamBuilder<List<DocumentationParticipant>>(
       stream: database.documentationParticipantBySubCategoryStream(documentSubCategory, participantUser),
       builder: (context, documentationParticipantSnapshot) {
@@ -131,14 +130,14 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
                         child: CustomTextSmall(text: documentParticipant.name, height: 1,)),
                     Spacer(),
                     Container(
-                        width: 85,
+                        width: Responsive.isMobile(context) ? 50 : 85,
                         child: CustomTextSmall(text: formatter.format(documentParticipant.createDate), color: AppColors.primary900,)),
                     Spacer(),
-                    documentParticipant.renovationDate == null ? Container(width: 85,) :
+                    documentParticipant.renovationDate == null ? Container(width: Responsive.isMobile(context) ? 50 : 85) :
                       CustomTextSmall(text: formatter.format(documentParticipant.renovationDate!), color: AppColors.primary900,),
                     Spacer(),
-                    StreamBuilder<UserEnreda>(
-                        stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+                    Responsive.isMobile(context) ? Container() : StreamBuilder<UserEnreda>(
+                        stream: database.userEnredaStreamByUserId(documentParticipant.createdBy),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) return Container();
                           if (snapshot.hasData) {

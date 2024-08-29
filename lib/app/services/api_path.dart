@@ -9,6 +9,8 @@ class APIPath {
   static String socialEntity(String socialEntityId) => 'socialEntities/$socialEntityId';
   static String organization(String organizationId) => 'organizations/$organizationId';
   static String socialEntities() => 'socialEntities';
+  static String externalSocialEntities() => 'externalSocialEntities';
+  static String externalSocialEntity(String externalSocialEntityId) => 'externalSocialEntities/$externalSocialEntityId';
   static String country(String? countryId) => 'countries/$countryId';
   static String countries() => 'countries';
   static String region(String? regionId) => 'states/$regionId';

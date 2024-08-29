@@ -27,7 +27,7 @@ class NoResourcesIlustration extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: textTheme.bodyText1
+            style: textTheme.bodySmall
                 ?.copyWith(fontSize: 22.0, color: AppColors.red),
           ),
           const SpaceH40(),
@@ -49,7 +49,7 @@ class NoResourcesIlustration extends StatelessWidget {
                   EdgeInsets.symmetric(vertical: 16.0, horizontal: Responsive.isDesktop(context)? 64.0:18.0),
               child: Text(
                 'VER RECURSOS',
-                style: textTheme.bodyText1?.copyWith(
+                style: textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.white,
                 ),

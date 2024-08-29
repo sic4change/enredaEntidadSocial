@@ -25,7 +25,7 @@ class ReferenceTile extends StatelessWidget {
             RichText(
               text: TextSpan(
                   text: '${certificationRequest.certifierPosition.toUpperCase()} -',
-                  style: textTheme.bodyText1?.copyWith(
+                  style: textTheme.bodySmall?.copyWith(
                     color: AppColors.greyAlt,
                     fontSize: fontSize,
                     fontWeight: FontWeight.bold,
@@ -33,7 +33,7 @@ class ReferenceTile extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: ' ${certificationRequest.certifierCompany}',
-                      style: textTheme.bodyText1?.copyWith(
+                      style: textTheme.bodySmall?.copyWith(
                         color: AppColors.greyAlt,
                         fontSize: fontSize,
                         fontWeight: FontWeight.bold,

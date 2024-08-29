@@ -82,44 +82,5 @@ Widget streamBuilderDropdownEducation (BuildContext context, Education? selected
               ),
             ]
         );
-
-          DropdownButtonFormField<Education>(
-          hint: Text(StringConst.FORM_EDUCATION, maxLines: 2, overflow: TextOverflow.ellipsis),
-          isExpanded: true,
-          isDense: false,
-          value: selectedEducation,
-          items: educationItems,
-          validator: (value) => selectedEducation != null ? null : StringConst.FORM_MOTIVATION_ERROR,
-          onChanged: (value) => functionToWriteBackThings(value),
-          iconDisabledColor: AppColors.greyDark,
-          iconEnabledColor: AppColors.primaryColor,
-          decoration: InputDecoration(
-            labelStyle: textTheme.button?.copyWith(
-              height: 1.5,
-              color: AppColors.greyDark,
-              fontWeight: FontWeight.w400,
-              fontSize: fontSize,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
-                color: AppColors.greyUltraLight,
-                width: 1.0,
-              ),
-            ),
-          ),
-          style: textTheme.button?.copyWith(
-            height: 1.5,
-            color: AppColors.greyDark,
-            fontWeight: FontWeight.w400,
-            fontSize: fontSize,
-          ),
-        );
       });
 }

@@ -38,7 +38,7 @@ Widget streamBuilderDropdownResourceCategoryCreate (BuildContext context, Resour
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            labelStyle: textTheme.button?.copyWith(
+            labelStyle: textTheme.bodySmall?.copyWith(
               height: 1.5,
               color: AppColors.greyDark,
               fontWeight: FontWeight.w400,
@@ -58,7 +58,7 @@ Widget streamBuilderDropdownResourceCategoryCreate (BuildContext context, Resour
               ),
             ),
           ),
-          style: textTheme.button?.copyWith(
+          style: textTheme.bodySmall?.copyWith(
             height: 1.5,
             color: AppColors.greyDark,
             fontWeight: FontWeight.w400,

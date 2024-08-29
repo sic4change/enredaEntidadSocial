@@ -179,7 +179,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
                   padding: const EdgeInsets.only(top: Sizes.kDefaultPaddingDouble, bottom: Sizes.kDefaultPaddingDouble),
                   child: Text(
                     StringConst.FORM_ORGANIZATION_INFO,
-                    style: textTheme.bodyText1?.copyWith(
+                    style: textTheme.bodySmall?.copyWith(
                       height: 1.5,
                       color: AppColors.greyDark,
                       fontWeight: FontWeight.w700,
@@ -201,7 +201,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
                   padding: const EdgeInsets.only(top: Sizes.kDefaultPaddingDouble, bottom: Sizes.kDefaultPaddingDouble),
                   child: Text(
                     StringConst.FORM_CONTACT_INFO,
-                    style: textTheme.bodyText1?.copyWith(
+                    style: textTheme.bodySmall?.copyWith(
                       height: 1.5,
                       color: AppColors.greyDark,
                       fontWeight: FontWeight.w700,
@@ -215,7 +215,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
                   childLeft: TextFormField(
                       decoration: InputDecoration(
                         labelText: StringConst.FORM_PHONE,
-                        labelStyle: textTheme.bodyText1?.copyWith(
+                        labelStyle: textTheme.bodySmall?.copyWith(
                           height: 1.5,
                           color: AppColors.greyDark,
                           fontWeight: FontWeight.w400,
@@ -253,7 +253,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
                       },
                       textCapitalization: TextCapitalization.sentences,
                       keyboardType: TextInputType.phone,
-                      style: textTheme.bodyText1?.copyWith(
+                      style: textTheme.bodySmall?.copyWith(
                         height: 1.5,
                         color: AppColors.greyDark,
                         fontWeight: FontWeight.w700,
@@ -278,7 +278,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
                           TextFormField(
                               decoration: InputDecoration(
                                 labelText: StringConst.FORM_EMAIL,
-                                labelStyle: textTheme.bodyText1?.copyWith(
+                                labelStyle: textTheme.bodySmall?.copyWith(
                                   height: 1.5,
                                   color: AppColors.greyDark,
                                   fontWeight: FontWeight.w400,
@@ -303,7 +303,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
                               onSaved: (value) => _email = value,
                               keyboardType: TextInputType.emailAddress,
                               onChanged: (value) => setState(() => writtenEmail = value),
-                              style: textTheme.bodyText1?.copyWith(
+                              style: textTheme.bodySmall?.copyWith(
                                 height: 1.5,
                                 color: AppColors.greyDark,
                                 fontWeight: FontWeight.w700,

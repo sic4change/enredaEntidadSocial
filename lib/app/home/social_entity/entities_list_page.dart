@@ -6,16 +6,17 @@ import 'package:enreda_empresas/app/home/social_entity/entity_list_tile.dart';
 import 'package:enreda_empresas/app/models/filterResource.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
-import 'package:enreda_empresas/app/services/algolia_search.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
+import '../../models/externalSocialEntity.dart';
 
 class EntitiesListPage extends StatefulWidget {
-  const EntitiesListPage({Key? key}) : super(key: key);
+  const EntitiesListPage({Key? key, required this.socialEntityId}) : super(key: key);
+  final String? socialEntityId;
 
   @override
   State<EntitiesListPage> createState() => _EntitiesListPageState();
@@ -23,24 +24,28 @@ class EntitiesListPage extends StatefulWidget {
 
 class _EntitiesListPageState extends State<EntitiesListPage> {
 
-  List<String> tags = [];
-  final _queryController = TextEditingController();
+  List<SocialEntitiesType> socialEntityTypes = [];
   final _searchTextController = TextEditingController();
   FilterResource filterResource = FilterResource("", []);
-  String get searchQuery => _queryController.text;
   List<SocialEntity> finalSocialEntities = [];
   bool create = false;  //Choose between show list of social entities or create form
+
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchTextController.dispose();
+    super.dispose();
+  }
 
   void setStateIfMounted(f) {
     if (mounted) setState(f);
   }
 
-  void _clearFilter() {
-    setStateIfMounted(() {
-      _searchTextController.clear();
-      filterResource.searchText = '';
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,42 +62,24 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
           Padding(
             padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
             child: FilterTextFieldRow(
-              searchTextController: _queryController,
+              searchTextController: _searchTextController,
               onPressed: () async {
-                var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
-                setState((){
-                  finalSocialEntities = fetchUsers;
-                });
-
+                filterResource.searchText = _searchTextController.text;
               },
-              onFieldSubmitted: (value) async {
-                setStateIfMounted(() {
-                  filterResource.searchText = _queryController.text;
-                });
-                var fetchUsers = await AlgoliaSearch().fetchUsers(_queryController.text);
-                setState((){
-                  finalSocialEntities = fetchUsers;
-                });
-              },
-              clearFilter: (){
-                setState(() {
-                  _queryController.clear();
-                  finalSocialEntities.clear();
-                  _clearFilter();
-                });
-
-              },
-              hintText: '',
+              onFieldSubmitted: (value) => setState(() {
+                filterResource.searchText = _searchTextController.text;
+              }),
+              clearFilter: () => _clearFilter(),
+              hintText: 'Nombre del contacto ...',
             ),
           ),
-          SizedBox(height: Sizes.mainPadding,),
           Padding(
             padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
             child: chipFilter(),
           ),
           Container(
               margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
-              child: _buildEntitiesStream(context, tags)),
+              child: _buildEntitiesStream(context)),
         ],
       ),);
   }
@@ -108,14 +95,12 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
           snapshot.data!.toList().forEach((element) {
             socialEntityTypes.add(element);
           });
-          print('socialEntities: $socialEntityTypes');
           return ChipsChoice<String>.multiple(
             padding: EdgeInsets.all(5),
             wrapped: true,
-            value: tags,
+            value: filterResource.externalSocialEntityTypesIds,
             onChanged: (val){
-              setState(() => tags = val);
-              print('tags: $tags');
+              setState(() => filterResource.externalSocialEntityTypesIds = val);
             },
             choiceItems: C2Choice.listFrom<String, SocialEntitiesType>(
               source: socialEntityTypes,
@@ -136,69 +121,46 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
     );
   }
 
-  bool _showSocialEntitySearch(SocialEntity currentSocialEntity, List<SocialEntity> finalSocialEntities){
-    if(finalSocialEntities.contains(currentSocialEntity) || _queryController.text == ''){
-      return true;
-    }else return false;
-  }
-
-  bool _showSocialEntityChipFilter(SocialEntity currentSocialEntity, List<String> tags){
-    bool result = false;
-    if(currentSocialEntity.types != null){
-      currentSocialEntity.types!.forEach((element) {
-        if(tags.contains(element)){
-          result = true;
-        }
-      });
-    }
-    if(tags.isEmpty){
-      result = true; //No filter selected -> show all socialEntities
-    }
-    print(tags);
-    return result;
-
-  }
-
-  bool _showSocialEntity(SocialEntity currentSocialEntity, List<String> tags, List<SocialEntity> finalSocialEntities){
-    return
-      _showSocialEntitySearch(currentSocialEntity, finalSocialEntities) &&
-          _showSocialEntityChipFilter(currentSocialEntity, tags);
-  }
-
-  Widget _buildEntitiesStream(BuildContext context, List<String> filter) {
+  Widget _buildEntitiesStream(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
-    return StreamBuilder<List<SocialEntity>>(
-        stream: database.socialEntitiesStream(),
+    return StreamBuilder<List<ExternalSocialEntity>>(
+        stream: database.filteredExternalSocialEntitiesStream(filterResource, widget.socialEntityId!),
         builder: (context, snapshot) {
           if(snapshot.hasData) {
-            final List<SocialEntity> socialEntities = snapshot.data!.toList();
+            final List<ExternalSocialEntity> socialEntities = snapshot.data!.toList();
             return SingleChildScrollView(
               controller: ScrollController(),
               child: Wrap(
                 alignment: WrapAlignment.center,
                 children: [
-                  for(SocialEntity currentSocialEntity in socialEntities)
-                    _showSocialEntity(currentSocialEntity, tags, finalSocialEntities) ?
+                  for(ExternalSocialEntity currentExternalSocialEntity in socialEntities)
                     Padding(
                       padding: EdgeInsets.all(15),
                       child: EntityListTile(
-                          socialEntity: currentSocialEntity,
-                          filter: filter,
+                          socialEntity: currentExternalSocialEntity,
                           onTap: () {
                             setState(() {
-                              globals.currentSocialEntity = currentSocialEntity;
+                              globals.currentExternalSocialEntity = currentExternalSocialEntity;
                               EntityDirectoryPage.selectedIndex.value = 2;
                             });
                           }
                       ),
-                    ) :
-                    Container(),
+                    ),
                 ],
               ),
             );
           }
           return const Center(child: CircularProgressIndicator());
         });
+  }
+
+  void _clearFilter() {
+    setStateIfMounted(() {
+      _searchTextController.clear();
+      _searchTextController.text = '';
+      filterResource.searchText = '';
+      filterResource.externalSocialEntityTypesIds = [];
+    });
   }
 
 }

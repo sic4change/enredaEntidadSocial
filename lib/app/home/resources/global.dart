@@ -9,6 +9,7 @@ import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 
+import '../../models/externalSocialEntity.dart';
 import '../../models/interest.dart';
 
 Resource? currentResource;
@@ -21,7 +22,7 @@ List<String> interestsCurrentResource = [];
 UserEnreda? currentParticipant;
 UserEnreda? currentSocialEntityUser; // this is the user that is logged
 SocialEntity? currentUserSocialEntity; // this is the social entity that the user is belonging
-SocialEntity? currentSocialEntity; // this is the social entity that is selected
+ExternalSocialEntity? currentExternalSocialEntity; // this is the social entity that is selected in "Agenda de entidades sociales externas"
 InitialReport currentInitialReportUser = InitialReport();
 FollowReport currentFollowReportUser = FollowReport();
 DerivationReport currentDerivationReportUser = DerivationReport();

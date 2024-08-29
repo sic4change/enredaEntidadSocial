@@ -28,7 +28,7 @@ class CustomTextFormField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hintText,
         labelText: labelText,
-        labelStyle: textTheme.button?.copyWith(
+        labelStyle: textTheme.bodySmall?.copyWith(
           height: 1.5,
           color: AppColors.greyDark,
           fontWeight: FontWeight.w400,
@@ -53,7 +53,7 @@ class CustomTextFormField extends StatelessWidget {
       onSaved: onSaved,
       keyboardType: keyboardType,
       onChanged: onChanged,
-      style: textTheme.button?.copyWith(
+      style: textTheme.bodySmall?.copyWith(
         height: 1.5,
         color: AppColors.greyDark,
         fontWeight: FontWeight.w400,

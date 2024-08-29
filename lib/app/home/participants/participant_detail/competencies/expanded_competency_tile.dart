@@ -64,7 +64,7 @@ class _ExpandedCompetencyTileState extends State<ExpandedCompetencyTile> {
             child: Text(
               widget.competency.description,
               textAlign: TextAlign.center,
-              style: textTheme.bodyText1?.copyWith(
+              style: textTheme.bodySmall?.copyWith(
                 fontSize: Responsive.isMobile(context) ? 10.0 : 14.0,
               ),
             ),

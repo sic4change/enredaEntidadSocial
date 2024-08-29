@@ -91,7 +91,7 @@ class _AccessPageWebState extends State<AccessPageWeb> {
                                 const SpaceH4(),
                                 kIsWeb ? Text(
                                   StringConst.BETTER_FROM_APPS,
-                                  style: textTheme.bodyText2,
+                                  style: textTheme.bodySmall,
                                 ) : Container(),
                               ],
                             ),
@@ -178,7 +178,7 @@ class _AccessPageWebState extends State<AccessPageWeb> {
                                 const SpaceH4(),
                                 kIsWeb ? Text(
                                   StringConst.BETTER_FROM_APPS,
-                                  style: textTheme.bodyText2,
+                                  style: textTheme.bodySmall,
                                 ) : Container(),
                               ],
                             ),

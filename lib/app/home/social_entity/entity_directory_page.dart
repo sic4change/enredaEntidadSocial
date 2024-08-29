@@ -3,12 +3,13 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/home/social_entity/edit_social_entity/edit_social_entity_page.dart';
 import 'package:enreda_empresas/app/home/social_entity/entities_list_page.dart';
-import 'package:enreda_empresas/app/home/social_entity/create_social_entity/create_social_entity_page.dart';
 import 'package:enreda_empresas/app/home/social_entity/entity_detail/entity_detail_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
+
+import 'create_external_social_entity/create_social_entity_page.dart';
 
 class EntityDirectoryPage extends StatefulWidget {
   EntityDirectoryPage({Key? key, required this.socialEntity}) : super(key: key);
@@ -25,10 +26,10 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
   @override
   void initState() {
     bodyWidget = [
-      EntitiesListPage(),
-      CreateSocialEntityPage(),
-      EntityDetailPage(socialEntityId: widget.socialEntity.socialEntityId,),
-      EditSocialEntity()
+      EntitiesListPage(socialEntityId: widget.socialEntity.socialEntityId),
+      CreateExternalSocialEntityPage(socialEntityId: widget.socialEntity.socialEntityId),
+      ExternalEntityDetailPage(socialEntityId: widget.socialEntity.socialEntityId),
+      EditSocialEntity(socialEntityId: widget.socialEntity.socialEntityId)
     ];
     super.initState();
   }
@@ -72,10 +73,10 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                                   EntityDirectoryPage.selectedIndex.value = 0;
                                 })
                               },
-                              child: selectedIndex != 0 ? CustomTextMedium(text: 'Directorio de entidades ') :
-                              CustomTextMediumBold(text: 'Directorio de entidades ') ),
-                          selectedIndex == 1 ? CustomTextMediumBold(text: '> Crear entidad',) :
-                          selectedIndex == 2 ? CustomTextMediumBold(text:'> Detalle de la entidad') :
+                              child: selectedIndex != 0 ? CustomTextMedium(text: 'Agenda ') :
+                              CustomTextMediumBold(text: 'Agenda ') ),
+                          selectedIndex == 1 ? CustomTextMediumBold(text: '> Crear contacto',) :
+                          selectedIndex == 2 ? CustomTextMediumBold(text:'> Detalle del contacto') :
                           selectedIndex == 3 ? Row(
                             children: [
                               InkWell(
@@ -84,8 +85,8 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                                       EntityDirectoryPage.selectedIndex.value = 2;
                                     })
                                   },
-                                  child: CustomTextMedium(text:'> Detalle de la entidad ')),
-                              CustomTextMediumBold(text:'> Editar entidad'),
+                                  child: CustomTextMedium(text:'> Detalle del contacto ')),
+                              CustomTextMediumBold(text:'> Editar contacto'),
                             ],
                           ) : Container()
                         ],
@@ -98,7 +99,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                       child: Align(
                           alignment: Responsive.isMobile(context) ? Alignment.center : Alignment.topRight,
                           child: AddYellowButton(
-                            text: 'Crear nueva entidad',
+                            text: 'Crear nuevo contacto',
                             onPressed: () => setState(() {
                               setState(() {
                                 EntityDirectoryPage.selectedIndex.value = 1;

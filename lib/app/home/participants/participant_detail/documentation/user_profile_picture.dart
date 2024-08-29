@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import '../../../../values/values.dart';
 
@@ -28,11 +26,6 @@ Widget UserProfilePicture(BuildContext context, String profilePic) {
               height: 25,
               fit: BoxFit.cover,
             ),
-            /*PrecacheAvatarCard(
-              imageUrl: profilePic,
-              width: 30,
-              height: 30,
-            ),*/
           )
         ],
       ),
