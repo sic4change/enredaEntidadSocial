@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_widgets/custom_drop_down.dart';
 import '../../../services/auth.dart';
 import '../entity_directory_page.dart';
 
@@ -178,20 +179,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
             ),
           ),
         ),
-        _buildFormNewEntity(context),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: Sizes.MARGIN_20),
-          child: Text(
-            'Datos de la persona de contacto',
-            style: textTheme.titleMedium!.copyWith(
-              color: AppColors.turquoiseBlue,
-              fontWeight: FontWeight.w300,
-              // Fix the bug with Google Fonts that doesn't allow change the fontWeight with copyWith method
-              fontFamily: GoogleFonts.poppins().fontFamily,
-            ),
-          ),
-        ),
-        _buildFormContactPerson(context),
+        _buildForm(context),
         SpaceH50(),
         Center(
           child: EnredaButton(
@@ -280,17 +268,14 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
 
   bool _validateAndSaveForm() {
     if (_formKey.currentState != null &&
-        _formKey.currentState!.validate() &&
-        _formKeyContactPerson.currentState != null &&
-        _formKeyContactPerson.currentState!.validate()) {
+        _formKey.currentState!.validate()) {
         _formKey.currentState?.save();
-        _formKeyContactPerson.currentState?.save();
       return true;
     }
     return false;
   }
 
-  Widget _buildFormNewEntity(BuildContext context){
+  Widget _buildForm(BuildContext context){
     double fontSize = responsiveSize(context, 14, 16, md: 15);
     return Form(
       key: _formKey,
@@ -346,7 +331,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
                 validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
                 initialValue: 'Tercer sector',
               ),
-              childRight: CustomDropDownButtonFormFieldTittle(
+              childRight: CustomDropDownButton(
                 labelText: 'Sub-categoría',
                 source: subCategories,
                 onChanged: (value){
@@ -361,7 +346,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
           CustomFlexRowColumn(
             contentPadding: EdgeInsets.zero,
             separatorSize: 20,
-            childLeft: CustomDropDownButtonFormFieldTittle(
+            childLeft: CustomDropDownButton(
               labelText: 'Zona geográfica de influencia',
               source: geographicZone,
               onChanged: (value){
@@ -402,8 +387,6 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
                 onCountryChange: (code){
                   entityPhoneCode = code.toString();
                 },
-                validator: (value) =>
-                  value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
                 onSaved: (value) => _entityPhone = entityPhoneCode +' '+ value!,
               )
           ),
@@ -417,8 +400,6 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
                 onCountryChange: (code){
                   entityMobilePhoneCode = code.toString();
                 },
-                validator: (value) =>
-                  value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
                 onSaved: (value) => _entityMobilePhone = entityMobilePhoneCode +' '+ value!,
               ),
               childRight: CustomTextFormFieldTitle(
@@ -426,7 +407,6 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
                 onChanged: (value){
                   _linkedin = value;
                 },
-                //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
               )
           ),
           SpaceH24(),
@@ -438,14 +418,12 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
                 onChanged: (value){
                   _twitter = value;
                 },
-                //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: 'Otra red social',
                 onChanged: (value){
                   _otherSocialMedia = value;
                 },
-                //validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
               )
           ),
           SpaceH24(),
@@ -464,24 +442,25 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
                 selectedProvince,
                 selectedCity,
                 buildCityStreamBuilderSetState),
-            childRight: customTextFormField(
+            childRight: customTextFormMultilineNotValidator(
                 context,
                 _postalCode!,
                 StringConst.FORM_POSTAL_CODE,
-                StringConst.FORM_COMPANY_ERROR,
                 addressSetState),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFormContactPerson(BuildContext context){
-    return Form(
-      key: _formKeyContactPerson,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          SpaceH30(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: Sizes.MARGIN_20),
+            child: Text(
+              'Datos de la persona de contacto',
+              style: textTheme.titleMedium!.copyWith(
+                color: AppColors.turquoiseBlue,
+                fontWeight: FontWeight.w300,
+                // Fix the bug with Google Fonts that doesn't allow change the fontWeight with copyWith method
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              ),
+            ),
+          ),
           CustomTextFormFieldTitle(
             labelText: 'Nombre completo de la técnico de referencia',
             onChanged: (value){
@@ -491,68 +470,61 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
           ),
           SpaceH24(),
           CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomPhoneFormFieldTitle(
-                labelText: 'Teléfono fijo',
-                phoneCode: contactDeskPhoneCode,
-                onCountryChange: (code){
-                  contactDeskPhoneCode = code.toString();
-                },
-                validator: (value) =>
-                  value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
-                onSaved: (value) => _contactPhone = contactDeskPhoneCode +' '+ value!,
-              ),
-              childRight: CustomPhoneFormFieldTitle(
-                labelText: 'Teléfono móvil',
-                phoneCode: contactMobilePhoneCode,
-                onCountryChange: (code){
-                  contactMobilePhoneCode = code.toString();
-                },
-                validator: (value) =>
-                value!.isNotEmpty ? null : StringConst.PHONE_ERROR,
-                onSaved: (value) => _contactMobilePhone = contactMobilePhoneCode +' '+ value!,
-              ),
+            contentPadding: EdgeInsets.zero,
+            separatorSize: 20,
+            childLeft: CustomPhoneFormFieldTitle(
+              labelText: 'Teléfono fijo',
+              phoneCode: contactDeskPhoneCode,
+              onCountryChange: (code){
+                contactDeskPhoneCode = code.toString();
+              },
+              onSaved: (value) => _contactPhone = contactDeskPhoneCode +' '+ value!,
+            ),
+            childRight: CustomPhoneFormFieldTitle(
+              labelText: 'Teléfono móvil',
+              phoneCode: contactMobilePhoneCode,
+              onCountryChange: (code){
+                contactMobilePhoneCode = code.toString();
+              },
+              onSaved: (value) => _contactMobilePhone = contactMobilePhoneCode +' '+ value!,
+            ),
           ),
           SpaceH24(),
           CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Email',
-                onChanged: (value){
-                  _contactEmail = value;
-                },
-                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
+            contentPadding: EdgeInsets.zero,
+            separatorSize: 20,
+            childLeft: CustomTextFormFieldTitle(
+              labelText: 'Email',
+              onChanged: (value){
+                _contactEmail = value;
+              },
+              validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+            ),
 
-              childRight: CustomTextFormFieldTitle(
-                labelText: 'Cargo de la persona de contacto',
-                onChanged: (value){
-                  _contactPosition = value;
-                },
-                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
+            childRight: CustomTextFormFieldTitle(
+              labelText: 'Cargo de la persona de contacto',
+              onChanged: (value){
+                _contactPosition = value;
+              },
+            ),
           ),
           SpaceH24(),
           CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
               childLeft: CustomDropDownButtonFormFieldTittle(
-                  labelText: 'Grado de decisión',
-                  source: choiceGrade,
-                  onChanged: (value){
-                    _contactChoiceGrade = value;
-                  },
-                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                labelText: 'Grado de decisión',
+                source: choiceGrade,
+                onChanged: (value){
+                  _contactChoiceGrade = value;
+                },
               ),
               childRight: CustomDropDownButtonFormFieldTittle(
-                  labelText: '¿Se considera un KOL (Key Opinion Leader)?',
-                  source: yesNo,
-                  onChanged: (value){
-                    _contactKOL = value;
-                  },
-                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
+                labelText: '¿Se considera un KOL (Key Opinion Leader)?',
+                source: yesNo,
+                onChanged: (value){
+                  _contactKOL = value;
+                },
               )
           ),
           SpaceH24(),

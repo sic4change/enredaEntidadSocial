@@ -1,15 +1,15 @@
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
-import 'package:enreda_empresas/app/home/social_entity/edit_social_entity/edit_social_entity_page.dart';
-import 'package:enreda_empresas/app/home/social_entity/entities_list_page.dart';
-import 'package:enreda_empresas/app/home/social_entity/entity_detail/entity_detail_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
 import 'create_external_social_entity/create_social_entity_page.dart';
+import 'edit_social_entity/edit_social_entity_page.dart';
+import 'entities_list_page.dart';
+import 'entity_detail/entity_detail_page.dart';
 
 class EntityDirectoryPage extends StatefulWidget {
   EntityDirectoryPage({Key? key, required this.socialEntity}) : super(key: key);

@@ -596,7 +596,9 @@ class StringConst {
   static const String TECHNICAL_NAME = "Nombre de la técnica";
   static const String START_HERE = "Comienza aquí...";
   static const String GOALS_MONITORING = "Seguimiento:";
-  static const String ADD_IPIL_ENTRY = "Crear nuevo IPIL";
+  static const String ADD_IPIL_ENTRY = "Crea un IPIL";
+  static const String ADD_REPORT_ENTRY = 'Crea el Informe Inicial';
+  static const String NO_REPORT_ENTRY = 'Todavía no has creado ningún informe social';
   static const String DOWNLOAD_ALL = "Descargar todos";
   static const String DOWNLOAD_PDF = "Descargar";
   static const String PERSONAL_DATA_LAW_PDF = 'https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/BOE-A-2018-16673-consolidado.pdf?alt=media&token=5a8ee31a-1288-487c-8dd6-1de1eed79860';
@@ -613,6 +615,7 @@ class StringConst {
   static const String IPIL_POST_WORK_SUPPORT = "Acompañamiento Post-laboral";
   static const String IPIL_CREATE = "Crear nuevo IPIL";
   static const String IPIL_WARNING_TECHNICAL = "Este participante no tiene técnica asignada, para crear un IPIL asigne una técnica.";
+  static const String REPORT_WARNING_TECHNICAL = "Este participante no tiene técnica asignada, para crear el Informe Inicial asigne una técnica.";
   static const String IPIL_GOALS_MONITORING_PLACEHOLDER = 'Por favor, utiliza este espacio para documentar los detalles de la entrevista. Incluye las impresiones generales, avances del participante, y una descripción de los eventos y cambios ocurridos desde la última entrevista. Anota también cualquier objetivo o plan de acción acordado para las próximas semanas.';
   static const String DELETE_DOCUMENT = 'Si pulsa en "Aceptar" se procederá a la eliminación del documento.\nEsta acción no se podrá deshacer. ¿Está seguro que quiere continuar?';
 

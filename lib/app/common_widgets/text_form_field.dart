@@ -34,8 +34,7 @@ Widget customTextFormField(BuildContext context, String formValue, String labelT
         ),
       ),
       initialValue: formValue,
-      validator: (value) =>
-      value!.isNotEmpty ? null : errorText,
+      validator: (value) => value!.isNotEmpty ? null : errorText,
       onSaved: (String? val) => functionSetState(val),
       textCapitalization: TextCapitalization.sentences,
       keyboardType: TextInputType.name,

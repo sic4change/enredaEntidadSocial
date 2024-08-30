@@ -1,8 +1,5 @@
 import 'package:chips_choice/chips_choice.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_chip.dart';
-import 'package:enreda_empresas/app/home/social_entity/entity_directory_page.dart';
-import 'package:enreda_empresas/app/home/social_entity/filter_text_field_row.dart';
-import 'package:enreda_empresas/app/home/social_entity/entity_list_tile.dart';
 import 'package:enreda_empresas/app/models/filterResource.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -13,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import '../../models/externalSocialEntity.dart';
+import 'entity_directory_page.dart';
+import 'entity_list_tile.dart';
+import 'filter_text_field_row.dart';
 
 class EntitiesListPage extends StatefulWidget {
   const EntitiesListPage({Key? key, required this.socialEntityId}) : super(key: key);

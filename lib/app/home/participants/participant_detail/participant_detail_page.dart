@@ -17,6 +17,7 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
@@ -54,19 +55,33 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     if (_currentPage == null) {
       _currentPage =  ParticipantControlPanelPage(participantUser: participantUser);
     }
-
-    return Responsive.isDesktop(context)? _buildParticipantWeb(context, participantUser):
-      _buildParticipantMobile(context, participantUser);
+    final database = Provider.of<Database>(context, listen: false);
+    return StreamBuilder<UserEnreda>(
+      stream: database.userEnredaStreamByUserId(participantUser.assignedById),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          String techName = snapshot.data?.firstName ?? '';
+          String techLastName = snapshot.data?.lastName ?? '';
+          techNameComplete = '$techName $techLastName';
+          return Responsive.isDesktop(context)? _buildParticipantWeb(context, participantUser, techNameComplete):
+          _buildParticipantMobile(context, participantUser, techNameComplete);
+        } else {
+          return Responsive.isDesktop(context)? _buildParticipantWeb(context, participantUser, techNameComplete):
+          _buildParticipantMobile(context, participantUser, techNameComplete);
+        }
+      },
+    );
   }
 
-  Widget _buildParticipantWeb(BuildContext context, UserEnreda user){
+  Widget _buildParticipantWeb(BuildContext context, UserEnreda user, String? techNameComplete) {
     return SingleChildScrollView(
       controller: ScrollController(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Responsive.isDesktop(context)? _buildHeaderWeb(context, user): _buildHeaderMobile(context, user),
+          Responsive.isDesktop(context)? _buildHeaderWeb(context, user, techNameComplete) :
+            _buildHeaderMobile(context, user, techNameComplete),
           SpaceH20(),
           Divider(
             indent: 0,
@@ -96,13 +111,13 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     );
   }
 
-  Widget _buildParticipantMobile(BuildContext context, UserEnreda? user) {
+  Widget _buildParticipantMobile(BuildContext context, UserEnreda? user, String? techNameComplete) {
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeaderMobile(context, user!),
+          _buildHeaderMobile(context, user!, techNameComplete),
           SpaceH20(),
           _buildMenuSelectorChips(context, user),
           SpaceH20(),
@@ -168,7 +183,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     );
   }
 
-  Widget _buildHeaderWeb(BuildContext context, UserEnreda user){
+  Widget _buildHeaderWeb(BuildContext context, UserEnreda user, String? techNameComplete) {
     final textTheme = Theme.of(context).textTheme;
     final database = Provider.of<Database>(context, listen: false);
     return Padding(
@@ -209,81 +224,120 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
           ),
           //Personal data
           Expanded(
-            child: StreamBuilder<UserEnreda>(
-              stream: database.userEnredaStreamByUserId(user.assignedById),
-              builder: (context, snapshot) {
-                String techName = snapshot.data?.firstName ?? '';
-                String techLastName = snapshot.data?.lastName ?? '';
-                return Padding(
-                  padding: const EdgeInsets.only(top:50),
-                  child: Column(
+            child: Padding(
+              padding: const EdgeInsets.only(top:50),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${user.firstName} ${user.lastName}',
+                          style:
+                          textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.chatDarkGray,
+                            fontFamily: GoogleFonts.outfit().fontFamily,
+                            fontSize: 30,
+                          ),
+                        ),
+                      ),
+                      AddYellowButton(
+                        text: StringConst.INVITE_RESOURCE,
+                        onPressed: () => showDialog(
+                            context: context,
+                            builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
+                      ),
+                      SpaceW20(),
+                    ],
+                  ),
+                  SpaceH8(),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      (techNameComplete != null) ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          CustomTextSmallColor(text: 'Técnica de referencia:', color: AppColors.primary900, height: 0.5,),
+                          SpaceW8(),
+                          CustomTextSmallBold(title: '$techNameComplete', color: AppColors.primary900, height: 0.5,),
+                        ],
+                      ) : _bottomAddTech(socialEntityUser),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          CustomTextSmallColor(text: 'Inicio de itinerario:', color: AppColors.primary900, height: 0.5,),
+                          SpaceW8(),
+                          StreamBuilder<UserEnreda>(
+                            stream: database.userEnredaStreamByUserId(participantUser.userId),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return CustomTextSmallBold(
+                                  title: 'No iniciado',
+                                  color: AppColors.primary900,
+                                  height: 0.5,
+                                );
+                              }
+                              DateTime? startDateItinerary = snapshot.data?.startDateItinerary;
+                              if (startDateItinerary != null) {
+                                return CustomTextSmallBold(
+                                  title: DateFormat('dd/MM/yyyy').format(startDateItinerary),
+                                  color: AppColors.primary900,
+                                  height: 0.5,
+                                );
+                              } else {
+                                return CustomTextSmallBold(
+                                  title: 'No iniciado',
+                                  color: AppColors.primary900,
+                                  height: 0.5,
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  SpaceH20(),
+                  Row(
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              '${user.firstName} ${user.lastName}',
-                              style:
-                                textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.chatDarkGray,
-                                fontFamily: GoogleFonts.outfit().fontFamily,
-                                fontSize: 30,
-                                ),
-                            ),
+                          const Icon(
+                            Icons.mail,
+                            color: AppColors.darkGray,
+                            size: 22.0,
                           ),
-                          AddYellowButton(
-                            text: StringConst.INVITE_RESOURCE,
-                            onPressed: () => showDialog(
-                                context: context,
-                                builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
-                          ),
-                          SpaceW20(),
+                          const SpaceW4(),
+                          CustomTextSmall(text: user.email,),
                         ],
                       ),
-                      SpaceH8(),
-                      (techName != '' || techLastName != '') ?
-                        Text('Técnica de referencia: $techName $techLastName') :
-                        _bottomAddTech(socialEntityUser),
-                      SpaceH20(),
-                      Row(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.mail,
-                                color: AppColors.darkGray,
-                                size: 22.0,
-                              ),
-                              const SpaceW4(),
-                              CustomTextSmall(text: user.email,),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.phone,
-                                  color: AppColors.darkGray,
-                                  size: 22.0,
-                                ),
-                                const SpaceW4(),
-                                CustomTextSmall(text: user.phone ?? '',)
-                              ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.phone,
+                              color: AppColors.darkGray,
+                              size: 22.0,
                             ),
-                          ),
-                          _buildMyLocation(context, user),
-                        ],
-                      )
-
+                            const SpaceW4(),
+                            CustomTextSmall(text: user.phone ?? '',)
+                          ],
+                        ),
+                      ),
+                      _buildMyLocation(context, user),
                     ],
-                  ),
-                );
-              }
+                  )
+
+                ],
+              ),
             ),
           ),
         ],
@@ -293,46 +347,41 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
   Widget _bottomAddTech(UserEnreda tech){
     final database = Provider.of<Database>(context, listen: false);
-    return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            onTap: () async {
-              setState((){
-                participantUser.assignedById = tech.userId;
-              });
-              await database.setUserEnreda(participantUser);
-            },
-            child: Text(
-              'Asignarme este participante',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontFamily: GoogleFonts.inter().fontFamily,
-                fontSize: 16,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            InkWell(
+              onTap: () async {
+                setState((){
+                  participantUser.assignedById = tech.userId;
+                });
+                await database.setUserEnreda(participantUser);
+              },
+              child: CustomTextBold(title: 'Asignarme este participante', color: AppColors.turquoiseButton2,),
+            ),
+            SpaceW4(),
+            InkWell(
+              onTap: () async {
+                setState((){
+                  participantUser.assignedById = tech.userId;
+                });
+                await database.setUserEnreda(participantUser);
+              },
+              child: Icon(
+                Icons.add_circle,
                 color: AppColors.turquoiseButton2,
+                size: 24,
               ),
             ),
-          ),
-          SpaceW12(),
-          InkWell(
-            onTap: () async {
-              setState((){
-                participantUser.assignedById = tech.userId;
-              });
-              await database.setUserEnreda(participantUser);
-            },
-            child: Icon(
-              Icons.add_circle,
-              color: AppColors.turquoiseButton2,
-              size: 24,
-            ),
-          ),
-        ],
-      );
+          ],
+        ),
+    );
 
   }
 
-  Widget _buildHeaderMobile(BuildContext context, UserEnreda user) {
+  Widget _buildHeaderMobile(BuildContext context, UserEnreda user, String? techNameComplete) {
     final textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -370,6 +419,32 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
           maxLines: 2,
           style: textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold, color: AppColors.primary900, overflow: TextOverflow.ellipsis),
+        ),
+        SpaceH12(),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            (techNameComplete != null) ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CustomTextSmallColor(text: 'Técnica de referencia:', color: AppColors.primary900, height: 0.2,),
+                SpaceW8(),
+                CustomTextSmallBold(title: '$techNameComplete', color: AppColors.primary900, height: 0.2,),
+              ],
+            ) : _bottomAddTech(socialEntityUser),
+            user.startDateItinerary != null ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CustomTextSmallColor(text: 'Inicio de itinerario:', color: AppColors.primary900, height: 0.2,),
+                SpaceW8(),
+
+                CustomTextSmallBold(title: '${DateFormat('dd/MM/yyyy').format(user.startDateItinerary!)}', color: AppColors.primary900, height: 0.2,),
+              ],
+            ) : CustomTextSmallColor(text: 'Initerario no iniciado', color: AppColors.primary900, height: 0.2,),
+          ],
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
