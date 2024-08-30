@@ -391,6 +391,15 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             return;
                           }
                         }
+                        if(user.initialReportId == null){
+                          showAlertDialog(
+                            context,
+                            title: 'Aviso',
+                            content: 'El Informe Inicial aún no se ha completado.',
+                            defaultActionText: 'Aceptar',
+                          );
+                          return;
+                        }
                         if(user.initialReportId != null){
                           if(initialReport.completedDate!.add(Duration(days: 180)).isBefore(DateTime.now()) == false){
                             showAlertDialog(
