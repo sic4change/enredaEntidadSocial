@@ -155,15 +155,28 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                                         noneAreSet == true ?
                                           globals.currentSocialEntityUser?.userId == participantAssignedUserId ?
                                         EmptyList(
-                                            title: 'Todavía no has creado ningún informe social.',
-                                            subtitle: 'Crea el Informe Inicial.',
+                                            title: StringConst.NO_REPORT_ENTRY,
+                                            subtitle: StringConst.ADD_REPORT_ENTRY,
                                             imagePath: ImagePath.EMPTY_LiST_ICON,
                                             onPressed: () {
                                                 ParticipantSocialReportPage.selectedIndexInforms.value = 1;
                                             }
                                         ) : EmptyList(
-                                              title: 'No hay informes creados.',
+                                              title: StringConst.NO_REPORT_ENTRY,
+                                              subtitle: StringConst.ADD_REPORT_ENTRY,
                                               imagePath: ImagePath.EMPTY_LiST_ICON,
+                                              onPressed: () {
+                                                if(widget.participantUser.assignedById == null ||
+                                                    widget.participantUser.assignedById == ''){
+                                                  showAlertDialog(
+                                                    context,
+                                                    title: StringConst.FORM_WARNING,
+                                                    content: StringConst.REPORT_WARNING_TECHNICAL,
+                                                    defaultActionText: StringConst.FORM_ACCEPT,
+                                                  );
+                                                  return;
+                                                }
+                                              }
                                           ) : Container(),
                                         if(user.initialReportId != null)
                                            _documentTile(

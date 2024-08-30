@@ -2,7 +2,6 @@ import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/account/personal_data.dart';
-import 'package:enreda_empresas/app/home/social_entity/entity_directory_page.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/create_participant_page.dart';
 import 'package:enreda_empresas/app/home/side_bar_widget.dart';
 import 'package:enreda_empresas/app/home/control_panel/control_panel_page.dart';
@@ -26,6 +25,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sidebarx/sidebarx.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
+
+import 'external_social_entity/entity_directory_page.dart';
 
 
 class WebHome extends StatefulWidget {

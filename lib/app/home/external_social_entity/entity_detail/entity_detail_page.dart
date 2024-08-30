@@ -3,13 +3,9 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_dialog.dart';
-import 'package:enreda_empresas/app/home/social_entity/entity_detail/box_social_entity_contact.dart';
-import 'package:enreda_empresas/app/home/social_entity/entity_detail/box_social_network_data.dart';
-import 'package:enreda_empresas/app/home/social_entity/entity_directory_page.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/province.dart';
-import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
@@ -23,6 +19,9 @@ import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import '../../../models/externalSocialEntity.dart';
 import '../../../services/auth.dart';
 import '../../../utils/functions.dart';
+import '../entity_directory_page.dart';
+import 'box_social_entity_contact.dart';
+import 'box_social_network_data.dart';
 import 'social_entity_category_stream.dart';
 
 class ExternalEntityDetailPage extends StatefulWidget {

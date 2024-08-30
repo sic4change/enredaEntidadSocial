@@ -150,18 +150,19 @@ class CustomTextSmall extends StatelessWidget {
 
 class CustomTextSmallBold extends StatelessWidget {
 
-  CustomTextSmallBold({ required this.title, this.color = AppColors.greyTxtAlt });
+  CustomTextSmallBold({ required this.title, this.color = AppColors.greyTxtAlt,  this.height = 1.5 });
   final String title;
   final Color? color;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    double fontSize = responsiveSize(context, 12, 15, md: 14);
+    double fontSize = responsiveSize(context, 13, 15, md: 14);
     TextTheme textTheme = Theme.of(context).textTheme;
     return Text(
       title,
       style: textTheme.titleSmall?.copyWith(
-          height: 1.5,
+          height: height,
           color: color,
           fontSize: fontSize
       ),
@@ -296,7 +297,7 @@ class CustomTextSmallColor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
-
+    double fontSize = responsiveSize(context, 13, 15, md: 14);
     return Padding(
     padding: padding,
       child: Text(
@@ -305,6 +306,7 @@ class CustomTextSmallColor extends StatelessWidget {
         style: textTheme.bodyMedium?.copyWith(
             color: color,
             height: height,
+            fontSize: fontSize
         ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,

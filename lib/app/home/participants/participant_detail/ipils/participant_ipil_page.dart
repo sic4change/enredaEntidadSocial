@@ -231,8 +231,8 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
         SpaceH8(),
         ipilEntries.isEmpty ? EmptyList(
           title: StringConst.FORM_NO_IPILS,
+          subtitle: StringConst.ADD_IPIL_ENTRY,
           imagePath: ImagePath.EMPTY_LiST_ICON,
-          buttonTitle: StringConst.ADD_IPIL_ENTRY,
           onPressed: () {
             if(widget.participantUser.assignedById == null ||
                 widget.participantUser.assignedById == ''){

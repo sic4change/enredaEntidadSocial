@@ -10,7 +10,7 @@ import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_province.dart';
-import 'package:enreda_empresas/app/home/social_entity/entity_directory_page.dart';
+import 'package:enreda_empresas/app/home/external_social_entity/entity_detail/entity_detail_page.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
@@ -31,6 +31,7 @@ import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 import '../../../models/externalSocialEntity.dart';
+import '../entity_directory_page.dart';
 
 const double contactBtnWidthLg = 200.0;
 const double contactBtnWidthSm = 100.0;

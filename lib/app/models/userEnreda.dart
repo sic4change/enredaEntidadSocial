@@ -51,6 +51,7 @@ class UserEnreda {
     this.derivationReportId,
     this.nationality,
     this.ipilObjectivesId,
+    this.startDateItinerary,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -90,6 +91,11 @@ class UserEnreda {
     final String? province = data['address']['province'];
     final String? city = data['address']['city'];
     final String? postalCode = data['address']['postalCode'];
+
+    DateTime? startDateItinerary;
+    if(data['startDateItinerary'] != null) {
+      startDateItinerary = DateTime.parse(data['startDateItinerary'].toDate().toString());
+    }
 
     List<String> abilities = [];
     try {
@@ -252,6 +258,7 @@ class UserEnreda {
       derivationReportId: derivationReportId,
       nationality: nationality,
       ipilObjectivesId: ipilObjectivesId,
+      startDateItinerary: startDateItinerary
     );
   }
 
@@ -298,6 +305,7 @@ class UserEnreda {
   final String? derivationReportId;
   final String? nationality;
   final String? ipilObjectivesId;
+  DateTime? startDateItinerary;
 
   @override
   bool operator ==(Object other){
@@ -348,6 +356,7 @@ class UserEnreda {
       'derivationReportId': derivationReportId,
       'nationality' : nationality,
       'ipilObjectivesId': ipilObjectivesId,
+      'startDateItinerary': startDateItinerary
     };
   }
 
@@ -397,6 +406,7 @@ class UserEnreda {
     String? derivationReportId,
     String? nationality,
     String? ipilObjectivesId,
+    DateTime? startDateItinerary
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -440,6 +450,7 @@ class UserEnreda {
       derivationReportId: derivationReportId ?? this.derivationReportId,
       nationality: nationality ?? this.nationality,
       ipilObjectivesId: ipilObjectivesId ?? this.ipilObjectivesId,
+      startDateItinerary: startDateItinerary ?? this.startDateItinerary
     );
   }
 
