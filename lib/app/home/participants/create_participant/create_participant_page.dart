@@ -206,8 +206,6 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
               style: textTheme.titleMedium!.copyWith(
                 color: AppColors.turquoiseBlue,
                 fontWeight: FontWeight.w300,
-                // Fix the bug with Google Fonts that doesn't allow change the fontWeight with copyWith method
-                fontFamily: GoogleFonts.poppins().fontFamily,
               ),
             ),
           ),

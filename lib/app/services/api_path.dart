@@ -60,7 +60,7 @@ class APIPath {
   static String activityRoleChoices() => 'activityRoleChoices';
   static String activityLevelChoices() => 'activityLevelChoices';
   static String socialEntitiesType() => 'socialEntitiesType';
-
+  static String socialEntitiesCategories() => 'socialEntitiesCategories';
   static String tests() => 'tests';
   static String test(String testId) => 'tests/$testId';
   static String gamificationFlags() => 'gamificationFlags';

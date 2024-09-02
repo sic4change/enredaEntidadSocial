@@ -278,7 +278,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
   Widget _myCurriculumWeb(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames){
     return Stack(
       children: [
-        CustomTextMediumBold(text: StringConst.MY_CV),
+        CustomTextMediumBold(text: StringConst.CV),
         MainContainer(
           height: MediaQuery.of(context).size.height,
           padding: EdgeInsets.all(0),

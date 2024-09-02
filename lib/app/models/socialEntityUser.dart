@@ -4,6 +4,7 @@ class SocialEntityUser {
   SocialEntityUser({
     required this.email,
     this.firstName,
+    this.lastName,
     this.userId,
     this.organization,
     this.country,
@@ -18,6 +19,7 @@ class SocialEntityUser {
   String? email;
   String? userId;
   final String? firstName;
+  final String? lastName;
   final String? organization;
   final String? country;
   final String? province;
@@ -40,6 +42,7 @@ class SocialEntityUser {
     return SocialEntityUser(
       email: data['email'],
       firstName: data['firstName'],
+      lastName: data['lastName'],
       organization: data['organization'],
       userId: data['userId'],
       address: address,
@@ -52,6 +55,7 @@ class SocialEntityUser {
     return {
       'email': email,
       'firstName': firstName,
+      'lastName': lastName,
       'organization': organization,
       'userId': userId,
       'address': address?.toMap(),

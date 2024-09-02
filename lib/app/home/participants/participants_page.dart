@@ -45,15 +45,19 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         valueListenable: ParticipantsListPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
+            color: AppColors.grey80,
             borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
             margin: Responsive.isMobile(context) ? EdgeInsets.all(20) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
-            contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) :
-            EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble * 2, vertical: Sizes.kDefaultPaddingDouble),
+            // contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) :
+            // EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble * 2, vertical: Sizes.kDefaultPaddingDouble),
             child: Stack(
               alignment: Alignment.topCenter,
               children: [
                 Container(
-                  height: 50,
+                  height: 80,
+                  padding:  Responsive.isDesktopS(context) ? EdgeInsets.symmetric(horizontal: 20, vertical: 10) :
+                    Responsive.isMobile(context) ? EdgeInsets.symmetric(horizontal: 0, vertical: 10) :
+                      EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                   child: Row(
                     children: [
                       InkWell(
@@ -70,7 +74,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                 ),
                 Container(
                   height: double.infinity,
-                  margin: EdgeInsets.only(top: Sizes.mainPadding * 2),
+                  margin: Responsive.isDesktopS(context) ? EdgeInsets.symmetric(horizontal: 20, vertical: 60) : EdgeInsets.only(top: 60),
                   child: _bodyWidget[selectedIndex]),
               ],
                     ),
@@ -109,50 +113,53 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                         && u.assignedById != socialEntityUser.userId).toList();
 
                     return SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SpaceH12(),
-                          Text(StringConst.MY_PARTICIPANTS,
-                            style: textTheme.titleLarge?.copyWith(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SpaceH12(),
+                            Text(StringConst.MY_PARTICIPANTS,
+                              style: textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.turquoiseBlue),),
+                            SpaceH20(),
+                            ParticipantsItemBuilder(
+                                usersList: myParticipants,
+                                emptyMessage: 'No hay participantes gestionados por ti',
+                                itemBuilder: (context, user) {
+                                  return ParticipantsListTile(
+                                      user: user,
+                                      socialEntityUserId: socialEntityUser.socialEntityId!,
+                                      onTap: () => setState(() {
+                                        globals.currentParticipant = user;
+                                        ParticipantsListPage.selectedIndex.value = 1;
+                                      })
+                                  );
+                                }
+                                ),
+                            SpaceH40(),
+                            Text(StringConst.allParticipants(socialEntitySnapshot.data!.name),
+                              style: textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.turquoiseBlue),),
-                          SpaceH20(),
-                          ParticipantsItemBuilder(
-                              usersList: myParticipants,
-                              emptyMessage: 'No hay participantes gestionados por ti',
-                              itemBuilder: (context, user) {
-                                return ParticipantsListTile(
-                                    user: user,
-                                    socialEntityUserId: socialEntityUser.socialEntityId!,
-                                    onTap: () => setState(() {
-                                      globals.currentParticipant = user;
-                                      ParticipantsListPage.selectedIndex.value = 1;
-                                    })
-                                );
-                              }
-                              ),
-                          SpaceH40(),
-                          Text(StringConst.allParticipants(socialEntitySnapshot.data!.name),
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.turquoiseBlue,),),
-                          SpaceH20(),
-                          ParticipantsItemBuilder(
-                              usersList: allOtherParticipants,
-                              emptyMessage: 'No hay participantes gestionados por tu entidad',
-                              itemBuilder: (context, user) {
-                                return ParticipantsListTile(
-                                    user: user,
-                                    socialEntityUserId: socialEntityUser.socialEntityId!,
-                                    onTap: () => setState(() {
-                                      globals.currentParticipant = user;
-                                      ParticipantsListPage.selectedIndex.value = 1;
-                                    })
-                                );
-                              }
-                              ),
-                        ],
+                                color: AppColors.turquoiseBlue,),),
+                            SpaceH20(),
+                            ParticipantsItemBuilder(
+                                usersList: allOtherParticipants,
+                                emptyMessage: 'No hay participantes gestionados por tu entidad',
+                                itemBuilder: (context, user) {
+                                  return ParticipantsListTile(
+                                      user: user,
+                                      socialEntityUserId: socialEntityUser.socialEntityId!,
+                                      onTap: () => setState(() {
+                                        globals.currentParticipant = user;
+                                        ParticipantsListPage.selectedIndex.value = 1;
+                                      })
+                                  );
+                                }
+                                ),
+                          ],
+                        ),
                       ),
                     );
                   }

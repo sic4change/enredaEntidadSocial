@@ -135,6 +135,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                           }
                           return Container(
                             decoration: BoxDecoration(
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(color: AppColors.greyBorder),
                             ),

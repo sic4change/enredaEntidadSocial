@@ -224,7 +224,7 @@ class CustomTextMediumBold extends StatelessWidget {
     return Text(
       text,
       style: textTheme.bodyLarge?.copyWith(
-        color: AppColors.turquoiseBlue,
+        color: AppColors.primary900,
         height: 1.5,
         fontSize: fontSize,
       ),
