@@ -4,7 +4,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/sign_in/email_sign_in_change_model.dart';
-import 'package:enreda_empresas/app/sign_up/socialEntityUser/social_entity_registering.dart';
+import 'package:enreda_empresas/app/sign_up/socialEntity/social_entity_registering.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';

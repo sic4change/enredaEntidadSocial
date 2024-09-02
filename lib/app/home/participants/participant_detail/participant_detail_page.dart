@@ -76,37 +76,39 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   Widget _buildParticipantWeb(BuildContext context, UserEnreda user, String? techNameComplete) {
     return SingleChildScrollView(
       controller: ScrollController(),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Responsive.isDesktop(context)? _buildHeaderWeb(context, user, techNameComplete) :
-            _buildHeaderMobile(context, user, techNameComplete),
-          SpaceH20(),
-          Divider(
-            indent: 0,
-            endIndent: 0,
-            color: AppColors.greyBorder,
-            thickness: 1,
-            height: 1,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(40.0, 22.0,0.0,22.0),
-            child: _buildMenuSelectorChips(context, user),
-          ),
-          Divider(
-            indent: 0,
-            endIndent: 0,
-            color: AppColors.greyBorder,
-            thickness: 1,
-            height: 0,
-          ),
-          SpaceH24(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
-            child: _currentPage!,
-          ),
-        ],
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Responsive.isDesktop(context)? _buildHeaderWeb(context, user, techNameComplete) :
+              _buildHeaderMobile(context, user, techNameComplete),
+            SpaceH20(),
+            Divider(
+              indent: 0,
+              endIndent: 0,
+              color: AppColors.greyBorder,
+              thickness: 1,
+              height: 1,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(40.0, 22.0,0.0,22.0),
+              child: _buildMenuSelectorChips(context, user),
+            ),
+            Divider(
+              indent: 0,
+              endIndent: 0,
+              color: AppColors.greyBorder,
+              thickness: 1,
+              height: 0,
+            ),
+            SpaceH24(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
+              child: _currentPage!,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -250,7 +252,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                             context: context,
                             builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
                       ),
-                      SpaceW20(),
+                      SpaceW40(),
                     ],
                   ),
                   SpaceH8(),

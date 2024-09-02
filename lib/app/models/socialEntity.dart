@@ -7,6 +7,8 @@ class SocialEntity {
   SocialEntity({
     this.socialEntityId,
     required this.name,
+    this.cif,
+    this.mision,
     this.email,
     this.phone,
     this.address,
@@ -47,6 +49,8 @@ class SocialEntity {
   //Old fields
   final String? socialEntityId;
   final String name;
+  final String? cif;
+  final String? mision;
   final String? email;
   final String? phone;
   final String? country;
@@ -101,6 +105,8 @@ class SocialEntity {
 
 
     final String name = data['name'];
+    final String? cif = data['cif'] ?? '';
+    final String? mision = data['mision'] ?? '';
     final String? socialEntityId = data['socialEntityId'];
     final String email = data['email']??"";
 
@@ -145,6 +151,8 @@ class SocialEntity {
     return SocialEntity(
         socialEntityId: socialEntityId,
         name: name,
+        cif: cif,
+        mision: mision,
         email: email,
         address: address,
         website: website,
@@ -181,6 +189,8 @@ class SocialEntity {
     return {
       'socialEntityId': socialEntityId,
       'name': name,
+      'cif': cif,
+      'mision': mision,
       'email': email,
       'address': address?.toMap(),
       'website': website,
@@ -214,6 +224,8 @@ class SocialEntity {
   SocialEntity copyWith({
     String? socialEntityId,
     String? name,
+    String? cif,
+    String? mision,
     String? email,
     Address? address,
     String? website,
@@ -247,6 +259,8 @@ class SocialEntity {
     return SocialEntity(
         socialEntityId: socialEntityId ?? this.socialEntityId,
         name: name ?? this.name,
+        cif: cif ?? this.cif,
+        mision: mision ?? this.mision,
         email: email ?? this.email,
         address: address ?? this.address,
         website: website ?? this.website,

@@ -59,6 +59,7 @@ import '../models/filterResource.dart';
 import '../models/ipilCoordination.dart';
 import '../models/ipilImprovementEmployment.dart';
 import '../models/ipilObtainingEmployment.dart';
+import '../models/socialEntitiesCategories.dart';
 import '../utils/functions.dart';
 
 abstract class Database {
@@ -118,6 +119,7 @@ abstract class Database {
      Stream<List<CompetencySubCategory>> competenciesSubCategoriesStream();
      Stream<List<CertificationRequest>> myCertificationRequestStream(String userId);
      Stream<List<SocialEntitiesType>> socialEntitiesTypeStream();
+     Stream<List<SocialEntityCategory>> socialEntitiesCategoriesStream();
      Stream<List<DocumentCategory>> documentCategoriesStream();
      Stream<List<PersonalDocumentType>> personalDocumentTypeStream();
      Stream<List<PersonalDocumentType>> documentSubCategoriesByCategoryStream(String categoryId);
@@ -653,6 +655,14 @@ class FirestoreDatabase implements Database {
     );
 
     @override
+    Stream<List<SocialEntityCategory>> socialEntitiesCategoriesStream() => _service.collectionStream(
+      path: APIPath.socialEntitiesCategories(),
+      queryBuilder: (query) => query.where('socialEntityCategoryId', isNotEqualTo: null),
+      builder: (data, documentId) => SocialEntityCategory.fromMap(data, documentId),
+      sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
+    );
+
+    @override
     Future<void> setUserEnreda(UserEnreda userEnreda) {
       return _service.updateData(
           path: APIPath.user(userEnreda.userId!), data: userEnreda.toMap());
@@ -700,7 +710,6 @@ class FirestoreDatabase implements Database {
             PersonalDocumentType.fromMap(data, documentId),
         sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
       );
-
 
   @override
   Stream<List<SpecificInterest>> specificInterestsStream() => _service.collectionStream(

@@ -307,7 +307,7 @@ class StringConst {
 
   //Create an resource forms
   static const String FORM_MENTOR_REGISTER = "Quiero colaborar";
-  static const String FORM_ORGANIZATION_REGISTER = "Soy organización";
+  static const String FORM_ENTITY_REGISTER = "Soy Entidad";
   static const String FORM_CREATE = "Crear recurso";
   static const String FORM_EDIT = "Editar recurso";
   static const String FORM_TITLE = "Título";
@@ -322,8 +322,13 @@ class StringConst {
   static const String FORM_LINK = "Link";
   static const String FORM_ORGANIZATION_NAME = "Nombre de la Organización";
   static const String FORM_ORGANIZATION_INFO = "Información de la organización";
-  static const String FORM_ORGANIZATION = "Organización";
+  static const String FORM_ENTITY_NAME = "Nombre de la entidad";
+  static const String FORM_ENTITY_EMAIL = "Email de la entidad";
+  static const String FORM_ENTITY_CIF = "Cif de la entidad";
+  static const String FORM_ENTITY_MISSION = "Misión";
+  static const String FORM_ENTITY_CATEGORY = "Tipología de la entidad";
   static const String FORM_CONTACT_NAME = "Nombre de la persona de contacto";
+  static const String FORM_CONTACT_LASTNAME = "Apellidos de la persona de contacto";
   static const String FORM_CONTACT_INFO = "Información de contacto";
   static const String FORM_CONTACT = "Contacto";
   static const String FORM_RESOURCE_TYPE = "Tipo de recurso";
@@ -335,6 +340,7 @@ class StringConst {
   static const String FORM_DESCRIPTION_ERROR = "La descripción no puede estar vacía";
   static const String FORM_COMPANY_ERROR = "El campo no puede estar vacío";
   static const String FORM_BIRTHDAY_DATE = "Fecha de nacimiento";
+  static const String FORM_PHONE_ENTITY = "Teléfono entidad";
   static const String FORM_PHONE = "Teléfono";
   static const String PHONE_ERROR = "El teléfono no puede estar vacío";
   static const String FORM_EMAIL = "Email";
@@ -391,6 +397,8 @@ class StringConst {
   static const String FORM_DESCRIPTION = "Descripción del puesto";
 
   static const String FORM_GENERAL_INFO = "Información general";
+  static const String FORM_CONTACT_DATA_INFO = "Datos de la persona de contacto";
+  static const String FORM_SOCIAL_ENTITY_INFO = "Datos entidad";
   static const String FORM_ORGANIZER = "Lugar y organizador";
   static const String FORM_REVISION = "Revisión";
   static const String FORM_CONFIRM = "Aceptar";
@@ -535,6 +543,7 @@ class StringConst {
   static const String GAMIFICATION = "Gamificación";
   static const String GO_PROFILE = "Ver perfil";
   static const String CREATE_PARTICIPANT = "Crear participante";
+  static const String CREATE_NEW_ENTITY = "Crear nueva entidad";
   static const String CALL = "Llamar";
   static const String CREATE_PARTICIPANT_TITLE = "¡Enorabuena!";
   static const String CREATE_PARTICIPANT_SUCCESS = "El perfil ha sido creado con éxito";

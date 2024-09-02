@@ -37,40 +37,37 @@ class ParticipantControlPanelPage extends StatelessWidget {
   }
 
   Widget _buildBodyDesktop(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildGamificationSection(context),
-          SpaceH40(),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildInitialFormSection(context),
-                    SpaceH40(),
-                    _buildCompetenciesSection(context),
-                    SpaceH40(),
-                    _buildResourcesSection(context),
-                  ],
-                ),
-              ),
-              SpaceW20(),
-              Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildGamificationSection(context),
+        SpaceH40(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildCvSection(context),
+                  _buildInitialFormSection(context),
                   SpaceH40(),
-                  //_buildDocumetationSection(context),
+                  _buildCompetenciesSection(context),
+                  SpaceH40(),
+                  _buildResourcesSection(context),
                 ],
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+            SpaceW20(),
+            Column(
+              children: [
+                _buildCvSection(context),
+                SpaceH40(),
+                //_buildDocumetationSection(context),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -457,6 +454,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
 
     return RoundedContainer(
       margin: EdgeInsets.all(0.0),
+      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       borderColor: AppColors.greyAlt.withOpacity(0.15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,6 +574,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
       children: [
         RoundedContainer(
           margin: EdgeInsets.all(0.0),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           width: 340.0,
           height: 365.0,
           borderColor: AppColors.greyAlt.withOpacity(0.15),
@@ -587,7 +586,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    CustomTextBoldTitle(title: StringConst.MY_CV),
+                    CustomTextBoldTitle(title: StringConst.CV),
                   ],
                 ),
                 InkWell(
