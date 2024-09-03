@@ -42,24 +42,22 @@ class ParticipantControlPanelPage extends StatelessWidget {
         SpaceH40(),
         Container(
           height: participantUser.competencies.isEmpty ? 460 : 650,
-          child: Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildInitialFormSection(context),
-                      SpaceH20(),
-                      _buildCompetenciesSection(context),
-                    ],
-                  ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInitialFormSection(context),
+                    SpaceH20(),
+                    _buildCompetenciesSection(context),
+                  ],
                 ),
-                SpaceW20(),
-                _buildCvSection(context),
-              ],
-            ),
+              ),
+              SpaceW20(),
+              _buildCvSection(context),
+            ],
           ),
         ),
         SpaceH20(),
