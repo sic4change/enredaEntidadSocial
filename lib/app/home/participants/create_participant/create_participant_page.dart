@@ -225,7 +225,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                       height: Sizes.kDefaultPaddingDouble * 2,
                       margin: EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           if(currentStep !=0)
                             EnredaButton(

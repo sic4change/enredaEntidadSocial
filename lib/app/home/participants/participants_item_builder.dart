@@ -1,6 +1,7 @@
-import 'package:enreda_empresas/app/home/resources/left_empty_content.dart';
+import 'package:enreda_empresas/app/common_widgets/empty-list.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
+import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
 typedef ItemWidgetBuilder<T> = Widget Function(BuildContext context, T item);
@@ -23,7 +24,7 @@ class ParticipantsItemBuilder<T> extends StatelessWidget {
     if (usersList.isNotEmpty) {
       return _build(context, usersList);
     } else {
-      return LeftEmptyContent(title: emptyTitle ?? '', message: emptyMessage ?? '');
+      return EmptyList(title: emptyTitle ?? '', subtitle: emptyMessage ?? '', imagePath: ImagePath.EMPTY_LiST_ICON);
     }
   }
 

@@ -51,7 +51,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
   final _formKey = GlobalKey<FormState>();
   final _formKeyContact = GlobalKey<FormState>();
   final _checkFieldKey = GlobalKey<FormState>();
-  String? _email;
+  String? _emailContact;
   String? _emailSocialEntity;
   String? _socialEntityId;
   String? _name;
@@ -120,7 +120,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
     _socialEntityCategoryName = "";
     _socialEntityCategoryId = "";
     _emailSocialEntity = "";
-    _email = "";
+    _emailContact = "";
     _firstName = "";
     _lastName = "";
     _country = "";
@@ -176,6 +176,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
         geographicZone : _geographicZone,
         subGeographicZone : _subGeographicZone,
         email: _emailSocialEntity,
+        contactEmail: _emailContact,
         phone: _phoneWithCodeSocialEntity,
         linkedin: _linkedin,
         otherSocialMedia: _otherSocialMedia,
@@ -184,7 +185,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
       final socialEntityUser = SocialEntityUser(
         firstName: _firstName,
         lastName: _lastName,
-        email: _email,
+        email: _emailContact,
         phone: _phoneWithCode,
         address: address,
         role: 'Entidad Social',
@@ -446,9 +447,9 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
                                 ),
                               ),
                             ),
-                            initialValue: _email,
+                            initialValue: _emailContact,
                             validator: validationMessage,
-                            onSaved: (value) => _email = value,
+                            onSaved: (value) => _emailContact = value,
                             keyboardType: TextInputType.emailAddress,
                             onChanged: (value) => setState(() => writtenEmail = value),
                             style: textTheme?.bodyMedium?.copyWith(
@@ -498,7 +499,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
               _firstName!,
               _lastName!,
               _phoneWithCode,
-              _email!,
+              _emailContact!,
             ),
           ),
           Row(
@@ -588,7 +589,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
   }
 
   void _email_setState(String? val) {
-    setState(() => _email = val!);
+    setState(() => _emailContact = val!);
   }
 
   void _postalCode_setState(String? val) {

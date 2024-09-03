@@ -40,6 +40,7 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
       margin: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? EdgeInsets.all(0) : EdgeInsets.only(left: 30, right: 10, bottom: 10, top: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           CustomTextBoldTitle(title: StringConst.MY_PARTICIPANTS),
           SpaceH4(),

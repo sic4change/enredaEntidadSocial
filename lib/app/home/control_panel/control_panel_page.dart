@@ -1,5 +1,6 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
+import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/my_participants_list.dart';
 import 'package:enreda_empresas/app/home/resources/build_collapsed_resources.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
@@ -140,19 +141,20 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                                   children: [
                                                     Container(
                                                       width: 300,
-                                                      child: Text('Directorio Entidades',
+                                                      child: Text(StringConst.DRAWER_ENTITIES,
                                                         style: textTheme.displaySmall?.copyWith(
                                                             fontWeight: FontWeight.bold,
                                                             fontSize: Responsive.isMobile(context) ? 25 : 35.0,
                                                             color: AppColors.white),),
                                                     ),
+                                                    SpaceH16(),
                                                     InkWell(
                                                         onTap: () {
                                                           setState(() {
                                                             WebHome.goToEntities();
                                                           });
                                                         },
-                                                        child: CustomTextBold(title: 'Ver más')),
+                                                        child: CustomTextBold(title: StringConst.SEE_MORE)),
                                                   ],
                                                 ),
                                               ),
@@ -417,14 +419,14 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                         children: [
                           Container(
                             width: Responsive.isDesktopS(context) ? 200 : 150,
-                            child: Text('Directorio Entidades',
+                            child: Text(StringConst.DRAWER_ENTITIES,
                               style: textTheme.displaySmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   fontSize: Responsive.isMobile(context) ? 25 : 35.0,
                                   color: AppColors.white),),
                           ),
                           SizedBox(height: 20,),
-                          CustomTextBold(title: 'Ver más'),
+                          CustomTextBold(title: StringConst.SEE_MORE),
                         ],
                       ),
                     ),
