@@ -22,7 +22,7 @@ class UnemployedUser {
     this.postalCode,
     this.motivation,
     this.interests,
-    this.education,
+    this.educationId,
     this.unemployedType,
     this.belongOrganization,
     this.assignedById,
@@ -48,12 +48,12 @@ class UnemployedUser {
   final String? postalCode;
   final Motivation? motivation;
   final Interests? interests;
-  final Education? education;
   final String? unemployedType;
   final String? belongOrganization;
   final String? assignedById;
   final String? assignedEntityId;
   final String? nationality;
+  final String? educationId;
   final Map<String, bool> gamificationFlags;
 
   factory UnemployedUser.fromMap(Map<String, dynamic> data, String documentId) {
@@ -94,12 +94,6 @@ class UnemployedUser {
       surePurpose: data['interests']['surePurpose'],
     );
 
-    final Education? education = new Education(
-        label: data['education']['label'],
-        value: data['education']['value'],
-        order: data['education']['order']
-    );
-
     final ProfilePic? profilePic = new ProfilePic(
         src: data['profilePic']['src'],
         title: 'photo.jpg'
@@ -125,12 +119,12 @@ class UnemployedUser {
         birthday: data['birthday'],
         motivation: motivation,
         interests: interestsUser,
-        education: education,
         unemployedType: data['unemployedType'],
         belongOrganization: data['belongOrganization'],
         assignedById: data['assignedById'],
         assignedEntityId: data['assignedEntityId'],
         nationality: data['nationality'],
+        educationId: data['educationId'],
         gamificationFlags: gamificationFlags,
     );
   }
@@ -147,13 +141,13 @@ class UnemployedUser {
       'birthday': birthday,
       'motivation': motivation?.toMap(),
       'interests': interests?.toMap(),
-      'education': education?.toMap(),
       'unemployedType': unemployedType,
       'belongOrganization': belongOrganization,
       'assignedById': assignedById,
       'assignedEntityId': assignedEntityId,
       'nationality' : nationality,
       'gamificationFlags': gamificationFlags,
+      'educationId': educationId
     };
   }
 }

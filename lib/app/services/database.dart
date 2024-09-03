@@ -1145,7 +1145,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<KeepLearningOption>> keepLearningOptionsStream() => _service.collectionStream(
     path: APIPath.keepLearningOptions(),
-    queryBuilder: (query) => query.where('keepLearningOptionId', isNotEqualTo: null),
+    queryBuilder: (query) => query.where('title', isNotEqualTo: null),
     builder: (data, documentId) => KeepLearningOption.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );

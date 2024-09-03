@@ -369,7 +369,10 @@ class StringConst {
   static const String FORM_COMPETENCIES_SUB_CATEGORIES = "Sub categoría de Competencias";
   static const String FORM_SPECIFIC_COMPETENCIES = "Competencias específicas";
   static const String FORM_INTERESTS = "Intereses";
+  static const String FORM_INTERESTS_DOTS = "Intereses: ";
+  static const String FORM_KEEP_LEARNING = "Le gustaría seguir aprendiendo: ";
   static const String FORM_SPECIFIC_INTERESTS = "Intereses específicos";
+  static const String FORM_SPECIFIC_INTERESTS_DOTS = "Intereses específicos: ";
   static const String FORM_INTEREST_EMPTY = "Selecciona primero tus intereses";
   static const String FORM_CATEGORIES_EMPTY = "Selecciona primero las categorías de las competencias";
   static const String FORM_SUB_CATEGORIES_EMPTY = "Selecciona primero las sub categorías de las competencias";
@@ -387,7 +390,7 @@ class StringConst {
   static const String FORM_TIME_SPENT_WEEKLY = "¿Cuánto tiempo dedicas a la búsqueda de empleo semanal?";
   static const String FORM_TIME_SPENT_WEEKLY_REV = "Tiempo dedicado";
   static const String FORM_EDUCATION = "Nivel de titulación";
-  static const String FORM_EDUCATION_REV = "Educación";
+  static const String FORM_EDUCATION_REV = "Nivel educativo";
   static const String FORM_EDUCATION_REV_CREATE = "Nivel educativo";
   static const String FORM_NAME_CERTIFIER = "Nombres y Apellidos";
   static const String FORM_COMPANY_CERTIFIER = "Empresa";
@@ -424,6 +427,7 @@ class StringConst {
   static const String FORM_WARNING = "Aviso";
   static const String FORM_NO_IPIL = "Este participante aún no tiene IPILs creados.";
   static const String FORM_NO_IPILS = "Todavía no has creado ningún IPIL.";
+  static const String FORM_AGE = "Edad del participante: ";
 
   static const List<String> RESOURCE_TYPES = [
     'Oferta de empleo',

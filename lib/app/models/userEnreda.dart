@@ -24,6 +24,7 @@ class UserEnreda {
     this.address,
     this.specificInterests = const [],
     this.interests = const [],
+    this.keepLearningOptions = const [],
     this.abilities,
     this.certifications,
     this.unemployedType,
@@ -122,6 +123,15 @@ class UserEnreda {
       });
     } catch (e) {
       print('user not specific intersts');
+    }
+
+    List<String> keepLearningOptions = [];
+    try {
+      data['interests']['continueLearning'].forEach((keepLearningOption) {
+        keepLearningOptions.add(keepLearningOption.toString());
+      });
+    } catch (e) {
+      print('user not keepLearningOptions');
     }
 
     List<String> certifications = [];
@@ -230,6 +240,7 @@ class UserEnreda {
       address: address,
       postalCode: postalCode,
       specificInterests: specificInterests,
+      keepLearningOptions: keepLearningOptions,
       interests: interests,
       unemployedType: unemployedType,
       role: role,
@@ -280,6 +291,7 @@ class UserEnreda {
   final Address? address;
   final List<String> interests;
   final List<String> specificInterests;
+  final List<String> keepLearningOptions;
   final String? unemployedType;
   final List<String>? abilities;
   final List<String>? certifications;
@@ -317,7 +329,7 @@ class UserEnreda {
 
   Map<String, dynamic> toMap() {
     InterestsUserEnreda interestUserEnreda = InterestsUserEnreda(
-        interests: interests, specificInterests: specificInterests);
+        interests: interests, specificInterests: specificInterests, keepLearningOptions: keepLearningOptions,);
     return {
       'email': email,
       'firstName': firstName,
@@ -381,6 +393,7 @@ class UserEnreda {
     Address? address,
     List<String>? specificInterests,
     List<String>? interests,
+    List<String>? keepLearningOptions,
     List<String>? abilities,
     List<String>? resources,
     String? unemployedType,
@@ -424,6 +437,7 @@ class UserEnreda {
       postalCode: postalCode ?? this.postalCode,
       address: address ?? this.address,
       specificInterests: specificInterests ?? this.specificInterests,
+      keepLearningOptions: keepLearningOptions ?? this.keepLearningOptions,
       interests: interests ?? this.interests,
       abilities: abilities ?? this.abilities,
       unemployedType: unemployedType ?? this.unemployedType,

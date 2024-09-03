@@ -139,6 +139,8 @@ class CustomTextSmall extends StatelessWidget {
     TextTheme textTheme = Theme.of(context).textTheme;
     return Text(
       text,
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
       style: textTheme.bodySmall?.copyWith(
         color: color,
         height: height,

@@ -136,6 +136,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   int? timeSpentWeeklyValue;
   String? timeSpentWeeklyId;
   String? educationValue;
+  String? educationId;
   String? unemployedType;
 
   TextEditingController textEditingControllerDateInput = TextEditingController();
@@ -170,6 +171,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     timeSearchingName = "";
     timeSpentWeeklyName = "";
     educationName = "";
+    educationId = "";
     genderName = "";
     interestsNames = "";
     specificInterestsNames = "";
@@ -730,7 +732,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           gender: genderName,
           birthday: _birthday,
           interests: interestsSet,
-          education: education,
+          educationId: educationId,
           address: address,
           role: 'Desempleado',
           unemployedType: unemployedType,
@@ -836,6 +838,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     setState(() {
       this.selectedEducation = education;
       educationName = (education != null ? education.label : "");
+      educationId = education?.educationId;
     });
     educationValue = education?.value;
   }
