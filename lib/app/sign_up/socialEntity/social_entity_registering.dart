@@ -286,7 +286,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
                           color: AppColors.greyDark,
                           fontWeight: FontWeight.w400,
                         ),
-                        prefixIcon:CountryCodePicker(
+                        prefixIcon: CountryCodePicker(
                           dialogSize: Size(350.0, MediaQuery.of(context).size.height * 0.6),
                           onChanged: (code){
                             initialCountryCode = code.code!;

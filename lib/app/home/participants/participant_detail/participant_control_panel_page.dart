@@ -1,6 +1,4 @@
-import 'package:circular_seek_bar/circular_seek_bar.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
-import 'package:enreda_empresas/app/common_widgets/custom_text_title.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
@@ -8,11 +6,10 @@ import 'package:enreda_empresas/app/common_widgets/show_custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/my_curriculum_page.dart';
-import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
-import 'package:enreda_empresas/app/models/personalDocumentType.dart';
+import 'package:enreda_empresas/app/models/keepLearningOption.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -25,6 +22,7 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+
 class ParticipantControlPanelPage extends StatelessWidget {
   const ParticipantControlPanelPage({required this.participantUser, super.key});
 
@@ -32,8 +30,8 @@ class ParticipantControlPanelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Responsive.isDesktop(context)? _buildBodyDesktop(context):
-        _buildBodyMobile(context);
+    return Responsive.isMobile(context) || Responsive.isDesktopS(context) ? _buildBodyMobile(context):
+        _buildBodyDesktop(context);
   }
 
   Widget _buildBodyDesktop(BuildContext context) {
@@ -42,31 +40,37 @@ class ParticipantControlPanelPage extends StatelessWidget {
       children: [
         _buildGamificationSection(context),
         SpaceH40(),
+        Container(
+          height: participantUser.competencies.isEmpty ? 460 : 650,
+          child: Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInitialFormSection(context),
+                      SpaceH20(),
+                      _buildCompetenciesSection(context),
+                    ],
+                  ),
+                ),
+                SpaceW20(),
+                _buildCvSection(context),
+              ],
+            ),
+          ),
+        ),
+        SpaceH20(),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildInitialFormSection(context),
-                  SpaceH40(),
-                  _buildCompetenciesSection(context),
-                  SpaceH40(),
-                  _buildResourcesSection(context),
-                ],
-              ),
-            ),
-            SpaceW20(),
-            Column(
-              children: [
-                _buildCvSection(context),
-                SpaceH40(),
-                //_buildDocumetationSection(context),
-              ],
+              child: _buildResourcesSection(context),
             ),
           ],
         ),
+        SpaceH20(),
       ],
     );
   }
@@ -188,7 +192,16 @@ class ParticipantControlPanelPage extends StatelessWidget {
     final database = Provider.of<Database>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
     double fontSize = responsiveSize(context, 12, 16, md: 15);
-
+    int calculateAge(DateTime birthDate) {
+      final today = DateTime.now();
+      int age = today.year - birthDate.year;
+      if (today.month < birthDate.month ||
+          (today.month == birthDate.month && today.day < birthDate.day)) {
+        age--;
+      }
+      return age;
+    }
+    int age = calculateAge(participantUser.birthday!);
     return RoundedContainer(
       margin: EdgeInsets.all(0.0),
       contentPadding: EdgeInsets.all(0.0),
@@ -201,99 +214,15 @@ class ParticipantControlPanelPage extends StatelessWidget {
             child: CustomTextBoldTitle(title: StringConst.INITIAL_FORM_DATA),
           ),
           Padding(
-            padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+            padding: const EdgeInsets.only(bottom: Sizes.kDefaultPaddingDouble, left: Sizes.kDefaultPaddingDouble, right: Sizes.kDefaultPaddingDouble),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                StreamBuilder<List<Ability>>(
-                    stream: database.abilityStream(),
-                    builder: (context, snapshot) {
-                      String abilitiesString = "";
-                      if (snapshot.hasData) {
-                        participantUser.abilities!.forEach((abilityId) {
-                          final abilityName = snapshot.data!.firstWhere((a) => abilityId == a.abilityId).name;
-                          abilitiesString = "$abilitiesString$abilityName, ";
-                        });
-                        if (abilitiesString.isNotEmpty) {
-                          abilitiesString = abilitiesString.substring(0, abilitiesString.lastIndexOf(","));
-                        }
-                      }
-                      return RichText(
-                        text: TextSpan(
-                          text: "${StringConst.FORM_ABILITIES_REV}: ",
-                          style: textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.turquoiseBlue,
-                            height: 1.5,
-                            fontSize: fontSize,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: abilitiesString,
-                              style: textTheme.bodySmall?.copyWith(
-                                fontSize: fontSize,
-                              ),)
-                          ],
-                        ),
-                      );
-                    }
-                ),
-                SpaceH12(),
-                RichText(
-                  text: TextSpan(
-                    text: "${StringConst.FORM_DEDICATION_REV}: ",
-                    style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.turquoiseBlue,
-                      height: 1.5,
-                      fontSize: fontSize,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: participantUser.motivation?.dedication?.label??"",
-                        style: textTheme.bodySmall?.copyWith(
-                          fontSize: fontSize,
-                        ),)
-                    ],
-                  ),
-                ),
-                SpaceH12(),
-                RichText(
-                  text: TextSpan(
-                    text: "${StringConst.FORM_TIME_SEARCHING_REV}: ",
-                    style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.turquoiseBlue,
-                      height: 1.5,
-                      fontSize: fontSize,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: participantUser.motivation?.timeSearching?.label??"",
-                        style: textTheme.bodySmall?.copyWith(
-                          fontSize: fontSize,
-                        ),)
-                    ],
-                  ),
-                ),
-                SpaceH12(),
-                RichText(
-                  text: TextSpan(
-                    text: "${StringConst.FORM_TIME_SPENT_WEEKLY_REV}: ",
-                    style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.turquoiseBlue,
-                      height: 1.5,
-                      fontSize: fontSize,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: participantUser.motivation?.timeSpentWeekly?.label??"",
-                        style: textTheme.bodySmall?.copyWith(
-                          fontSize: fontSize,
-                        ),)
-                    ],
-                  ),
+                Row(
+                  children: [
+                    CustomTextBold(title: StringConst.FORM_AGE, color: AppColors.primary900,),
+                    CustomTextSmall(text: '${age} años'),
+                  ],
                 ),
                 SpaceH12(),
                 StreamBuilder(
@@ -302,7 +231,6 @@ class ParticipantControlPanelPage extends StatelessWidget {
                       Education? myMaxEducation;
                       if (snapshotEducations.hasData) {
                         final educations = snapshotEducations.data!;
-
                         if (participantUser.educationId!.isNotEmpty) {
                           myMaxEducation = educations.firstWhere((e) => e.educationId == participantUser.educationId, orElse: () => Education(label: "", value: "", order: 0));
                           return RichText(
@@ -323,7 +251,8 @@ class ParticipantControlPanelPage extends StatelessWidget {
                               ],
                             ),
                           );
-                        } else {
+                        }
+                        else {
                           return StreamBuilder(
                               stream: database.myExperiencesStream(participantUser.userId ?? ''),
                               builder: (context, snapshotExperiences) {
@@ -366,7 +295,12 @@ class ParticipantControlPanelPage extends StatelessWidget {
                                     return Container();
                                   }
                                 } else {
-                                  return Container();
+                                  return Row(
+                                    children: [
+                                      CustomTextBold(title: StringConst.FORM_EDUCATION_REV, color: AppColors.primary900,),
+                                      CustomTextSmall(text: 'No indicado'),
+                                    ],
+                                  );
                                 }
                               });
                         }
@@ -389,10 +323,10 @@ class ParticipantControlPanelPage extends StatelessWidget {
                         }}
                       return RichText(
                         text: TextSpan(
-                          text: "${StringConst.FORM_INTERESTS}: ",
+                          text: StringConst.FORM_INTERESTS_DOTS,
                           style: textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: AppColors.turquoiseBlue,
+                            color: AppColors.primary900,
                             height: 1.5,
                             fontSize: fontSize,
                           ),
@@ -423,10 +357,10 @@ class ParticipantControlPanelPage extends StatelessWidget {
 
                       return RichText(
                         text: TextSpan(
-                          text: "${StringConst.FORM_SPECIFIC_INTERESTS}: ",
+                          text: StringConst.FORM_SPECIFIC_INTERESTS_DOTS,
                           style: textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: AppColors.turquoiseBlue,
+                            color: AppColors.primary900,
                             height: 1.5,
                             fontSize: fontSize,
                           ),
@@ -441,6 +375,42 @@ class ParticipantControlPanelPage extends StatelessWidget {
                       );
                     }),
                 SpaceH12(),
+                StreamBuilder<List<KeepLearningOption>>(
+                    stream: database.keepLearningOptionsStream(),
+                    builder: (context, snapshot) {
+                      String keepLearningString = "";
+                      if(!snapshot.hasData) return Container();
+                      if (snapshot.hasData) {
+                        participantUser.keepLearningOptions.forEach((id) {
+                          final interestName = snapshot.data!.firstWhere((i) => id == i.keepLearningOptionId).title;
+                          keepLearningString = "$keepLearningString$interestName, ";
+                        });
+                        if (keepLearningString.isNotEmpty) {
+                          keepLearningString = keepLearningString.substring(0, keepLearningString.lastIndexOf(","));
+                        }
+                        if (keepLearningString.isEmpty || keepLearningString == " ") {
+                          keepLearningString = 'No indicado';
+                        }
+                      }
+                      return RichText(
+                        text: TextSpan(
+                          text: StringConst.FORM_KEEP_LEARNING,
+                          style: textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary900,
+                            height: 1.5,
+                            fontSize: fontSize,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: keepLearningString,
+                              style: textTheme.bodySmall?.copyWith(
+                                fontSize: fontSize,
+                              ),)
+                          ],
+                        ),
+                      );
+                    }),
               ],
             ),
           ),
@@ -460,7 +430,6 @@ class ParticipantControlPanelPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomTextBoldTitle(title: StringConst.COMPETENCIES),
-          SpaceH20(),
           StreamBuilder<List<Competency>>(
               stream: database.competenciesStream(),
               builder: (context, snapshotCompetencies) {
@@ -479,11 +448,11 @@ class ParticipantControlPanelPage extends StatelessWidget {
                           StringConst.NO_COMPETENCIES,
                           style: textTheme.bodyMedium,
                         )),
-                  ): Column(
+                  ) : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: Responsive.isDesktop(context)? 270.0: 180.0,
+                        height: Responsive.isDesktop(context)? 210.0 : 180.0,
                         child: ScrollConfiguration(
                           behavior: MyCustomScrollBehavior(),
                           child: ListView(
@@ -504,7 +473,7 @@ class ParticipantControlPanelPage extends StatelessWidget {
                                         //mini: true,
                                       ),
                                       Positioned(
-                                        bottom: Responsive.isDesktop(context)?5.0: 0.0,
+                                        bottom: 0,
                                         child: Text(
                                             status ==
                                                 StringConst
@@ -575,8 +544,8 @@ class ParticipantControlPanelPage extends StatelessWidget {
         RoundedContainer(
           margin: EdgeInsets.all(0.0),
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          width: 340.0,
-          height: 365.0,
+          width: Responsive.isMobile(context) ? MediaQuery.sizeOf(context).width : 340.0,
+          height: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? 450.0 : participantUser.competencies.isEmpty ? 430.0 : 620,
           borderColor: AppColors.greyAlt.withOpacity(0.15),
           child: SingleChildScrollView(
             physics: NeverScrollableScrollPhysics(),
@@ -610,71 +579,6 @@ class ParticipantControlPanelPage extends StatelessWidget {
       ],
     );
   }
-
-  // Widget _buildDocumetationSection(BuildContext context) {
-  //   final database = Provider.of<Database>(context, listen: false);
-  //   double maxValue = 10;
-  //   double value = 0;
-  //   return StreamBuilder<List<PersonalDocumentType>>(
-  //       stream: database.personalDocumentTypeStream(),
-  //       builder: (context, snapshot) {
-  //         if (snapshot.hasData) {
-  //           maxValue = snapshot.data!.length.toDouble();
-  //           value = participantUser.personalDocuments.where((userDocument) =>
-  //               userDocument.document.isNotEmpty && snapshot.data!.any((document) => document.title == userDocument.name)
-  //           ).length.toDouble();
-  //         }
-  //         return RoundedContainer(
-  //           margin: EdgeInsets.all(0.0),
-  //           height: 420.0,
-  //           width: 340.0,
-  //           borderColor: AppColors.greyAlt.withOpacity(0.15),
-  //           child: Column (
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               CustomTextBoldTitle(title: StringConst.DOCUMENTATION),
-  //               SpaceH20(),
-  //               Stack(
-  //                 children: [
-  //                   Center(
-  //                     child: CircularSeekBar(
-  //                       height: 260,
-  //                       width: 260,
-  //                       startAngle: 45,
-  //                       sweepAngle: 270,
-  //                       progress: value,
-  //                       maxProgress: maxValue,
-  //                       barWidth: 15,
-  //                       progressColor: AppColors.darkYellow,
-  //                       innerThumbStrokeWidth: 15,
-  //                       innerThumbColor: AppColors.darkYellow,
-  //                       outerThumbColor: Colors.transparent,
-  //                       trackColor: AppColors.lightYellow,
-  //                       strokeCap: StrokeCap.round,
-  //                       animation: true,
-  //                       animDurationMillis: 1500,
-  //                     ),
-  //                   ),
-  //                   Center(
-  //                     child: Column(
-  //                         children: [
-  //                           Padding(
-  //                             padding: const EdgeInsets.only(left: 40.0),
-  //                             child: Image.asset(ImagePath.PARTICIPANT_DOCUMENTATION_ICON, width:220,),
-  //                           ),
-  //                           CustomTextBoldTitle(title: "${(value/maxValue)*100}%"),
-  //                           CustomTextMediumBold(text: StringConst.COMPLETED.toUpperCase()),
-  //                         ],
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ],
-  //           ),
-  //         );
-  //     }
-  //   );
-  // }
 
   Widget _buildResourcesSection(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
