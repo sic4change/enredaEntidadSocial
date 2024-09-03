@@ -641,6 +641,7 @@ class StringConst {
   static const String DRAWER_MY_RESOURCES = 'Mis recursos';
   static const String DRAWER_TOOLS = 'Caja de herramientas';
   static const String DRAWER_ENTITIES = 'Agenda';
+  static const String SEE_MORE = 'Ver más';
 
   //ToolBox
   static const String TOOL_BOX = 'Caja de herramientas ';

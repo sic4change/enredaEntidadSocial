@@ -51,7 +51,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             // contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) :
             // EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble * 2, vertical: Sizes.kDefaultPaddingDouble),
             child: Stack(
-              alignment: Alignment.topCenter,
+              alignment: Alignment.topLeft,
               children: [
                 Container(
                   height: 80,
