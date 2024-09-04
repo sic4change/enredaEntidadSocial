@@ -512,6 +512,25 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
               ),
             ),
             _buildDetailResource(context, resource),
+            SpaceH20(),
+            SingleChildScrollView(
+                child: Stack(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomTextTitle(
+                            title: '${resource.participants?.length.toString()} ${StringConst.PARTICIPANTS.toUpperCase()}',
+                            color: AppColors.turquoiseBlue),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30.0),
+                      child: _buildParticipantsList(context, resource),
+                    ),
+                  ],
+                )),
+            SpaceH20(),
           ],
         ),
       ),
