@@ -99,24 +99,25 @@ class _ToolBoxPageState extends State<ToolBoxPage> {
                             color: ToolBoxPage.selectedIndex.value == 1 ? AppColors.yellow : AppColors.white,
                           ),
                         ),
-                        Responsive.isMobile(context) ? SizedBox(height: Sizes.mainPadding,) : SizedBox(width: Sizes.mainPadding,),
-                        InkWell(
-                          onTap: () => {
-                            setState(() {
-                              ToolBoxPage.selectedIndex.value = 2;
-                            })
-                          },
-                          child: CustomStepperButton(
-                            child: CustomTextBold(title: StringConst.WORKFLOW, color: AppColors.turquoiseBlue,),
-                            color: ToolBoxPage.selectedIndex.value == 2 ? AppColors.yellow : AppColors.white,
-                          ),
-                        ),
+                        // Responsive.isMobile(context) ? SizedBox(height: Sizes.mainPadding,) : SizedBox(width: Sizes.mainPadding,),
+                        // InkWell(
+                        //   onTap: () => {
+                        //     setState(() {
+                        //       ToolBoxPage.selectedIndex.value = 2;
+                        //     })
+                        //   },
+                        //   child: CustomStepperButton(
+                        //     child: CustomTextBold(title: StringConst.WORKFLOW, color: AppColors.turquoiseBlue,),
+                        //     color: ToolBoxPage.selectedIndex.value == 2 ? AppColors.yellow : AppColors.white,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ],
                 ),
                 Container(
-                    margin: Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 9) : EdgeInsets.only(top: Sizes.mainPadding * 6),
+                    //margin: Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 9) : EdgeInsets.only(top: Sizes.mainPadding * 6),
+                    margin: Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 6) : EdgeInsets.only(top: Sizes.mainPadding * 6),
                     child: bodyWidget[selectedIndex]),
               ],
             ),

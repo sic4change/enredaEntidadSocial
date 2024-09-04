@@ -575,7 +575,7 @@ class StringConst {
   static const String FORM_MISSING_DOCUMENT_TITLE = 'Falta añadir un nuevo documento.';
   static const String FORM_MISSING_DOCUMENT = 'Añadir documento';
   static const String INITIAL_FORM = "Ficha de ingreso";
-  static const String INITIAL_FORM_DATA = "Datos del formulario inicial";
+  static const String INITIAL_FORM_DATA = "Datos del formulario de inscripción";
   static const String RESOURCES_JOINED = "Se ha inscrito en los siguientes recursos:";
   static const String NO_COMPETENCIES = "Aquí aparecerán las competencias evaluadas a través de los microtests";
   static const String NO_RESOURCES = "Aquí aparecerán los recursos a los que está inscrito este participante";
@@ -648,8 +648,9 @@ class StringConst {
   static const String SEE_MORE = 'Ver más';
 
   //ToolBox
-  static const String TOOL_BOX = 'Caja de herramientas ';
+  static const String TOOL_BOX = 'Caja de Herramientas ';
   static const String ENREDA_METHODOLOGY = 'Metodología Enreda';
+  static const String ENREDA_METHODOLOGY_TITLE = 'Accede al Manual de Intervención y descubre cómo nuestra metodología transforma vidas, ayudando a las personas a construir un futuro mejor.';
   static const String WORKFLOW = 'Workflow de intervención';
   static const String MANUAL_METHODOLOGY = 'Manual de Intervención de Metodología';
   static const String PREVIEW = 'Vista previa';
