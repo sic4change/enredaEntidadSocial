@@ -97,12 +97,10 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                 Positioned(
                     top: -35,
                     right: 0,
-                    child: Expanded(
-                    flex: Responsive.isMobile(context) ? 0 : 1,
                     child: Container(
                         width: 380,
                         height: 380,
-                        child: Image.asset(ImagePath.CONTROL_TECHNICAL,)))),
+                        child: Image.asset(ImagePath.CONTROL_TECHNICAL,))),
                 Container(
                     margin: const EdgeInsets.only(top: 320.0, right: 50.0, left: 0, bottom: 10.0,),
                     child: Image.asset(ImagePath.LOGO_LINES)),
@@ -297,6 +295,7 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
       margin: EdgeInsets.zero,
       child: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
                 margin: const EdgeInsets.only(top: 10.0, right: 0, left: 0, bottom: 10.0,),
