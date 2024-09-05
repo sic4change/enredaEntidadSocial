@@ -79,19 +79,10 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                               child: CircularProgressIndicator());
                         }
                         if (snapshot.hasData) {
-                          List<Resource> resource = snapshot.data!;
-                          totalResources = resource.length;
-                          return StreamBuilder<SocialEntity>(
-                            stream: database.socialEntityStreamById(user.socialEntityId!),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              }
-                              final SocialEntity? socialEntity = snapshot.data;
-                              return CustomTextBoldTitle(title: '${resource.length.toString()} recursos creados por ${socialEntity == null ? '' : socialEntity.name}');
-                            },
-                          );
+                          List<Resource> resources = snapshot.data!;
+                          totalResources = resources.length;
+                          return CustomTextBoldTitle(title: resources.length == 1 ? '${resources.length.toString()} recurso creado por ${user.firstName}'
+                              : '${resources.length.toString()} recursos creados por ${user.firstName}');
                         }
                         return const Center(child: CircularProgressIndicator());
                       });

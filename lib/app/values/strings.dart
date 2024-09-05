@@ -644,7 +644,7 @@ class StringConst {
   //Side drawer
   static const String DRAWER_CONTROL_PANEL = 'Panel de control';
   static const String DRAWER_PARTICIPANTS = 'Participantes';
-  static const String DRAWER_MY_RESOURCES = 'Mis recursos';
+  static const String DRAWER_MY_RESOURCES = 'Recursos';
   static const String DRAWER_TOOLS = 'Caja de herramientas';
   static const String DRAWER_ENTITIES = 'Agenda';
   static const String SEE_MORE = 'Ver más';
