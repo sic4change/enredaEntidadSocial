@@ -1,4 +1,5 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/common_widgets/empty-list.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/home/resources/list_item_builder_grid.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
@@ -16,6 +17,7 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../values/strings.dart';
 import 'global.dart' as globals;
 
 class ResourcesListPage extends StatefulWidget {
@@ -56,7 +58,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
   Widget _buildMyResources(BuildContext context) {
     final auth = Provider.of<AuthBase>(context, listen: false);
     final database = Provider.of<Database>(context, listen: false);
-
+    int totalResources = 0;
     buildTitle() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,6 +80,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                         }
                         if (snapshot.hasData) {
                           List<Resource> resource = snapshot.data!;
+                          totalResources = resource.length;
                           return StreamBuilder<SocialEntity>(
                             stream: database.socialEntityStreamById(user.socialEntityId!),
                             builder: (context, snapshot) {
@@ -303,7 +306,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                         builder: (context) {
                           var controller =
                           ExpandableController.of(context, required: true)!;
-                          return Padding(
+                          return totalResources > 3 ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: EnredaButton(
                               buttonTitle: controller.expanded ? "Ver menos recursos" : "Ver más recursos",
@@ -311,7 +314,7 @@ class _ResourcesListPageState extends State<ResourcesListPage> {
                                 controller.toggle();
                               },
                             ),
-                          );
+                          ) : Container();
                         },
                       ),
                     ],

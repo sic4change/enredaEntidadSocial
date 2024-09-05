@@ -427,6 +427,7 @@ class StringConst {
   static const String FORM_WARNING = "Aviso";
   static const String FORM_NO_IPIL = "Este participante aún no tiene IPILs creados.";
   static const String FORM_NO_IPILS = "Todavía no has creado ningún IPIL.";
+  static const String FORM_NO_RESOURCES = "Todavía no has creado ningún recurso.";
   static const String FORM_AGE = "Edad del participante: ";
 
   static const List<String> RESOURCE_TYPES = [
@@ -610,6 +611,7 @@ class StringConst {
   static const String START_HERE = "Comienza aquí...";
   static const String GOALS_MONITORING = "Seguimiento:";
   static const String ADD_IPIL_ENTRY = "Crea un IPIL";
+  static const String ADD_RESOURCE_ENTRY = "Crea un crecurso";
   static const String ADD_REPORT_ENTRY = 'Crea el Informe Inicial';
   static const String NO_REPORT_ENTRY = 'Todavía no has creado ningún informe social';
   static const String DOWNLOAD_ALL = "Descargar todos";

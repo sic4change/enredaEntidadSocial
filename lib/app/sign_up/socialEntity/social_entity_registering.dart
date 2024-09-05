@@ -611,7 +611,7 @@ class _SocialEntityRegisteringState extends State<SocialEntityRegistering> {
         child: Text(
           StringConst.FORM_SOCIAL_ENTITY_INFO,
           style: textTheme?.titleSmall!.copyWith(
-              color: AppColors.turquoiseBlue
+              color: AppColors.primary900
           ),
         ),
       ),
