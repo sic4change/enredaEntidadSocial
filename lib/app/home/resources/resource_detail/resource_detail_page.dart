@@ -303,7 +303,13 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                                         buildShare(context, resource, AppColors.darkGray, AppColors.darkGray, Colors.white),
                                         SizedBox(width: 10),
                                       ],
-                                    ) : SizedBox(height: 30,),
+                                    ) : Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        buildShare(context, resource, AppColors.darkGray, AppColors.darkGray, Colors.white),
+                                        SizedBox(width: 10),
+                                      ],
+                                    ),
                                   ]
                               ),
                             ),
@@ -780,23 +786,23 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
               );
             },
           ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     Padding(
-          //       padding: const EdgeInsets.all(15),
-          //       child: AddYellowButton(
-          //         text: 'Invitar a este recurso',
-          //         onPressed: () => showDialog(context: context, builder: (_) {
-          //           return CustomDialog(
-          //               width: Responsive.isMobile(context)? widthOfScreen(context) : widthOfScreen(context)/2,
-          //               child: InviteUsersToResourcePage(resource: resource,)
-          //           );
-          //         }),
-          //       ),
-          //     ),
-          //   ],
-          // ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: AddYellowButton(
+                  text: 'Invitar a este recurso',
+                  onPressed: () => showDialog(context: context, builder: (_) {
+                    return CustomDialog(
+                        width: Responsive.isMobile(context)? widthOfScreen(context) : widthOfScreen(context)/2,
+                        child: InviteUsersToResourcePage(resource: resource,)
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
