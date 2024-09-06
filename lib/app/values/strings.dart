@@ -196,8 +196,9 @@ class StringConst {
   static const String PHONE_NUMBER = "+34 613 04 24 34";
   static const String MAIL_ME = "Contáctanos";
   static const String FOLLOW_ME_2 = "Follow Me";
-  static const String RIGHTS_RESERVED = "Política de privacidad";
-  static const String BUILT_BY = "Condiciones de uso";
+  static const String PRIVACY_POLICIES = "Política de privacidad";
+  static const String USE_CONDITIONS = "Condiciones de uso.";
+  static const String FORM_PRIVACY_DATA_ERROR = "Para continuar debe autorizar el uso de sus datos personales.";
   static const String SIC4CHANGE_FOOTER = "SIC4Change";
   static const String DESIGNED_BY = "";
   static const String WEB_SIC4Change = "https://www.sic4change.org/";
@@ -410,8 +411,8 @@ class StringConst {
   static const String FORM_BACK = "Atrás";
   static const String FORM_ACCEPTANCE = "Si es conforme, pulse en 'ACEPTAR'. Puede volver 'ATRÁS' y modificar la información.";
   static const String FORM_ACCEPTANCE_ERROR = "Debe aceptar las Políticas y Condiciones";
-  static const String FORM_ACCEPT_SENTENCE = "Acepto las";
-  static const String FORM_ACCEPT_SENTENCE_Y = "y";
+  static const String FORM_ACCEPT_SENTENCE = "Acepto las ";
+  static const String FORM_ACCEPT_SENTENCE_Y = " y ";
   static const String FORM_SUCCESS = "¡Registro exitoso!";
   static const String FORM_SUCCESS_MAIL = "Por favor revisa tu correo electrónico.";
   static const String FORM_SUCCESS_CREATED = "El recurso fue creado exitosamente.";
@@ -429,6 +430,7 @@ class StringConst {
   static const String FORM_NO_IPILS = "Todavía no has creado ningún IPIL.";
   static const String FORM_NO_RESOURCES = "Todavía no has creado ningún recurso.";
   static const String FORM_AGE = "Edad del participante: ";
+  static const String FORM_ACCORDING = "Según la ";
 
   static const List<String> RESOURCE_TYPES = [
     'Oferta de empleo',

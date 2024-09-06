@@ -5,7 +5,7 @@ import '../../../../utils/functions.dart';
 import '../../../../values/strings.dart';
 import '../../../../values/values.dart';
 
-Widget checkboxForm(BuildContext context, _checkFieldKey, bool _isChecked, functionSetState) {
+Widget checkboxDataForm(BuildContext context, _checkFieldKey, bool _isChecked, functionSetState) {
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
   return Form(
@@ -27,7 +27,7 @@ Widget checkboxForm(BuildContext context, _checkFieldKey, bool _isChecked, funct
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: StringConst.FORM_ACCEPT_SENTENCE,
+                          text: StringConst.FORM_ACCORDING,
                           style: textTheme.bodySmall?.copyWith(
                             color: AppColors.primary900,
                             height: 1.5,
@@ -35,7 +35,7 @@ Widget checkboxForm(BuildContext context, _checkFieldKey, bool _isChecked, funct
                           ),
                         ),
                         TextSpan(
-                          text: StringConst.PRIVACY_POLICIES,
+                          text: StringConst.PERSONAL_DATA_LAW,
                           style: textTheme.titleMedium?.copyWith(
                             color: AppColors.primary900,
                             height: 1.5,
@@ -43,33 +43,21 @@ Widget checkboxForm(BuildContext context, _checkFieldKey, bool _isChecked, funct
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              launchURL(StringConst.POLICIES_URL);
+                              launchURL(StringConst.PERSONAL_DATA_LAW_PDF);
                             },
                         ),
                         TextSpan(
-                          text: StringConst.FORM_ACCEPT_SENTENCE_Y,
+                          text: StringConst.PERSONAL_DATA_LAW_TEXT,
                           style: textTheme.bodySmall?.copyWith(
                             color: AppColors.primary900,
                             height: 1.5,
                             fontSize: fontSize,
                           ),
-                        ),
-                        TextSpan(
-                          text: StringConst.USE_CONDITIONS,
-                          style: textTheme.titleMedium?.copyWith(
-                            color: AppColors.primary900,
-                            height: 1.5,
-                            fontSize: fontSize,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              launchURL(StringConst.USE_CONDITIONS_URL);
-                            },
                         ),
                       ],
                     ),
                   ),
-                ),
+                )
               ],
             ),
             state.errorText == null
@@ -78,7 +66,7 @@ Widget checkboxForm(BuildContext context, _checkFieldKey, bool _isChecked, funct
           ],
         );
       },
-      validator: (value) => _isChecked ? null : StringConst.FORM_ACCEPTANCE_ERROR,
+      validator: (value) => _isChecked ? null : StringConst.FORM_PRIVACY_DATA_ERROR,
     ),
   );
 }

@@ -38,7 +38,7 @@ Widget checkboxForm(BuildContext context, _checkFieldKey, bool _isChecked, funct
                           direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(StringConst.RIGHTS_RESERVED,
+                            Text(StringConst.PRIVACY_POLICIES,
                               style: textTheme.bodySmall?.copyWith(
                                 height: 1.5,
                                 color: AppColors.primaryColor,
@@ -66,7 +66,7 @@ Widget checkboxForm(BuildContext context, _checkFieldKey, bool _isChecked, funct
                           direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(StringConst.BUILT_BY,
+                            Text(StringConst.USE_CONDITIONS,
                               style: textTheme.bodySmall?.copyWith(
                                 height: 1.5,
                                 color: AppColors.primaryColor,
