@@ -13,6 +13,7 @@ import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/checkbox_form.dart';
+import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/chekbox_data_form.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_abilities.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_city.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/validating_form_controls/stream_builder_country.dart';
@@ -76,6 +77,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   final _formKeyMotivations = GlobalKey<FormState>();
   final _formKeyInterests = GlobalKey<FormState>();
   final _checkFieldKey = GlobalKey<FormState>();
+  final _checkFieldKeyDataProtectionPolicy = GlobalKey<FormState>();
 
   String? _email, _firstName, _lastName, _phone;
   DateTime? _birthday;
@@ -87,6 +89,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   int usersIds = 0;
   int currentStep = 0;
   bool _isChecked = false;
+  bool _isCheckedDataProtectionPolicy = false;
 
   List<String> countries = [];
   List<String> provinces = [];
@@ -627,7 +630,17 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
               keepLearningOptionsNames,
             ),
           ),
-          checkboxForm(context, _checkFieldKey, _isChecked, functionSetState)
+          Padding(
+            padding: Responsive.isMobile(context) ? EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble * 2),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                checkboxForm(context, _checkFieldKey, _isChecked, functionSetState),
+                checkboxDataForm(context, _checkFieldKeyDataProtectionPolicy, _isCheckedDataProtectionPolicy, functionDataSetState),
+              ],
+            ),
+          )
         ],
       ),
     );
@@ -672,8 +685,20 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     return false;
   }
 
+  bool _validateCheckDataField() {
+    final checkKeyData = _checkFieldKeyDataProtectionPolicy.currentState;
+    if (checkKeyData!.validate() && isRegistered == 0) {
+      checkKeyData.save();
+      return true;
+    }
+    return false;
+  }
+
   Future<void> _submit() async {
-    if (_validateCheckField()) {
+    bool checkFieldValid = _validateCheckField();
+    bool checkDataFieldValid = _validateCheckDataField();
+
+    if (checkFieldValid && checkDataFieldValid) {
 
       final database = Provider.of<Database>(context, listen: false);
       final auth = Provider.of<AuthBase>(context, listen: false);
@@ -736,10 +761,11 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           address: address,
           role: 'Desempleado',
           unemployedType: unemployedType,
-          belongOrganization: _belongOrganization,
-          assignedById: user.userId,
-          assignedEntityId: selectedSocialEntity!.socialEntityId ?? null,
           nationality: selectedNationality,
+          assignedEntityId: selectedSocialEntity!.socialEntityId ?? null,
+          assignedById: user.userId,
+          checkAgreeCV: _isCheckedDataProtectionPolicy,
+          belongOrganization: _belongOrganization,
           gamificationFlags: {
             UserEnreda.FLAG_SIGN_UP: true,
             UserEnreda.FLAG_PILL_WHAT_IS_ENREDA: true,
@@ -759,6 +785,25 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
         showExceptionAlertDialog(context,
             title: StringConst.FORM_ERROR, exception: e).then((value) => Navigator.pop(context));
       }
+    } else {
+      if (!checkFieldValid) {
+        showAlertDialog(
+          context,
+          title: 'Aviso',
+          content: 'Para continuar debe aceptar las Políticas y Condiciones de uso.',
+          defaultActionText: 'Aceptar',
+        );
+        return;
+      }
+      if (!checkDataFieldValid) {
+        showAlertDialog(
+          context,
+          title: 'Aviso',
+          content: 'Para continuar debe autorizar el uso de sus datos personales.',
+          defaultActionText: 'Aceptar',
+        );
+        return;
+      }
     }
   }
 
@@ -769,6 +814,12 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   void functionSetState(bool? val) {
     setState(() {
       _isChecked = val!;
+    });
+  }
+
+  void functionDataSetState(bool? val) {
+    setState(() {
+      _isCheckedDataProtectionPolicy = val!;
     });
   }
 
