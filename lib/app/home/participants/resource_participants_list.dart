@@ -7,11 +7,16 @@ import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+
+import '../../models/city.dart';
+import '../../models/country.dart';
+import '../../models/province.dart';
 
 
 class ParticipantResourcesList extends StatefulWidget {
@@ -59,14 +64,10 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
             color: _buttonColor,
             onPressed: _buttonDisabled == false ? () async {
               if (_isSelected == true) {
-                final startDate = DateFormat('dd-MM-yyyy').format(resource.start!);
-                final endDate = DateFormat('dd-MM-yyyy').format(resource.end!);
                 final resourceInvitation = ResourceInvitation(
                   resourceId: resource.resourceId!,
                   resourceTitle: resource.title,
-                  resourceDates: 'Del $startDate al $endDate',
-                  resourceDuration: resource.duration!,
-                  resourceDescription: resource.description,
+                  resourceDescription: '${resource.resourceCategoryName!} en ${resource.cityName!}, ${resource.provinceName!}, ${resource.countryName!}',
                   unemployedId: widget.participant.userId!,
                   unemployedName: '${widget.participant.firstName!} ${widget.participant.lastName}',
                   unemployedEmail: widget.participant.email,
@@ -84,7 +85,7 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
                     context,
                     title: '¡Recurso: ${resourcesList[_selectedCertify!].title}',
                     content: '¡Ha sido enviada la invitación con éxito!',
-                    defaultActionText: 'ACEPTAR',
+                    defaultActionText: 'Aceptar',
                   );
                 } on FirebaseException catch (e) {
                   showExceptionAlertDialog(context,
@@ -103,9 +104,7 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
     return StreamBuilder<List<Resource>>(
       stream: database.myResourcesStream(widget.organizerId),
       builder: (context, snapshot) {
-        if (snapshot.hasData &&
-            snapshot.data!.isNotEmpty &&
-            snapshot.connectionState == ConnectionState.active) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           resourcesList = snapshot.data!;
           return Center(
             child: Column(
@@ -119,30 +118,49 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
                   children: List<Widget>.generate(
                     resourcesList.length,
                     (int index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 5.0),
-                        child: ChoiceChip(
-                          backgroundColor: AppColors.greyLight,
-                          label: Text(
-                            resourcesList[index].title,
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: _textColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          labelPadding: const EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 5.0),
-                          selected: _selectedCertify == index,
-                          selectedColor: _selectedColor,
-                          onSelected: (value) {
-                            setState(() {
-                              _selectResource(index);
-                              _isSelected = true;
-                              resource = resourcesList[index];
-                            });
-                          },
-                        ),
-                      );
+                      return StreamBuilder<Country>(
+                          stream: database.countryStream(resourcesList[index].country),
+                          builder: (context, snapshot) {
+                            final country = snapshot.data;
+                            resourcesList[index].countryName = country == null ? '' : country.name;
+                            return StreamBuilder<Province>(
+                                stream: database.provinceStream(resourcesList[index].province),
+                                builder: (context, snapshot) {
+                                  final province = snapshot.data;
+                                  resourcesList[index].provinceName = province == null ? '' : province.name;
+                                  return StreamBuilder<City>(
+                                      stream: database.cityStream(resourcesList[index].city),
+                                      builder: (context, snapshot) {
+                                        final city = snapshot.data;
+                                        resourcesList[index].cityName = city == null ? '' : city.name;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(bottom: 5.0),
+                                          child: ChoiceChip(
+                                            backgroundColor: AppColors.greyLight,
+                                            label: Text(
+                                              resourcesList[index].title,
+                                              style: textTheme.bodyMedium?.copyWith(
+                                                color: _textColor,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            labelPadding: const EdgeInsets.symmetric(
+                                                horizontal: 10.0, vertical: 5.0),
+                                            selected: _selectedCertify == index,
+                                            selectedColor: _selectedColor,
+                                            onSelected: (value) {
+                                              setState(() {
+                                                _selectResource(index);
+                                                _isSelected = true;
+                                                resource = resourcesList[index];
+                                                resource.setResourceCategoryName();
+                                              });
+                                            },
+                                          ),
+                                        );
+                                      });
+                                });
+                          });
                     },
                   ).toList(),
                 ),
@@ -154,6 +172,8 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
       },
     );
   }
+
+
 
   void _selectResource(int choice) {
     setState(() {

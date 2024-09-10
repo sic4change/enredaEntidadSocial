@@ -9,7 +9,7 @@ class AccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Responsive.isMobile(context) || Responsive.isTablet(context)
-        ? const AccessPageMobile()
-        : const AccessPageWeb();
+        ? AccessPageMobile()
+        : AccessPageWeb();
   }
 }

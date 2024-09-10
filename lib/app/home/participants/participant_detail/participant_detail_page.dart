@@ -246,12 +246,12 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                           ),
                         ),
                       ),
-                      // AddYellowButton(
-                      //   text: StringConst.INVITE_RESOURCE,
-                      //   onPressed: () => showDialog(
-                      //       context: context,
-                      //       builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
-                      // ),
+                      AddYellowButton(
+                        text: StringConst.INVITE_RESOURCE,
+                        onPressed: () => showDialog(
+                            context: context,
+                            builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
+                      ),
                       SpaceW40(),
                     ],
                   ),
@@ -474,14 +474,14 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
         ),
         _buildMyLocation(context, user),
         SpaceH40(),
-        // Center(
-        //   child: AddYellowButton(
-        //     text: StringConst.INVITE_RESOURCE,
-        //     onPressed: () => showDialog(
-        //         context: context,
-        //         builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
-        //   ),
-        // ),
+        Center(
+          child: AddYellowButton(
+            text: StringConst.INVITE_RESOURCE,
+            onPressed: () => showDialog(
+                context: context,
+                builder: (BuildContext context) => ShowInvitationDialog(user: user, organizerId: socialEntityUser.socialEntityId!,)),
+          ),
+        ),
         SpaceH20(),
       ],
     );

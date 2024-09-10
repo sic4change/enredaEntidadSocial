@@ -648,7 +648,7 @@ class StringConst {
   static const String DRAWER_PARTICIPANTS = 'Participantes';
   static const String DRAWER_MY_RESOURCES = 'Recursos';
   static const String DRAWER_TOOLS = 'Caja de herramientas';
-  static const String DRAWER_ENTITIES = 'Agenda';
+  static const String DRAWER_ENTITIES = 'Agenda de contactos ';
   static const String SEE_MORE = 'Ver más';
 
   //ToolBox
