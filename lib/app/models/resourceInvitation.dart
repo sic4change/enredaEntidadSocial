@@ -3,8 +3,6 @@ class ResourceInvitation {
     this.resourceInvitationId,
     required this.resourceId,
     required this.resourceTitle,
-    required this.resourceDates,
-    required this.resourceDuration,
     required this.resourceDescription,
     required this.unemployedId,
     required this.unemployedName,
@@ -15,8 +13,6 @@ class ResourceInvitation {
     final String resourceInvitationId = data['resourceInvitationId'];
     final String resourceId = data['resourceId'];
     final String resourceTitle = data['resourceTitle'];
-    final String resourceDates = data['resourceDates'];
-    final String resourceDuration = data['resourceDuration'];
     final String resourceDescription = data['resourceDescription'];
     final String unemployedId = data['unemployedId'];
     final String unemployedName = data['unemployedName'];
@@ -26,8 +22,6 @@ class ResourceInvitation {
       resourceInvitationId: resourceInvitationId,
       resourceId: resourceId,
       resourceTitle: resourceTitle,
-      resourceDates: resourceDates,
-      resourceDuration: resourceDuration,
       resourceDescription: resourceDescription,
       unemployedId: unemployedId,
       unemployedName: unemployedName,
@@ -38,8 +32,6 @@ class ResourceInvitation {
   final String? resourceInvitationId;
   final String resourceId;
   final String resourceTitle;
-  final String resourceDates;
-  final String resourceDuration;
   final String resourceDescription;
   final String unemployedId;
   final String unemployedName;
@@ -57,8 +49,6 @@ class ResourceInvitation {
     return {
       'resourceId' : resourceId,
       'resourceTitle' : resourceTitle,
-      'resourceDates' : resourceDates,
-      'resourceDuration' : resourceDuration,
       'resourceDescription' : resourceDescription,
       'unemployedId' : unemployedId,
       'unemployedName' : unemployedName,

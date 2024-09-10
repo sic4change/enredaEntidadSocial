@@ -39,6 +39,9 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
 
     return InkWell(
       onTap: widget.onTap,
+      hoverColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
       child: Container(
           width: 240.0,
           clipBehavior: Clip.hardEdge,
@@ -108,20 +111,20 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                           ),
                         ),
                         SpaceH20(),
-                        // AddYellowButtonSmall(
-                        //   text: StringConst.INVITE_RESOURCE,
-                        //   onPressed: () => showDialog(
-                        //       context: context,
-                        //       builder: (BuildContext context) =>
-                        //           ShowInvitationDialog(
-                        //             user: widget.user,
-                        //             organizerId: widget.socialEntityUserId,
-                        //           )),
-                        //   height: 40,
-                        //   circleHeight: 41,
-                        //   circleWidth: 41,
-                        // ),
-                        // SpaceH30(),
+                        AddYellowButtonSmall(
+                          text: StringConst.INVITE_RESOURCE,
+                          onPressed: () => showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  ShowInvitationDialog(
+                                    user: widget.user,
+                                    organizerId: widget.socialEntityUserId,
+                                  )),
+                          height: 40,
+                          circleHeight: 41,
+                          circleWidth: 41,
+                        ),
+                        SpaceH30(),
                         _buildContactRow(textTheme),
                       ],
                     ),

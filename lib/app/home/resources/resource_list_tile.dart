@@ -39,6 +39,9 @@ class _ResourceListTileState extends State<ResourceListTile> {
           child: InkWell(
             mouseCursor: MaterialStateMouseCursor.clickable,
             onTap: widget.onTap,
+            hoverColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
             child: Container(
               decoration: BoxDecoration(
                   border: Border.all(color: AppColors.blue050, width: 1),

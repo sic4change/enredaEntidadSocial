@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
+import '../../values/strings.dart';
 import 'create_external_social_entity/create_external_social_entity.dart';
 import 'edit_social_entity/edit_social_entity_page.dart';
 import 'entities_list_page.dart';
@@ -73,8 +74,8 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
                                   EntityDirectoryPage.selectedIndex.value = 0;
                                 })
                               },
-                              child: selectedIndex != 0 ? CustomTextMedium(text: 'Agenda ') :
-                              CustomTextMediumBold(text: 'Agenda ') ),
+                              child: selectedIndex != 0 ? CustomTextMedium(text: StringConst.DRAWER_ENTITIES) :
+                              CustomTextMediumBold(text: StringConst.DRAWER_ENTITIES) ),
                           selectedIndex == 1 ? CustomTextMediumBold(text: '> Crear contacto',) :
                           selectedIndex == 2 ? CustomTextMediumBold(text:'> Detalle del contacto') :
                           selectedIndex == 3 ? Row(

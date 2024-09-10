@@ -139,7 +139,7 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                                 borderRadius: BorderRadius.circular(15.0),
                                               ),
                                               child: Padding(
-                                                padding: const EdgeInsets.only(left: 30.0, top: 30),
+                                                padding: const EdgeInsets.only(left: 30.0, top: 0),
                                                 child: Column(
                                                   mainAxisAlignment: MainAxisAlignment.start,
                                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,6 +255,9 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                   WebHome.goResources();
                                   MyResourcesListPage.selectedIndex.value = 0;
                                 },
+                                hoverColor: Colors.transparent,
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
                                 child: RoundedContainer(
                                   color: Colors.white,
                                   borderWith: 1,

@@ -1,4 +1,5 @@
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
@@ -78,7 +79,7 @@ class _EmailSignInFormChangeNotifierState
           onPressed: model.canSubmit ? _submit : null,
           style: ButtonStyle(
               backgroundColor:
-              MaterialStateProperty.all(AppColors.turquoise),
+              MaterialStateProperty.all(AppColors.turquoiseButton2),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -87,10 +88,10 @@ class _EmailSignInFormChangeNotifierState
             padding: const EdgeInsets.symmetric(
                 vertical: 16.0, horizontal: 48.0),
             child: Text(
-              StringConst.ACCESS.toUpperCase(),
+              StringConst.ACCESS,
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: AppColors.white,
+                color: AppColors.primary900,
               ),
             ),
           ),
@@ -112,31 +113,37 @@ class _EmailSignInFormChangeNotifierState
     return TextField(
       controller: _emailController,
       focusNode: _emailFocusNode,
-      cursorColor: AppColors.turquoise,
+      cursorColor: AppColors.primary900,
       decoration: InputDecoration(
         labelText: 'Correo electrónico',
         hintText: 'email@email.com',
+        hintStyle: textTheme.bodySmall?.copyWith(
+          height: 1.5,
+          color: AppColors.primary900,
+          fontWeight: FontWeight.w400,
+          fontSize: fontSize,
+        ),
         errorText: model.emailErrorText,
         enabled: model.isLoading == false,
-        focusColor: AppColors.primaryColor,
+        focusColor: AppColors.primary900,
         labelStyle: textTheme.bodySmall?.copyWith(
           height: 1.5,
-          color: AppColors.greyDark,
+          color: AppColors.primary900,
           fontWeight: FontWeight.w400,
           fontSize: fontSize,
         ),
         focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.turquoise, width: 1.0),
+          borderSide: BorderSide(color: AppColors.primary900, width: 1.0),
         ),
         border: const OutlineInputBorder(),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: const BorderSide(
-            color: AppColors.greyUltraLight,
+            color: AppColors.primary900,
             width: 1.0,
           ),
         ),
-        floatingLabelStyle: const TextStyle(color: AppColors.turquoise),
+        floatingLabelStyle: const TextStyle(color: AppColors.primary900),
 
       ),
       autocorrect: false,
@@ -146,7 +153,7 @@ class _EmailSignInFormChangeNotifierState
       onEditingComplete: () => _emailEditingComplete(),
       style: textTheme.bodySmall?.copyWith(
         height: 1.5,
-        color: AppColors.greyDark,
+        color: AppColors.primary900,
         fontWeight: FontWeight.w400,
         fontSize: fontSize,
       ),
@@ -159,9 +166,15 @@ class _EmailSignInFormChangeNotifierState
     return TextField(
       controller: _passwordController,
       focusNode: _passwordFocusNode,
-      cursorColor: AppColors.turquoise,
+      cursorColor: AppColors.primary900,
       decoration: InputDecoration(
         labelText: 'Contraseña',
+        hintStyle: textTheme.bodySmall?.copyWith(
+          height: 1.5,
+          color: AppColors.primary900,
+          fontWeight: FontWeight.w400,
+          fontSize: fontSize,
+        ),
         errorText: model.passwordErrorText,
         enabled: model.isLoading == false,
         suffixIcon: Padding(
@@ -170,28 +183,29 @@ class _EmailSignInFormChangeNotifierState
             onTap: _toggle,
             child: CircleAvatar(
                 backgroundColor: Colors.transparent,
-                child: FaIcon(_obscureText ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash, size: 20, color: AppColors.turquoiseBlue,)),
+                child: FaIcon(_obscureText ? FontAwesomeIcons.eye :
+                FontAwesomeIcons.eyeSlash, size: 20, color: AppColors.primary900,)),
           ),
         ),
-        focusColor: AppColors.primaryColor,
+        focusColor: AppColors.primary900,
         labelStyle: textTheme.bodySmall?.copyWith(
           height: 1.5,
-          color: AppColors.greyDark,
+          color: AppColors.primary900,
           fontWeight: FontWeight.w400,
           fontSize: fontSize,
         ),
         border: const OutlineInputBorder(),
         focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.turquoise, width: 1.0),
+          borderSide: BorderSide(color: AppColors.primary900, width: 1.0),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: const BorderSide(
-            color: AppColors.greyUltraLight,
+            color: AppColors.primary900,
             width: 1.0,
           ),
         ),
-        floatingLabelStyle: const TextStyle(color: AppColors.turquoise),
+        floatingLabelStyle: const TextStyle(color: AppColors.primary900),
       ),
       obscureText: _obscureText,
       textInputAction: TextInputAction.done,
@@ -199,7 +213,7 @@ class _EmailSignInFormChangeNotifierState
       onEditingComplete: _submit,
       style: textTheme.bodySmall?.copyWith(
         height: 1.5,
-        color: AppColors.greyDark,
+        color: AppColors.primary900,
         fontWeight: FontWeight.w400,
         fontSize: fontSize,
       ),
@@ -221,7 +235,7 @@ class _EmailSignInFormChangeNotifierState
     return InkWell(
       mouseCursor: MaterialStateMouseCursor.clickable,
       onTap: () => _launchForgotPassword(context),
-      child: const Center(child: Text("¿Has olvidado la contraseña?")),
+      child: const Center(child: CustomTextBold(title: "¿Has olvidado la contraseña?", color: AppColors.primary900,)),
     );
   }
 
@@ -239,17 +253,14 @@ class _EmailSignInFormChangeNotifierState
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('¿Aún no tienes cuenta?', style: TextStyle(
-          fontWeight: FontWeight.bold,),),
+        const CustomTextSmall(text: '¿Aún no tienes cuenta?', color: AppColors.primary900),
         const SpaceW8(),
         InkWell(
           mouseCursor: MaterialStateMouseCursor.clickable,
           onTap: () => _organizationRegistering(context),
           child: const Center(
-              child: Text(
-                "Regístrate",
-                style: TextStyle(color: AppColors.turquoise, fontWeight: FontWeight.bold),
-              )),
+              child: CustomTextBold(title: "Regístrate", color: AppColors.primary900,),
+        ),
         ),
       ],
     );
