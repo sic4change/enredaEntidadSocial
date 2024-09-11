@@ -283,7 +283,7 @@ class StringConst {
   static String RESOURCE_LINK(String resourceId) => 'https://enredawebapp.web.app/resources/$resourceId';
   static const String THE_USER = 'El usuario';
   static const String ALREADY_ADDED = 'ya está añadido';
-  static const String INVITE_TO_RESOURCE = 'Invitar a recurso';
+  static const String INVITE_TO_RESOURCE = 'Invitar recurso: ';
   static const String INVITE_USERS = 'Invitar a usuarios';
   static const String WRONG_EMAIL = 'Correo electrónico inválido';
   static const String DUPLICATED_USER = 'Usuario duplicado';

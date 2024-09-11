@@ -26,7 +26,6 @@ class CustomChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return InkWell(
       child: AnimatedContainer(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
