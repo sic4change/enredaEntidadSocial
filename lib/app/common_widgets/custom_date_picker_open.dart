@@ -4,8 +4,8 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class CustomDatePickerTitleClosed extends StatelessWidget {
-  const CustomDatePickerTitleClosed({
+class CustomDatePickerTitleOpen extends StatelessWidget {
+  const CustomDatePickerTitleOpen({
     super.key,
     required this.labelText,
     this.fontSize = 14.0,
@@ -29,7 +29,6 @@ class CustomDatePickerTitleClosed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final now = DateTime.now();
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -99,8 +98,8 @@ class CustomDatePickerTitleClosed extends StatelessWidget {
                   context: context,
                   locale: Locale('es', 'ES'),
                   firstDate: DateTime(DateTime.now().year - 100, DateTime.now().month, DateTime.now().day),
-                  initialDate: currentValue ?? DateTime(now.year - 16, now.month, now.day),
-                  lastDate: DateTime(now.year - 16, now.month, now.day),
+                  initialDate: currentValue ?? DateTime.now(),
+                  lastDate: DateTime(DateTime.now().year + 100, DateTime.now().month, DateTime.now().day),
                 );
               },
             ),

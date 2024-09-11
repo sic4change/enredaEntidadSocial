@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../common_widgets/custom_date_picker_open.dart';
 import '../../../../utils/adaptative.dart';
 import '../../../../utils/responsive.dart';
 
@@ -485,7 +486,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomDatePickerTitle(
+              childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_ARRIVE_DATE,
                 initialValue: _arriveDate,
                 onChanged: (value) {
@@ -552,7 +553,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                     enabled: !_finished,
                   ) : //Open Field
                       _adminStateNotifier.value == 'Concedida' ?
-                      CustomDatePickerTitle(
+                      CustomDatePickerTitleOpen(
                         labelText: StringConst.INITIAL_DATE_CONCESSION,
                         initialValue: _adminDateConcession,
                         onChanged: (value) {
@@ -574,7 +575,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                     CustomFlexRowColumn(
                       contentPadding: EdgeInsets.zero,
                       separatorSize: 20,
-                      childLeft: CustomDatePickerTitle(
+                      childLeft: CustomDatePickerTitleOpen(
                         labelText: StringConst.INITIAL_DATE_ASK,
                         initialValue: _adminDateAsk,
                         onChanged: (value) {
@@ -582,7 +583,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         },
                         enabled: !_finished,
                       ),
-                      childRight: CustomDatePickerTitle(
+                      childRight: CustomDatePickerTitleOpen(
                         labelText: StringConst.INITIAL_DATE_RESOLUTION,
                         initialValue: _adminDateResolution,
                         onChanged: (value) {
@@ -623,7 +624,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 valueListenable: _adminTempNotifier,
                 builder: (context, value, child){
                   return _adminTempNotifier.value == 'Inicial' || _adminTempNotifier.value == 'Temporal' ?
-                  CustomDatePickerTitle(
+                  CustomDatePickerTitleOpen(
                     labelText: StringConst.INITIAL_DATE_RENOVATION,
                     initialValue: _adminDateRenovation,
                     onChanged: (value) {
@@ -736,7 +737,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                               _healthCard = value;
                             },
                     ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_EXPIRATION_DATE,
                 initialValue: _expirationDate,
                 onChanged: (value) {
@@ -911,7 +912,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
 
                               //Date selection if revisable
                               childRight: _grantedNotifier.value == 'Revisable'
-                                  ? CustomDatePickerTitle(
+                                  ? CustomDatePickerTitleOpen(
                                       labelText: StringConst.INITIAL_DATE,
                                       initialValue: _revisionDate,
                                       onChanged: (value) {
@@ -1135,7 +1136,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                               _internalDerivationLegal = value;
                             },
                     ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
                 initialValue: _internalDerivationDate,
                 onChanged: (value) {
@@ -1178,7 +1179,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   _psychosocialDerivationLegal = value;
                 },
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
                 initialValue: _psychosocialDerivationDate,
                 onChanged: (value) {
@@ -1221,7 +1222,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   _externalDerivationLegal = value;
                 },
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
                 initialValue: _externalDerivationDate,
                 onChanged: (value) {
@@ -1636,7 +1637,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         CustomFlexRowColumn(
                           contentPadding: EdgeInsets.zero,
                           separatorSize: 20,
-                          childRight: CustomDatePickerTitle(
+                          childRight: CustomDatePickerTitleOpen(
                             labelText: StringConst.INITIAL_DATE,
                             initialValue: _socialExclusionCertificateDate,
                             onChanged: (value) {

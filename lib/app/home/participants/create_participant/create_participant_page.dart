@@ -290,7 +290,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                 children: [
                   Expanded(
                       flex: Responsive.isMobile(context) ? 0 : 1,
-                      child: CustomDatePickerTitle(
+                      child: CustomDatePickerTitleClosed(
                         labelText: StringConst.FORM_BIRTHDAY,
                         onChanged: (value){//pickedDate output format => 2021-03-10 00:00:00.000
                           _formattedBirthdayDate = DateFormat('dd-MM-yyyy').format(value!);
