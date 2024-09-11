@@ -792,7 +792,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
               Padding(
                 padding: const EdgeInsets.all(15),
                 child: AddYellowButton(
-                  text: 'Invitar a este recurso',
+                  text: 'Invitar este recurso',
                   onPressed: () => showDialog(context: context, builder: (_) {
                     return CustomDialog(
                         width: Responsive.isMobile(context)? widthOfScreen(context) : widthOfScreen(context)/2,

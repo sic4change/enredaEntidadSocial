@@ -61,10 +61,11 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double fontSize = responsiveSize(context, 14, 18, md: 15);
+    TextTheme textTheme = Theme.of(context).textTheme;
     return Container(
       margin: EdgeInsets.all(Sizes.mainPadding),
       child: Column(
-        crossAxisAlignment: Responsive.isMobile(context) ? CrossAxisAlignment.stretch : CrossAxisAlignment.center,
+        crossAxisAlignment: Responsive.isMobile(context) ? CrossAxisAlignment.center : CrossAxisAlignment.center,
         children: [
           TextButton(
             onPressed: onPressed,
@@ -72,19 +73,18 @@ class CustomButton extends StatelessWidget {
                 backgroundColor: MaterialStateProperty.all(color),
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(25.0),
                     ))),
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 18.0, horizontal: Responsive.isDesktop(context)? 96.0 : 18.0),
+              padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: Responsive.isDesktop(context)? 26.0 : 10.0),
               child: Text(
-                text.toUpperCase(),
+                text,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.3,
-                  color: AppColors.white,
-                  fontSize: fontSize,
-                ),
+                  style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.white,
+                      height: 1.5,
+                      fontWeight: FontWeight.w400,
+                      fontSize: fontSize)
               ),
             ),
           ),
@@ -93,8 +93,3 @@ class CustomButton extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

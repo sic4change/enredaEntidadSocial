@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/resource_participants_list.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -28,9 +29,9 @@ class _ShowInvitationDialogState extends State<ShowInvitationDialog> {
         borderRadius: BorderRadius.circular(15.0),
       ),
       elevation: 0.0,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.primary050,
       content: dialogContent(context, widget.user, widget.organizerId),
-      contentPadding: const EdgeInsets.all(0.0),
+      contentPadding: const EdgeInsets.all(20.0),
     );
   }
 }
@@ -41,76 +42,45 @@ dialogContent(BuildContext context, UserEnreda user, String organizerId) {
       ? widthOfScreen(context)
       : widthOfScreen(context) * 0.55;
   final dialogHeight = Responsive.isMobile(context)
-      ? heightOfScreen(context)
-      : heightOfScreen(context) * 0.80;
+      ? heightOfScreen(context) * 0.60
+      : heightOfScreen(context) * 0.50;
   TextTheme textTheme = Theme.of(context).textTheme;
-  return Stack(
-    children: <Widget>[
-      Container(
-        width: dialogWidth,
-        height: dialogHeight,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(Sizes.mainPadding),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10.0,
-              offset: Offset(0.0, 10.0),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // To make the card compact
-          children: <Widget>[
-            Column(
+  return Container(
+    width: dialogWidth,
+    height: dialogHeight,
+    child: Column(
+      children: <Widget>[
+        Column(
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).pop((false)),
-                        child: Icon(
-                          Icons.close,
-                          color: AppColors.greyTxtAlt,
-                          size: widthOfScreen(context) >= 1024 ? 25 : 20,
-                        ),
-                      ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop((false)),
+                    child: Icon(
+                      Icons.close,
+                      color: AppColors.greyTxtAlt,
+                      size: widthOfScreen(context) >= 1024 ? 25 : 20,
                     ),
-                  ],
-                ),
-                Responsive.isMobile(context) ? Container() : const SpaceH20(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    const Text('Invitar a:'),
-                    const SizedBox(width: 10.0,),
-                    Text(
-                      '${user.firstName!} ${user.lastName!}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.titleMedium?.copyWith(
-                        color: AppColors.penBlue,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
-            const Divider(
-              color: AppColors.grey150,
-              thickness: 1,
+            Responsive.isMobile(context) ? Container() : const SpaceH20(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                const CustomTextMedium(text: 'Invitar a:'),
+                const SizedBox(height: 10.0,),
+                CustomTextMediumBold(text: '${user.firstName!} ${user.lastName!}'),
+              ],
             ),
-            ParticipantResourcesList(participant: user, organizerId: organizerId,),
           ],
         ),
-      ),
-
-    ],
+        ParticipantResourcesList(participant: user, organizerId: organizerId,),
+      ],
+    ),
   );
 }

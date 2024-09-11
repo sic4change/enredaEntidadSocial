@@ -64,6 +64,8 @@ class _InviteUsersToResourcePageState extends State<InviteUsersToResourcePage> {
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(25.0),
       child: Padding(
           padding: Responsive.isMobile(context)
               ? const EdgeInsets.all(0.0)
@@ -100,15 +102,15 @@ class _InviteUsersToResourcePageState extends State<InviteUsersToResourcePage> {
         controller: _scrollController,
         primary: false,
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 30),
                 child: Column(
                   children: [
-                    CustomTextMediumBold(text: StringConst.INVITE_TO_RESOURCE.toUpperCase()),
-                    const SpaceH20(),
-                    CustomTextMedium(text: widget.resource.title)
+                    CustomTextMedium(text: StringConst.INVITE_TO_RESOURCE),
+                    const SpaceH8(),
+                    CustomTextMediumBold(text: widget.resource.title)
                   ],
                 ),
               ),
@@ -116,8 +118,10 @@ class _InviteUsersToResourcePageState extends State<InviteUsersToResourcePage> {
               TextFormField(
                   decoration: customTextFormFieldDialog(context, StringConst.VALID_EMAIL).copyWith(
                       floatingLabelBehavior: FloatingLabelBehavior.always,
+                      fillColor: AppColors.white,
+                      filled: true,
                       hintStyle: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.greyTxtAlt,
+                        color: AppColors.primary900,
                         fontWeight: FontWeight.w400,
                       )
                   ),

@@ -11,7 +11,8 @@ class CustomDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      surfaceTintColor: Colors.white,
+      surfaceTintColor: AppColors.primary050,
+      backgroundColor: AppColors.primary050,
       child: CupertinoScrollbar(
         thumbVisibility: true,
         child: SingleChildScrollView(
