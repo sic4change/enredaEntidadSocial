@@ -1,16 +1,14 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
 
 import '../../../../common_widgets/alert_dialog.dart';
-import '../../../../common_widgets/custom_date_picker_title.dart';
+import '../../../../common_widgets/custom_date_picker_open.dart';
 import '../../../../common_widgets/custom_text.dart';
 import '../../../../common_widgets/custom_text_form_field_title.dart';
 import '../../../../common_widgets/show_exception_alert_dialog.dart';
@@ -115,7 +113,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
                 onSaved: (value) => _documentName = value!,
               ),
               SizedBox(height: 20,),
-              CustomDatePickerTitle(
+              CustomDatePickerTitleOpen(
                 labelText: StringConst.CREATION_DOCUMENT,
                 initialValue: _creationDate,
                 onChanged: (value){
@@ -128,7 +126,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
                 validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               SizedBox(height: 20,),
-              CustomDatePickerTitle(
+              CustomDatePickerTitleOpen(
                 labelText: StringConst.RENOVATION_DOCUMENT,
                 onChanged: (value){
                   _formattedBDate = DateFormat('dd-MM-yyyy').format(value!);

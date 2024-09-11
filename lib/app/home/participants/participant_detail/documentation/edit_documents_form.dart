@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../common_widgets/alert_dialog.dart';
-import '../../../../common_widgets/custom_date_picker_title.dart';
+import '../../../../common_widgets/custom_date_picker_open.dart';
 import '../../../../common_widgets/custom_text.dart';
 import '../../../../common_widgets/custom_text_form_field_title.dart';
 import '../../../../common_widgets/show_exception_alert_dialog.dart';
@@ -144,7 +144,7 @@ class _EditDocumentsFormState extends State<EditDocumentsForm> {
                 onSaved: (value) => _documentName = value!,
               ),
               SizedBox(height: 20,),
-              CustomDatePickerTitle(
+              CustomDatePickerTitleOpen(
                 labelText: StringConst.CREATION_DOCUMENT,
                 initialValue: _creationDate,
                 onChanged: (value){
@@ -157,7 +157,7 @@ class _EditDocumentsFormState extends State<EditDocumentsForm> {
                 validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               SizedBox(height: 20,),
-              CustomDatePickerTitle(
+              CustomDatePickerTitleOpen(
                 labelText: StringConst.RENOVATION_DOCUMENT,
                 initialValue: _renovationDate,
                 onChanged: (value){

@@ -18,6 +18,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
+import '../../../../common_widgets/custom_date_picker_open.dart';
 import '../../../../utils/adaptative.dart';
 import '../../../../utils/responsive.dart';
 
@@ -683,7 +684,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomDatePickerTitle(
+              childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_ARRIVE_DATE,
                 initialValue: _arriveDate,
                 onChanged: (value) {
@@ -766,7 +767,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       enabled: !_finished,
                     ) : //Open Field
                     _adminStateNotifier.value == 'Concedida' ?
-                    CustomDatePickerTitle(
+                    CustomDatePickerTitleOpen(
                       labelText: StringConst.INITIAL_DATE_CONCESSION,
                       initialValue: _adminDateConcession,
                       onChanged: (value) {
@@ -791,7 +792,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       CustomFlexRowColumn(
                         contentPadding: EdgeInsets.zero,
                         separatorSize: 20,
-                        childLeft: CustomDatePickerTitle(
+                        childLeft: CustomDatePickerTitleOpen(
                           labelText: StringConst.INITIAL_DATE_ASK,
                           initialValue: _adminDateAsk,
                           onChanged: (value) {
@@ -802,7 +803,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           //     ? null
                           //     : StringConst.FORM_GENERIC_ERROR,
                         ),
-                        childRight: CustomDatePickerTitle(
+                        childRight: CustomDatePickerTitleOpen(
                           labelText: StringConst.INITIAL_DATE_RESOLUTION,
                           initialValue: _adminDateResolution,
                           onChanged: (value) {
@@ -850,7 +851,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   valueListenable: _adminTempNotifier,
                   builder: (context, value, child){
                     return _adminTempNotifier.value == 'Inicial' || _adminTempNotifier.value == 'Temporal' ?
-                    CustomDatePickerTitle(
+                    CustomDatePickerTitleOpen(
                       labelText: StringConst.INITIAL_DATE_RENOVATION,
                       initialValue: _adminDateRenovation,
                       onChanged: (value) {
@@ -981,7 +982,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 // validator: (value) =>
                 // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_EXPIRATION_DATE,
                 initialValue: _expirationDate,
                 onChanged: (value) {
@@ -1175,7 +1176,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
 
                               //Date selection if revisable
                               childRight: _grantedNotifier.value == 'Revisable'
-                                  ? CustomDatePickerTitle(
+                                  ? CustomDatePickerTitleOpen(
                                 labelText: StringConst.INITIAL_DATE,
                                 initialValue: _revisionDate,
                                 onChanged: (value) {
@@ -1425,7 +1426,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 // validator: (value) =>
                 // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
                 initialValue: _internalDerivationDate,
                 onChanged: (value) {
@@ -1477,7 +1478,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 // validator: (value) =>
                 // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
                 initialValue: _psychosocialDerivationDate,
                 onChanged: (value) {
@@ -1529,7 +1530,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 // validator: (value) =>
                 // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
                 initialValue: _externalDerivationDate,
                 onChanged: (value) {
@@ -1580,7 +1581,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DATE,
                 initialValue: _processingBagDate,
                 onChanged: (value) {
@@ -2056,7 +2057,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       CustomFlexRowColumn(
                         contentPadding: EdgeInsets.zero,
                         separatorSize: 20,
-                        childRight: CustomDatePickerTitle(
+                        childRight: CustomDatePickerTitleOpen(
                           labelText: StringConst.INITIAL_DATE,
                           initialValue: _socialExclusionCertificateDate,
                           onChanged: (value) {
@@ -2360,7 +2361,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 // validator: (value) =>
                 // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DATE,
                 initialValue: _formationBagDate,
                 onChanged: (value) {
@@ -2491,7 +2492,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomDatePickerTitle(
+              childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.FOLLOW_OBTAIN_DATE,
                 initialValue: _jobObtainDate,
                 onChanged: (value) {
@@ -2501,7 +2502,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 // validator: (value) =>
                 // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.FOLLOW_FINISH_DATE,
                 initialValue: _jobFinishDate,
                 onChanged: (value) {
@@ -2542,7 +2543,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     ? null
                     : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DATE,
                 initialValue: _upgradeDate,
                 onChanged: (value) {
@@ -2630,7 +2631,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomDatePickerTitle(
+              childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.FOLLOW_INIT_DATE,
                 initialValue: _postLaborInitialDate,
                 onChanged: (value) {
@@ -2644,7 +2645,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 // validator: (value) =>
                 // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDatePickerTitle(
+              childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.FOLLOW_END_DATE,
                 initialValue: _postLaborFinalDate,
                 onChanged: (value) {

@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 
 import '../../../../common_widgets/alert_dialog.dart';
-import '../../../../common_widgets/custom_date_picker_title.dart';
+import '../../../../common_widgets/custom_date_picker_open.dart';
 import '../../../../common_widgets/custom_drop_down_button_form_field_title_check.dart';
 import '../../../../common_widgets/custom_text_form_field_title.dart';
 import '../../../../common_widgets/enreda_button.dart';
@@ -23,11 +23,9 @@ import '../../../../models/ipilEntry.dart';
 import '../../../../models/ipilInterviews.dart';
 import '../../../../models/ipilReinforcement.dart';
 import '../../../../models/userEnreda.dart';
-import '../../../../services/auth.dart';
 import '../../../../services/database.dart';
 import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
-import '../../../resources/list_item_builder.dart';
 
 class CreateIpilForm extends StatefulWidget {
   const CreateIpilForm({super.key, required this.participantUser});
@@ -137,7 +135,7 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
                       return Container();
                     }
                   }),
-              childLeft: CustomDatePickerTitle(
+              childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.DATE,
                 enabled: false,
                 color: AppColors.primary900,
