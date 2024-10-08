@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
 class CustomMultiSelectionCheckBoxList extends StatefulWidget {
@@ -19,6 +20,7 @@ class CustomMultiSelectionCheckBoxList extends StatefulWidget {
 class _CustomMultiSelectionCheckBoxListState extends State<CustomMultiSelectionCheckBoxList> {
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Wrap(
       alignment: WrapAlignment.start,
       direction: Axis.horizontal,
@@ -27,7 +29,16 @@ class _CustomMultiSelectionCheckBoxListState extends State<CustomMultiSelectionC
           SizedBox(
             width: 280,
             child: CheckboxListTile(
-              title: Text(option),
+              title: Text(
+                option,
+                style: textTheme.bodySmall?.copyWith(
+                  height: 1.4,
+                  color: AppColors.greyDark,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                )
+              ),
+              controlAffinity: ListTileControlAffinity.leading,
               selected: widget.selections.contains(option),
               checkColor: Colors.white,
               value: widget.selections.contains(option) ? true : false,

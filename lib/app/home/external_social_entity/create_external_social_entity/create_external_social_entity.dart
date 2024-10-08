@@ -44,7 +44,6 @@ class CreateExternalSocialEntityPage extends StatefulWidget {
 
 class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEntityPage> {
   final _formKey = GlobalKey<FormState>();
-  final _formKeyContactPerson = GlobalKey<FormState>();
 
   String? _entityName, _actionScope;
   late List<String> _entityTypes;
@@ -209,7 +208,6 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
     if (_validateAndSaveForm()) {
 
       _formKey.currentState!.save();
-      _formKeyContactPerson.currentState!.save();
 
       final address = Address(
         city: _cityId,

@@ -137,7 +137,7 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
                   }),
               childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.DATE,
-                enabled: false,
+                enabled: true,
                 color: AppColors.primary900,
                 initialValue: DateTime.now(),
               ),

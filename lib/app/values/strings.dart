@@ -761,7 +761,7 @@ class StringConst {
   static const String INITIAL_EDUCATION_LEVEL = 'Nivel educativo';
   static const String INITIAL_TITLE_9_2_WORK_SITUATION = '9.2 Situación laboral';
   static const String INITIAL_LABOR_SITUATION = 'Situación laboral inicial';
-  static const String INITIAL_LABOR_TYPE = 'Tipo laboral';
+  static const String INITIAL_LABOR_TYPE = 'Tipo de jornada laboral';
   static const String INITIAL_TITLE_9_3_TRAJECTORY = '9.3 Trayectoria B.A.E previa';
   static const String INITIAL_COMPETENCIES = 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)';
   static const String INITIAL_CONTEXTUALIZATION = 'Contextualización del territorio';
@@ -967,7 +967,7 @@ class StringConst {
     'Situación sinhogarismo',
     'Colectivo LGTBI',
     'Salud mental grave',
-    'Joven ex tutelado/a',
+    'Joven tutelado/a o ex tutelado/a',
     'Responsabilidades familiares',
     'Madre monomarental',
     'Minoría étnica',
