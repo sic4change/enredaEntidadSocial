@@ -68,6 +68,7 @@ abstract class Database {
      Stream<Resource> resourceStream(String? resourceId);
      Stream<List<Resource>> myResourcesStream(String socialEntityId);
      Stream<List<Resource>> myLimitResourcesStream(String socialEntityId, int i);
+     Stream<List<Resource>> filteredMyResourcesStream(String socialEntityId, String searchText);
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
      Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId);
      Stream<List<SocialEntity>> socialEntitiesStream();
@@ -236,7 +237,40 @@ class FirestoreDatabase implements Database {
         sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
       );
 
-    @override
+  @override
+  Stream<List<Resource>> filteredMyResourcesStream(String socialEntityId, String searchText) {
+    return _service.filteredCollectionStream(
+      path: APIPath.resources(),
+      queryBuilder: (query) => query.where('organizer', isEqualTo: socialEntityId),
+      builder: (data, documentId) {
+        final searchTextCommunity = removeDiacritics((data['searchText'] ?? '').toLowerCase());
+        final searchListCommunity = searchTextCommunity.split(';');
+        final searchTextFilter = removeDiacritics(searchText.toLowerCase());
+        final searchListFilter = searchTextFilter.split(' ');
+
+        if (searchText == '')
+          return Resource.fromMap(data, documentId);
+
+        // The following code checks if a resource is selected by applying filters
+        bool textFilterSelection = false; // Initialize textFilter result to false
+
+        // If search text exists in filter, filter through the search list
+        if (searchText != '') {
+          searchListFilter.forEach((filterElement) {
+            // For each element in searchListFilter, check against each element in searchListIdea
+            if (searchListCommunity.any(
+                    (resourceElement) => resourceElement.contains(filterElement))) {
+              textFilterSelection = textFilterSelection || true; // Set ideaSelected false if a match isn't found
+            }
+          });
+        }
+        return textFilterSelection ? Resource.fromMap(data, documentId) : null;
+      },
+      sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+    );
+  }
+
+  @override
     Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId) =>
       _service.collectionStream(
         path: APIPath.resources(),

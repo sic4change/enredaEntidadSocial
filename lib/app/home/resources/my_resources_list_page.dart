@@ -4,12 +4,14 @@ import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/home/resources/create_resource/create_resource.dart';
 import 'package:enreda_empresas/app/home/resources/edit_resource/edit_resource.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail/resource_detail_page.dart';
-import 'package:enreda_empresas/app/home/resources/resources_page.dart';
+import 'package:enreda_empresas/app/home/resources/resources_list.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
+
+import 'my_resources_page.dart';
 
 
 class MyResourcesListPage extends StatefulWidget {
@@ -33,7 +35,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
   @override
   void initState() {
     bodyWidget = [
-      ResourcesListPage(),
+      MyResourcesPage(),
       CreateResource(socialEntityId: widget.socialEntity?.socialEntityId!),
       ResourceDetailPage(socialEntityId: widget.socialEntity?.socialEntityId!),
       EditResource()
@@ -48,6 +50,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
             borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
+            color: AppColors.grey80,
             margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
             contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) :
               EdgeInsets.all(Sizes.kDefaultPaddingDouble * 2),
