@@ -1,10 +1,9 @@
-import 'package:enreda_empresas/app/common_widgets/search_rounded_container.dart';
+import 'package:enreda_empresas/app/common_widgets/filter_row.dart';
 import 'package:flutter/material.dart';
-
 import '../../common_widgets/spaces.dart';
+import '../../utils/adaptative.dart';
 import '../../utils/responsive.dart';
 import '../../values/values.dart';
-
 
 class FilterTextFieldRow extends StatefulWidget {
   FilterTextFieldRow(
@@ -27,7 +26,6 @@ class FilterTextFieldRow extends StatefulWidget {
   State<FilterTextFieldRow> createState() => _FilterTextFieldRowState();
 }
 
-
 class _FilterTextFieldRowState extends State<FilterTextFieldRow> {
   bool _isClearTextVisible = false;
 
@@ -37,7 +35,6 @@ class _FilterTextFieldRowState extends State<FilterTextFieldRow> {
     if (mounted) setState(f);
   }
 
-  @override
   void initState() {
     widget.searchTextController.addListener(() {
       if (widget.searchTextController.text.isNotEmpty && !_isClearTextVisible) {
@@ -66,33 +63,43 @@ class _FilterTextFieldRowState extends State<FilterTextFieldRow> {
 
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
-    double fontSize = Responsive.isMobile(context) ? 14 : 16;
+    double fontSize = responsiveSize(context, 15, 16, md: 15);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
           Expanded(
-            child: SearchRoundedContainer(
+            child: RoundedContainerFilter(
               height: Responsive.isMobile(context) ? 40 : 45,
+              padding: Responsive.isMobile(context) ? EdgeInsets.all(0)
+                  : Responsive.isDesktop(context) ? EdgeInsets.only(bottom: 8) : EdgeInsets.only(bottom: 2),
               margin: EdgeInsets.only(left: 5, right: 5),
               child: Row(children: [
-                SpaceW8(),
+                SpaceW16(),
                 Expanded(
                   child: TextFormField(
                     onFieldSubmitted: widget.onFieldSubmitted,
                     textInputAction: TextInputAction.done,
+                    textAlignVertical: TextAlignVertical.center,
                     focusNode: _focusNode,
                     decoration: InputDecoration(
                       hintText: widget.hintText,
+                      hintStyle:  textTheme.bodySmall?.copyWith(
+                        color: AppColors.primary900,
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                        fontSize: fontSize,
+                      ),
                       border: InputBorder.none,
                     ),
                     controller: widget.searchTextController,
                     keyboardType: TextInputType.text,
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.greyTxtAlt,
+                      color: AppColors.primary900,
                       height: 1.5,
                       fontWeight: FontWeight.w500,
                       fontSize: fontSize,
@@ -101,14 +108,14 @@ class _FilterTextFieldRowState extends State<FilterTextFieldRow> {
                 ),
                 if (_isClearTextVisible)
                   IconButton(
-                    padding: EdgeInsets.only(top: 8),
-                    icon: Icon(Icons.clear, color: AppColors.greyDark),
+                    padding: Responsive.isDesktop(context) ? EdgeInsets.only(top: 10, right: 10) : EdgeInsets.only(bottom: 2),
+                    icon: Icon(Icons.clear, color: AppColors.primary900),
                     onPressed: widget.clearFilter,
                   ),
                 if (!_isClearTextVisible)
                   IconButton(
-                    padding: EdgeInsets.only(top: 8),
-                    icon: Icon(Icons.search, color: AppColors.greyDark),
+                    padding: Responsive.isDesktop(context) ? EdgeInsets.only(top: 10, right: 10) : EdgeInsets.only(bottom: 2),
+                    icon: Icon(Icons.search, color: AppColors.primary900),
                     onPressed: widget.onPressed,
                   ),
               ]),
