@@ -34,6 +34,7 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
   Widget myWelcomePageDesktop(BuildContext context){
     final textTheme = Theme.of(context).textTheme;
     return RoundedContainer(
+        color: AppColors.grey80,
         contentPadding: const EdgeInsets.only(left: 0, right: Sizes.kDefaultPaddingDouble,
             bottom: Sizes.kDefaultPaddingDouble, top: Sizes.kDefaultPaddingDouble),
         child: SingleChildScrollView(

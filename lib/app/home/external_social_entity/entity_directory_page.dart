@@ -51,6 +51,7 @@ class _EntityDirectoryPageState extends State<EntityDirectoryPage> {
         valueListenable: EntityDirectoryPage.selectedIndex,
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
+            color: AppColors.grey80,
             borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
             margin: Responsive.isMobile(context) ? EdgeInsets.all(0) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
             contentPadding: Responsive.isMobile(context) ? EdgeInsets.all(0) :

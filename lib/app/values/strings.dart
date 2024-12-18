@@ -296,6 +296,8 @@ class StringConst {
   static const String INVITE_SUCCESS_DESCRIPTION = 'Se han enviado las invitaciones a los correo electrónicos de los usuarios.';
   static const String INVITE_ERROR = 'Se ha producido un error';
   static const String INVITE_ERROR_DESCRIPTION = 'Revise los campos.';
+  static const String NO_RESOURCES_TITLE = '¡No tienes recursos con la búsqueda!';
+  static const String NO_RESOURCES_DESCRIPTION = 'Crea un recurso';
 
 
   //Resource modalities
