@@ -659,6 +659,7 @@ class StringConst {
   static const String MANUAL_METHODOLOGY = 'Manual de Intervención de Metodología';
   static const String PREVIEW = 'Vista previa';
   static const String MANUAL_METHODOLOGY_PDF = 'https://firebasestorage.googleapis.com/v0/b/enreda-d3b41.appspot.com/o/MANUAL%20DE%20INTERVENCIO%CC%81N.%20METODOLOGI%CC%81A%20ENREDA.pdf?alt=media&token=b023917b-04d8-4236-9925-ec47ab21100b';
+  static const String DRAWER_ENTITIES_TEXT = "Consulta y gestiona la información básica de entidades y organizaciones con las que tu equipo colabora.";
 
   //Socia Entities
   static const String ACTION_SCOPE = 'Ámbito de actuación';

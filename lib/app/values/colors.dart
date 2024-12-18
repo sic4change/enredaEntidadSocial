@@ -120,4 +120,5 @@ class AppColors {
   //Red
   static const Color red = Color(0xFFF1291A);
   static const Color red050 = Color(0xFFD32D50);
+  static const Color redClose = Color(0xFFFA1919);
 }

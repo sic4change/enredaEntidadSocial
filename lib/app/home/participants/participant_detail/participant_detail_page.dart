@@ -8,6 +8,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
+import 'package:enreda_empresas/app/models/derivationReport.dart';
 import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -273,7 +274,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          CustomTextSmallColor(text: 'Inicio de itinerario:', color: AppColors.primary900, height: 0.5,),
+                          CustomTextSmallColor(text: 'Estado de itinerario:', color: AppColors.primary900, height: 0.5,),
                           SpaceW8(),
                           StreamBuilder<UserEnreda>(
                             stream: database.userEnredaStreamByUserId(participantUser.userId),
@@ -287,10 +288,57 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                               }
                               DateTime? startDateItinerary = snapshot.data?.startDateItinerary;
                               if (startDateItinerary != null) {
-                                return CustomTextSmallBold(
-                                  title: DateFormat('dd/MM/yyyy').format(startDateItinerary),
-                                  color: AppColors.primary900,
-                                  height: 0.5,
+                                return StreamBuilder<DerivationReport>(
+                                  stream: database.derivationReportsStreamByUserId(participantUser.userId),
+                                  builder: (context, snapshotDerivation) {
+                                    return StreamBuilder(
+                                      stream: database.closureReportsStreamByUserId(participantUser.userId),
+                                      builder: (context, snapshotClosure){
+                                        if(snapshotDerivation.hasData) {
+                                          if(snapshotDerivation.data!.completedDate != null){
+                                            return CustomTextSmallBold(
+                                              title: 'CERRADO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)} - ${DateFormat('dd/MM/yyyy').format(snapshotDerivation.data!.completedDate!)}',
+                                              color: AppColors.redClose,
+                                              height: 0.5,
+                                            );
+                                          }
+                                          else{
+                                            if(snapshotClosure.hasData){
+                                              if(snapshotClosure.data!.completedDate != null){
+                                                return CustomTextSmallBold(
+                                                  title: 'CERRADO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)} - ${DateFormat('dd/MM/yyyy').format(snapshotClosure.data!.completedDate!)}',
+                                                  color: AppColors.redClose,
+                                                  height: 0.5,
+                                                );
+                                              }
+                                              else{
+                                                return CustomTextSmallBold(
+                                                  title: 'ACTIVO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)}',
+                                                  color: AppColors.primary900,
+                                                  height: 0.5,
+                                                );
+                                              }
+                                            }
+                                            else{
+                                              return CustomTextSmallBold(
+                                                title: 'ACTIVO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)}',
+                                                color: AppColors.primary900,
+                                                height: 0.5,
+                                              );
+                                            }
+                                          }
+                                        }
+                                        else {
+                                          return CustomTextSmallBold(
+                                            title: 'ACTIVO: ${DateFormat(
+                                                'dd/MM/yyyy').format(
+                                                startDateItinerary)}',
+                                            color: AppColors.primary900,
+                                            height: 0.5,
+                                          );
+                                        }
+                                    });
+                                  }
                                 );
                               } else {
                                 return CustomTextSmallBold(
@@ -440,12 +488,12 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                CustomTextSmallColor(text: 'Inicio de itinerario:', color: AppColors.primary900, height: 0.2,),
+                CustomTextSmallColor(text: 'Estado de itinerario:', color: AppColors.primary900, height: 0.2,),
                 SpaceW8(),
 
-                CustomTextSmallBold(title: '${DateFormat('dd/MM/yyyy').format(user.startDateItinerary!)}', color: AppColors.primary900, height: 0.2,),
+                CustomTextSmallBold(title: 'ACTIVO: ${DateFormat('dd/MM/yyyy').format(user.startDateItinerary!)}', color: AppColors.primary900, height: 0.2,),
               ],
-            ) : CustomTextSmallColor(text: 'Initerario no iniciado', color: AppColors.primary900, height: 0.2,),
+            ) : CustomTextSmallColor(text: 'No iniciado', color: AppColors.primary900, height: 0.2,),
           ],
         ),
         Row(

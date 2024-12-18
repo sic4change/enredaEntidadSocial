@@ -147,4 +147,5 @@ class ImagePath {
   static const String CONTROL_CHECKED_BOOK = '$imageDir/book_checked.png';
   static const String CONTROL_TECHNICAL = '$imageDir/technical_image.png';
   static const String CONTROL_METHODOLOGY = '$imageDir/methodology_image.png';
+  static const String CONTROL_AGENDA = '$imageDir/agenda-image.png';
 }

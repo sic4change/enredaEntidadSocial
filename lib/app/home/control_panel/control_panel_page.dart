@@ -80,18 +80,19 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                       color: Colors.black),),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 20.0),
+                                padding: const EdgeInsets.only(left: 4.0, top: 20.0, bottom: 20.0, right: 300.0),
                                 child: Text(StringConst.WELCOME_TEXT,
                                   style: textTheme.bodySmall?.copyWith(
                                       fontWeight: FontWeight.normal,
                                       fontSize: Responsive.isMobile(context) ? 15 : 18.0,
                                       color: AppColors.greyAlt),),
-                              )
+                              ),
+                              //SpaceH8()
                             ],
                           ),
                         ),
                       ),
-                      Spacer()
+                      SpaceH12()
                     ]
                   )),
                 Positioned(
@@ -126,67 +127,61 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                     direction: Axis.horizontal,
                                     children: [
                                       Expanded(
-                                        flex: 2,
+                                        flex: 1,
                                         child: Stack(
+                                          clipBehavior: Clip.none,
                                           children: [
-                                            Container(
+                                            RoundedContainer(
+                                              color: AppColors.primary100,
+                                              borderWith: 1,
                                               height: double.infinity,
+                                              borderColor: Colors.transparent,
+                                              contentPadding: EdgeInsets.all(0.0),
+                                              margin: EdgeInsets.only(bottom: 0.0),
                                               width: double.infinity,
-                                              margin: const EdgeInsets.only(top: 30.0, bottom: 30.0),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.primary100,
-                                                shape: BoxShape.rectangle,
-                                                borderRadius: BorderRadius.circular(15.0),
-                                              ),
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(left: 30.0, top: 0),
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    SpaceH20(),
-                                                    Container(
-                                                      width: 300,
-                                                      child: Text(StringConst.DRAWER_ENTITIES,
-                                                        style: textTheme.displaySmall?.copyWith(
-                                                            fontWeight: FontWeight.bold,
-                                                            fontSize: Responsive.isMobile(context) ? 25 : 35.0,
-                                                            color: AppColors.white),),
-                                                    ),
-                                                    SpaceH16(),
-                                                    InkWell(
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    flex: 2,
+                                                    child: InkWell(
                                                         onTap: () {
-                                                          setState(() {
-                                                            WebHome.goToEntities();
-                                                          });
+                                                          WebHome.goToEntities();
                                                         },
-                                                        child: CustomTextBold(title: StringConst.SEE_MORE)),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.only(left: 20, top: 15.0),
+                                                          child: Column(
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              SpaceH40(),
+                                                              CustomTextBoldTitle(title: StringConst.DRAWER_ENTITIES),
+                                                              CustomTextMedium(text: StringConst.DRAWER_ENTITIES_TEXT),
+                                                            ],
+                                                          ),
+                                                        )),
+                                                  ),
+                                                  Expanded(
+                                                      flex: 1,
+                                                      child: Container()),
+                                                ],
+                                              ),),
                                             Positioned(
-                                              bottom: 0,
+                                              bottom: 10,
                                               top: -20,
                                               right: 0,
-                                              child: InkWell(
-                                                onTap: () {
-                                                  setState(() {
-                                                    WebHome.goToEntities();
-                                                  });
-                                                },
-                                                child: Container(
-                                                  width: 200,
-                                                    child: Image.asset(ImagePath.CONTROL_PANEL_CALENDAR, fit: BoxFit.fitHeight,)),
-                                              ),
+                                              child: Container(
+                                                  margin: const EdgeInsets.only(right: 20.0),
+                                                  height: 230,
+                                                  width: 230,
+                                                  child: Image.asset(ImagePath.CONTROL_AGENDA,)),
                                             ),
                                           ],
                                         ),
                                       ),
-                                      Responsive.isMobile(context) || Responsive.isDesktopS(context) ? Container() :
-                                      Expanded(
-                                          flex: 2,
-                                          child: Container()),
+                                      //Responsive.isMobile(context) || Responsive.isDesktopS(context) ? Container() :
+                                      //Expanded(
+                                      //    flex: 2,
+                                      //    child: Container()),
                                     ],
                                   ),
                                 ),
@@ -199,7 +194,7 @@ class _ControlPanelPageState extends State<ControlPanelPage> {
                                         color: AppColors.yellow,
                                         borderWith: 1,
                                         height: double.infinity,
-                                        borderColor: AppColors.greyLight2.withOpacity(0.3),
+                                        borderColor: Colors.transparent,
                                         contentPadding: EdgeInsets.all(0.0),
                                         margin: EdgeInsets.only(bottom: 0.0),
                                         width: double.infinity,

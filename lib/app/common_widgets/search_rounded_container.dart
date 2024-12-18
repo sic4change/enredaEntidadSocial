@@ -21,7 +21,7 @@ class SearchRoundedContainer extends StatelessWidget {
       height: height,
       margin: margin,
       decoration: BoxDecoration(
-          color: AppColors.greySearch,
+          color: AppColors.primary050,
           borderRadius: BorderRadius.all(Radius.circular(20))),
       child: Padding(
         padding: padding,

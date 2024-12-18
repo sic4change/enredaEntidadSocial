@@ -51,6 +51,7 @@ import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/api_path.dart';
 import 'package:enreda_empresas/app/services/firestore_service.dart';
 import 'package:enreda_empresas/app/models/resourcePicture.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models/documentCategory.dart';
@@ -125,6 +126,8 @@ abstract class Database {
      Stream<List<PersonalDocumentType>> documentSubCategoriesByCategoryStream(String categoryId);
      Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user);
      Stream<DocumentationParticipant> documentationParticipantStream(String documentId);
+     Stream<List<UserEnreda>> filteredParticipantsStream(String filter, String socialEntityId);
+
 
      Future<void> setUserEnreda(UserEnreda userEnreda);
      Future<void> deleteUser(UserEnreda userEnreda);
@@ -451,20 +454,20 @@ class FirestoreDatabase implements Database {
     //   );
     // }
 
-    @override
-    Stream<List<Province>> provincesCountryStream(String? countryId) {
+  @override
+  Stream<List<Province>> provincesCountryStream(String? countryId) {
 
-      if (countryId == null) {
-        return const Stream<List<Province>>.empty();
-      }
-
-      return _service.collectionStream(
-        path: APIPath.provinces(),
-        builder: (data, documentId) => Province.fromMap(data, documentId),
-        queryBuilder: (query) => query.where('countryId', isEqualTo: countryId),
-        sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
-      );
+    if (countryId == null) {
+      return const Stream<List<Province>>.empty();
     }
+
+    return _service.collectionStream(
+      path: APIPath.provinces(),
+      builder: (data, documentId) => Province.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('countryId', isEqualTo: countryId).where('active', isEqualTo: true),
+      sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+    );
+  }
 
     @override
     Stream<List<City>> citiesStream() => _service.collectionStream(
@@ -1387,6 +1390,47 @@ class FirestoreDatabase implements Database {
   @override
   Future<void> addIpilObjectives(IpilObjectives ipilObjectives) async {
       await _service.addData(path: APIPath.ipilObjectives(), data: ipilObjectives.toMap());
+  }
+
+  @override
+  Stream<List<UserEnreda>> filteredParticipantsStream(String filter, String socialEntityId) {
+    return _service.filteredCollectionStream(
+      path: APIPath.users(),
+      queryBuilder: (query) {
+        query = query.where('assignedEntityId', isEqualTo: socialEntityId);
+        return query;
+      },
+      builder: (data, documentId) {
+        final firstName = data['firstName'] ?? '';
+        final lastName = data['lastName'] ?? '';
+        final email = data['email'] ?? '';
+        final searchTextChallenge = removeDiacritics((firstName + ';' + lastName + ';' + email).toLowerCase());
+        final searchListPost = searchTextChallenge.split(';');
+        final searchTextFilter = removeDiacritics(filter.toLowerCase());
+        final searchListFilter = searchTextFilter.split(' ');
+        //Set<dynamic> postCategoriesSet = filter.externalSocialEntityTypesIds.toSet();
+
+        if (filter == '')
+          return UserEnreda.fromMap(data, documentId);
+
+        // The following code checks if an idea is selected by applying filters
+        bool textFilterSelection = false; // Initialize textFilter result to false
+        bool tagsFilterSelection = false; // Initialize tagsFilter result to false
+
+        // If search text exists in filter, filter through the search list
+        if (filter != '') {
+          searchListFilter.forEach((filterElement) {
+            // For each element in searchListFilter, check against each element in searchListIdea
+            if (searchListPost.any(
+                    (resourceElement) => resourceElement.contains(filterElement))) {
+              textFilterSelection = textFilterSelection || true; // Set ideaSelected false if a match isn't found
+            }
+          });
+        }
+        return textFilterSelection || tagsFilterSelection ? UserEnreda.fromMap(data, documentId) : null;
+      },
+      sort: (rhs, lhs) => lhs.firstName!.compareTo(rhs.firstName!),
+    );
   }
 
 }
