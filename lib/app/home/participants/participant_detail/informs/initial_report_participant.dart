@@ -265,6 +265,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
     //Pre-Selection
     String? _subsidy = report.subsidy ?? '';
     String? _techPerson = report.techPerson ?? widget.user.assignedById;
+    DateTime _completedTime = widget.user.startDateItinerary ?? DateTime.now();
+    print("fecha de usuario: ${widget.user.startDateItinerary}");
 
     //Section 1
     String _orientation1 = report.orientation1 ?? '';
@@ -454,22 +456,33 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           },
                   ),
             SpaceH12(),
-            StreamBuilder<UserEnreda>(
-              stream: database.userEnredaStreamByUserId(_techPerson),
-              builder: (context, snapshot) {
+            CustomFlexRowColumn(
+              childRight: StreamBuilder<UserEnreda>(
+                stream: database.userEnredaStreamByUserId(_techPerson),
+                builder: (context, snapshot) {
 
-                if(snapshot.hasData && snapshot.connectionState != ConnectionState.waiting){
+                  if(snapshot.hasData && snapshot.connectionState != ConnectionState.waiting){
 
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _techPersonController.text = '${snapshot.data?.firstName}' + ' ' + '${snapshot.data?.lastName}';
-                  });
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _techPersonController.text = '${snapshot.data?.firstName}' + ' ' + '${snapshot.data?.lastName}';
+                    });
+                  }
+                  return CustomTextFormFieldTitle(
+                    labelText: StringConst.INITIAL_TECH_PERSON,
+                    controller: _techPersonController,
+                    enabled: false,
+                  );
                 }
-                return CustomTextFormFieldTitle(
-                  labelText: StringConst.INITIAL_TECH_PERSON,
-                  controller: _techPersonController,
-                  enabled: false,
-                );
-              }
+              ),
+              childLeft: CustomDatePickerTitleOpen(
+                labelText: StringConst.DATE,
+                enabled: !_finished,
+                color: AppColors.primary900,
+                initialValue: _completedTime,
+                onChanged: (value){
+                  _completedTime = value!;
+                },
+              ),
             ),
 
             //Section 1
@@ -1977,6 +1990,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                 mediumTerm: _mediumTerm,
                                 longTerm: _longTerm,
                                 finished: false,
+                                completedDate: _completedTime,
                               ));
                               showDialog(
                                   context: context,
@@ -2164,6 +2178,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                         )),
                                     ElevatedButton(
                                         onPressed: () async {
+                                          setState(() {
+                                            widget.user.startDateItinerary = _completedTime;
+                                          });
+                                          database.setUserEnreda(widget.user);
                                           database.setInitialReport(
                                               InitialReport(
                                             userId: report.userId,
@@ -2287,7 +2305,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                             mediumTerm: _mediumTerm,
                                             longTerm: _longTerm,
                                             finished: true,
-                                            completedDate: DateTime.now(),
+                                            completedDate: _completedTime,
                                           ));
                                           Navigator.of(context).pop();
                                           //setStateMenuPage();
