@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:enreda_empresas/app/home/participants/pdf_generator/common_widgets/text_formats.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_print/data.dart';
+import 'package:enreda_empresas/app/home/participants/pdf_generator/follow_report_format_pdf.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -11,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-
 import 'common_widgets/bottom_signatures.dart';
 import 'common_widgets/doc_theme.dart';
 
@@ -41,6 +41,12 @@ Future<Uint8List> generateInitialReportFile(
   final pageTheme = await MyPageTheme(format, isMdm);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
+  int inYears(int days) {
+    if (days < 1) return 0;
+
+    return days~/365;
+  }
+
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
@@ -66,7 +72,20 @@ Future<Uint8List> generateInitialReportFile(
         pw.SizedBox(
           height: 30,
         ),
+        CustomItemSameLine(title: 'Nombre y apellidos', content: '${user.firstName} ${user.lastName}'),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Fecha de nacimiento', content: formatter.format(user.birthday!)),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Edad', content: '${inYears(DateTime.now().difference(user.birthday!).inDays).toString()} años'),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Nacionalidad', content: user.nationality!),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Género', content: user.gender!),
+        SpaceH12(),
         CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: initialReport.subsidy ?? ''),
+        SpaceH12(),
+        CustomItem(title: 'Técnico/a de referencia', content: initialReport.techPersonName ?? ''),
+
 
         //Section 1
         SectionTitle(title: '1. Itinerario en España'),
@@ -74,7 +93,7 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH5(),
         CustomRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: initialReport.arriveDate == null ? '' : formatter.format(initialReport.arriveDate!) , content2: initialReport.receptionResources ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Situación administrativa', content: initialReport.administrativeExternalResources ?? ''),
+        CustomItem(title: StringConst.INITIAL_EXTERNAL_RESOURCES, content: initialReport.administrativeExternalResources ?? ''),
 
         //Subsection 1.1
         SubSectionTitle(title: StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION),
@@ -117,10 +136,10 @@ Future<Uint8List> generateInitialReportFile(
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_2 ?? ''),
         SpaceH5(),
         CustomItem(title: 'Estado', content: initialReport.disabilityState ?? ''),
-        initialReport.dependenceState == 'Concedida' ?
+        initialReport.disabilityState == 'Concedida' ?
           CustomRow(title1: 'Concedida', title2: 'Fecha', content1: initialReport.granted ?? '', content2: initialReport.revisionDate == null ? '' : formatter.format(initialReport.revisionDate!)) :
           pw.Container(),
-        initialReport.dependenceState == 'Concedida' ? SpaceH5() : pw.Container(),
+        initialReport.disabilityState == 'Concedida' ? SpaceH5() : pw.Container(),
         SpaceH5(),
         CustomItem(title: 'Profesional de referencia', content: initialReport.referenceProfessionalDisability ?? ''),
         SpaceH5(),

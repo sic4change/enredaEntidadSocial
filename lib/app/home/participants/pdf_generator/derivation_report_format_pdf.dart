@@ -41,6 +41,12 @@ Future<Uint8List> generateDerivationReportFile(
   final pageTheme = await MyPageTheme(format, isMdm);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
+  int inYears(int days) {
+    if (days < 1) return 0;
+
+    return days~/365;
+  }
+
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
@@ -65,7 +71,19 @@ Future<Uint8List> generateDerivationReportFile(
         pw.SizedBox(
           height: 30,
         ),
+        CustomItemSameLine(title: 'Nombre y apellidos', content: '${user.firstName} ${user.lastName}'),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Fecha de nacimiento', content: formatter.format(user.birthday!)),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Edad', content: '${inYears(DateTime.now().difference(user.birthday!).inDays).toString()} años'),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Nacionalidad', content: user.nationality!),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Género', content: user.gender!),
+        SpaceH12(),
         CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: derivationReport.subsidy ?? ''),
+        SpaceH12(),
+        CustomItem(title: 'Técnico/a de referencia', content: derivationReport.techPersonName ?? ''),
         SpaceH12(),
         CustomItem(title: 'Dirigido a:', content: derivationReport.addressedTo ?? ''),
         SpaceH12(),
@@ -144,10 +162,10 @@ Future<Uint8List> generateDerivationReportFile(
                     CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: derivationReport.orientation2_2 ?? ''),
                     SpaceH12(),
                     CustomItem(title: 'Estado', content: derivationReport.disabilityState ?? ''),
-                    derivationReport.dependenceState == 'Concedida' ?
+                    derivationReport.disabilityState == 'Concedida' ?
                     CustomRow(title1: 'Concedida', title2: 'Fecha', content1: derivationReport.granted ?? '', content2: derivationReport.revisionDate == null ? '' : formatter.format(derivationReport.revisionDate!)) :
                     pw.Container(),
-                    derivationReport.dependenceState == 'Concedida' ? SpaceH12() : pw.Container(),
+                    derivationReport.disabilityState == 'Concedida' ? SpaceH12() : pw.Container(),
                     SpaceH12(),
                     CustomItem(title: 'Profesional de referencia', content: derivationReport.referenceProfessionalDisability ?? ''),
                     SpaceH12(),
@@ -420,6 +438,10 @@ Future<Uint8List> generateDerivationReportFile(
 
 pw.Widget SpaceH12(){
   return pw.SizedBox(height: 12);
+}
+
+pw.Widget SpaceH5(){
+  return pw.SizedBox(height: 5);
 }
 
 

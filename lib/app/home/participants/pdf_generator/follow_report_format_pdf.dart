@@ -42,6 +42,12 @@ Future<Uint8List> generateFollowReportFile(
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
 
+  int inYears(int days) {
+        if (days < 1) return 0;
+
+        return days~/365;
+  }
+
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
@@ -66,7 +72,19 @@ Future<Uint8List> generateFollowReportFile(
         pw.SizedBox(
           height: 30,
         ),
+        CustomItemSameLine(title: 'Nombre y apellidos', content: '${user.firstName} ${user.lastName}'),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Fecha de nacimiento', content: formatter.format(user.birthday!)),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Edad', content: '${inYears(DateTime.now().difference(user.birthday!).inDays).toString()} años'),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Nacionalidad', content: user.nationality!),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Género', content: user.gender!),
+        SpaceH12(),
         CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: followReport.subsidy ?? ''),
+        SpaceH12(),
+        CustomItem(title: 'Técnico/a de referencia', content: followReport.techPersonName ?? ''),
 
         //Section 1
         SectionTitle(title: '1. Itinerario en España'),
@@ -74,7 +92,7 @@ Future<Uint8List> generateFollowReportFile(
         SpaceH12(),
         CustomRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1:  followReport.arriveDate == null ? '' : formatter.format(followReport.arriveDate!), content2: followReport.receptionResources ?? ''),
         SpaceH12(),
-        CustomItem(title: 'Situación administrativa', content: followReport.administrativeExternalResources ?? ''),
+        CustomItem(title: StringConst.INITIAL_EXTERNAL_RESOURCES, content: followReport.administrativeExternalResources ?? ''),
 
         //Subsection 1.1
         SubSectionTitle(title: StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION),
@@ -117,10 +135,10 @@ Future<Uint8List> generateFollowReportFile(
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation2_2 ?? ''),
         SpaceH12(),
         CustomItem(title: 'Estado', content: followReport.disabilityState ?? ''),
-        followReport.dependenceState == 'Concedida' ?
+        followReport.disabilityState == 'Concedida' ?
         CustomRow(title1: 'Concedida', title2: 'Fecha', content1: followReport.granted ?? '', content2: followReport.revisionDate == null ? '' : formatter.format(followReport.revisionDate!)) :
         pw.Container(),
-        followReport.dependenceState == 'Concedida' ? SpaceH12() : pw.Container(),
+        followReport.disabilityState == 'Concedida' ? SpaceH12() : pw.Container(),
         SpaceH12(),
         CustomItem(title: 'Profesional de referencia', content: followReport.referenceProfessionalDisability ?? ''),
         SpaceH12(),
@@ -329,4 +347,8 @@ Future<Uint8List> generateFollowReportFile(
 
 pw.Widget SpaceH12(){
   return pw.SizedBox(height: 12);
+}
+
+pw.Widget SpaceH5(){
+      return pw.SizedBox(height: 5);
 }

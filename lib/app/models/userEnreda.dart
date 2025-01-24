@@ -311,7 +311,7 @@ class UserEnreda {
   final Motivation? motivation;
   final bool? checkAgreeCV;
   //final List<PersonalDocument> personalDocuments;
-  final String? initialReportId;
+  late  String? initialReportId;
   final String? closureReportId;
   final String? followReportId;
   final String? derivationReportId;

@@ -10,6 +10,7 @@ class FollowReport {
 
     this.subsidy,
     this.techPerson,
+    this.techPersonName,
 
     //Section 1
     this.orientation1,
@@ -161,6 +162,7 @@ class FollowReport {
   //Pre-Sections
   final String? subsidy;
   final String? techPerson;
+  final String? techPersonName;
 
   //Section 1
   final String? orientation1;
@@ -357,6 +359,7 @@ class FollowReport {
       //Pre-Sections
       subsidy: data['subsidy'],
       techPerson: data['techPerson'],
+      techPersonName: data['techPersonName'],
 
       //Section 1
       orientation1: data['orientation1'],
@@ -520,6 +523,7 @@ class FollowReport {
       //Pre-Sections
       'subsidy': subsidy,
       'techPerson': techPerson,
+      'techPersonName': techPersonName,
 
       //Section 1
       'orientation1': orientation1,

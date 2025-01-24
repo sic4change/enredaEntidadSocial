@@ -98,6 +98,36 @@ class CustomItem extends pw.StatelessWidget {
   }
 }
 
+class CustomItemSameLine extends pw.StatelessWidget {
+  CustomItemSameLine({
+    required this.title,
+    required this.content,
+  });
+  final String title;
+  final String content;
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text('$title: ',
+              textScaleFactor: 0.8,
+              style: pw.Theme.of(context)
+                  .defaultTextStyle
+                  .copyWith(fontWeight: pw.FontWeight.normal, color: black)
+          ),
+          pw.Text(content,
+              textScaleFactor: 0.8,
+              style: pw.Theme.of(context)
+                  .defaultTextStyle
+                  .copyWith(fontWeight: pw.FontWeight.bold, color: black)
+          )
+        ]
+    );
+  }
+}
+
 class SectionTitle extends pw.StatelessWidget {
   SectionTitle({
     required this.title,

@@ -41,6 +41,12 @@ Future<Uint8List> generateClosureReportFile(
   final pageTheme = await MyPageTheme(format, isMdm);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
+  int inYears(int days) {
+    if (days < 1) return 0;
+
+    return days~/365;
+  }
+
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
@@ -65,7 +71,19 @@ Future<Uint8List> generateClosureReportFile(
         pw.SizedBox(
           height: 30,
         ),
+        CustomItemSameLine(title: 'Nombre y apellidos', content: '${user.firstName} ${user.lastName}'),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Fecha de nacimiento', content: formatter.format(user.birthday!)),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Edad', content: '${inYears(DateTime.now().difference(user.birthday!).inDays).toString()} años'),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Nacionalidad', content: user.nationality!),
+        SpaceH5(),
+        CustomItemSameLine(title: 'Género', content: user.gender!),
+        SpaceH12(),
         CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: closureReport.subsidy ?? ''),
+        SpaceH12(),
+        CustomItem(title: 'Técnico/a de referencia', content: closureReport.techPersonName ?? ''),
 
         //Section 1
         SectionTitle(title: '1. Itinerario en España'),
@@ -116,10 +134,10 @@ Future<Uint8List> generateClosureReportFile(
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation2_2 ?? ''),
         SpaceH12(),
         CustomItem(title: 'Estado', content: closureReport.disabilityState ?? ''),
-        closureReport.dependenceState == 'Concedida' ?
+        closureReport.disabilityState == 'Concedida' ?
         CustomRow(title1: 'Concedida', title2: 'Fecha', content1: closureReport.granted ?? '', content2: closureReport.revisionDate == null ? '' : formatter.format(closureReport.revisionDate!)) :
         pw.Container(),
-        closureReport.dependenceState == 'Concedida' ? SpaceH12() : pw.Container(),
+        closureReport.disabilityState == 'Concedida' ? SpaceH12() : pw.Container(),
         SpaceH12(),
         CustomItem(title: 'Profesional de referencia', content: closureReport.referenceProfessionalDisability ?? ''),
         SpaceH12(),
@@ -333,6 +351,10 @@ Future<Uint8List> generateClosureReportFile(
 
 pw.Widget SpaceH12(){
   return pw.SizedBox(height: 12);
+}
+
+pw.Widget SpaceH5(){
+  return pw.SizedBox(height: 5);
 }
 
 

@@ -30,7 +30,7 @@ class BottomSignatures extends pw.StatelessWidget {
                           .copyWith(fontWeight: pw.FontWeight.bold, color: black)),
                 ]
             ),
-            pw.Column(
+            /*pw.Column(
                 children: [
                   pw.Text('FDO por participante',
                       textScaleFactor: 0.8,
@@ -44,7 +44,7 @@ class BottomSignatures extends pw.StatelessWidget {
                           .copyWith(fontWeight: pw.FontWeight.bold, color: black)
                   ),
                 ]
-            )
+            )*/
           ]
       ),
     );

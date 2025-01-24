@@ -694,6 +694,7 @@ class StringConst {
   static const String FORM_GALLERY = "Galería";
 
   //Initial Report
+  static const String INITIAL_DATE_ERROR =  'No se puede poner una fecha posterior a la actual';
   static const String INITIAL_SUBSIDY = 'Subvención a la que el/la participante está imputado/a';
   static const String INITIAL_TECH_PERSON = 'Técnica de referencia';
   static const String INITIAL_TITLE1_ITINERARY = '1. Itinerario en España';

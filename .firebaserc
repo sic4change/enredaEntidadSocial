@@ -7,6 +7,9 @@
       "hosting": {
         "entidadsocial": [
           "enredadentidadsocial"
+        ],
+        "test-enreda": [
+          "test-enreda"
         ]
       }
     }

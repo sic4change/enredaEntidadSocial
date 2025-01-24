@@ -1140,9 +1140,26 @@ class FirestoreDatabase implements Database {
         path: APIPath.initialReport(initialReport.initialReportId!), data: initialReport.toMap());
   }
 
-  @override
-  Future<void> addInitialReport(InitialReport initialReport) =>
-      _service.addData(path: APIPath.initialReports(), data: initialReport.toMap());
+  Future<void> addInitialReport(InitialReport initialReport) async {
+    try {
+      // Verifica si existe al menos un reporte para este userId
+      final hasReports = await initialReportsStreamByUserId(initialReport.userId).any((_) => true);
+
+      if (!hasReports) {
+        // Si no hay reportes, añade el nuevo
+        await _service.addData(path: APIPath.initialReports(), data: initialReport.toMap());
+      }
+    } catch (e) {
+      // Maneja el caso en el que el stream no tiene datos o falla
+      if (e is StateError && e.message == 'No element') {
+        // Esto significa que el Stream está vacío, así que añade el reporte
+        await _service.addData(path: APIPath.initialReports(), data: initialReport.toMap());
+      } else {
+        // Lanza otros errores que no esperabas
+        rethrow;
+      }
+    }
+  }
 
   @override
   Stream<List<String>> languagesStream() => _service.collectionStream(

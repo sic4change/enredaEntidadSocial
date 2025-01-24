@@ -11,6 +11,7 @@ class DerivationReport {
 
     this.subsidy,
     this.techPerson,
+    this.techPersonName,
     this.addressedTo,
     this.objectiveDerivation,
 
@@ -187,6 +188,7 @@ class DerivationReport {
   //Pre-Sections
   final String? subsidy;
   final String? techPerson;
+  final String? techPersonName;
   final String? addressedTo;
   final String? objectiveDerivation;
 
@@ -407,6 +409,7 @@ class DerivationReport {
       //Pre-Sections
       subsidy: data['subsidy'],
       techPerson: data['techPerson'],
+      techPersonName: data['techPersonName'],
       addressedTo: data['addressedTo'],
       objectiveDerivation: data['objectiveDerivation'],
       fromInitialReport: data['fromInitialReport'],
@@ -593,6 +596,7 @@ class DerivationReport {
       //Pre-Sections
       'subsidy': subsidy,
       'techPerson': techPerson,
+      'techPersonName': techPersonName,
       'addressedTo': addressedTo,
       'objectiveDerivation': objectiveDerivation,
       'fromInitialReport': fromInitialReport,

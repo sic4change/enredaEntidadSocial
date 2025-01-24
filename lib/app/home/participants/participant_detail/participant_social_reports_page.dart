@@ -401,7 +401,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                           );
                           return;
                         }
-                        if(user.initialReportId != null){
+                        /*if(user.initialReportId != null){
                           if(initialReport.completedDate!.add(Duration(days: 180)).isBefore(DateTime.now()) == false){
                             showAlertDialog(
                               context,
@@ -411,7 +411,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             );
                             return;
                           }
-                        }
+                        }*/
                         setState(() {
                           ParticipantSocialReportPage.selectedIndexInforms.value = 2;
                         });
@@ -437,15 +437,6 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             context,
                             title: 'Aviso',
                             content: 'El Informe Inicial aún no se ha completado.',
-                            defaultActionText: 'Aceptar',
-                          );
-                          return;
-                        }
-                        if(followReport.completedDate == null){
-                          showAlertDialog(
-                            context,
-                            title: 'Aviso',
-                            content: 'El Informe de Seguimiento aún no se ha completado.',
                             defaultActionText: 'Aceptar',
                           );
                           return;
@@ -477,7 +468,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             );
                             return;
                           }
-                          if(followReport.completedDate == null){
+                          if(followReport.completedDate == null && !initialReport.completedDate!.isAfter(DateTime.now().add(Duration(days: -180)))){
                             showAlertDialog(
                               context,
                               title: 'Aviso',
@@ -486,7 +477,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             );
                             return;
                           }
-                          if(derivationReport.completedDate == null){
+                          if(derivationReport.completedDate == null && !initialReport.completedDate!.isAfter(DateTime.now().add(Duration(days: -180)))){
                             showAlertDialog(
                               context,
                               title: 'Aviso',

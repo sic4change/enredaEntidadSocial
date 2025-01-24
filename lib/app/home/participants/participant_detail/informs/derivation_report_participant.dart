@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../common_widgets/alert_dialog.dart';
 import '../../../../common_widgets/custom_date_picker_open.dart';
 import '../../../../utils/adaptative.dart';
 import '../../../../utils/responsive.dart';
@@ -637,6 +638,8 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
     String? _addressedTo = report.addressedTo ?? '';
     String? _objectiveDerivation = report.objectiveDerivation ?? '';
     final bool _fromInitialReport = report.fromInitialReport!;
+    DateTime _completedTime = report.completedDate ?? DateTime.now();
+
 
     //Section 1
     String _orientation1 = report.orientation1 ?? '';
@@ -968,23 +971,43 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             SpaceH12(),
 
-            StreamBuilder<UserEnreda>(
-                stream: database.userEnredaStreamByUserId(_techPerson),
-                builder: (context, snapshot) {
+            CustomFlexRowColumn(
+              childRight: StreamBuilder<UserEnreda>(
+                  stream: database.userEnredaStreamByUserId(_techPerson),
+                  builder: (context, snapshot) {
 
-                  if(snapshot.hasData && snapshot.connectionState != ConnectionState.waiting){
+                    if(snapshot.hasData && snapshot.connectionState != ConnectionState.waiting){
 
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _techPersonController.text = '${snapshot.data?.firstName}' + ' ' + '${snapshot.data?.lastName}';
-                    });
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _techPersonController.text = '${snapshot.data?.firstName}' + ' ' + '${snapshot.data?.lastName}';
+                      });
+                    }
+                    return CustomTextFormFieldTitle(
+                      labelText: StringConst.INITIAL_TECH_PERSON,
+                      controller: _techPersonController,
+                      enabled: false,
+                    );
                   }
-                  return CustomTextFormFieldTitle(
-                    labelText: StringConst.INITIAL_TECH_PERSON,
-                    controller: _techPersonController,
-                    enabled: false,
-                  );
-                }
+              ),
+              childLeft: CustomDatePickerTitleOpen(
+                labelText: StringConst.DATE,
+                enabled: !_finished,
+                color: AppColors.primary900,
+                initialValue: _completedTime,
+                onChanged: (value){
+                  if(value!.isAfter(DateTime.now())){
+                    showAlertDialog(context, title: StringConst.DATE_ERROR, content: StringConst.INITIAL_DATE_ERROR, defaultActionText: StringConst.FORM_CONFIRM);
+                    setState(() {
+                      value = _completedTime;
+                    });
+                    return;
+                  }else{
+                    _completedTime = value;
+                  }
+                },
+              ),
             ),
+
 
             //Section 1
             ValueListenableBuilder(
@@ -1855,72 +1878,18 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: _psychosocialDerivationLegal == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
-                source: StringConst.YES_NO_SELECTION,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _psychosocialDerivationLegal = value;
-                },
-                // validator: (value) =>
-                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              )
-                  : CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
-                source: StringConst.YES_NO_SELECTION,
-                value: _psychosocialDerivationLegal,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _psychosocialDerivationLegal = value;
-                },
-                // validator: (value) =>
-                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-              childRight: CustomDatePickerTitleOpen(
-                labelText: StringConst.INITIAL_DERIVATION_DATE,
-                initialValue: _psychosocialDerivationDate,
-                onChanged: (value) {
-                  _psychosocialDerivationDate = value;
-                },
-                enabled: !_finished,
-                // validator: (value) =>
-                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-            ),
-            SpaceH12(), //TODO check values saved
-            CustomTextFormFieldTitle(
-              labelText: StringConst.INITIAL_MOTIVE,
-              initialValue: _psychosocialDerivationMotive,
-              onChanged: (value) {
-                _psychosocialDerivationMotive = value;
-              },
-              // validator: (value) => (value!.isNotEmpty || value != '')
-              //     ? null
-              //     : StringConst.FORM_GENERIC_ERROR,
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            //External derivation
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
               childLeft: _externalDerivationLegal == ''
                   ? CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
                 source: StringConst.YES_NO_SELECTION,
                 onChanged: _finished
                     ? null
                     : (value) {
                   _externalDerivationLegal = value;
                 },
-                // validator: (value) =>
-                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               )
                   : CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
                 source: StringConst.YES_NO_SELECTION,
                 value: _externalDerivationLegal,
                 onChanged: _finished
@@ -1928,8 +1897,6 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                     : (value) {
                   _externalDerivationLegal = value;
                 },
-                // validator: (value) =>
-                // value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomDatePickerTitleOpen(
                 labelText: StringConst.INITIAL_DERIVATION_DATE,
@@ -1938,20 +1905,58 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   _externalDerivationDate = value;
                 },
                 enabled: !_finished,
-                // validator: (value) =>
-                // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
-            SpaceH12(),
+            SpaceH12(), //TODO check values saved
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
               initialValue: _externalDerivationMotive,
               onChanged: (value) {
                 _externalDerivationMotive = value;
               },
-              // validator: (value) => (value!.isNotEmpty || value != '')
-              //     ? null
-              //     : StringConst.FORM_GENERIC_ERROR,
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            //External derivation
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _psychosocialDerivationLegal == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _psychosocialDerivationLegal = value;
+                },
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                value: _psychosocialDerivationLegal,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _psychosocialDerivationLegal = value;
+                },
+              ),
+              childRight: CustomDatePickerTitleOpen(
+                labelText: StringConst.INITIAL_DERIVATION_DATE,
+                initialValue: _psychosocialDerivationDate,
+                onChanged: (value) {
+                  _psychosocialDerivationDate = value;
+                },
+                enabled: !_finished,
+              ),
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_MOTIVE,
+              initialValue: _psychosocialDerivationMotive,
+              onChanged: (value) {
+                _psychosocialDerivationMotive = value;
+              },
               enabled: !_finished,
             ),
             SpaceH12(),
@@ -3474,8 +3479,10 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                           allow9_4: _allow9_4Notifier.value,
                           allow9_5: _allow9_5Notifier.value,
                           allow9_6: _allow9_6Notifier.value,
+                          completedDate: _completedTime,
                           finished: false,
                           fromInitialReport: _fromInitialReport,
+                          techPersonName: _techPersonController.text,
                         ));
                         showDialog(
                             context: context,
@@ -3831,8 +3838,9 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                                             allow9_5: _allow9_5Notifier.value,
                                             allow9_6: _allow9_6Notifier.value,
                                             finished: true,
-                                            completedDate: DateTime.now(),
+                                            completedDate: _completedTime,
                                             fromInitialReport: _fromInitialReport,
+                                            techPersonName: _techPersonController.text,
                                           ));
                                       Navigator.of(context).pop();
                                       ParticipantSocialReportPage.selectedIndexInforms.value = 0;

@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_date_picker_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_multi_selection_radio_list.dart';
@@ -78,7 +79,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
   }
 
   Widget initialReport(BuildContext context, UserEnreda user) {
-    final database = Provider.of<Database>(context, listen: false);
+    final database = Provider.of<Database>(context, listen: true);
 
     return Container(
       padding: Responsive.isMobile(context) ? EdgeInsets.zero : EdgeInsets.symmetric(vertical: 15),
@@ -124,6 +125,12 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           database.addInitialReport(InitialReport(
                             userId: user.userId,
                           ));
+                          if(initialReportSaved.userId != null){
+                            setState(() {
+                              widget.user.initialReportId = initialReportSaved.initialReportId;
+                            });
+                            database.setUserEnreda(widget.user);
+                          }
                         }
                         return Container(
                           height: 300,
@@ -266,7 +273,6 @@ class _InitialReportFormState extends State<InitialReportForm> {
     String? _subsidy = report.subsidy ?? '';
     String? _techPerson = report.techPerson ?? widget.user.assignedById;
     DateTime _completedTime = widget.user.startDateItinerary ?? DateTime.now();
-    print("fecha de usuario: ${widget.user.startDateItinerary}");
 
     //Section 1
     String _orientation1 = report.orientation1 ?? '';
@@ -480,7 +486,15 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 color: AppColors.primary900,
                 initialValue: _completedTime,
                 onChanged: (value){
-                  _completedTime = value!;
+                  if(value!.isAfter(DateTime.now())){
+                    showAlertDialog(context, title: StringConst.DATE_ERROR, content: StringConst.INITIAL_DATE_ERROR, defaultActionText: StringConst.FORM_CONFIRM);
+                    setState(() {
+                      value = _completedTime;
+                    });
+                    return;
+                  }else{
+                    _completedTime = value;
+                  }
                 },
               ),
             ),
@@ -1172,52 +1186,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: _psychosocialDerivationLegal == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
-                source: StringConst.YES_NO_SELECTION,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _psychosocialDerivationLegal = value;
-                },
-              )
-                  : CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
-                source: StringConst.YES_NO_SELECTION,
-                value: _psychosocialDerivationLegal,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _psychosocialDerivationLegal = value;
-                },
-              ),
-              childRight: CustomDatePickerTitleOpen(
-                labelText: StringConst.INITIAL_DERIVATION_DATE,
-                initialValue: _psychosocialDerivationDate,
-                onChanged: (value) {
-                  _psychosocialDerivationDate = value;
-                },
-                enabled: !_finished,
-              ),
-            ),
-            SpaceH12(), //TODO check values saved
-            CustomTextFormFieldTitle(
-              labelText: StringConst.INITIAL_MOTIVE,
-              initialValue: _psychosocialDerivationMotive,
-              onChanged: (value) {
-                _psychosocialDerivationMotive = value;
-              },
-              enabled: !_finished,
-            ),
-            SpaceH12(),
-            //External derivation
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
               childLeft: _externalDerivationLegal == ''
                   ? CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
                 source: StringConst.YES_NO_SELECTION,
                 onChanged: _finished
                     ? null
@@ -1226,7 +1197,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 },
               )
                   : CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                labelText: StringConst.INITIAL_EXTERNAL_DERIVATION,
                 source: StringConst.YES_NO_SELECTION,
                 value: _externalDerivationLegal,
                 onChanged: _finished
@@ -1244,12 +1215,55 @@ class _InitialReportFormState extends State<InitialReportForm> {
                 enabled: !_finished,
               ),
             ),
-            SpaceH12(),
+            SpaceH12(), //TODO check values saved
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
               initialValue: _externalDerivationMotive,
               onChanged: (value) {
                 _externalDerivationMotive = value;
+              },
+              enabled: !_finished,
+            ),
+            SpaceH12(),
+            //External derivation
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _psychosocialDerivationLegal == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _psychosocialDerivationLegal = value;
+                },
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                value: _psychosocialDerivationLegal,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _psychosocialDerivationLegal = value;
+                },
+              ),
+              childRight: CustomDatePickerTitleOpen(
+                labelText: StringConst.INITIAL_DERIVATION_DATE,
+                initialValue: _psychosocialDerivationDate,
+                onChanged: (value) {
+                  _psychosocialDerivationDate = value;
+                },
+                enabled: !_finished,
+              ),
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_MOTIVE,
+              initialValue: _psychosocialDerivationMotive,
+              onChanged: (value) {
+                _psychosocialDerivationMotive = value;
               },
               enabled: !_finished,
             ),
@@ -1893,6 +1907,11 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         width: 250,
                         child: ElevatedButton(
                             onPressed: () async {
+                              setState(() {
+                                widget.user.startDateItinerary = _completedTime;
+                                widget.user.initialReportId = initialReportSaved.initialReportId;
+                              });
+                              database.setUserEnreda(widget.user);
                               database.setInitialReport(InitialReport(
                                 userId: report.userId,
                                 initialReportId: report.initialReportId,
@@ -1991,6 +2010,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                 longTerm: _longTerm,
                                 finished: false,
                                 completedDate: _completedTime,
+                                techPersonName: _techPersonController.text,
                               ));
                               showDialog(
                                   context: context,
@@ -2022,6 +2042,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                                   ElevatedButton(
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
+                                                        ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                                                         //setStateMenuPage();
                                                       },
                                                       child: Padding(
@@ -2180,6 +2201,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                         onPressed: () async {
                                           setState(() {
                                             widget.user.startDateItinerary = _completedTime;
+                                            widget.user.initialReportId = initialReportSaved.initialReportId;
                                           });
                                           database.setUserEnreda(widget.user);
                                           database.setInitialReport(
@@ -2306,8 +2328,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                             longTerm: _longTerm,
                                             finished: true,
                                             completedDate: _completedTime,
+                                            techPersonName: _techPersonController.text,
                                           ));
                                           Navigator.of(context).pop();
+                                          ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                                           //setStateMenuPage();
                                         },
                                         child: Padding(
