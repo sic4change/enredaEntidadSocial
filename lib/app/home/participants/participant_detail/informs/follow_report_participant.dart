@@ -43,7 +43,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
   final ValueNotifier<String> _grantedNotifier =
   ValueNotifier<String>('');
   final ValueNotifier<List<LanguageReport>> _languagesNotifier =
-  ValueNotifier<List<LanguageReport>>([LanguageReport(name: '', level: '')]);
+  ValueNotifier<List<LanguageReport>>([LanguageReport(name: '', level: '', accreditation: '')]);
   final ValueNotifier<String> _laborSituationNotifier =
   ValueNotifier<String>('');
   final ValueNotifier<String> _adminStateNotifier =
@@ -100,6 +100,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       userId: globals.currentInitialReportUser.userId,
                       subsidy: globals.currentInitialReportUser.subsidy,
                       techPerson: globals.currentInitialReportUser.techPerson,
+                      techPersonName: globals.currentInitialReportUser.techPersonName,
+                      dniParticipant: globals.currentInitialReportUser.dniParticipant,
                       orientation1: globals.currentInitialReportUser.orientation1,
                       arriveDate: globals.currentInitialReportUser.arriveDate,
                       receptionResources: globals.currentInitialReportUser.receptionResources,
@@ -177,6 +179,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       orientation13: globals.currentInitialReportUser.orientation13,
                       orientation13_2: globals.currentInitialReportUser.orientation13_2,
                       educationLevel: globals.currentInitialReportUser.educationLevel,
+                      laborSituation: globals.currentInitialReportUser.laborSituation,
                       tempLabor: globals.currentInitialReportUser.tempLabor,
                       workingDayLabor: globals.currentInitialReportUser.workingDayLabor,
                       competencies: globals.currentInitialReportUser.competencies,
@@ -185,6 +188,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       shortTerm: globals.currentInitialReportUser.shortTerm,
                       mediumTerm: globals.currentInitialReportUser.mediumTerm,
                       longTerm: globals.currentInitialReportUser.longTerm,
+                      homologation: globals.currentInitialReportUser.homologation,
+                      laborOtherConsiderations: globals.currentInitialReportUser.laborOtherConsiderations,
                       finished: false,
                     ));
                 return SingleChildScrollView(
@@ -206,7 +211,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
   }
 
   void _addLanguage(){
-    final newLanguages = List<LanguageReport>.from(_languagesNotifier.value)..add(LanguageReport(name: '', level: ''));
+    final newLanguages = List<LanguageReport>.from(_languagesNotifier.value)..add(LanguageReport(name: '', level: '', accreditation: ''));
     _languagesNotifier.value = newLanguages;
   }
 
@@ -424,6 +429,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
     String? _subsidy = report.subsidy ?? '';
     String? _techPerson = report.techPerson ?? userEnreda.assignedById;
     DateTime _completedTime = report.completedDate ?? DateTime.now();
+    String? _dniParticipant = report.dniParticipant ?? '';
 
 
     //Section 1
@@ -573,10 +579,12 @@ class _FollowReportFormState extends State<FollowReportForm> {
     String? _orientation13 = report.orientation13 ?? '';
     String? _orientation13_2 = report.orientation13_2 ?? '';
     String? _educationLevel = report.educationLevel ?? '';
+    String? _homologation = report.homologation ?? '';
     if (_laborSituationNotifier.value == '' &&
         report.laborSituation != null) {
       _laborSituationNotifier.value = report.laborSituation!;
     }
+    String? _laborOtherConsiderations = report.laborOtherConsiderations ?? '';
     String? _tempLabor = report.tempLabor ?? '';
     String? _workingDayLabor = report.workingDayLabor ?? '';
     String? _competencies = report.competencies ?? '';
@@ -687,6 +695,16 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   }
                 },
               ),
+            ),
+
+            CustomTextFormFieldTitle(
+              labelText: StringConst.DNI_PARTICIPANT,
+              initialValue: _dniParticipant,
+              hintText: "Escribe el n° de documentación personal vigente del participante",
+              onChanged: (value) {
+                _dniParticipant = value ?? '';
+              },
+              enabled: !_finished,
             ),
 
             //Section 1
@@ -1040,7 +1058,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
               //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
-            SpaceH12(),
+            /*SpaceH12(),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
@@ -1106,6 +1124,48 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 //     : StringConst.FORM_GENERIC_ERROR,
                 enabled: !_finished,
               ),
+            ),*/
+            SpaceH12(),
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: _psychosocialDerivationLegal == ''
+                  ? CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _psychosocialDerivationLegal = value;
+                },
+              )
+                  : CustomDropDownButtonFormFieldTittle(
+                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
+                source: StringConst.YES_NO_SELECTION,
+                value: _psychosocialDerivationLegal,
+                onChanged: _finished
+                    ? null
+                    : (value) {
+                  _psychosocialDerivationLegal = value;
+                },
+              ),
+              childRight: CustomDatePickerTitleOpen(
+                labelText: StringConst.INITIAL_DERIVATION_DATE,
+                initialValue: _psychosocialDerivationDate,
+                onChanged: (value) {
+                  _psychosocialDerivationDate = value;
+                },
+                enabled: !_finished,
+              ),
+            ),
+            SpaceH12(),
+            CustomTextFormFieldTitle(
+              labelText: StringConst.INITIAL_MOTIVE,
+              initialValue: _psychosocialDerivationMotive,
+              onChanged: (value) {
+                _psychosocialDerivationMotive = value;
+              },
+              enabled: !_finished,
             ),
 
             //Subsection 2.2
@@ -1515,49 +1575,6 @@ class _FollowReportFormState extends State<FollowReportForm> {
               enabled: !_finished,
             ),
             SpaceH12(),
-            //External derivation
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: _psychosocialDerivationLegal == ''
-                  ? CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
-                source: StringConst.YES_NO_SELECTION,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _psychosocialDerivationLegal = value;
-                },
-              )
-                  : CustomDropDownButtonFormFieldTittle(
-                labelText: StringConst.INITIAL_PSYCHOSOCIAL_DERIVATION,
-                source: StringConst.YES_NO_SELECTION,
-                value: _psychosocialDerivationLegal,
-                onChanged: _finished
-                    ? null
-                    : (value) {
-                  _psychosocialDerivationLegal = value;
-                },
-              ),
-              childRight: CustomDatePickerTitleOpen(
-                labelText: StringConst.INITIAL_DERIVATION_DATE,
-                initialValue: _psychosocialDerivationDate,
-                onChanged: (value) {
-                  _psychosocialDerivationDate = value;
-                },
-                enabled: !_finished,
-              ),
-            ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: StringConst.INITIAL_MOTIVE,
-              initialValue: _psychosocialDerivationMotive,
-              onChanged: (value) {
-                _psychosocialDerivationMotive = value;
-              },
-              enabled: !_finished,
-            ),
-            SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LEGAL_REPRESENTATION,
               hintText: StringConst.INITIAL_HINT_LEGAL,
@@ -1794,7 +1811,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
               //     : StringConst.FORM_GENERIC_ERROR,
               enabled: !_finished,
             ),
-            SpaceH12(),
+            informSubSectionTitle(StringConst.HABITABILITY_CONDITIONS),
             Align(
                 alignment: Alignment.center,
                 child: CustomMultiSelectionCheckBoxList(
@@ -1890,63 +1907,78 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       {
                         return Column(
                           children: [
-                            for (LanguageReport language in _languagesNotifier
-                                .value)
-                              Column(
-                                children: [
-                                  CustomFlexRowColumn(
-                                    contentPadding: EdgeInsets.zero,
-                                    separatorSize: 20,
-                                    childLeft: language.name == ''
-                                        ? CustomDropDownButtonFormFieldTittle(
-                                      labelText: StringConst.INITIAL_LANGUAGE,
-                                      source: _languageOptions,
-                                      onChanged: _finished
-                                          ? null
-                                          : (value) {
-                                        _languagesNotifier.value[_languagesNotifier
-                                            .value.indexOf(language)].name = value!;
-                                      },
-                                      // validator: (value) =>
-                                      // value != null
-                                      //     ? null
-                                      //     : StringConst.FORM_GENERIC_ERROR,
-                                    )
-                                        : CustomDropDownButtonFormFieldTittle(
-                                      labelText: StringConst.INITIAL_LANGUAGE,
-                                      value: language.name,
-                                      source: _languageOptions,
-                                      onChanged: _finished
-                                          ? null
-                                          : (value) {
-                                        _languagesNotifier.value[_languagesNotifier
-                                            .value.indexOf(language)].name = value!;
-                                      },
-                                      // validator: (value) =>
-                                      // value != null
-                                      //     ? null
-                                      //     : StringConst.FORM_GENERIC_ERROR,
-                                    ),
-                                    childRight: CustomTextFormFieldTitle(
-                                      labelText:
-                                      StringConst.INITIAL_LANGUAGE_LEVEL,
-                                      initialValue: language.level,
-                                      onChanged: (value) {
-                                        _languagesNotifier.value[_languagesNotifier
-                                            .value.indexOf(language)].level = value;
-                                      },
-                                      // validator: (value) =>
-                                      // (value!.isNotEmpty || value != '')
-                                      //     ? null
-                                      //     : StringConst.FORM_GENERIC_ERROR,
-                                      enabled: !_finished,
-                                    ),
-
-                                  ),
-                                  SpaceH12(),
-                                ],
+                            for (LanguageReport language in _languagesNotifier.value)
+                              Builder(
+                                  builder: (context){
+                                    if (!StringConst.LANGUAGE_LEVEL_SELECTION.any((item) => item.value == language.level)) {
+                                      language.level = '';
+                                      print("lo deja a vacio");
+                                    };
+                                    return Column(
+                                      children: [
+                                        CustomFlexRowColumn(
+                                          contentPadding: EdgeInsets.zero,
+                                          separatorSize: 20,
+                                          childLeft: language.name == ''
+                                              ? CustomDropDownButtonFormFieldTittle(
+                                            labelText: StringConst.INITIAL_LANGUAGE,
+                                            source: _languageOptions,
+                                            onChanged: _finished
+                                                ? null
+                                                : (value) {
+                                              _languagesNotifier.value[_languagesNotifier
+                                                  .value.indexOf(language)].name = value!;
+                                            },
+                                          )
+                                              : CustomDropDownButtonFormFieldTittle(
+                                            labelText: StringConst.INITIAL_LANGUAGE,
+                                            value: language.name,
+                                            source: _languageOptions,
+                                            onChanged: _finished
+                                                ? null
+                                                : (value) {
+                                              _languagesNotifier.value[_languagesNotifier
+                                                  .value.indexOf(language)].name = value!;
+                                            },
+                                          ),
+                                          childRight: language.level == ''
+                                              ? CustomDropDownButtonFormFieldTittle(
+                                            labelText: StringConst.INITIAL_LANGUAGE_LEVEL,
+                                            source: StringConst.LANGUAGE_LEVEL_SELECTION,
+                                            onChanged: _finished
+                                                ? null
+                                                : (value) {
+                                              _languagesNotifier.value[_languagesNotifier
+                                                  .value.indexOf(language)].level = value!;
+                                            },
+                                          )
+                                              : CustomDropDownButtonFormFieldTittle(
+                                            labelText: StringConst.INITIAL_LANGUAGE_LEVEL,
+                                            value: language.level,
+                                            source: StringConst.LANGUAGE_LEVEL_SELECTION,
+                                            onChanged: _finished
+                                                ? null
+                                                : (value) {
+                                              _languagesNotifier.value[_languagesNotifier
+                                                  .value.indexOf(language)].level = value!;
+                                            },
+                                          ),
+                                        ),
+                                        SpaceH12(),
+                                        CustomTextFormFieldTitle(
+                                          labelText: StringConst.INITIAL_LANGUAGE_ACCREDITATION,
+                                          initialValue: language.accreditation,
+                                          onChanged: (value){
+                                            _languagesNotifier.value[_languagesNotifier
+                                                .value.indexOf(language)].accreditation = value;
+                                          },
+                                          enabled: !_finished,
+                                        ),
+                                        SpaceH12(),
+                                      ],
+                                    );
+                                  }
                               ),
-
                           ],
                         );
                       }
@@ -2141,7 +2173,120 @@ class _FollowReportFormState extends State<FollowReportForm> {
               // validator: (value) =>
               // value != null ? null : StringConst.FORM_GENERIC_ERROR,
             ),
-            informSubSectionTitle(StringConst.INITIAL_TITLE_9_2_WORK_SITUATION),
+            SpaceH12(),
+            _homologation == ''
+                ? CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.HOMOLOGATION,
+              source: StringConst.HOMOLOGATION_SELECTION,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _homologation = value;
+              },
+            )
+                : CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.HOMOLOGATION,
+              source: StringConst.HOMOLOGATION_SELECTION,
+              value: _homologation,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _homologation = value;
+              },
+            ),
+            SpaceH12(),
+            _laborSituationNotifier.value == ''
+                ? CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.INITIAL_LABOR_SITUATION,
+              source: StringConst.LABOR_SITUATION_SELECTION,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _laborSituationNotifier.value = value!;
+              },
+              validator: (value) =>
+              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+            )
+                : CustomDropDownButtonFormFieldTittle(
+              labelText: StringConst.INITIAL_LABOR_SITUATION,
+              source: StringConst.LABOR_SITUATION_SELECTION,
+              value: _laborSituationNotifier.value,
+              onChanged: _finished
+                  ? null
+                  : (value) {
+                _laborSituationNotifier.value = value!;
+              },
+              validator: (value) =>
+              value != null ? null : StringConst.FORM_GENERIC_ERROR,
+            ),
+
+            SpaceH12(),
+            ValueListenableBuilder(
+                valueListenable: _laborSituationNotifier,
+                builder: (context, value, child){
+                  return  _laborSituationNotifier.value == 'Ocupada cuenta ajena' || _laborSituationNotifier.value == 'Ocupada cuenta propia' ? Column(
+                    children: [
+                      CustomFlexRowColumn(
+                        contentPadding: EdgeInsets.zero,
+                        separatorSize: 20,
+                        childLeft: _tempLabor == ''
+                            ? CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.INITIAL_TEMP,
+                          source: StringConst.TEMP_SELECTION,
+                          onChanged: _finished
+                              ? null
+                              : (value) {
+                            _tempLabor = value;
+                          },
+                        )
+                            : CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.INITIAL_TEMP,
+                          source: StringConst.TEMP_SELECTION,
+                          value: _tempLabor,
+                          onChanged: _finished
+                              ? null
+                              : (value) {
+                            _tempLabor = value;
+                          },
+                        ),
+                        childRight: _workingDayLabor == ''
+                            ? CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.INITIAL_LABOR_TYPE,
+                          source: StringConst.WORK_DAY_SELECTION,
+                          onChanged: _finished
+                              ? null
+                              : (value) {
+                            _workingDayLabor = value;
+                          },
+                        )
+                            : CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.INITIAL_LABOR_TYPE,
+                          source: StringConst.WORK_DAY_SELECTION,
+                          value: _workingDayLabor,
+                          onChanged: _finished
+                              ? null
+                              : (value) {
+                            _workingDayLabor = value;
+                          },
+                        ),
+                      ),
+                      SpaceH12(),
+                      CustomTextFormFieldTitle(
+                        labelText: StringConst.LABOR_OTHER_CONSIDERATIONS,
+                        initialValue: _laborOtherConsiderations,
+                        onChanged: (value) {
+                          _laborOtherConsiderations = value;
+                        },
+                        enabled: !_finished,
+                      ),
+                    ],
+                  ) :
+                  Container();
+                }
+            ),
+            SpaceH12(),
+
+            informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
               initialValue: _orientation13_2,
@@ -2150,8 +2295,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
               },
               enabled: !_finished,
             ),
-
-            informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
+            SpaceH12(),
             CustomTextFormFieldTitle(
               labelText:
               StringConst.INITIAL_COMPETENCIES,
@@ -2404,93 +2548,25 @@ class _FollowReportFormState extends State<FollowReportForm> {
 
             informSubSectionTitle(StringConst.FOLLOW_JOB),
 
-            _laborSituationNotifier.value == ''
+            _jobObtaining == ''
                 ? CustomDropDownButtonFormFieldTittle(
               labelText: StringConst.FOLLOW_JOB_ACHIEVEMENT,
-              source: StringConst.LABOR_SITUATION_SELECTION,
+              source: StringConst.YES_NO_SELECTION,
               onChanged: _finished
                   ? null
                   : (value) {
-                _laborSituationNotifier.value = value!;
+                _jobObtaining = value;
               },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
             )
                 : CustomDropDownButtonFormFieldTittle(
               labelText: StringConst.FOLLOW_JOB_ACHIEVEMENT,
-              source: StringConst.LABOR_SITUATION_SELECTION,
-              value: _laborSituationNotifier.value,
+              source: StringConst.YES_NO_SELECTION,
+              value: _jobObtaining,
               onChanged: _finished
                   ? null
                   : (value) {
-                _laborSituationNotifier.value = value!;
+                _jobObtaining = value;
               },
-              validator: (value) =>
-              value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            ),
-
-            SpaceH12(),
-            ValueListenableBuilder(
-                valueListenable: _laborSituationNotifier,
-                builder: (context, value, child){
-                  return  _laborSituationNotifier.value == 'Ocupada cuenta ajena' || _laborSituationNotifier.value == 'Ocupada cuenta propia' ? CustomFlexRowColumn(
-                    contentPadding: EdgeInsets.zero,
-                    separatorSize: 20,
-                    childLeft: _tempLabor == ''
-                        ? CustomDropDownButtonFormFieldTittle(
-                      labelText: StringConst.INITIAL_TEMP,
-                      source: StringConst.TEMP_SELECTION,
-                      onChanged: _finished
-                          ? null
-                          : (value) {
-                        _tempLabor = value;
-                      },
-                      validator: (value) => value != null
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                    )
-                        : CustomDropDownButtonFormFieldTittle(
-                      labelText: StringConst.INITIAL_TEMP,
-                      source: StringConst.TEMP_SELECTION,
-                      value: _tempLabor,
-                      onChanged: _finished
-                          ? null
-                          : (value) {
-                        _tempLabor = value;
-                      },
-                      validator: (value) => value != null
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                    ),
-                    childRight: _workingDayLabor == ''
-                        ? CustomDropDownButtonFormFieldTittle(
-                      labelText: StringConst.INITIAL_LABOR_TYPE,
-                      source: StringConst.WORK_DAY_SELECTION,
-                      onChanged: _finished
-                          ? null
-                          : (value) {
-                        _workingDayLabor = value;
-                      },
-                      validator: (value) => value != null
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                    )
-                        : CustomDropDownButtonFormFieldTittle(
-                      labelText: StringConst.INITIAL_LABOR_TYPE,
-                      source: StringConst.WORK_DAY_SELECTION,
-                      value: _workingDayLabor,
-                      onChanged: _finished
-                          ? null
-                          : (value) {
-                        _workingDayLabor = value;
-                      },
-                      validator: (value) => value != null
-                          ? null
-                          : StringConst.FORM_GENERIC_ERROR,
-                    ),
-                  ) :
-                  Container();
-                }
             ),
             SpaceH12(),
             CustomFlexRowColumn(
@@ -2739,6 +2815,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           followReportId: report.followReportId,
                           subsidy: _subsidy,
                           techPerson: _techPerson,
+                          dniParticipant: _dniParticipant,
                           orientation1: _orientation1,
                           arriveDate: _arriveDate,
                           receptionResources: _receptionResources,
@@ -2824,7 +2901,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
                           orientation13: _orientation13,
                           orientation13_2: _orientation13_2,
                           educationLevel: _educationLevel,
+                          homologation: _homologation,
                           laborSituation: _laborSituationNotifier.value,
+                          laborOtherConsiderations: _laborOtherConsiderations,
                           tempLabor: _tempLabor,
                           workingDayLabor: _workingDayLabor,
                           competencies: _competencies,
@@ -3051,6 +3130,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                             report.followReportId,
                                             subsidy: _subsidy,
                                             techPerson: _techPerson,
+                                            dniParticipant: _dniParticipant,
                                             orientation1: _orientation1,
                                             arriveDate: _arriveDate,
                                             receptionResources:
@@ -3157,8 +3237,10 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                             orientation13_2: _orientation13_2,
                                             educationLevel:
                                             _educationLevel,
+                                            homologation: _homologation,
                                             laborSituation:
                                             _laborSituationNotifier.value,
+                                            laborOtherConsiderations: _laborOtherConsiderations,
                                             tempLabor: _tempLabor,
                                             workingDayLabor:
                                             _workingDayLabor,

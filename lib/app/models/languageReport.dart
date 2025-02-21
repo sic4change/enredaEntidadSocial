@@ -2,15 +2,18 @@ class LanguageReport {
   LanguageReport({
     required this.name,
     required this.level,
+    required this.accreditation,
   });
 
   String name;
   String level;
+  String accreditation;
 
   factory LanguageReport.fromMap(Map<String, dynamic> data, String documentId) {
     return LanguageReport(
       name: data['name'] ?? '',
-      level: data['level'] ?? ''
+      level: data['level'] ?? '',
+      accreditation: data['accreditation'] ?? '',
     );
   }
 
@@ -26,6 +29,7 @@ class LanguageReport {
     return {
       'name': name,
       'level': level,
+      'accreditation': accreditation,
     };
   }
 }

@@ -716,7 +716,7 @@ class StringConst {
   static const String INITIAL_HEALTH_CARD = 'Tarjeta sanitaria';
   static const String INITIAL_EXPIRATION_DATE = 'Fecha de caducidad';
   static const String INITIAL_MEDICATION = 'Medicación/Tratamiento';
-  static const String INITIAL_TITLE_2_1_MENTAL_HEALTH = '2.1 Salud mental';
+  static const String INITIAL_TITLE_2_1_MENTAL_HEALTH = '2.1 Salud Mental: sueño y descanso,tranquilidad, seguridad';
   static const String INITIAL_REST = 'Sueño y descanso';
   static const String INITIAL_DIAGNOSIS = 'Diagnóstico';
   static const String INITIAL_TREATMENT = 'Tratamiento';
@@ -753,10 +753,11 @@ class StringConst {
   static const String INITIAL_FAMILY_CONCILIATION = 'Conciliación familiar';
   static const String INITIAL_TITLE_6_LANGUAGES = '6. Idiomas';
   static const String INITIAL_LANGUAGE = 'Idioma';
-  static const String INITIAL_LANGUAGE_LEVEL = 'Reconocimiento / acreditación - nivel';
+  static const String INITIAL_LANGUAGE_LEVEL = 'Nivel';
+  static const String INITIAL_LANGUAGE_ACCREDITATION = 'Reconocimiento o acreditación';
   static const String INITIAL_TITLE_7_SOCIAL_ATTENTION = '7. Atención social integral';
   static const String INITIAL_CENTER_TS = 'Centro y TS de referencia';
-  static const String INITIAL_SUBSIDY_BENEFICIARY = 'Destinataria de subvención y/o programa de apoyo';
+  static const String INITIAL_SUBSIDY_BENEFICIARY = 'Destinataria de prestación o programa de apoyo';
   static const String INITIAL_NAME_TYPE = 'Nombre/tipo';
   static const String INITIAL_SOCIAL_EXCLUSION_CERTIFICATE = 'Certificado de Exclusión Social';
   static const String INITIAL_SOCIAL_EXCLUSION_OBSERVATIONS = 'Observaciones sobre el certificado';
@@ -766,18 +767,18 @@ class StringConst {
   static const String INITIAL_TITLE_9_2_WORK_SITUATION = '9.2 Situación laboral';
   static const String INITIAL_LABOR_SITUATION = 'Situación laboral inicial';
   static const String INITIAL_LABOR_TYPE = 'Tipo de jornada laboral';
-  static const String INITIAL_TITLE_9_3_TRAJECTORY = '9.3 Trayectoria B.A.E previa';
+  static const String INITIAL_TITLE_9_3_TRAJECTORY = '9.1 Trayectoria B.A.E previa';
   static const String INITIAL_COMPETENCIES = 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)';
   static const String INITIAL_CONTEXTUALIZATION = 'Contextualización del territorio';
   static const String INITIAL_CONNEXION = 'Conexión del entorno';
-  static const String INITIAL_TITLE_9_4_EXPECTATIONS = '9.4 Deseos y expectativas laborales';
+  static const String INITIAL_TITLE_9_4_EXPECTATIONS = '9.2 Deseos y expectativas laborales';
   static const String INITIAL_SHORT_TERM = 'Corto plazo: 1-3 meses';
   static const String INITIAL_MEDIUM_TERM = 'Medio plazo: 3-6 meses';
   static const String INITIAL_LONG_TERM = 'Largo plazo: 6-12 meses';
 
   static const String FOLLOW_PROCESSING_BAG = 'Bolsa de tramitación';
   static const String FOLLOW_ECONOMIC_AMOUNT = 'Cuantía económica';
-  static const String FOLLOW_TITLE_9_5_DEVELOP = '9.5 Desarrollo del tinerario formativo';
+  static const String FOLLOW_TITLE_9_5_DEVELOP = '9.3 Desarrollo del tinerario formativo';
   static const String FOLLOW_FORMATIONS = 'Formaciones';
   static const String FOLLOW_FORMATION_NAME = 'Nombre de la formación';
   static const String FOLLOW_FORMATION_TYPE = 'Tipo de formación';
@@ -789,7 +790,7 @@ class StringConst {
   static const String FOLLOW_FINISH_DATE = 'Fecha de finalización';
   static const String FOLLOW_JOB_UPGRADE = 'Mejora laboral';
   static const String FOLLOW_JOB_UPGRADE_MOTIVE = 'Motivos de la mejora';
-  static const String FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT = '9.6 Acompañamiento post-laboral';
+  static const String FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT = '9.4 Acompañamiento post-laboral';
   static const String FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT = 'Acompañamiento post-laboral';
   static const String FOLLOW_INIT_DATE = 'Fecha de inicio';
   static const String FOLLOW_END_DATE = 'Fecha de fin';
@@ -800,6 +801,11 @@ class StringConst {
   static const String CLOSURE_CLOSE_MOTIVE_DETAIL = 'Detalle del motivo';
   static const String DERIVATION_ADDRESSED = 'Dirigido a:';
   static const String DERIVATION_OBJECTIVE = 'Con el objetivo de:';
+  static const String DNI_PARTICIPANT = "N° Documentación Personal vigente";
+  static const String DNI_PARTICIPANT_HINT = "Escribe el n° de documentación personal vigente del participante";
+  static const String HABITABILITY_CONDITIONS = "Condiciones de habitabilidad";
+  static const String HOMOLOGATION = "Homologación";
+  static const String LABOR_OTHER_CONSIDERATIONS = "Otras consideraciones";
 
   static List<DropdownMenuItem<String>> YES_NO_SELECTION =
   ['Si', 'No'].map<DropdownMenuItem<String>>((String value) {
@@ -840,6 +846,7 @@ class StringConst {
     'Residencia por reagrupación familiar (hab trabajar)', 'Residencia temporal y trabajo por cuenta ajena',
     'Residencia temporal y trabajo por cuenta ajena (duración determinada)',
     'Residencia temporal y trabajo por cuenta propia',
+    'Residencia temporal y trabajo por cuenta ajena y propia',
     'Residencia Temporal y Trabajo en Prestaciones Transnacionales'].map<DropdownMenuItem<String>>((String value) {
     return DropdownMenuItem<String>(
       value: value,
@@ -973,12 +980,13 @@ class StringConst {
     'Salud mental grave',
     'Joven tutelado/a o ex tutelado/a',
     'Responsabilidades familiares',
-    'Madre monomarental',
-    'Minoría étnica',
+    'Familia monomarental/monoparental',
+    'Minoría',
     'Falta de red de apoyo',
     'Violencia de Género',
     'Adicciones',
-    'Ruralidad'
+    'Ruralidad',
+    'Situación administrativa'
   ];
 
   static List<DropdownMenuItem<String>> EDUCATIONAL_LEVEL_SELECTION = [
@@ -1044,7 +1052,21 @@ class StringConst {
     );
   }).toList();
 
+  static List<DropdownMenuItem<String>> LANGUAGE_LEVEL_SELECTION =
+  ['Básico', 'Intermedio', 'Avanzado'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
 
+  static List<DropdownMenuItem<String>> HOMOLOGATION_SELECTION =
+  ['Si', 'No', 'En proceso'].map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
 
 
 

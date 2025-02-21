@@ -81,6 +81,8 @@ Future<Uint8List> generateInitialReportFile(
         CustomItemSameLine(title: 'Nacionalidad', content: user.nationality!),
         SpaceH5(),
         CustomItemSameLine(title: 'Género', content: user.gender!),
+        SpaceH5(),
+        CustomItemSameLine(title: StringConst.DNI_PARTICIPANT, content: initialReport.dniParticipant ?? ''),
         SpaceH12(),
         CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: initialReport.subsidy ?? ''),
         SpaceH12(),
@@ -126,10 +128,16 @@ Future<Uint8List> generateInitialReportFile(
         //Subsection 2.1
         SubSectionTitle(title: '2.1 Salud Mental'),
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_1 ?? ''),
+        /*
         SpaceH5(),
         CustomRow(title1: 'Sueño y descanso', title2: 'Diagnostico', content1: initialReport.rest ?? '', content2: initialReport.diagnosis ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Tratamiento', title2: 'Seguimiento', content1: initialReport.treatment ?? '', content2: initialReport.tracking ?? ''),
+        */
+        SpaceH5(),
+        CustomRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: initialReport.psychosocialDerivationLegal ?? '', content2: initialReport.psychosocialDerivationDate == null ? '' : formatter.format(initialReport.psychosocialDerivationDate!)),
+        SpaceH5(),
+        CustomItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.psychosocialDerivationMotive ?? ''),
 
         //Subsection 2.2
         SubSectionTitle(title: '2.2 Discapacidad'),
@@ -171,10 +179,6 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH5(),
         CustomItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.externalDerivationMotive ?? ''),
         SpaceH5(),
-        CustomRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: initialReport.psychosocialDerivationLegal ?? '', content2: initialReport.psychosocialDerivationDate == null ? '' : formatter.format(initialReport.psychosocialDerivationDate!)),
-        SpaceH5(),
-        CustomItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.psychosocialDerivationMotive ?? ''),
-        SpaceH5(),
         CustomItem(title: 'Representación legal', content: initialReport.legalRepresentation ?? ''),
 
         //Section 4
@@ -197,8 +201,8 @@ Future<Uint8List> generateInitialReportFile(
         ) : pw.Container(),
         CustomItem(title: 'Datos de contacto del recurso alojativo', content: initialReport.centerContact ?? ''),
         CustomItem(title: StringConst.INITIAL_LOCATION, content: initialReport.location ?? ''),
-        SpaceH5(),
         //_customEnumeration(enumeration: initialReport.hostingObservations ?? []),
+        SubSectionTitle(title: StringConst.HABITABILITY_CONDITIONS),
         for (var data in initialReport.hostingObservations!)
           BlockSimpleList(
             title: data,
@@ -221,8 +225,11 @@ Future<Uint8List> generateInitialReportFile(
           children: [
             for(LanguageReport language in initialReport.languages ?? [])
               pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  CustomRow(title1: 'Idioma', title2: 'Reconocimiento / acreditación - nivel', content1: language.name, content2: language.level),
+                  CustomRow(title1: StringConst.INITIAL_LANGUAGE, title2: StringConst.INITIAL_LANGUAGE_LEVEL, content1: language.name, content2: language.level),
+                  SpaceH5(),
+                  CustomItem(title: StringConst.INITIAL_LANGUAGE_ACCREDITATION, content: language.accreditation),
                   SpaceH5(),
                 ]
               )
@@ -269,15 +276,23 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH5(),
         CustomRow(title1: 'Nivel educativo', title2: 'Situación laboral inicial', content1: initialReport.educationLevel ?? '', content2: initialReport.laborSituation ?? ''),
         SpaceH5(),
+        CustomItem(title: StringConst.HOMOLOGATION, content: initialReport.homologation ?? ''),
+        SpaceH5(),
         initialReport.laborSituation == 'Ocupada cuenta propia' || initialReport.laborSituation == 'Ocupada cuenta ajena' ?
             pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.start,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 CustomRow(title1: StringConst.INITIAL_TEMP, title2: 'Tipo jornada', content1: initialReport.tempLabor ?? '', content2: initialReport.workingDayLabor ?? ''),
                 SpaceH5(),
+                CustomItem(title: StringConst.LABOR_OTHER_CONSIDERATIONS, content: initialReport.laborOtherConsiderations ?? ''),
               ]
             )
          : pw.Container(),
+
         SubSectionTitle(title: StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
+        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation13_2 ?? ''),
+        SpaceH5(),
         CustomItem(title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: initialReport.competencies ?? ''),
         SpaceH5(),
         CustomItem(title: 'Contextualización del territorio', content: initialReport.contextualization ?? ''),

@@ -92,6 +92,7 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
 
   Widget _buildContents(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
+    final scrollResources = ScrollController();
     return StreamBuilder<List<Resource>>(
         stream: database.myResourcesStream(widget.organizerId),
         builder: (context, snapshot) {
@@ -103,25 +104,32 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
             return const Center(child: Text('Sin recursos'));
           } 
           resourcesList = snapshot.data!;
-          return Wrap(
-            direction: Axis.horizontal,
-            spacing: 5.0,
-            children: resourcesList.map((resource) =>
-              ResourceChip(
-                resource: resource,
-                database: database,
-                textTheme: Theme.of(context).textTheme,
-                isSelected: _selectedCertify == resourcesList.indexOf(resource),
-                onSelected: () {
-                  setState(() {
-                    _selectResource(resourcesList.indexOf(resource));
-                    _isSelected = true;
-                    this.resource = resource;
-                    resource.setResourceCategoryName();
-                  });
-                },
-              )
-            ).toList(),
+          return Container(
+            height: 80,
+            child: SingleChildScrollView(
+              controller: scrollResources,
+              clipBehavior: Clip.antiAlias,
+              child: Wrap(
+                direction: Axis.horizontal,
+                spacing: 5.0,
+                children: resourcesList.map((resource) =>
+                  ResourceChip(
+                    resource: resource,
+                    database: database,
+                    textTheme: Theme.of(context).textTheme,
+                    isSelected: _selectedCertify == resourcesList.indexOf(resource),
+                    onSelected: () {
+                      setState(() {
+                        _selectResource(resourcesList.indexOf(resource));
+                        _isSelected = true;
+                        this.resource = resource;
+                        resource.setResourceCategoryName();
+                      });
+                    },
+                  )
+                ).toList(),
+              ),
+            ),
           );
         },
       );

@@ -66,6 +66,9 @@ class CustomTextFormFieldTitle extends StatelessWidget {
         fillColor: Colors.white,
         contentPadding: EdgeInsets.all(5),
         hintText: hintText,
+        hintStyle: TextStyle(
+          color: AppColors.greyDropMenuBorder,
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: BorderSide(

@@ -15,7 +15,7 @@ class BottomSignatures extends pw.StatelessWidget {
   @override
   pw.Widget build(pw.Context context) {
     return pw.Container(
-      margin: const pw.EdgeInsets.only(top: 50.0, left: 50.0, right: 50),
+      margin: const pw.EdgeInsets.only(top: 50.0, left: 0.0, right: 50),
       child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -23,7 +23,7 @@ class BottomSignatures extends pw.StatelessWidget {
             pw.Column(
                 mainAxisAlignment: pw.MainAxisAlignment.start,
                 children: [
-                  pw.Text('FDO por técnica',
+                  pw.Text('Nombre del/a técnico/a de Enreda:\nEn ......................... a .................... de ....................\nFDO:',
                       textScaleFactor: 0.8,
                       style: pw.Theme.of(context)
                           .defaultTextStyle

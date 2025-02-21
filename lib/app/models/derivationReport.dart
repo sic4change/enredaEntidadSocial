@@ -12,6 +12,7 @@ class DerivationReport {
     this.subsidy,
     this.techPerson,
     this.techPersonName,
+    this.dniParticipant,
     this.addressedTo,
     this.objectiveDerivation,
 
@@ -121,7 +122,9 @@ class DerivationReport {
     //Section 13
     this.orientation13,
     this.educationLevel,
+    this.homologation,
     this.laborSituation,
+    this.laborOtherConsiderations,
     this.tempLabor,
     this.workingDayLabor,
     this.competencies,
@@ -189,6 +192,7 @@ class DerivationReport {
   final String? subsidy;
   final String? techPerson;
   final String? techPersonName;
+  final String? dniParticipant;
   final String? addressedTo;
   final String? objectiveDerivation;
 
@@ -300,7 +304,9 @@ class DerivationReport {
   //Section 13
   final String? orientation13;
   final String? educationLevel;
+  final String? homologation;
   final String? laborSituation;
+  final String? laborOtherConsiderations;
   final String? tempLabor;
   final String? workingDayLabor;
   final String? competencies;
@@ -379,6 +385,7 @@ class DerivationReport {
             LanguageReport(
               name: languagesFirestore['name'] ?? '',
               level: languagesFirestore['level'] ?? '',
+              accreditation:  languagesFirestore['accreditation'] ?? '',
             )
         );
       });
@@ -409,6 +416,7 @@ class DerivationReport {
       //Pre-Sections
       subsidy: data['subsidy'],
       techPerson: data['techPerson'],
+      dniParticipant: data['dniParticipant'],
       techPersonName: data['techPersonName'],
       addressedTo: data['addressedTo'],
       objectiveDerivation: data['objectiveDerivation'],
@@ -521,8 +529,9 @@ class DerivationReport {
       //Section 13
       orientation13: data['orientation13'],
       educationLevel: data['educationLevel'],
+      homologation: data['homologation'],
       laborSituation: data['laborSituation'],
-      tempLabor: data['tempLabor'],
+      laborOtherConsiderations: data['laborOtherConsiderations'],      tempLabor: data['tempLabor'],
       workingDayLabor: data['workingDayLabor'],
       competencies: data['competencies'],
       contextualization: data['contextualization'],
@@ -597,6 +606,7 @@ class DerivationReport {
       'subsidy': subsidy,
       'techPerson': techPerson,
       'techPersonName': techPersonName,
+      'dniParticipant': dniParticipant,
       'addressedTo': addressedTo,
       'objectiveDerivation': objectiveDerivation,
       'fromInitialReport': fromInitialReport,
@@ -709,7 +719,9 @@ class DerivationReport {
       //Section 13
       'orientation13': orientation13,
       'educationLevel': educationLevel,
+      'homologation': homologation,
       'laborSituation': laborSituation,
+      'laborOtherConsiderations': laborOtherConsiderations,
       'tempLabor': tempLabor,
       'workingDayLabor': workingDayLabor,
       'competencies': competencies,

@@ -7,6 +7,7 @@ class FollowReport {
     this.userId,
     this.finished,
     this.completedDate,
+    this.dniParticipant,
 
     this.subsidy,
     this.techPerson,
@@ -118,7 +119,9 @@ class FollowReport {
     //Section 13
     this.orientation13,
     this.educationLevel,
+    this.homologation,
     this.laborSituation,
+    this.laborOtherConsiderations,
     this.tempLabor,
     this.workingDayLabor,
     this.competencies,
@@ -163,6 +166,7 @@ class FollowReport {
   final String? subsidy;
   final String? techPerson;
   final String? techPersonName;
+  final String? dniParticipant;
 
   //Section 1
   final String? orientation1;
@@ -271,7 +275,9 @@ class FollowReport {
   //Section 13
   final String? orientation13;
   final String? educationLevel;
+  final String? homologation;
   final String? laborSituation;
+  final String? laborOtherConsiderations;
   final String? tempLabor;
   final String? workingDayLabor;
   final String? competencies;
@@ -329,6 +335,7 @@ class FollowReport {
             LanguageReport(
               name: languagesFirestore['name'] ?? '',
               level: languagesFirestore['level'] ?? '',
+              accreditation:  languagesFirestore['accreditation'] ?? '',
             )
         );
       });
@@ -360,6 +367,7 @@ class FollowReport {
       subsidy: data['subsidy'],
       techPerson: data['techPerson'],
       techPersonName: data['techPersonName'],
+      dniParticipant: data['dniParticipant'],
 
       //Section 1
       orientation1: data['orientation1'],
@@ -468,7 +476,9 @@ class FollowReport {
       //Section 13
       orientation13: data['orientation13'],
       educationLevel: data['educationLevel'],
+      homologation: data['homologation'],
       laborSituation: data['laborSituation'],
+      laborOtherConsiderations: data['laborOtherConsiderations'],
       tempLabor: data['tempLabor'],
       workingDayLabor: data['workingDayLabor'],
       competencies: data['competencies'],
@@ -524,6 +534,7 @@ class FollowReport {
       'subsidy': subsidy,
       'techPerson': techPerson,
       'techPersonName': techPersonName,
+      'dniParticipant': dniParticipant,
 
       //Section 1
       'orientation1': orientation1,
@@ -633,7 +644,9 @@ class FollowReport {
       //Section 13
       'orientation13': orientation13,
       'educationLevel': educationLevel,
+      'homologation': homologation,
       'laborSituation': laborSituation,
+      'laborOtherConsiderations': laborOtherConsiderations,
       'tempLabor': tempLabor,
       'workingDayLabor': workingDayLabor,
       'competencies': competencies,

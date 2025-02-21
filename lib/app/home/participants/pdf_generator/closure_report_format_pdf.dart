@@ -80,6 +80,8 @@ Future<Uint8List> generateClosureReportFile(
         CustomItemSameLine(title: 'Nacionalidad', content: user.nationality!),
         SpaceH5(),
         CustomItemSameLine(title: 'Género', content: user.gender!),
+        SpaceH5(),
+        CustomItemSameLine(title: StringConst.DNI_PARTICIPANT, content: closureReport.dniParticipant ?? ''),
         SpaceH12(),
         CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: closureReport.subsidy ?? ''),
         SpaceH12(),
@@ -116,10 +118,17 @@ Future<Uint8List> generateClosureReportFile(
         //Section 2
         SectionTitle(title: '2. Situación Sanitaria'),
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation2 ?? ''),
+        /*
         SpaceH12(),
         CustomRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: closureReport.healthCard ?? '', content2: closureReport.expirationDate == null ? '' : formatter.format(closureReport.expirationDate!)),
         SpaceH12(),
         CustomItem(title: 'Medicación/Tratamiento', content: closureReport.medication ?? ''),
+         */
+        SpaceH5(),
+        CustomRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: closureReport.psychosocialDerivationLegal ?? '', content2: closureReport.psychosocialDerivationDate == null ? '' : formatter.format(closureReport.psychosocialDerivationDate!)),
+        SpaceH5(),
+        CustomItem(title: StringConst.INITIAL_MOTIVE, content: closureReport.psychosocialDerivationMotive ?? ''),
+
 
         //Subsection 2.1
         SubSectionTitle(title: '2.1 Salud Mental'),
@@ -169,10 +178,6 @@ Future<Uint8List> generateClosureReportFile(
         SpaceH12(),
         CustomItem(title: StringConst.INITIAL_MOTIVE, content: closureReport.externalDerivationMotive ?? ''),
         SpaceH12(),
-        CustomRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: closureReport.psychosocialDerivationLegal ?? '', content2: closureReport.psychosocialDerivationDate == null ? '' : formatter.format(closureReport.psychosocialDerivationDate!)),
-        SpaceH12(),
-        CustomItem(title: StringConst.INITIAL_MOTIVE, content: closureReport.psychosocialDerivationMotive ?? ''),
-        SpaceH12(),
         CustomItem(title: 'Representación legal', content: closureReport.legalRepresentation ?? ''),
         SpaceH12(),
         CustomRow(title1: 'Bolsa de tramitación', title2: StringConst.INITIAL_DATE, content1: closureReport.processingBag ?? '', content2: closureReport.processingBagDate == null ? '' : formatter.format(closureReport.processingBagDate!)),
@@ -199,7 +204,7 @@ Future<Uint8List> generateClosureReportFile(
         ) : pw.Container(),
         CustomItem(title: 'Datos de contacto del recurso alojativo', content: closureReport.centerContact ?? ''),
         CustomItem(title: StringConst.INITIAL_LOCATION, content: closureReport.location ?? ''),
-        SpaceH12(),
+        SubSectionTitle(title: StringConst.HABITABILITY_CONDITIONS),
         for (var data in closureReport.hostingObservations!)
           BlockSimpleList(
             title: data,
@@ -222,9 +227,12 @@ Future<Uint8List> generateClosureReportFile(
             children: [
               for(LanguageReport language in closureReport.languages ?? [])
                 pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      CustomRow(title1: 'Idioma', title2: 'Reconocimiento / acreditación - nivel', content1: language.name, content2: language.level),
-                      SpaceH12(),
+                      CustomRow(title1: StringConst.INITIAL_LANGUAGE, title2: StringConst.INITIAL_LANGUAGE_LEVEL, content1: language.name, content2: language.level),
+                      SpaceH5(),
+                      CustomItem(title: StringConst.INITIAL_LANGUAGE_ACCREDITATION, content: language.accreditation),
+                      SpaceH5(),
                     ]
                 )
             ]
@@ -265,7 +273,25 @@ Future<Uint8List> generateClosureReportFile(
         //Section 13
         SectionTitle(title: '9. Itinerario formativo laboral'),
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation13 ?? ''),
+        SpaceH5(),
+        CustomRow(title1: 'Nivel educativo', title2: 'Situación laboral inicial', content1: closureReport.educationLevel ?? '', content2: closureReport.laborSituation ?? ''),
+        SpaceH5(),
+        CustomItem(title: StringConst.HOMOLOGATION, content: closureReport.homologation ?? ''),
+        SpaceH5(),
+        closureReport.laborSituation == 'Ocupada cuenta propia' || closureReport.laborSituation == 'Ocupada cuenta ajena' ?
+        pw.Column(
+            mainAxisAlignment: pw.MainAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              CustomRow(title1: StringConst.INITIAL_TEMP, title2: 'Tipo jornada', content1: closureReport.tempLabor ?? '', content2: closureReport.workingDayLabor ?? ''),
+              SpaceH5(),
+              CustomItem(title: StringConst.LABOR_OTHER_CONSIDERATIONS, content: closureReport.laborOtherConsiderations ?? ''),
+            ]
+        )
+            : pw.Container(),
         SubSectionTitle(title: StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
+        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation13_2 ?? ''),
+        SpaceH12(),
         CustomItem(title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: closureReport.competencies ?? ''),
         SpaceH12(),
         CustomItem(title: 'Contextualización del territorio', content: closureReport.contextualization ?? ''),
@@ -301,16 +327,8 @@ Future<Uint8List> generateClosureReportFile(
         CustomRow(title1: StringConst.INITIAL_MOTIVE, title2: StringConst.FOLLOW_ECONOMIC_AMOUNT, content1: closureReport.formationBagMotive ?? '', content2: closureReport.formationBagEconomic ?? ''),
 
         SubSectionTitle(title: 'Empleo'),
-        CustomRow(title1: 'Nivel educativo', title2: 'Situación laboral', content1: closureReport.educationLevel ?? '', content2: closureReport.laborSituation ?? ''),
+        CustomItem(title: StringConst.FOLLOW_JOB_ACHIEVEMENT, content: closureReport.jobObtaining ?? ''),
         SpaceH12(),
-        closureReport.laborSituation == 'Ocupada cuenta propia' || closureReport.laborSituation == 'Ocupada cuenta ajena' ?
-        pw.Column(
-            children: [
-              CustomRow(title1: StringConst.INITIAL_TEMP, title2: 'Tipo jornada', content1: closureReport.tempLabor ?? '', content2: closureReport.workingDayLabor ?? ''),
-              SpaceH12(),
-            ]
-        )
-            : pw.Container(),
         CustomRow(title1: 'Fecha de obtención', title2: 'Fecha de finalización', content1: closureReport.jobObtainDate == null ? '' : formatter.format(closureReport.jobObtainDate!), content2: closureReport.jobFinishDate == null ? '' : formatter.format(closureReport.jobFinishDate!)),
         SpaceH12(),
         CustomRow(title1: 'Mejora laboral', title2: 'Motivo de mejora', content1: closureReport.jobUpgrade ?? '', content2: closureReport.upgradeMotive ?? ''),
