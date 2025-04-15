@@ -18,6 +18,8 @@ class IpilEntry {
     this.connectionTerritoryText,
     this.interviews,
     this.interviewsText,
+    this.intermediations,
+    this.intermediationsText,
     this.obtainingEmployment,
     this.obtainingEmploymentText,
     this.improvingEmployment,
@@ -26,6 +28,23 @@ class IpilEntry {
     this.coordinationText,
     this.postWorkSupport,
     this.postWorkSupportText,
+    this.legal,
+    this.legalText,
+    this.economicBag,
+    this.economicBagText,
+    this.specificSkills,
+    this.specificSkillsText,
+    this.softSkills,
+    this.softSkillsText,
+    this.digitalSkills,
+    this.digitalSkillsText,
+    this.laborSkills,
+    this.laborSkillsText,
+    this.initialInterview,
+    this.initialJobValorationQuestionary,
+    this.finalInterview,
+    this.finalJobValorationQuestionary,
+    this.other,
     this.results,
   });
 
@@ -42,14 +61,33 @@ class IpilEntry {
   late String? connectionTerritoryText;
   late List<String>? interviews;
   late String? interviewsText;
-  late String? obtainingEmployment;
+  late List<String>? intermediations;
+  late String? intermediationsText;
+  late List<String>? obtainingEmployment;
   late String? obtainingEmploymentText;
-  late String? improvingEmployment;
+  late List<String>? improvingEmployment;
   late String? improvingEmploymentText;
-  late String? coordination;
+  late List<String>? coordination;
   late String? coordinationText;
-  late String? postWorkSupport;
+  late List<String>? postWorkSupport;
   late String? postWorkSupportText;
+  late List<String>? legal;
+  late String? legalText;
+  late List<String>? economicBag;
+  late String? economicBagText;
+  late List<String>? specificSkills;
+  late String? specificSkillsText;
+  late List<String>? softSkills;
+  late String? softSkillsText;
+  late List<String>? digitalSkills;
+  late String? digitalSkillsText;
+  late List<String>? laborSkills;
+  late String? laborSkillsText;
+  late bool? initialInterview;
+  late bool? initialJobValorationQuestionary;
+  late bool? finalInterview;
+  late bool? finalJobValorationQuestionary;
+  late String? other;
   late List<String>? results;
 
   factory IpilEntry.fromMap(Map<String, dynamic> data, String documentId) {
@@ -74,6 +112,61 @@ class IpilEntry {
       data['interviews'].forEach((interview) {interviews.add(interview.toString());});
     }
 
+    List<String> intermediations = [];
+    if (data['intermediations'] != null) {
+      data['intermediations'].forEach((intermediation) {intermediations.add(intermediation.toString());});
+    }
+
+    List<String> obtainingEmployment = [];
+    if (data['obtainingEmployment'] != null) {
+      data['obtainingEmployment'].forEach((obtainedEmployment) {obtainingEmployment.add(obtainedEmployment.toString());});
+    }
+
+    List<String> improvingEmployment = [];
+    if (data['improvingEmployment'] != null) {
+      data['improvingEmployment'].forEach((improvedEmployment) {improvingEmployment.add(improvedEmployment.toString());});
+    }
+
+    List<String> coordination = [];
+    if (data['coordination'] != null) {
+      data['coordination'].forEach((singleCoordination) {coordination.add(singleCoordination.toString());});
+    }
+
+    List<String> legal = [];
+    if (data['legal'] != null) {
+      data['legal'].forEach((singleLegal) {legal.add(singleLegal.toString());});
+    }
+
+    List<String> postWorkSupport = [];
+    if (data['postWorkSupport'] != null) {
+      data['postWorkSupport'].forEach((singlePostWorkSupport) {postWorkSupport.add(singlePostWorkSupport.toString());});
+    }
+
+    List<String> economicBag = [];
+    if (data['economicBag'] != null) {
+      data['economicBag'].forEach((singleEconomicBag) {economicBag.add(singleEconomicBag.toString());});
+    }
+
+    List<String> specificSkills = [];
+    if (data['specificSkills'] != null) {
+      data['specificSkills'].forEach((specificSkill) {specificSkills.add(specificSkill.toString());});
+    }
+
+    List<String> softSkills = [];
+    if (data['softSkills'] != null) {
+      data['softSkills'].forEach((softSkill) {softSkills.add(softSkill.toString());});
+    }
+
+    List<String> digitalSkills = [];
+    if (data['digitalSkills'] != null) {
+      data['digitalSkills'].forEach((digitalSkill) {digitalSkills.add(digitalSkill.toString());});
+    }
+
+    List<String> laborSkills = [];
+    if (data['laborSkills'] != null) {
+      data['laborSkills'].forEach((laborSkill) {laborSkills.add(laborSkill.toString());});
+    }
+
     List<String> results = [];
     if (data['results'] != null) {
       data['results'].forEach((result) {results.add(result.toString());});
@@ -93,14 +186,33 @@ class IpilEntry {
       connectionTerritoryText: data['connectionTerritoryText']  ?? '',
       interviews: interviews,
       interviewsText: data['interviewsText'] ?? '',
-      obtainingEmployment: data['obtainingEmployment'] ?? '',
+      intermediations: intermediations,
+      intermediationsText: data['intermediationsText'] ?? '',
+      obtainingEmployment: obtainingEmployment,
       obtainingEmploymentText: data['obtainingEmploymentText'] ?? '',
-      improvingEmployment: data['improvingEmployment'] ?? '',
+      improvingEmployment: improvingEmployment,
       improvingEmploymentText: data['improvingEmploymentText'] ?? '',
-      coordination: data['coordination'] ?? '',
+      coordination: coordination,
       coordinationText: data['coordinationText'] ?? '',
-      postWorkSupport: data['postWorkSupport'] ?? '',
+      postWorkSupport: postWorkSupport,
       postWorkSupportText: data['postWorkSupportText'] ?? '',
+      legal: legal,
+      legalText: data['legalText'] ?? '',
+      economicBag: economicBag,
+      economicBagText: data['economicBagText'] ?? '',
+      specificSkills: specificSkills,
+      specificSkillsText: data['specificSkillsText'] ?? '',
+      softSkills: softSkills,
+      softSkillsText: data['softSkillsText'] ?? '',
+      digitalSkills: digitalSkills,
+      digitalSkillsText: data['digitalSkillsText'] ?? '',
+      laborSkills: laborSkills,
+      laborSkillsText: data['laborSkillsText'] ?? '',
+      initialInterview: data['initialInterview'] ?? false,
+      initialJobValorationQuestionary: data['initialJobValorationQuestionary'] ?? false,
+      finalInterview: data['finalInterview'] ?? false,
+      finalJobValorationQuestionary: data['finalJobValorationQuestionary'] ?? false,
+      other: data['other'] ?? '',
       results: results,
     );
   }
@@ -128,6 +240,8 @@ class IpilEntry {
       'connectionTerritoryText': connectionTerritoryText,
       "interviews": interviews,
       "interviewsText": interviewsText,
+      "intermediations": intermediations,
+      "intermediationsText": intermediationsText,
       "obtainingEmployment": obtainingEmployment,
       "obtainingEmploymentText": obtainingEmploymentText,
       "improvingEmployment": improvingEmployment,
@@ -136,6 +250,23 @@ class IpilEntry {
       "coordinationText": coordinationText,
       "postWorkSupport": postWorkSupport,
       "postWorkSupportText": postWorkSupportText,
+      "legal": legal,
+      "legalText": legalText,
+      "economicBag": economicBag,
+      "economicBagText": economicBagText,
+      "specificSkills": specificSkills,
+      "specificSkillsText": specificSkillsText,
+      "softSkills": softSkills,
+      "softSkillsText": softSkillsText,
+      "digitalSkills": digitalSkills,
+      "digitalSkillsText": digitalSkillsText,
+      "laborSkills": laborSkills,
+      "laborSkillsText": laborSkillsText,
+      "initialInterview": initialInterview,
+      "initialJobValorationQuestionary": initialJobValorationQuestionary,
+      "finalInterview": finalInterview,
+      "finalJobValorationQuestionary": finalJobValorationQuestionary,
+      "other": other,
       'results': results,
     };
   }

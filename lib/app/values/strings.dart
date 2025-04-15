@@ -627,11 +627,28 @@ class StringConst {
   static const String IPIL_REINFORCEMENT = "Fortalecimiento de las competencias";
   static const String IPIL_CONTEXTUALIZATION = "Contextualización";
   static const String IPIL_CONNECTION_TERRITORY = "Conexión con el territorio";
-  static const String IPIL_INTERVIEWS = "Entrevistas";
+  static const String IPIL_INTERVIEWS = "Entrevistas-laboral";
+  static const String IPIL_INTERMEDIATIONS = "Intermediación laboral";
   static const String IPIL_OBTAINING_EMPLOYMENT = "Obtención de empleo";
   static const String IPIL_IMPROVING_EMPLOYMENT = "Mejora de empleo";
-  static const String IPIL_COORDINATION = "Coordinación";
-  static const String IPIL_POST_WORK_SUPPORT = "Acompañamiento Post-laboral";
+  static const String IPIL_COORDINATION = "Coordinación/derivación";
+  static const String IPIL_LEGAL = "Jurídico";
+  static const String IPIL_POST_WORK_SUPPORT = "Acompañamientos";
+  static const String IPIL_ECONOMIC_BAG = "Bolsas económicas";
+  static const String IPIL_SPECIFIC_SKILLS= "Habilidades específicas";
+  static const String IPIL_SOFT_SKILLS= "Habilidades blandas";
+  static const String IPIL_DIGITAL_SKILLS= "Habilidades digitales";
+  static const String IPIL_LABOR_SKILLS= "Habilidades laborales";
+  static const String IPIL_INITIAL_ITINERARY = "Inicio de itinerario";
+  static const String IPIL_INITIAL_INTERVIEW = "Entrevista inicial";
+  static const String IPIL_INITIAL_QUESTIONARY = "Cuestionario de Valoración de Empleabilidad Inicial";
+  static const String IPIL_CLOSE_ITINERARY = "Cierre de itinerario";
+  static const String IPIL_CLOSE_INTERVIEW = "Entrevista de cierre";
+  static const String IPIL_CLOSE_QUESTIONARY = "Cuestionario de Valoración de la Empleabilidad Final";
+  static const String IPIL_OTHERS = "Otros";
+
+
+
   static const String IPIL_CREATE = "Crear nuevo IPIL";
   static const String IPIL_WARNING_TECHNICAL = "Este participante no tiene técnica asignada, para crear un IPIL asigne una técnica.";
   static const String REPORT_WARNING_TECHNICAL = "Este participante no tiene técnica asignada, para crear el Informe Inicial asigne una técnica.";

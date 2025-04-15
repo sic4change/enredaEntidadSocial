@@ -3,33 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../values/values.dart';
-import 'custom_drop_down-button_form_field_no_title_check.dart';
 
-class CheckboxDropdown extends StatefulWidget {
-  const CheckboxDropdown({super.key, required this.title, required this.options, required this.onTapItem});
+class CheckboxDropdownNoTitle extends StatefulWidget {
+  const CheckboxDropdownNoTitle({super.key, required this.title, required this.options, required this.onTapItem, required this.cornerBottom, required this.cornerTop});
 
   final String title;
   final List<DropdownItem> options;
   final Function(bool, String) onTapItem;
+  final bool cornerTop;
+  final bool cornerBottom;
   @override
-  _CheckboxDropdownState createState() => _CheckboxDropdownState();
+  _CheckboxDropdownNoTitleState createState() => _CheckboxDropdownNoTitleState();
 }
 
-class _CheckboxDropdownState extends State<CheckboxDropdown> {
+class _CheckboxDropdownNoTitleState extends State<CheckboxDropdownNoTitle> {
 
   bool _isDropdownOpened = false;
-  String _textSelection = "Selecciona una o varias opciones";
   
   @override
   void initState() {
-    if(widget.options != []){
-      _textSelection = "";
-      for(var element in widget.options){
-        if(element.isSelected){
-          _textSelection == '' ? _textSelection += '${element.title}' : _textSelection += ', ${element.title}';
-        }
-      }
-    }
     super.initState();
   }
 
@@ -37,12 +29,11 @@ class _CheckboxDropdownState extends State<CheckboxDropdown> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
+      padding: const EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble / 2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomTextBold(title: widget.title, color: AppColors.primary900,),
           GestureDetector(
             onTap: () {
               setState(() {
@@ -53,17 +44,22 @@ class _CheckboxDropdownState extends State<CheckboxDropdown> {
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.greyDropMenuBorder),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: widget.cornerBottom ? Radius.circular(6) : Radius.zero,
+                  bottomRight:  widget.cornerBottom ? Radius.circular(6) : Radius.zero,
+                  topLeft: widget.cornerTop ? Radius.circular(6) : Radius.zero,
+                  topRight:  widget.cornerTop ? Radius.circular(6) : Radius.zero,
+                  ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _textSelection,
+                    widget.title,
                     style: textTheme.bodySmall?.copyWith(
                       height: 1.5,
-                      color: _someElementSelected() ? AppColors.greyDark : AppColors.greyDropMenuBorder,
-                      fontWeight: _someElementSelected() ? FontWeight.w500 : FontWeight.w300,
+                      color: AppColors.greyDark,
+                      fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
                   ),
@@ -102,13 +98,6 @@ class _CheckboxDropdownState extends State<CheckboxDropdown> {
                       widget.onTapItem(value!, item.title);
                       setState(() {
                         item.isSelected = value;
-                        _textSelection = "";
-                        for(var element in widget.options){
-                          if(element.isSelected){
-                            _textSelection == '' ? _textSelection += '${element.title}' : _textSelection += ', ${element.title}';
-                          }
-                        }
-                        _textSelection == '' ? _textSelection = 'Selecciona una o varias opciones' : _textSelection = _textSelection;
                       });
                     },
                   );
@@ -119,16 +108,11 @@ class _CheckboxDropdownState extends State<CheckboxDropdown> {
       ),
     );
   }
-
-  bool _someElementSelected(){
-    bool atLeastOne = false;
-    for(var element in widget.options){
-      if(element.isSelected){
-        atLeastOne = true;
-      }
-    }
-    return atLeastOne;
-  }
 }
 
+class DropdownItem {
+  final String title;
+  bool isSelected;
 
+  DropdownItem({required this.title, this.isSelected = false});
+}

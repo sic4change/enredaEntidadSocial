@@ -5,12 +5,19 @@ import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/
 import 'package:enreda_empresas/app/models/ipilConnectionTerritory.dart';
 import 'package:enreda_empresas/app/models/ipilContextualization.dart';
 import 'package:enreda_empresas/app/models/ipilCoordination.dart';
+import 'package:enreda_empresas/app/models/ipilDigitalSkills.dart';
+import 'package:enreda_empresas/app/models/ipilEconomicBag.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/ipilImprovementEmployment.dart';
+import 'package:enreda_empresas/app/models/ipilIntermediations.dart';
 import 'package:enreda_empresas/app/models/ipilInterviews.dart';
+import 'package:enreda_empresas/app/models/ipilLaborSkills.dart';
+import 'package:enreda_empresas/app/models/ipilLegal.dart';
 import 'package:enreda_empresas/app/models/ipilObjectives.dart';
 import 'package:enreda_empresas/app/models/ipilObtainingEmployment.dart';
 import 'package:enreda_empresas/app/models/ipilPostWorkSupport.dart';
+import 'package:enreda_empresas/app/models/ipilSoftSkills.dart';
+import 'package:enreda_empresas/app/models/ipilSpecificSkills.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
@@ -284,6 +291,73 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
           }
         }
         ipilEntry.reinforcementsText = reinforcementList.join(', ');
+        return _buildSpecificSkillsStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildSpecificSkillsStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilSpecificSkills>>(
+      stream: database.ipilSpecificSkillsStreamByUser(ipilEntry.specificSkills ?? []),
+      builder: (context, specificSkillsSnapshot) {
+        if (!specificSkillsSnapshot.hasData) return Container();
+        List<String> specificSkillsList = [];
+        for (IpilSpecificSkills specificSkill in specificSkillsSnapshot.data!) {
+          if (!specificSkillsList.contains(specificSkill.label)) {
+            specificSkillsList.add(specificSkill.label);
+          }
+        }
+        ipilEntry.specificSkillsText = specificSkillsList.join(', ');
+        return _buildSoftSkillsStream(ipilEntry, database);
+      },
+    );
+  }
+  Widget _buildSoftSkillsStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilSoftSkills>>(
+      stream: database.ipilSoftSkillsStreamByUser(ipilEntry.softSkills ?? []),
+      builder: (context, softSkillsSnapshot) {
+        if (!softSkillsSnapshot.hasData) return Container();
+        List<String> softSkillsList = [];
+        for (IpilSoftSkills softSkill in softSkillsSnapshot.data!) {
+          if (!softSkillsList.contains(softSkill.label)) {
+            softSkillsList.add(softSkill.label);
+          }
+        }
+        ipilEntry.softSkillsText = softSkillsList.join(', ');
+        return _buildDigitalSkillsStream(ipilEntry, database);
+      },
+    );
+  }
+  
+  Widget _buildDigitalSkillsStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilDigitalSkills>>(
+      stream: database.ipilDigitalSkillsStreamByUser(ipilEntry.digitalSkills ?? []),
+      builder: (context, digitalSkillsSnapshot) {
+        if (!digitalSkillsSnapshot.hasData) return Container();
+        List<String> digitalSkillsList = [];
+        for (IpilDigitalSkills digitalSkill in digitalSkillsSnapshot.data!) {
+          if (!digitalSkillsList.contains(digitalSkill.label)) {
+            digitalSkillsList.add(digitalSkill.label);
+          }
+        }
+        ipilEntry.digitalSkillsText = digitalSkillsList.join(', ');
+        return _buildLaborSkillsStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildLaborSkillsStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilLaborSkills>>(
+      stream: database.ipilLaborSkillsStreamByUser(ipilEntry.laborSkills ?? []),
+      builder: (context, laborSkillsSnapshot) {
+        if (!laborSkillsSnapshot.hasData) return Container();
+        List<String> laborSkillsList = [];
+        for (IpilLaborSkills laborSkill in laborSkillsSnapshot.data!) {
+          if (!laborSkillsList.contains(laborSkill.label)) {
+            laborSkillsList.add(laborSkill.label);
+          }
+        }
+        ipilEntry.laborSkillsText = laborSkillsList.join(', ');
         return _buildIpilContextualizationStream(ipilEntry, database);
       },
     );
@@ -301,6 +375,23 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
           }
         }
         ipilEntry.contextualizationText = contextualizationList.join(', ');
+        return _buildIpilIntermediationsStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildIpilIntermediationsStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilIntermediations>>(
+      stream: database.ipilIntermediationsStreamByUser(ipilEntry.intermediations ?? []),
+      builder: (context, intermediationsSnapshot) {
+        if (!intermediationsSnapshot.hasData) return Container();
+        List<String> intermediationsList = [];
+        for(IpilIntermediations ipilIntermediation in intermediationsSnapshot.data!){
+          if(!intermediationsList.contains(ipilIntermediation.label)){
+            intermediationsList.add(ipilIntermediation.label);
+          }
+        }
+        ipilEntry.intermediationsText = intermediationsList.join(', ');
         return _buildIpilConnectionTerritoryStream(ipilEntry, database);
       },
     );
@@ -341,44 +432,102 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   }
 
   Widget _buildIpilObtainingEmploymentStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<IpilObtainingEmployment>(
-      stream: database.ipilObtainingEmploymentStreamByUser(ipilEntry.obtainingEmployment ?? ""),
-      builder: (context, obtainingEmploymentsSnapshot) {
-        ipilEntry.obtainingEmploymentText =
-        obtainingEmploymentsSnapshot.hasData ? obtainingEmploymentsSnapshot.data?.label ?? '' : '';
+    return StreamBuilder<List<IpilObtainingEmployment>>(
+      stream: database.ipilObtainingEmploymentStreamByUser(ipilEntry.obtainingEmployment ?? []),
+      builder: (context, IpilObtainingEmploymentSnapshot) {
+        if (!IpilObtainingEmploymentSnapshot.hasData) return Container();
+        List<String> obtainedEmploymentList = [];
+        for(IpilObtainingEmployment ipilObtainingEmployment in IpilObtainingEmploymentSnapshot.data!){
+          if(!obtainedEmploymentList.contains(ipilObtainingEmployment.label)){
+            obtainedEmploymentList.add(ipilObtainingEmployment.label);
+          }
+        }
+        ipilEntry.obtainingEmploymentText = obtainedEmploymentList.join(', ');
         return _buildIpilImprovingEmploymentStream(ipilEntry, database);
       },
     );
   }
 
-  Widget _buildIpilImprovingEmploymentStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<IpilImprovingEmployment>(
-      stream: database.ipilImprovingEmploymentStreamByUser(ipilEntry.improvingEmployment ?? ""),
-      builder: (context, improvingEmploymentsSnapshot) {
-        ipilEntry.improvingEmploymentText =
-        improvingEmploymentsSnapshot.hasData ? improvingEmploymentsSnapshot.data?.label ?? '' : '';
+    Widget _buildIpilImprovingEmploymentStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilImprovingEmployment>>(
+      stream: database.ipilImprovingEmploymentStreamByUser(ipilEntry.improvingEmployment ?? []),
+      builder: (context, IpilImprovingEmploymentSnapshot) {
+        if (!IpilImprovingEmploymentSnapshot.hasData) return Container();
+        List<String> improvedEmploymentList = [];
+        for(IpilImprovingEmployment ipilImprovingEmployment in IpilImprovingEmploymentSnapshot.data!){
+          if(!improvedEmploymentList.contains(ipilImprovingEmployment.label)){
+            improvedEmploymentList.add(ipilImprovingEmployment.label);
+          }
+        }
+        ipilEntry.improvingEmploymentText = improvedEmploymentList.join(', ');
         return _buildCoordinationEmploymentStream(ipilEntry, database);
       },
     );
   }
 
   Widget _buildCoordinationEmploymentStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<IpilCoordination>(
-      stream: database.ipilCoordinationStreamByUser(ipilEntry.coordination ?? ""),
-      builder: (context, coordinationSnapshot) {
-        ipilEntry.coordinationText =
-        coordinationSnapshot.hasData ? coordinationSnapshot.data?.label ?? '' : '';
+    return StreamBuilder<List<IpilCoordination>>(
+      stream: database.ipilCoordinationStreamByUser(ipilEntry.coordination ?? []),
+      builder: (context, IpilCoordinationSnapshot) {
+        if (!IpilCoordinationSnapshot.hasData) return Container();
+        List<String> coordinationList = [];
+        for(IpilCoordination cordination in IpilCoordinationSnapshot.data!){
+          if(!coordinationList.contains(cordination.label)){
+            coordinationList.add(cordination.label);
+          }
+        }
+        ipilEntry.coordinationText = coordinationList.join(', ');
+        return _buildLegalStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildLegalStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilLegal>>(
+      stream: database.ipilLegalStreamByUser(ipilEntry.legal ?? []),
+      builder: (context, IpilLegalSnapshot) {
+        if (!IpilLegalSnapshot.hasData) return Container();
+        List<String> legalList = [];
+        for(IpilLegal legal in IpilLegalSnapshot.data!){
+          if(!legalList.contains(legal.label)){
+            legalList.add(legal.label);
+          }
+        }
+        ipilEntry.legalText = legalList.join(', ');
         return _buildPostWorkSupportStream(ipilEntry, database);
       },
     );
   }
 
   Widget _buildPostWorkSupportStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<IpilPostWorkSupport>(
-      stream: database.ipilPostWorkSupportStreamByUser(ipilEntry.postWorkSupport ?? ""),
-      builder: (context, postWorkSupportSnapshot) {
-        ipilEntry.postWorkSupportText =
-        postWorkSupportSnapshot.hasData ? postWorkSupportSnapshot.data?.label ?? '' : '';
+    return StreamBuilder<List<IpilPostWorkSupport>>(
+      stream: database.ipilPostWorkSupportStreamByUser(ipilEntry.postWorkSupport ?? []),
+      builder: (context, IpilPostWorkSupportSnapshot) {
+        if (!IpilPostWorkSupportSnapshot.hasData) return Container();
+        List<String> postWorkSupportList = [];
+        for(IpilPostWorkSupport postWorkSupport in IpilPostWorkSupportSnapshot.data!){
+          if(!postWorkSupportList.contains(postWorkSupport.label)){
+            postWorkSupportList.add(postWorkSupport.label);
+          }
+        }
+        ipilEntry.postWorkSupportText = postWorkSupportList.join(', ');
+        return _buildEconomicBagStream(ipilEntry, database);
+      },
+    );
+  }
+
+  Widget _buildEconomicBagStream(IpilEntry ipilEntry, Database database) {
+    return StreamBuilder<List<IpilEconomicBag>>(
+      stream: database.ipilEconomicBagStreamByUser(ipilEntry.economicBag ?? []),
+      builder: (context, IpilEconomicBagSnapshot) {
+        if (!IpilEconomicBagSnapshot.hasData) return Container();
+        List<String> economicBagList = [];
+        for(IpilEconomicBag economicBag in IpilEconomicBagSnapshot.data!){
+          if(!economicBagList.contains(economicBag.label)){
+            economicBagList.add(economicBag.label);
+          }
+        }
+        ipilEntry.economicBagText = economicBagList.join(', ');
         return _buildUserEnredaStream(ipilEntry, database);
       },
     );

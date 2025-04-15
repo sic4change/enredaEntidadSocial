@@ -1,7 +1,14 @@
 import 'package:enreda_empresas/app/models/ipilCoordination.dart';
+import 'package:enreda_empresas/app/models/ipilDigitalSkills.dart';
+import 'package:enreda_empresas/app/models/ipilEconomicBag.dart';
 import 'package:enreda_empresas/app/models/ipilImprovementEmployment.dart';
+import 'package:enreda_empresas/app/models/ipilIntermediations.dart';
+import 'package:enreda_empresas/app/models/ipilLaborSkills.dart';
+import 'package:enreda_empresas/app/models/ipilLegal.dart';
 import 'package:enreda_empresas/app/models/ipilObtainingEmployment.dart';
 import 'package:enreda_empresas/app/models/ipilPostWorkSupport.dart';
+import 'package:enreda_empresas/app/models/ipilSoftSkills.dart';
+import 'package:enreda_empresas/app/models/ipilSpecificSkills.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -76,24 +83,105 @@ class IpilEntryTile extends StatelessWidget {
         ipilEntry.content == null ? Container() :
         CustomTextBold(title: StringConst.IPIL_FOLLOW, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
         ipilEntry.content == null ? Container() : CustomTextSmall(text: ipilEntry.content!),
-        ipilEntry.reinforcement!.isEmpty ? Container() :
-        CustomTextBold(title: StringConst.IPIL_REINFORCEMENT, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
-        StreamBuilder<List<IpilReinforcement>>(
-            stream: database.ipilReinforcementStreamByUser(ipilEntry.reinforcement ?? []),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return Container();
-              if (snapshot.hasData){
-                List<IpilReinforcement> userReinforcements =  snapshot.data!;
-                return ListView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: userReinforcements.map((e) {
-                    return CustomTextSmall(text:e.label);
-                  }).toList(),
-                );
-              }
-              return Container();
+        ipilEntry.specificSkills == null || ipilEntry.specificSkills!.isEmpty
+          ? Container()
+          : CustomTextBold(
+              title: StringConst.IPIL_SPECIFIC_SKILLS,
+              color: AppColors.primary900,
+              padding: EdgeInsets.only(top: 16),
+            ),
+
+        StreamBuilder<List<IpilSpecificSkills>>(
+          stream: database.ipilSpecificSkillsStreamByUser(ipilEntry.specificSkills ?? []),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return Container();
+            if (snapshot.hasData) {
+              List<IpilSpecificSkills> userSpecificSkills = snapshot.data!;
+              return ListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: userSpecificSkills.map((e) {
+                  return CustomTextSmall(text: e.label);
+                }).toList(),
+              );
             }
+            return Container();
+          }
+        ),
+        ipilEntry.softSkills == null || ipilEntry.softSkills!.isEmpty
+          ? Container()
+          : CustomTextBold(
+              title: StringConst.IPIL_SOFT_SKILLS,
+              color: AppColors.primary900,
+              padding: EdgeInsets.only(top: 16),
+            ),
+
+        StreamBuilder<List<IpilSoftSkills>>(
+          stream: database.ipilSoftSkillsStreamByUser(ipilEntry.softSkills ?? []),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return Container();
+            if (snapshot.hasData) {
+              List<IpilSoftSkills> userSoftSkills = snapshot.data!;
+              return ListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: userSoftSkills.map((e) {
+                  return CustomTextSmall(text: e.label);
+                }).toList(),
+              );
+            }
+            return Container();
+          }
+        ),
+        ipilEntry.digitalSkills == null || ipilEntry.digitalSkills!.isEmpty
+          ? Container()
+          : CustomTextBold(
+              title: StringConst.IPIL_DIGITAL_SKILLS,
+              color: AppColors.primary900,
+              padding: EdgeInsets.only(top: 16),
+            ),
+
+        StreamBuilder<List<IpilDigitalSkills>>(
+          stream: database.ipilDigitalSkillsStreamByUser(ipilEntry.digitalSkills ?? []),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return Container();
+            if (snapshot.hasData) {
+              List<IpilDigitalSkills> userDigitalSkills = snapshot.data!;
+              return ListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: userDigitalSkills.map((e) {
+                  return CustomTextSmall(text: e.label);
+                }).toList(),
+              );
+            }
+            return Container();
+          }
+        ),
+        ipilEntry.laborSkills == null || ipilEntry.laborSkills!.isEmpty
+          ? Container()
+          : CustomTextBold(
+              title: StringConst.IPIL_LABOR_SKILLS,
+              color: AppColors.primary900,
+              padding: EdgeInsets.only(top: 16),
+            ),
+
+        StreamBuilder<List<IpilLaborSkills>>(
+          stream: database.ipilLaborSkillsStreamByUser(ipilEntry.laborSkills ?? []),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return Container();
+            if (snapshot.hasData) {
+              List<IpilLaborSkills> userLaborSkills = snapshot.data!;
+              return ListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: userLaborSkills.map((e) {
+                  return CustomTextSmall(text: e.label);
+                }).toList(),
+              );
+            }
+            return Container();
+          }
         ),
         ipilEntry.contextualization!.isEmpty ? Container() :
         CustomTextBold(title: StringConst.IPIL_CONTEXTUALIZATION, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
@@ -133,18 +221,18 @@ class IpilEntryTile extends StatelessWidget {
               return Container();
             }
         ),
-        ipilEntry.interviews!.isEmpty ? Container() :
-        CustomTextBold(title: StringConst.IPIL_INTERVIEWS, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
-        StreamBuilder<List<IpilInterviews>>(
-            stream: database.ipilInterviewsStreamByUser(ipilEntry.interviews ?? []),
+        ipilEntry.intermediations!.isEmpty ? Container() :
+        CustomTextBold(title: StringConst.IPIL_INTERMEDIATIONS, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
+        StreamBuilder<List<IpilIntermediations>>(
+            stream: database.ipilIntermediationsStreamByUser(ipilEntry.intermediations ?? []),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Container();
               if (snapshot.hasData){
-                List<IpilInterviews> userContextualization =  snapshot.data!;
+                List<IpilIntermediations> userIntermediations =  snapshot.data!;
                 return ListView(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  children: userContextualization.map((e) {
+                  children: userIntermediations.map((e) {
                     return CustomTextSmall(text:e.label);
                   }).toList(),
                 );
@@ -152,54 +240,135 @@ class IpilEntryTile extends StatelessWidget {
               return Container();
             }
         ),
-        ipilEntry.obtainingEmployment == null || ipilEntry.obtainingEmployment!.isEmpty ? Container() :
+        ipilEntry.interviews!.isEmpty ? Container() :
+        CustomTextBold(title: StringConst.IPIL_INTERVIEWS, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
+        StreamBuilder<List<IpilInterviews>>(
+            stream: database.ipilInterviewsStreamByUser(ipilEntry.interviews ?? []),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return Container();
+              if (snapshot.hasData){
+                List<IpilInterviews> userInterviews =  snapshot.data!;
+                return ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: userInterviews.map((e) {
+                    return CustomTextSmall(text:e.label);
+                  }).toList(),
+                );
+              }
+              return Container();
+            }
+        ),
+        ipilEntry.obtainingEmployment!.isEmpty ? Container() :
         CustomTextBold(title: StringConst.IPIL_OBTAINING_EMPLOYMENT, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
-        StreamBuilder<IpilObtainingEmployment>(
-            stream: database.ipilObtainingEmploymentStreamByUser(ipilEntry.obtainingEmployment ?? ""),
+        StreamBuilder<List<IpilObtainingEmployment>>(
+            stream: database.ipilObtainingEmploymentStreamByUser(ipilEntry.obtainingEmployment ?? []),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Container();
               if (snapshot.hasData){
-                IpilObtainingEmployment obtainingEmployment =  snapshot.data!;
-                return CustomTextSmall(text: obtainingEmployment.label);
+                List<IpilObtainingEmployment> userObtainingEmployment =  snapshot.data!;
+                return ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: userObtainingEmployment.map((e) {
+                    return CustomTextSmall(text:e.label);
+                  }).toList(),
+                );
               }
               return Container();
             }
         ),
-        ipilEntry.improvingEmployment == null || ipilEntry.improvingEmployment!.isEmpty ? Container() :
+        ipilEntry.improvingEmployment!.isEmpty ? Container() :
         CustomTextBold(title: StringConst.IPIL_IMPROVING_EMPLOYMENT, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
-        StreamBuilder<IpilImprovingEmployment>(
-            stream: database.ipilImprovingEmploymentStreamByUser(ipilEntry.improvingEmployment ?? ""),
+        StreamBuilder<List<IpilImprovingEmployment>>(
+            stream: database.ipilImprovingEmploymentStreamByUser(ipilEntry.improvingEmployment ?? []),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Container();
               if (snapshot.hasData){
-                IpilImprovingEmployment improvingEmployment =  snapshot.data!;
-                return CustomTextSmall(text: improvingEmployment.label);
+                List<IpilImprovingEmployment> userImprovingEmployment =  snapshot.data!;
+                return ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: userImprovingEmployment.map((e) {
+                    return CustomTextSmall(text:e.label);
+                  }).toList(),
+                );
               }
               return Container();
             }
         ),
-        ipilEntry.coordination == null || ipilEntry.coordination!.isEmpty ? Container() :
+        ipilEntry.coordination!.isEmpty ? Container() :
         CustomTextBold(title: StringConst.IPIL_COORDINATION, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
-        StreamBuilder<IpilCoordination>(
-            stream: database.ipilCoordinationStreamByUser(ipilEntry.coordination ?? ""),
+        StreamBuilder<List<IpilCoordination>>(
+            stream: database.ipilCoordinationStreamByUser(ipilEntry.coordination ?? []),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Container();
               if (snapshot.hasData){
-                IpilCoordination coordination =  snapshot.data!;
-                return CustomTextSmall(text: coordination.label);
+                List<IpilCoordination> userCoordination =  snapshot.data!;
+                return ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: userCoordination.map((e) {
+                    return CustomTextSmall(text:e.label);
+                  }).toList(),
+                );
+              }
+              return Container();
+            }
+        ),
+        ipilEntry.legal!.isEmpty ? Container() :
+        CustomTextBold(title: StringConst.IPIL_LEGAL, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
+        StreamBuilder<List<IpilLegal>>(
+            stream: database.ipilLegalStreamByUser(ipilEntry.legal ?? []),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return Container();
+              if (snapshot.hasData){
+                List<IpilLegal> userLegal =  snapshot.data!;
+                return ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: userLegal.map((e) {
+                    return CustomTextSmall(text:e.label);
+                  }).toList(),
+                );
               }
               return Container();
             }
         ),
         ipilEntry.postWorkSupport == null || ipilEntry.postWorkSupport!.isEmpty ? Container() :
         CustomTextBold(title: StringConst.IPIL_POST_WORK_SUPPORT, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
-        StreamBuilder<IpilPostWorkSupport>(
-            stream: database.ipilPostWorkSupportStreamByUser(ipilEntry.postWorkSupport ?? ""),
+        StreamBuilder<List<IpilPostWorkSupport>>(
+            stream: database.ipilPostWorkSupportStreamByUser(ipilEntry.postWorkSupport ?? []),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Container();
               if (snapshot.hasData){
-                IpilPostWorkSupport postWorkSupport =  snapshot.data!;
-                return CustomTextSmall(text: postWorkSupport.label);
+                List<IpilPostWorkSupport> userPostWorkSupport =  snapshot.data!;
+                return ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: userPostWorkSupport.map((e) {
+                    return CustomTextSmall(text:e.label);
+                  }).toList(),
+                );
+              }
+              return Container();
+            }
+        ),
+        ipilEntry.economicBag == null || ipilEntry.economicBag!.isEmpty ? Container() :
+        CustomTextBold(title: StringConst.IPIL_ECONOMIC_BAG, color: AppColors.primary900, padding: EdgeInsets.only(top: 16),),
+        StreamBuilder<List<IpilEconomicBag>>(
+            stream: database.ipilEconomicBagStreamByUser(ipilEntry.economicBag ?? []),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return Container();
+              if (snapshot.hasData){
+                List<IpilEconomicBag> userEconomicBag =  snapshot.data!;
+                return ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: userEconomicBag.map((e) {
+                    return CustomTextSmall(text:e.label);
+                  }).toList(),
+                );
               }
               return Container();
             }

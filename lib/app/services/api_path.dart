@@ -85,10 +85,17 @@ class APIPath {
   static String ipilContextualization() => 'ipilContextualization';
   static String ipilConnectionTerritory() => 'ipilConnectionTerritory';
   static String ipilInterviews() => 'ipilInterviews';
+  static String ipilIntermediations() => 'ipilIntermediations';
   static String ipilObtainingEmployment() => 'ipilObtainingEmployment';
   static String ipilImprovingEmployment() => 'ipilImprovingEmployment';
   static String ipilPostWorkSupport() => 'ipilPostWorkSupport';
   static String ipilCoordination() => 'ipilCoordination';
+  static String ipilLegal() => 'ipilLegal';
+  static String ipilEconomicBag() => 'ipilEconomicBag';
+  static String ipilSpecificSkills() => 'ipilSpecificSkills';
+  static String ipilSoftSkills() => 'ipilSoftSkills';
+  static String ipilDigitalSkills() => 'ipilDigitalSkills';
+  static String ipilLaborSkills() => 'ipilLaborSkills';
   static String ipilResults() => 'ipilResults';
   static String ipilObjectives() => 'ipilObjectives';
   static String ipilObjective(String ipilObjectivesId) => 'ipilObjectives/$ipilObjectivesId';

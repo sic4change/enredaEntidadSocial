@@ -8,6 +8,7 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
+import 'package:flutter/material.dart' as mt;
 import 'package:pdf/widgets.dart' as pw;
 
 import 'doc_ipil_theme.dart';
@@ -80,14 +81,48 @@ class _IpilEntry extends pw.StatelessWidget {
 
           BlockText(title: StringConst.IPIL_FOLLOW, text: ipil.content!),
 
-          if (ipil.reinforcementsText != null && ipil.reinforcementsText!.isNotEmpty)
-            BlockText(title: StringConst.IPIL_REINFORCEMENT, text: ipil.reinforcementsText!),
+          pw.SizedBox(height: 5),
+          if((ipil.initialInterview != null && ipil.initialInterview!) || (ipil.initialJobValorationQuestionary != null && ipil.initialJobValorationQuestionary!))
+            SmallText(text: StringConst.IPIL_INITIAL_ITINERARY, fontWeight: pw.FontWeight.bold, color: primary900),
+          if((ipil.initialInterview != null && ipil.initialInterview!) || (ipil.initialJobValorationQuestionary != null && ipil.initialJobValorationQuestionary!))
+            pw.SizedBox(height: 5),
+          if(ipil.initialInterview != null && ipil.initialInterview!)
+            CheckBoxText(isSelected: true, title: StringConst.IPIL_INITIAL_INTERVIEW),
+          pw.SizedBox(height: 5),
+          if(ipil.initialJobValorationQuestionary != null && ipil.initialJobValorationQuestionary!)
+            CheckBoxText(isSelected: true, title: StringConst.IPIL_INITIAL_QUESTIONARY),
+
+
+          if((ipil.initialInterview != null && ipil.initialInterview!) || (ipil.initialJobValorationQuestionary != null && ipil.initialJobValorationQuestionary!))
+            SmallText(text: StringConst.IPIL_CLOSE_ITINERARY, fontWeight: pw.FontWeight.bold, color: primary900),
+          if((ipil.finalInterview != null && ipil.finalInterview!) || (ipil.finalJobValorationQuestionary != null && ipil.finalJobValorationQuestionary!))
+            pw.SizedBox(height: 5),
+          if(ipil.finalInterview != null && ipil.finalInterview!)
+            CheckBoxText(isSelected: true, title: StringConst.IPIL_CLOSE_INTERVIEW),
+          pw.SizedBox(height: 5),
+          if(ipil.finalJobValorationQuestionary != null && ipil.finalJobValorationQuestionary!)
+            CheckBoxText(isSelected: true, title: StringConst.IPIL_CLOSE_QUESTIONARY),
+          
+          if (ipil.specificSkillsText != null && ipil.specificSkillsText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_SPECIFIC_SKILLS, text: ipil.specificSkillsText!),
+
+          if (ipil.softSkillsText != null && ipil.softSkillsText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_SOFT_SKILLS, text: ipil.softSkillsText!),
+
+          if (ipil.digitalSkillsText != null && ipil.digitalSkillsText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_DIGITAL_SKILLS, text: ipil.digitalSkillsText!),
+
+          if (ipil.laborSkillsText != null && ipil.laborSkillsText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_LABOR_SKILLS, text: ipil.laborSkillsText!),
 
           if (ipil.contextualizationText != null && ipil.contextualizationText!.isNotEmpty)
             BlockText(title: StringConst.IPIL_CONTEXTUALIZATION, text: ipil.contextualizationText!),
 
           if (ipil.connectionTerritoryText != null && ipil.connectionTerritoryText!.isNotEmpty)
             BlockText(title: StringConst.IPIL_CONNECTION_TERRITORY, text: ipil.connectionTerritoryText!),
+
+          if (ipil.intermediationsText != null && ipil.intermediationsText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_INTERMEDIATIONS, text: ipil.intermediationsText!),
 
           if (ipil.interviewsText != null && ipil.interviewsText!.isNotEmpty)
             BlockText(title: StringConst.IPIL_INTERVIEWS, text: ipil.interviewsText!),
@@ -101,8 +136,17 @@ class _IpilEntry extends pw.StatelessWidget {
           if (ipil.coordinationText != null && ipil.coordinationText!.isNotEmpty )
             BlockText(title: StringConst.IPIL_COORDINATION, text: ipil.coordinationText!),
 
+          if (ipil.legalText != null && ipil.legalText!.isNotEmpty )
+            BlockText(title: StringConst.IPIL_LEGAL, text: ipil.legalText!),
+
           if (ipil.postWorkSupportText != null && ipil.postWorkSupportText!.isNotEmpty)
             BlockText(title: StringConst.IPIL_POST_WORK_SUPPORT, text: ipil.postWorkSupportText!),
+
+          if (ipil.economicBagText != null && ipil.economicBagText!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_ECONOMIC_BAG, text: ipil.economicBagText!),
+
+          if (ipil.other != null && ipil.other!.isNotEmpty)
+            BlockText(title: StringConst.IPIL_OTHERS, text: ipil.other!),
 
           pw.SizedBox(height: 8),
           pw.Divider(color: grey, thickness: 0.5),
@@ -156,3 +200,38 @@ class SmallText extends pw.StatelessWidget {
     );
   }
 }
+class CheckBoxText extends pw.StatelessWidget {
+  CheckBoxText({
+    required this.title,
+    required this.isSelected,
+  });
+
+  final String title;
+  final bool isSelected;
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.center,
+      children: [
+        pw.Container(
+          width: 8,
+          height: 8,
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(
+              color: PdfColor.fromHex("#C4C4C4"), // greyDropMenuBorder
+              width: 1,
+            ),
+            color: isSelected ? primary900 : PdfColors.white,
+          ),
+        ),
+        pw.SizedBox(width: 8),
+        pw.Expanded(
+          child: SmallText(text: title,
+            fontWeight: pw.FontWeight.normal, color: grey),
+        ),
+      ],
+    );
+  }
+}
+
