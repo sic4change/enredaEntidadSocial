@@ -658,6 +658,28 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
     double fontSizeSubTitle = responsiveSize(context, 14, 18, md: 15);
     bool _finished = report.finished ?? false;
 
+/*
+    _allow1Notifier.value = report.allow1!;
+    _allow1_1Notifier.value = report.allow1_1!;
+    _allow2Notifier.value = report.allow2!;
+    _allow2_1Notifier.value = report.allow2_1!;
+    _allow2_2Notifier.value = report.allow2_2!;
+    _allow2_3Notifier.value = report.allow2_3!;
+    _allow2_4Notifier.value = report.allow2_4!;
+    _allow3Notifier.value = report.allow3!;
+    _allow4Notifier.value = report.allow4!;
+    _allow5Notifier.value = report.allow5!;
+    _allow6Notifier.value = report.allow6!;
+    _allow7Notifier.value = report.allow7!;
+    _allow8Notifier.value = report.allow8!;
+    _allow9Notifier.value = report.allow9!;
+    _allow9_2Notifier.value = report.allow9_2!;
+    _allow9_3Notifier.value = report.allow9_3!;
+    _allow9_4Notifier.value = report.allow9_4!;
+    _allow9_5Notifier.value = report.allow9_5!;
+    _allow9_6Notifier.value = report.allow9_6!;
+
+*/
     //Pre-Selection
     String? _subsidy = report.subsidy ?? '';
     String? _techPerson = report.techPerson ?? userEnreda.assignedById;
@@ -1051,7 +1073,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
               valueListenable: _allow1Notifier,
               builder: (context, value, child){
-                return informSectionTitle(StringConst.INITIAL_TITLE1_ITINERARY, _allow1Notifier.value, (){_allow1Notifier.value = !_allow1Notifier.value;});
+                return informSectionTitle(StringConst.INITIAL_TITLE1_ITINERARY, _allow1Notifier.value, 
+                  ()async{
+                    _allow1Notifier.value = !_allow1Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow1': _allow1Notifier.value});
+                    });
               }
             ),
 
@@ -1112,7 +1138,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   return             ValueListenableBuilder(
                       valueListenable: _allow1_1Notifier,
                       builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION, _allow1Notifier.value, _allow1_1Notifier.value, (){_allow1_1Notifier.value = !_allow1_1Notifier.value;});
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION, _allow1Notifier.value, _allow1_1Notifier.value, 
+                        ()async{
+                          _allow1_1Notifier.value = !_allow1_1Notifier.value;
+                          await database.updateDerivationReportField(report.derivationReportId!, {'allow1_1': _allow1_1Notifier.value});
+                          });
                       }
                   );
                 }
@@ -1342,7 +1372,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
                 valueListenable: _allow2Notifier,
                 builder: (context, value, child){
-                  return informSectionTitle(StringConst.INITIAL_TITLE2_SANITARY, _allow2Notifier.value, (){_allow2Notifier.value = !_allow2Notifier.value;});
+                  return informSectionTitle(StringConst.INITIAL_TITLE2_SANITARY, _allow2Notifier.value, 
+                  ()async{
+                    _allow2Notifier.value = !_allow2Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow2': _allow2Notifier.value});
+                    });
                 }
             ),
             CustomTextFormFieldTitle(
@@ -1415,7 +1449,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   return             ValueListenableBuilder(
                       valueListenable: _allow2_1Notifier,
                       builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_1_MENTAL_HEALTH, _allow2Notifier.value, _allow2_1Notifier.value, (){_allow2_1Notifier.value = !_allow2_1Notifier.value;});
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_1_MENTAL_HEALTH, _allow2Notifier.value, _allow2_1Notifier.value, 
+                        ()async{
+                          _allow2_1Notifier.value = !_allow2_1Notifier.value;
+                          await database.updateDerivationReportField(report.derivationReportId!, {'allow2_1': _allow2_1Notifier.value});
+                          });
                       }
                   );
                 }
@@ -1549,7 +1587,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   return             ValueListenableBuilder(
                       valueListenable: _allow2_2Notifier,
                       builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_2_DISABILITY, _allow2Notifier.value, _allow2_2Notifier.value, (){_allow2_2Notifier.value = !_allow2_2Notifier.value;});
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_2_DISABILITY, _allow2Notifier.value, _allow2_2Notifier.value, 
+                        ()async{
+                          _allow2_2Notifier.value = !_allow2_2Notifier.value;
+                          await database.updateDerivationReportField(report.derivationReportId!, {'allow2_2': _allow2_2Notifier.value});
+                          });
                       }
                   );
                 }
@@ -1738,7 +1780,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   return             ValueListenableBuilder(
                       valueListenable: _allow2_3Notifier,
                       builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_3_DEPENDENCE, _allow2Notifier.value, _allow2_3Notifier.value, (){_allow2_3Notifier.value = !_allow2_3Notifier.value;});
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_3_DEPENDENCE, _allow2Notifier.value, _allow2_3Notifier.value, 
+                        ()async{
+                          _allow2_3Notifier.value = !_allow2_3Notifier.value;
+                          await database.updateDerivationReportField(report.derivationReportId!, {'allow2_3': _allow2_3Notifier.value});
+                          });
                       }
                   );
                 }
@@ -1827,7 +1873,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   return             ValueListenableBuilder(
                       valueListenable: _allow2_4Notifier,
                       builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_4_ADDICTIONS, _allow2Notifier.value, _allow2_4Notifier.value, (){_allow2_4Notifier.value = !_allow2_4Notifier.value;});
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_2_4_ADDICTIONS, _allow2Notifier.value, _allow2_4Notifier.value, 
+                        ()async{
+                          _allow2_4Notifier.value = !_allow2_4Notifier.value;
+                          await database.updateDerivationReportField(report.derivationReportId!, {'allow2_4': _allow2_4Notifier.value});
+                          });
                       }
                   );
                 }
@@ -1888,7 +1938,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
                 valueListenable: _allow3Notifier,
                 builder: (context, value, child){
-                  return informSectionTitle(StringConst.INITIAL_TITLE_3_LEGAL_SITUATION, _allow3Notifier.value, (){_allow3Notifier.value = !_allow3Notifier.value;});
+                  return informSectionTitle(StringConst.INITIAL_TITLE_3_LEGAL_SITUATION, _allow3Notifier.value, 
+                  ()async{
+                    _allow3Notifier.value = !_allow3Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow3': _allow3Notifier.value});
+                    });
                 }
             ),
             CustomTextFormFieldTitle(
@@ -2059,7 +2113,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
                 valueListenable: _allow4Notifier,
                 builder: (context, value, child){
-                  return informSectionTitle(StringConst.INITIAL_TITLE_4_HOUSE_SITUATION, _allow4Notifier.value, (){_allow4Notifier.value = !_allow4Notifier.value;});
+                  return informSectionTitle(StringConst.INITIAL_TITLE_4_HOUSE_SITUATION, _allow4Notifier.value, 
+                  ()async{
+                    _allow4Notifier.value = !_allow4Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow4': _allow4Notifier.value});
+                    });
                 }
             ),
             CustomTextFormFieldTitle(
@@ -2257,7 +2315,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
                 valueListenable: _allow5Notifier,
                 builder: (context, value, child){
-                  return informSectionTitle(StringConst.INITIAL_TITLE_5_SUPPORT, _allow5Notifier.value, (){_allow5Notifier.value = !_allow5Notifier.value;});
+                  return informSectionTitle(StringConst.INITIAL_TITLE_5_SUPPORT, _allow5Notifier.value, 
+                  ()async{
+                    _allow5Notifier.value = !_allow5Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow5': _allow5Notifier.value});
+                    });
                 }
             ),
             CustomTextFormFieldTitle(
@@ -2316,7 +2378,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
                 valueListenable: _allow6Notifier,
                 builder: (context, value, child){
-                  return informSectionTitle(StringConst.INITIAL_TITLE_6_LANGUAGES, _allow6Notifier.value, (){_allow6Notifier.value = !_allow6Notifier.value;});
+                  return informSectionTitle(StringConst.INITIAL_TITLE_6_LANGUAGES, _allow6Notifier.value, 
+                  ()async{
+                    _allow6Notifier.value = !_allow6Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow6': _allow6Notifier.value});
+                    });
                 }
             ),
             CustomTextFormFieldTitle(
@@ -2435,7 +2501,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
                 valueListenable: _allow7Notifier,
                 builder: (context, value, child){
-                  return informSectionTitle(StringConst.INITIAL_TITLE_7_SOCIAL_ATTENTION, _allow7Notifier.value, (){_allow7Notifier.value = !_allow7Notifier.value;});
+                  return informSectionTitle(StringConst.INITIAL_TITLE_7_SOCIAL_ATTENTION, _allow7Notifier.value, 
+                  ()async{
+                    _allow7Notifier.value = !_allow7Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow7': _allow7Notifier.value});
+                    });
                 }
             ),
             CustomTextFormFieldTitle(
@@ -2581,7 +2651,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
                 valueListenable: _allow8Notifier,
                 builder: (context, value, child){
-                  return informSectionTitle(StringConst.INITIAL_TITLE_8_VULNERABILITY, _allow8Notifier.value, (){_allow8Notifier.value = !_allow8Notifier.value;});
+                  return informSectionTitle(StringConst.INITIAL_TITLE_8_VULNERABILITY, _allow8Notifier.value, 
+                  ()async{
+                    _allow8Notifier.value = !_allow8Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow8': _allow8Notifier.value});
+                    });
                 }
             ),
             CustomTextFormFieldTitle(
@@ -2605,7 +2679,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ValueListenableBuilder(
                 valueListenable: _allow9Notifier,
                 builder: (context, value, child){
-                  return informSectionTitle(StringConst.INITIAL_TITLE_9_WORK, _allow9Notifier.value, (){_allow9Notifier.value = !_allow9Notifier.value;});
+                  return informSectionTitle(StringConst.INITIAL_TITLE_9_WORK, _allow9Notifier.value, 
+                  ()async{
+                    _allow9Notifier.value = !_allow9Notifier.value;
+                    await database.updateDerivationReportField(report.derivationReportId!, {'allow9': _allow9Notifier.value});
+                    });
                 }
             ),
             CustomTextFormFieldTitle(
@@ -2763,7 +2841,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   return             ValueListenableBuilder(
                       valueListenable: _allow9_3Notifier,
                       builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY, _allow9Notifier.value, _allow9_3Notifier.value, (){_allow9_3Notifier.value = !_allow9_3Notifier.value;});
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY, _allow9Notifier.value, _allow9_3Notifier.value, 
+                        ()async{
+                          _allow9_3Notifier.value = !_allow9_3Notifier.value;
+                          await database.updateDerivationReportField(report.derivationReportId!, {'allow9_3': _allow9_3Notifier.value});
+                          });
                       }
                   );
                 }
@@ -2823,7 +2905,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                   return             ValueListenableBuilder(
                       valueListenable: _allow9_4Notifier,
                       builder: (context, value, child){
-                        return informSubSectionTitle(StringConst.INITIAL_TITLE_9_4_EXPECTATIONS, _allow9Notifier.value, _allow9_4Notifier.value, (){_allow9_4Notifier.value = !_allow9_4Notifier.value;});
+                        return informSubSectionTitle(StringConst.INITIAL_TITLE_9_4_EXPECTATIONS, _allow9Notifier.value, _allow9_4Notifier.value, 
+                        ()async{
+                          _allow9_4Notifier.value = !_allow9_4Notifier.value;
+                          await database.updateDerivationReportField(report.derivationReportId!, {'allow9_4': _allow9_4Notifier.value});
+                          });
                       }
                   );
                 }
@@ -2873,7 +2959,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                       return             ValueListenableBuilder(
                           valueListenable: _allow9_5Notifier,
                           builder: (context, value, child){
-                            return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_5_DEVELOP, _allow9Notifier.value, _allow9_5Notifier.value, (){_allow9_5Notifier.value = !_allow9_5Notifier.value;});
+                            return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_5_DEVELOP, _allow9Notifier.value, _allow9_5Notifier.value, 
+                            ()async{
+                              _allow9_5Notifier.value = !_allow9_5Notifier.value;
+                              await database.updateDerivationReportField(report.derivationReportId!, {'allow9_5': _allow9_5Notifier.value});
+                              });
                           }
                       );
                     }
@@ -3163,7 +3253,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                       return             ValueListenableBuilder(
                           valueListenable: _allow9_6Notifier,
                           builder: (context, value, child){
-                            return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT, _allow9Notifier.value, _allow9_6Notifier.value, (){_allow9_6Notifier.value = !_allow9_6Notifier.value;});
+                            return informSubSectionTitle(StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT, _allow9Notifier.value, _allow9_6Notifier.value, 
+                            ()async{
+                              _allow9_6Notifier.value = !_allow9_6Notifier.value;
+                              await database.updateDerivationReportField(report.derivationReportId!, {'allow9_6': _allow9_6Notifier.value});
+                              });
                           }
                       );
                     }

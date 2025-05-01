@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -21,44 +22,58 @@ class CustomRow extends pw.StatelessWidget {
   pw.Widget build(pw.Context context) {
     return pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
+        mainAxisAlignment: pw.MainAxisAlignment.start,
         children: <pw.Widget>[
           pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.start,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: <pw.Widget>[
-                pw.Column(
+                  pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    mainAxisAlignment: pw.MainAxisAlignment.start,
                     children: [
                       pw.Text(title1,
                           textScaleFactor: 0.8,
+                          overflow: pw.TextOverflow.span,
                           style: pw.Theme.of(context)
                               .defaultTextStyle
-                              .copyWith(fontWeight: pw.FontWeight.normal, color: black)),
+                              .copyWith(fontWeight: pw.FontWeight.normal, color: black)
+                                ),
                       pw.SizedBox(width: 170),
-                      pw.Text(content1,
+                      pw.Container(
+                        width: 220,
+                        child: pw.Text(content1,
                           textScaleFactor: 0.8,
+                          overflow: pw.TextOverflow.span,
                           style: pw.Theme.of(context)
                               .defaultTextStyle
                               .copyWith(fontWeight: pw.FontWeight.bold, color: black)
-                      )
+                        )
+                      ), 
                     ]
                 ),
                 pw.SizedBox(
                   width: 50,
                 ),
-                pw.Column(
+                  pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    mainAxisAlignment: pw.MainAxisAlignment.start,
                     children: [
                       pw.Text(title2,
                           textScaleFactor: 0.8,
                           style: pw.Theme.of(context)
                               .defaultTextStyle
                               .copyWith(fontWeight: pw.FontWeight.normal, color: black)),
-                      pw.Text(content2,
+                      pw.Container(
+                        width: 220,
+                        child: pw.Text(content2,
                           textScaleFactor: 0.8,
+                          overflow: pw.TextOverflow.span,
                           style: pw.Theme.of(context)
                               .defaultTextStyle
                               .copyWith(fontWeight: pw.FontWeight.bold, color: black)
-                      )
+                        )
+                      ), 
                     ]
                 ),
               ]

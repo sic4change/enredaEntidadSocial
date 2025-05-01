@@ -51,6 +51,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   String? _value;
   var bodyWidget = <Widget>[];
   List<IpilEntry> ipilEntriesPage = [];
+  IpilEntry? selectedIpil;
 
   @override
   void dispose() {
@@ -64,6 +65,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
       followPage(),
       objectivePage(),
       CreateIpilForm(participantUser: widget.participantUser),
+      CreateIpilForm(participantUser: widget.participantUser, selectedIpil: selectedIpil),
     ];
     super.initState();
   }
@@ -73,6 +75,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
     return ValueListenableBuilder<int>(
         valueListenable: ParticipantIPILPage.selectedIndexIpils,
         builder: (context, selectedIndex, child) {
+          print("ipil al repintar: $selectedIpil, $selectedIndex");
           return Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
@@ -547,6 +550,14 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
           ipilEntry: ipilEntry,
           techNameComplete: techNameComplete,
           participantUser: widget.participantUser,
+          editIpilEntry: () {
+            setState(() {
+              selectedIpil = ipilEntry;
+              print("ipil en pag general: $selectedIpil");
+              bodyWidget[3] = CreateIpilForm(participantUser: widget.participantUser, selectedIpil: selectedIpil);
+              ParticipantIPILPage.selectedIndexIpils.value = 3;
+            });
+          },
         );
       },
     );

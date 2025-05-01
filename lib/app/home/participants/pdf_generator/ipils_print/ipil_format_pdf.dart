@@ -46,7 +46,7 @@ Future<Uint8List> generateIpilFile(
         pw.SizedBox(height: 10),
         for(IpilEntry ipil in ipilEntries!)
           (ipil.content != null && ipil.content != '') ?
-          _IpilEntry(ipil: ipil, techName: techName) : pw.Container(),
+          _IpilEntry(ipil: ipil, techName: ipil.techName!) : pw.Container(),
         pw.SizedBox(height: 10),
       ]
     )

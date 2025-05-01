@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "target": "test-enreda",
+    "target": "entidadsocial",
     "public": "build/web",
     "ignore": [
       "firebase.json",

@@ -104,6 +104,7 @@ abstract class Database {
      Stream<List<Interest>> resourcesInterestsStream(List<String?> interestsIdList);
      Stream<List<Competency>> resourcesCompetenciesStream(List<String?> competenciesIdList);
      Stream<List<UserEnreda>> participantsByResourceStream(String resourceId);
+     Stream<List<UserEnreda>> getSocialUsersByEntityId(String socialEntityId);
      Stream<SocialEntity> socialEntityStreamById(String? socialEntityId);
      Stream<Organization> organizationStreamById(String organizationId);
      Stream<UserEnreda> userEnredaStreamByUserId(String? userId);
@@ -159,6 +160,7 @@ abstract class Database {
      Stream<List<TimeSpentWeekly>> timeSpentWeeklyStream();
      Stream<List<TimeSearching>> timeSearchingStream();
      Stream<List<IpilEntry>> getIpilEntriesByUserStream(String userId);
+     Stream<IpilEntry> getIpilEntry(String ipilEntryId);
      Future<void> addIpilEntry(IpilEntry ipilEntry);
      Future<void> updateIpilEntryContent(IpilEntry ipilEntry, String content);
      Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date);
@@ -182,6 +184,7 @@ abstract class Database {
      Stream<DerivationReport> derivationReportsStreamByUserId(String? userId);
      Future<void> setDerivationReport(DerivationReport derivationReport);
      Future<void> addDerivationReport(DerivationReport derivationReport);
+     Future<void> updateDerivationReportField(String derivationReportId, Map<String, dynamic> fieldsToUpdate);
      Stream<List<IpilReinforcement>> ipilReinforcementStream();
      Stream<List<IpilReinforcement>> ipilReinforcementStreamByUser(List<String> idList);
      Stream<List<IpilContextualization>> ipilContextualizationStream();
@@ -609,6 +612,17 @@ class FirestoreDatabase implements Database {
   }
 
   @override
+  Stream<List<UserEnreda>> getSocialUsersByEntityId(String socialEntityId) {
+    return _service.collectionStream<UserEnreda>(
+      path: APIPath.users(),
+      queryBuilder: (query) => query
+          .where('role', isEqualTo: 'Entidad Social')
+          .where('socialEntityId', isEqualTo: socialEntityId),
+      builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+    );
+  }
+
+  @override
   Stream<List<Resource>> resourcesParticipantsStream(List<String?> participantsIdList) {
     return _service.collectionStream<Resource>(
       path: APIPath.resources(),
@@ -1023,6 +1037,15 @@ class FirestoreDatabase implements Database {
   }
 
   @override
+  Stream<IpilEntry> getIpilEntry(String ipilEntryId) {
+    return _service.documentStreamByField(
+      path: APIPath.ipilEntry(),
+      builder: (data, documentId) => IpilEntry.fromMap(data, documentId),
+      queryBuilder: (query) => query.where(FieldPath.documentId, isEqualTo: ipilEntryId),
+    );
+  }
+
+  @override
   Future<void> addIpilEntry(IpilEntry ipilEntry) =>
       _service.addData(path: APIPath.ipilEntry(), data: ipilEntry.toMap());
 
@@ -1262,6 +1285,14 @@ class FirestoreDatabase implements Database {
   @override
   Future<void> addDerivationReport(DerivationReport derivationReport) =>
       _service.addData(path: APIPath.derivationReports(), data: derivationReport.toMap());
+
+  @override
+  Future<void> updateDerivationReportField(String derivationReportId, Map<String, dynamic> fieldsToUpdate) {
+    return _service.updateData(
+      path: APIPath.derivationReport(derivationReportId),
+      data: fieldsToUpdate,
+    );
+  }
 
 
   @override

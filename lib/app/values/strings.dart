@@ -559,9 +559,11 @@ class StringConst {
   static const String CREATE_ENTITY = "Entidad creada";
   static const String CREATE_ENTITY_SUCCESS = "¡La entidad ha sido creada con éxito!";
   static const String CREATE_IPIL = "IPIL creado";
+  static const String UPDATE_IPIL = "IPIL actualizado";
   static const String CREATE_DOCUMENT = "Documento creado";
   static const String UPDATED_DOCUMENT = "Documento actualizado";
   static const String CREATE_IPIL_SUCCESS = "¡El IPIL ha sido creado con éxito!";
+  static const String UPDATE_IPIL_SUCCESS = "¡El IPIL ha sido actualizado con éxito!";
   static const String CREATE_DOC_SUCCESS = "¡El Documento ha sido creado con éxito!";
   static const String UPDATED_DOC_SUCCESS = "¡El Documento ha sido actualizado con éxito!";
   static const String FORM_UNEMPLOYED = "Busco trabajo";
@@ -835,6 +837,7 @@ class StringConst {
   static List<DropdownMenuItem<String>> SUBSIDY_SELECTION = [
     '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS',
     '529775_SICFCH - Acompañamiento, tecnología y colaboración: 3 claves en el camino hacia el empleo joven',
+    '1/MAC/4/7.2/0080- SEIMLab: Laboratorio de innovación para la movilidad de personas trabajadoras e inclusión socioeconómica de personas migrantes en las Islas Canarias'
   ].map<DropdownMenuItem<String>>((String value) {
     return DropdownMenuItem<String>(
       value: value,

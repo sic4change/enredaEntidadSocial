@@ -1,8 +1,11 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:expandable/expandable.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../models/userEnreda.dart';
 import '../../../../utils/responsive.dart';
@@ -16,10 +19,12 @@ class ExpandableIpilEntryTile extends StatefulWidget {
     required this.ipilEntry,
     required this.techNameComplete,
     required this.participantUser,
+    required this.editIpilEntry,
   }) : super(key: key);
   final IpilEntry ipilEntry;
   final String? techNameComplete;
   final UserEnreda participantUser;
+  final GestureDoubleTapCallback editIpilEntry;
 
   @override
   State<ExpandableIpilEntryTile> createState() =>
@@ -44,6 +49,7 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
   @override
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
+    final auth = Provider.of<AuthBase>(context, listen: false);
     String dateEntry = formatter.format(widget.ipilEntry.date);
     List<IpilEntry> ipilEntries = [];
     ipilEntries.add(widget.ipilEntry);
@@ -127,7 +133,24 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                         ImagePath.PERSONAL_DOCUMENTATION_DOWNLOAD,
                         scale: 2,
                     )),
-                  )
+                  ),
+                auth.currentUser!.uid == widget.ipilEntry.techId ? 
+                Row(
+                  children: [
+                    SizedBox(width: 20),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      child: InkWell(
+                        onTap: widget.editIpilEntry,
+                          
+                        child: Image.asset(
+                          ImagePath.PERSONAL_DOCUMENTATION_EDIT,
+                          scale: 2,
+                      )),
+                    )
+                  ],
+                ) : Container()
                 ],
               )),
         ],

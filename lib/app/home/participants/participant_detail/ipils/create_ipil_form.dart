@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_check_box_selectable.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_drop_down-button_form_field_no_title_check.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
@@ -38,8 +39,9 @@ import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
 
 class CreateIpilForm extends StatefulWidget {
-  const CreateIpilForm({super.key, required this.participantUser});
+  const CreateIpilForm({super.key, required this.participantUser, this.selectedIpil});
   final UserEnreda participantUser;
+  final IpilEntry? selectedIpil;
 
   @override
   State<CreateIpilForm> createState() => _CreateIpilFormState();
@@ -65,6 +67,7 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
   late List<String> digitalSkills;
   late List<String> laborSkills;
   String? content;
+  DateTime? lastUpdateDate;
   List<String> userConnectionTerritory = [];
   List<String> userContextualization = [];
   List<String> userReinforcement = [];
@@ -85,33 +88,43 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
   late bool closeInterview = false;
   late bool closeQuestionary = false;
   String? other;
+  String? techId;
+  final ValueNotifier<String> techName = ValueNotifier<String>("");
+  bool wasManuallyChanged = false;
 
   @override
   void dispose() {
     textEditingControllerDateInput.dispose();
     super.dispose();
   }
-  @override
-  void initState() {
-    super.initState();
-    reinforcement = [];
-    contextualization = [];
-    connectionTerritory = [];
-    interviews = [];
-    intermediations = [];
-    obtainingEmployment = [];
-    improvingEmployment = [];
-    coordination = [];
-    legal = [];
-    economicBag = [];
-    specificSkills = [];
-    softSkills = [];
-    digitalSkills = [];
-    laborSkills = [];
-    content = '';
-    postWorkSupport = [];
-    other = '';
-  }
+@override
+void initState() {
+  super.initState();
+
+  final ipil = widget.selectedIpil;
+  print('Existe el ipil? $ipil');
+
+  reinforcement = ipil?.reinforcement ?? [];
+  contextualization = ipil?.contextualization ?? [];
+  connectionTerritory = ipil?.connectionTerritory ?? [];
+  interviews = ipil?.interviews ?? [];
+  intermediations = ipil?.intermediations ?? [];
+  obtainingEmployment = ipil?.obtainingEmployment ?? [];
+  improvingEmployment = ipil?.improvingEmployment ?? [];
+  coordination = ipil?.coordination ?? [];
+  legal = ipil?.legal ?? [];
+  economicBag = ipil?.economicBag ?? [];
+  specificSkills = ipil?.specificSkills ?? [];
+  softSkills = ipil?.softSkills ?? [];
+  digitalSkills = ipil?.digitalSkills ?? [];
+  laborSkills = ipil?.laborSkills ?? [];
+  content = ipil?.content ?? '';
+  postWorkSupport = ipil?.postWorkSupport ?? [];
+  other = ipil?.other ?? '';
+  lastUpdateDate = ipil?.date ?? DateTime.now();
+  techId = ipil?.techId ?? '';
+  techName.value = ipil?.techName ?? '';
+}
 
   @override
   Widget build(BuildContext context) {
@@ -145,42 +158,63 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
             CustomTextMediumBold(text: StringConst.IPIL_CREATE),
             const SizedBox(height: 20),
             CustomFlexRowColumn(
-              childRight: StreamBuilder<UserEnreda>(
-                  stream: database
-                      .userEnredaStreamByUserId(widget.participantUser.userId!),
+              childRight: 
+                StreamBuilder<UserEnreda>(
+                  stream: database.userEnredaStreamByUserId(widget.participantUser.assignedById),
                   builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      String techId = snapshot.data?.assignedById ?? '';
-                      return StreamBuilder<UserEnreda>(
-                          stream: database.userEnredaStreamByUserId(techId),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              String techName = snapshot.data?.firstName ?? '';
-                              String techLastName = snapshot.data?.lastName ?? '';
-                              return Column(
-                                children: [
-                                  CustomTextFormFieldTitle(
-                                    labelText: StringConst.TECHNICAL_NAME,
-                                    height: 45,
-                                    initialValue: '$techName $techLastName',
-                                    enabled: false,
-                                    color: AppColors.primary900,
-                                  ),
-                                ],
-                              );
-                            } else {
-                              return Container();
-                            }
-                          });
-                    } else {
-                      return Container();
+                    if (snapshot.hasData && !wasManuallyChanged) {
+                      final newName = '${snapshot.data!.firstName} ${snapshot.data!.lastName}';
+                      if (techName.value != newName) {
+                        techName.value = newName;
+                      }
                     }
-                  }),
+                    return StreamBuilder<List<UserEnreda>>(
+                      stream: database.getSocialUsersByEntityId(widget.participantUser.assignedEntityId!),
+                      builder: (context, snapshot) {
+                        List<DropdownMenuItem<String>> techUsers = [];
+                        List<UserEnreda> techUsersComplete = [];
+                        UserEnreda realTechUser;
+                        if(snapshot.hasData){
+                          techUsersComplete = snapshot.data!;
+                          techUsers = 
+                            snapshot.data!.map((userTech) {
+                              return DropdownMenuItem<String>(
+                                value: userTech.userId,
+                                child: Text('${userTech.firstName}' + ' ' + '${userTech.lastName}'),
+                              );
+                            }).toList();
+                            realTechUser = techUsersComplete.firstWhere((element) => element.userId == widget.participantUser.assignedById!);
+                        }
+                        String? currentTechId = (techId == '' ? widget.participantUser.assignedById : techId);
+                        if (!techUsers.any((item) => item.value == currentTechId)) {
+                          currentTechId = null;
+                        }
+                        return CustomDropDownButtonFormFieldTittle(
+                          labelText: StringConst.TECHNICAL_NAME,
+                          value: currentTechId,
+                          onChanged: (value) {
+                            setState(() {
+                              wasManuallyChanged = true;
+                              techId = value!;
+                              UserEnreda techUserComplete = techUsersComplete.firstWhere((element) => element.userId == value);
+                              techName.value = '${techUserComplete.firstName}' + ' ' + '${techUserComplete.lastName}';
+                            });
+                          },
+                          source: techUsers);
+                    }
+                    );
+                  }
+                ),         
               childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.DATE,
                 enabled: true,
                 color: AppColors.primary900,
-                initialValue: DateTime.now(),
+                initialValue: lastUpdateDate,
+                onChanged: (value) {
+                  setState(() {
+                    lastUpdateDate = value;
+                  });
+                },
               ),
             ),
             Padding(
@@ -819,43 +853,86 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
           defaultActionText: StringConst.CLOSE);
     }
     if (_validateAndSaveForm()) {
+      print("validado");
       _formKey.currentState!.save();
-      IpilEntry newIpilEntry = IpilEntry(
-        date: DateTime.now(),
-        userId: widget.participantUser.userId!,
-        techId: widget.participantUser.assignedById,
-        content: content,
-        interviews: interviews,
-        intermediations: intermediations,
-        connectionTerritory: connectionTerritory,
-        contextualization: contextualization,
-        reinforcement: reinforcement,
-        obtainingEmployment: obtainingEmployment,
-        improvingEmployment: improvingEmployment,
-        coordination: coordination,
-        legal: legal,
-        economicBag: economicBag,
-        postWorkSupport: postWorkSupport,
-        specificSkills: specificSkills,
-        softSkills: softSkills,
-        digitalSkills: digitalSkills,
-        laborSkills: laborSkills,
-        initialInterview: initialInterview,
-        initialJobValorationQuestionary: initialQuestionary,
-        finalInterview: closeInterview,
-        finalJobValorationQuestionary: closeQuestionary,
-        other: other
-      );
-
       try {
         final database = Provider.of<Database>(context, listen: false);
-        await database.addIpilEntry(newIpilEntry);
-        await showAlertDialog(
-          context,
-          title: StringConst.CREATE_IPIL,
-          content: StringConst.CREATE_IPIL_SUCCESS,
-          defaultActionText: StringConst.FORM_ACCEPT,
-        );
+        print('selectedIPIL: ${widget.selectedIpil}');
+        if(widget.selectedIpil == null){
+          IpilEntry newIpilEntry = IpilEntry(
+            date: DateTime.now(),
+            lastUpdateDate: lastUpdateDate!,
+            userId: widget.participantUser.userId!,
+            techId: techId,
+            techName: techName.value,
+            content: content,
+            interviews: interviews,
+            intermediations: intermediations,
+            connectionTerritory: connectionTerritory,
+            contextualization: contextualization,
+            reinforcement: reinforcement,
+            obtainingEmployment: obtainingEmployment,
+            improvingEmployment: improvingEmployment,
+            coordination: coordination,
+            legal: legal,
+            economicBag: economicBag,
+            postWorkSupport: postWorkSupport,
+            specificSkills: specificSkills,
+            softSkills: softSkills,
+            digitalSkills: digitalSkills,
+            laborSkills: laborSkills,
+            initialInterview: initialInterview,
+            initialJobValorationQuestionary: initialQuestionary,
+            finalInterview: closeInterview,
+            finalJobValorationQuestionary: closeQuestionary,
+            other: other
+          );
+          await database.addIpilEntry(newIpilEntry);
+          await showAlertDialog(
+            context,
+            title: StringConst.CREATE_IPIL,
+            content: StringConst.CREATE_IPIL_SUCCESS,
+            defaultActionText: StringConst.FORM_ACCEPT,
+          );
+        }else{
+          IpilEntry updatedIpilEntry = IpilEntry(
+            ipilId: widget.selectedIpil!.ipilId,
+            lastUpdateDate: lastUpdateDate,
+            date: widget.selectedIpil!.date,
+            userId: widget.participantUser.userId!,
+            techId: techId,
+            techName: techName.value,
+            content: content,
+            interviews: interviews,
+            intermediations: intermediations,
+            connectionTerritory: connectionTerritory,
+            contextualization: contextualization,
+            reinforcement: reinforcement,
+            obtainingEmployment: obtainingEmployment,
+            improvingEmployment: improvingEmployment,
+            coordination: coordination,
+            legal: legal,
+            economicBag: economicBag,
+            postWorkSupport: postWorkSupport,
+            specificSkills: specificSkills,
+            softSkills: softSkills,
+            digitalSkills: digitalSkills,
+            laborSkills: laborSkills,
+            initialInterview: initialInterview,
+            initialJobValorationQuestionary: initialQuestionary,
+            finalInterview: closeInterview,
+            finalJobValorationQuestionary: closeQuestionary,
+            other: other
+          );
+          await database.setIpilEntry(updatedIpilEntry);
+          await showAlertDialog(
+            context,
+            title: StringConst.UPDATE_IPIL,
+            content: StringConst.UPDATE_IPIL_SUCCESS,
+            defaultActionText: StringConst.FORM_ACCEPT,
+          );
+        }
+        
         ParticipantIPILPage.selectedIndexIpils.value = 0;
       } on FirebaseException catch (e) {
         showExceptionAlertDialog(context,

@@ -36,7 +36,8 @@ Future<Uint8List> generateInitialReportFile(
       right: 2.0 * PdfPageFormat.cm,
       bottom: 2.0 * PdfPageFormat.cm);
 
-  final bool isMdm = initialReport.subsidy == '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS' ? true : false;
+  final int isMdm = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == initialReport.subsidy);
+  print('isMdm: $isMdm');
 
   final pageTheme = await MyPageTheme(format, isMdm);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');

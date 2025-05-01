@@ -36,7 +36,7 @@ Future<Uint8List> generateDerivationReportFile(
       right: 2.0 * PdfPageFormat.cm,
       bottom: 3.0 * PdfPageFormat.cm);
 
-  final bool isMdm = derivationReport.subsidy == '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS' ? true : false;
+  final int isMdm = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == derivationReport.subsidy);
 
   final pageTheme = await MyPageTheme(format, isMdm);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
@@ -379,69 +379,89 @@ Future<Uint8List> generateDerivationReportFile(
                   ]
               )
                   : pw.Container(),
-              SubSectionTitle(title: StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
-              CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: derivationReport.orientation13_2 ?? ''),
-              SpaceH12(),
-              CustomItem(title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: derivationReport.competencies ?? ''),
-              SpaceH12(),
-              CustomItem(title: 'Contextualización del territorio', content: derivationReport.contextualization ?? ''),
-              SpaceH12(),
-              CustomItem(title: 'Conexión del entorno', content: derivationReport.connexion ?? ''),
+              derivationReport.allow9_3 ?? true ? pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  SubSectionTitle(title: StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
+                  CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: derivationReport.orientation13_2 ?? ''),
+                  SpaceH12(),
+                  CustomItem(title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: derivationReport.competencies ?? ''),
+                  SpaceH12(),
+                  CustomItem(title: 'Contextualización del territorio', content: derivationReport.contextualization ?? ''),
+                  SpaceH12(),
+                  CustomItem(title: 'Conexión del entorno', content: derivationReport.connexion ?? ''),
+                ]
+              ): pw.Container(),
 
-              SubSectionTitle(title: StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
-              CustomItem(title: 'Corto plazo', content: derivationReport.shortTerm ?? ''),
-              SpaceH12(),
-              CustomItem(title: 'Medio plazo', content: derivationReport.mediumTerm ?? ''),
-              SpaceH12(),
-              CustomItem(title: 'Largo plazo', content: derivationReport.longTerm ?? ''),
+              derivationReport.allow9_4 ?? true ? pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  SubSectionTitle(title: StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
+                  CustomItem(title: 'Corto plazo', content: derivationReport.shortTerm ?? ''),
+                  SpaceH12(),
+                  CustomItem(title: 'Medio plazo', content: derivationReport.mediumTerm ?? ''),
+                  SpaceH12(),
+                  CustomItem(title: 'Largo plazo', content: derivationReport.longTerm ?? ''),
+                ]
+              ) : pw.Container(), 
 
               //Subsection 9.5
-              SubSectionTitle(title: StringConst.FOLLOW_TITLE_9_5_DEVELOP),
-              CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: derivationReport.orientation9_5 ?? ''),
-              SubSectionTitle(title: StringConst.FOLLOW_FORMATIONS),
-              pw.Column(
-                  children: [
-                    for(FormationReport formation in derivationReport.formations ?? [])
-                      pw.Column(
-                          children: [
-                            CustomRow(title1: 'Nombre de la formación', title2: 'Tipo de formación', content1: formation.name, content2: formation.type),
-                            SpaceH12(),
-                            CustomItem(title: 'Certificación', content: formation.certification),
-                            SpaceH12(),
-                          ]
-                      )
-                  ]
-              ),
-              CustomRow(title1: 'Bolsa de formación', title2: StringConst.INITIAL_DATE, content1: derivationReport.formationBag ?? '', content2: derivationReport.formationBagDate == null ? '' : formatter.format(derivationReport.formationBagDate!)),
-              SpaceH12(),
-              CustomRow(title1: StringConst.INITIAL_MOTIVE, title2: StringConst.FOLLOW_ECONOMIC_AMOUNT, content1: derivationReport.formationBagMotive ?? '', content2: derivationReport.formationBagEconomic ?? ''),
+              derivationReport.allow9_5 ?? true ? pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  SubSectionTitle(title: StringConst.FOLLOW_TITLE_9_5_DEVELOP),
+                  CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: derivationReport.orientation9_5 ?? ''),
+                  SubSectionTitle(title: StringConst.FOLLOW_FORMATIONS),
+                  pw.Column(
+                      children: [
+                        for(FormationReport formation in derivationReport.formations ?? [])
+                          pw.Column(
+                              children: [
+                                CustomRow(title1: 'Nombre de la formación', title2: 'Tipo de formación', content1: formation.name, content2: formation.type),
+                                SpaceH12(),
+                                CustomItem(title: 'Certificación', content: formation.certification),
+                                SpaceH12(),
+                              ]
+                          )
+                      ]
+                  ),
+                  CustomRow(title1: 'Bolsa de formación', title2: StringConst.INITIAL_DATE, content1: derivationReport.formationBag ?? '', content2: derivationReport.formationBagDate == null ? '' : formatter.format(derivationReport.formationBagDate!)),
+                  SpaceH12(),
+                  CustomRow(title1: StringConst.INITIAL_MOTIVE, title2: StringConst.FOLLOW_ECONOMIC_AMOUNT, content1: derivationReport.formationBagMotive ?? '', content2: derivationReport.formationBagEconomic ?? ''),
 
-              SubSectionTitle(title: 'Empleo'),
-              CustomItem(title: StringConst.FOLLOW_JOB_ACHIEVEMENT, content: derivationReport.jobObtaining ?? ''),
-              SpaceH12(),
-              CustomRow(title1: 'Fecha de obtención', title2: 'Fecha de finalización', content1: derivationReport.jobObtainDate == null ? '' : formatter.format(derivationReport.jobObtainDate!), content2: derivationReport.jobFinishDate == null ? '' : formatter.format(derivationReport.jobFinishDate!)),
-              SpaceH12(),
-              CustomRow(title1: 'Mejora laboral', title2: 'Motivo de mejora', content1: derivationReport.jobUpgrade ?? '', content2: derivationReport.upgradeMotive ?? ''),
-              SpaceH12(),
-              CustomItem(title: StringConst.INITIAL_DATE, content: derivationReport.upgradeDate == null ? '' : formatter.format(derivationReport.upgradeDate!)),
+                  SubSectionTitle(title: 'Empleo'),
+                  CustomItem(title: StringConst.FOLLOW_JOB_ACHIEVEMENT, content: derivationReport.jobObtaining ?? ''),
+                  SpaceH12(),
+                  CustomRow(title1: 'Fecha de obtención', title2: 'Fecha de finalización', content1: derivationReport.jobObtainDate == null ? '' : formatter.format(derivationReport.jobObtainDate!), content2: derivationReport.jobFinishDate == null ? '' : formatter.format(derivationReport.jobFinishDate!)),
+                  SpaceH12(),
+                  CustomRow(title1: 'Mejora laboral', title2: 'Motivo de mejora', content1: derivationReport.jobUpgrade ?? '', content2: derivationReport.upgradeMotive ?? ''),
+                  SpaceH12(),
+                  CustomItem(title: StringConst.INITIAL_DATE, content: derivationReport.upgradeDate == null ? '' : formatter.format(derivationReport.upgradeDate!)),
+                ]
+              ) : pw.Container(),
 
-              SubSectionTitle(title: StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
-              CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: derivationReport.orientation9_6 ?? ''),
-              SpaceH12(),
-              CustomItem(title: 'Acompañamiento post-laboral', content: derivationReport.postLaborAccompaniment ?? ''),
-              derivationReport.postLaborAccompaniment == 'No' ?
-              pw.Column(
-                  children: [
-                    SpaceH12(),
-                    CustomItem(title: StringConst.INITIAL_MOTIVE, content: derivationReport.postLaborAccompanimentMotive ?? ''),
-                  ]
-              ): pw.Container(),
-              SpaceH12(),
-              CustomRow(title1: StringConst.FOLLOW_INIT_DATE, title2: StringConst.FOLLOW_END_DATE, content1: derivationReport.postLaborInitialDate == null ? '' : formatter.format(derivationReport.postLaborInitialDate!), content2: derivationReport.postLaborFinalDate == null ? '' : formatter.format(derivationReport.postLaborFinalDate!)),
-              SpaceH12(),
-              CustomItem(title: 'Total de días', content: derivationReport.postLaborTotalDays == null ? '' : derivationReport.postLaborTotalDays.toString()),
-              SpaceH12(),
-              CustomItem(title: 'Mantenimiento del empleo obtenido', content: derivationReport.jobMaintenance ?? ''),
+              derivationReport.allow9_6 ?? true ? pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  SubSectionTitle(title: StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
+                  CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: derivationReport.orientation9_6 ?? ''),
+                  SpaceH12(),
+                  CustomItem(title: 'Acompañamiento post-laboral', content: derivationReport.postLaborAccompaniment ?? ''),
+                  derivationReport.postLaborAccompaniment == 'No' ?
+                  pw.Column(
+                      children: [
+                        SpaceH12(),
+                        CustomItem(title: StringConst.INITIAL_MOTIVE, content: derivationReport.postLaborAccompanimentMotive ?? ''),
+                      ]
+                  ): pw.Container(),
+                  SpaceH12(),
+                  CustomRow(title1: StringConst.FOLLOW_INIT_DATE, title2: StringConst.FOLLOW_END_DATE, content1: derivationReport.postLaborInitialDate == null ? '' : formatter.format(derivationReport.postLaborInitialDate!), content2: derivationReport.postLaborFinalDate == null ? '' : formatter.format(derivationReport.postLaborFinalDate!)),
+                  SpaceH12(),
+                  CustomItem(title: 'Total de días', content: derivationReport.postLaborTotalDays == null ? '' : derivationReport.postLaborTotalDays.toString()),
+                  SpaceH12(),
+                  CustomItem(title: 'Mantenimiento del empleo obtenido', content: derivationReport.jobMaintenance ?? ''),
+                ]
+              ) : pw.Container(),
             ]
         ) : pw.Container(),
 

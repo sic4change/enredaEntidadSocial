@@ -8,8 +8,10 @@ class IpilEntry {
     this.ipilId,
     this.content,
     this.techId,
+    this.techName,
     required this.userId,
     required this.date,
+    this.lastUpdateDate,
     this.reinforcement,
     this.reinforcementsText,
     this.contextualization,
@@ -51,8 +53,10 @@ class IpilEntry {
   final String? ipilId;
   late String? content;
   final String? techId;
+  final String? techName;
   final String userId;
   late DateTime date;
+  late DateTime? lastUpdateDate;
   late List<String>? reinforcement;
   late String? reinforcementsText;
   late List<String>? contextualization;
@@ -176,8 +180,10 @@ class IpilEntry {
       ipilId: data['ipilId'],
       content: data['content'],
       techId: data['techId'],
+      techName: data['techName'] == null ? '' : data['techName'],
       userId: data['userId'],
       date: data['date'].toDate(),
+      lastUpdateDate: data['lastUpdateDate'] != null ? data['lastUpdateDate'].toDate() : DateTime.now(),
       reinforcement: reinforcements,
       reinforcementsText: data['reinforcementsText'] ?? '',
       contextualization: contextualizations,
@@ -230,8 +236,10 @@ class IpilEntry {
       'ipilId': ipilId,
       'content': content,
       'techId': techId,
+      'techName': techName,
       'userId': userId,
       'date': date,
+      'lastUpdateDate': lastUpdateDate,
       'reinforcement': reinforcement,
       'reinforcementsText': reinforcementsText,
       'contextualization': contextualization,
