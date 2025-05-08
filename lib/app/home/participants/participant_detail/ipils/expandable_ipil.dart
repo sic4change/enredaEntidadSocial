@@ -1,6 +1,9 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
+import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -50,8 +53,10 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
     final auth = Provider.of<AuthBase>(context, listen: false);
-    String dateEntry = formatter.format(widget.ipilEntry.date);
+    String dateEntry = formatter.format(widget.ipilEntry.lastUpdateDate!);
     List<IpilEntry> ipilEntries = [];
+    final database = Provider.of<Database>(context, listen: false);
+    int subsidy = 0;
     ipilEntries.add(widget.ipilEntry);
     return InkWell(
       onTap: () {
@@ -122,11 +127,22 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  MyIpilEntries(
-                                    user: widget.participantUser,
-                                    ipilEntries: ipilEntries,
-                                    techName: widget.techNameComplete!,
-                                  )),
+                                  StreamBuilder<InitialReport>(
+                              stream: database.initialReportsStreamByUserId(widget.participantUser.userId),
+                              builder: (context, snapshot) {
+                                if(snapshot.hasData){
+                                  if(snapshot.data!.finished ?? false){
+                                    subsidy = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == snapshot.data!.subsidy);
+                                  }
+                                }
+                                return MyIpilEntries(
+                                  user: widget.participantUser,
+                                  ipilEntries: ipilEntries,
+                                  techName: widget.techNameComplete!,
+                                  subsidy: subsidy,
+                                );
+                              }
+                            )),
                         );
                       },
                       child: Image.asset(

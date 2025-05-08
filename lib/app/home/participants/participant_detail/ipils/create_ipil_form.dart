@@ -122,7 +122,7 @@ void initState() {
   postWorkSupport = ipil?.postWorkSupport ?? [];
   other = ipil?.other ?? '';
   lastUpdateDate = ipil?.date ?? DateTime.now();
-  techId = ipil?.techId ?? '';
+  techId = ipil?.techId ?? widget.participantUser.assignedById;
   techName.value = ipil?.techName ?? '';
 }
 

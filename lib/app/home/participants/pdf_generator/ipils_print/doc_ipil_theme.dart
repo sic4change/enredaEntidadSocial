@@ -16,9 +16,13 @@ const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
 const leftWidth = 230.0;
 const rightWidth = 350.0;
 
-Future<pw.PageTheme> MyIpilPageTheme(PdfPageFormat format, bool isMdm) async {
-  // final bgShape2 = isMdm ? await rootBundle.loadString('assets/images/logos-mdm.svg') :
-  // await rootBundle.loadString('assets/images/logos-fse.svg');
+Future<pw.PageTheme> MyIpilPageTheme(PdfPageFormat format, int isMdm) async {
+final bgShape2 = isMdm == 0
+    ? await rootBundle.loadString('assets/images/logos-mdm.svg')
+    : isMdm == 2
+        ? await rootBundle.loadString('assets/images/logos-seimlab.svg')
+        : await rootBundle.loadString('assets/images/logos-fse.svg');
+
   return pw.PageTheme(
     pageFormat: format,
     theme: pw.ThemeData.withFont(
@@ -58,8 +62,8 @@ Future<pw.PageTheme> MyIpilPageTheme(PdfPageFormat format, bool isMdm) async {
                       decoration: pw.BoxDecoration(
                         shape: pw.BoxShape.rectangle,
                       ),
-                      //child: pw.SvgImage(svg: bgShape2),
-                      child: pw.Container(),
+                      child: pw.SvgImage(svg: bgShape2),
+                      //child: pw.Container(),
                     ),
                   ],)
             ),

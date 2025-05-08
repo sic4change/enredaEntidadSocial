@@ -2,6 +2,7 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/pdf_ipil_preview.dart';
+import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/ipilConnectionTerritory.dart';
 import 'package:enreda_empresas/app/models/ipilContextualization.dart';
 import 'package:enreda_empresas/app/models/ipilCoordination.dart';
@@ -170,98 +171,132 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   }
 
   Widget followPageDetail(List<IpilEntry> ipilEntries) {
-    return Column(
-      children: [
-        Padding(
-          padding: Responsive.isMobile(context) ? EdgeInsets.symmetric(horizontal: 8.0)
-              : EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-          child: Row(
-            children: [
-              EnredaButtonIconSmall(
-                buttonTitle: StringConst.ADD_IPIL_ENTRY,
-                buttonColor: AppColors.greySearch,
-                titleColor: AppColors.primary900,
-                widget: Icon(
-                  Icons.add_circle_outlined,
-                  color: AppColors.turquoiseBlue,
-                  size: 24,
-                ),
-                onPressed: () {
-                  if(widget.participantUser.assignedById == null ||
-                      widget.participantUser.assignedById == ''){
-                    showAlertDialog(
-                      context,
-                      title: StringConst.FORM_WARNING,
-                      content: StringConst.IPIL_WARNING_TECHNICAL,
-                      defaultActionText: StringConst.FORM_ACCEPT,
-                    );
-                    return;
-                  }
-                  setState(() {
-                    ParticipantIPILPage.selectedIndexIpils.value = 2;
-                  });
-                },
+    final database = Provider.of<Database>(context, listen: false);
+    int subsidy = 0;
+    bool isInitialReportFinished = false;
+    return StreamBuilder<InitialReport>(
+      stream: database.initialReportsStreamByUserId(widget.participantUser.userId),
+      builder: (context, snapshot) {
+        if(snapshot.hasData){
+          if(snapshot.data!.finished ?? false){
+            subsidy = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == snapshot.data!.subsidy);
+            isInitialReportFinished = true;
+          }
+        }
+        return Column(
+          children: [
+            Padding(
+              padding: Responsive.isMobile(context) ? EdgeInsets.symmetric(horizontal: 8.0)
+                  : EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+              child: Row(
+                children: [
+                  EnredaButtonIconSmall(
+                    buttonTitle: StringConst.ADD_IPIL_ENTRY,
+                    buttonColor: AppColors.greySearch,
+                    titleColor: AppColors.primary900,
+                    widget: Icon(
+                      Icons.add_circle_outlined,
+                      color: AppColors.turquoiseBlue,
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      if(!isInitialReportFinished){
+                        showAlertDialog(
+                          context,
+                          title: StringConst.FORM_WARNING,
+                          content: StringConst.IPIL_WARNING_INITIAL_REPORT,
+                          defaultActionText: StringConst.FORM_ACCEPT,
+                        );
+                        return;
+                      }
+
+                      if(widget.participantUser.assignedById == null ||
+                          widget.participantUser.assignedById == ''){
+                        showAlertDialog(
+                          context,
+                          title: StringConst.FORM_WARNING,
+                          content: StringConst.IPIL_WARNING_TECHNICAL,
+                          defaultActionText: StringConst.FORM_ACCEPT,
+                        );
+                        return;
+                      }
+                      setState(() {
+                        ParticipantIPILPage.selectedIndexIpils.value = 2;
+                      });
+                    },
+                  ),
+                  SizedBox(width: 20,),
+                  EnredaButtonIconSmall(
+                    buttonTitle: StringConst.DOWNLOAD_ALL,
+                    buttonColor: AppColors.greySearch,
+                    titleColor: AppColors.primary900,
+                    widget: Image.asset(
+                      ImagePath.DOWNLOAD_FILLED,
+                      width: 24,
+                      height: 24,
+                    ),
+                    onPressed: () async {
+                      if(ipilEntries.isEmpty || ipilEntries.length == 0){
+                        showAlertDialog(
+                          context,
+                          title: StringConst.FORM_WARNING,
+                          content: StringConst.FORM_NO_IPIL,
+                          defaultActionText: StringConst.FORM_ACCEPT,
+                        );
+                        return;
+                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                              MyIpilEntries(
+                                user: widget.participantUser,
+                                ipilEntries: ipilEntriesPage,
+                                techName: techNameComplete!,
+                                subsidy: subsidy,
+                              )),
+                      );
+                    },
+                  ),
+                ],
               ),
-              SizedBox(width: 20,),
-              EnredaButtonIconSmall(
-                buttonTitle: StringConst.DOWNLOAD_ALL,
-                buttonColor: AppColors.greySearch,
-                titleColor: AppColors.primary900,
-                widget: Image.asset(
-                  ImagePath.DOWNLOAD_FILLED,
-                  width: 24,
-                  height: 24,
-                ),
-                onPressed: () async {
-                  if(ipilEntries.isEmpty || ipilEntries.length == 0){
-                    showAlertDialog(
-                      context,
-                      title: StringConst.FORM_WARNING,
-                      content: StringConst.FORM_NO_IPIL,
-                      defaultActionText: StringConst.FORM_ACCEPT,
-                    );
-                    return;
-                  }
-                  Navigator.push(
+            ),
+            Divider(color: AppColors.greyBorder,),
+            SpaceH8(),
+            ipilEntries.isEmpty ? EmptyList(
+              title: StringConst.FORM_NO_IPILS,
+              subtitle: StringConst.ADD_IPIL_ENTRY,
+              imagePath: ImagePath.EMPTY_LiST_ICON,
+              onPressed: () {
+                if(!isInitialReportFinished){
+                        showAlertDialog(
+                          context,
+                          title: StringConst.FORM_WARNING,
+                          content: StringConst.IPIL_WARNING_INITIAL_REPORT,
+                          defaultActionText: StringConst.FORM_ACCEPT,
+                        );
+                        return;
+                      }
+                if(widget.participantUser.assignedById == null ||
+                    widget.participantUser.assignedById == ''){
+                  showAlertDialog(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            MyIpilEntries(
-                              user: widget.participantUser,
-                              ipilEntries: ipilEntriesPage,
-                              techName: techNameComplete!,
-                            )),
+                    title: StringConst.FORM_WARNING,
+                    content: StringConst.IPIL_WARNING_TECHNICAL,
+                    defaultActionText: StringConst.FORM_ACCEPT,
                   );
-                },
-              ),
-            ],
-          ),
-        ),
-        Divider(color: AppColors.greyBorder,),
-        SpaceH8(),
-        ipilEntries.isEmpty ? EmptyList(
-          title: StringConst.FORM_NO_IPILS,
-          subtitle: StringConst.ADD_IPIL_ENTRY,
-          imagePath: ImagePath.EMPTY_LiST_ICON,
-          onPressed: () {
-            if(widget.participantUser.assignedById == null ||
-                widget.participantUser.assignedById == ''){
-              showAlertDialog(
-                context,
-                title: StringConst.FORM_WARNING,
-                content: StringConst.IPIL_WARNING_TECHNICAL,
-                defaultActionText: StringConst.FORM_ACCEPT,
-              );
-              return;
-            }
-            setState(() {
-              ParticipantIPILPage.selectedIndexIpils.value = 2;
-            });
-          },
-        ) :
-        listIpils(),
-        SizedBox(height: 20),
-      ],
+                  return;
+                }
+                setState(() {
+                  ParticipantIPILPage.selectedIndexIpils.value = 2;
+                });
+              },
+            ) :
+            listIpils(),
+            SizedBox(height: 20),
+          ],
+        );
+      }
     );
   }
 

@@ -16,6 +16,7 @@ typedef LayoutCallbackWithData = Future<Uint8List> Function(
     UserEnreda user,
     List<IpilEntry> ipilEntries,
     String techName,
+    int isMdm,
     );
 
 class Example {

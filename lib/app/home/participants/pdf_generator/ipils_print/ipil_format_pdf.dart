@@ -19,11 +19,19 @@ Future<Uint8List> generateIpilFile(
     UserEnreda user,
     List<IpilEntry>? ipilEntries,
     String techName,
+    int isMdm,
     ) async {
   final doc = pw.Document(title: 'Mis IPILs');
+
+    format = format.applyMargin(
+      left: 2.0 * PdfPageFormat.cm,
+      top: 3.0 * PdfPageFormat.cm,
+      right: 2.0 * PdfPageFormat.cm,
+      bottom: 3.0 * PdfPageFormat.cm);
+
   const PdfColor grey = PdfColor.fromInt(0xFF535A5F);
   const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
-  final pageTheme = await MyIpilPageTheme(format, false);
+  final pageTheme = await MyIpilPageTheme(format, isMdm);
 
   doc.addPage(
     pw.MultiPage(
@@ -72,7 +80,7 @@ class _IpilEntry extends pw.StatelessWidget {
           pw.Row(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: <pw.Widget>[
-                BlockText(title: StringConst.DATE, text: formatter.format(ipil.date.toLocal())),
+                BlockText(title: StringConst.DATE, text: formatter.format(ipil.lastUpdateDate!.toLocal())),
                 pw.SizedBox(width: 50,),
                 BlockText(title: StringConst.TECHNICAL_NAME, text: '$techName'),
               ]

@@ -5,6 +5,8 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/ipil_pdf_page.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:provider/provider.dart';
 import '../cv_print/data.dart';
 
 
@@ -22,11 +25,13 @@ class MyIpilEntries extends StatefulWidget {
     required this.user,
     required this.ipilEntries,
     required this.techName,
+    required this.subsidy,
   }) : super(key: key);
 
   final UserEnreda user;
   final List<IpilEntry> ipilEntries;
   final String techName;
+  final int subsidy;
 
   @override
   MyAppState createState() {
@@ -110,7 +115,7 @@ class MyAppState extends State<MyIpilEntries> with SingleTickerProviderStateMixi
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
     pw.RichText.debug = true;
-
+    
     if (_tabController == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -122,7 +127,6 @@ class MyAppState extends State<MyIpilEntries> with SingleTickerProviderStateMixi
           onPressed: _saveAsFile,
         )
     ];
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primary100,
@@ -150,6 +154,7 @@ class MyAppState extends State<MyIpilEntries> with SingleTickerProviderStateMixi
           widget.user,
           widget.ipilEntries,
           widget.techName,
+          widget.subsidy,
         ),
         actions: actions,
         canDebug: false,
