@@ -1066,6 +1066,7 @@ class StringConst {
     'Baja voluntaria',
     'Obtención de empleo o mejora',
     'Baja involuntaria',
+    'Finalización del itinerario en el programa',
   ].map<DropdownMenuItem<String>>((String value) {
     return DropdownMenuItem<String>(
       value: value,

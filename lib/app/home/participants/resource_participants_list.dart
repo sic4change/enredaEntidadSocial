@@ -2,6 +2,7 @@ import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_raised_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
+import 'package:enreda_empresas/app/home/external_social_entity/filter_text_field_row.dart';
 import 'package:enreda_empresas/app/home/participants/resource_chip.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/resourceInvitation.dart';
@@ -35,6 +36,12 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
    String? valueText;
    int? _selectedCertify;
    Color _buttonColor = AppColors.primaryColor;
+   String searchText = "";
+   final _searchTextController = TextEditingController();
+
+  void setStateIfMounted(f) {
+    if (mounted) setState(f);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +49,10 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
       child: Column(
         children: [
           const SizedBox(height: 20.0),
+          _buildFilterRow(),
           const CustomTextSmall(text: 'Elegir el recurso que desea invitar:', color: AppColors.primary900),
           SizedBox(height: Sizes.mainPadding * 1.5),
-          _buildContents(context),
+          _buildContents(context, searchText),
           SizedBox(height: Sizes.mainPadding / 2),
           isLoading ? const Padding(
             padding: EdgeInsets.all(30.0),
@@ -90,11 +98,11 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
     );
   }
 
-  Widget _buildContents(BuildContext context) {
+  Widget _buildContents(BuildContext context, String searchText) {
     final database = Provider.of<Database>(context, listen: false);
     final scrollResources = ScrollController();
     return StreamBuilder<List<Resource>>(
-        stream: database.myResourcesStream(widget.organizerId),
+        stream: database.filteredMyResourcesStream(widget.organizerId, searchText),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -139,6 +147,32 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
   void _selectResource(int choice) {
     setState(() {
       _selectedCertify = choice;
+    });
+  }
+
+    Widget _buildFilterRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FilterTextFieldRow(
+          searchTextController: _searchTextController,
+          onPressed: () => setState(() {
+            searchText = _searchTextController.text;
+          }),
+          onFieldSubmitted: (value) => setState(() {
+            searchText = _searchTextController.text;
+          }),
+          clearFilter: () => _clearFilter(),
+          hintText: 'Busca recurso por nombre o ubicación...',
+        ),
+      ],
+    );
+  }
+
+  void _clearFilter() {
+    setStateIfMounted(() {
+      _searchTextController.clear();
+      searchText = '';
     });
   }
 

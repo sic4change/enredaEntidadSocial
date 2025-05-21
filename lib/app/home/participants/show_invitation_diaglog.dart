@@ -43,7 +43,7 @@ dialogContent(BuildContext context, UserEnreda user, String organizerId) {
       : widthOfScreen(context) * 0.55;
   final dialogHeight = Responsive.isMobile(context)
       ? heightOfScreen(context) * 0.60
-      : heightOfScreen(context) * 0.50;
+      : heightOfScreen(context) * 0.65;
   TextTheme textTheme = Theme.of(context).textTheme;
   return Container(
     width: dialogWidth,
