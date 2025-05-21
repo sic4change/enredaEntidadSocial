@@ -121,9 +121,25 @@ void initState() {
   content = ipil?.content ?? '';
   postWorkSupport = ipil?.postWorkSupport ?? [];
   other = ipil?.other ?? '';
-  lastUpdateDate = ipil?.date ?? DateTime.now();
+  lastUpdateDate = ipil?.lastUpdateDate ?? DateTime.now();
   techId = ipil?.techId ?? widget.participantUser.assignedById;
   techName.value = ipil?.techName ?? '';
+
+  userConnectionTerritory = ipil?.connectionTerritory ?? [];
+  userContextualization = ipil?.contextualization ?? [];
+  userReinforcement = ipil?.reinforcement ?? [];
+  userInterviews = ipil?.interviews ?? [];
+  userIntermediations = ipil?.intermediations ?? [];
+  userObtainingEmployment = ipil?.obtainingEmployment ?? [];;
+  userImprovingEmployment = ipil?.improvingEmployment ?? [];;
+  userCoordination = ipil?.coordination ?? [];
+  userLegal = ipil?.legal ?? [];
+  userPostWorkSupport = ipil?.postWorkSupport ?? [];
+  userEconomicBag = ipil?.economicBag ?? [];
+  userSpecificSkills = ipil?.specificSkills ?? [];
+  userSoftSkills = ipil?.softSkills ?? [];
+  userDigitalSkills = ipil?.digitalSkills ?? [];
+  userLaborSkills = ipil?.laborSkills ?? [];
 }
 
   @override
