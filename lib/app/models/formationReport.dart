@@ -25,6 +25,18 @@ class FormationReport {
             other.name == name);
   }
 
+  FormationReport copyWith({
+    String? name,
+    String? type,
+    String? certification,
+  }) {
+    return FormationReport(
+      name: name ?? this.name,
+      type: type ?? this.type,
+      certification: certification ?? this.certification,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'name': name,

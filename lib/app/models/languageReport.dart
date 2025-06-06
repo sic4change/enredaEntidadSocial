@@ -25,6 +25,14 @@ class LanguageReport {
             other.name == name);
   }
 
+  LanguageReport copyWith({String? name, String? level, String? accreditation}) {
+    return LanguageReport(
+      name: name ?? this.name,
+      level: level ?? this.level,
+      accreditation: accreditation ?? this.accreditation,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'name': name,

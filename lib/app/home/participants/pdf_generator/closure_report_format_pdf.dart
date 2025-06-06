@@ -338,7 +338,7 @@ Future<Uint8List> generateClosureReportFile(
         SubSectionTitle(title: StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: closureReport.orientation9_6 ?? ''),
         SpaceH12(),
-        CustomItem(title: 'Acompañamiento post-laboral', content: closureReport.postLaborAccompaniment ?? ''),
+        CustomItem(title: 'Acompañamiento intra-laboral', content: closureReport.postLaborAccompaniment ?? ''),
         closureReport.postLaborAccompaniment == 'No' ?
         pw.Column(
             children: [

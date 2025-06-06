@@ -340,7 +340,7 @@ Future<Uint8List> generateFollowReportFile(
         SubSectionTitle(title: StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
         CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: followReport.orientation9_6 ?? ''),
         SpaceH12(),
-        CustomItem(title: 'Acompañamiento post-laboral', content: followReport.postLaborAccompaniment ?? ''),
+        CustomItem(title: 'Acompañamiento intra-laboral', content: followReport.postLaborAccompaniment ?? ''),
         followReport.postLaborAccompaniment == 'No' ?
             pw.Column(
               children: [

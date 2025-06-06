@@ -810,8 +810,8 @@ class StringConst {
   static const String FOLLOW_FINISH_DATE = 'Fecha de finalización';
   static const String FOLLOW_JOB_UPGRADE = 'Mejora laboral';
   static const String FOLLOW_JOB_UPGRADE_MOTIVE = 'Motivos de la mejora';
-  static const String FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT = '9.4 Acompañamiento post-laboral';
-  static const String FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT = 'Acompañamiento post-laboral';
+  static const String FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT = '9.4 Acompañamiento intra-laboral';
+  static const String FOLLOW_TITLE_POST_LABOR_ACCOMPANIMENT = 'Acompañamiento intra-laboral';
   static const String FOLLOW_INIT_DATE = 'Fecha de inicio';
   static const String FOLLOW_END_DATE = 'Fecha de fin';
   static const String FOLLOW_POST_LABOR_TOTAL_DAYS = 'Total de días';

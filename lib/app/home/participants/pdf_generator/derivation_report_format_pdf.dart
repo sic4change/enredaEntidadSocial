@@ -446,7 +446,7 @@ Future<Uint8List> generateDerivationReportFile(
                   SubSectionTitle(title: StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
                   CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: derivationReport.orientation9_6 ?? ''),
                   SpaceH12(),
-                  CustomItem(title: 'Acompañamiento post-laboral', content: derivationReport.postLaborAccompaniment ?? ''),
+                  CustomItem(title: 'Acompañamiento intra-laboral', content: derivationReport.postLaborAccompaniment ?? ''),
                   derivationReport.postLaborAccompaniment == 'No' ?
                   pw.Column(
                       children: [
