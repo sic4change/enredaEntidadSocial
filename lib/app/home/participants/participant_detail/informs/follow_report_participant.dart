@@ -3433,7 +3433,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                             jobMaintenance: _controllers['jobMaintenance']!.text,
                                             finished: true,
                                             completedDate: _dateValues['completedDate'],
-                                            techPersonName: _controllers['techPersonName']!.text,
+                                            techPersonName: _techPersonController.text,
                                           ));
                                       Navigator.of(context).pop();
                                       ParticipantSocialReportPage.selectedIndexInforms.value = 0;

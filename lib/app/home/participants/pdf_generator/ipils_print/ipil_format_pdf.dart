@@ -21,7 +21,7 @@ Future<Uint8List> generateIpilFile(
     String techName,
     int isMdm,
     ) async {
-  final doc = pw.Document(title: 'Mis IPILs');
+  final doc = pw.Document(title: 'IPILs ${user.firstName} ${user.lastName}');
 
     format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,

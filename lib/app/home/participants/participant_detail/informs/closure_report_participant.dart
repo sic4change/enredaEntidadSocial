@@ -3644,7 +3644,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                                             _controllers['centerTSReference']!.text,
                                             subsidyBeneficiary: _subsidyBeneficiaryNotifier.value,
                                             socialExclusionCertificate:
-                                            _controllers['socialExclusionCertificate']!.text,
+                                            _socialExclusionCertificateNotifier.value,
                                             subsidyName: _controllers['subsidyName']!.text,
                                             socialExclusionCertificateDate: _dateValues['socialExclusionCertificateDate'],
                                             socialExclusionCertificateObservations: _controllers['socialExclusionCertificateObservations']!.text,
