@@ -3693,7 +3693,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                                             motiveCloseDetail: _controllers['motiveCloseDetail']!.text,
                                             closeDate: _dateValues['closeDate'],
                                             finished: true,
-                                            completedDate: _dateValues['completedTime'],
+                                            completedDate: _dateValues['completedDate'],
                                             techPersonName: _techPersonController.text,
                                           ));
                                       Navigator.of(context).pop();

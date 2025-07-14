@@ -288,58 +288,35 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                               }
                               DateTime? startDateItinerary = snapshot.data?.startDateItinerary;
                               if (startDateItinerary != null) {
-                                return StreamBuilder<DerivationReport>(
-                                  stream: database.derivationReportsStreamByUserId(participantUser.userId),
-                                  builder: (context, snapshotDerivation) {
-                                    return StreamBuilder(
-                                      stream: database.closureReportsStreamByUserId(participantUser.userId),
-                                      builder: (context, snapshotClosure){
-                                        if(snapshotDerivation.hasData) {
-                                          if(snapshotDerivation.data!.completedDate != null){
-                                            return CustomTextSmallBold(
-                                              title: 'CERRADO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)} - ${DateFormat('dd/MM/yyyy').format(snapshotDerivation.data!.completedDate!)}',
+                                return StreamBuilder(
+                                  stream: database.closureReportsStreamByUserId(participantUser.userId),
+                                  builder: (context, snapshotClosure){
+                                        if(snapshotClosure.hasData){
+                                          if(snapshotClosure.data!.completedDate != null && snapshotClosure.data!.finished == true){
+                                            return CustomTextSmallBold( 
+                                              title: 'CERRADO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)} - ${DateFormat('dd/MM/yyyy').format(snapshotClosure.data!.completedDate!)}',
                                               color: AppColors.redClose,
                                               height: 0.5,
                                             );
                                           }
                                           else{
-                                            if(snapshotClosure.hasData){
-                                              if(snapshotClosure.data!.completedDate != null){
-                                                return CustomTextSmallBold(
-                                                  title: 'CERRADO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)} - ${DateFormat('dd/MM/yyyy').format(snapshotClosure.data!.completedDate!)}',
-                                                  color: AppColors.redClose,
-                                                  height: 0.5,
-                                                );
-                                              }
-                                              else{
-                                                return CustomTextSmallBold(
-                                                  title: 'ACTIVO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)}',
-                                                  color: AppColors.primary900,
-                                                  height: 0.5,
-                                                );
-                                              }
-                                            }
-                                            else{
-                                              return CustomTextSmallBold(
-                                                title: 'ACTIVO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)}',
-                                                color: AppColors.primary900,
-                                                height: 0.5,
-                                              );
-                                            }
-                                          }
-                                        }
-                                        else {
-                                          return CustomTextSmallBold(
-                                            title: 'ACTIVO: ${DateFormat(
-                                                'dd/MM/yyyy').format(
-                                                startDateItinerary)}',
-                                            color: AppColors.primary900,
-                                            height: 0.5,
-                                          );
-                                        }
-                                    });
-                                  }
-                                );
+                                            return CustomTextSmallBold(
+                                              title: 'ACTIVO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)}',
+                                              color: AppColors.primary900,
+                                              height: 0.5,
+                                            );
+                                      }
+                                    }
+                                    else {
+                                      return CustomTextSmallBold(
+                                        title: 'ACTIVO: ${DateFormat(
+                                            'dd/MM/yyyy').format(
+                                            startDateItinerary)}',
+                                        color: AppColors.primary900,
+                                        height: 0.5,
+                                      );
+                                    }
+                                });
                               } else {
                                 return CustomTextSmallBold(
                                   title: 'No iniciado',

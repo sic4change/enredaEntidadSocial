@@ -995,7 +995,7 @@ class StringConst {
   ];
 
   static const List<String> OPTIONS_SECTION_12 = [
-    'Barrera ideomática',
+    'Barrera idiomática',
     'Situación sinhogarismo',
     'Colectivo LGTBI',
     'Salud mental grave',
