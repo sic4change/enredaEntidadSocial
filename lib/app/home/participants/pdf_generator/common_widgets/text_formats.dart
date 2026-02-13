@@ -43,6 +43,7 @@ class CustomRow extends pw.StatelessWidget {
                       pw.Container(
                         width: 220,
                         child: pw.Text(content1,
+                          textAlign: pw.TextAlign.justify,
                           textScaleFactor: 0.8,
                           overflow: pw.TextOverflow.span,
                           style: pw.Theme.of(context)
@@ -67,6 +68,7 @@ class CustomRow extends pw.StatelessWidget {
                       pw.Container(
                         width: 220,
                         child: pw.Text(content2,
+                          textAlign: pw.TextAlign.justify,
                           textScaleFactor: 0.8,
                           overflow: pw.TextOverflow.span,
                           style: pw.Theme.of(context)
@@ -104,6 +106,7 @@ class CustomItem extends pw.StatelessWidget {
           ),
           pw.Text(content,
               textScaleFactor: 0.8,
+              textAlign: pw.TextAlign.justify,
               style: pw.Theme.of(context)
                   .defaultTextStyle
                   .copyWith(fontWeight: pw.FontWeight.bold, color: black)
@@ -134,6 +137,7 @@ class CustomItemSameLine extends pw.StatelessWidget {
           ),
           pw.Text(content,
               textScaleFactor: 0.8,
+              textAlign: pw.TextAlign.justify,
               style: pw.Theme.of(context)
                   .defaultTextStyle
                   .copyWith(fontWeight: pw.FontWeight.bold, color: black)

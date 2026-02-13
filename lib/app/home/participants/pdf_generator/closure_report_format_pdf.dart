@@ -28,13 +28,13 @@ Future<Uint8List> generateClosureReportFile(
     UserEnreda user,
     ClosureReport closureReport,
     ) async {
-  final doc = pw.Document(title: StringConst.CLOSURE_REPORT);
+  final doc = pw.Document(title: 'Informe de cierre de ${user.firstName}');
 
   format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,
       top: 3.0 * PdfPageFormat.cm,
       right: 2.0 * PdfPageFormat.cm,
-      bottom: 3.0 * PdfPageFormat.cm);
+      bottom: 0);
 
   final int isMdm = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == closureReport.subsidy);
 
@@ -51,15 +51,30 @@ Future<Uint8List> generateClosureReportFile(
     pw.MultiPage(
       pageTheme: pageTheme,
       footer: (pw.Context context) {
-        return pw.Container(
-            alignment: pw.Alignment.centerRight,
-            margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
-            child: pw.Text(
-                'Pág. ${context.pageNumber} de ${context.pagesCount}',
-                textScaleFactor: 0.8,
-                style: pw.Theme.of(context)
-                    .defaultTextStyle
-                    .copyWith(color: PdfColors.grey)));
+        return pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.end,
+          mainAxisSize: pw.MainAxisSize.min,
+          children: [
+            pw.Container(
+              alignment: pw.Alignment.centerRight,
+              margin: const pw.EdgeInsets.only(top: 2),
+              child: pw.Text(
+                  StringConst.INFORMS_CONDITIONS,
+                  textScaleFactor: 0.6,
+                  style: pw.Theme.of(context)
+                      .defaultTextStyle
+                      .copyWith(color: PdfColors.grey))),
+            pw.Container(
+              alignment: pw.Alignment.centerRight,
+              margin: const pw.EdgeInsets.only(top: 2),
+              child: pw.Text(
+                  'Pág. ${context.pageNumber} de ${context.pagesCount}',
+                  textScaleFactor: 0.8,
+                  style: pw.Theme.of(context)
+                      .defaultTextStyle
+                      .copyWith(color: PdfColors.grey)))
+          ]
+        ); 
       },
       build: (pw.Context context) => [
         pw.Text(

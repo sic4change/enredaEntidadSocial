@@ -433,6 +433,8 @@ class StringConst {
   static const String FORM_NO_RESOURCES = "Todavía no has creado ningún recurso.";
   static const String FORM_AGE = "Edad del participante: ";
   static const String FORM_ACCORDING = "Según la ";
+  static const String PAGE_TITLE = "Entidad Social";
+  static const String INFORMS_CONDITIONS = "En SIC4Change tratamos la información que nos entrega con el fin de poder facilitar la participación en la actividad descrita. Los datos proporcionados se conservarán mientras se mantenga la relación de participación o durante los años necesarios para cumplir con las obligaciones legales. Los datos no se ceden a terceros salvo en los casos en que exista una obligación legal. Usted tiene derecho a obtener confirmación sobre si en SIC4change estamos tratando sus datos personales de forma correcta, puede rectificar los datos inexactos o solicitar su supresión cuando los datos ya no sean necesarios. Puede revisar nuestra política de privacidad de datos en nuestra página web";
 
   static const List<String> RESOURCE_TYPES = [
     'Oferta de empleo',

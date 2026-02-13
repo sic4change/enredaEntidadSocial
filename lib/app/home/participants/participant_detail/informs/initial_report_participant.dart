@@ -933,10 +933,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
                     onChanged: (value) {
                       _dateValues['adminDateRenovation'] = value;
                     },
-                    enabled: !_finished,
-                    validator: (value) => (value != null)
+                    enabled: !_finished
+                    /*validator: (value) => (value != null)
                         ? null
-                        : StringConst.FORM_GENERIC_ERROR,
+                        : StringConst.FORM_GENERIC_ERROR,*/
                   ) : Container();
                 },
               )

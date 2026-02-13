@@ -1,4 +1,5 @@
 import 'package:enreda_empresas/app/models/documentationParticipant.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -6,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:pdf/widgets.dart' as pw;
+import 'dart:html' as html;
+
 
 const kDuration = Duration(milliseconds: 600);
 
@@ -86,4 +89,10 @@ String removeDiacritics(String str) {
 bool isEmailValid(String email) =>
     RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
         .hasMatch(email);
+
+void setWebPdfTitle(String title) {
+  if (kIsWeb) {
+    html.document.title = title;
+  }
+}
 

@@ -9,6 +9,8 @@ import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/utils/functions.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -129,6 +131,10 @@ class MyAppState extends State<MyInitialReport> with SingleTickerProviderStateMi
       appBar: AppBar(
         backgroundColor: AppColors.primary100,
         iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
+        leading: IconButton(onPressed: () {
+          setWebPdfTitle(StringConst.PAGE_TITLE);
+          Navigator.of(context).pop();
+          }, icon: Icon(Icons.arrow_back)),
         actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
         title: CustomTextBoldCenter(title: 'Informe inicial de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
@@ -146,12 +152,17 @@ class MyAppState extends State<MyInitialReport> with SingleTickerProviderStateMi
       ),
       body: PdfPreview(
         maxPageWidth: 700,
-        build: (format) => examplesInitialReport[_tab].builder(
+        pdfFileName: 'Informe_Inicial_${widget.user.firstName}.pdf',
+        build: (format){ 
+          setWebPdfTitle(
+            'Informe_Inicial_${widget.user.firstName}',
+          );
+          return examplesInitialReport[_tab].builder(
           format,
           _data,
           widget.user,
           widget.initialReport,
-        ),
+        );},
         actions: actions,
         canDebug: false,
         initialPageFormat: PdfPageFormat.a4,

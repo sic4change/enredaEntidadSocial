@@ -468,7 +468,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             );
                             return;
                           }
-                          if(followReport.completedDate == null && !initialReport.completedDate!.isAfter(DateTime.now().add(Duration(days: -180)))){
+                          /*if(followReport.completedDate == null && !initialReport.completedDate!.isAfter(DateTime.now().add(Duration(days: -180)))){
                             showAlertDialog(
                               context,
                               title: 'Aviso',
@@ -485,7 +485,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                               defaultActionText: 'Aceptar',
                             );
                             return;
-                          }
+                          }*/
                           setState(() {
                             ParticipantSocialReportPage.selectedIndexInforms.value = 4;
                           });

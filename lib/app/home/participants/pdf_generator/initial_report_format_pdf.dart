@@ -34,7 +34,7 @@ Future<Uint8List> generateInitialReportFile(
       left: 2.0 * PdfPageFormat.cm,
       top: 3.0 * PdfPageFormat.cm,
       right: 2.0 * PdfPageFormat.cm,
-      bottom: 2.0 * PdfPageFormat.cm);
+      bottom: 0.0 * PdfPageFormat.cm);
 
   final int isMdm = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == initialReport.subsidy);
   print('isMdm: $isMdm');
@@ -52,15 +52,30 @@ Future<Uint8List> generateInitialReportFile(
     pw.MultiPage(
       pageTheme: pageTheme,
       footer: (pw.Context context) {
-        return pw.Container(
-            alignment: pw.Alignment.centerRight,
-            margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
-            child: pw.Text(
-                'Pág. ${context.pageNumber} de ${context.pagesCount}',
-                textScaleFactor: 0.8,
-                style: pw.Theme.of(context)
-                    .defaultTextStyle
-                    .copyWith(color: PdfColors.grey)));
+        return pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.end,
+          mainAxisSize: pw.MainAxisSize.min,
+          children: [
+            pw.Container(
+              alignment: pw.Alignment.centerRight,
+              margin: const pw.EdgeInsets.only(top: 2),
+              child: pw.Text(
+                  StringConst.INFORMS_CONDITIONS,
+                  textScaleFactor: 0.6,
+                  style: pw.Theme.of(context)
+                      .defaultTextStyle
+                      .copyWith(color: PdfColors.grey))),
+            pw.Container(
+              alignment: pw.Alignment.centerRight,
+              margin: const pw.EdgeInsets.only(top: 2),
+              child: pw.Text(
+                  'Pág. ${context.pageNumber} de ${context.pagesCount}',
+                  textScaleFactor: 0.8,
+                  style: pw.Theme.of(context)
+                      .defaultTextStyle
+                      .copyWith(color: PdfColors.grey)))
+          ]
+        ); 
       },
       build: (pw.Context context) => [
         pw.Text(

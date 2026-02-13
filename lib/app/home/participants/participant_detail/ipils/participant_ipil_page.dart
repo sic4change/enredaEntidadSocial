@@ -200,7 +200,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                       size: 24,
                     ),
                     onPressed: () {
-                      if(!isInitialReportFinished){
+                      /*if(!isInitialReportFinished){
                         showAlertDialog(
                           context,
                           title: StringConst.FORM_WARNING,
@@ -208,7 +208,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                           defaultActionText: StringConst.FORM_ACCEPT,
                         );
                         return;
-                      }
+                      }*/
 
                       if(widget.participantUser.assignedById == null ||
                           widget.participantUser.assignedById == ''){
@@ -268,7 +268,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
               subtitle: StringConst.ADD_IPIL_ENTRY,
               imagePath: ImagePath.EMPTY_LiST_ICON,
               onPressed: () {
-                if(!isInitialReportFinished){
+                /*if(!isInitialReportFinished){
                         showAlertDialog(
                           context,
                           title: StringConst.FORM_WARNING,
@@ -276,7 +276,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                           defaultActionText: StringConst.FORM_ACCEPT,
                         );
                         return;
-                      }
+                      }*/
                 if(widget.participantUser.assignedById == null ||
                     widget.participantUser.assignedById == ''){
                   showAlertDialog(

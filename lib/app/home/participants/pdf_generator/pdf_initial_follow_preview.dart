@@ -5,6 +5,8 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/follow_report_pdf_page.dart';
 import 'package:enreda_empresas/app/models/followReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/utils/functions.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -125,6 +127,10 @@ class MyAppState extends State<MyFollowReport> with SingleTickerProviderStateMix
       appBar: AppBar(
         backgroundColor: AppColors.primary100,
         iconTheme: const IconThemeData(color: AppColors.turquoiseBlue,),
+        leading: IconButton(onPressed: () {
+          setWebPdfTitle(StringConst.PAGE_TITLE);
+          Navigator.of(context).pop();
+          }, icon: Icon(Icons.arrow_back)),
         actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
         title: CustomTextBoldCenter(title: 'Informe de seguimiento de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
@@ -142,12 +148,17 @@ class MyAppState extends State<MyFollowReport> with SingleTickerProviderStateMix
       ),
       body: PdfPreview(
         maxPageWidth: 700,
-        build: (format) => examplesFollowReport[_tab].builder(
+        pdfFileName: 'Informe_Seguimiento_${widget.user.firstName}.pdf',
+        build: (format){ 
+          setWebPdfTitle(
+            'Informe_Seguimiento_${widget.user.firstName}',
+          );
+          return examplesFollowReport[_tab].builder(
           format,
           _data,
           widget.user!,
           widget.followReport,
-        ),
+        );},
         actions: actions,
         canDebug: false,
         initialPageFormat: PdfPageFormat.a4,

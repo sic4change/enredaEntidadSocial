@@ -17,14 +17,17 @@ const leftWidth = 230.0;
 const rightWidth = 350.0;
 
 Future<pw.PageTheme> MyIpilPageTheme(PdfPageFormat format, int isMdm) async {
-final bgShape2 = isMdm == 0
-    ? await rootBundle.loadString('assets/images/logos-mdm.svg')
+final bgBytes = isMdm == 0
+    ? await rootBundle.load('assets/images/logos-mdm.png')
     : isMdm == 2
-        ? await rootBundle.loadString('assets/images/logos-seimlab.svg')
-        : await rootBundle.loadString('assets/images/logos-fse.svg');
+        ? await rootBundle.load('assets/images/logos-seimlab.png')
+        : await rootBundle.load('assets/images/logos-fse.png');
+        final bgImage = pw.MemoryImage(bgBytes.buffer.asUint8List());
 
   return pw.PageTheme(
     pageFormat: format,
+    margin: pw.EdgeInsets.fromLTRB(
+      format.marginLeft, format.marginTop, format.marginRight, format.marginBottom),
     theme: pw.ThemeData.withFont(
       base: await PdfGoogleFonts.poppinsLight(),
       bold: await PdfGoogleFonts.poppinsMedium(),
@@ -62,7 +65,11 @@ final bgShape2 = isMdm == 0
                       decoration: pw.BoxDecoration(
                         shape: pw.BoxShape.rectangle,
                       ),
-                      child: pw.SvgImage(svg: bgShape2),
+                      child: /*pw.SvgImage(svg: bgShape2),*/pw.Image(
+                      bgImage,
+                      width: 550,
+                      fit: pw.BoxFit.contain,
+                    )
                       //child: pw.Container(),
                     ),
                   ],)
