@@ -53,7 +53,7 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
     final auth = Provider.of<AuthBase>(context, listen: false);
-    String dateEntry = formatter.format(widget.ipilEntry.lastUpdateDate!);
+    String dateEntry = formatter.format(widget.ipilEntry.date);
     List<IpilEntry> ipilEntries = [];
     final database = Provider.of<Database>(context, listen: false);
     int subsidy = 0;
@@ -164,6 +164,40 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                           ImagePath.PERSONAL_DOCUMENTATION_EDIT,
                           scale: 2,
                       )),
+                    ),
+                    SizedBox(width: 20),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      child: InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text(StringConst.FORM_WARNING),
+                                content: Text("¿Estás seguro? Vas a borrar este epil ${widget.participantUser.firstName} ${widget.participantUser.lastName}"),
+                                actions: [
+                                  TextButton(
+                                    child: Text(StringConst.CANCEL),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: Text("Sí, borrar"),
+                                    onPressed: () async {
+                                      Navigator.of(context).pop();
+                                      await database.deleteIpilEntry(widget.ipilEntry);
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Icon(Icons.delete, color: AppColors.deleteRed),
+                      ),
                     )
                   ],
                 ) : Container()
