@@ -176,7 +176,7 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: Text(StringConst.FORM_WARNING),
-                                content: Text("¿Estás seguro? Vas a borrar este epil ${widget.participantUser.firstName} ${widget.participantUser.lastName}"),
+                                content: Text("¿Estás seguro? Vas a borrar este epil para usuario ${widget.participantUser.firstName} ${widget.participantUser.lastName}"),
                                 actions: [
                                   TextButton(
                                     child: Text(StringConst.CANCEL),
