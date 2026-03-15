@@ -53,7 +53,7 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
     final auth = Provider.of<AuthBase>(context, listen: false);
-    String dateEntry = formatter.format(widget.ipilEntry.date);
+    String dateEntry = formatter.format(widget.ipilEntry.lastUpdateDate!);
     List<IpilEntry> ipilEntries = [];
     final database = Provider.of<Database>(context, listen: false);
     int subsidy = 0;

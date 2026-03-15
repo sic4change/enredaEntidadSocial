@@ -1032,7 +1032,7 @@ class FirestoreDatabase implements Database {
       path: APIPath.ipilEntry(),
       queryBuilder: (query) => query.where('userId', isEqualTo: userId),
       builder: (data, documentId) => IpilEntry.fromMap(data, documentId),
-      sort: (lhs, rhs) => (rhs.date).compareTo(lhs.date),
+      sort: (lhs, rhs) => (rhs.lastUpdateDate ?? rhs.date).compareTo(lhs.lastUpdateDate ?? lhs.date),
     );
   }
 
