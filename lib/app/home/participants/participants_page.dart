@@ -121,61 +121,97 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             return ValueListenableBuilder(
               valueListenable: searchText,
               builder: (context, selectedIndex, child) {
-                // Step 3: Query participants by programs with text filter
-                return StreamBuilder<List<UserEnreda>>(
-                  stream: database.filteredParticipantsByProgramsStream(searchText.value, programs),
+                  // Step 3: Query participants by entity
+                  stream: database.filteredParticipantsStream(searchText.value, socialEntityUser.socialEntityId!),
                   builder: (context, userSnapshot) {
                     if(userSnapshot.hasData) {
-                      final textTheme = Theme.of(context).textTheme;
-                      final allParticipants = userSnapshot.data!;
+                      return StreamBuilder(
+                        stream: database.socialEntityStreamById(socialEntityUser.socialEntityId!),
+                        builder: (context, socialEntitySnapshot) {
+                          if (socialEntitySnapshot.hasData) {
+                            final textTheme = Theme.of(context).textTheme;
+                            final users = userSnapshot.data!;
+                            
+                            // "Mis Participantes" are those assigned to this entity and specifically assigned to the logged-in user
+                            final myParticipants = users.where((u) =>
+                                u.assignedEntityId == socialEntityUser.socialEntityId! &&
+                                u.assignedById == socialEntityUser.userId).toList();
+                                
+                            // "Todos los participantes" are the rest of the participants belonging to this entity
+                            final allOtherParticipants = users.where((u) =>
+                                u.assignedEntityId == socialEntityUser.socialEntityId! &&
+                                u.assignedById != socialEntityUser.userId).toList();
 
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
-                                child: FilterTextFieldRow(
-                                  searchTextController: _searchTextController,
-                                  onPressed: () async {
-                                    searchText.value = _searchTextController.text;
-                                  },
-                                  onFieldSubmitted: (value) => _setState(_searchTextController.text),
-                                  clearFilter: () => _clearFilter(),
-                                  hintText: 'Busca por nombre, apellidos, correo electrónico...',
+                            return SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 40),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
+                                      child: FilterTextFieldRow(
+                                        searchTextController: _searchTextController,
+                                        onPressed: () async {
+                                          searchText.value = _searchTextController.text;
+                                        },
+                                        onFieldSubmitted: (value) => _setState(_searchTextController.text),
+                                        clearFilter: () => _clearFilter(),
+                                        hintText: 'Busca por nombre, apellidos, correo electrónico...',
+                                      ),
+                                    ),
+                                    SpaceH12(),
+                                    Text(StringConst.MY_PARTICIPANTS,
+                                      style: textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.turquoiseBlue),),
+                                    SpaceH20(),
+                                    ParticipantsItemBuilder(
+                                        usersList: myParticipants,
+                                        emptyMessage: 'No hay participantes gestionados por ti',
+                                        itemBuilder: (context, user) {
+                                          return ParticipantsListTile(
+                                              user: user,
+                                              socialEntityUserId: socialEntityUser.socialEntityId!,
+                                              onTap: () => setState(() {
+                                                globals.currentParticipant = user;
+                                                ParticipantsListPage.selectedIndex.value = 1;
+                                              })
+                                          );
+                                        }
+                                    ),
+                                    SpaceH40(),
+                                    Text(StringConst.allParticipants(socialEntitySnapshot.data!.name),
+                                      style: textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.turquoiseBlue,),),
+                                    SpaceH20(),
+                                    ParticipantsItemBuilder(
+                                        usersList: allOtherParticipants,
+                                        emptyMessage: 'No hay participantes gestionados por tu entidad',
+                                        itemBuilder: (context, user) {
+                                          return ParticipantsListTile(
+                                              user: user,
+                                              socialEntityUserId: socialEntityUser.socialEntityId!,
+                                              onTap: () => setState(() {
+                                                globals.currentParticipant = user;
+                                                ParticipantsListPage.selectedIndex.value = 1;
+                                              })
+                                          );
+                                        }
+                                    ),
+                                  ],
                                 ),
                               ),
-                              SpaceH12(),
-                              Text('Participantes del programa',
-                                style: textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.turquoiseBlue),),
-                              SpaceH20(),
-                              ParticipantsItemBuilder(
-                                  usersList: allParticipants,
-                                  emptyMessage: 'No hay participantes en los programas asignados',
-                                  itemBuilder: (context, user) {
-                                    return ParticipantsListTile(
-                                        user: user,
-                                        socialEntityUserId: socialEntityUser.socialEntityId!,
-                                        onTap: () => setState(() {
-                                          globals.currentParticipant = user;
-                                          ParticipantsListPage.selectedIndex.value = 1;
-                                        })
-                                    );
-                                  }
-                                  ),
-                            ],
-                          ),
-                        ),
-                      );
+                            );
+                          }
+                          return const Center(child: CircularProgressIndicator());
+                        });
                     }
                     return const Center(child: CircularProgressIndicator());
                   });
-              }
-            );
+              });
+
           }
         );
     });

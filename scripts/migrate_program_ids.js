@@ -19,7 +19,7 @@
 const admin = require('firebase-admin');
 
 // ─── CONFIGURE THIS ────────────────────────────────────────────────────────────
-const SERVICE_ACCOUNT_PATH = './serviceAccount.json'; // path to your service account key
+const SERVICE_ACCOUNT_PATH = './enreda-d3b41-firebase-adminsdk-ndmgv-3833f18c9b.json'; // path to your service account key
 // ───────────────────────────────────────────────────────────────────────────────
 
 const serviceAccount = require(SERVICE_ACCOUNT_PATH);
@@ -112,23 +112,10 @@ async function main() {
     }
 
     // ── Step 4: Match subsidy string to a programId ────────────────────────────
-    let matchedProgramId = null;
-
-    // Try direct match first
-    if (subsidyToId.has(subsidyRaw)) {
-      matchedProgramId = subsidyToId.get(subsidyRaw);
-    } else {
-      // Try partial match — check if the subsidy contains any known code
-      for (const [key, id] of subsidyToId.entries()) {
-        if (subsidyRaw.includes(key) || key.includes(subsidyRaw)) {
-          matchedProgramId = id;
-          break;
-        }
-      }
-    }
+    const matchedProgramId = resolveMatch(subsidyRaw);
 
     if (!matchedProgramId) {
-      console.log(`  NO MATCH [${userId}] — subsidy: "${subsidyRaw.slice(0, 60)}..."`);
+      console.log(`  NO MATCH [${userId}] — subsidy: "${subsidyRaw.slice(0, 80)}"`);
       noMatch++;
       continue;
     }
