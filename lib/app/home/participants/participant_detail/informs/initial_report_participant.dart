@@ -12,6 +12,7 @@ import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/notifier_initi.dart';
+import 'package:enreda_empresas/app/models/program.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +49,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
     ValueNotifier<String>('');
   final ValueNotifier<String> _adminTempNotifier =
     ValueNotifier<String>('');
+  String? _selectedProgramId;
   final ValueNotifier<String> _adminJuridicFigureNotifier =
     ValueNotifier<String>('');
   final ValueNotifier<String> _ownershipTypeNotifier =
@@ -139,6 +141,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
       'mediumTerm': TextEditingController(),
       'longTerm': TextEditingController(),
     };
+    _selectedProgramId = widget.user.programId;
     _dateValues = {
       'arriveDate': null,
       'completedDate': widget.user.startDateItinerary ?? DateTime.now(),
@@ -389,7 +392,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
     //Pre-Selection
     if (_controllers['subsidy']!.text.trim().isEmpty) {
       _controllers['subsidy']!.text = report.subsidy ?? '';
-    } 
+    }
+    if (_selectedProgramId == null && widget.user.programId != null) {
+      _selectedProgramId = widget.user.programId;
+    }
     if (_controllers['techPerson']!.text.trim().isEmpty) {
       _controllers['techPerson']!.text = report.techPerson ?? widget.user.assignedById ?? '';
     } 
@@ -714,28 +720,42 @@ class _InitialReportFormState extends State<InitialReportForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SpaceH20(),
-            _controllers['subsidy']!.text == ''
-                ? CustomDropDownButtonFormFieldTittle(
-                    labelText:
-                        StringConst.INITIAL_SUBSIDY,
-                    source: StringConst.SUBSIDY_SELECTION,
-                    onChanged: _finished
-                        ? null
-                        : (value) {
-                            _controllers['subsidy']!.text = value!;
-                          },
-                  )
-                : CustomDropDownButtonFormFieldTittle(
-                    labelText:
-                      StringConst.INITIAL_SUBSIDY,
-                    source: StringConst.SUBSIDY_SELECTION,
-                    value: _controllers['subsidy']!.text,
-                    onChanged: _finished
-                        ? null
-                        : (value) {
-                            _controllers['subsidy']!.text = value!;
-                          },
-                  ),
+            StreamBuilder<List<Program>>(
+              stream: database.programsStream(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const SizedBox.shrink();
+                }
+                final programs = snapshot.data!;
+                final items = programs.map((program) {
+                  final display = '${program.code} - ${program.name}';
+                  return DropdownMenuItem<String>(
+                    value: program.programId,
+                    child: Text(display),
+                  );
+                }).toList();
+
+                return CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.INITIAL_SUBSIDY,
+                  source: items,
+                  value: _selectedProgramId,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                          setState(() {
+                            _selectedProgramId = value;
+                            // Also store the human-readable name for the report's subsidy field
+                            final selected = programs.firstWhere(
+                              (p) => p.programId == value,
+                              orElse: () => programs.first,
+                            );
+                            _controllers['subsidy']!.text =
+                                '${selected.code} - ${selected.name}';
+                          });
+                        },
+                );
+              },
+            ),
             SpaceH12(),
             CustomFlexRowColumn(
               childRight: StreamBuilder<UserEnreda>(
@@ -2150,6 +2170,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                               setState(() {
                                 widget.user.startDateItinerary = _dateValues['completedDate'];
                                 widget.user.initialReportId = initialReportSaved.initialReportId;
+                                widget.user.programId = _selectedProgramId;
                               });
                               database.setUserEnreda(widget.user);
                               database.setInitialReport(InitialReport(
@@ -2444,6 +2465,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                           setState(() {
                                             widget.user.startDateItinerary = _dateValues['completedDate'];
                                             widget.user.initialReportId = initialReportSaved.initialReportId;
+                                            widget.user.programId = _selectedProgramId;
                                           });
                                           database.setUserEnreda(widget.user);
                                           database.setInitialReport(InitialReport(

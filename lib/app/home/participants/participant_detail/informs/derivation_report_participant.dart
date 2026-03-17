@@ -12,6 +12,7 @@ import 'package:enreda_empresas/app/models/languageReport.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/notifier_initi.dart';
+import 'package:enreda_empresas/app/models/program.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -1311,31 +1312,36 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SpaceH20(),
-            _controllers['subsidy']!.text == ''
-                ? CustomDropDownButtonFormFieldTittle(
-              labelText: StringConst.INITIAL_SUBSIDY,
-              source: StringConst.SUBSIDY_SELECTION,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _controllers['subsidy']!.text = value!;
+            StreamBuilder<List<Program>>(
+              stream: database.programsStream(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const SizedBox.shrink();
+                }
+                final programs = snapshot.data!;
+                final items = programs.map((program) {
+                  final display = '${program.code} - ${program.name}';
+                  return DropdownMenuItem<String>(
+                    value: program.programId,
+                    child: Text(display),
+                  );
+                }).toList();
+
+                return CustomDropDownButtonFormFieldTittle(
+                  labelText: StringConst.INITIAL_SUBSIDY,
+                  source: items,
+                  value: _controllers['subsidy']!.text.isNotEmpty
+                      ? _controllers['subsidy']!.text
+                      : null,
+                  onChanged: _finished
+                      ? null
+                      : (value) {
+                    setState(() {
+                      _controllers['subsidy']!.text = value!;
+                    });
+                  },
+                );
               },
-              // validator: (value) =>
-              // value != null ? null : StringConst.FORM_GENERIC_ERROR,
-            )
-                : CustomDropDownButtonFormFieldTittle(
-              labelText:
-              StringConst.INITIAL_SUBSIDY,
-              source: StringConst.SUBSIDY_SELECTION,
-              value: _controllers['subsidy']!.text,
-              onChanged: _finished
-                  ? null
-                  : (value) {
-                _controllers['subsidy']!.text = value!;
-              },
-              // validator: (value) => (value!.isNotEmpty || value != '')
-              //     ? null
-              //     : StringConst.FORM_GENERIC_ERROR,
             ),
             SpaceH12(),
             CustomTextFormFieldTitle(

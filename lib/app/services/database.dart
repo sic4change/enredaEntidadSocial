@@ -63,6 +63,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models/documentCategory.dart';
 import '../models/externalSocialEntity.dart';
+import 'package:enreda_empresas/app/models/program.dart';
 import '../models/filterResource.dart';
 import '../models/ipilCoordination.dart';
 import '../models/ipilImprovementEmployment.dart';
@@ -79,6 +80,7 @@ abstract class Database {
      Stream<List<Resource>> filteredMyResourcesStream(String socialEntityId, String searchText);
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
      Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId);
+     Stream<List<UserEnreda>> getParticipantsByProgramsStream(List<String> programs);
      Stream<List<SocialEntity>> socialEntitiesStream();
      Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter, String socialEntityId);
      Stream<List<SocialEntity>> socialEntityByIdStream(String socialEntityId);
@@ -136,6 +138,7 @@ abstract class Database {
      Stream<List<DocumentationParticipant>> documentationParticipantBySubCategoryStream(PersonalDocumentType documentSubCategory, UserEnreda user);
      Stream<DocumentationParticipant> documentationParticipantStream(String documentId);
      Stream<List<UserEnreda>> filteredParticipantsStream(String filter, String socialEntityId);
+     Stream<List<UserEnreda>> filteredParticipantsByProgramsStream(String filter, List<String> programs);
 
 
      Future<void> setUserEnreda(UserEnreda userEnreda);
@@ -157,6 +160,7 @@ abstract class Database {
      Future<void> addUnemployedUser(UnemployedUser unemployedUser);
      Stream<List<Dedication>> dedicationStream();
      Stream<List<Gender>> genderStream();
+     Stream<List<Program>> programsStream();
      Stream<List<TimeSpentWeekly>> timeSpentWeeklyStream();
      Stream<List<TimeSearching>> timeSearchingStream();
      Stream<List<IpilEntry>> getIpilEntriesByUserStream(String userId);
@@ -602,6 +606,19 @@ class FirestoreDatabase implements Database {
   }
 
   @override
+  Stream<List<UserEnreda>> getParticipantsByProgramsStream(List<String> programs) {
+    if (programs.isEmpty) {
+      return Stream.value([]);
+    }
+    return _service.collectionStream<UserEnreda>(
+      path: APIPath.users(),
+      queryBuilder: (query) => query.where('programId', whereIn: programs.take(10).toList()),
+      builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+      sort: (lhs, rhs) => (lhs.firstName??"").compareTo(rhs.firstName??""),
+    );
+  }
+
+  @override
   Stream<List<UserEnreda>> participantsByResourceStream(String? resourceId) {
     return _service.collectionStream<UserEnreda>(
       path: APIPath.users(),
@@ -1005,6 +1022,12 @@ class FirestoreDatabase implements Database {
     queryBuilder: (query) => query.where('name', isNotEqualTo: null),
     builder: (data, documentId) => Gender.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
+
+  @override
+  Stream<List<Program>> programsStream() => _service.collectionStream(
+    path: APIPath.programs(),
+    builder: (data, documentId) => Program.fromMap(data, documentId),
   );
 
   @override
@@ -1749,6 +1772,44 @@ class FirestoreDatabase implements Database {
           });
         }
         return textFilterSelection || tagsFilterSelection ? UserEnreda.fromMap(data, documentId) : null;
+      },
+      sort: (rhs, lhs) => lhs.firstName!.compareTo(rhs.firstName!),
+    );
+  }
+  @override
+  Stream<List<UserEnreda>> filteredParticipantsByProgramsStream(String filter, List<String> programs) {
+    if (programs.isEmpty) {
+      return Stream.value([]);
+    }
+    return _service.filteredCollectionStream(
+      path: APIPath.users(),
+      queryBuilder: (query) {
+        query = query.where('programId', whereIn: programs.take(10).toList());
+        return query;
+      },
+      builder: (data, documentId) {
+        final firstName = data['firstName'] ?? '';
+        final lastName = data['lastName'] ?? '';
+        final email = data['email'] ?? '';
+        final searchTextChallenge = removeDiacritics((firstName + ';' + lastName + ';' + email).toLowerCase());
+        final searchListPost = searchTextChallenge.split(';');
+        final searchTextFilter = removeDiacritics(filter.toLowerCase());
+        final searchListFilter = searchTextFilter.split(' ');
+
+        if (filter == '')
+          return UserEnreda.fromMap(data, documentId);
+
+        bool textFilterSelection = false;
+
+        if (filter != '') {
+          searchListFilter.forEach((filterElement) {
+            if (searchListPost.any(
+                    (resourceElement) => resourceElement.contains(filterElement))) {
+              textFilterSelection = textFilterSelection || true;
+            }
+          });
+        }
+        return textFilterSelection ? UserEnreda.fromMap(data, documentId) : null;
       },
       sort: (rhs, lhs) => lhs.firstName!.compareTo(rhs.firstName!),
     );

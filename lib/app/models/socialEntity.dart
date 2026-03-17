@@ -24,6 +24,7 @@ class SocialEntity {
     this.size,
     this.photo,
     this.types,
+    this.programs,
     this.actionScope,
     this.category,
     this.subCategory,
@@ -66,6 +67,7 @@ class SocialEntity {
   final SizeOrg? size;
   final String? photo;
   final List<String>? types;
+  final List<String>? programs;
   //New fields
   final String? actionScope;
   final String? category;
@@ -124,6 +126,11 @@ class SocialEntity {
       data['types'].forEach((type) {types.add(type.toString());});
     }
 
+    final List<String> programs = [];
+    if (data['programs'] != null) {
+      data['programs'].forEach((program) {programs.add(program.toString());});
+    }
+
     final String actionScope = data['actionScope'] ?? '';
     final String category = data['category'] ?? '';
     final String subCategory = data['subCategory'] ?? '';
@@ -158,6 +165,7 @@ class SocialEntity {
         website: website,
         photo: photo,
         types: types,
+        programs: programs,
         actionScope: actionScope,
         category: category,
         subCategory: subCategory,
@@ -195,6 +203,7 @@ class SocialEntity {
       'address': address?.toMap(),
       'website': website,
       'types': types,
+      'programs': programs,
       'actionScope': actionScope,
       'category' : category,
       'subCategory': subCategory,
@@ -230,6 +239,7 @@ class SocialEntity {
     Address? address,
     String? website,
     List<String>? types,
+    List<String>? programs,
     String? actionScope,
     String? category,
     String? subCategory,
@@ -265,6 +275,7 @@ class SocialEntity {
         address: address ?? this.address,
         website: website ?? this.website,
         types: types ?? this.types,
+        programs: programs ?? this.programs,
         actionScope: actionScope ?? this.actionScope,
         category: category ?? this.category,
         subCategory: subCategory ?? this.subCategory,

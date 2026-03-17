@@ -99,4 +99,5 @@ class APIPath {
   static String ipilResults() => 'ipilResults';
   static String ipilObjectives() => 'ipilObjectives';
   static String ipilObjective(String ipilObjectivesId) => 'ipilObjectives/$ipilObjectivesId';
+  static String programs() => 'programs';
 }

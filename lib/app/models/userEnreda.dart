@@ -53,6 +53,7 @@ class UserEnreda {
     this.nationality,
     this.ipilObjectivesId,
     this.startDateItinerary,
+    this.programId,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -223,6 +224,7 @@ class UserEnreda {
     final String? derivationReportId = data['derivationReportId'];
     final String? nationality = data['nationality'] ?? '';
     final String? ipilObjectivesId = data['ipilObjectivesId'];
+    final String? programId = data['programId'];
 
     return UserEnreda(
       email: email,
@@ -269,7 +271,8 @@ class UserEnreda {
       derivationReportId: derivationReportId,
       nationality: nationality,
       ipilObjectivesId: ipilObjectivesId,
-      startDateItinerary: startDateItinerary
+      startDateItinerary: startDateItinerary,
+      programId: programId,
     );
   }
 
@@ -318,6 +321,7 @@ class UserEnreda {
   final String? nationality;
   final String? ipilObjectivesId;
   DateTime? startDateItinerary;
+  late String? programId;
 
   @override
   bool operator ==(Object other){
@@ -368,7 +372,8 @@ class UserEnreda {
       'derivationReportId': derivationReportId,
       'nationality' : nationality,
       'ipilObjectivesId': ipilObjectivesId,
-      'startDateItinerary': startDateItinerary
+      'startDateItinerary': startDateItinerary,
+      'programId': programId,
     };
   }
 
@@ -419,7 +424,8 @@ class UserEnreda {
     String? derivationReportId,
     String? nationality,
     String? ipilObjectivesId,
-    DateTime? startDateItinerary
+    DateTime? startDateItinerary,
+    String? programId,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -464,7 +470,8 @@ class UserEnreda {
       derivationReportId: derivationReportId ?? this.derivationReportId,
       nationality: nationality ?? this.nationality,
       ipilObjectivesId: ipilObjectivesId ?? this.ipilObjectivesId,
-      startDateItinerary: startDateItinerary ?? this.startDateItinerary
+      startDateItinerary: startDateItinerary ?? this.startDateItinerary,
+      programId: programId ?? this.programId,
     );
   }
 

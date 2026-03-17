@@ -107,26 +107,27 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         }
         globals.currentSocialEntityUser = snapshot.data!;
         socialEntityUser = snapshot.data!;
-        return ValueListenableBuilder(
-          valueListenable: searchText,
-          builder: (context, selectedIndex, child) {
-            return StreamBuilder<List<UserEnreda>>(
-            stream: database.filteredParticipantsStream(searchText.value, socialEntityUser.socialEntityId!),
-            builder: (context, userSnapshot) {
-              if(userSnapshot.hasData) {
-                return StreamBuilder(
-                  stream: database.socialEntityStreamById(socialEntityUser.socialEntityId!),
-                  builder: (context, socialEntitySnapshot) {
-                    if (socialEntitySnapshot.hasData) {
+
+        // Step 2: Load the SocialEntity to get its programs
+        return StreamBuilder<SocialEntity>(
+          stream: database.socialEntityStream(socialEntityUser.socialEntityId),
+          builder: (context, entitySnapshot) {
+            if (!entitySnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final socialEntity = entitySnapshot.data!;
+            final programs = socialEntity.programs ?? [];
+
+            return ValueListenableBuilder(
+              valueListenable: searchText,
+              builder: (context, selectedIndex, child) {
+                // Step 3: Query participants by programs with text filter
+                return StreamBuilder<List<UserEnreda>>(
+                  stream: database.filteredParticipantsByProgramsStream(searchText.value, programs),
+                  builder: (context, userSnapshot) {
+                    if(userSnapshot.hasData) {
                       final textTheme = Theme.of(context).textTheme;
-                      final users = userSnapshot.data!;
-                      final myParticipants =
-                      users.where((u) =>
-                      u.assignedEntityId == socialEntityUser.socialEntityId!
-                          && u.assignedById == socialEntityUser.userId).toList();
-                      final allOtherParticipants = users.where((u) =>
-                      u.assignedEntityId == socialEntityUser.socialEntityId!
-                          && u.assignedById != socialEntityUser.userId).toList();
+                      final allParticipants = userSnapshot.data!;
 
                       return SingleChildScrollView(
                         child: Padding(
@@ -147,34 +148,14 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                                 ),
                               ),
                               SpaceH12(),
-                              Text(StringConst.MY_PARTICIPANTS,
+                              Text('Participantes del programa',
                                 style: textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.turquoiseBlue),),
                               SpaceH20(),
                               ParticipantsItemBuilder(
-                                  usersList: myParticipants,
-                                  emptyMessage: 'No hay participantes gestionados por ti',
-                                  itemBuilder: (context, user) {
-                                    return ParticipantsListTile(
-                                        user: user,
-                                        socialEntityUserId: socialEntityUser.socialEntityId!,
-                                        onTap: () => setState(() {
-                                          globals.currentParticipant = user;
-                                          ParticipantsListPage.selectedIndex.value = 1;
-                                        })
-                                    );
-                                  }
-                                  ),
-                              SpaceH40(),
-                              Text(StringConst.allParticipants(socialEntitySnapshot.data!.name),
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.turquoiseBlue,),),
-                              SpaceH20(),
-                              ParticipantsItemBuilder(
-                                  usersList: allOtherParticipants,
-                                  emptyMessage: 'No hay participantes gestionados por tu entidad',
+                                  usersList: allParticipants,
+                                  emptyMessage: 'No hay participantes en los programas asignados',
                                   itemBuilder: (context, user) {
                                     return ParticipantsListTile(
                                         user: user,
@@ -192,11 +173,9 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                       );
                     }
                     return const Center(child: CircularProgressIndicator());
-                  }
-                );
+                  });
               }
-              return const Center(child: CircularProgressIndicator());
-          });
+            );
           }
         );
     });

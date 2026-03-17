@@ -5,6 +5,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
+import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -44,6 +45,7 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
         children: [
           CustomTextBoldTitle(title: StringConst.MY_PARTICIPANTS),
           SpaceH4(),
+          // Step 1: Load the logged-in collaborator's UserEnreda doc
           StreamBuilder<UserEnreda>(
               stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
               builder: (context, snapshot) {
@@ -55,82 +57,94 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
                   UserEnreda socialEntityUser = snapshot.data!;
                   final controller = ScrollController();
                   var scrollJump = Responsive.isDesktopS(context) ? 350 : 410;
-                  return StreamBuilder<List<UserEnreda>>(
-                    stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
-                    builder: (context, userSnapshot) {
-                      if(userSnapshot.hasData) {
-                        final participants = userSnapshot.data!;
-                        final myParticipants = participants.where((user) =>
-                        user.assignedEntityId == socialEntityUser.socialEntityId!
-                            && user.assignedById == socialEntityUser.userId).toList();
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 382,
-                              color: Colors.white,
-                              child: ScrollConfiguration(
-                                behavior: MyCustomScrollBehavior(),
-                                child: ListView(
-                                  controller: controller,
-                                  scrollDirection: Axis.horizontal,
-                                  children: myParticipants.map((user) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: ParticipantsListTile(
-                                          user: user,
-                                          socialEntityUserId: socialEntityUser.socialEntityId!,
-                                          onTap: () => setState(() {
-                                            globals.currentParticipant = user;
-                                            WebHome.goToParticipants();
-                                            ParticipantsListPage.selectedIndex.value = 1;
-                                          })
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+
+                  // Step 2: Load the SocialEntity to retrieve the entity's programs list
+                  return StreamBuilder<SocialEntity>(
+                    stream: database.socialEntityStream(socialEntityUser.socialEntityId),
+                    builder: (context, entitySnapshot) {
+                      if (!entitySnapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final socialEntity = entitySnapshot.data!;
+                      final programs = socialEntity.programs ?? [];
+
+                      // Step 3: Query participants whose programId matches one of the entity's programs
+                      return StreamBuilder<List<UserEnreda>>(
+                        stream: database.getParticipantsByProgramsStream(programs),
+                        builder: (context, userSnapshot) {
+                          if(userSnapshot.hasData) {
+                            final participants = userSnapshot.data!;
+                            final myParticipants = participants.toList();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                InkWell(
-                                  onTap: () {
-                                    if (controller.position.pixels >=
-                                        controller.position.minScrollExtent)
-                                      controller.animateTo(
-                                          controller.position.pixels - scrollJump,
-                                          duration: Duration(milliseconds: 500),
-                                          curve: Curves.ease);
-                                  },
-                                  child: Image.asset(
-                                    ImagePath.ARROW_BACK,
-                                    width: 36.0,
+                                Container(
+                                  height: 382,
+                                  color: Colors.white,
+                                  child: ScrollConfiguration(
+                                    behavior: MyCustomScrollBehavior(),
+                                    child: ListView(
+                                      controller: controller,
+                                      scrollDirection: Axis.horizontal,
+                                      children: myParticipants.map((user) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ParticipantsListTile(
+                                              user: user,
+                                              socialEntityUserId: socialEntityUser.socialEntityId!,
+                                              onTap: () => setState(() {
+                                                globals.currentParticipant = user;
+                                                WebHome.goToParticipants();
+                                                ParticipantsListPage.selectedIndex.value = 1;
+                                              })
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
-                                SpaceW12(),
-                                InkWell(
-                                  onTap: () {
-                                    if (controller.position.pixels <=
-                                        controller.position.maxScrollExtent)
-                                      controller.animateTo(
-                                          controller.position.pixels + scrollJump,
-                                          duration: Duration(milliseconds: 500),
-                                          curve: Curves.ease);
-                                  },
-                                  child: Image.asset(
-                                    ImagePath.ARROW_FORWARD,
-                                    width: 36.0,
-                                  ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        if (controller.position.pixels >=
+                                            controller.position.minScrollExtent)
+                                          controller.animateTo(
+                                              controller.position.pixels - scrollJump,
+                                              duration: Duration(milliseconds: 500),
+                                              curve: Curves.ease);
+                                      },
+                                      child: Image.asset(
+                                        ImagePath.ARROW_BACK,
+                                        width: 36.0,
+                                      ),
+                                    ),
+                                    SpaceW12(),
+                                    InkWell(
+                                      onTap: () {
+                                        if (controller.position.pixels <=
+                                            controller.position.maxScrollExtent)
+                                          controller.animateTo(
+                                              controller.position.pixels + scrollJump,
+                                              duration: Duration(milliseconds: 500),
+                                              curve: Curves.ease);
+                                      },
+                                      child: Image.asset(
+                                        ImagePath.ARROW_FORWARD,
+                                        width: 36.0,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ),
-                          ],
-                        );
-                      } else {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                    });
+                            );
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        });
+                    }
+                  );
                 }
                 return const Center(child: CircularProgressIndicator());
               }),
