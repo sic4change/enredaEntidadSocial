@@ -44,6 +44,11 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
   String? techNameComplete;
 
+  Database? _db;
+  Stream<UserEnreda>? _participantStream;
+  Stream<UserEnreda>? _assignedStream;
+  String? _cachedAssignedId;
+
   @override
   void initState() {
     _value = _menuOptions[0];
@@ -52,19 +57,32 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_db == null) {
+      _db = Provider.of<Database>(context, listen: false);
+      _participantStream = _db!.userEnredaStreamByUserId(participantUser.userId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     if (_currentPage == null) {
       _currentPage =  ParticipantControlPanelPage(participantUser: participantUser);
     }
-    final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<UserEnreda>(
-      stream: database.userEnredaStreamByUserId(participantUser.userId),
+      stream: _participantStream,
       builder: (context, participantSnapshot) {
         UserEnreda currentUser = participantSnapshot.data ?? participantUser;
+
+        if (_cachedAssignedId != currentUser.assignedById) {
+          _cachedAssignedId = currentUser.assignedById;
+          _assignedStream = _cachedAssignedId == null ? null : _db!.userEnredaStreamByUserId(_cachedAssignedId!);
+        }
+
         return StreamBuilder<UserEnreda>(
-          stream: database.userEnredaStreamByUserId(currentUser.assignedById),
+          stream: _assignedStream,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               String techName = snapshot.data?.firstName ?? '';
@@ -285,20 +303,12 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                         children: [
                           CustomTextSmallColor(text: 'Estado de itinerario:', color: AppColors.primary900, height: 0.5,),
                           SpaceW8(),
-                          StreamBuilder<UserEnreda>(
-                            stream: database.userEnredaStreamByUserId(participantUser.userId),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return CustomTextSmallBold(
-                                  title: 'No iniciado',
-                                  color: AppColors.primary900,
-                                  height: 0.5,
-                                );
-                              }
-                              DateTime? startDateItinerary = snapshot.data?.startDateItinerary;
+                          Builder(
+                            builder: (context) {
+                              DateTime? startDateItinerary = user.startDateItinerary;
                               if (startDateItinerary != null) {
                                 return StreamBuilder(
-                                  stream: database.closureReportsStreamByUserId(participantUser.userId),
+                                  stream: Provider.of<Database>(context, listen: false).closureReportsStreamByUserId(user.userId),
                                   builder: (context, snapshotClosure){
                                         if(snapshotClosure.hasData){
                                           if(snapshotClosure.data!.completedDate != null && snapshotClosure.data!.finished == true){
@@ -340,10 +350,14 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                     ],
                   ),
                   SpaceH20(),
-                  Row(
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const Icon(
                             Icons.mail,
@@ -355,8 +369,10 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                         ],
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             const Icon(
                               Icons.phone,
@@ -369,8 +385,10 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(right: 30),
+                        padding: const EdgeInsets.only(right: 10),
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             const Icon(
                               Icons.assignment_ind,

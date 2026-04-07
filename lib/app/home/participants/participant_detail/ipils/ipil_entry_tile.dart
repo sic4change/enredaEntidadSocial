@@ -46,37 +46,67 @@ class IpilEntryTile extends StatelessWidget {
         SizedBox(height: 20,),
         Flex(
           direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomTextBold(title: StringConst.DATE, color: AppColors.primary900),
-                Container(
-                  padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.greyTxtAlt.withOpacity(0.5), width: 1),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: CustomTextSmall(text: dateEntry)),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomTextBold(title: StringConst.DATE, color: AppColors.primary900),
+                    Container(
+                      padding: EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.greyTxtAlt.withOpacity(0.5), width: 1),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: CustomTextSmall(text: dateEntry)),
+                  ],
+                ),
+                SizedBox(width: 20, height: 10,),
+                techNameComplete == null ? Container() : Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomTextBold(title: StringConst.TECHNICAL_NAME, color: AppColors.primary900),
+                    Container(
+                        padding: EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.greyTxtAlt.withOpacity(0.5), width: 1),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: CustomTextSmall(text: techNameComplete!)),
+                  ],
+                ),
               ],
             ),
-            SizedBox(width: 20, height: 10,),
-            techNameComplete == null ? Container() : Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomTextBold(title: StringConst.TECHNICAL_NAME, color: AppColors.primary900),
-                Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.greyTxtAlt.withOpacity(0.5), width: 1),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: CustomTextSmall(text: techNameComplete!)),
-              ],
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () async {
+                bool? confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Eliminar IPIL'),
+                    content: Text('¿Seguro que quieres eliminar esta entrada de IPIL?, No podras recuperarla'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text('Eliminar', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await database.deleteIpilEntry(ipilEntry);
+                }
+              },
             ),
           ],
         ),

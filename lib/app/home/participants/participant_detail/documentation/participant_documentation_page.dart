@@ -21,11 +21,30 @@ class ParticipantDocumentationPage extends StatefulWidget {
 }
 
 class _ParticipantDocumentationPageState extends State<ParticipantDocumentationPage> {
+  Stream<UserEnreda>? _userStream;
+  Stream<List<DocumentCategory>>? _documentCategoriesStream;
+  Database? _db;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_db == null) {
+      _db = Provider.of<Database>(context, listen: false);
+      _userStream = _db!.userEnredaStreamByUserId(widget.participantUser.userId);
+      _documentCategoriesStream = _db!.documentCategoriesStream();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
+    if (widget.participantUser.userId == null || widget.participantUser.userId!.isEmpty) {
+      return Center(
+        child: Text('El usuario no tiene una identificación válida.'),
+      );
+    }
+    
     return StreamBuilder<UserEnreda>(
-        stream: database.userEnredaStreamByUserId(widget.participantUser.userId),
+        stream: _userStream,
         builder: (context, snapshot) {
             return Container(
                 decoration: BoxDecoration(
@@ -95,9 +114,8 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
   }
 
   Widget documentCategoriesList(UserEnreda participantUser) {
-    final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<List<DocumentCategory>>(
-      stream: database.documentCategoriesStream(),
+      stream: _documentCategoriesStream,
       builder: (context, documentCategoriesSnapshot) {
         if (!documentCategoriesSnapshot.hasData) return Container();
         return ListItemBuilder<DocumentCategory>(
