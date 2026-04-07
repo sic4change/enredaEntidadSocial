@@ -95,6 +95,9 @@ class _WebHomeState extends State<WebHome> {
                   return StreamBuilder<UserEnreda>(
                       stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
                       builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return _buildErrorPage(context, snapshot.error.toString());
+                        }
                         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                         if (snapshot.hasData){
                           var user = snapshot.data!;
@@ -104,9 +107,15 @@ class _WebHomeState extends State<WebHome> {
                             _unemployedSignOut(context);
                             return Container();
                           }
+                          if (user.socialEntityId == null || user.socialEntityId!.isEmpty) {
+                            return _buildErrorPage(context, "No se ha encontrado una entidad asociada a tu usuario.");
+                          }
                           return StreamBuilder<SocialEntity>(
                               stream: database.socialEntityStreamById(user.socialEntityId!),
                               builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return _buildErrorPage(context, snapshot.error.toString());
+                                }
                                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                                 if (snapshot.hasData) {
                                   var socialEntity = snapshot.data!;
@@ -239,6 +248,42 @@ class _WebHomeState extends State<WebHome> {
       await auth.signOut();
       GoRouter.of(context).go(StringConst.PATH_HOME);
     }
+  }
+
+  Widget _buildErrorPage(BuildContext context, String error) {
+    final auth = Provider.of<AuthBase>(context, listen: false);
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 60),
+              const SpaceH20(),
+              const Text(
+                'Ha ocurrido un error al cargar tus datos',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SpaceH12(),
+              Text(
+                error,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SpaceH20(),
+              EnredaButton(
+                buttonTitle: 'Cerrar sesión',
+                onPressed: () async {
+                  await auth.signOut();
+                  GoRouter.of(context).go(StringConst.PATH_HOME);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

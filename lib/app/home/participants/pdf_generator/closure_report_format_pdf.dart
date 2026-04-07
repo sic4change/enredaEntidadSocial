@@ -36,7 +36,7 @@ Future<Uint8List> generateClosureReportFile(
       right: 2.0 * PdfPageFormat.cm,
       bottom: 0);
 
-  final int isMdm = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == closureReport.subsidy);
+  final int isMdm = StringConst.getSubsidyIndex(closureReport.subsidy);
 
   final pageTheme = await MyPageTheme(format, isMdm);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');

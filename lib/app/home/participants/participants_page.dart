@@ -115,107 +115,144 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             if (!entitySnapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
-            final socialEntity = entitySnapshot.data!;
-            final programs = socialEntity.programs ?? [];
 
-            return ValueListenableBuilder(
+            return ValueListenableBuilder<String>(
               valueListenable: searchText,
-              builder: (context, selectedIndex, child) {
-                  // Step 3: Query participants by entity
-                  stream: database.filteredParticipantsStream(searchText.value, socialEntityUser.socialEntityId!),
-                  builder: (context, userSnapshot) {
-                    if(userSnapshot.hasData) {
-                      return StreamBuilder(
-                        stream: database.socialEntityStreamById(socialEntityUser.socialEntityId!),
-                        builder: (context, socialEntitySnapshot) {
-                          if (socialEntitySnapshot.hasData) {
-                            final textTheme = Theme.of(context).textTheme;
-                            final users = userSnapshot.data!;
-                            
-                            // "Mis Participantes" are those assigned to this entity and specifically assigned to the logged-in user
-                            final myParticipants = users.where((u) =>
-                                u.assignedEntityId == socialEntityUser.socialEntityId! &&
-                                u.assignedById == socialEntityUser.userId).toList();
-                                
-                            // "Todos los participantes" are the rest of the participants belonging to this entity
-                            final allOtherParticipants = users.where((u) =>
-                                u.assignedEntityId == socialEntityUser.socialEntityId! &&
-                                u.assignedById != socialEntityUser.userId).toList();
+              builder: (context, selectedSearchValue, child) {
+                // Step 3: Query participants by entity
+                return StreamBuilder<List<UserEnreda>>(
+                  stream: database.filteredParticipantsStream(
+                      selectedSearchValue, socialEntityUser.socialEntityId!),
+                  builder: (context, assignedSnapshot) {
+                    return StreamBuilder<List<UserEnreda>>(
+                      stream: database.filteredParticipantsByProgramsStream(
+                          selectedSearchValue, entitySnapshot.data!.programs ?? []),
+                      builder: (context, programSnapshot) {
+                        if (assignedSnapshot.hasData || programSnapshot.hasData) {
+                          final textTheme = Theme.of(context).textTheme;
+                          final assignedUsers = assignedSnapshot.data ?? [];
+                          final programUsers = programSnapshot.data ?? [];
+
+                          // Merge and deduplicate by userId
+                          final Map<String, UserEnreda> allUsersMap = {};
+                          for (var u in assignedUsers) {
+                            if (u.userId != null) allUsersMap[u.userId!] = u;
+                          }
+                          for (var u in programUsers) {
+                            if (u.userId != null) allUsersMap[u.userId!] = u;
+                          }
+
+                          final users = allUsersMap.values.toList();
+                          users.sort((rhs, lhs) => lhs.firstName!.compareTo(rhs.firstName!));
+
+                          // "Mis Participantes" are those assigned to this entity and specifically assigned to the logged-in user
+                          final myParticipants = users
+                              .where((u) =>
+                                  u.assignedEntityId ==
+                                      socialEntityUser.socialEntityId! &&
+                                  u.assignedById == socialEntityUser.userId)
+                              .toList();
+
+                          // "Todos los participantes" are the rest
+                          final allOtherParticipants = users
+                              .where((u) => !myParticipants.contains(u))
+                              .toList();
 
                             return SingleChildScrollView(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 40),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 40),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Padding(
-                                      padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
+                                      padding: Responsive.isMobile(context)
+                                          ? EdgeInsets.all(Sizes.mainPadding)
+                                          : const EdgeInsets.all(8.0),
                                       child: FilterTextFieldRow(
-                                        searchTextController: _searchTextController,
+                                        searchTextController:
+                                            _searchTextController,
                                         onPressed: () async {
-                                          searchText.value = _searchTextController.text;
+                                          searchText.value =
+                                              _searchTextController.text;
                                         },
-                                        onFieldSubmitted: (value) => _setState(_searchTextController.text),
+                                        onFieldSubmitted: (value) => _setState(
+                                            _searchTextController.text),
                                         clearFilter: () => _clearFilter(),
-                                        hintText: 'Busca por nombre, apellidos, correo electrónico...',
+                                        hintText:
+                                            'Busca por nombre, apellidos, correo electrónico...',
                                       ),
                                     ),
                                     SpaceH12(),
-                                    Text(StringConst.MY_PARTICIPANTS,
+                                    Text(
+                                      StringConst.MY_PARTICIPANTS,
                                       style: textTheme.titleLarge?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color: AppColors.turquoiseBlue),),
+                                          color: AppColors.turquoiseBlue),
+                                    ),
                                     SpaceH20(),
                                     ParticipantsItemBuilder(
                                         usersList: myParticipants,
-                                        emptyMessage: 'No hay participantes gestionados por ti',
+                                        emptyMessage:
+                                            'No hay participantes gestionados por ti',
                                         itemBuilder: (context, user) {
                                           return ParticipantsListTile(
                                               user: user,
-                                              socialEntityUserId: socialEntityUser.socialEntityId!,
+                                              socialEntityUserId:
+                                                  socialEntityUser
+                                                      .socialEntityId!,
                                               onTap: () => setState(() {
-                                                globals.currentParticipant = user;
-                                                ParticipantsListPage.selectedIndex.value = 1;
-                                              })
-                                          );
-                                        }
-                                    ),
+                                                    globals.currentParticipant =
+                                                        user;
+                                                    ParticipantsListPage
+                                                        .selectedIndex.value = 1;
+                                                  }));
+                                        }),
                                     SpaceH40(),
-                                    Text(StringConst.allParticipants(socialEntitySnapshot.data!.name),
+                                    Text(
+                                      StringConst.allParticipants(
+                                          entitySnapshot.data!.name),
                                       style: textTheme.titleLarge?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.turquoiseBlue,),),
+                                        color: AppColors.turquoiseBlue,
+                                      ),
+                                    ),
                                     SpaceH20(),
                                     ParticipantsItemBuilder(
                                         usersList: allOtherParticipants,
-                                        emptyMessage: 'No hay participantes gestionados por tu entidad',
+                                        emptyMessage:
+                                            'No hay participantes gestionados por tu entidad',
                                         itemBuilder: (context, user) {
                                           return ParticipantsListTile(
                                               user: user,
-                                              socialEntityUserId: socialEntityUser.socialEntityId!,
+                                              socialEntityUserId:
+                                                  socialEntityUser
+                                                      .socialEntityId!,
                                               onTap: () => setState(() {
-                                                globals.currentParticipant = user;
-                                                ParticipantsListPage.selectedIndex.value = 1;
-                                              })
-                                          );
-                                        }
-                                    ),
+                                                    globals.currentParticipant =
+                                                        user;
+                                                    ParticipantsListPage
+                                                        .selectedIndex.value = 1;
+                                                  }));
+                                        }),
                                   ],
                                 ),
                               ),
                             );
-                          }
-                          return const Center(child: CircularProgressIndicator());
-                        });
-                    }
-                    return const Center(child: CircularProgressIndicator());
-                  });
-              });
-
-          }
+                        }
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
         );
-    });
+      },
+    );
   }
+
 
   void _clearFilter() {
     setStateIfMounted(() {

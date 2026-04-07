@@ -68,12 +68,28 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
                       final socialEntity = entitySnapshot.data!;
                       final programs = socialEntity.programs ?? [];
 
-                      // Step 3: Query participants whose programId matches one of the entity's programs
+                      // Step 3: Query participants from both sources (assigned and shared programs)
                       return StreamBuilder<List<UserEnreda>>(
                         stream: database.getParticipantsByProgramsStream(programs),
-                        builder: (context, userSnapshot) {
-                          if(userSnapshot.hasData) {
-                            final participants = userSnapshot.data!;
+                        builder: (context, programSnapshot) {
+                          return StreamBuilder<List<UserEnreda>>(
+                            stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
+                            builder: (context, assignedSnapshot) {
+                              if (programSnapshot.hasData || assignedSnapshot.hasData) {
+                                final programUsers = programSnapshot.data ?? [];
+                                final assignedUsers = assignedSnapshot.data ?? [];
+
+                                // Merge and deduplicate
+                                final Map<String, UserEnreda> allUsersMap = {};
+                                for (var u in assignedUsers) {
+                                  if (u.userId != null) allUsersMap[u.userId!] = u;
+                                }
+                                for (var u in programUsers) {
+                                  if (u.userId != null) allUsersMap[u.userId!] = u;
+                                }
+
+                                final participants = allUsersMap.values.toList();
+                                participants.sort((lhs, rhs) => (lhs.firstName ?? "").compareTo(rhs.firstName ?? ""));
                             final myParticipants = participants.toList();
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,9 +155,11 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
                                 ),
                               ],
                             );
-                          } else {
-                            return Center(child: CircularProgressIndicator());
-                          }
+                              } else {
+                                return Center(child: CircularProgressIndicator());
+                              }
+                            },
+                          );
                         });
                     }
                   );

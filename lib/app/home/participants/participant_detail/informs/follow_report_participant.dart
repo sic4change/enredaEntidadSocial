@@ -77,7 +77,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
   final TextEditingController _totalDaysController = TextEditingController();
 
   late UserEnreda userEnreda;
-
+  bool _isCreatingReport = false;
+  String? _selectedProgramId;
+ 
   late final Map<String, TextEditingController> _controllers;
   late Map<String, DateTime?> _dateValues;
   late final Map<String, List<String>> _listValues;
@@ -85,6 +87,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
   @override
   void initState() {
     _totalDaysController.text = '0';
+    _selectedProgramId = widget.user.programId;
     _controllers = {
       'administrativeExternalResources': TextEditingController(),
       'subsidy': TextEditingController(),
@@ -207,27 +210,26 @@ class _FollowReportFormState extends State<FollowReportForm> {
   @override
   Widget build(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
-    print('Entra en el build del follow report');
     return SingleChildScrollView(
       child: StreamBuilder<UserEnreda>(
           stream: database.userEnredaStreamByUserId(widget.user.userId),
           builder: (context, snapshot) {
             if(!snapshot.hasData) {
-              print('No hay datos del usuario');
               return const Center(
                 child: CircularProgressIndicator(),
               );
             }
             if (snapshot.hasData) {
-              print('Hay datos del usuario');
               userEnreda = snapshot.data!;
-              if(userEnreda.followReportId == null) {
-                print('No hay follow report');
-                database.addFollowReport(
-                   FollowReport(
-                      userId: globals.currentInitialReportUser.userId,
-                      subsidy: globals.currentInitialReportUser.subsidy,
-                      techPerson: globals.currentInitialReportUser.techPerson,
+              if(userEnreda.followReportId == null && !_isCreatingReport) {
+                _isCreatingReport = true;
+                Future.microtask(() async {
+                  try {
+                    String newId = await database.addFollowReport(
+                       FollowReport(
+                        userId: globals.currentInitialReportUser.userId,
+                        subsidy: globals.currentInitialReportUser.subsidy,
+                        techPerson: globals.currentInitialReportUser.techPerson,
                       techPersonName: globals.currentInitialReportUser.techPersonName,
                       dniParticipant: globals.currentInitialReportUser.dniParticipant,
                       orientation1: globals.currentInitialReportUser.orientation1,
@@ -320,14 +322,31 @@ class _FollowReportFormState extends State<FollowReportForm> {
                       laborOtherConsiderations: globals.currentInitialReportUser.laborOtherConsiderations,
                       finished: false,
                     ));
-                return SingleChildScrollView(
-                  child: Container(
-                    child: followReport(context, userEnreda),
-                  ),
-                );
+                    if(newId.isNotEmpty){
+                      userEnreda.followReportId = newId;
+                      await database.setUserEnreda(userEnreda);
+                    }
+                  } catch (e) {
+                    print('Error creating follow report: $e');
+                    if (mounted) {
+                      showAlertDialog(
+                        context,
+                        title: 'Error de servidor',
+                        content: 'No se pudo crear el informe de seguimiento. Por favor, inténtelo de nuevo más tarde.',
+                        defaultActionText: 'Ok',
+                      );
+                    }
+                  } finally {
+                    if (mounted) {
+                      setState(() {
+                        _isCreatingReport = false;
+                      });
+                    }
+                  }
+                });
+                return const Center(child: CircularProgressIndicator());
               }
             }
-            print('Entra en el return del follow report');
             return SingleChildScrollView(
               child: Container(
                 child: followReport(context, userEnreda),
@@ -985,17 +1004,39 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   );
                 }).toList();
 
+                String? dropdownValue = _selectedProgramId;
+                if (dropdownValue == null && _controllers['subsidy']!.text.isNotEmpty) {
+                  try {
+                    final matchingProgram = programs.firstWhere(
+                      (p) =>
+                          '${p.code} - ${p.name}' == _controllers['subsidy']!.text ||
+                          p.name == _controllers['subsidy']!.text ||
+                          (p.shortName != null &&
+                              ('${p.code} - ${p.shortName}' == _controllers['subsidy']!.text ||
+                                  p.shortName == _controllers['subsidy']!.text)),
+                    );
+                    dropdownValue = matchingProgram.programId;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          _selectedProgramId = dropdownValue;
+                        });
+                      }
+                    });
+                  } catch (_) {}
+                }
+
                 return CustomDropDownButtonFormFieldTittle(
                   labelText: StringConst.INITIAL_SUBSIDY,
                   source: items,
-                  value: _controllers['subsidy']!.text.isNotEmpty
-                      ? _controllers['subsidy']!.text
-                      : null,
+                  value: dropdownValue,
                   onChanged: _finished
                       ? null
                       : (value) {
                     setState(() {
-                      _controllers['subsidy']!.text = value!;
+                      _selectedProgramId = value;
+                      final selected = programs.firstWhere((p) => p.programId == value);
+                      _controllers['subsidy']!.text = '${selected.code} - ${selected.name}';
                     });
                   },
                 );

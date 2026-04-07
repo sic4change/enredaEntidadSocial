@@ -36,7 +36,7 @@ Future<Uint8List> generateInitialReportFile(
       right: 2.0 * PdfPageFormat.cm,
       bottom: 0.0 * PdfPageFormat.cm);
 
-  final int isMdm = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == initialReport.subsidy);
+  final int isMdm = StringConst.getSubsidyIndex(initialReport.subsidy);
   print('isMdm: $isMdm');
 
   final pageTheme = await MyPageTheme(format, isMdm);

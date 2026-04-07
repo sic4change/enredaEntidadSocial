@@ -36,7 +36,7 @@ Future<Uint8List> generateFollowReportFile(
       right: 2.0 * PdfPageFormat.cm,
       bottom: 0.0 * PdfPageFormat.cm);
 
-  final int isMdm = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == followReport.subsidy);
+  final int isMdm = StringConst.getSubsidyIndex(followReport.subsidy);
     print('isMdm: $isMdm');
 
 

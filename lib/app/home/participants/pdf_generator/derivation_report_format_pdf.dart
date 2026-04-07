@@ -36,7 +36,7 @@ Future<Uint8List> generateDerivationReportFile(
       right: 2.0 * PdfPageFormat.cm,
       bottom: 0.0 * PdfPageFormat.cm);
 
-  final int isMdm = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == derivationReport.subsidy);
+  final int isMdm = StringConst.getSubsidyIndex(derivationReport.subsidy);
 
   final pageTheme = await MyPageTheme(format, isMdm);
   final DateFormat formatter = DateFormat('yyyy-MM-dd');

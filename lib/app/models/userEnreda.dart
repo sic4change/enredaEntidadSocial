@@ -5,6 +5,7 @@ import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserEnreda {
   UserEnreda({
@@ -88,15 +89,36 @@ class UserEnreda {
     }
 
     final String? phone = data['phone'];
-    final DateTime? birthday = DateTime.parse(data['birthday'].toDate().toString());
-    final String? country = data['address']['country'];
-    final String? province = data['address']['province'];
-    final String? city = data['address']['city'];
-    final String? postalCode = data['address']['postalCode'];
+    
+    DateTime? birthday;
+    if (data['birthday'] != null) {
+      if (data['birthday'] is Timestamp) {
+        birthday = (data['birthday'] as Timestamp).toDate();
+      } else if (data['birthday'] is String) {
+        birthday = DateTime.tryParse(data['birthday']);
+      }
+    }
+
+    String? country;
+    String? province;
+    String? city;
+    String? postalCode;
+    
+    if (data['address'] != null && data['address'] is Map) {
+      final addressData = data['address'] as Map<String, dynamic>;
+      country = addressData['country'];
+      province = addressData['province'];
+      city = addressData['city'];
+      postalCode = addressData['postalCode'];
+    }
 
     DateTime? startDateItinerary;
-    if(data['startDateItinerary'] != null) {
-      startDateItinerary = DateTime.parse(data['startDateItinerary'].toDate().toString());
+    if (data['startDateItinerary'] != null) {
+      if (data['startDateItinerary'] is Timestamp) {
+        startDateItinerary = (data['startDateItinerary'] as Timestamp).toDate();
+      } else if (data['startDateItinerary'] is String) {
+        startDateItinerary = DateTime.tryParse(data['startDateItinerary']);
+      }
     }
 
     List<String> abilities = [];
@@ -315,9 +337,9 @@ class UserEnreda {
   final bool? checkAgreeCV;
   //final List<PersonalDocument> personalDocuments;
   late  String? initialReportId;
-  final String? closureReportId;
-  final String? followReportId;
-  final String? derivationReportId;
+  late  String? closureReportId;
+  late  String? followReportId;
+  late  String? derivationReportId;
   final String? nationality;
   final String? ipilObjectivesId;
   DateTime? startDateItinerary;

@@ -70,6 +70,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
   late final Map<String, TextEditingController> _controllers;
   late Map<String, DateTime?> _dateValues;
   late final Map<String, List<String>> _listValues;
+  bool _isCreatingReport = false;
 
   @override
   void initState() {
@@ -224,19 +225,39 @@ class _InitialReportFormState extends State<InitialReportForm> {
                             context, initialReportSaved);
                       }
                       else {
-                        if (userStream.initialReportId == null) {
-                          database.addInitialReport(InitialReport(
-                            userId: user.userId,
-                          ));
-                          if(initialReportSaved.userId != null){
-                            setState(() {
-                              widget.user.initialReportId = initialReportSaved.initialReportId;
-                            });
-                            database.setUserEnreda(widget.user);
-                          }
+                        if (userStream.initialReportId == null && !_isCreatingReport) {
+                          _isCreatingReport = true;
+                          Future.microtask(() async {
+                            try {
+                              String newId = await database.addInitialReport(InitialReport(
+                                userId: user.userId,
+                              ));
+                              if(newId.isNotEmpty){
+                                widget.user.initialReportId = newId;
+                                await database.setUserEnreda(widget.user);
+                              }
+                            } catch (e) {
+                              print('Error creating initial report: $e');
+                              if (mounted) {
+                                showAlertDialog(
+                                  context,
+                                  title: 'Error de servidor',
+                                  content: 'No se pudo crear el informe inicial. Por favor, inténtelo de nuevo más tarde.',
+                                  defaultActionText: 'Ok',
+                                );
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(() {
+                                  _isCreatingReport = false;
+                                });
+                              }
+                            }
+                          });
                         }
                         return Container(
                           height: 300,
+                          child: Center(child: CircularProgressIndicator()),
                         );
                       }
                     });
@@ -735,10 +756,32 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   );
                 }).toList();
 
+                String? dropdownValue = _selectedProgramId;
+                if (dropdownValue == null && _controllers['subsidy']!.text.isNotEmpty) {
+                  try {
+                    final matchingProgram = programs.firstWhere(
+                      (p) =>
+                          '${p.code} - ${p.name}' == _controllers['subsidy']!.text ||
+                          p.name == _controllers['subsidy']!.text ||
+                          (p.shortName != null &&
+                              ('${p.code} - ${p.shortName}' == _controllers['subsidy']!.text ||
+                                  p.shortName == _controllers['subsidy']!.text)),
+                    );
+                    dropdownValue = matchingProgram.programId;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          _selectedProgramId = dropdownValue;
+                        });
+                      }
+                    });
+                  } catch (_) {}
+                }
+
                 return CustomDropDownButtonFormFieldTittle(
                   labelText: StringConst.INITIAL_SUBSIDY,
                   source: items,
-                  value: _selectedProgramId,
+                  value: dropdownValue,
                   onChanged: _finished
                       ? null
                       : (value) {

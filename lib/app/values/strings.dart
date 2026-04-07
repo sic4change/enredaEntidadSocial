@@ -838,15 +838,23 @@ class StringConst {
   }).toList();
 
   static List<DropdownMenuItem<String>> SUBSIDY_SELECTION = [
-    '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS',
+    '529760_MEDICOS DEL MUNDO_EMPLEANDO_SUEÑOS - Empleando Sueños - Médicos del Mundo',
     '529775_SICFCH - Acompañamiento, tecnología y colaboración: 3 claves en el camino hacia el empleo joven',
-    '1/MAC/4/7.2/0080- SEIMLab: Laboratorio de innovación para la movilidad de personas trabajadoras e inclusión socioeconómica de personas migrantes en las Islas Canarias'
+    '1/MAC/4/7.2/0080 - SEIMLab: Laboratorio de innovación para la movilidad en Senegal y Marruecos a través del emprendimiento y la empleabilidad de jóvenes y mujeres'
   ].map<DropdownMenuItem<String>>((String value) {
     return DropdownMenuItem<String>(
       value: value,
       child: Text(value),
     );
   }).toList();
+
+  static int getSubsidyIndex(String? subsidy) {
+    if (subsidy == null) return -1;
+    if (subsidy.contains('MEDICOS DEL MUNDO') || subsidy.contains('529760')) return 0;
+    if (subsidy.contains('SEIMLab') || subsidy.contains('0080')) return 2;
+    if (subsidy.contains('SICFCH') || subsidy.contains('529775')) return 1;
+    return -1;
+  }
 
   static List<DropdownMenuItem<String>> ADMIN_STATE_SELECTION =
   ['Sin tramitar', 'En trámite', 'Concedida'].map<DropdownMenuItem<String>>((String value) {

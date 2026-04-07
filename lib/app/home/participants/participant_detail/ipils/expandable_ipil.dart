@@ -132,7 +132,7 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                               builder: (context, snapshot) {
                                 if(snapshot.hasData){
                                   if(snapshot.data!.finished ?? false){
-                                    subsidy = StringConst.SUBSIDY_SELECTION.indexWhere((element) => element.value == snapshot.data!.subsidy);
+                                    subsidy = StringConst.getSubsidyIndex(snapshot.data!.subsidy);
                                   }
                                 }
                                 return MyIpilEntries(

@@ -78,7 +78,8 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
   final TextEditingController _totalDaysController = TextEditingController();
 
   late UserEnreda userEnreda;
-
+  String? _selectedProgramId;
+ 
   late final Map<String, TextEditingController> _controllers;
   late Map<String, DateTime?> _dateValues;
   late final Map<String, List<String>> _listValues;
@@ -86,6 +87,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
   @override
   void initState() {
     _totalDaysController.text = '0';
+    _selectedProgramId = widget.user.programId;
     _controllers = {
       'administrativeExternalResources': TextEditingController(),
       'subsidy': TextEditingController(),
@@ -199,6 +201,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     };
     super.initState();
     }
+  bool _isCreatingReport = false;
 
   @override
   void dispose() {
@@ -222,17 +225,20 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             }
             if (snapshot.hasData) {
               userEnreda = snapshot.data!;
-              if(userEnreda.closureReportId == null) {
+              if(userEnreda.closureReportId == null && !_isCreatingReport) {
+                _isCreatingReport = true;
                 if(globals.currentFollowReportUser.finished == true) {
-                  database.addClosureReport(ClosureReport(
-                    userId: globals.currentFollowReportUser.userId,
-                    subsidy: globals.currentFollowReportUser.subsidy,
-                    techPerson: globals.currentFollowReportUser.techPerson,
-                    techPersonName: globals.currentInitialReportUser.techPersonName,
-                    dniParticipant: globals.currentInitialReportUser.dniParticipant,
-                    orientation1: globals.currentFollowReportUser.orientation1,
-                    arriveDate: globals.currentFollowReportUser.arriveDate,
-                    receptionResources: globals.currentFollowReportUser.receptionResources,
+                  Future.microtask(() async {
+                    try {
+                      String newId = await database.addClosureReport(ClosureReport(
+                      userId: globals.currentFollowReportUser.userId,
+                      subsidy: globals.currentFollowReportUser.subsidy,
+                      techPerson: globals.currentFollowReportUser.techPerson,
+                      techPersonName: globals.currentInitialReportUser.techPersonName,
+                      dniParticipant: globals.currentInitialReportUser.dniParticipant,
+                      orientation1: globals.currentFollowReportUser.orientation1,
+                      arriveDate: globals.currentFollowReportUser.arriveDate,
+                      receptionResources: globals.currentFollowReportUser.receptionResources,
                     administrativeExternalResources: globals.currentFollowReportUser.administrativeExternalResources,
                     expirationDate: globals.currentFollowReportUser.expirationDate,
                     adminState: globals.currentFollowReportUser.adminState,
@@ -342,11 +348,16 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                     laborOtherConsiderations: globals.currentFollowReportUser.laborOtherConsiderations,
                     finished: false,
                   ));
+                  if(newId.isNotEmpty){
+                    userEnreda.closureReportId = newId;
+                    await database.setUserEnreda(userEnreda); } } catch (e) { print("Error creating closure report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de seguimiento. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } }
+                  });
                 } else {
-                  database.addClosureReport(ClosureReport(
-                    userId: globals.currentInitialReportUser.userId,
-                    subsidy: globals.currentInitialReportUser.subsidy,
-                    techPerson: globals.currentInitialReportUser.techPerson,
+                  Future.microtask(() async { try {
+                    String newId = await database.addClosureReport(ClosureReport(
+                      userId: globals.currentInitialReportUser.userId,
+                      subsidy: globals.currentInitialReportUser.subsidy,
+                      techPerson: globals.currentInitialReportUser.techPerson,
                     techPersonName: globals.currentInitialReportUser.techPersonName,
                     dniParticipant: globals.currentInitialReportUser.dniParticipant,
                     orientation1: globals.currentInitialReportUser.orientation1,
@@ -439,12 +450,12 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                     laborOtherConsiderations: globals.currentInitialReportUser.laborOtherConsiderations,
                     finished: false,
                   ));
+                  if(newId.isNotEmpty){
+                    userEnreda.closureReportId = newId;
+                    await database.setUserEnreda(userEnreda); } } catch (e) { print("Error creating closure report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de cierre. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } } 
+                  });
                 }
-                return SingleChildScrollView(
-                  child: Container(
-                    child: closureReport(context, userEnreda),
-                  ),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
             }
             return SingleChildScrollView(
@@ -1138,17 +1149,39 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                   );
                 }).toList();
 
+                String? dropdownValue = _selectedProgramId;
+                if (dropdownValue == null && _controllers['subsidy']!.text.isNotEmpty) {
+                  try {
+                    final matchingProgram = programs.firstWhere(
+                      (p) =>
+                          '${p.code} - ${p.name}' == _controllers['subsidy']!.text ||
+                          p.name == _controllers['subsidy']!.text ||
+                          (p.shortName != null &&
+                              ('${p.code} - ${p.shortName}' == _controllers['subsidy']!.text ||
+                                  p.shortName == _controllers['subsidy']!.text)),
+                    );
+                    dropdownValue = matchingProgram.programId;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          _selectedProgramId = dropdownValue;
+                        });
+                      }
+                    });
+                  } catch (_) {}
+                }
+
                 return CustomDropDownButtonFormFieldTittle(
                   labelText: StringConst.INITIAL_SUBSIDY,
                   source: items,
-                  value: _controllers['subsidy']!.text.isNotEmpty
-                      ? _controllers['subsidy']!.text
-                      : null,
+                  value: dropdownValue,
                   onChanged: _finished
                       ? null
                       : (value) {
                     setState(() {
-                      _controllers['subsidy']!.text = value!;
+                      _selectedProgramId = value;
+                      final selected = programs.firstWhere((p) => p.programId == value);
+                      _controllers['subsidy']!.text = '${selected.code} - ${selected.name}';
                     });
                   },
                 );

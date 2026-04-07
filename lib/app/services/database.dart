@@ -81,6 +81,7 @@ abstract class Database {
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
      Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId);
      Stream<List<UserEnreda>> getParticipantsByProgramsStream(List<String> programs);
+     Stream<List<UserEnreda>> getParticipantsByEntityStream(String socialEntityId);
      Stream<List<SocialEntity>> socialEntitiesStream();
      Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter, String socialEntityId);
      Stream<List<SocialEntity>> socialEntityByIdStream(String socialEntityId);
@@ -175,19 +176,19 @@ abstract class Database {
      Future<void> updateDocumentationParticipant(DocumentationParticipant document);
      Stream<InitialReport> initialReportsStreamByUserId(String? userId);
      Future<void> setInitialReport(InitialReport initialReport);
-     Future<void> addInitialReport(InitialReport initialReport);
+     Future<String> addInitialReport(InitialReport initialReport);
      Stream<List<String>> languagesStream();
      Stream<List<String>> nationsSpanishStream();
      Stream<ClosureReport> closureReportsStreamByUserId(String? userId);
      Future<void> setClosureReport(ClosureReport closureReport);
-     Future<void> addClosureReport(ClosureReport closureReport);
+     Future<String> addClosureReport(ClosureReport closureReport);
      Stream<List<KeepLearningOption>> keepLearningOptionsStream();
      Stream<FollowReport> followReportsStreamByUserId(String? userId);
      Future<void> setFollowReport(FollowReport followReport);
-     Future<void> addFollowReport(FollowReport followReport);
+     Future<String> addFollowReport(FollowReport followReport);
      Stream<DerivationReport> derivationReportsStreamByUserId(String? userId);
      Future<void> setDerivationReport(DerivationReport derivationReport);
-     Future<void> addDerivationReport(DerivationReport derivationReport);
+     Future<String> addDerivationReport(DerivationReport derivationReport);
      Future<void> updateDerivationReportField(String derivationReportId, Map<String, dynamic> fieldsToUpdate);
      Stream<List<IpilReinforcement>> ipilReinforcementStream();
      Stream<List<IpilReinforcement>> ipilReinforcementStreamByUser(List<String> idList);
@@ -230,6 +231,7 @@ class FirestoreDatabase implements Database {
   FirestoreDatabase();
 
   final _service = FirestoreService.instance;
+  final Set<String> _pendingCreations = {};
 
   @override
   Future<void> setResource(Resource resource) => _service.updateData(
@@ -612,7 +614,17 @@ class FirestoreDatabase implements Database {
     }
     return _service.collectionStream<UserEnreda>(
       path: APIPath.users(),
-      queryBuilder: (query) => query.where('programId', whereIn: programs.take(10).toList()),
+      queryBuilder: (query) => query.where('programId', whereIn: programs.take(30).toList()),
+      builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+      sort: (lhs, rhs) => (lhs.firstName??"").compareTo(rhs.firstName??""),
+    );
+  }
+
+  @override
+  Stream<List<UserEnreda>> getParticipantsByEntityStream(String socialEntityId) {
+    return _service.collectionStream<UserEnreda>(
+      path: APIPath.users(),
+      queryBuilder: (query) => query.where('assignedEntityId', isEqualTo: socialEntityId),
       builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
       sort: (lhs, rhs) => (lhs.firstName??"").compareTo(rhs.firstName??""),
     );
@@ -1207,24 +1219,19 @@ class FirestoreDatabase implements Database {
         path: APIPath.initialReport(initialReport.initialReportId!), data: initialReport.toMap());
   }
 
-  Future<void> addInitialReport(InitialReport initialReport) async {
-    try {
-      // Verifica si existe al menos un reporte para este userId
-      final hasReports = await initialReportsStreamByUserId(initialReport.userId).any((_) => true);
+  @override
+  Future<String> addInitialReport(InitialReport initialReport) async {
+    final lockKey = '${initialReport.userId}_initial';
+    if (_pendingCreations.contains(lockKey)) return '';
+    _pendingCreations.add(lockKey);
 
-      if (!hasReports) {
-        // Si no hay reportes, añade el nuevo
-        await _service.addData(path: APIPath.initialReports(), data: initialReport.toMap());
-      }
+    try {
+      return await _service.addDataFile(path: APIPath.initialReports(), data: initialReport.toMap());
     } catch (e) {
-      // Maneja el caso en el que el stream no tiene datos o falla
-      if (e is StateError && e.message == 'No element') {
-        // Esto significa que el Stream está vacío, así que añade el reporte
-        await _service.addData(path: APIPath.initialReports(), data: initialReport.toMap());
-      } else {
-        // Lanza otros errores que no esperabas
-        rethrow;
-      }
+      print('Error adding initial report: $e');
+      rethrow;
+    } finally {
+      _pendingCreations.remove(lockKey);
     }
   }
 
@@ -1260,8 +1267,20 @@ class FirestoreDatabase implements Database {
   }
 
   @override
-  Future<void> addClosureReport(ClosureReport closureReport) =>
-      _service.addData(path: APIPath.closureReports(), data: closureReport.toMap());
+  Future<String> addClosureReport(ClosureReport closureReport) async {
+    final lockKey = '${closureReport.userId}_closure';
+    if (_pendingCreations.contains(lockKey)) return '';
+    _pendingCreations.add(lockKey);
+
+    try {
+      return await _service.addDataFile(path: APIPath.closureReports(), data: closureReport.toMap());
+    } catch (e) {
+      print('Error adding closure report: $e');
+      rethrow;
+    } finally {
+      _pendingCreations.remove(lockKey);
+    }
+  }
 
   @override
   Stream<List<KeepLearningOption>> keepLearningOptionsStream() => _service.collectionStream(
@@ -1287,8 +1306,20 @@ class FirestoreDatabase implements Database {
   }
 
   @override
-  Future<void> addFollowReport(FollowReport followReport) =>
-      _service.addData(path: APIPath.followReports(), data: followReport.toMap());
+  Future<String> addFollowReport(FollowReport followReport) async {
+    final lockKey = '${followReport.userId}_follow';
+    if (_pendingCreations.contains(lockKey)) return '';
+    _pendingCreations.add(lockKey);
+
+    try {
+      return await _service.addDataFile(path: APIPath.followReports(), data: followReport.toMap());
+    } catch (e) {
+      print('Error adding follow report: $e');
+      rethrow;
+    } finally {
+      _pendingCreations.remove(lockKey);
+    }
+  }
 
   @override
   Stream<DerivationReport> derivationReportsStreamByUserId(String? userId) {
@@ -1306,8 +1337,20 @@ class FirestoreDatabase implements Database {
   }
 
   @override
-  Future<void> addDerivationReport(DerivationReport derivationReport) =>
-      _service.addData(path: APIPath.derivationReports(), data: derivationReport.toMap());
+  Future<String> addDerivationReport(DerivationReport derivationReport) async {
+    final lockKey = '${derivationReport.userId}_derivation';
+    if (_pendingCreations.contains(lockKey)) return '';
+    _pendingCreations.add(lockKey);
+
+    try {
+      return await _service.addDataFile(path: APIPath.derivationReports(), data: derivationReport.toMap());
+    } catch (e) {
+      print('Error adding derivation report: $e');
+      rethrow;
+    } finally {
+      _pendingCreations.remove(lockKey);
+    }
+  }
 
   @override
   Future<void> updateDerivationReportField(String derivationReportId, Map<String, dynamic> fieldsToUpdate) {
@@ -1784,7 +1827,7 @@ class FirestoreDatabase implements Database {
     return _service.filteredCollectionStream(
       path: APIPath.users(),
       queryBuilder: (query) {
-        query = query.where('programId', whereIn: programs.take(10).toList());
+        query = query.where('programId', whereIn: programs.take(30).toList());
         return query;
       },
       builder: (data, documentId) {
