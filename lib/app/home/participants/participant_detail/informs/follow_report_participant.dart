@@ -18,6 +18,7 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 import '../../../../common_widgets/alert_dialog.dart';
@@ -79,7 +80,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
   late UserEnreda userEnreda;
   bool _isCreatingReport = false;
   String? _selectedProgramId;
- 
+  late Stream<UserEnreda> _userStream;
+  late Stream<FollowReport> _reportStream;
+
   late final Map<String, TextEditingController> _controllers;
   late Map<String, DateTime?> _dateValues;
   late final Map<String, List<String>> _listValues;
@@ -196,6 +199,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
       'vulnerabilityOptions': [],
     };
     print('Se inicializa el follow report');
+    final database = Provider.of<Database>(context, listen: false);
+    _userStream = database.userEnredaStreamByUserId(widget.user.userId);
+    _reportStream = database.followReportsStreamByUserId(widget.user.userId);
     super.initState();
     }
 
@@ -212,7 +218,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
     final database = Provider.of<Database>(context, listen: false);
     return SingleChildScrollView(
       child: StreamBuilder<UserEnreda>(
-          stream: database.userEnredaStreamByUserId(widget.user.userId),
+          stream: _userStream,
           builder: (context, snapshot) {
             if(!snapshot.hasData) {
               return const Center(
@@ -400,7 +406,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
             ),
             Divider(color: AppColors.greyBorder,),
             StreamBuilder<FollowReport>(
-                stream: database.followReportsStreamByUserId(userEnreda.userId),
+                stream: _reportStream,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     FollowReport followReportSaved = snapshot.data!;
@@ -2206,83 +2212,79 @@ class _FollowReportFormState extends State<FollowReportForm> {
               enabled: !_finished,
             ),
             SpaceH12(),
-            StreamBuilder<List<String>>(
-  stream: database.languagesStream(),
-  builder: (context, snapshot) {
-    if (!snapshot.hasData) {
-      return Container();
-    }
+            Builder(
+              builder: (context) {
+                final List<String> languageList = LocationCache.instance.languages;
+                final _languageOptions = languageList
+                    .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList();
 
-    final _languageOptions = snapshot.data!
-        .map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList();
+                return ValueListenableBuilder<List<LanguageReport>>(
+                  valueListenable: _languagesInit.notifier,
+                  builder: (context, languages, child) {
+                    return Column(
+                      children: [
+                        for (int index = 0; index < languages.length; index++)
+                          Builder(
+                            builder: (context) {
+                              final language = languages[index];
 
-    return ValueListenableBuilder<List<LanguageReport>>(
-      valueListenable: _languagesInit.notifier,
-      builder: (context, languages, child) {
-        return Column(
-          children: [
-            for (int index = 0; index < languages.length; index++)
-              Builder(
-                builder: (context) {
-                  final language = languages[index];
-
-                  return Column(
-                    children: [
-                      CustomFlexRowColumn(
-                        contentPadding: EdgeInsets.zero,
-                        separatorSize: 20,
-                        childLeft: CustomDropDownButtonFormFieldTittle(
-                          labelText: StringConst.INITIAL_LANGUAGE,
-                          value: language.name.isNotEmpty ? language.name : null,
-                          source: _languageOptions,
-                          onChanged: _finished
-                              ? null
-                              : (value) {
-                                  final updated = List<LanguageReport>.from(languages);
-                                  updated[index] = language.copyWith(name: value);
-                                  _languagesInit.notifier.value = updated;
-                                },
-                        ),
-                        childRight: CustomDropDownButtonFormFieldTittle(
-                          labelText: StringConst.INITIAL_LANGUAGE_LEVEL,
-                          value: language.level.isNotEmpty ? language.level : null,
-                          source: StringConst.LANGUAGE_LEVEL_SELECTION,
-                          onChanged: _finished
-                              ? null
-                              : (value) {
-                                  final updated = List<LanguageReport>.from(languages);
-                                  updated[index] = language.copyWith(level: value);
-                                  _languagesInit.notifier.value = updated;
-                                },
-                        ),
-                      ),
-                      SpaceH12(),
-                      CustomTextFormFieldTitle(
-                        labelText: StringConst.INITIAL_LANGUAGE_ACCREDITATION,
-                        initialValue: language.accreditation,
-                        onChanged: (value) {
-                          final updated = List<LanguageReport>.from(languages);
-                          updated[index] = language.copyWith(accreditation: value);
-                          _languagesInit.notifier.value = updated;
-                        },
-                        enabled: !_finished,
-                      ),
-                      SpaceH12(),
-                    ],
-                  );
-                },
-              ),
-          ],
-        );
-      },
-    );
-  },
-),
+                              return Column(
+                                children: [
+                                  CustomFlexRowColumn(
+                                    contentPadding: EdgeInsets.zero,
+                                    separatorSize: 20,
+                                    childLeft: CustomDropDownButtonFormFieldTittle(
+                                      labelText: StringConst.INITIAL_LANGUAGE,
+                                      value: language.name.isNotEmpty ? language.name : null,
+                                      source: _languageOptions,
+                                      onChanged: _finished
+                                          ? null
+                                          : (value) {
+                                              final updated = List<LanguageReport>.from(languages);
+                                              updated[index] = language.copyWith(name: value);
+                                              _languagesInit.notifier.value = updated;
+                                            },
+                                    ),
+                                    childRight: CustomDropDownButtonFormFieldTittle(
+                                      labelText: StringConst.INITIAL_LANGUAGE_LEVEL,
+                                      value: language.level.isNotEmpty ? language.level : null,
+                                      source: StringConst.LANGUAGE_LEVEL_SELECTION,
+                                      onChanged: _finished
+                                          ? null
+                                          : (value) {
+                                              final updated = List<LanguageReport>.from(languages);
+                                              updated[index] = language.copyWith(level: value);
+                                              _languagesInit.notifier.value = updated;
+                                            },
+                                    ),
+                                  ),
+                                  SpaceH12(),
+                                  CustomTextFormFieldTitle(
+                                    labelText: StringConst.INITIAL_LANGUAGE_ACCREDITATION,
+                                    initialValue: language.accreditation,
+                                    onChanged: (value) {
+                                      final updated = List<LanguageReport>.from(languages);
+                                      updated[index] = language.copyWith(accreditation: value);
+                                      _languagesInit.notifier.value = updated;
+                                    },
+                                    enabled: !_finished,
+                                  ),
+                                  SpaceH12(),
+                                ],
+                              );
+                            },
+                          ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
 
             addLanguageButton(),
 

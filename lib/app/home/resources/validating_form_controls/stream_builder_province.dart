@@ -9,70 +9,68 @@ import 'package:provider/provider.dart';
 
 Widget streamBuilderForProvince (BuildContext context, String? selectedCountryId, Province? selectedProvince,  functionToWriteBackThings, genericType ) {
   final database = Provider.of<Database>(context, listen: false);
-  TextTheme textTheme = Theme.of(context).textTheme;
-  double fontSize = responsiveSize(context, 14, 16, md: 15);
   return StreamBuilder<List<Province>>(
       stream: database.provincesCountryStream(selectedCountryId),
       builder: (context, snapshotProvinces) {
-
-        List<DropdownMenuItem<Province>> provinceItems = [];
-        if (snapshotProvinces.hasData && selectedCountryId != null &&
-            snapshotProvinces.data!.isNotEmpty &&
-            snapshotProvinces.data![0].countryId == selectedCountryId) {
-          provinceItems = snapshotProvinces.data!.map((Province province) {
-            if (selectedProvince == null && province.provinceId == genericType.address?.province) {
-              selectedProvince = province;
-            }
-            return DropdownMenuItem<Province>(
-              value: province,
-              child: Text(province.name),
-            );
-          }
-          ).toList();
-        }
-
-        return DropdownButtonFormField<Province>(
-          hint: const Text(StringConst.FORM_PROVINCE),
-          isExpanded: true,
-          value: selectedProvince,
-          items: provinceItems,
-          validator: (value) => selectedProvince != null ?
-          null : StringConst.PROVINCE_ERROR,
-          onChanged: (value) => functionToWriteBackThings(value),
-          onSaved: (value) => functionToWriteBackThings(value),
-          iconDisabledColor: AppColors.greyDark,
-          iconEnabledColor: AppColors.primaryColor,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.white,
-            labelStyle: textTheme.bodySmall?.copyWith(
-              height: 1.5,
-              color: AppColors.greyDark,
-              fontWeight: FontWeight.w400,
-              fontSize: fontSize,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: const BorderSide(
-                color: AppColors.greyUltraLight,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: const BorderSide(
-                color: AppColors.greyUltraLight,
-                width: 1.0,
-              ),
-            ),
-          ),
-          style: textTheme.bodySmall?.copyWith(
-            height: 1.5,
-            fontWeight: FontWeight.w400,
-            color: AppColors.greyDark,
-            fontSize: fontSize,
-          ),
-        );
+        if (!snapshotProvinces.hasData) return _buildProvinceDropdown(context, [], selectedProvince, functionToWriteBackThings, genericType);
+        return _buildProvinceDropdown(context, snapshotProvinces.data!, selectedProvince, functionToWriteBackThings, genericType);
       }
+  );
+}
+
+Widget _buildProvinceDropdown(BuildContext context, List<Province> provinces, Province? selectedProvince, functionToWriteBackThings, genericType) {
+  TextTheme textTheme = Theme.of(context).textTheme;
+  double fontSize = responsiveSize(context, 14, 16, md: 15);
+  
+  List<DropdownMenuItem<Province>> provinceItems = provinces.map((Province province) {
+    if (selectedProvince == null && province.provinceId == genericType.address?.province) {
+      selectedProvince = province;
+    }
+    return DropdownMenuItem<Province>(
+      value: province,
+      child: Text(province.name),
+    );
+  }).toList();
+
+  return DropdownButtonFormField<Province>(
+    hint: const Text(StringConst.FORM_PROVINCE),
+    isExpanded: true,
+    value: selectedProvince,
+    items: provinceItems,
+    validator: (value) => selectedProvince != null ? null : StringConst.PROVINCE_ERROR,
+    onChanged: (value) => functionToWriteBackThings(value),
+    onSaved: (value) => functionToWriteBackThings(value),
+    iconDisabledColor: AppColors.greyDark,
+    iconEnabledColor: AppColors.primaryColor,
+    decoration: InputDecoration(
+      filled: true,
+      fillColor: AppColors.white,
+      labelStyle: textTheme.bodySmall?.copyWith(
+        height: 1.5,
+        color: AppColors.greyDark,
+        fontWeight: FontWeight.w400,
+        fontSize: fontSize,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(
+          color: AppColors.greyUltraLight,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(
+          color: AppColors.greyUltraLight,
+          width: 1.0,
+        ),
+      ),
+    ),
+    style: textTheme.bodySmall?.copyWith(
+      height: 1.5,
+      fontWeight: FontWeight.w400,
+      color: AppColors.greyDark,
+      fontSize: fontSize,
+    ),
   );
 }
 

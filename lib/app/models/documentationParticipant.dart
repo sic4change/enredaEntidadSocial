@@ -1,3 +1,5 @@
+import 'package:enreda_empresas/app/services/location_cache.dart';
+
 class DocumentationParticipant {
   DocumentationParticipant({
     this.documentationParticipantId,
@@ -10,6 +12,7 @@ class DocumentationParticipant {
     this.urlDocument,
     this.nameDocument,
     this.createdBy,
+    this.documentSubCategoryName,
   });
 
   final String? documentationParticipantId;
@@ -22,6 +25,7 @@ class DocumentationParticipant {
   final String? urlDocument;
   final String? nameDocument;
   final String? createdBy;
+  final String? documentSubCategoryName;
 
   factory DocumentationParticipant.fromMap(Map<String, dynamic> data, String documentId) {
 
@@ -39,6 +43,14 @@ class DocumentationParticipant {
       nameDocument = '';
     }
 
+    final subCategoryId = data['documentSubCategoryId'];
+    String? typeName = data['documentSubCategoryName'];
+    
+    // Fallback to LocationCache if the name is not stored yet
+    if (typeName == null || typeName.isEmpty) {
+      typeName = LocationCache.instance.personalDocumentTypeById(subCategoryId)?.title;
+    }
+
     return DocumentationParticipant(
       documentationParticipantId: data['documentationParticipantId'],
       name: data['name'],
@@ -46,7 +58,8 @@ class DocumentationParticipant {
       createdBy: data['createdBy'],
       createDate: DateTime.parse(data['createDate'].toDate().toString()),
       documentCategoryId: data['documentCategoryId'],
-      documentSubCategoryId: data['documentSubCategoryId'],
+      documentSubCategoryId: subCategoryId,
+      documentSubCategoryName: typeName,
       renovationDate: data['renovationDate'] != null ? DateTime.parse(data['renovationDate'].toDate().toString()) : null,
       urlDocument: urlDocument,
       nameDocument: nameDocument,
@@ -71,6 +84,7 @@ class DocumentationParticipant {
       'renovationDate': renovationDate,
       'documentCategoryId': documentCategoryId,
       'documentSubCategoryId': documentSubCategoryId,
+      'documentSubCategoryName': documentSubCategoryName,
     };
   }
 
@@ -83,6 +97,7 @@ class DocumentationParticipant {
     DateTime? renovationDate,
     String? documentCategoryId,
     String? documentSubCategoryId,
+    String? documentSubCategoryName,
 
   }) {
     return DocumentationParticipant(
@@ -93,6 +108,7 @@ class DocumentationParticipant {
         createDate: createDate?? this.createDate,
         documentCategoryId: documentCategoryId?? this.documentCategoryId,
         documentSubCategoryId: documentSubCategoryId?? this.documentSubCategoryId,
+        documentSubCategoryName: documentSubCategoryName?? this.documentSubCategoryName,
         renovationDate: renovationDate?? this.renovationDate,
     );
   }

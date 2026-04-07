@@ -21,12 +21,14 @@ import 'package:enreda_empresas/app/models/ipilSoftSkills.dart';
 import 'package:enreda_empresas/app/models/ipilSpecificSkills.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'expandable_ipil.dart';
 
 import '../../../../common_widgets/alert_dialog.dart';
 import '../../../../common_widgets/empty-list.dart';
@@ -54,6 +56,11 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   List<IpilEntry> ipilEntriesPage = [];
   IpilEntry? selectedIpil;
 
+  late Stream<List<IpilEntry>> _ipilEntriesStream;
+  late Stream<InitialReport> _initialReportStream;
+  late Stream<IpilObjectives> _ipilObjectivesStream;
+  late Database _database;
+
   @override
   void dispose() {
     super.dispose();
@@ -61,6 +68,11 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
 
   @override
   void initState() {
+    _database = Provider.of<Database>(context, listen: false);
+    _ipilEntriesStream = _database.getIpilEntriesByUserStream(widget.participantUser.userId!);
+    _initialReportStream = _database.initialReportsStreamByUserId(widget.participantUser.userId);
+    _ipilObjectivesStream = _database.ipilObjectivesStreamByUserId(widget.participantUser.userId!);
+    
     _value = _menuOptions[0];
     bodyWidget = [
       followPage(),
@@ -76,7 +88,6 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
     return ValueListenableBuilder<int>(
         valueListenable: ParticipantIPILPage.selectedIndexIpils,
         builder: (context, selectedIndex, child) {
-          print("ipil al repintar: $selectedIpil, $selectedIndex");
           return Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
@@ -155,27 +166,21 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   }
 
   Widget followPage(){
-    final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<List<IpilEntry>>(
-        stream: database.getIpilEntriesByUserStream(widget.participantUser.userId!),
+        stream: _ipilEntriesStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return Container();
-          if (snapshot.hasData) {
-            List<IpilEntry> ipilEntries = snapshot.data!;
-            return followPageDetail(ipilEntries);
-          } else {
-            return Container();
-          }
+          List<IpilEntry> ipilEntries = snapshot.data!;
+          return followPageDetail(ipilEntries);
         }
     );
   }
 
   Widget followPageDetail(List<IpilEntry> ipilEntries) {
-    final database = Provider.of<Database>(context, listen: false);
     int subsidy = 0;
     bool isInitialReportFinished = false;
     return StreamBuilder<InitialReport>(
-      stream: database.initialReportsStreamByUserId(widget.participantUser.userId),
+      stream: _initialReportStream,
       builder: (context, snapshot) {
         if(snapshot.hasData){
           if(snapshot.data!.finished ?? false){
@@ -301,297 +306,26 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   }
 
   Widget listIpils(){
-    final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<List<IpilEntry>>(
-      stream: database.getIpilEntriesByUserStream(widget.participantUser.userId!),
+      stream: _ipilEntriesStream,
       builder: (context, entriesSnapshot) {
         if (!entriesSnapshot.hasData) return Container();
         ipilEntriesPage = entriesSnapshot.data!;
         return ListItemBuilder<IpilEntry>(
           snapshot: entriesSnapshot,
           itemBuilder: (context, ipilEntry) {
-            return _buildIpilReinforcementStream(ipilEntry, database);
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildIpilReinforcementStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilReinforcement>>(
-      stream: database.ipilReinforcementStreamByUser(ipilEntry.reinforcement ?? []),
-      builder: (context, reinforcementSnapshot) {
-        if (!reinforcementSnapshot.hasData) return Container();
-        List<String> reinforcementList = [];
-        for(IpilReinforcement ipilReinforcement in reinforcementSnapshot.data!){
-          if(!reinforcementList.contains(ipilReinforcement.label)){
-            reinforcementList.add(ipilReinforcement.label);
-          }
-        }
-        ipilEntry.reinforcementsText = reinforcementList.join(', ');
-        return _buildSpecificSkillsStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildSpecificSkillsStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilSpecificSkills>>(
-      stream: database.ipilSpecificSkillsStreamByUser(ipilEntry.specificSkills ?? []),
-      builder: (context, specificSkillsSnapshot) {
-        if (!specificSkillsSnapshot.hasData) return Container();
-        List<String> specificSkillsList = [];
-        for (IpilSpecificSkills specificSkill in specificSkillsSnapshot.data!) {
-          if (!specificSkillsList.contains(specificSkill.label)) {
-            specificSkillsList.add(specificSkill.label);
-          }
-        }
-        ipilEntry.specificSkillsText = specificSkillsList.join(', ');
-        return _buildSoftSkillsStream(ipilEntry, database);
-      },
-    );
-  }
-  Widget _buildSoftSkillsStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilSoftSkills>>(
-      stream: database.ipilSoftSkillsStreamByUser(ipilEntry.softSkills ?? []),
-      builder: (context, softSkillsSnapshot) {
-        if (!softSkillsSnapshot.hasData) return Container();
-        List<String> softSkillsList = [];
-        for (IpilSoftSkills softSkill in softSkillsSnapshot.data!) {
-          if (!softSkillsList.contains(softSkill.label)) {
-            softSkillsList.add(softSkill.label);
-          }
-        }
-        ipilEntry.softSkillsText = softSkillsList.join(', ');
-        return _buildDigitalSkillsStream(ipilEntry, database);
-      },
-    );
-  }
-  
-  Widget _buildDigitalSkillsStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilDigitalSkills>>(
-      stream: database.ipilDigitalSkillsStreamByUser(ipilEntry.digitalSkills ?? []),
-      builder: (context, digitalSkillsSnapshot) {
-        if (!digitalSkillsSnapshot.hasData) return Container();
-        List<String> digitalSkillsList = [];
-        for (IpilDigitalSkills digitalSkill in digitalSkillsSnapshot.data!) {
-          if (!digitalSkillsList.contains(digitalSkill.label)) {
-            digitalSkillsList.add(digitalSkill.label);
-          }
-        }
-        ipilEntry.digitalSkillsText = digitalSkillsList.join(', ');
-        return _buildLaborSkillsStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildLaborSkillsStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilLaborSkills>>(
-      stream: database.ipilLaborSkillsStreamByUser(ipilEntry.laborSkills ?? []),
-      builder: (context, laborSkillsSnapshot) {
-        if (!laborSkillsSnapshot.hasData) return Container();
-        List<String> laborSkillsList = [];
-        for (IpilLaborSkills laborSkill in laborSkillsSnapshot.data!) {
-          if (!laborSkillsList.contains(laborSkill.label)) {
-            laborSkillsList.add(laborSkill.label);
-          }
-        }
-        ipilEntry.laborSkillsText = laborSkillsList.join(', ');
-        return _buildIpilContextualizationStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildIpilContextualizationStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilContextualization>>(
-      stream: database.ipilContextualizationStreamByUser(ipilEntry.contextualization ?? []),
-      builder: (context, contextualizationSnapshot) {
-        if (!contextualizationSnapshot.hasData) return Container();
-        List<String> contextualizationList = [];
-        for(IpilContextualization ipilContextualization in contextualizationSnapshot.data!){
-          if(!contextualizationList.contains(ipilContextualization.label)){
-            contextualizationList.add(ipilContextualization.label);
-          }
-        }
-        ipilEntry.contextualizationText = contextualizationList.join(', ');
-        return _buildIpilIntermediationsStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildIpilIntermediationsStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilIntermediations>>(
-      stream: database.ipilIntermediationsStreamByUser(ipilEntry.intermediations ?? []),
-      builder: (context, intermediationsSnapshot) {
-        if (!intermediationsSnapshot.hasData) return Container();
-        List<String> intermediationsList = [];
-        for(IpilIntermediations ipilIntermediation in intermediationsSnapshot.data!){
-          if(!intermediationsList.contains(ipilIntermediation.label)){
-            intermediationsList.add(ipilIntermediation.label);
-          }
-        }
-        ipilEntry.intermediationsText = intermediationsList.join(', ');
-        return _buildIpilConnectionTerritoryStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildIpilConnectionTerritoryStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilConnectionTerritory>>(
-      stream: database.ipilConnectionTerritoryStreamByUser(ipilEntry.connectionTerritory ?? []),
-      builder: (context, connectionTerritorySnapshot) {
-        if (!connectionTerritorySnapshot.hasData) return Container();
-        List<String> connectionTerritoryList = [];
-        for(IpilConnectionTerritory ipilConnectionTerritory in connectionTerritorySnapshot.data!){
-          if(!connectionTerritoryList.contains(ipilConnectionTerritory.label)){
-            connectionTerritoryList.add(ipilConnectionTerritory.label);
-          }
-        }
-        ipilEntry.connectionTerritoryText = connectionTerritoryList.join(', ');
-        return _buildIpilInterviewsStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildIpilInterviewsStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilInterviews>>(
-      stream: database.ipilInterviewsStreamByUser(ipilEntry.interviews ?? []),
-      builder: (context, interviewsSnapshot) {
-        if (!interviewsSnapshot.hasData) return Container();
-        List<String> interviewsList = [];
-        for(IpilInterviews ipilInterviews in interviewsSnapshot.data!){
-          if(!interviewsList.contains(ipilInterviews.label)){
-            interviewsList.add(ipilInterviews.label);
-          }
-        }
-        ipilEntry.interviewsText = interviewsList.join(', ');
-        return _buildIpilObtainingEmploymentStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildIpilObtainingEmploymentStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilObtainingEmployment>>(
-      stream: database.ipilObtainingEmploymentStreamByUser(ipilEntry.obtainingEmployment ?? []),
-      builder: (context, IpilObtainingEmploymentSnapshot) {
-        if (!IpilObtainingEmploymentSnapshot.hasData) return Container();
-        List<String> obtainedEmploymentList = [];
-        for(IpilObtainingEmployment ipilObtainingEmployment in IpilObtainingEmploymentSnapshot.data!){
-          if(!obtainedEmploymentList.contains(ipilObtainingEmployment.label)){
-            obtainedEmploymentList.add(ipilObtainingEmployment.label);
-          }
-        }
-        ipilEntry.obtainingEmploymentText = obtainedEmploymentList.join(', ');
-        return _buildIpilImprovingEmploymentStream(ipilEntry, database);
-      },
-    );
-  }
-
-    Widget _buildIpilImprovingEmploymentStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilImprovingEmployment>>(
-      stream: database.ipilImprovingEmploymentStreamByUser(ipilEntry.improvingEmployment ?? []),
-      builder: (context, IpilImprovingEmploymentSnapshot) {
-        if (!IpilImprovingEmploymentSnapshot.hasData) return Container();
-        List<String> improvedEmploymentList = [];
-        for(IpilImprovingEmployment ipilImprovingEmployment in IpilImprovingEmploymentSnapshot.data!){
-          if(!improvedEmploymentList.contains(ipilImprovingEmployment.label)){
-            improvedEmploymentList.add(ipilImprovingEmployment.label);
-          }
-        }
-        ipilEntry.improvingEmploymentText = improvedEmploymentList.join(', ');
-        return _buildCoordinationEmploymentStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildCoordinationEmploymentStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilCoordination>>(
-      stream: database.ipilCoordinationStreamByUser(ipilEntry.coordination ?? []),
-      builder: (context, IpilCoordinationSnapshot) {
-        if (!IpilCoordinationSnapshot.hasData) return Container();
-        List<String> coordinationList = [];
-        for(IpilCoordination cordination in IpilCoordinationSnapshot.data!){
-          if(!coordinationList.contains(cordination.label)){
-            coordinationList.add(cordination.label);
-          }
-        }
-        ipilEntry.coordinationText = coordinationList.join(', ');
-        return _buildLegalStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildLegalStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilLegal>>(
-      stream: database.ipilLegalStreamByUser(ipilEntry.legal ?? []),
-      builder: (context, IpilLegalSnapshot) {
-        if (!IpilLegalSnapshot.hasData) return Container();
-        List<String> legalList = [];
-        for(IpilLegal legal in IpilLegalSnapshot.data!){
-          if(!legalList.contains(legal.label)){
-            legalList.add(legal.label);
-          }
-        }
-        ipilEntry.legalText = legalList.join(', ');
-        return _buildPostWorkSupportStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildPostWorkSupportStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilPostWorkSupport>>(
-      stream: database.ipilPostWorkSupportStreamByUser(ipilEntry.postWorkSupport ?? []),
-      builder: (context, IpilPostWorkSupportSnapshot) {
-        if (!IpilPostWorkSupportSnapshot.hasData) return Container();
-        List<String> postWorkSupportList = [];
-        for(IpilPostWorkSupport postWorkSupport in IpilPostWorkSupportSnapshot.data!){
-          if(!postWorkSupportList.contains(postWorkSupport.label)){
-            postWorkSupportList.add(postWorkSupport.label);
-          }
-        }
-        ipilEntry.postWorkSupportText = postWorkSupportList.join(', ');
-        return _buildEconomicBagStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildEconomicBagStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<List<IpilEconomicBag>>(
-      stream: database.ipilEconomicBagStreamByUser(ipilEntry.economicBag ?? []),
-      builder: (context, IpilEconomicBagSnapshot) {
-        if (!IpilEconomicBagSnapshot.hasData) return Container();
-        List<String> economicBagList = [];
-        for(IpilEconomicBag economicBag in IpilEconomicBagSnapshot.data!){
-          if(!economicBagList.contains(economicBag.label)){
-            economicBagList.add(economicBag.label);
-          }
-        }
-        ipilEntry.economicBagText = economicBagList.join(', ');
-        return _buildUserEnredaStream(ipilEntry, database);
-      },
-    );
-  }
-
-  Widget _buildUserEnredaStream(IpilEntry ipilEntry, Database database) {
-    return StreamBuilder<UserEnreda>(
-      stream: database.userEnredaStreamByUserId(ipilEntry.techId),
-      builder: (context, userSnapshot) {
-        if (!userSnapshot.hasData) return Container();
-
-        String techName = userSnapshot.data?.firstName ?? '';
-        String techLastName = userSnapshot.data?.lastName ?? '';
-        techNameComplete = '$techName $techLastName';
-
-        return ExpandableIpilEntryTile(
-          ipilEntry: ipilEntry,
-          techNameComplete: techNameComplete,
-          participantUser: widget.participantUser,
-          editIpilEntry: () {
-            setState(() {
-              selectedIpil = ipilEntry;
-              print("ipil en pag general: $selectedIpil");
-              bodyWidget[3] = CreateIpilForm(participantUser: widget.participantUser, selectedIpil: selectedIpil);
-              ParticipantIPILPage.selectedIndexIpils.value = 3;
-            });
+            return ExpandableIpilEntryWrapper(
+              ipilEntry: ipilEntry,
+              participantUser: widget.participantUser,
+              editIpilEntry: () {
+                setState(() {
+                  selectedIpil = ipilEntry;
+                  print("ipil en pag general: $selectedIpil");
+                  bodyWidget[3] = CreateIpilForm(participantUser: widget.participantUser, selectedIpil: selectedIpil);
+                  ParticipantIPILPage.selectedIndexIpils.value = 3;
+                });
+              },
+            );
           },
         );
       },
@@ -748,10 +482,8 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   }
 
   Widget objectivePage(){
-    final database = Provider.of<Database>(context, listen: false);
-
     return StreamBuilder<IpilObjectives>(
-        stream: database.ipilObjectivesStreamByUserId(widget.participantUser.userId!),
+        stream: _ipilObjectivesStream,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             IpilObjectives ipilObjectivesSaved = snapshot.data!;
@@ -760,7 +492,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
           else {
             if (widget.participantUser.ipilObjectivesId == null && snapshot.connectionState != ConnectionState.waiting) {
               IpilObjectives ipilObjectivesNew = IpilObjectives(userId: widget.participantUser.userId);
-              database.addIpilObjectives(ipilObjectivesNew);
+              _database.addIpilObjectives(ipilObjectivesNew);
             }
             return Container(
               height: 300,
@@ -783,4 +515,80 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   }
 
 
+}
+
+class ExpandableIpilEntryWrapper extends StatefulWidget {
+  final IpilEntry ipilEntry;
+  final UserEnreda participantUser;
+  final VoidCallback editIpilEntry;
+
+  const ExpandableIpilEntryWrapper({
+    Key? key,
+    required this.ipilEntry,
+    required this.participantUser,
+    required this.editIpilEntry,
+  }) : super(key: key);
+
+  @override
+  State<ExpandableIpilEntryWrapper> createState() => _ExpandableIpilEntryWrapperState();
+}
+
+class _ExpandableIpilEntryWrapperState extends State<ExpandableIpilEntryWrapper> {
+  late Future<void> _loadingFuture;
+  String? techNameComplete;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadingFuture = _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final database = Provider.of<Database>(context, listen: false);
+    final cache = LocationCache.instance;
+    
+    // Resolve labels synchronously from cache
+    widget.ipilEntry.reinforcementsText = cache.getReinforcementLabels(widget.ipilEntry.reinforcement ?? []);
+    widget.ipilEntry.specificSkillsText = cache.getSpecificSkillsLabels(widget.ipilEntry.specificSkills ?? []);
+    widget.ipilEntry.softSkillsText = cache.getSoftSkillsLabels(widget.ipilEntry.softSkills ?? []);
+    widget.ipilEntry.digitalSkillsText = cache.getDigitalSkillsLabels(widget.ipilEntry.digitalSkills ?? []);
+    widget.ipilEntry.laborSkillsText = cache.getLaborSkillsLabels(widget.ipilEntry.laborSkills ?? []);
+    widget.ipilEntry.contextualizationText = cache.getContextualizationLabels(widget.ipilEntry.contextualization ?? []);
+    widget.ipilEntry.intermediationsText = cache.getIntermediationsLabels(widget.ipilEntry.intermediations ?? []);
+    widget.ipilEntry.connectionTerritoryText = cache.getConnectionTerritoryLabels(widget.ipilEntry.connectionTerritory ?? []);
+    widget.ipilEntry.interviewsText = cache.getInterviewsLabels(widget.ipilEntry.interviews ?? []);
+    widget.ipilEntry.obtainingEmploymentText = cache.getObtainingEmploymentLabels(widget.ipilEntry.obtainingEmployment ?? []);
+    widget.ipilEntry.improvingEmploymentText = cache.getImprovingEmploymentLabels(widget.ipilEntry.improvingEmployment ?? []);
+    widget.ipilEntry.coordinationText = cache.getCoordinationLabels(widget.ipilEntry.coordination ?? []);
+    widget.ipilEntry.legalText = cache.getLegalLabels(widget.ipilEntry.legal ?? []);
+    widget.ipilEntry.postWorkSupportText = cache.getPostWorkSupportLabels(widget.ipilEntry.postWorkSupport ?? []);
+    widget.ipilEntry.economicBagText = cache.getEconomicBagLabels(widget.ipilEntry.economicBag ?? []);
+
+    // Tech user lookup (already has a cache inside LocationCache.getUser)
+    final techUser = await cache.getUser(database, widget.ipilEntry.techId ?? '');
+    if (techUser != null) {
+      techNameComplete = '${techUser.firstName} ${techUser.lastName}';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _loadingFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return ExpandableIpilEntryTile(
+          ipilEntry: widget.ipilEntry,
+          techNameComplete: techNameComplete,
+          participantUser: widget.participantUser,
+          editIpilEntry: widget.editIpilEntry,
+        );
+      },
+    );
+  }
 }

@@ -69,18 +69,18 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
                       final socialEntity = entitySnapshot.data!;
                       final programs = socialEntity.programs ?? [];
 
-                      // Step 3: Query participants from cache
-                      LocationCache.instance.startParticipantsStream(database, socialEntityUser.socialEntityId!, programs);
+                      // Step 3: Query participants from cache (limited for preview)
+                      LocationCache.instance.startParticipantsPreview(database, socialEntityUser.socialEntityId!, programs);
                       return StreamBuilder<List<UserEnreda>>(
-                        stream: LocationCache.instance.participantsStream,
-                        initialData: LocationCache.instance.cachedParticipants,
+                        stream: LocationCache.instance.participantsPreviewStream,
+                        initialData: LocationCache.instance.cachedParticipantsPreview,
                         builder: (context, snapshot) {
-                          if (!snapshot.hasData && LocationCache.instance.cachedParticipants == null) {
+                          if (!snapshot.hasData && LocationCache.instance.cachedParticipantsPreview == null) {
                             return const Center(child: CircularProgressIndicator());
                           }
                           
-                          final participants = snapshot.data?.toList() ?? LocationCache.instance.cachedParticipants?.toList() ?? [];
-                          final myParticipants = participants;
+                          final participants = snapshot.data?.toList() ?? LocationCache.instance.cachedParticipantsPreview?.toList() ?? [];
+                          final myParticipants = participants.take(10).toList();
                           
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

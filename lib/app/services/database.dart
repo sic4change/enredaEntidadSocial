@@ -79,8 +79,8 @@ abstract class Database {
      Stream<List<Resource>> myLimitResourcesStream(String socialEntityId, int i);
      Stream<List<Resource>> filteredMyResourcesStream(String socialEntityId, String searchText);
      Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId);
-     Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId);
-     Stream<List<UserEnreda>> getParticipantsByProgramsStream(List<String> programs);
+     Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId, {int? limit});
+     Stream<List<UserEnreda>> getParticipantsByProgramsStream(List<String> programs, {int? limit});
      Stream<List<UserEnreda>> getParticipantsByEntityStream(String socialEntityId);
      Stream<List<SocialEntity>> socialEntitiesStream();
      Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter, String socialEntityId);
@@ -145,6 +145,25 @@ abstract class Database {
      Future<(List<UserEnreda>, DocumentSnapshot?)> getParticipantsByProgramsPaginated(List<String> programs, {int limit = 10, DocumentSnapshot? startAfterDocument});
 
 
+     Future<List<IpilReinforcement>> getIpilReinforcements(List<String?> idList);
+     Future<List<IpilContextualization>> getIpilContextualizations(List<String?> idList);
+     Future<List<IpilConnectionTerritory>> getIpilConnectionTerritories(List<String?> idList);
+     Future<List<IpilInterviews>> getIpilInterviews(List<String?> idList);
+     Future<List<IpilIntermediations>> getIpilIntermediations(List<String?> idList);
+     Future<List<IpilObtainingEmployment>> getIpilObtainingEmployments(List<String?> idList);
+     Future<List<IpilImprovingEmployment>> getIpilImprovingEmployments(List<String?> idList);
+     Future<List<IpilCoordination>> getIpilCoordinations(List<String?> idList);
+     Future<List<IpilLegal>> getIpilLegals(List<String?> idList);
+     Future<List<IpilEconomicBag>> getIpilEconomicBags(List<String?> idList);
+     Future<List<IpilSpecificSkills>> getIpilSpecificSkills(List<String?> idList);
+     Future<List<IpilSoftSkills>> getIpilSoftSkills(List<String?> idList);
+     Future<List<IpilDigitalSkills>> getIpilDigitalSkills(List<String?> idList);
+     Future<List<IpilLaborSkills>> getIpilLaborSkills(List<String?> idList);
+     Future<List<IpilPostWorkSupport>> getIpilPostWorkSupports(List<String?> idList);
+     Future<List<IpilResults>> getIpilResults();
+     Future<IpilObjectives?> getIpilObjectivesByUserId(String userId);
+
+     Future<List<SpecificInterest>> getSpecificInterests();
      Future<void> setUserEnreda(UserEnreda userEnreda);
      Future<void> deleteUser(UserEnreda userEnreda);
      Future<void> uploadUserAvatar(String userId, Uint8List data);
@@ -607,23 +626,31 @@ class FirestoreDatabase implements Database {
     }
 
   @override
-  Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId) {
+  Stream<List<UserEnreda>> getParticipantsBySocialEntityStream(String socialEntityId, {int? limit}) {
     return _service.collectionStream<UserEnreda>(
       path: APIPath.users(),
-      queryBuilder: (query) => query.where('assignedEntityId', isEqualTo: socialEntityId),
+      queryBuilder: (query) {
+        query = query.where('assignedEntityId', isEqualTo: socialEntityId);
+        if (limit != null) query = query.limit(limit);
+        return query;
+      },
       builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
       sort: (lhs, rhs) => (lhs.firstName??"").compareTo(rhs.firstName??""),
     );
   }
 
   @override
-  Stream<List<UserEnreda>> getParticipantsByProgramsStream(List<String> programs) {
+  Stream<List<UserEnreda>> getParticipantsByProgramsStream(List<String> programs, {int? limit}) {
     if (programs.isEmpty) {
       return Stream.value([]);
     }
     return _service.collectionStream<UserEnreda>(
       path: APIPath.users(),
-      queryBuilder: (query) => query.where('programId', whereIn: programs.take(30).toList()),
+      queryBuilder: (query) {
+        query = query.where('programId', whereIn: programs.take(30).toList());
+        if (limit != null) query = query.limit(limit);
+        return query;
+      },
       builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
       sort: (lhs, rhs) => (lhs.firstName??"").compareTo(rhs.firstName??""),
     );
@@ -1930,6 +1957,226 @@ class FirestoreDatabase implements Database {
   Future<UserEnreda?> getUser(String id) => _service.getDocument(
     path: APIPath.user(id),
     builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+  );
+
+  @override
+  Future<List<IpilReinforcement>> getIpilReinforcements(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilReinforcement());
+    final batches = <Future<List<IpilReinforcement>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilReinforcementId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilReinforcement.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilContextualization>> getIpilContextualizations(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilContextualization());
+    final batches = <Future<List<IpilContextualization>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilContextualizationId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilContextualization.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilConnectionTerritory>> getIpilConnectionTerritories(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilConnectionTerritory());
+    final batches = <Future<List<IpilConnectionTerritory>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilConnectionTerritoryId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilConnectionTerritory.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilInterviews>> getIpilInterviews(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilInterviews());
+    final batches = <Future<List<IpilInterviews>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilInterviewsId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilInterviews.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilIntermediations>> getIpilIntermediations(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilIntermediations());
+    final batches = <Future<List<IpilIntermediations>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilIntermediationsId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilIntermediations.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilObtainingEmployment>> getIpilObtainingEmployments(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilObtainingEmployment());
+    final batches = <Future<List<IpilObtainingEmployment>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilObtainingEmploymentId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilObtainingEmployment.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilImprovingEmployment>> getIpilImprovingEmployments(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilImprovingEmployment());
+    final batches = <Future<List<IpilImprovingEmployment>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilImprovingEmploymentId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilImprovingEmployment.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilCoordination>> getIpilCoordinations(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilCoordination());
+    final batches = <Future<List<IpilCoordination>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilCoordinationId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilCoordination.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilLegal>> getIpilLegals(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilLegal());
+    final batches = <Future<List<IpilLegal>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilLegalId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilLegal.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilEconomicBag>> getIpilEconomicBags(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilEconomicBag());
+    final batches = <Future<List<IpilEconomicBag>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilEconomicBagId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilEconomicBag.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilSpecificSkills>> getIpilSpecificSkills(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilSpecificSkills());
+    final batches = <Future<List<IpilSpecificSkills>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilSpecificSkillsId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilSpecificSkills.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilSoftSkills>> getIpilSoftSkills(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilSoftSkills());
+    final batches = <Future<List<IpilSoftSkills>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilSoftSkillsId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilSoftSkills.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilDigitalSkills>> getIpilDigitalSkills(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilDigitalSkills());
+    final batches = <Future<List<IpilDigitalSkills>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilDigitalSkillsId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilDigitalSkills.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilLaborSkills>> getIpilLaborSkills(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilLaborSkills());
+    final batches = <Future<List<IpilLaborSkills>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilLaborSkillsId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilLaborSkills.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilPostWorkSupport>> getIpilPostWorkSupports(List<String?> idList) async {
+    if (idList.isEmpty) return [];
+    final collectionPath = FirebaseFirestore.instance.collection(APIPath.ipilPostWorkSupport());
+    final batches = <Future<List<IpilPostWorkSupport>>>[];
+    for (var i = 0; i < idList.length; i += 10) {
+      final batch = idList.sublist(i, i + 10 < idList.length ? i + 10 : idList.length);
+      batches.add(collectionPath.where('ipilPostWorkSupportId', whereIn: batch).get().then((res) => res.docs.map((d) => IpilPostWorkSupport.fromMap(d.data(), d.id)).toList()));
+    }
+    final results = await Future.wait(batches);
+    return results.expand((i) => i).toList();
+  }
+
+  @override
+  Future<List<IpilResults>> getIpilResults() => _service.getCollection(
+    path: APIPath.ipilResults(),
+    builder: (data, documentId) => IpilResults.fromMap(data, documentId),
+    limit: 1000,
+  );
+
+  @override
+  Future<IpilObjectives?> getIpilObjectivesByUserId(String userId) async {
+    final objectives = await _service.getCollection(
+      path: APIPath.ipilObjectives(),
+      queryBuilder: (q) => q.where('userId', isEqualTo: userId),
+      builder: (data, documentId) => IpilObjectives.fromMap(data, documentId),
+      limit: 1,
+    );
+    return objectives.isNotEmpty ? objectives.first : null;
+  }
+
+  @override
+  Future<List<SpecificInterest>> getSpecificInterests() => _service.getCollection(
+    path: APIPath.specificInterests(),
+    builder: (data, documentId) => SpecificInterest.fromMap(data, documentId),
+    limit: 1000,
   );
 
   @override

@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/resources/resource_detail_dialog.dart';
 import 'package:enreda_empresas/app/home/resources/wrap_builder_list.dart';
@@ -19,50 +20,36 @@ class TypesBySocialEntity extends StatelessWidget {
   }
 
   Widget _buildContents(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
-    return StreamBuilder<List<SocialEntitiesType>>(
-        stream: database.socialEntitiesTypeStream(),
-        builder: (context, snapshot) {
-          return snapshot.hasData && snapshot.data!.isNotEmpty
-              ? WrapBuilderList<SocialEntitiesType>(
-            emptyTitle: 'Sin sectores',
-            emptyMessage: 'La entidad social no tiene sectores',
-            snapshot: snapshot,
-            itemBuilder: (context, socialEntityType) {
-              for (var socialEntityTypeId in typesIdList) {
-                if (socialEntityType.id == socialEntityTypeId) {
-                  return Container(
-                      key: Key(
-                          'socialEntityType-${socialEntityType.id}'),
-                      child: Container(
-                          margin: const EdgeInsets.only(left: 0, right: 5, top: 5, bottom: 5),
-                          decoration: BoxDecoration(
-                            color: AppColors.turquoiseBlue,
-                            border: Border.all(
-                                color: AppColors.turquoiseBlue.withOpacity(0.2),
-                                width: 1),
-                            borderRadius:
-                            BorderRadius.circular(
-                                Consts.padding),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                            child: Text(
-                                socialEntityType.name, style: TextStyle(color: Colors.white, fontSize: 14),),
-                          )));
-                }
+    final socialEntityTypes = LocationCache.instance.socialEntitiesTypes;
+    
+    final filteredTypes = socialEntityTypes.where((type) => typesIdList.contains(type.id)).toList();
 
-              }
-              return Container();
-            },
+    if (filteredTypes.isEmpty) {
+      if (socialEntityTypes.isEmpty) {
+        // Fallback or loading
+        return const Center(child: CircularProgressIndicator());
+      }
+      return const CustomTextTitle(title: '¡La entidad social aun no tiene sectores!');
+    }
 
-          )
-              : snapshot.connectionState == ConnectionState.active
-              ? const CustomTextTitle(
-              title: '¡La entidad social aun no tiene sectores!')
-              : const Center(child: CircularProgressIndicator());
-          ;
-        });
+    return Wrap(
+      spacing: 5,
+      runSpacing: 5,
+      children: filteredTypes.map((type) => Container(
+          key: Key('socialEntityType-${type.id}'),
+          decoration: BoxDecoration(
+            color: AppColors.turquoiseBlue,
+            border: Border.all(
+                color: AppColors.turquoiseBlue.withOpacity(0.2),
+                width: 1),
+            borderRadius: BorderRadius.circular(Consts.padding),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+            child: Text(
+                type.name, style: TextStyle(color: Colors.white, fontSize: 14),),
+          ))).toList(),
+    );
   }
 
 }

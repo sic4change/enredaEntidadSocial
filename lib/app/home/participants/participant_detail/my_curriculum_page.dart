@@ -8,6 +8,7 @@ import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -82,6 +83,8 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
   BuildContext? myContext;
   String _userId = '';
   String _photo = '';
+  late Stream<List<Experience>> _experiencesStream;
+  late Stream<List<Education>> _educationsStream;
 
   void setStateIfMounted(f) {
     if (mounted) setState(f);
@@ -90,6 +93,9 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
   @override
   void initState() {
     user = globals.currentParticipant!;
+    final database = Provider.of<Database>(context, listen: false);
+    _experiencesStream = database.myExperiencesStream(user?.userId ?? '');
+    _educationsStream = database.educationStream();
     super.initState();
   }
 
@@ -103,62 +109,71 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
               snapshot.connectionState == ConnectionState.active) {
             user = snapshot.data!.isNotEmpty ? snapshot.data!.first : null;
             var profilePic = user?.profilePic?.src ?? "";
-            return StreamBuilder<List<Competency>>(
-                stream: database.competenciesStream(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return Container();
-                  if (snapshot.hasError)
-                    return Center(child: Text('Ocurrió un error'));
-                  List<Competency> competencies = snapshot.data!;
-                  final competenciesIds = user!.competencies.keys.toList();
-                  competencies = competencies
-                      .where((competency) => competenciesIds.any((id) => competency.id == id))
-                      .toList();
-                  competencies.forEach((competency) {
-                    final status =
-                        user?.competencies[competency.id] ?? StringConst.BADGE_EMPTY;
-                    if (competency.name !="" && status != StringConst.BADGE_EMPTY && status != StringConst.BADGE_IDENTIFIED ) {
-                      final index1 = competenciesNames.indexWhere((element) => element == competency.name);
-                      if (index1 == -1) competenciesNames.add(competency.name);
-                    }
-                  });
+            
+            final competenciesList = LocationCache.instance.competencies;
+            List<Competency> competencies = List.from(competenciesList);
+            final competenciesIds = user!.competencies.keys.toList();
+            competencies = competencies
+                .where((competency) => competenciesIds.any((id) => competency.id == id))
+                .toList();
+            
+            competenciesNames.clear();
+            competencies.forEach((competency) {
+              final status =
+                  user?.competencies[competency.id] ?? StringConst.BADGE_EMPTY;
+              if (competency.name != "" && status != StringConst.BADGE_EMPTY && status != StringConst.BADGE_IDENTIFIED) {
+                final index1 = competenciesNames.indexWhere((element) => element == competency.name);
+                if (index1 == -1) competenciesNames.add(competency.name);
+              }
+            });
 
-                  final myAboutMe = user?.aboutMe ?? "";
-                  myCustomAboutMe = myAboutMe;
+            final myAboutMe = user?.aboutMe ?? "";
+            myCustomAboutMe = myAboutMe;
 
-                  final myEmail = user?.email ?? "";
-                  myCustomEmail = myEmail;
+            final myEmail = user?.email ?? "";
+            myCustomEmail = myEmail;
 
-                  final myPhone = user?.phone ?? "";
-                  myCustomPhone = myPhone;
+            final myPhone = user?.phone ?? "";
+            myCustomPhone = myPhone;
 
-                  myCustomCompetencies = competenciesNames.map((element) => element).toList();
-                  mySelectedCompetencies = List.generate(myCustomCompetencies.length, (i) => i);
+            myCustomCompetencies = competenciesNames.map((element) => element).toList();
+            mySelectedCompetencies = List.generate(myCustomCompetencies.length, (i) => i);
 
-                  final myDataOfInterest = user?.dataOfInterest ?? [];
-                  myCustomDataOfInterest = myDataOfInterest.map((element) => element).toList();
-                  mySelectedDataOfInterest = List.generate(myCustomDataOfInterest.length, (i) => i);
+            final myDataOfInterest = user?.dataOfInterest ?? [];
+            myCustomDataOfInterest = myDataOfInterest.map((element) => element).toList();
+            mySelectedDataOfInterest = List.generate(myCustomDataOfInterest.length, (i) => i);
 
-                  final myLanguages = user?.languagesLevels ?? [];
-                  myCustomLanguages = myLanguages.map((element) => element).toList();
-                  mySelectedLanguages = List.generate(myCustomLanguages.length, (i) => i);
+            final myLanguages = user?.languagesLevels ?? [];
+            myCustomLanguages = myLanguages.map((element) => element).toList();
+            mySelectedLanguages = List.generate(myCustomLanguages.length, (i) => i);
 
-                  _photo = profilePic;
-                  if (widget.mini)
-                    return _myCurriculumMini(context, user, profilePic, competenciesNames );
-                  else {
-                    return Responsive.isDesktop(context)
-                        ? _myCurriculumWeb(context, user, profilePic, competenciesNames )
-                        : _myCurriculumMobile(context, user, profilePic, competenciesNames);
-                  }
-                });
+            return StreamBuilder<List<Experience>>(
+              stream: _experiencesStream,
+              builder: (context, experiencesSnapshot) {
+                if (!experiencesSnapshot.hasData) return Center(child: CircularProgressIndicator());
+                
+                final allExp = experiencesSnapshot.data!;
+                myEducation = allExp.where((e) => e.type == 'Formativa').toList();
+                mySecondaryEducation = allExp.where((e) => e.type == 'Complementaria').toList();
+                myExperiences = allExp.where((e) => e.type == 'Profesional').toList();
+                myPersonalExperiences = allExp.where((e) => e.type == 'Personal').toList();
+
+                if (widget.mini) {
+                  return _myCurriculumMini(context, user, profilePic, competenciesNames, allExp);
+                } else {
+                  return Responsive.isDesktop(context)
+                      ? _myCurriculumWeb(context, user, profilePic, competenciesNames, allExp)
+                      : _myCurriculumMobile(context, user, profilePic, competenciesNames, allExp);
+                }
+              }
+            );
           } else {
             return Center(child: CircularProgressIndicator());
           }
         });
   }
 
-  Widget _myCurriculumMini(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames){
+  Widget _myCurriculumMini(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames, List<Experience> allExp){
     final textTheme = Theme.of(context).textTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,11 +273,11 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
                     color: AppColors.primary900),
               ),
               SpaceH30(),
-              _buildMyEducation(context, user),
+              _buildMyEducation(context, user, allExp),
               SpaceH30(),
-              _buildMySecondaryEducation(context, user),
+              _buildMySecondaryEducation(context, user, allExp),
               SpaceH30(),
-              _buildMyExperiences(context, user),
+              _buildMyExperiences(context, user, allExp),
               SpaceH30(),
               _buildMyCompetencies(context, user),
               SpaceH30(),
@@ -275,7 +290,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     );
   }
 
-  Widget _myCurriculumWeb(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames){
+  Widget _myCurriculumWeb(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames, List<Experience> allExp){
     return Stack(
       children: [
         CustomTextMediumBold(text: StringConst.CV),
@@ -341,11 +356,11 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
                         children: [
                           _buildCVHeader(context, user, profilePic, competenciesNames),
                           SpaceH30(),
-                          _buildMyEducation(context, user),
+                          _buildMyEducation(context, user, allExp),
                           SpaceH30(),
-                          _buildMySecondaryEducation(context, user),
+                          _buildMySecondaryEducation(context, user, allExp),
                           SpaceH30(),
-                          _buildMyExperiences(context, user),
+                          _buildMyExperiences(context, user, allExp),
                           SpaceH30(),
                           _buildMyCompetencies(context, user),
                           SpaceH30(),
@@ -362,7 +377,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     );
   }
 
-  Widget _myCurriculumMobile(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames) {
+  Widget _myCurriculumMobile(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames, List<Experience> allExp) {
     final textTheme = Theme.of(context).textTheme;
     return SingleChildScrollView(
       child: Container(
@@ -387,11 +402,11 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
                   textAlign: TextAlign.left,
                 ),
                 SpaceH24(),
-                _buildMyEducation(context, user),
+                _buildMyEducation(context, user, allExp),
                 SpaceH24(),
-                _buildMySecondaryEducation(context, user),
+                _buildMySecondaryEducation(context, user, allExp),
                 SpaceH24(),
-                _buildMyExperiences(context, user),
+                _buildMyExperiences(context, user, allExp),
                 SpaceH24(),
                 _buildMyCompetencies(context, user),
               ],
@@ -604,52 +619,35 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     );
   }
 
-  Widget _buildMyCareer(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
+  Widget _buildMyCareer(BuildContext context, List<Experience> experiences) {
+    Education? myMaxEducation;
+    final educations = LocationCache.instance.educations;
 
-    return StreamBuilder(
-        stream: database.educationStream(),
-        builder: (context, snapshotEducations) {
-          if (snapshotEducations.hasData) {
-            final educations = snapshotEducations.data!;
-
-            if (user!.educationId!.isNotEmpty) {
-              myMaxEducation = educations.firstWhere((e) => e.educationId == user!.educationId, orElse: () => Education(label: "", value: "", order: 0));
-              return CustomTextBody(text: myMaxEducation?.label??"");
-            } else {
-              return StreamBuilder(
-                  stream: database.myExperiencesStream(user?.userId ?? ''),
-                  builder: (context, snapshotExperiences) {
-                    if (snapshotEducations.hasData && snapshotExperiences.hasData) {
-                      final myEducationalExperiencies = snapshotExperiences.data!
-                          .where((experience) => experience.type == 'Formativa')
-                          .toList();
-                      if (myEducationalExperiencies.isNotEmpty) {
-                        final areEduactions = myEducationalExperiencies.any((exp) => exp.education != null && exp.education!.isNotEmpty);
-                        if (areEduactions) {
-                          final myEducations = educations.where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label)).toList();
-                          myEducations.sort((a, b) => a.order.compareTo(b.order));
-                          if(myEducations.isNotEmpty){
-                            myMaxEducation = myEducations.first;
-                          } else {
-                            myMaxEducation = Education(label: "", value: "", order: 0);
-                          }
-                        } else {
-                          myMaxEducation = Education(label: "", value: "", order: 0);
-                        }
-                        return CustomTextBody(text: myMaxEducation?.label??"");
-                      } else {
-                        return Container();
-                      }
-                    } else {
-                      return Container();
-                    }
-                  });
-            }
+    if (user!.educationId!.isNotEmpty) {
+      myMaxEducation = educations.firstWhere((e) => e.educationId == user!.educationId, orElse: () => Education(label: "", value: "", order: 0));
+      return CustomTextBody(text: myMaxEducation?.label??"");
+    } else {
+      final myEducationalExperiencies = experiences
+          .where((experience) => experience.type == 'Formativa')
+          .toList();
+      if (myEducationalExperiencies.isNotEmpty) {
+        final areEduactions = myEducationalExperiencies.any((exp) => exp.education != null && exp.education!.isNotEmpty);
+        if (areEduactions) {
+          final myEduations = educations.where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label)).toList();
+          myEduations.sort((a, b) => a.order.compareTo(b.order));
+          if(myEduations.isNotEmpty){
+            myMaxEducation = myEduations.first;
           } else {
-            return Container();
+            myMaxEducation = Education(label: "", value: "", order: 0);
           }
-        });
+        } else {
+          myMaxEducation = Education(label: "", value: "", order: 0);
+        }
+        return CustomTextBody(text: myMaxEducation?.label??"");
+      } else {
+        return Container();
+      }
+    }
   }
 
   Widget _buildAboutMe(BuildContext context) {
@@ -715,202 +713,146 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
   }
 
   Widget _buildMyLocation(BuildContext context, UserEnreda? user) {
-    final database = Provider.of<Database>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
-    Country? myCountry;
-    Province? myProvince;
-    City? myCity;
+    final myCountry = LocationCache.instance.countryById(user?.address?.country);
+    final myProvince = LocationCache.instance.provinceById(user?.address?.province);
+    final myCity = LocationCache.instance.cityById(user?.address?.city);
 
-    return StreamBuilder<Country>(
-        stream: database.countryStream(user?.address?.country),
-        builder: (context, snapshot) {
-          myCountry = snapshot.data;
-          return StreamBuilder<Province>(
-              stream: database.provinceStream(user?.address?.province),
-              builder: (context, snapshot) {
-                myProvince = snapshot.data;
+    myLocation = '${myCity?.name ?? ''}, ${myProvince?.name ?? ''}, ${myCountry?.name ?? ''}';
+    city = '${myCity?.name ?? ''}';
+    province = '${myProvince?.name ?? ''}';
+    country = '${myCountry?.name ?? ''}';
 
-                return StreamBuilder<City>(
-                    stream: database.cityStream(user?.address?.city),
-                    builder: (context, snapshot) {
-                      myCity = snapshot.data;
+    myCustomCity = city ?? "";
+    myCustomProvince = province ?? "";
+    myCustomCountry = country ?? "";
 
-                      myLocation =
-                      '${myCity?.name ?? ''}, ${myProvince?.name ?? ''}, ${myCountry?.name ?? ''}';
-                      city = '${myCity?.name ?? ''}';
-                      province = '${myProvince?.name ?? ''}';
-                      country = '${myCountry?.name ?? ''}';
-
-                      myCustomCity = city!;
-                      myCustomProvince = province!;
-                      myCustomCountry = country!;
-
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            color: Colors.black.withOpacity(0.7),
-                            size: 16,
-                          ),
-                          SpaceW4(),
-                          Responsive.isMobile(context) ? CustomTextSmall(text: myLocation ?? '') :
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                city ?? '',
-                                style: textTheme.bodyMedium?.copyWith(),
-                              ),
-                              Text(
-                                province ?? '',
-                                style: textTheme.bodyMedium?.copyWith(),
-                              ),
-                              Text(
-                                country ?? '',
-                                style: textTheme.bodyMedium?.copyWith(),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    });
-              });
-        });
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.location_on,
+          color: Colors.black.withOpacity(0.7),
+          size: 16,
+        ),
+        SpaceW4(),
+        Responsive.isMobile(context) ? CustomTextSmall(text: myLocation ?? '') :
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              city ?? '',
+              style: textTheme.bodyMedium?.copyWith(),
+            ),
+            Text(
+              province ?? '',
+              style: textTheme.bodyMedium?.copyWith(),
+            ),
+            Text(
+              country ?? '',
+              style: textTheme.bodyMedium?.copyWith(),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _buildMyCompetencies(BuildContext context, UserEnreda? user) {
-    final database = Provider.of<Database>(context, listen: false);
+    if (user == null) return Container();
+    final competenciesIds = user.competencies.keys.toList();
+    final competenciesList = LocationCache.instance.competencies;
+    myCompetencies = competenciesList
+        .where((competency) => competenciesIds.any((id) => competency.id == id &&
+        (user.competencies[id] == StringConst.BADGE_VALIDATED ||
+            user.competencies[id] == StringConst.BADGE_CERTIFIED) ))
+        .toList();
+    
     final textTheme = Theme.of(context).textTheme;
     final controller = ScrollController();
     var scrollJump = 137.5;
-    return StreamBuilder<List<Competency>>(
-      stream: database.competenciesStream(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData &&
-            snapshot.connectionState == ConnectionState.active) {
-          final competenciesIds = user!.competencies.keys.toList();
-          myCompetencies = snapshot.data!
-              .where((competency) => competenciesIds.any((id) => competency.id == id &&
-              (user.competencies[id] == StringConst.BADGE_VALIDATED ||
-                  user.competencies[id] == StringConst.BADGE_CERTIFIED) ))
-              .toList();
-          return Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.rectangle,
-                border: Border.all(color: AppColors.primary900, width: 1),
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              child: Column(
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.rectangle,
+        border: Border.all(color: AppColors.primary900, width: 1),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: Container(
+              height: 34,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0),
-                    child: Container(
-                      height: 34,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomTextTitle(title: StringConst.COMPETENCIES.toUpperCase(), color: AppColors.primary900,),
-                        ],
-                      ),
-                    ),
-                  ),
-                  myCompetencies!.isNotEmpty
-                      ? Container(
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: InkWell(
-                            onTap: () {
-                              if (controller.position.pixels >=
-                                  controller.position.minScrollExtent)
-                                controller.animateTo(
-                                    controller.position.pixels - scrollJump,
-                                    duration: Duration(milliseconds: 500),
-                                    curve: Curves.ease);
-                            },
-                            child: Icon(
-                              Icons.arrow_back_ios_new,
-                              color: AppColors.primary900,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            height: 185.0,
-                            child: ScrollConfiguration(
-                              behavior: MyCustomScrollBehavior(),
-                              child: ListView(
-                                controller: controller,
-                                scrollDirection: Axis.horizontal,
-                                children: myCompetencies!.map((competency) {
-                                  final status =
-                                      user.competencies[competency.id] ??
-                                          StringConst.BADGE_EMPTY;
-                                  return Column(
-                                    children: [
-                                      CompetencyTile(
-                                        competency: competency,
-                                        status: status,
-                                        mini: true,
-                                        height: 40,
-                                      ),
-                                      Text(
-                                          status == StringConst.BADGE_VALIDATED
-                                              ? 'EVALUADA'
-                                              : 'CERTIFICADA',
-                                          style: textTheme.bodySmall
-                                              ?.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 10,
-                                              color: AppColors.primaryColor)),
-                                    ],
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding:
-                          const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: InkWell(
-                            onTap: () {
-                              if (controller.position.pixels <=
-                                  controller.position.maxScrollExtent)
-                                controller.animateTo(
-                                    controller.position.pixels + scrollJump,
-                                    duration: Duration(milliseconds: 500),
-                                    curve: Curves.ease);
-                            },
-                            child: Icon(
-                              Icons.arrow_forward_ios,
-                              color: AppColors.primary900,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                      : Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Center(
-                        child: Text(
-                          'Aquí aparecerán las competencias evaluadas a través de los microtests',
-                          style: textTheme.bodySmall,
-                        )),
-                  ),
+                  CustomTextTitle(title: StringConst.COMPETENCIES.toUpperCase(), color: AppColors.primary900,),
                 ],
-              )
-          );
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
+              ),
+            ),
+          ),
+          myCompetencies!.isNotEmpty
+              ? Container(
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    controller.animateTo(
+                        controller.offset - scrollJump,
+                        curve: Curves.linear,
+                        duration: Duration(milliseconds: 500));
+                  },
+                  icon: Icon(
+                    Icons.arrow_back_ios,
+                    color: AppColors.primary900,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    height: 180,
+                    child: ListView(
+                      controller: controller,
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      children: myCompetencies!
+                          .map((competency) =>
+                          CompetencyTile(
+                            competency: competency,
+                            status: user.competencies[competency.id] ?? StringConst.BADGE_EMPTY,
+                          ))
+                          .toList(),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    controller.animateTo(
+                        controller.offset + scrollJump,
+                        curve: Curves.linear,
+                        duration: Duration(milliseconds: 500));
+                  },
+                  icon: Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppColors.primary900,
+                  ),
+                ),
+              ],
+            ),
+          )
+              : Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: Container(
+                child: Text(
+                  StringConst.NO_COMPETENCIES,
+                  style: textTheme.bodySmall,
+                )),
+          ),
+        ],
+      ),
     );
   }
 
@@ -958,8 +900,13 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     );
   }
 
-  Widget _buildMyEducation(BuildContext context, UserEnreda? user) {
-    final database = Provider.of<Database>(context, listen: false);
+  Widget _buildMyEducation(BuildContext context, UserEnreda? user, List<Experience> experiences) {
+    myEducation = experiences
+        .where((experience) => experience.type == 'Formativa')
+        .toList();
+    myCustomEducation = myEducation!.map((element) => element).toList();
+    mySelectedEducation = List.generate(myCustomEducation.length, (i) => i);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -969,7 +916,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
             CustomTextTitle(title: StringConst.EDUCATIONAL_LEVEL.toUpperCase(), color: AppColors.primary900,),
           ],
         ),
-        _buildMyCareer(context),
+        _buildMyCareer(context, experiences),
         SpaceH20(),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -978,51 +925,42 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ],
         ),
         SpaceH4(),
-        StreamBuilder<List<Experience>>(
-            stream: database.myExperiencesStream(user?.userId ?? ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData &&
-                  snapshot.connectionState == ConnectionState.active) {
-                myEducation = snapshot.data!
-                    .where((experience) => experience.type == 'Formativa')
-                    .toList();
-                myCustomEducation = myEducation!.map((element) => element).toList();
-                mySelectedEducation = List.generate(myCustomEducation.length, (i) => i);
-                return Container(
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: Colors.white,
+          ),
+          child: myEducation!.isNotEmpty
+              ? Wrap(
+            children: myEducation!
+                .map((e) => Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+              children: [
+                SpaceH12(),
+                Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
-                    color: Colors.white,
-                  ),
-                  child: myEducation!.isNotEmpty
-                      ? Wrap(
-                    children: myEducation!
-                        .map((e) => Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                      children: [
-                        SpaceH12(),
-                        Container(
-                          width: double.infinity,
-                          child: ExperienceTile(experience: e, type: e.type),
-                        ),
-                        Divider(color: AppColors.greyBorder,),
-                      ],
-                    ))
-                        .toList(),
-                  )
-                      : CustomTextBody(text: StringConst.NO_EDUCATION),
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }),
+                  child: ExperienceTile(experience: e, type: e.type),
+                ),
+                Divider(color: AppColors.greyBorder,),
+              ],
+            ))
+                .toList(),
+          )
+              : CustomTextBody(text: StringConst.NO_EDUCATION),
+        ),
       ],
     );
   }
 
-  Widget _buildMySecondaryEducation(BuildContext context, UserEnreda? user) {
-    final database = Provider.of<Database>(context, listen: false);
+  Widget _buildMySecondaryEducation(BuildContext context, UserEnreda? user, List<Experience> experiences) {
+    mySecondaryEducation = experiences
+        .where((experience) => experience.type == 'Complementaria')
+        .toList();
+    mySecondaryCustomEducation = mySecondaryEducation!.map((element) => element).toList();
+    mySecondarySelectedEducation = List.generate(mySecondaryCustomEducation.length, (i) => i);
+
     return Column(
       children: [
         Row(
@@ -1031,51 +969,42 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ],
         ),
         SpaceH4(),
-        StreamBuilder<List<Experience>>(
-            stream: database.myExperiencesStream(user?.userId ?? ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData &&
-                  snapshot.connectionState == ConnectionState.active) {
-                mySecondaryEducation = snapshot.data!
-                    .where((experience) => experience.type == 'Complementaria')
-                    .toList();
-                mySecondaryCustomEducation = mySecondaryEducation!.map((element) => element).toList();
-                mySecondarySelectedEducation = List.generate(mySecondaryCustomEducation.length, (i) => i);
-                return Container(
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: Colors.white,
+          ),
+          child: mySecondaryEducation!.isNotEmpty
+              ? Wrap(
+            children: mySecondaryEducation!
+                .map((e) => Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+              children: [
+                SpaceH12(),
+                Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
-                    color: Colors.white,
-                  ),
-                  child: mySecondaryEducation!.isNotEmpty
-                      ? Wrap(
-                    children: mySecondaryEducation!
-                        .map((e) => Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                      children: [
-                        SpaceH12(),
-                        Container(
-                          width: double.infinity,
-                          child: ExperienceTile(experience: e, type: e.type),
-                        ),
-                        Divider(color: AppColors.greyBorder,),
-                      ],
-                    ))
-                        .toList(),
-                  )
-                      : CustomTextBody(text: StringConst.NO_EDUCATION),
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }),
+                  child: ExperienceTile(experience: e, type: e.type,),
+                ),
+                Divider(color: AppColors.greyBorder,),
+              ],
+            ))
+                .toList(),
+          )
+              : CustomTextBody(text: StringConst.NO_EDUCATION),
+        ),
       ],
     );
   }
 
-  Widget _buildProfesionalExperience(BuildContext context, UserEnreda? user) {
-    final database = Provider.of<Database>(context, listen: false);
+  Widget _buildProfesionalExperience(BuildContext context, UserEnreda? user, List<Experience> experiences) {
+    myExperiences = experiences
+        .where((experience) => experience.type == 'Profesional')
+        .toList();
+    myCustomExperiences = myExperiences!.map((element) => element).toList();
+    mySelectedExperiences = List.generate(myCustomExperiences.length, (i) => i);
+
     return Column(
       children: [
         Row(
@@ -1084,51 +1013,42 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ],
         ),
         SpaceH4(),
-        StreamBuilder<List<Experience>>(
-            stream: database.myExperiencesStream(user?.userId ?? ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData &&
-                  snapshot.connectionState == ConnectionState.active) {
-                myExperiences = snapshot.data!
-                    .where((experience) => experience.type == 'Profesional')
-                    .toList();
-                myCustomExperiences = myExperiences!.map((element) => element).toList();
-                mySelectedExperiences = List.generate(myCustomExperiences.length, (i) => i);
-                return Container(
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: Colors.white,
+          ),
+          child: myExperiences!.isNotEmpty
+              ? Wrap(
+            children: myExperiences!
+                .map((e) => Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+              children: [
+                SpaceH4(),
+                Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
-                    color: Colors.white,
-                  ),
-                  child: myExperiences!.isNotEmpty
-                      ? Wrap(
-                    children: myExperiences!
-                        .map((e) => Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                      children: [
-                        SpaceH4(),
-                        Container(
-                          width: double.infinity,
-                          child: ExperienceTile(experience: e, type: e.type),
-                        ),
-                        Divider(color: AppColors.greyBorder,),
-                      ],
-                    ))
-                        .toList(),
-                  )
-                      : CustomTextBody(text: StringConst.NO_EXPERIENCE),
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }),
+                  child: ExperienceTile(experience: e, type: e.type),
+                ),
+                Divider(color: AppColors.greyBorder,),
+              ],
+            ))
+                .toList(),
+          )
+              : CustomTextBody(text: StringConst.NO_EXPERIENCE),
+        ),
       ],
     );
   }
 
-  Widget _buildPersonalExperience(BuildContext context, UserEnreda? user) {
-    final database = Provider.of<Database>(context, listen: false);
+  Widget _buildPersonalExperience(BuildContext context, UserEnreda? user, List<Experience> experiences) {
+    myPersonalExperiences = experiences
+        .where((experience) => experience.type == 'Personal')
+        .toList();
+    myPersonalCustomExperiences = myPersonalExperiences!.map((element) => element).toList();
+    myPersonalSelectedExperiences = List.generate(myPersonalCustomExperiences.length, (i) => i);
+
     return Column(
       children: [
         Row(
@@ -1137,50 +1057,36 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ],
         ),
         SpaceH4(),
-        StreamBuilder<List<Experience>>(
-            stream: database.myExperiencesStream(user?.userId ?? ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData &&
-                  snapshot.connectionState == ConnectionState.active) {
-                myPersonalExperiences = snapshot.data!
-                    .where((experience) => experience.type == 'Personal')
-                    .toList();
-                myPersonalCustomExperiences = myPersonalExperiences!.map((element) => element).toList();
-                myPersonalSelectedExperiences = List.generate(myPersonalCustomExperiences.length, (i) => i);
-                return Container(
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            color: Colors.white,
+          ),
+          child: myPersonalExperiences!.isNotEmpty
+              ? Wrap(
+            children: myPersonalExperiences!
+                .map((e) => Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+              children: [
+                SpaceH12(),
+                Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
-                    color: Colors.white,
-                  ),
-                  child: myPersonalExperiences!.isNotEmpty
-                      ? Wrap(
-                    children: myPersonalExperiences!
-                        .map((e) => Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                      children: [
-                        SpaceH12(),
-                        Container(
-                          width: double.infinity,
-                          child: ExperienceTile(experience: e, type: e.type,),
-                        ),
-                        Divider(color: AppColors.greyBorder,),
-                      ],
-                    ))
-                        .toList(),
-                  )
-                      : CustomTextBody(text: StringConst.NO_EXPERIENCE),
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }),
+                  child: ExperienceTile(experience: e, type: e.type,),
+                ),
+                Divider(color: AppColors.greyBorder,),
+              ],
+            ))
+                .toList(),
+          )
+              : CustomTextBody(text: StringConst.NO_EXPERIENCE),
+        ),
       ],
     );
   }
 
-  Widget _buildMyExperiences(BuildContext context, UserEnreda? user) {
+  Widget _buildMyExperiences(BuildContext context, UserEnreda? user, List<Experience> experiences) {
     return Column(
       children: [
         Row(
@@ -1189,9 +1095,9 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ],
         ),
         SpaceH4(),
-        _buildProfesionalExperience(context, user),
+        _buildProfesionalExperience(context, user, experiences),
         SpaceH4(),
-        _buildPersonalExperience(context, user),
+        _buildPersonalExperience(context, user, experiences),
       ],
     );
   }

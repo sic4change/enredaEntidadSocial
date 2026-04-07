@@ -213,6 +213,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
         documentationParticipantId: '',
         documentCategoryId: widget.documentSubCategory.documentCategoryId,
         documentSubCategoryId: widget.documentSubCategory.personalDocId,
+        documentSubCategoryName: widget.documentSubCategory.title,
         createdBy: auth.currentUser!.uid,
       );
       try {

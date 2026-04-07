@@ -4,6 +4,7 @@ import 'package:enreda_empresas/app/models/filterResource.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -84,40 +85,31 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
       ),);
   }
 
-  Widget chipFilter(){
-    final database = Provider.of<Database>(context, listen: false);
-    List<SocialEntitiesType> socialEntityTypes = [];
-    return StreamBuilder<List<SocialEntitiesType>>(
-        stream: database.socialEntitiesTypeStream(),
-        builder: (context, snapshot) {
-          if(!snapshot.hasData) return Container();
-          socialEntityTypes.clear();
-          snapshot.data!.toList().forEach((element) {
-            socialEntityTypes.add(element);
-          });
-          return ChipsChoice<String>.multiple(
-            padding: EdgeInsets.all(5),
-            wrapped: true,
-            value: filterResource.externalSocialEntityTypesIds,
-            onChanged: (val){
-              setState(() => filterResource.externalSocialEntityTypesIds = val);
-            },
-            choiceItems: C2Choice.listFrom<String, SocialEntitiesType>(
-              source: socialEntityTypes,
-              value: (i, v) => v.id,
-              label: (i, v) => v.name,
-            ),
-            choiceBuilder: (item, i) => CustomChip(
-              label: item.label,
-              borderRadius: 17.0,
-              backgroundColor: AppColors.greyChip,
-              selectedBackgroundColor: AppColors.bluePetrol,
-              textColor: AppColors.greyLetter,
-              selected: item.selected,
-              onSelect: item.select!,
-            ),
-          );
-        }
+  Widget chipFilter() {
+    final socialEntityTypes = LocationCache.instance.socialEntitiesTypes;
+    if (socialEntityTypes.isEmpty) return Container();
+    
+    return ChipsChoice<String>.multiple(
+      padding: EdgeInsets.all(5),
+      wrapped: true,
+      value: filterResource.externalSocialEntityTypesIds,
+      onChanged: (val){
+        setState(() => filterResource.externalSocialEntityTypesIds = val);
+      },
+      choiceItems: C2Choice.listFrom<String, SocialEntitiesType>(
+        source: socialEntityTypes,
+        value: (i, v) => v.id,
+        label: (i, v) => v.name,
+      ),
+      choiceBuilder: (item, i) => CustomChip(
+        label: item.label,
+        borderRadius: 17.0,
+        backgroundColor: AppColors.greyChip,
+        selectedBackgroundColor: AppColors.bluePetrol,
+        textColor: AppColors.greyLetter,
+        selected: item.selected,
+        onSelect: item.select!,
+      ),
     );
   }
 

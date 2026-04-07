@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import '../../../../models/documentCategory.dart';
 import '../../../../models/documentationParticipant.dart';
 import '../../../../services/auth.dart';
@@ -136,17 +137,10 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
                     documentParticipant.renovationDate == null ? Container(width: Responsive.isMobile(context) ? 50 : 85) :
                       CustomTextSmall(text: formatter.format(documentParticipant.renovationDate!), color: AppColors.primary900,),
                     Spacer(),
-                    Responsive.isMobile(context) ? Container() : StreamBuilder<UserEnreda>(
-                        stream: database.userEnredaStreamByUserId(documentParticipant.createdBy),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) return Container();
-                          if (snapshot.hasData) {
-                            UserEnreda user = snapshot.data!;
-                            String _photo = user.photo ?? '';
-                            return UserProfilePicture(context, _photo);
-                          }
-                          return Container();
-                        }),
+                    Responsive.isMobile(context) ? Container() : _DocumentCreatedByIcon(
+                      userId: documentParticipant.createdBy,
+                      database: database,
+                    ),
                     Spacer(),
                     Container(
                       alignment: Alignment.center,
@@ -180,6 +174,25 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
       },
     );
   }
+}
 
+class _DocumentCreatedByIcon extends StatelessWidget {
+  final String? userId;
+  final Database database;
 
+  const _DocumentCreatedByIcon({required this.userId, required this.database});
+
+  @override
+  Widget build(BuildContext context) {
+    if (userId == null) return Container(width: 25, height: 25);
+    return FutureBuilder<UserEnreda?>(
+      future: LocationCache.instance.getUser(database, userId!),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return Container(width: 25, height: 25);
+        final user = snapshot.data!;
+        // Use photo property which is mapped from profilePic['src'] in UserEnreda.fromMap
+        return UserProfilePicture(context, user.photo ?? '');
+      },
+    );
+  }
 }

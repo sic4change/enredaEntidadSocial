@@ -128,7 +128,7 @@ class UserEnreda {
         abilities.add(ability.toString());
       });
     } catch (e) {
-      print('user not abilities');
+      // No abilities
     }
 
     List<String> interests = [];
@@ -137,7 +137,7 @@ class UserEnreda {
         interests.add(interest.toString());
       });
     } catch (e) {
-      print('user not interests');
+      // No interests
     }
 
     List<String> specificInterests = [];
@@ -146,7 +146,7 @@ class UserEnreda {
         specificInterests.add(specificInterest.toString());
       });
     } catch (e) {
-      print('user not specific intersts');
+      // No specificInterests
     }
 
     List<String> keepLearningOptions = [];
@@ -155,14 +155,14 @@ class UserEnreda {
         keepLearningOptions.add(keepLearningOption.toString());
       });
     } catch (e) {
-      print('user not keepLearningOptions');
+      // No keepLearningOptions
     }
 
     List<String> certifications = [];
     try {
       data['certifications'].forEach((certification) {certifications.add(certification.toString());});
     } catch (e) {
-      print('user does not have certifications');
+      // No certifications
     }
 
     final ProfilePic profilePic = new ProfilePic(src: photo, title: 'photo.jpg');
@@ -189,7 +189,7 @@ class UserEnreda {
         dataOfInterest.add(interest.toString());
       });
     } catch (e) {
-      print('user does not have data of interest');
+      // No data of interest
     }
 
     List<Language> languagesLevels = [];

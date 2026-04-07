@@ -94,67 +94,69 @@ class _AccessPageWebState extends State<AccessPageWeb> {
                         padding: EdgeInsets.only(left: Sizes.mainPadding,
                             right: Sizes.mainPadding, bottom: Sizes.mainPadding,
                             top: Sizes.mainPadding * 2),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              color: Colors.transparent,
-                              height: 50,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Expanded(child: Container()),
-                                  Image.asset(
-                                    ImagePath.LOGO,
-                                    height: Sizes.HEIGHT_100,
-                                  ),
-                                ],
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                color: Colors.transparent,
+                                height: 50,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Expanded(child: Container()),
+                                    Image.asset(
+                                      ImagePath.LOGO,
+                                      height: Sizes.HEIGHT_100,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Spacer(),
-                            Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          StringConst.LOOKING_FOR_OPPORTUNITIES,
-                                          textAlign: TextAlign.center,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 3,
-                                          style: textTheme.bodyLarge?.copyWith(
-                                            height: 1.5,
-                                            color: AppColors.primary900,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: fontSize,
+                              SpaceH30(),
+                              Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            StringConst.LOOKING_FOR_OPPORTUNITIES,
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 3,
+                                            style: textTheme.bodyLarge?.copyWith(
+                                              height: 1.5,
+                                              color: AppColors.primary900,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: fontSize,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                SpaceH12(),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                                  child: EmailSignInFormChangeNotifier.create(context),
-                                ),
-                                SpaceH4(),
-                                kIsWeb ? buildStoresButtons(context) : Container(),
-                                SpaceH4(),
-                                kIsWeb ? Text(
-                                  StringConst.BETTER_FROM_APPS,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    height: 1.5,
-                                    color: AppColors.primary900,
+                                  SpaceH12(),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                                    child: EmailSignInFormChangeNotifier.create(context),
                                   ),
-                                ) : Container(),
-                              ],
-                            ),
-                            Spacer(),
-                          ],
+                                  SpaceH4(),
+                                  kIsWeb ? buildStoresButtons(context) : Container(),
+                                  SpaceH4(),
+                                  kIsWeb ? Text(
+                                    StringConst.BETTER_FROM_APPS,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      height: 1.5,
+                                      color: AppColors.primary900,
+                                    ),
+                                  ) : Container(),
+                                ],
+                              ),
+                              SpaceH30(),
+                            ],
+                          ),
                         ),
                       )),
                 ],
@@ -228,65 +230,67 @@ class _AccessPageWebState extends State<AccessPageWeb> {
                       flex: 5,
                       child: Padding(
                         padding: EdgeInsets.all(Sizes.mainPadding),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 10.0, top: 50),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Image.asset(
-                                    ImagePath.LOGO,
-                                    height: Sizes.HEIGHT_74,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Spacer(),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 10.0, top: 50),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Container(
-                                      width: 34,
+                                    Image.asset(
+                                      ImagePath.LOGO,
+                                      height: Sizes.HEIGHT_74,
                                     ),
-                                    Spacer(),
-                                    Text(
-                                      StringConst.LOOKING_FOR_OPPORTUNITIES,
-                                      textAlign: TextAlign.center,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 3,
-                                      style: textTheme.bodyLarge?.copyWith(
-                                        height: 1.5,
-                                        color: AppColors.primary900,
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: fontSize,
-                                      ),
-                                    ),
-                                    Spacer(),
                                   ],
                                 ),
-                                SpaceH12(),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                                  child: EmailSignInFormChangeNotifier.create(context),
-                                ),
-                                SpaceH4(),
-                                kIsWeb ? buildStoresButtons(context) : Container(),
-                                SpaceH4(),
-                                kIsWeb ? Text(
-                                  StringConst.BETTER_FROM_APPS,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    height: 1.5,
-                                    color: AppColors.primary900,
+                              ),
+                              SpaceH30(),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 34,
+                                      ),
+                                      Spacer(),
+                                      Text(
+                                        StringConst.LOOKING_FOR_OPPORTUNITIES,
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 3,
+                                        style: textTheme.bodyLarge?.copyWith(
+                                          height: 1.5,
+                                          color: AppColors.primary900,
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: fontSize,
+                                        ),
+                                      ),
+                                      Spacer(),
+                                    ],
                                   ),
-                                ) : Container(),
-                              ],
-                            ),
-                            Spacer(),
-                          ],
+                                  SpaceH12(),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                                    child: EmailSignInFormChangeNotifier.create(context),
+                                  ),
+                                  SpaceH4(),
+                                  kIsWeb ? buildStoresButtons(context) : Container(),
+                                  SpaceH4(),
+                                  kIsWeb ? Text(
+                                    StringConst.BETTER_FROM_APPS,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      height: 1.5,
+                                      color: AppColors.primary900,
+                                    ),
+                                  ) : Container(),
+                                ],
+                              ),
+                              SpaceH30(),
+                            ],
+                          ),
                         ),
                       )),
                 ],

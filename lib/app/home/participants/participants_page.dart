@@ -17,6 +17,7 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
+import 'package:enreda_empresas/app/services/algolia_search.dart';
 
 class ParticipantsListPage extends StatefulWidget {
   const ParticipantsListPage({super.key});
@@ -143,121 +144,120 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
       return Center(child: Text(_errorMessage, style: const TextStyle(color: Colors.red)));
     }
 
-    return StreamBuilder<void>(
-      stream: LocationCache.instance.paginationUpdates,
-      builder: (context, snapshot) {
-        return ValueListenableBuilder<String>(
-          valueListenable: searchText,
-          builder: (context, selectedSearchValue, child) {
-            final textTheme = Theme.of(context).textTheme;
-            final allUsers = LocationCache.instance.allParticipants;
-            
-            // Local filtering
-            final filter = selectedSearchValue.toLowerCase().trim();
-            final filteredUsers = allUsers.where((user) {
-              if (filter.isEmpty) return true;
-              final firstName = (user.firstName ?? '').toLowerCase();
-              final lastName = (user.lastName ?? '').toLowerCase();
-              final email = (user.email).toLowerCase();
-              
-              final searchListChallenge = (firstName + ';' + lastName + ';' + email).split(';');
-              final searchListFilter = filter.split(' ');
-              
-              bool matches = false;
-              for (var searchToken in searchListFilter) {
-                 if (searchListChallenge.any((field) => field.contains(searchToken))) {
-                    matches = true;
-                 }
+    return ValueListenableBuilder<String>(
+      valueListenable: searchText,
+      builder: (context, selectedSearchValue, child) {
+        final query = selectedSearchValue.trim();
+        if (query.isNotEmpty) {
+          // Task 3: Switch to Algolia Search results
+          return FutureBuilder<List<UserEnreda>>(
+            future: AlgoliaSearch.queryParticipants(query),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
               }
-              return matches;
-            }).toList();
+              final searchResults = snapshot.data ?? [];
+              return _buildListBody(context, searchResults, isAlgolia: true);
+            },
+          );
+        }
 
-            // "Mis Participantes"
-            final myParticipants = filteredUsers
-                .where((u) => u.assignedEntityId == socialEntityUser.socialEntityId! &&
-                    u.assignedById == socialEntityUser.userId)
-                .toList();
-
-            // "Todos los participantes"
-            final allOtherParticipants = filteredUsers
-                .where((u) => !myParticipants.contains(u))
-                .toList();
-
-            return SingleChildScrollView(
-              controller: _scrollController,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: Responsive.isMobile(context)
-                          ? EdgeInsets.all(Sizes.mainPadding)
-                          : const EdgeInsets.all(8.0),
-                      child: FilterTextFieldRow(
-                        searchTextController: _searchTextController,
-                        onPressed: () async {
-                          searchText.value = _searchTextController.text;
-                        },
-                        onFieldSubmitted: (value) => _setState(_searchTextController.text),
-                        clearFilter: () => _clearFilter(),
-                        hintText: 'Busca por nombre, apellidos, correo electrónico...',
-                      ),
-                    ),
-                    SpaceH12(),
-                    Text(
-                      StringConst.MY_PARTICIPANTS,
-                      style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.turquoiseBlue),
-                    ),
-                    SpaceH20(),
-                    ParticipantsItemBuilder(
-                        usersList: myParticipants,
-                        emptyMessage: 'No hay participantes gestionados por ti',
-                        itemBuilder: (context, user) {
-                          return ParticipantsListTile(
-                              user: user,
-                              socialEntityUserId: socialEntityUser.socialEntityId!,
-                              onTap: () => setState(() {
-                                    globals.currentParticipant = user;
-                                    ParticipantsListPage.selectedIndex.value = 1;
-                                  }));
-                        }),
-                    SpaceH40(),
-                    Text(
-                      StringConst.allParticipants(_socialEntity?.name ?? ''),
-                      style: textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.turquoiseBlue,
-                      ),
-                    ),
-                    SpaceH20(),
-                    ParticipantsItemBuilder(
-                        usersList: allOtherParticipants,
-                        emptyMessage: 'No hay participantes gestionados por tu entidad',
-                        itemBuilder: (context, user) {
-                          return ParticipantsListTile(
-                              user: user,
-                              socialEntityUserId: socialEntityUser.socialEntityId!,
-                              onTap: () => setState(() {
-                                    globals.currentParticipant = user;
-                                    ParticipantsListPage.selectedIndex.value = 1;
-                                  }));
-                        }),
-                    if (LocationCache.instance.isLoadingParticipants)
-                      const Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    SpaceH40(),
-                  ],
-                ),
-              ),
-            );;
+        // Task 3 fallback: Firestore Paginated List
+        return StreamBuilder<void>(
+          stream: LocationCache.instance.paginationUpdates,
+          builder: (context, snapshot) {
+            final allUsers = LocationCache.instance.allParticipants;
+            return _buildListBody(context, allUsers, isAlgolia: false);
           },
         );
       },
+    );
+  }
+
+  Widget _buildListBody(BuildContext context, List<UserEnreda> users, {required bool isAlgolia}) {
+    final textTheme = Theme.of(context).textTheme;
+
+    // Filter by entity/curator (My vs All)
+    final myParticipants = users
+        .where((u) => u.assignedEntityId == socialEntityUser.socialEntityId! &&
+            u.assignedById == socialEntityUser.userId)
+        .toList();
+
+    final allOtherParticipants = users
+        .where((u) => !myParticipants.contains(u))
+        .toList();
+
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: Responsive.isMobile(context)
+                  ? EdgeInsets.all(Sizes.mainPadding)
+                  : const EdgeInsets.all(8.0),
+              child: FilterTextFieldRow(
+                searchTextController: _searchTextController,
+                onPressed: () async {
+                  searchText.value = _searchTextController.text;
+                },
+                onFieldSubmitted: (value) => _setState(_searchTextController.text),
+                clearFilter: () => _clearFilter(),
+                hintText: 'Busca por nombre, apellidos, correo electrónico...',
+              ),
+            ),
+            SpaceH12(),
+            Text(
+              isAlgolia ? "Resultados de búsqueda: Mis" : StringConst.MY_PARTICIPANTS,
+              style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.turquoiseBlue),
+            ),
+            SpaceH20(),
+            ParticipantsItemBuilder(
+                usersList: myParticipants,
+                emptyMessage: isAlgolia ? 'No se encontraron resultados en tus participantes' : 'No hay participantes gestionados por ti',
+                itemBuilder: (context, user) {
+                  return ParticipantsListTile(
+                      user: user,
+                      socialEntityUserId: socialEntityUser.socialEntityId!,
+                      onTap: () => setState(() {
+                            globals.currentParticipant = user;
+                            ParticipantsListPage.selectedIndex.value = 1;
+                          }));
+                }),
+            SpaceH40(),
+            Text(
+              isAlgolia ? "Resultados de búsqueda: Todos" : StringConst.allParticipants(_socialEntity?.name ?? ''),
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.turquoiseBlue,
+              ),
+            ),
+            SpaceH20(),
+            ParticipantsItemBuilder(
+                usersList: allOtherParticipants,
+                emptyMessage: isAlgolia ? 'No se encontraron resultados en la entidad' : 'No hay participantes gestionados por tu entidad',
+                itemBuilder: (context, user) {
+                  return ParticipantsListTile(
+                      user: user,
+                      socialEntityUserId: socialEntityUser.socialEntityId!,
+                      onTap: () => setState(() {
+                            globals.currentParticipant = user;
+                            ParticipantsListPage.selectedIndex.value = 1;
+                          }));
+                }),
+            if (!isAlgolia && LocationCache.instance.isLoadingParticipants)
+              const Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            SpaceH40(),
+          ],
+        ),
+      ),
     );
   }
 
