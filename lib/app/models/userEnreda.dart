@@ -55,6 +55,7 @@ class UserEnreda {
     this.ipilObjectivesId,
     this.startDateItinerary,
     this.programId,
+    this.dni,
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -247,6 +248,7 @@ class UserEnreda {
     final String? nationality = data['nationality'] ?? '';
     final String? ipilObjectivesId = data['ipilObjectivesId'];
     final String? programId = data['programId'];
+    final String? dni = data['dni'] ?? '';
 
     return UserEnreda(
       email: email,
@@ -295,6 +297,7 @@ class UserEnreda {
       ipilObjectivesId: ipilObjectivesId,
       startDateItinerary: startDateItinerary,
       programId: programId,
+      dni: dni,
     );
   }
 
@@ -344,6 +347,7 @@ class UserEnreda {
   final String? ipilObjectivesId;
   DateTime? startDateItinerary;
   late String? programId;
+  late String? dni;
 
   @override
   bool operator ==(Object other){
@@ -396,6 +400,7 @@ class UserEnreda {
       'ipilObjectivesId': ipilObjectivesId,
       'startDateItinerary': startDateItinerary,
       'programId': programId,
+      'dni': dni,
     };
   }
 
@@ -448,6 +453,7 @@ class UserEnreda {
     String? ipilObjectivesId,
     DateTime? startDateItinerary,
     String? programId,
+    String? dni,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -494,6 +500,7 @@ class UserEnreda {
       ipilObjectivesId: ipilObjectivesId ?? this.ipilObjectivesId,
       startDateItinerary: startDateItinerary ?? this.startDateItinerary,
       programId: programId ?? this.programId,
+      dni: dni ?? this.dni,
     );
   }
 

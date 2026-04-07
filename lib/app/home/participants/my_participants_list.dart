@@ -9,6 +9,7 @@ import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/my_custom_scroll_behavior.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
@@ -68,99 +69,85 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
                       final socialEntity = entitySnapshot.data!;
                       final programs = socialEntity.programs ?? [];
 
-                      // Step 3: Query participants from both sources (assigned and shared programs)
+                      // Step 3: Query participants from cache
+                      LocationCache.instance.startParticipantsStream(database, socialEntityUser.socialEntityId!, programs);
                       return StreamBuilder<List<UserEnreda>>(
-                        stream: database.getParticipantsByProgramsStream(programs),
-                        builder: (context, programSnapshot) {
-                          return StreamBuilder<List<UserEnreda>>(
-                            stream: database.getParticipantsBySocialEntityStream(socialEntityUser.socialEntityId!),
-                            builder: (context, assignedSnapshot) {
-                              if (programSnapshot.hasData || assignedSnapshot.hasData) {
-                                final programUsers = programSnapshot.data ?? [];
-                                final assignedUsers = assignedSnapshot.data ?? [];
-
-                                // Merge and deduplicate
-                                final Map<String, UserEnreda> allUsersMap = {};
-                                for (var u in assignedUsers) {
-                                  if (u.userId != null) allUsersMap[u.userId!] = u;
-                                }
-                                for (var u in programUsers) {
-                                  if (u.userId != null) allUsersMap[u.userId!] = u;
-                                }
-
-                                final participants = allUsersMap.values.toList();
-                                participants.sort((lhs, rhs) => (lhs.firstName ?? "").compareTo(rhs.firstName ?? ""));
-                            final myParticipants = participants.toList();
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 382,
-                                  color: Colors.white,
-                                  child: ScrollConfiguration(
-                                    behavior: MyCustomScrollBehavior(),
-                                    child: ListView(
-                                      controller: controller,
-                                      scrollDirection: Axis.horizontal,
-                                      children: myParticipants.map((user) {
-                                        return Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: ParticipantsListTile(
-                                              user: user,
-                                              socialEntityUserId: socialEntityUser.socialEntityId!,
-                                              onTap: () => setState(() {
-                                                globals.currentParticipant = user;
-                                                WebHome.goToParticipants();
-                                                ParticipantsListPage.selectedIndex.value = 1;
-                                              })
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
+                        stream: LocationCache.instance.participantsStream,
+                        initialData: LocationCache.instance.cachedParticipants,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData && LocationCache.instance.cachedParticipants == null) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          
+                          final participants = snapshot.data?.toList() ?? LocationCache.instance.cachedParticipants?.toList() ?? [];
+                          final myParticipants = participants;
+                          
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 382,
+                                color: Colors.white,
+                                child: ScrollConfiguration(
+                                  behavior: MyCustomScrollBehavior(),
+                                  child: ListView(
+                                    controller: controller,
+                                    scrollDirection: Axis.horizontal,
+                                    children: myParticipants.map((user) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: ParticipantsListTile(
+                                            user: user,
+                                            socialEntityUserId: socialEntityUser.socialEntityId!,
+                                            onTap: () => setState(() {
+                                              globals.currentParticipant = user;
+                                              WebHome.goToParticipants();
+                                              ParticipantsListPage.selectedIndex.value = 1;
+                                            })
+                                        ),
+                                      );
+                                    }).toList(),
                                   ),
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        if (controller.position.pixels >=
-                                            controller.position.minScrollExtent)
-                                          controller.animateTo(
-                                              controller.position.pixels - scrollJump,
-                                              duration: Duration(milliseconds: 500),
-                                              curve: Curves.ease);
-                                      },
-                                      child: Image.asset(
-                                        ImagePath.ARROW_BACK,
-                                        width: 36.0,
-                                      ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      if (controller.position.pixels >=
+                                          controller.position.minScrollExtent)
+                                        controller.animateTo(
+                                            controller.position.pixels - scrollJump,
+                                            duration: Duration(milliseconds: 500),
+                                            curve: Curves.ease);
+                                    },
+                                    child: Image.asset(
+                                      ImagePath.ARROW_BACK,
+                                      width: 36.0,
                                     ),
-                                    SpaceW12(),
-                                    InkWell(
-                                      onTap: () {
-                                        if (controller.position.pixels <=
-                                            controller.position.maxScrollExtent)
-                                          controller.animateTo(
-                                              controller.position.pixels + scrollJump,
-                                              duration: Duration(milliseconds: 500),
-                                              curve: Curves.ease);
-                                      },
-                                      child: Image.asset(
-                                        ImagePath.ARROW_FORWARD,
-                                        width: 36.0,
-                                      ),
+                                  ),
+                                  SpaceW12(),
+                                  InkWell(
+                                    onTap: () {
+                                      if (controller.position.pixels <=
+                                          controller.position.maxScrollExtent)
+                                        controller.animateTo(
+                                            controller.position.pixels + scrollJump,
+                                            duration: Duration(milliseconds: 500),
+                                            curve: Curves.ease);
+                                    },
+                                    child: Image.asset(
+                                      ImagePath.ARROW_FORWARD,
+                                      width: 36.0,
                                     ),
-                                  ],
-                                ),
-                              ],
-                            );
-                              } else {
-                                return Center(child: CircularProgressIndicator());
-                              }
-                            },
+                                  ),
+                                ],
+                              ),
+                            ],
                           );
-                        });
+                        }
+                      );
                     }
                   );
                 }

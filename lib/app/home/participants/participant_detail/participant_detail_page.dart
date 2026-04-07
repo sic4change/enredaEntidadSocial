@@ -10,9 +10,11 @@ import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/derivationReport.dart';
 import 'package:enreda_empresas/app/models/documentationParticipant.dart';
+import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -58,19 +60,26 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     }
     final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<UserEnreda>(
-      stream: database.userEnredaStreamByUserId(participantUser.assignedById),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          String techName = snapshot.data?.firstName ?? '';
-          String techLastName = snapshot.data?.lastName ?? '';
-          techNameComplete = '$techName $techLastName';
-          return Responsive.isDesktop(context)? _buildParticipantWeb(context, participantUser, techNameComplete):
-          _buildParticipantMobile(context, participantUser, techNameComplete);
-        } else {
-          return Responsive.isDesktop(context)? _buildParticipantWeb(context, participantUser, techNameComplete):
-          _buildParticipantMobile(context, participantUser, techNameComplete);
-        }
-      },
+      stream: database.userEnredaStreamByUserId(participantUser.userId),
+      builder: (context, participantSnapshot) {
+        UserEnreda currentUser = participantSnapshot.data ?? participantUser;
+        return StreamBuilder<UserEnreda>(
+          stream: database.userEnredaStreamByUserId(currentUser.assignedById),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              String techName = snapshot.data?.firstName ?? '';
+              String techLastName = snapshot.data?.lastName ?? '';
+              techNameComplete = '$techName $techLastName';
+              return Responsive.isDesktop(context)? _buildParticipantWeb(context, currentUser, techNameComplete):
+              _buildParticipantMobile(context, currentUser, techNameComplete);
+            } else {
+              techNameComplete = null;
+              return Responsive.isDesktop(context)? _buildParticipantWeb(context, currentUser, techNameComplete):
+              _buildParticipantMobile(context, currentUser, techNameComplete);
+            }
+          },
+        );
+      }
     );
   }
 
@@ -359,6 +368,20 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                           ],
                         ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 30),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.assignment_ind,
+                              color: AppColors.darkGray,
+                              size: 22.0,
+                            ),
+                            const SpaceW4(),
+                            _buildDniWidget(context, user),
+                          ],
+                        ),
+                      ),
                       _buildMyLocation(context, user),
                     ],
                   )
@@ -497,6 +520,18 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             CustomTextSmall(text: user.phone ?? '',)
           ],
         ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.assignment_ind,
+              color: AppColors.darkGray,
+              size: 14.0,
+            ),
+            const SpaceW4(),
+            _buildDniWidget(context, user),
+          ],
+        ),
         _buildMyLocation(context, user),
         SpaceH40(),
         Center(
@@ -512,54 +547,55 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     );
   }
 
-  Widget _buildMyLocation(BuildContext context, UserEnreda? user) {
+  Widget _buildDniWidget(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
-    Country? myCountry;
-    Province? myProvince;
-    City? myCity;
-    String? city;
-    String? province;
-    String? country;
 
-    return StreamBuilder<Country>(
-        stream: database.countryStream(user?.address?.country),
-        builder: (context, snapshot) {
-          myCountry = snapshot.data;
-          return StreamBuilder<Province>(
-              stream: database.provinceStream(user?.address?.province),
-              builder: (context, snapshot) {
-                myProvince = snapshot.data;
+    return StreamBuilder<InitialReport>(
+      stream: database.initialReportsStreamByUserId(user.userId),
+      builder: (context, snapshotReport) {
+        // 1. Check InitialReport.dniParticipant first
+        final dniFromReport = snapshotReport.data?.dniParticipant;
+        if (dniFromReport != null && dniFromReport.trim().isNotEmpty) {
+          return CustomTextSmall(text: dniFromReport);
+        }
 
-                return StreamBuilder<City>(
-                    stream: database.cityStream(user?.address?.city),
-                    builder: (context, snapshot) {
-                      myCity = snapshot.data;
-                      city = myCity?.name ?? '';
-                      province = myProvince?.name ?? '';
-                      country = myCountry?.name ?? '';
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            color: Colors.black.withOpacity(0.7),
-                            size: Responsive.isDesktop(context) && !Responsive.isDesktopS(context)? 22: 14,
-                          ),
-                          const SpaceW4(),
-                          /*Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CustomTextSmall(text: city ?? ''),
-                              CustomTextSmall(text: province ?? ''),
-                              CustomTextSmall(text: country ?? ''),
-                            ],
-                          ),*/
-                          CustomTextSmall(text: city ?? ''),
-                        ],
-                      );
-                    });
-              });
-        });
+        // 2. Fall back to user.dni stored in user object
+        if (user.dni != null && user.dni!.trim().isNotEmpty) {
+          return CustomTextSmall(text: user.dni!);
+        }
+
+        // 3. Fall back to the name of the most recent documentación personal vigente
+        return StreamBuilder<List<DocumentationParticipant>>(
+          stream: database.documentationParticipantByUserStream(user.userId ?? ''),
+          builder: (context, snapshotDocs) {
+            if (snapshotDocs.hasData && snapshotDocs.data!.isNotEmpty) {
+              final sorted = List<DocumentationParticipant>.from(snapshotDocs.data!)
+                ..sort((a, b) => b.createDate.compareTo(a.createDate));
+              return CustomTextSmall(text: sorted.first.name);
+            }
+            return const SizedBox.shrink();
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildMyLocation(BuildContext context, UserEnreda? user) {
+    City? myCity = LocationCache.instance.cityById(user?.address?.city);
+    String city = myCity?.name ?? '';
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.location_on,
+          color: Colors.black.withOpacity(0.7),
+          size: Responsive.isDesktop(context) && !Responsive.isDesktopS(context)? 22: 14,
+        ),
+        const SpaceW4(),
+        CustomTextSmall(text: city),
+      ],
+    );
   }
 }

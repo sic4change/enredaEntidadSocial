@@ -2214,6 +2214,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                 widget.user.startDateItinerary = _dateValues['completedDate'];
                                 widget.user.initialReportId = initialReportSaved.initialReportId;
                                 widget.user.programId = _selectedProgramId;
+                                widget.user.dni = _controllers['dniParticipant']!.text;
                               });
                               database.setUserEnreda(widget.user);
                               database.setInitialReport(InitialReport(
@@ -2509,6 +2510,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                             widget.user.startDateItinerary = _dateValues['completedDate'];
                                             widget.user.initialReportId = initialReportSaved.initialReportId;
                                             widget.user.programId = _selectedProgramId;
+                                            widget.user.dni = _controllers['dniParticipant']!.text;
                                           });
                                           database.setUserEnreda(widget.user);
                                           database.setInitialReport(InitialReport(

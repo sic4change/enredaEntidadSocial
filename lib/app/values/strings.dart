@@ -607,6 +607,7 @@ class StringConst {
   static const String DERIVATION_REPORT = "Informe de derivación";
   static const String CLOSURE_REPORT = "Informe de cierre";
   static const String QUESTIONNAIRES = "Cuestionarios";
+  static const String DNI_NIE = "DNI/NIE";
   static const String EMPTY_FORM_ERROR = "Tiene varios campos vacíos";
   static const String WANNA_REMOVE = "¿Desea borrarlos?";
   static const String NO = "No";

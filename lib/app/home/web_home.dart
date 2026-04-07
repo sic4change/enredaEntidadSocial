@@ -12,6 +12,7 @@ import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/sign_in/access/access_page.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/functions.dart';
@@ -119,6 +120,7 @@ class _WebHomeState extends State<WebHome> {
                                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                                 if (snapshot.hasData) {
                                   var socialEntity = snapshot.data!;
+                                  LocationCache.instance.warmUpAll(database);
                                   globals.currentUserSocialEntity = socialEntity;
                                   return _buildContent(context, socialEntity, user, profilePic, userName);
                                 }

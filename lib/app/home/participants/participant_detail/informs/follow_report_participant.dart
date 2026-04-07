@@ -3028,6 +3028,10 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   width: 250,
                   child: ElevatedButton(
                       onPressed: () async {
+                        setState(() {
+                          widget.user.dni = _controllers['dniParticipant']!.text;
+                        });
+                        database.setUserEnreda(widget.user);
                         database.setFollowReport(FollowReport(
                           userId: report.userId,
                           followReportId: report.followReportId,
@@ -3341,6 +3345,10 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                 ),
                                 ElevatedButton(
                                     onPressed: () async {
+                                      setState(() {
+                                        widget.user.dni = _controllers['dniParticipant']!.text;
+                                      });
+                                      database.setUserEnreda(widget.user);
                                       database.setFollowReport(
                                           FollowReport(
                                             userId: report.userId,
