@@ -141,6 +141,8 @@ abstract class Database {
      Stream<List<DocumentationParticipant>> documentationParticipantByUserStream(String userId);
      Stream<List<UserEnreda>> filteredParticipantsStream(String filter, String socialEntityId);
      Stream<List<UserEnreda>> filteredParticipantsByProgramsStream(String filter, List<String> programs);
+     Future<(List<UserEnreda>, DocumentSnapshot?)> getParticipantsByEntityPaginated(String socialEntityId, {int limit = 10, DocumentSnapshot? startAfterDocument});
+     Future<(List<UserEnreda>, DocumentSnapshot?)> getParticipantsByProgramsPaginated(List<String> programs, {int limit = 10, DocumentSnapshot? startAfterDocument});
 
 
      Future<void> setUserEnreda(UserEnreda userEnreda);
@@ -226,6 +228,12 @@ abstract class Database {
      Future<void> setIpilObjectives(IpilObjectives ipilObjectives);
      Future<void> addIpilObjectives(IpilObjectives ipilObjectives);
      Future<void> deleteDocumentationParticipant(DocumentationParticipant document);
+     Future<List<Competency>> getCompetencies();
+     Future<List<Interest>> getInterests();
+     Future<List<Ability>> getAbilities();
+     Future<SocialEntity?> getSocialEntity(String id);
+     Future<UserEnreda?> getUser(String id);
+     Future<InitialReport?> getInitialReport(String userId);
 }
 
 class FirestoreDatabase implements Database {
@@ -628,6 +636,31 @@ class FirestoreDatabase implements Database {
       queryBuilder: (query) => query.where('assignedEntityId', isEqualTo: socialEntityId),
       builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
       sort: (lhs, rhs) => (lhs.firstName??"").compareTo(rhs.firstName??""),
+    );
+  }
+
+  @override
+  Future<(List<UserEnreda>, DocumentSnapshot?)> getParticipantsByEntityPaginated(String socialEntityId, {int limit = 10, DocumentSnapshot? startAfterDocument}) {
+    return _service.paginatedCollectionGet<UserEnreda>(
+      path: APIPath.users(),
+      queryBuilder: (query) => query.where('assignedEntityId', isEqualTo: socialEntityId),
+      builder: (data, documentId, snapshot) => UserEnreda.fromMap(data, documentId),
+      limit: limit,
+      startAfterDocument: startAfterDocument,
+    );
+  }
+
+  @override
+  Future<(List<UserEnreda>, DocumentSnapshot?)> getParticipantsByProgramsPaginated(List<String> programs, {int limit = 10, DocumentSnapshot? startAfterDocument}) {
+    if (programs.isEmpty) {
+      return Future.value((<UserEnreda>[], null));
+    }
+    return _service.paginatedCollectionGet<UserEnreda>(
+      path: APIPath.users(),
+      queryBuilder: (query) => query.where('programId', whereIn: programs.take(10).toList()),
+      builder: (data, documentId, snapshot) => UserEnreda.fromMap(data, documentId),
+      limit: limit,
+      startAfterDocument: startAfterDocument,
     );
   }
 
@@ -1866,6 +1899,49 @@ class FirestoreDatabase implements Database {
     );
   }
 
+  @override
+  Future<List<Competency>> getCompetencies() => _service.getCollection(
+    path: APIPath.competencies(),
+    builder: (data, documentId) => Competency.fromMap(data, documentId),
+    limit: 1000,
+  );
+
+  @override
+  Future<List<Interest>> getInterests() => _service.getCollection(
+    path: APIPath.interests(),
+    builder: (data, documentId) => Interest.fromMap(data, documentId),
+    limit: 1000,
+  );
+
+  @override
+  Future<List<Ability>> getAbilities() => _service.getCollection(
+    path: APIPath.abilities(),
+    builder: (data, documentId) => Ability.fromMap(data, documentId),
+    limit: 1000,
+  );
+
+  @override
+  Future<SocialEntity?> getSocialEntity(String id) => _service.getDocument(
+    path: APIPath.socialEntity(id),
+    builder: (data, documentId) => SocialEntity.fromMap(data, documentId),
+  );
+
+  @override
+  Future<UserEnreda?> getUser(String id) => _service.getDocument(
+    path: APIPath.user(id),
+    builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+  );
+
+  @override
+  Future<InitialReport?> getInitialReport(String userId) async {
+    final reports = await _service.getCollection(
+      path: APIPath.initialReports(),
+      queryBuilder: (q) => q.where('userId', isEqualTo: userId),
+      builder: (data, documentId) => InitialReport.fromMap(data, documentId),
+      limit: 1,
+    );
+    return reports.isNotEmpty ? reports.first : null;
+  }
 }
 
 

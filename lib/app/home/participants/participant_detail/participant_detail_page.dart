@@ -76,25 +76,19 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
       builder: (context, participantSnapshot) {
         UserEnreda currentUser = participantSnapshot.data ?? participantUser;
 
-        if (_cachedAssignedId != currentUser.assignedById) {
-          _cachedAssignedId = currentUser.assignedById;
-          _assignedStream = _cachedAssignedId == null ? null : _db!.userEnredaStreamByUserId(_cachedAssignedId!);
-        }
-
-        return StreamBuilder<UserEnreda>(
-          stream: _assignedStream,
+        return FutureBuilder<UserEnreda?>(
+          future: currentUser.assignedById != null 
+              ? LocationCache.instance.getUser(_db!, currentUser.assignedById!) 
+              : Future.value(null),
           builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              String techName = snapshot.data?.firstName ?? '';
-              String techLastName = snapshot.data?.lastName ?? '';
+            String? techNameComplete;
+            if (snapshot.hasData && snapshot.data != null) {
+              String techName = snapshot.data!.firstName ?? '';
+              String techLastName = snapshot.data!.lastName ?? '';
               techNameComplete = '$techName $techLastName';
-              return Responsive.isDesktop(context)? _buildParticipantWeb(context, currentUser, techNameComplete):
-              _buildParticipantMobile(context, currentUser, techNameComplete);
-            } else {
-              techNameComplete = null;
-              return Responsive.isDesktop(context)? _buildParticipantWeb(context, currentUser, techNameComplete):
-              _buildParticipantMobile(context, currentUser, techNameComplete);
             }
+            return Responsive.isDesktop(context)? _buildParticipantWeb(context, currentUser, techNameComplete):
+              _buildParticipantMobile(context, currentUser, techNameComplete);
           },
         );
       }
@@ -568,8 +562,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   Widget _buildDniWidget(BuildContext context, UserEnreda user) {
     final database = Provider.of<Database>(context, listen: false);
 
-    return StreamBuilder<InitialReport>(
-      stream: database.initialReportsStreamByUserId(user.userId),
+    return FutureBuilder<InitialReport?>(
+      future: database.getInitialReport(user.userId ?? ''),
       builder: (context, snapshotReport) {
         // 1. Check InitialReport.dniParticipant first
         final dniFromReport = snapshotReport.data?.dniParticipant;

@@ -142,4 +142,74 @@ class FirestoreService {
       return result.isNotEmpty? result.first: null;
     });
   }
+
+  Future<(List<T>, DocumentSnapshot?)> paginatedCollectionGet<T>({
+    required String path,
+    required T Function(Map<String, dynamic> data, String documentId, DocumentSnapshot snapshot) builder,
+    Query Function(Query query)? queryBuilder,
+    int Function(T lhs, T rhs)? sort,
+    int limit = 10,
+    DocumentSnapshot? startAfterDocument,
+  }) async {
+    Query query = FirebaseFirestore.instance.collection(path);
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
+    }
+    
+    query = query.limit(limit);
+    if (startAfterDocument != null) {
+      query = query.startAfterDocument(startAfterDocument);
+    }
+
+    final querySnapshot = await query.get();
+    FirestoreMonitor.logRead(path, count: querySnapshot.docs.length);
+    
+    final List<T> result = querySnapshot.docs
+        .map((snapshot) => builder(snapshot.data() as Map<String, dynamic>, snapshot.id, snapshot))
+        .toList();
+
+    if (sort != null) {
+      result.sort(sort);
+    }
+    
+    final DocumentSnapshot? lastDocument = querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
+    return (result, lastDocument);
+  }
+
+  Future<T?> getDocument<T>({
+    required String path,
+    required T Function(Map<String, dynamic> data, String documentId) builder,
+  }) async {
+    FirestoreMonitor.logRead(path, count: 1);
+    final reference = FirebaseFirestore.instance.doc(path);
+    final snapshot = await reference.get();
+    if (snapshot.exists && snapshot.data() != null) {
+      return builder(snapshot.data() as Map<String, dynamic>, snapshot.id);
+    }
+    return null;
+  }
+
+  Future<List<T>> getCollection<T>({
+    required String path,
+    required T Function(Map<String, dynamic> data, String documentId) builder,
+    Query Function(Query query)? queryBuilder,
+    int Function(T lhs, T rhs)? sort,
+    int limit = 1000,
+  }) async {
+    Query query = FirebaseFirestore.instance.collection(path);
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
+    }
+    query = query.limit(limit);
+    final snapshot = await query.get();
+    FirestoreMonitor.logRead(path, count: snapshot.docs.length);
+    
+    final List<T> result = snapshot.docs
+        .map((doc) => builder(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
+    if (sort != null) {
+      result.sort(sort);
+    }
+    return result;
+  }
 }
