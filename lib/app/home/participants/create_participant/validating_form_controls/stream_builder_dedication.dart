@@ -1,28 +1,17 @@
 import 'package:enreda_empresas/app/models/dedication.dart';
-import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 Widget streamBuilderDropdownDedication (BuildContext context, Dedication? selectedDedication,  functionToWriteBackThings ) {
-  final database = Provider.of<Database>(context, listen: false);
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
-  return StreamBuilder<List<Dedication>>(
-      stream: database.dedicationStream(),
-      builder: (context, snapshotDedications){
 
-        List<DropdownMenuItem<Dedication>> dedicationItems = [];
-        if (snapshotDedications.hasData) {
-          dedicationItems = snapshotDedications.data!.map((Dedication dedication) =>
-              DropdownMenuItem<Dedication>(
-                value: dedication,
-                child: Text(dedication.label),
-              ))
-              .toList();
-        }
+  final dedicationItems = LocationCache.instance.dedications
+      .map((Dedication dedication) => DropdownMenuItem<Dedication>(value: dedication, child: Text(dedication.label)))
+      .toList();
 
         return DropdownButtonFormField<Dedication>(
           hint: Text(StringConst.FORM_DEDICATION, maxLines: 2, overflow: TextOverflow.ellipsis),
@@ -62,5 +51,4 @@ Widget streamBuilderDropdownDedication (BuildContext context, Dedication? select
             fontSize: fontSize,
           ),
         );
-      });
 }

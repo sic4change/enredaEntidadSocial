@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:enreda_empresas/app/services/persistence_service.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
@@ -35,6 +37,10 @@ import 'package:enreda_empresas/app/models/gender.dart';
 import 'package:enreda_empresas/app/models/dedication.dart';
 import 'package:enreda_empresas/app/models/keepLearningOption.dart';
 import 'package:enreda_empresas/app/models/documentCategory.dart';
+import 'package:enreda_empresas/app/models/program.dart';
+import 'package:enreda_empresas/app/models/resourcetype.dart';
+import 'package:enreda_empresas/app/models/resourceCategory.dart';
+import 'package:enreda_empresas/app/models/resourcePicture.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 
 class LocationCache {
@@ -78,6 +84,10 @@ class LocationCache {
   List<Dedication> dedications = [];
   List<KeepLearningOption> keepLearningOptions = [];
   List<DocumentCategory> documentCategories = [];
+  List<Program> programs = [];
+  List<ResourceType> resourceTypes = [];
+  List<ResourceCategory> resourceCategories = [];
+  List<ResourcePicture> resourcePictures = [];
   List<String> languages = [];
 
   final Map<String, SocialEntity> socialEntitiesCache = {};
@@ -125,7 +135,8 @@ class LocationCache {
   }
 
   /// Loads all participants for the active entity/programs into session cache.
-  /// Data is fetched in paginated batches internally to avoid giant single queries.
+  /// Data is fetched in paginated batches and the UI is notified after each batch
+  /// so the list renders progressively instead of blocking.
   Future<void> loadAllParticipants(Database database, String socialEntityId, List<String> programs, {int pageSize = 30}) async {
     final normalizedPrograms = programs.toSet().toList();
     final sameScope = _currentEntityId == socialEntityId &&
@@ -155,6 +166,7 @@ class LocationCache {
           normalizedPrograms,
           pageSize,
         );
+        _notifyPaginationListeners();
       }
       _initialLoadDone = true;
     } catch (e) {
@@ -225,15 +237,39 @@ class LocationCache {
   Future<List<T>> _loadOrFetchCatalog<T>(
     String key,
     Future<List<T>> Function() fetchFunction,
-    T Function(Map<String, dynamic> data, String id) fromMap,
-  ) async {
+    T Function(Map<String, dynamic> data, String id) fromMap, {
+    String Function(T)? getDocId,
+  }) async {
     final cached = await PersistenceService.instance.loadCatalog(key);
     if (cached != null && cached.isNotEmpty) {
-      return cached.map((e) => fromMap(e as Map<String, dynamic>, '')).toList();
+      return cached.map((e) {
+        final map = Map<String, dynamic>.from(e as Map<String, dynamic>);
+        final docId = (map.remove('_docId') as String?) ?? '';
+        return fromMap(map, docId);
+      }).toList();
     }
     final fetched = await fetchFunction();
-    await PersistenceService.instance.saveCatalog(key, fetched);
+    await _saveCatalogWithDocIds(key, fetched, getDocId);
     return fetched;
+  }
+
+  Future<void> _saveCatalogWithDocIds<T>(
+    String key, List<T> data, String Function(T)? getDocId,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(data.map((e) {
+      try {
+        final map = (e as dynamic).toMap() as Map<String, dynamic>;
+        map.forEach((k, v) {
+          if (v is DateTime) map[k] = v.toIso8601String();
+        });
+        if (getDocId != null) map['_docId'] = getDocId(e);
+        return map;
+      } catch (_) {
+        return e;
+      }
+    }).toList());
+    await prefs.setString(key, jsonString);
   }
 
   Future<List<String>> _loadOrFetchList(
@@ -251,42 +287,94 @@ class LocationCache {
 
   Future<void> warmUpAll(Database database) {
     if (_warmUpFuture != null) return _warmUpFuture!;
-
-    _warmUpFuture = Future.wait([
-      _loadOrFetchCatalog<Country>('countries', () => database.countriesStream().first, (data, id) => Country.fromMap(data, id)).then((value) => countries = value),
-      // NOTE: provinces, cities — fetched on-demand per country/province via filtered Firestore queries
-      _loadOrFetchCatalog<GamificationFlag>('gamificationFlags', () => database.gamificationFlagsStream().first, (data, id) => GamificationFlag.fromMap(data, id)).then((value) => gamificationFlags = value),
-      _loadOrFetchCatalog<Competency>('competencies', () => database.getCompetencies(), (data, id) => Competency.fromMap(data, id)).then((value) => competencies = value),
-      _loadOrFetchCatalog<Interest>('interests', () => database.getInterests(), (data, id) => Interest.fromMap(data, id)).then((value) => interests = value),
-      _loadOrFetchCatalog<Ability>('abilities', () => database.getAbilities(), (data, id) => Ability.fromMap(data, id)).then((value) => abilities = value),
-      // NOTE: specificInterests — fetched on-demand per interest via filtered Firestore queries
-      _loadOrFetchCatalog<SocialEntitiesType>('socialEntitiesTypes', () => database.socialEntitiesTypeStream().first, (data, id) => SocialEntitiesType.fromMap(data, id)).then((value) => socialEntitiesTypes = value),
-      _loadOrFetchCatalog<PersonalDocumentType>('personalDocumentTypes', () => database.personalDocumentTypeStream().first, (data, id) => PersonalDocumentType.fromMap(data, id)).then((value) => personalDocumentTypes = value),
-      _loadOrFetchCatalog<Education>('educations', () => database.educationStream().first, (data, id) => Education.fromMap(data, id)).then((value) => educations = value).catchError((_) => []),
-      // NOTE: nations (250 docs) and resources (120 docs) are now fetched on-demand
-      database.genderStream().first.then((value) => genders = value).catchError((_) => []),
-      database.dedicationStream().first.then((value) => dedications = value).catchError((_) => []),
-      database.keepLearningOptionsStream().first.then((value) => keepLearningOptions = value).catchError((_) => []),
-      database.documentCategoriesStream().first.then((value) => documentCategories = value).catchError((_) => []),
-      _loadOrFetchList('languages', () => database.languagesStream().first).then((value) => languages = value).catchError((_) => []),
-      // Warm up IPIL Master Data
-      database.getIpilReinforcements([]).then((_) => database.ipilReinforcementStream().first).then((value) => ipilReinforcements = value).catchError((_) => []),
-      database.ipilContextualizationStream().first.then((value) => ipilContextualizations = value).catchError((_) => []),
-      database.ipilConnectionTerritoryStream().first.then((value) => ipilConnectionTerritories = value).catchError((_) => []),
-      database.ipilInterviewsStream().first.then((value) => ipilInterviews = value).catchError((_) => []),
-      database.ipilIntermediationsStream().first.then((value) => ipilIntermediations = value).catchError((_) => []),
-      database.ipilObtainingEmploymentStream().first.then((value) => ipilObtainingEmployments = value).catchError((_) => []),
-      database.ipilImprovingEmploymentStream().first.then((value) => ipilImprovingEmployments = value).catchError((_) => []),
-      database.ipilPostWorkSupportStream().first.then((value) => ipilPostWorkSupports = value).catchError((_) => []),
-      database.ipilCoordinationStream().first.then((value) => ipilCoordinations = value).catchError((_) => []),
-      database.ipilLegalStream().first.then((value) => ipilLegals = value).catchError((_) => []),
-      database.ipilEconomicBagStream().first.then((value) => ipilEconomicBags = value).catchError((_) => []),
-      database.ipilSpecificSkillsStream().first.then((value) => ipilSpecificSkills = value).catchError((_) => []),
-      database.ipilSoftSkillsStream().first.then((value) => ipilSoftSkills = value).catchError((_) => []),
-      database.ipilDigitalSkillsStream().first.then((value) => ipilDigitalSkills = value).catchError((_) => []),
-      database.ipilLaborSkillsStream().first.then((value) => ipilLaborSkills = value).catchError((_) => []),
-    ]);
+    _warmUpFuture = _doWarmUp(database);
     return _warmUpFuture!;
+  }
+
+  static const int _cacheVersion = 2;
+
+  /// Batched warm-up: max ~5 concurrent Firestore reads at a time.
+  /// All catalogs use persistence cache so subsequent launches skip Firestore entirely.
+  Future<void> _doWarmUp(Database database) async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedVersion = prefs.getInt('_cacheVersion') ?? 0;
+    if (storedVersion < _cacheVersion) {
+      const catalogKeys = [
+        'countries', 'gamificationFlags', 'competencies', 'interests', 'abilities',
+        'socialEntitiesTypes', 'personalDocumentTypes', 'educations', 'genders', 'dedications',
+        'keepLearningOptions', 'documentCategories', 'programs', 'resourceTypes', 'languages',
+        'resourceCategories', 'resourcePictures',
+        'ipilReinforcements', 'ipilContextualizations', 'ipilConnectionTerritories',
+        'ipilInterviews', 'ipilIntermediations', 'ipilObtainingEmployments',
+        'ipilImprovingEmployments', 'ipilPostWorkSupports',
+        'ipilCoordinations', 'ipilLegals', 'ipilEconomicBags',
+        'ipilSpecificSkills', 'ipilSoftSkills', 'ipilDigitalSkills', 'ipilLaborSkills',
+      ];
+      for (final k in catalogKeys) {
+        await prefs.remove(k);
+      }
+      await prefs.setInt('_cacheVersion', _cacheVersion);
+    }
+
+    // Batch 1: Core lookup data
+    await Future.wait([
+      _loadOrFetchCatalog<Country>('countries', () => database.countriesStream().first, (data, id) => Country.fromMap(data, id)).then((v) => countries = v),
+      _loadOrFetchCatalog<GamificationFlag>('gamificationFlags', () => database.gamificationFlagsStream().first, (data, id) => GamificationFlag.fromMap(data, id)).then((v) => gamificationFlags = v),
+      _loadOrFetchCatalog<Competency>('competencies', () => database.getCompetencies(), (data, id) => Competency.fromMap(data, id)).then((v) => competencies = v),
+      _loadOrFetchCatalog<Interest>('interests', () => database.getInterests(), (data, id) => Interest.fromMap(data, id)).then((v) => interests = v),
+      _loadOrFetchCatalog<Ability>('abilities', () => database.getAbilities(), (data, id) => Ability.fromMap(data, id)).then((v) => abilities = v),
+    ]);
+
+    // Batch 2: More lookups
+    await Future.wait([
+      _loadOrFetchCatalog<SocialEntitiesType>('socialEntitiesTypes', () => database.socialEntitiesTypeStream().first, (data, id) => SocialEntitiesType.fromMap(data, id)).then((v) => socialEntitiesTypes = v),
+      _loadOrFetchCatalog<PersonalDocumentType>('personalDocumentTypes', () => database.personalDocumentTypeStream().first, (data, id) => PersonalDocumentType.fromMap(data, id), getDocId: (p) => p.personalDocId).then((v) => personalDocumentTypes = v),
+      _loadOrFetchCatalog<Education>('educations', () => database.educationStream().first, (data, id) => Education.fromMap(data, id)).then((v) => educations = v).catchError((_) {}),
+      _loadOrFetchCatalog<Gender>('genders', () => database.genderStream().first, (data, id) => Gender.fromMap(data, id)).then((v) => genders = v).catchError((_) {}),
+      _loadOrFetchCatalog<Dedication>('dedications', () => database.dedicationStream().first, (data, id) => Dedication.fromMap(data, id)).then((v) => dedications = v).catchError((_) {}),
+    ]);
+
+    // Batch 3: Remaining small catalogs + resource metadata
+    await Future.wait([
+      _loadOrFetchCatalog<KeepLearningOption>('keepLearningOptions', () => database.keepLearningOptionsStream().first, (data, id) => KeepLearningOption.fromMap(data, id)).then((v) => keepLearningOptions = v).catchError((_) {}),
+      _loadOrFetchCatalog<DocumentCategory>('documentCategories', () => database.documentCategoriesStream().first, (data, id) => DocumentCategory.fromMap(data, id), getDocId: (d) => d.documentCategoryId).then((v) => documentCategories = v).catchError((_) {}),
+      _loadOrFetchCatalog<Program>('programs', () => database.programsStream().first, (data, id) => Program.fromMap(data, id), getDocId: (p) => p.programId ?? '').then((v) => programs = v).catchError((_) {}),
+      _loadOrFetchCatalog<ResourceType>('resourceTypes', () => database.resourceTypeStream().first, (data, id) => ResourceType.fromMap(data, id)).then((v) => resourceTypes = v).catchError((_) {}),
+      _loadOrFetchList('languages', () => database.languagesStream().first).then((v) => languages = v).catchError((_) {}),
+    ]);
+
+    // Batch 4: Resource categories, pictures + IPIL master data (part 1)
+    await Future.wait([
+      _loadOrFetchCatalog<ResourceCategory>('resourceCategories', () => database.resourceCategoryStream().first, (data, id) => ResourceCategory.fromMap(data, id), getDocId: (r) => r.id).then((v) => resourceCategories = v).catchError((_) {}),
+      _loadOrFetchCatalog<ResourcePicture>('resourcePictures', () => database.resourcePicturesStream().first, (data, id) => ResourcePicture.fromMap(data, id)).then((v) => resourcePictures = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilReinforcement>('ipilReinforcements', () => database.ipilReinforcementStream().first, (data, id) => IpilReinforcement.fromMap(data, id)).then((v) => ipilReinforcements = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilContextualization>('ipilContextualizations', () => database.ipilContextualizationStream().first, (data, id) => IpilContextualization.fromMap(data, id)).then((v) => ipilContextualizations = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilConnectionTerritory>('ipilConnectionTerritories', () => database.ipilConnectionTerritoryStream().first, (data, id) => IpilConnectionTerritory.fromMap(data, id)).then((v) => ipilConnectionTerritories = v).catchError((_) {}),
+    ]);
+
+    // Batch 5: IPIL master data (part 2)
+    await Future.wait([
+      _loadOrFetchCatalog<IpilInterviews>('ipilInterviews', () => database.ipilInterviewsStream().first, (data, id) => IpilInterviews.fromMap(data, id)).then((v) => ipilInterviews = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilIntermediations>('ipilIntermediations', () => database.ipilIntermediationsStream().first, (data, id) => IpilIntermediations.fromMap(data, id)).then((v) => ipilIntermediations = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilObtainingEmployment>('ipilObtainingEmployments', () => database.ipilObtainingEmploymentStream().first, (data, id) => IpilObtainingEmployment.fromMap(data, id)).then((v) => ipilObtainingEmployments = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilImprovingEmployment>('ipilImprovingEmployments', () => database.ipilImprovingEmploymentStream().first, (data, id) => IpilImprovingEmployment.fromMap(data, id)).then((v) => ipilImprovingEmployments = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilPostWorkSupport>('ipilPostWorkSupports', () => database.ipilPostWorkSupportStream().first, (data, id) => IpilPostWorkSupport.fromMap(data, id)).then((v) => ipilPostWorkSupports = v).catchError((_) {}),
+    ]);
+
+    // Batch 6: IPIL master data (part 3)
+    await Future.wait([
+      _loadOrFetchCatalog<IpilCoordination>('ipilCoordinations', () => database.ipilCoordinationStream().first, (data, id) => IpilCoordination.fromMap(data, id)).then((v) => ipilCoordinations = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilLegal>('ipilLegals', () => database.ipilLegalStream().first, (data, id) => IpilLegal.fromMap(data, id)).then((v) => ipilLegals = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilEconomicBag>('ipilEconomicBags', () => database.ipilEconomicBagStream().first, (data, id) => IpilEconomicBag.fromMap(data, id)).then((v) => ipilEconomicBags = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilSpecificSkills>('ipilSpecificSkills', () => database.ipilSpecificSkillsStream().first, (data, id) => IpilSpecificSkills.fromMap(data, id)).then((v) => ipilSpecificSkills = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilSoftSkills>('ipilSoftSkills', () => database.ipilSoftSkillsStream().first, (data, id) => IpilSoftSkills.fromMap(data, id)).then((v) => ipilSoftSkills = v).catchError((_) {}),
+    ]);
+
+    // Batch 7: Final IPIL data
+    await Future.wait([
+      _loadOrFetchCatalog<IpilDigitalSkills>('ipilDigitalSkills', () => database.ipilDigitalSkillsStream().first, (data, id) => IpilDigitalSkills.fromMap(data, id)).then((v) => ipilDigitalSkills = v).catchError((_) {}),
+      _loadOrFetchCatalog<IpilLaborSkills>('ipilLaborSkills', () => database.ipilLaborSkillsStream().first, (data, id) => IpilLaborSkills.fromMap(data, id)).then((v) => ipilLaborSkills = v).catchError((_) {}),
+    ]);
   }
 
   int get gamificationFlagsCount => gamificationFlags.length;

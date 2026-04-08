@@ -72,6 +72,7 @@ class WebHome extends StatefulWidget {
 class _WebHomeState extends State<WebHome> {
   var bodyWidget = [];
   final _key = GlobalKey<ScaffoldState>();
+  bool _warmUpStarted = false;
 
   @override
   void initState() {
@@ -81,6 +82,12 @@ class _WebHomeState extends State<WebHome> {
       Container(),
     ];
     super.initState();
+  }
+
+  void _ensureWarmUp(Database database) {
+    if (_warmUpStarted) return;
+    _warmUpStarted = true;
+    LocationCache.instance.warmUpAll(database);
   }
 
   @override
@@ -124,7 +131,7 @@ class _WebHomeState extends State<WebHome> {
                                   if (socialEntityId != null && socialEntityId.isNotEmpty) {
                                     LocationCache.instance.socialEntitiesCache[socialEntityId] = socialEntity;
                                   }
-                                  LocationCache.instance.warmUpAll(database);
+                                  _ensureWarmUp(database);
                                   globals.currentUserSocialEntity = socialEntity;
                                   return _buildContent(context, socialEntity, user, profilePic, userName);
                                 }

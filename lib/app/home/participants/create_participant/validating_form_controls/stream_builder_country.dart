@@ -1,28 +1,17 @@
 import 'package:enreda_empresas/app/models/country.dart';
-import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 Widget streamBuilderForCountry (BuildContext context, Country? selectedCountry,  functionToWriteBackThings, String title ) {
-  final database = Provider.of<Database>(context, listen: false);
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
-  return StreamBuilder<List<Country>>(
-      stream: database.countryFormatedStream(),
-      builder: (context, snapshotCountries){
 
-        List<DropdownMenuItem<Country>> countryItems = [];
-        if (snapshotCountries.hasData) {
-          countryItems = snapshotCountries.data!.map((Country c) =>
-              DropdownMenuItem<Country>(
-                value: c,
-                child: Text(c.name),
-              ))
-              .toList();
-        }
+  final countryItems = LocationCache.instance.countries
+      .map((Country c) => DropdownMenuItem<Country>(value: c, child: Text(c.name)))
+      .toList();
 
         return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,5 +68,4 @@ Widget streamBuilderForCountry (BuildContext context, Country? selectedCountry, 
               ),
             ]
         );
-      });
 }

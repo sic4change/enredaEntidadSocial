@@ -995,13 +995,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SpaceH20(),
-            StreamBuilder<List<Program>>(
-              stream: database.programsStream(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const SizedBox.shrink();
-                }
-                final programs = snapshot.data!;
+            Builder(builder: (context) {
+                final programs = LocationCache.instance.programs;
                 final items = programs.map((program) {
                   final display = '${program.code} - ${program.name}';
                   return DropdownMenuItem<String>(
@@ -1032,6 +1027,10 @@ class _FollowReportFormState extends State<FollowReportForm> {
                   } catch (_) {}
                 }
 
+                if (dropdownValue != null && !items.any((i) => i.value == dropdownValue)) {
+                  dropdownValue = null;
+                }
+
                 return CustomDropDownButtonFormFieldTittle(
                   labelText: StringConst.INITIAL_SUBSIDY,
                   source: items,
@@ -1046,21 +1045,17 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     });
                   },
                 );
-              },
-            ),
+              }),
             SpaceH12(),
             CustomFlexRowColumn(
-              childRight: StreamBuilder<UserEnreda>(
-                  stream: database.userEnredaStreamByUserId(_controllers['techPerson']!.text),
+              childRight: FutureBuilder<UserEnreda?>(
+                  future: LocationCache.instance.getUser(database, _controllers['techPerson']!.text),
                   builder: (context, snapshot) {
-                    print('Entra en el stream del tech person');
-                    if(snapshot.hasData && snapshot.connectionState != ConnectionState.waiting){
-
+                    if (snapshot.hasData) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _techPersonController.text = '${snapshot.data?.firstName}' + ' ' + '${snapshot.data?.lastName}';
+                        _techPersonController.text = '${snapshot.data?.firstName} ${snapshot.data?.lastName}';
                       });
                     }
-                    print('Entra en el return del stream del tech person');
                     return CustomTextFormFieldTitle(
                       labelText: StringConst.INITIAL_TECH_PERSON,
                       controller: _techPersonController,
