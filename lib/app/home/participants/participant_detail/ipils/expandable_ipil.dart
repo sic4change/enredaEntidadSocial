@@ -65,12 +65,12 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
       child: Stack(
         children: [
           Container(
-            margin: Responsive.isMobile(context) ? EdgeInsets.only(bottom: 20) : EdgeInsets.only(
+            margin: Responsive.isMobile(context) ? const EdgeInsets.only(bottom: 20) : const EdgeInsets.only(
                 top: 4.0, left: 4.0, right: 4.0, bottom: 10),
             padding: Responsive.isMobile(context) ?
-            EdgeInsets.symmetric(horizontal: 8.0, vertical: 10) :
-            EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-            decoration: BoxDecoration(
+            const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10) :
+            const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+            decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.rectangle,
                 boxShadow: <BoxShadow>[
@@ -93,9 +93,33 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
               expanded: IpilEntryTile(
                 ipilEntry: widget.ipilEntry,
                 techNameComplete: widget.techNameComplete,
+                onDelete: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext ctx) {
+                      return AlertDialog(
+                        title: Text(StringConst.FORM_WARNING),
+                        content: const Text('¿Estás seguro? Vas a borrar este Ipil para usuario. Una vez borrado no se podrá recuperar.'),
+                        actions: [
+                          TextButton(
+                            child: Text(StringConst.CANCEL),
+                            onPressed: () => Navigator.of(ctx).pop(),
+                          ),
+                          TextButton(
+                            child: const Text('Sí, borrar'),
+                            onPressed: () async {
+                              Navigator.of(ctx).pop();
+                              await database.deleteIpilEntry(widget.ipilEntry);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
               collapsed: Container(),
-              theme: ExpandableThemeData(
+              theme: const ExpandableThemeData(
                 hasIcon: false,
               ),
             ),
@@ -108,7 +132,7 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                   Container(
                       width: 30,
                       height: 30,
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                           border: Border.all(color: AppColors.greyBorder, width: 1),
                           color: Colors.white,
@@ -117,12 +141,12 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                         imagePath,
                         color: AppColors.primary900,
                       )),
-                  SizedBox(width: 20),
-                  Container(
+                  const SizedBox(width: 20),
+                  SizedBox(
                     width: 30,
                     height: 30,
                     child: InkWell(
-                      onTap: (){
+                      onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -130,8 +154,8 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                                   StreamBuilder<InitialReport>(
                               stream: database.initialReportsStreamByUserId(widget.participantUser.userId),
                               builder: (context, snapshot) {
-                                if(snapshot.hasData){
-                                  if(snapshot.data!.finished ?? false){
+                                if (snapshot.hasData) {
+                                  if (snapshot.data!.finished ?? false) {
                                     subsidy = StringConst.getSubsidyIndex(snapshot.data!.subsidy);
                                   }
                                 }
@@ -150,57 +174,19 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                         scale: 2,
                     )),
                   ),
-                auth.currentUser!.uid == widget.ipilEntry.techId ? 
-                Row(
-                  children: [
-                    SizedBox(width: 20),
-                    Container(
-                      width: 30,
-                      height: 30,
-                      child: InkWell(
-                        onTap: widget.editIpilEntry,
-                          
-                        child: Image.asset(
-                          ImagePath.PERSONAL_DOCUMENTATION_EDIT,
-                          scale: 2,
-                      )),
-                    ),
-                    SizedBox(width: 20),
-                    Container(
-                      width: 30,
-                      height: 30,
-                      child: InkWell(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text(StringConst.FORM_WARNING),
-                                content: Text("¿Estás seguro? Vas a borrar este Ipil para usuario. Una vez borrado no se podrá recuperar."),
-                                actions: [
-                                  TextButton(
-                                    child: Text(StringConst.CANCEL),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: Text("Sí, borrar"),
-                                    onPressed: () async {
-                                      Navigator.of(context).pop();
-                                      await database.deleteIpilEntry(widget.ipilEntry);
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: Icon(Icons.delete, color: AppColors.deleteRed),
-                      ),
-                    )
-                  ],
-                ) : Container()
+                if (auth.currentUser!.uid == widget.ipilEntry.techId) ...[
+                  const SizedBox(width: 20),
+                  SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: InkWell(
+                      onTap: widget.editIpilEntry,
+                      child: Image.asset(
+                        ImagePath.PERSONAL_DOCUMENTATION_EDIT,
+                        scale: 2,
+                    )),
+                  ),
+                ]
                 ],
               )),
         ],

@@ -23,7 +23,6 @@ class CollapsedResourcesList extends StatefulWidget {
 class _CollapsedResourcesListState extends State<CollapsedResourcesList> {
   bool _isLoading = true;
   UserEnreda? _user;
-  Stream<List<Resource>>? _resourcesStream;
 
   @override
   void initState() {
@@ -39,10 +38,10 @@ class _CollapsedResourcesListState extends State<CollapsedResourcesList> {
       setState(() {
         _user = user;
         _isLoading = false;
-        if (user?.socialEntityId != null) {
-          _resourcesStream = database.myLimitResourcesStream(user!.socialEntityId!, widget.itemsNumber);
-        }
       });
+      if (user?.socialEntityId != null) {
+        LocationCache.instance.initResourcesStream(database, user!.socialEntityId!);
+      }
     }
   }
 
@@ -59,40 +58,44 @@ class _CollapsedResourcesListState extends State<CollapsedResourcesList> {
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.28,
-      child: StreamBuilder<List<Resource>>(
-          stream: _resourcesStream,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return ListItemBuilderGrid<Resource>(
-              snapshot: snapshot,
-              fitSmallerLayout: false,
-              mainAxisExtentValue: Responsive.isMobile(context) ? 180.0 : 248,
-              itemBuilder: (context, resource) {
-                resource.organizerName = socialEntity?.name ?? '';
-                resource.organizerImage = socialEntity?.photo ?? '';
-                resource.setResourceTypeName();
-                resource.setResourceCategoryName();
-                resource.countryName = LocationCache.instance.countryById(resource.country)?.name ?? '';
-                resource.provinceName = LocationCache.instance.provinceById(resource.province)?.name ?? '';
-                resource.cityName = LocationCache.instance.cityById(resource.city)?.name ?? '';
-                return Container(
-                  key: Key('resource-${resource.resourceId}'),
-                  child: ResourceListTile(
-                    resource: resource,
-                    onTap: () => setState(() {
-                      globals.currentResource = resource;
-                      WebHome.goResources();
-                      MyResourcesListPage.selectedIndex.value = 2;
-                    }),
-                  ),
-                );
-              },
-              emptyTitle: 'Sin recursos',
-              emptyMessage: 'Aún no has creado ningún recurso',
-            );
-          }),
+      child: StreamBuilder<void>(
+        stream: LocationCache.instance.resourceUpdates,
+        builder: (context, _) {
+          final allResources = LocationCache.instance.resources;
+          if (allResources.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final resources = allResources.take(widget.itemsNumber).toList();
+          return GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 520,
+              mainAxisExtent: Responsive.isMobile(context) ? 180.0 : 248,
+            ),
+            itemCount: resources.length,
+            itemBuilder: (context, index) {
+              final resource = resources[index];
+              resource.organizerName = socialEntity?.name ?? '';
+              resource.organizerImage = socialEntity?.photo ?? '';
+              resource.setResourceTypeName();
+              resource.setResourceCategoryName();
+              resource.countryName = LocationCache.instance.countryById(resource.country)?.name ?? '';
+              resource.provinceName = LocationCache.instance.provinceById(resource.province)?.name ?? '';
+              resource.cityName = LocationCache.instance.cityById(resource.city)?.name ?? '';
+              return Container(
+                key: Key('resource-${resource.resourceId}'),
+                child: ResourceListTile(
+                  resource: resource,
+                  onTap: () => setState(() {
+                    globals.currentResource = resource;
+                    WebHome.goResources();
+                    MyResourcesListPage.selectedIndex.value = 2;
+                  }),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

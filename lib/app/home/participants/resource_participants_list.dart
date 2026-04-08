@@ -8,6 +8,7 @@ import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/resourceInvitation.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
@@ -38,8 +39,6 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
    Color _buttonColor = AppColors.primaryColor;
    String searchText = "";
    final _searchTextController = TextEditingController();
-   Stream<List<Resource>>? _resourcesStream;
-   String? _lastSearchText;
    final ScrollController _scrollResources = ScrollController();
 
   void setStateIfMounted(f) {
@@ -50,8 +49,7 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
   void initState() {
     super.initState();
     final database = Provider.of<Database>(context, listen: false);
-    _resourcesStream = database.filteredMyResourcesStream(widget.organizerId, searchText);
-    _lastSearchText = searchText;
+    LocationCache.instance.initResourcesStream(database, widget.organizerId);
   }
 
   @override
@@ -59,6 +57,13 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
     _scrollResources.dispose();
     _searchTextController.dispose();
     super.dispose();
+  }
+
+  List<Resource> _filteredResources() {
+    final all = LocationCache.instance.resources;
+    final query = searchText.trim().toLowerCase();
+    if (query.isEmpty) return all;
+    return all.where((r) => r.title.toLowerCase().contains(query)).toList();
   }
 
   @override
@@ -117,50 +122,45 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
   }
 
   Widget _buildContents(BuildContext context, String currentSearchText) {
-    if (currentSearchText != _lastSearchText) {
-      final database = Provider.of<Database>(context, listen: false);
-      _resourcesStream = database.filteredMyResourcesStream(widget.organizerId, currentSearchText);
-      _lastSearchText = currentSearchText;
-    }
-    return StreamBuilder<List<Resource>>(
-        stream: _resourcesStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Sin recursos'));
-          } 
-          resourcesList = snapshot.data!;
-          return Container(
-            height: 80,
-            child: SingleChildScrollView(
-              controller: _scrollResources,
-              clipBehavior: Clip.antiAlias,
-              child: Wrap(
-                direction: Axis.horizontal,
-                spacing: 5.0,
-                children: resourcesList.map((resource) =>
-                  ResourceChip(
-                    resource: resource,
-                    textTheme: Theme.of(context).textTheme,
-                    isSelected: _selectedCertify == resourcesList.indexOf(resource),
-                    onSelected: () {
-                      setState(() {
-                        _selectResource(resourcesList.indexOf(resource));
-                        _isSelected = true;
-                        this.resource = resource;
-                        resource.setResourceCategoryName();
-                      });
-                    },
-                  )
-                ).toList(),
-              ),
+    return StreamBuilder<void>(
+      stream: LocationCache.instance.resourceUpdates,
+      builder: (context, _) {
+        final filtered = _filteredResources();
+        if (LocationCache.instance.resources.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (filtered.isEmpty) {
+          return const Center(child: Text('Sin recursos'));
+        }
+        resourcesList = filtered;
+        return Container(
+          height: 80,
+          child: SingleChildScrollView(
+            controller: _scrollResources,
+            clipBehavior: Clip.antiAlias,
+            child: Wrap(
+              direction: Axis.horizontal,
+              spacing: 5.0,
+              children: resourcesList.map((resource) =>
+                ResourceChip(
+                  resource: resource,
+                  textTheme: Theme.of(context).textTheme,
+                  isSelected: _selectedCertify == resourcesList.indexOf(resource),
+                  onSelected: () {
+                    setState(() {
+                      _selectResource(resourcesList.indexOf(resource));
+                      _isSelected = true;
+                      this.resource = resource;
+                      resource.setResourceCategoryName();
+                    });
+                  },
+                )
+              ).toList(),
             ),
-          );
-        },
-      );
+          ),
+        );
+      },
+    );
   }
 
 

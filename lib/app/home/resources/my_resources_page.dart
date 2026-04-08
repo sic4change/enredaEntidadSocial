@@ -1,6 +1,5 @@
 
 import 'package:enreda_empresas/app/home/resources/resources_list.dart';
-import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -28,7 +27,6 @@ class _MyResourcesPageState extends State<MyResourcesPage> {
   bool focused = false;
   bool _isLoading = true;
   UserEnreda? _user;
-  Stream<List<Resource>>? _resourceCountStream;
 
   @override
   void initState() {
@@ -43,11 +41,11 @@ class _MyResourcesPageState extends State<MyResourcesPage> {
     if (mounted) {
       setState(() {
         _user = user;
-        if (user?.socialEntityId != null) {
-          _resourceCountStream = database.myResourcesStream(user!.socialEntityId!);
-        }
         _isLoading = false;
       });
+      if (user?.socialEntityId != null) {
+        LocationCache.instance.initResourcesStream(database, user!.socialEntityId!);
+      }
     }
   }
 
@@ -77,23 +75,14 @@ class _MyResourcesPageState extends State<MyResourcesPage> {
         _buildFilterRow(),
         Container(
           margin: const EdgeInsets.only(top: 70),
-          child: StreamBuilder<List<Resource>>(
-            stream: _resourceCountStream,
-            builder: (context, resourceSnapshot) {
-              if (resourceSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (resourceSnapshot.hasData) {
-                List<Resource> resources = resourceSnapshot.data!;
-                if (resources.isNotEmpty) {
-                  return CustomTextBoldTitle(
-                    title: resources.length == 1
-                        ? '${resources.length} recurso creado por ${globals.currentUserSocialEntity?.name}'
-                        : '${resources.length} recursos creados por ${globals.currentUserSocialEntity?.name}',
-                  );
-                }
-              }
-              return CustomTextBoldTitle(title: '0 recursos creados por ${globals.currentUserSocialEntity?.name}');
+          child: StreamBuilder<void>(
+            stream: LocationCache.instance.resourceUpdates,
+            builder: (context, _) {
+              final count = LocationCache.instance.resources.length;
+              final label = count == 1
+                  ? '$count recurso creado por ${globals.currentUserSocialEntity?.name}'
+                  : '$count recursos creados por ${globals.currentUserSocialEntity?.name}';
+              return CustomTextBoldTitle(title: label);
             },
           ),
         ),

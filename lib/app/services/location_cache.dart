@@ -100,6 +100,24 @@ class LocationCache {
   final StreamController<void> _paginationController = StreamController<void>.broadcast();
   Stream<void> get paginationUpdates => _paginationController.stream;
 
+  // --- Shared Resources Stream ---
+  final StreamController<void> _resourcesController = StreamController<void>.broadcast();
+  Stream<void> get resourceUpdates => _resourcesController.stream;
+  StreamSubscription<List<Resource>>? _resourcesSubscription;
+  String? _resourcesEntityId;
+
+  /// Initialises a single shared Firestore subscription for the entity's resources.
+  /// Safe to call multiple times — re-uses the existing subscription when entityId unchanged.
+  void initResourcesStream(Database database, String entityId) {
+    if (_resourcesEntityId == entityId && _resourcesSubscription != null) return;
+    _resourcesSubscription?.cancel();
+    _resourcesEntityId = entityId;
+    _resourcesSubscription = database.myResourcesStream(entityId).listen((data) {
+      resources = data;
+      if (!_resourcesController.isClosed) _resourcesController.add(null);
+    });
+  }
+
   void _notifyPaginationListeners() {
     if (!_paginationController.isClosed) {
       _paginationController.add(null);
@@ -114,6 +132,7 @@ class LocationCache {
         _currentPrograms.length == normalizedPrograms.length &&
         _currentPrograms.toSet().containsAll(normalizedPrograms);
 
+    if (isLoadingParticipants && sameScope) return;
     if (_initialLoadDone && sameScope && allParticipants.isNotEmpty) return;
 
     _currentEntityId = socialEntityId;

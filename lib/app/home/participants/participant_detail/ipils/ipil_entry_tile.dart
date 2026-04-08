@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
-import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 
 import '../../../../common_widgets/spaces.dart';
@@ -15,20 +13,32 @@ class IpilEntryTile extends StatelessWidget {
     Key? key,
     required this.ipilEntry,
     required this.techNameComplete,
+    this.onDelete,
   }) : super(key: key);
   final IpilEntry ipilEntry;
   final String? techNameComplete;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
     String dateEntry = formatter.format(ipilEntry.lastUpdateDate!);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 20),
+        const SizedBox(height: 12),
+        if (onDelete != null)
+          Align(
+            alignment: Alignment.topRight,
+            child: InkWell(
+              onTap: onDelete,
+              child: const Padding(
+                padding: EdgeInsets.all(4.0),
+                child: Icon(Icons.delete, color: AppColors.deleteRed, size: 22),
+              ),
+            ),
+          ),
         Flex(
           direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -73,31 +83,6 @@ class IpilEntryTile extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () async {
-                bool? confirm = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('Eliminar IPIL'),
-                    content: Text('¿Seguro que quieres eliminar esta entrada de IPIL?, No podras recuperarla'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: Text('Cancelar'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: Text('Eliminar', style: TextStyle(color: Colors.red)),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirm == true) {
-                  await database.deleteIpilEntry(ipilEntry);
-                }
-              },
-            ),
           ],
         ),
         _labelSection(StringConst.IPIL_FOLLOW, ipilEntry.content),
@@ -117,7 +102,7 @@ class IpilEntryTile extends StatelessWidget {
         _labelSection(StringConst.IPIL_ECONOMIC_BAG, ipilEntry.economicBagText),
         if (ipilEntry.reinforcement?.isNotEmpty == true)
           _labelSection('Refuerzo', ipilEntry.reinforcementsText),
-        SpaceH50(),
+        const SizedBox(height: 20),
       ],
     );
   }
