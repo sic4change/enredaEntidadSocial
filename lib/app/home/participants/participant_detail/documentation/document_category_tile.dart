@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
+import 'package:enreda_empresas/app/home/resources/list_item_builder.dart';
 import '../../../../models/documentCategory.dart';
 import '../../../../models/documentationParticipant.dart';
 import '../../../../services/auth.dart';
@@ -35,6 +36,26 @@ class DocumentCategoryTile extends StatefulWidget {
 }
 
 class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
+  final Map<String, String> _creatorPhotoById = {};
+  final Set<String> _loadingCreatorIds = <String>{};
+
+  void _preloadCreatorPhotos(Database database, List<DocumentationParticipant> documents) {
+    for (final document in documents) {
+      final createdBy = document.createdBy;
+      if (createdBy == null || createdBy.isEmpty) continue;
+      if (_creatorPhotoById.containsKey(createdBy) || _loadingCreatorIds.contains(createdBy)) continue;
+      _loadingCreatorIds.add(createdBy);
+      LocationCache.instance.getUser(database, createdBy).then((user) {
+        if (!mounted) return;
+        setState(() {
+          _creatorPhotoById[createdBy] = user?.photo ?? '';
+          _loadingCreatorIds.remove(createdBy);
+        });
+      }).catchError((_) {
+        _loadingCreatorIds.remove(createdBy);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,61 +66,59 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          StreamBuilder<List<PersonalDocumentType>>(
-              stream: database.documentSubCategoriesByCategoryStream(widget.documentCategory.documentCategoryId),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return Container();
-                if (snapshot.hasData){
-                  List<PersonalDocumentType> documentSubCategories =  snapshot.data!;
-                  return ListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: documentSubCategories.map((documentSubCategory) {
-                      return Column(
+          (() {
+            final documentSubCategories = LocationCache.instance.personalDocumentTypes
+                .where((dt) => dt.documentCategoryId == widget.documentCategory.documentCategoryId)
+                .toList();
+            if (documentSubCategories.isEmpty) return Container();
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: documentSubCategories.length,
+              itemBuilder: (context, index) {
+                final documentSubCategory = documentSubCategories[index];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: Responsive.isMobile(context) ? const EdgeInsets.only(left: 0.0, right: 0.0) :
+                      const EdgeInsets.symmetric(horizontal: 55.0, vertical: 0.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Padding(
-                            padding: Responsive.isMobile(context) ? const EdgeInsets.only(left: 0.0, right: 0.0) :
-                            const EdgeInsets.symmetric(horizontal: 55.0, vertical: 0.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    CustomTextSmall(text: documentSubCategory.title),
-                                    Spacer(),
-                                    InkWell(
-                                      onTap: () {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context){
-                                              return AddDocumentsForm(
-                                                documentSubCategory: documentSubCategory,
-                                                participantUser: widget.participantUser,);
-                                            }
-                                        );
-                                      },
-                                      child: Image.asset(
-                                        ImagePath.ICON_PLUS,
-                                        height: Responsive.isMobile(context) ? 25 : 30,)),
-                                  ],
-                                ),
-                                SizedBox(height: 10),
-                                documentationParticipantBySubCategory(documentSubCategory, widget.participantUser),
-                              ],
-                            ),
+                          Row(
+                            children: [
+                              CustomTextSmall(text: documentSubCategory.title),
+                              Spacer(),
+                              InkWell(
+                                onTap: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context){
+                                        return AddDocumentsForm(
+                                          documentSubCategory: documentSubCategory,
+                                          participantUser: widget.participantUser,);
+                                      }
+                                  );
+                                },
+                                child: Image.asset(
+                                  ImagePath.ICON_PLUS,
+                                  height: Responsive.isMobile(context) ? 25 : 30,)),
+                            ],
                           ),
-                          Divider(thickness: 1, color: AppColors.greyDropMenuBorder,),
+                          SizedBox(height: 10),
+                          documentationParticipantBySubCategory(documentSubCategory, widget.participantUser),
                         ],
-                      );
-                    }).toList(),
-                  );
-                }
-                return Container();
-              }
-          ),
+                      ),
+                    ),
+                    Divider(thickness: 1, color: AppColors.greyDropMenuBorder,),
+                  ],
+                );
+              },
+            );
+          })(),
         ],
       ),
     );
@@ -113,6 +132,8 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
       builder: (context, documentationParticipantSnapshot) {
         if (!documentationParticipantSnapshot.hasData) return Container();
         if(documentationParticipantSnapshot.hasData) {
+          final documents = documentationParticipantSnapshot.data!;
+          _preloadCreatorPhotos(database, documents);
           return ListItemBuilder<DocumentationParticipant>(
             emptyTitle: 'Sin documentos',
             emptyMessage: 'Aún no se ha agreado ningún documento',
@@ -138,8 +159,7 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
                       CustomTextSmall(text: formatter.format(documentParticipant.renovationDate!), color: AppColors.primary900,),
                     Spacer(),
                     Responsive.isMobile(context) ? Container() : _DocumentCreatedByIcon(
-                      userId: documentParticipant.createdBy,
-                      database: database,
+                      photoUrl: _creatorPhotoById[documentParticipant.createdBy] ?? '',
                     ),
                     Spacer(),
                     Container(
@@ -177,22 +197,13 @@ class _DocumentCategoryTileState extends State<DocumentCategoryTile> {
 }
 
 class _DocumentCreatedByIcon extends StatelessWidget {
-  final String? userId;
-  final Database database;
+  final String photoUrl;
 
-  const _DocumentCreatedByIcon({required this.userId, required this.database});
+  const _DocumentCreatedByIcon({required this.photoUrl});
 
   @override
   Widget build(BuildContext context) {
-    if (userId == null) return Container(width: 25, height: 25);
-    return FutureBuilder<UserEnreda?>(
-      future: LocationCache.instance.getUser(database, userId!),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return Container(width: 25, height: 25);
-        final user = snapshot.data!;
-        // Use photo property which is mapped from profilePic['src'] in UserEnreda.fromMap
-        return UserProfilePicture(context, user.photo ?? '');
-      },
-    );
+    if (photoUrl.isEmpty) return Container(width: 25, height: 25);
+    return UserProfilePicture(context, photoUrl);
   }
 }

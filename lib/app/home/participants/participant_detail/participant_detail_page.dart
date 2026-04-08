@@ -7,11 +7,9 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
 import 'package:enreda_empresas/app/models/city.dart';
-import 'package:enreda_empresas/app/models/country.dart';
-import 'package:enreda_empresas/app/models/derivationReport.dart';
+import 'package:enreda_empresas/app/models/closureReport.dart';
 import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
-import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
@@ -46,8 +44,14 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
   Database? _db;
   Stream<UserEnreda>? _participantStream;
-  Stream<UserEnreda>? _assignedStream;
-  String? _cachedAssignedId;
+  Stream<ClosureReport>? _closureReportStream;
+  String? _closureReportUserId;
+  final ScrollController _webScrollController = ScrollController();
+
+  // Cached futures/streams for _buildDniWidget to avoid re-creating on every build
+  Future<InitialReport?>? _dniInitialReportFuture;
+  Stream<List<DocumentationParticipant>>? _dniDocumentationStream;
+  String? _dniUserId;
 
   @override
   void initState() {
@@ -67,6 +71,19 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   }
 
   @override
+  void dispose() {
+    _webScrollController.dispose();
+    super.dispose();
+  }
+
+  void _ensureDniStreams(String? userId) {
+    if (_db == null || userId == null || userId.isEmpty || _dniUserId == userId) return;
+    _dniUserId = userId;
+    _dniInitialReportFuture = _db!.getInitialReport(userId);
+    _dniDocumentationStream = _db!.documentationParticipantByUserStream(userId);
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_currentPage == null) {
       _currentPage =  ParticipantControlPanelPage(participantUser: participantUser);
@@ -75,6 +92,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
       stream: _participantStream,
       builder: (context, participantSnapshot) {
         UserEnreda currentUser = participantSnapshot.data ?? participantUser;
+        _ensureClosureReportStream(currentUser.userId);
 
         return FutureBuilder<UserEnreda?>(
           future: currentUser.assignedById != null 
@@ -95,9 +113,15 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     );
   }
 
+  void _ensureClosureReportStream(String? userId) {
+    if (_db == null || userId == null || userId.isEmpty || _closureReportUserId == userId) return;
+    _closureReportUserId = userId;
+    _closureReportStream = _db!.closureReportsStreamByUserId(userId);
+  }
+
   Widget _buildParticipantWeb(BuildContext context, UserEnreda user, String? techNameComplete) {
     return SingleChildScrollView(
-      controller: ScrollController(),
+      controller: _webScrollController,
       child: Container(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -209,7 +233,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
   Widget _buildHeaderWeb(BuildContext context, UserEnreda user, String? techNameComplete) {
     final textTheme = Theme.of(context).textTheme;
-    final database = Provider.of<Database>(context, listen: false);
     return Padding(
       padding: const EdgeInsets.only(left: Sizes.kDefaultPaddingDouble*2),
       child: Row(
@@ -302,7 +325,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                               DateTime? startDateItinerary = user.startDateItinerary;
                               if (startDateItinerary != null) {
                                 return StreamBuilder(
-                                  stream: Provider.of<Database>(context, listen: false).closureReportsStreamByUserId(user.userId),
+                                  stream: _closureReportStream,
                                   builder: (context, snapshotClosure){
                                         if(snapshotClosure.hasData){
                                           if(snapshotClosure.data!.completedDate != null && snapshotClosure.data!.finished == true){
@@ -560,10 +583,11 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   }
 
   Widget _buildDniWidget(BuildContext context, UserEnreda user) {
-    final database = Provider.of<Database>(context, listen: false);
+    _ensureDniStreams(user.userId);
+    if (_dniInitialReportFuture == null) return const SizedBox.shrink();
 
     return FutureBuilder<InitialReport?>(
-      future: database.getInitialReport(user.userId ?? ''),
+      future: _dniInitialReportFuture,
       builder: (context, snapshotReport) {
         // 1. Check InitialReport.dniParticipant first
         final dniFromReport = snapshotReport.data?.dniParticipant;
@@ -577,8 +601,9 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
         }
 
         // 3. Fall back to the name of the most recent documentación personal vigente
+        if (_dniDocumentationStream == null) return const SizedBox.shrink();
         return StreamBuilder<List<DocumentationParticipant>>(
-          stream: database.documentationParticipantByUserStream(user.userId ?? ''),
+          stream: _dniDocumentationStream,
           builder: (context, snapshotDocs) {
             if (snapshotDocs.hasData && snapshotDocs.data!.isNotEmpty) {
               final sorted = List<DocumentationParticipant>.from(snapshotDocs.data!)

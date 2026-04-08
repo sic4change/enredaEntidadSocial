@@ -85,6 +85,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
   String _photo = '';
   late Stream<List<Experience>> _experiencesStream;
   late Stream<List<Education>> _educationsStream;
+  late Stream<List<UserEnreda>> _userStream;
 
   void setStateIfMounted(f) {
     if (mounted) setState(f);
@@ -96,14 +97,14 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     final database = Provider.of<Database>(context, listen: false);
     _experiencesStream = database.myExperiencesStream(user?.userId ?? '');
     _educationsStream = database.educationStream();
+    _userStream = database.userStream(user?.email ?? '');
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
     return StreamBuilder<List<UserEnreda>>(
-        stream: database.userStream(user?.email ?? ''),
+        stream: _userStream,
         builder: (context, snapshot) {
           if (snapshot.hasData &&
               snapshot.connectionState == ConnectionState.active) {

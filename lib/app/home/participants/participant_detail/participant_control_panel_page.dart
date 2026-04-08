@@ -38,6 +38,7 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
   late Stream<List<Experience>>? _experiencesStream;
   List<Education>? _allEducations;
   late Stream<List<Resource>> _participantResourcesStream;
+  final ScrollController _competenciesScrollController = ScrollController();
 
   @override
   void initState() {
@@ -49,6 +50,12 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
       widget.participantUser.userId,
       widget.participantUser.assignedEntityId,
     );
+  }
+
+  @override
+  void dispose() {
+    _competenciesScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -443,8 +450,8 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomTextBoldTitle(title: StringConst.COMPETENCIES),
-          (() {
-                final controller = ScrollController();
+              (() {
+                final controller = _competenciesScrollController;
                 var scrollJump = Responsive.isDesktopS(context) ? 350 : 410;
                 List<Competency> myCompetencies = List.from(LocationCache.instance.competencies);
                 final competenciesIds = widget.participantUser.competencies.keys.toList();
@@ -573,12 +580,20 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                         width: Responsive.isDesktop(context) ? MediaQuery.sizeOf(context).width * 0.6: MediaQuery.sizeOf(context).width,
                         child: MyCurriculumPage()),
                   ),
-                  child: Transform.scale(
-                    scale: 0.3,
-                    child: MyCurriculumPage(
-                      mini: true,
+                  child: SizedBox(
+                    width: 300,
+                    height: 350,
+                    child: OverflowBox(
+                      alignment: Alignment.topLeft,
+                      maxWidth: double.infinity,
+                      maxHeight: double.infinity,
+                      child: Transform.scale(
+                        scale: 0.3,
+                        alignment: Alignment.topLeft,
+                        child: MyCurriculumPage(mini: true),
+                      ),
                     ),
-                    alignment: Alignment.topLeft,),
+                  ),
                 ),
               ],
             ),

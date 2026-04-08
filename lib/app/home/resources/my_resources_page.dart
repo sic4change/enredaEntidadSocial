@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../common_widgets/custom_text.dart';
 import '../../services/auth.dart';
 import '../../services/database.dart';
+import '../../services/location_cache.dart';
 import '../external_social_entity/filter_text_field_row.dart';
 import 'global.dart' as globals;
 
@@ -25,10 +26,29 @@ class _MyResourcesPageState extends State<MyResourcesPage> {
   final _searchTextController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool focused = false;
+  bool _isLoading = true;
+  UserEnreda? _user;
+  Stream<List<Resource>>? _resourceCountStream;
 
   @override
   void initState() {
     super.initState();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    final auth = Provider.of<AuthBase>(context, listen: false);
+    final database = Provider.of<Database>(context, listen: false);
+    final user = await LocationCache.instance.getUser(database, auth.currentUser!.uid);
+    if (mounted) {
+      setState(() {
+        _user = user;
+        if (user?.socialEntityId != null) {
+          _resourceCountStream = database.myResourcesStream(user!.socialEntityId!);
+        }
+        _isLoading = false;
+      });
+    }
   }
 
   void setStateIfMounted(f) {
@@ -44,45 +64,36 @@ class _MyResourcesPageState extends State<MyResourcesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
-    final auth = Provider.of<AuthBase>(context, listen: false);
     if (kIsWeb && !FocusScope.of(context).hasPrimaryFocus) {
       FocusScope.of(context).requestFocus();
     }
+
+    if (_isLoading || _user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Stack(
       children: [
         _buildFilterRow(),
         Container(
           margin: const EdgeInsets.only(top: 70),
-          child: StreamBuilder<UserEnreda>(
-            stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
-            builder: (context, userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting) {
+          child: StreamBuilder<List<Resource>>(
+            stream: _resourceCountStream,
+            builder: (context, resourceSnapshot) {
+              if (resourceSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (userSnapshot.hasData && userSnapshot.data != null) {
-                var user = userSnapshot.data!;
-                return StreamBuilder<List<Resource>>(
-                  stream: database.myResourcesStream(user.socialEntityId!),
-                  builder: (context, resourceSnapshot) {
-                    if (resourceSnapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (resourceSnapshot.hasData) {
-                      List<Resource> resources = resourceSnapshot.data!;
-                      if (resources.isNotEmpty) {
-                        return CustomTextBoldTitle(
-                          title: resources.length == 1
-                              ? '${resources.length} recurso creado por ${globals.currentUserSocialEntity?.name}'
-                              : '${resources.length} recursos creados por ${globals.currentUserSocialEntity?.name}',
-                        );
-                      }
-                    }
-                    return CustomTextBoldTitle(title: '0 recursos creados por ${globals.currentUserSocialEntity?.name}');
-                  },
-                );
+              if (resourceSnapshot.hasData) {
+                List<Resource> resources = resourceSnapshot.data!;
+                if (resources.isNotEmpty) {
+                  return CustomTextBoldTitle(
+                    title: resources.length == 1
+                        ? '${resources.length} recurso creado por ${globals.currentUserSocialEntity?.name}'
+                        : '${resources.length} recursos creados por ${globals.currentUserSocialEntity?.name}',
+                  );
+                }
               }
-              return const CustomTextBoldTitle(title: 'No hay datos disponibles');
+              return CustomTextBoldTitle(title: '0 recursos creados por ${globals.currentUserSocialEntity?.name}');
             },
           ),
         ),

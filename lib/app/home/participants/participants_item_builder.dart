@@ -29,14 +29,31 @@ class ParticipantsItemBuilder<T> extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, List<UserEnreda> usersList) {
-
     final alignment = Responsive.isDesktop(context)? Alignment.topLeft: Alignment.topCenter;
     return Align(
       alignment: alignment,
-      child: Wrap(
-        children: usersList.map((c) => itemBuilder(context, c)).toList(),
-        spacing: 15.0,
-        runSpacing: 15.0,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : MediaQuery.of(context).size.width;
+          const tileMinWidth = 265.0;
+          final rawCount = (maxWidth / tileMinWidth).floor();
+          final crossAxisCount = rawCount < 1 ? 1 : rawCount;
+
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: usersList.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 15.0,
+              mainAxisSpacing: 15.0,
+              mainAxisExtent: 370.0,
+            ),
+            itemBuilder: (context, index) => itemBuilder(context, usersList[index]),
+          );
+        },
       ),
     );
   }

@@ -38,9 +38,27 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
    Color _buttonColor = AppColors.primaryColor;
    String searchText = "";
    final _searchTextController = TextEditingController();
+   Stream<List<Resource>>? _resourcesStream;
+   String? _lastSearchText;
+   final ScrollController _scrollResources = ScrollController();
 
   void setStateIfMounted(f) {
     if (mounted) setState(f);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final database = Provider.of<Database>(context, listen: false);
+    _resourcesStream = database.filteredMyResourcesStream(widget.organizerId, searchText);
+    _lastSearchText = searchText;
+  }
+
+  @override
+  void dispose() {
+    _scrollResources.dispose();
+    _searchTextController.dispose();
+    super.dispose();
   }
 
   @override
@@ -98,11 +116,14 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
     );
   }
 
-  Widget _buildContents(BuildContext context, String searchText) {
-    final database = Provider.of<Database>(context, listen: false);
-    final scrollResources = ScrollController();
+  Widget _buildContents(BuildContext context, String currentSearchText) {
+    if (currentSearchText != _lastSearchText) {
+      final database = Provider.of<Database>(context, listen: false);
+      _resourcesStream = database.filteredMyResourcesStream(widget.organizerId, currentSearchText);
+      _lastSearchText = currentSearchText;
+    }
     return StreamBuilder<List<Resource>>(
-        stream: database.filteredMyResourcesStream(widget.organizerId, searchText),
+        stream: _resourcesStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -115,7 +136,7 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
           return Container(
             height: 80,
             child: SingleChildScrollView(
-              controller: scrollResources,
+              controller: _scrollResources,
               clipBehavior: Clip.antiAlias,
               child: Wrap(
                 direction: Axis.horizontal,
@@ -123,7 +144,6 @@ class _ParticipantResourcesListState extends State<ParticipantResourcesList> {
                 children: resourcesList.map((resource) =>
                   ResourceChip(
                     resource: resource,
-                    database: database,
                     textTheme: Theme.of(context).textTheme,
                     isSelected: _selectedCertify == resourcesList.indexOf(resource),
                     onSelected: () {

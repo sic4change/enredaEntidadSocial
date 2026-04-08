@@ -169,11 +169,15 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.mail_outline_outlined, color: hasEmail? AppColors.turquoiseBlue: AppColors.greyBlue,),
-                  SpaceW8(),
-                  Text(
-                    StringConst.EMAIL,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: hasEmail? AppColors.turquoiseBlue: AppColors.darkGray,
+                  SpaceW4(),
+                  Flexible(
+                    child: Text(
+                      StringConst.EMAIL,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: hasEmail? AppColors.turquoiseBlue: AppColors.darkGray,
+                      ),
                     ),
                   ),
                 ],
@@ -193,11 +197,15 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.phone, color: hasPhone? AppColors.turquoiseBlue: AppColors.greyBlue,),
-                  SpaceW8(),
-                  Text(
-                    StringConst.CALL,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: hasPhone? AppColors.turquoiseBlue: AppColors.darkGray,
+                  SpaceW4(),
+                  Flexible(
+                    child: Text(
+                      StringConst.CALL,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: hasPhone? AppColors.turquoiseBlue: AppColors.darkGray,
+                      ),
                     ),
                   ),
                 ],

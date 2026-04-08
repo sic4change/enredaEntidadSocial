@@ -5,7 +5,6 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
-import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -26,14 +25,44 @@ class MyParticipantsScrollPage extends StatefulWidget {
 }
 
 class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
+  bool _isLoading = true;
+  UserEnreda? _socialEntityUser;
+  final ScrollController _horizontalScrollController = ScrollController();
+
   @override
-  Widget build(BuildContext context) {
-    return buildParticipantsList(context);
+  void initState() {
+    super.initState();
+    _initData();
   }
 
-  Widget buildParticipantsList(BuildContext context) {
-    final auth = Provider.of<AuthBase>(context, listen: false);
-    final database = Provider.of<Database>(context, listen: false);
+  Future<void> _initData() async {
+    try {
+      final auth = Provider.of<AuthBase>(context, listen: false);
+      final database = Provider.of<Database>(context, listen: false);
+
+      final user = await LocationCache.instance.getUser(database, auth.currentUser!.uid);
+      if (user != null) {
+        _socialEntityUser = user;
+        globals.currentSocialEntityUser = user;
+
+        final socialEntity = await LocationCache.instance.getSocialEntity(database, user.socialEntityId!);
+        if (socialEntity != null) {
+          await LocationCache.instance.loadAllParticipants(
+            database,
+            user.socialEntityId!,
+            socialEntity.programs ?? [],
+          );
+        }
+      }
+    } catch (e) {
+      print('Error in MyParticipantsScrollPage._initData: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return RoundedContainer(
       color: Colors.white,
       borderWith: 1,
@@ -46,115 +75,99 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
         children: [
           CustomTextBoldTitle(title: StringConst.MY_PARTICIPANTS),
           SpaceH4(),
-          // Step 1: Load the logged-in collaborator's UserEnreda doc
-          StreamBuilder<UserEnreda>(
-              stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasData) {
-                  globals.currentSocialEntityUser = snapshot.data!;
-                  UserEnreda socialEntityUser = snapshot.data!;
-                  final controller = ScrollController();
-                  var scrollJump = Responsive.isDesktopS(context) ? 350 : 410;
-
-                  // Step 2: Load the SocialEntity to retrieve the entity's programs list
-                  return StreamBuilder<SocialEntity>(
-                    stream: database.socialEntityStream(socialEntityUser.socialEntityId),
-                    builder: (context, entitySnapshot) {
-                      if (!entitySnapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      final socialEntity = entitySnapshot.data!;
-                      final programs = socialEntity.programs ?? [];
-
-                      // Step 3: Query participants from cache (limited for preview)
-                      LocationCache.instance.startParticipantsPreview(database, socialEntityUser.socialEntityId!, programs);
-                      return StreamBuilder<List<UserEnreda>>(
-                        stream: LocationCache.instance.participantsPreviewStream,
-                        initialData: LocationCache.instance.cachedParticipantsPreview,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData && LocationCache.instance.cachedParticipantsPreview == null) {
-                            return const Center(child: CircularProgressIndicator());
-                          }
-                          
-                          final participants = snapshot.data?.toList() ?? LocationCache.instance.cachedParticipantsPreview?.toList() ?? [];
-                          final myParticipants = participants.take(10).toList();
-                          
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 382,
-                                color: Colors.white,
-                                child: ScrollConfiguration(
-                                  behavior: MyCustomScrollBehavior(),
-                                  child: ListView(
-                                    controller: controller,
-                                    scrollDirection: Axis.horizontal,
-                                    children: myParticipants.map((user) {
-                                      return Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: ParticipantsListTile(
-                                            user: user,
-                                            socialEntityUserId: socialEntityUser.socialEntityId!,
-                                            onTap: () => setState(() {
-                                              globals.currentParticipant = user;
-                                              WebHome.goToParticipants();
-                                              ParticipantsListPage.selectedIndex.value = 1;
-                                            })
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      if (controller.position.pixels >=
-                                          controller.position.minScrollExtent)
-                                        controller.animateTo(
-                                            controller.position.pixels - scrollJump,
-                                            duration: Duration(milliseconds: 500),
-                                            curve: Curves.ease);
-                                    },
-                                    child: Image.asset(
-                                      ImagePath.ARROW_BACK,
-                                      width: 36.0,
-                                    ),
-                                  ),
-                                  SpaceW12(),
-                                  InkWell(
-                                    onTap: () {
-                                      if (controller.position.pixels <=
-                                          controller.position.maxScrollExtent)
-                                        controller.animateTo(
-                                            controller.position.pixels + scrollJump,
-                                            duration: Duration(milliseconds: 500),
-                                            curve: Curves.ease);
-                                    },
-                                    child: Image.asset(
-                                      ImagePath.ARROW_FORWARD,
-                                      width: 36.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                        }
-                      );
-                    }
-                  );
-                }
-                return const Center(child: CircularProgressIndicator());
-              }),
+          _buildContent(),
         ],
       ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _horizontalScrollController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildContent() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_socialEntityUser == null) {
+      return const Center(child: Text('No se pudo cargar el usuario'));
+    }
+
+    var scrollJump = Responsive.isDesktopS(context) ? 350 : 410;
+
+    return StreamBuilder<void>(
+      stream: LocationCache.instance.paginationUpdates,
+      builder: (context, _) {
+        final participants = LocationCache.instance.allParticipants;
+        final myParticipants = participants.take(10).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 382,
+              color: Colors.white,
+              child: ScrollConfiguration(
+                behavior: MyCustomScrollBehavior(),
+                child: ListView(
+                  controller: _horizontalScrollController,
+                  scrollDirection: Axis.horizontal,
+                  children: myParticipants.map((user) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ParticipantsListTile(
+                          user: user,
+                          socialEntityUserId: _socialEntityUser!.socialEntityId!,
+                          onTap: () => setState(() {
+                            globals.currentParticipant = user;
+                            WebHome.goToParticipants();
+                            ParticipantsListPage.selectedIndex.value = 1;
+                          })
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: () {
+                    if (_horizontalScrollController.position.pixels >=
+                        _horizontalScrollController.position.minScrollExtent)
+                      _horizontalScrollController.animateTo(
+                          _horizontalScrollController.position.pixels - scrollJump,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.ease);
+                  },
+                  child: Image.asset(
+                    ImagePath.ARROW_BACK,
+                    width: 36.0,
+                  ),
+                ),
+                SpaceW12(),
+                InkWell(
+                  onTap: () {
+                    if (_horizontalScrollController.position.pixels <=
+                        _horizontalScrollController.position.maxScrollExtent)
+                      _horizontalScrollController.animateTo(
+                          _horizontalScrollController.position.pixels + scrollJump,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.ease);
+                  },
+                  child: Image.asset(
+                    ImagePath.ARROW_FORWARD,
+                    width: 36.0,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

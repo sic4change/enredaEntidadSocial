@@ -35,6 +35,7 @@ import '../../../../models/ipilInterviews.dart';
 import '../../../../models/ipilReinforcement.dart';
 import '../../../../models/userEnreda.dart';
 import '../../../../services/database.dart';
+import '../../../../services/location_cache.dart';
 import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
 
@@ -92,17 +93,36 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
   final ValueNotifier<String> techName = ValueNotifier<String>("");
   bool wasManuallyChanged = false;
 
+  Stream<UserEnreda>? _assignedUserStream;
+  Stream<List<UserEnreda>>? _socialUsersStream;
+
   @override
   void dispose() {
     textEditingControllerDateInput.dispose();
     super.dispose();
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_assignedUserStream == null) {
+      final database = Provider.of<Database>(context, listen: false);
+      final assignedById = widget.participantUser.assignedById;
+      if (assignedById != null && assignedById.isNotEmpty) {
+        _assignedUserStream = database.userEnredaStreamByUserId(assignedById);
+      }
+      final entityId = widget.participantUser.assignedEntityId;
+      if (entityId != null && entityId.isNotEmpty) {
+        _socialUsersStream = database.getSocialUsersByEntityId(entityId);
+      }
+    }
+  }
+
 @override
 void initState() {
   super.initState();
 
   final ipil = widget.selectedIpil;
-  print('Existe el ipil? $ipil');
 
   reinforcement = ipil?.reinforcement ?? [];
   contextualization = ipil?.contextualization ?? [];
@@ -147,6 +167,64 @@ void initState() {
     return createIpilForm();
   }
 
+  Widget _buildCachedCheckboxNoTitle({
+    required String title,
+    required List<dynamic> options,
+    required List<String> selectedIds,
+    required String Function(dynamic) getId,
+    required String Function(dynamic) getLabel,
+    required bool cornerTop,
+    required bool cornerBottom,
+    required void Function(List<String>) onChanged,
+  }) {
+    if (options.isEmpty) return Container();
+    final dropdownItems = options.map((e) => DropdownItem(
+      title: getLabel(e),
+      isSelected: selectedIds.contains(getId(e)),
+    )).toList();
+    return CheckboxDropdownNoTitle(
+      title: title,
+      options: dropdownItems,
+      cornerTop: cornerTop,
+      cornerBottom: cornerBottom,
+      onTapItem: (value, tapTitle) {
+        final match = options.where((e) => getLabel(e) == tapTitle).firstOrNull;
+        if (match == null) return;
+        final id = getId(match);
+        final updated = List<String>.from(selectedIds);
+        if (value) { updated.add(id); } else { updated.remove(id); }
+        onChanged(updated);
+      },
+    );
+  }
+
+  Widget _buildCachedCheckbox({
+    required String title,
+    required List<dynamic> options,
+    required List<String> selectedIds,
+    required String Function(dynamic) getId,
+    required String Function(dynamic) getLabel,
+    required void Function(List<String>) onChanged,
+  }) {
+    if (options.isEmpty) return Container();
+    final dropdownItems = options.map((e) => DropdownItem(
+      title: getLabel(e),
+      isSelected: selectedIds.contains(getId(e)),
+    )).toList();
+    return CheckboxDropdown(
+      title: title,
+      options: dropdownItems,
+      onTapItem: (value, tapTitle) {
+        final match = options.where((e) => getLabel(e) == tapTitle).firstOrNull;
+        if (match == null) return;
+        final id = getId(match);
+        final updated = List<String>.from(selectedIds);
+        if (value) { updated.add(id); } else { updated.remove(id); }
+        onChanged(updated);
+      },
+    );
+  }
+
   Widget createIpilForm(){
     final database = Provider.of<Database>(context, listen: false);
     return Container(
@@ -176,7 +254,7 @@ void initState() {
             CustomFlexRowColumn(
               childRight: 
                 StreamBuilder<UserEnreda>(
-                  stream: database.userEnredaStreamByUserId(widget.participantUser.assignedById),
+                  stream: _assignedUserStream,
                   builder: (context, snapshot) {
                     if (snapshot.hasData && !wasManuallyChanged) {
                       final newName = '${snapshot.data!.firstName} ${snapshot.data!.lastName}';
@@ -185,21 +263,18 @@ void initState() {
                       }
                     }
                     return StreamBuilder<List<UserEnreda>>(
-                      stream: database.getSocialUsersByEntityId(widget.participantUser.assignedEntityId!),
+                      stream: _socialUsersStream,
                       builder: (context, snapshot) {
                         List<DropdownMenuItem<String>> techUsers = [];
                         List<UserEnreda> techUsersComplete = [];
-                        UserEnreda realTechUser;
-                        if(snapshot.hasData){
+                        if (snapshot.hasData) {
                           techUsersComplete = snapshot.data!;
-                          techUsers = 
-                            snapshot.data!.map((userTech) {
-                              return DropdownMenuItem<String>(
-                                value: userTech.userId,
-                                child: Text('${userTech.firstName}' + ' ' + '${userTech.lastName}'),
-                              );
-                            }).toList();
-                            realTechUser = techUsersComplete.firstWhere((element) => element.userId == widget.participantUser.assignedById!);
+                          techUsers = techUsersComplete.map((userTech) {
+                            return DropdownMenuItem<String>(
+                              value: userTech.userId,
+                              child: Text('${userTech.firstName ?? ''} ${userTech.lastName ?? ''}'),
+                            );
+                          }).toList();
                         }
                         String? currentTechId = (techId == '' ? widget.participantUser.assignedById : techId);
                         if (!techUsers.any((item) => item.value == currentTechId)) {
@@ -212,12 +287,14 @@ void initState() {
                             setState(() {
                               wasManuallyChanged = true;
                               techId = value!;
-                              UserEnreda techUserComplete = techUsersComplete.firstWhere((element) => element.userId == value);
-                              techName.value = '${techUserComplete.firstName}' + ' ' + '${techUserComplete.lastName}';
+                              final match = techUsersComplete.where((e) => e.userId == value).firstOrNull;
+                              if (match != null) {
+                                techName.value = '${match.firstName ?? ''} ${match.lastName ?? ''}';
+                              }
                             });
                           },
                           source: techUsers);
-                    }
+                      }
                     );
                   }
                 ),         
@@ -341,465 +418,126 @@ void initState() {
               padding: const EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble / 2),
               child: CustomTextBold(title: StringConst.IPIL_REINFORCEMENT, color: AppColors.primary900,),
             ),
-            StreamBuilder<List<IpilSpecificSkills>>(
-              stream: database.ipilSpecificSkillsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilSpecificSkills> specificSkillsOptions = snapshot.data!;
-                  List<DropdownItem> specificSkillsOptionsDropdown = [];
-                  for (var element in specificSkillsOptions) {
-                    specificSkillsOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userSpecificSkills.contains(element.ipilSpecificSkillsId),
-                    ));
-                  }
-                  return CheckboxDropdownNoTitle(
-                    title: StringConst.IPIL_SPECIFIC_SKILLS,
-                    options: specificSkillsOptionsDropdown,
-                    cornerBottom: false,
-                    cornerTop: true,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilSpecificSkills itemSelected = specificSkillsOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userSpecificSkills.add(itemSelected.ipilSpecificSkillsId!);
-                        } else {
-                          userSpecificSkills.removeWhere((element) => element == itemSelected.ipilSpecificSkillsId);
-                        }
-                        specificSkills = userSpecificSkills;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckboxNoTitle(
+              title: StringConst.IPIL_SPECIFIC_SKILLS,
+              options: LocationCache.instance.ipilSpecificSkills,
+              selectedIds: userSpecificSkills,
+              getId: (e) => (e as IpilSpecificSkills).ipilSpecificSkillsId!,
+              getLabel: (e) => (e as IpilSpecificSkills).label,
+              cornerTop: true,
+              cornerBottom: false,
+              onChanged: (ids) => setState(() { userSpecificSkills = ids; specificSkills = ids; }),
             ),
-            StreamBuilder<List<IpilSoftSkills>>(
-              stream: database.ipilSoftSkillsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilSoftSkills> softSkillsOptions = snapshot.data!;
-                  List<DropdownItem> softSkillsOptionsDropdown = [];
-                  for (var element in softSkillsOptions) {
-                    softSkillsOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userSoftSkills.contains(element.ipilSoftSkillsId),
-                    ));
-                  }
-                  return CheckboxDropdownNoTitle(
-                    title: StringConst.IPIL_SOFT_SKILLS,
-                    options: softSkillsOptionsDropdown,
-                    cornerBottom: false,
-                    cornerTop: false,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilSoftSkills itemSelected = softSkillsOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userSoftSkills.add(itemSelected.ipilSoftSkillsId!);
-                        } else {
-                          userSoftSkills.removeWhere((element) => element == itemSelected.ipilSoftSkillsId);
-                        }
-                        softSkills = userSoftSkills;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckboxNoTitle(
+              title: StringConst.IPIL_SOFT_SKILLS,
+              options: LocationCache.instance.ipilSoftSkills,
+              selectedIds: userSoftSkills,
+              getId: (e) => (e as IpilSoftSkills).ipilSoftSkillsId!,
+              getLabel: (e) => (e as IpilSoftSkills).label,
+              cornerTop: false,
+              cornerBottom: false,
+              onChanged: (ids) => setState(() { userSoftSkills = ids; softSkills = ids; }),
             ),
-            StreamBuilder<List<IpilDigitalSkills>>(
-              stream: database.ipilDigitalSkillsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilDigitalSkills> digitalSkillsOptions = snapshot.data!;
-                  List<DropdownItem> digitalSkillsOptionsDropdown = [];
-                  for (var element in digitalSkillsOptions) {
-                    digitalSkillsOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userDigitalSkills.contains(element.ipilDigitalSkillsId),
-                    ));
-                  }
-                  return CheckboxDropdownNoTitle(
-                    title: StringConst.IPIL_DIGITAL_SKILLS,
-                    options: digitalSkillsOptionsDropdown,
-                    cornerBottom: false,
-                    cornerTop: false,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilDigitalSkills itemSelected = digitalSkillsOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userDigitalSkills.add(itemSelected.ipilDigitalSkillsId!);
-                        } else {
-                          userDigitalSkills.removeWhere((element) => element == itemSelected.ipilDigitalSkillsId);
-                        }
-                        digitalSkills = userDigitalSkills;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckboxNoTitle(
+              title: StringConst.IPIL_DIGITAL_SKILLS,
+              options: LocationCache.instance.ipilDigitalSkills,
+              selectedIds: userDigitalSkills,
+              getId: (e) => (e as IpilDigitalSkills).ipilDigitalSkillsId!,
+              getLabel: (e) => (e as IpilDigitalSkills).label,
+              cornerTop: false,
+              cornerBottom: false,
+              onChanged: (ids) => setState(() { userDigitalSkills = ids; digitalSkills = ids; }),
             ),
-            StreamBuilder<List<IpilLaborSkills>>(
-              stream: database.ipilLaborSkillsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilLaborSkills> laborSkillsOptions = snapshot.data!;
-                  List<DropdownItem> laborSkillsOptionsDropdown = [];
-                  for (var element in laborSkillsOptions) {
-                    laborSkillsOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userLaborSkills.contains(element.ipilLaborSkillsId),
-                    ));
-                  }
-                  return CheckboxDropdownNoTitle(
-                    title: StringConst.IPIL_LABOR_SKILLS,
-                    options: laborSkillsOptionsDropdown,
-                    cornerTop: false,
-                    cornerBottom: true,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilLaborSkills itemSelected = laborSkillsOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userLaborSkills.add(itemSelected.ipilLaborSkillsId!);
-                        } else {
-                          userLaborSkills.removeWhere((element) => element == itemSelected.ipilLaborSkillsId);
-                        }
-                        laborSkills = userLaborSkills;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckboxNoTitle(
+              title: StringConst.IPIL_LABOR_SKILLS,
+              options: LocationCache.instance.ipilLaborSkills,
+              selectedIds: userLaborSkills,
+              getId: (e) => (e as IpilLaborSkills).ipilLaborSkillsId!,
+              getLabel: (e) => (e as IpilLaborSkills).label,
+              cornerTop: false,
+              cornerBottom: true,
+              onChanged: (ids) => setState(() { userLaborSkills = ids; laborSkills = ids; }),
             ),
-            SizedBox(
-              height: Sizes.kDefaultPaddingDouble / 2,
+            SizedBox(height: Sizes.kDefaultPaddingDouble / 2),
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_CONTEXTUALIZATION,
+              options: LocationCache.instance.ipilContextualizations,
+              selectedIds: userContextualization,
+              getId: (e) => (e as IpilContextualization).ipilContextualizationId!,
+              getLabel: (e) => (e as IpilContextualization).label,
+              onChanged: (ids) => setState(() { userContextualization = ids; contextualization = ids; }),
             ),
-            StreamBuilder<List<IpilContextualization>>(
-                stream: database.ipilContextualizationStream(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData){
-                    List<IpilContextualization> contextualizationOptions =  snapshot.data!;
-                    List<DropdownItem> contextualizationOptionsDropdown = [];
-                    contextualizationOptions.forEach((element) {
-                      contextualizationOptionsDropdown.add(DropdownItem(title:
-                      element.label,
-                          isSelected: userContextualization.contains(element.ipilContextualizationId)));
-                    });
-                    return CheckboxDropdown(
-                      title: StringConst.IPIL_CONTEXTUALIZATION,
-                      options: contextualizationOptionsDropdown,
-                      onTapItem: (value, title){
-                        setState(() {
-                          IpilContextualization itemSelected = contextualizationOptions.firstWhere((element) => element.label == title);
-                          if(value){
-                            userContextualization.add(itemSelected.ipilContextualizationId!);
-                          }
-                          else{
-                            userContextualization.removeWhere((element) => element == itemSelected.ipilContextualizationId);
-                          }
-                          contextualization = userContextualization;
-                        });
-                      },
-                    );
-                  }
-                  else{
-                    return Container();
-                  }
-                }
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_CONNECTION_TERRITORY,
+              options: LocationCache.instance.ipilConnectionTerritories,
+              selectedIds: userConnectionTerritory,
+              getId: (e) => (e as IpilConnectionTerritory).ipilConnectionTerritoryId!,
+              getLabel: (e) => (e as IpilConnectionTerritory).label,
+              onChanged: (ids) => setState(() { userConnectionTerritory = ids; connectionTerritory = ids; }),
             ),
-            StreamBuilder<List<IpilConnectionTerritory>>(
-              stream: database.ipilConnectionTerritoryStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilConnectionTerritory> connectionTerritoryOptions = snapshot.data!;
-                  List<DropdownItem> connectionTerritoryOptionsDropdown = [];
-                  for (var element in connectionTerritoryOptions) {
-                    connectionTerritoryOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userConnectionTerritory.contains(element.ipilConnectionTerritoryId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_CONNECTION_TERRITORY,
-                    options: connectionTerritoryOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilConnectionTerritory itemSelected = connectionTerritoryOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userConnectionTerritory.add(itemSelected.ipilConnectionTerritoryId!);
-                        } else {
-                          userConnectionTerritory.removeWhere((element) => element == itemSelected.ipilConnectionTerritoryId);
-                        }
-                        connectionTerritory = userConnectionTerritory;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_INTERMEDIATIONS,
+              options: LocationCache.instance.ipilIntermediations,
+              selectedIds: userIntermediations,
+              getId: (e) => (e as IpilIntermediations).ipilIntermediationsId!,
+              getLabel: (e) => (e as IpilIntermediations).label,
+              onChanged: (ids) => setState(() { userIntermediations = ids; intermediations = ids; }),
             ),
-            StreamBuilder<List<IpilIntermediations>>(
-              stream: database.ipilIntermediationsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilIntermediations> intermediationsOptions = snapshot.data!;
-                  List<DropdownItem> intermediationsOptionsDropdown = [];
-                  for (var element in intermediationsOptions) {
-                    intermediationsOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userIntermediations.contains(element.ipilIntermediationsId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_INTERMEDIATIONS,
-                    options: intermediationsOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilIntermediations itemSelected = intermediationsOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userIntermediations.add(itemSelected.ipilIntermediationsId!);
-                        } else {
-                          userIntermediations.removeWhere((element) => element == itemSelected.ipilIntermediationsId);
-                        }
-                        intermediations = userIntermediations;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_INTERVIEWS,
+              options: LocationCache.instance.ipilInterviews,
+              selectedIds: userInterviews,
+              getId: (e) => (e as IpilInterviews).ipilInterviewsId!,
+              getLabel: (e) => (e as IpilInterviews).label,
+              onChanged: (ids) => setState(() { userInterviews = ids; interviews = ids; }),
             ),
-            StreamBuilder<List<IpilInterviews>>(
-              stream: database.ipilInterviewsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilInterviews> interviewsOptions = snapshot.data!;
-                  List<DropdownItem> interviewsOptionsDropdown = [];
-                  for (var element in interviewsOptions) {
-                    interviewsOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userInterviews.contains(element.ipilInterviewsId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_INTERVIEWS,
-                    options: interviewsOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilInterviews itemSelected = interviewsOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userInterviews.add(itemSelected.ipilInterviewsId!);
-                        } else {
-                          userInterviews.removeWhere((element) => element == itemSelected.ipilInterviewsId);
-                        }
-                        interviews = userInterviews;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_OBTAINING_EMPLOYMENT,
+              options: LocationCache.instance.ipilObtainingEmployments,
+              selectedIds: userObtainingEmployment,
+              getId: (e) => (e as IpilObtainingEmployment).ipilObtainingEmploymentId!,
+              getLabel: (e) => (e as IpilObtainingEmployment).label,
+              onChanged: (ids) => setState(() { userObtainingEmployment = ids; obtainingEmployment = ids; }),
             ),
-            StreamBuilder<List<IpilObtainingEmployment>>(
-              stream: database.ipilObtainingEmploymentStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilObtainingEmployment> obtainingEmploymentOptions = snapshot.data!;
-                  List<DropdownItem> obtainingEmploymentOptionsDropdown = [];
-                  for (var element in obtainingEmploymentOptions) {
-                    obtainingEmploymentOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userObtainingEmployment.contains(element.ipilObtainingEmploymentId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_OBTAINING_EMPLOYMENT,
-                    options: obtainingEmploymentOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilObtainingEmployment itemSelected = obtainingEmploymentOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userObtainingEmployment.add(itemSelected.ipilObtainingEmploymentId!);
-                        } else {
-                          userObtainingEmployment.removeWhere((element) => element == itemSelected.ipilObtainingEmploymentId);
-                        }
-                        obtainingEmployment = userObtainingEmployment;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_IMPROVING_EMPLOYMENT,
+              options: LocationCache.instance.ipilImprovingEmployments,
+              selectedIds: userImprovingEmployment,
+              getId: (e) => (e as IpilImprovingEmployment).ipilImprovingEmploymentId!,
+              getLabel: (e) => (e as IpilImprovingEmployment).label,
+              onChanged: (ids) => setState(() { userImprovingEmployment = ids; improvingEmployment = ids; }),
             ),
-            StreamBuilder<List<IpilImprovingEmployment>>(
-              stream: database.ipilImprovingEmploymentStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilImprovingEmployment> improvingEmploymentOptions = snapshot.data!;
-                  List<DropdownItem> improvingEmploymentOptionsDropdown = [];
-                  for (var element in improvingEmploymentOptions) {
-                    improvingEmploymentOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userImprovingEmployment.contains(element.ipilImprovingEmploymentId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_IMPROVING_EMPLOYMENT,
-                    options: improvingEmploymentOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilImprovingEmployment itemSelected = improvingEmploymentOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userImprovingEmployment.add(itemSelected.ipilImprovingEmploymentId!);
-                        } else {
-                          userImprovingEmployment.removeWhere((element) => element == itemSelected.ipilImprovingEmploymentId);
-                        }
-                        improvingEmployment = userImprovingEmployment;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_COORDINATION,
+              options: LocationCache.instance.ipilCoordinations,
+              selectedIds: userCoordination,
+              getId: (e) => (e as IpilCoordination).ipilCoordinationId!,
+              getLabel: (e) => (e as IpilCoordination).label,
+              onChanged: (ids) => setState(() { userCoordination = ids; coordination = ids; }),
             ),
-            StreamBuilder<List<IpilCoordination>>(
-              stream: database.ipilCoordinationStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilCoordination> coordinationOptions = snapshot.data!;
-                  List<DropdownItem> coordinationOptionsDropdown = [];
-                  for (var element in coordinationOptions) {
-                    coordinationOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userCoordination.contains(element.ipilCoordinationId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_COORDINATION,
-                    options: coordinationOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilCoordination itemSelected = coordinationOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userCoordination.add(itemSelected.ipilCoordinationId!);
-                        } else {
-                          userCoordination.removeWhere((element) => element == itemSelected.ipilCoordinationId);
-                        }
-                        coordination = userCoordination;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_LEGAL,
+              options: LocationCache.instance.ipilLegals,
+              selectedIds: userLegal,
+              getId: (e) => (e as IpilLegal).ipilLegalId!,
+              getLabel: (e) => (e as IpilLegal).label,
+              onChanged: (ids) => setState(() { userLegal = ids; legal = ids; }),
             ),
-            StreamBuilder<List<IpilLegal>>(
-              stream: database.ipilLegalStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilLegal> legalOptions = snapshot.data!;
-                  List<DropdownItem> legalOptionsDropdown = [];
-                  for (var element in legalOptions) {
-                    legalOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userLegal.contains(element.ipilLegalId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_LEGAL,
-                    options: legalOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilLegal itemSelected = legalOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userLegal.add(itemSelected.ipilLegalId!);
-                        } else {
-                          userLegal.removeWhere((element) => element == itemSelected.ipilLegalId);
-                        }
-                        legal = userLegal;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_POST_WORK_SUPPORT,
+              options: LocationCache.instance.ipilPostWorkSupports,
+              selectedIds: userPostWorkSupport,
+              getId: (e) => (e as IpilPostWorkSupport).ipilPostWorkSupportId!,
+              getLabel: (e) => (e as IpilPostWorkSupport).label,
+              onChanged: (ids) => setState(() { userPostWorkSupport = ids; postWorkSupport = ids; }),
             ),
-            StreamBuilder<List<IpilPostWorkSupport>>(
-              stream: database.ipilPostWorkSupportStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilPostWorkSupport> postWorkSupportOptions = snapshot.data!;
-                  List<DropdownItem> postWorkSupportOptionsDropdown = [];
-                  for (var element in postWorkSupportOptions) {
-                    postWorkSupportOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userPostWorkSupport.contains(element.ipilPostWorkSupportId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_POST_WORK_SUPPORT,
-                    options: postWorkSupportOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilPostWorkSupport itemSelected = postWorkSupportOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userPostWorkSupport.add(itemSelected.ipilPostWorkSupportId!);
-                        } else {
-                          userPostWorkSupport.removeWhere((element) => element == itemSelected.ipilPostWorkSupportId);
-                        }
-                        postWorkSupport = userPostWorkSupport;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
-            ),
-            StreamBuilder<List<IpilEconomicBag>>(
-              stream: database.ipilEconomicBagStream(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<IpilEconomicBag> economicBagOptions = snapshot.data!;
-                  List<DropdownItem> economicBagOptionsDropdown = [];
-                  for (var element in economicBagOptions) {
-                    economicBagOptionsDropdown.add(DropdownItem(
-                      title: element.label,
-                      isSelected: userEconomicBag.contains(element.ipilEconomicBagId),
-                    ));
-                  }
-                  return CheckboxDropdown(
-                    title: StringConst.IPIL_ECONOMIC_BAG,
-                    options: economicBagOptionsDropdown,
-                    onTapItem: (value, title) {
-                      setState(() {
-                        IpilEconomicBag itemSelected = economicBagOptions.firstWhere((element) => element.label == title);
-                        if (value) {
-                          userEconomicBag.add(itemSelected.ipilEconomicBagId!);
-                        } else {
-                          userEconomicBag.removeWhere((element) => element == itemSelected.ipilEconomicBagId);
-                        }
-                        economicBag = userEconomicBag;
-                      });
-                    },
-                  );
-                } else {
-                  return Container(); // Placeholder for loading state
-                }
-              },
+            _buildCachedCheckbox(
+              title: StringConst.IPIL_ECONOMIC_BAG,
+              options: LocationCache.instance.ipilEconomicBags,
+              selectedIds: userEconomicBag,
+              getId: (e) => (e as IpilEconomicBag).ipilEconomicBagId!,
+              getLabel: (e) => (e as IpilEconomicBag).label,
+              onChanged: (ids) => setState(() { userEconomicBag = ids; economicBag = ids; }),
             ),
             Padding(
               padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),

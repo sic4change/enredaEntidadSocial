@@ -84,34 +84,19 @@ class LocationCache {
   final Map<String, UserEnreda> userCache = {};
   final Map<String, Future<UserEnreda?>> _pendingUserFetches = {};
 
-  // --- Paginated Participant State ---
+  // --- Participant State ---
   final List<UserEnreda> allParticipants = [];
   final Map<String, UserEnreda> _participantCache = {};
   bool isLoadingParticipants = false;
-  bool hasMoreEntityParticipants = true;
-  bool hasMoreProgramParticipants = true;
-  bool get hasMoreParticipants => hasMoreEntityParticipants || hasMoreProgramParticipants;
-  DocumentSnapshot? _lastEntityDoc;
-  DocumentSnapshot? _lastProgramDoc;
   String? _currentEntityId;
   List<String> _currentPrograms = [];
   bool _initialLoadDone = false;
+  bool _hasMoreEntityParticipants = true;
+  bool _hasMoreProgramParticipants = true;
+  DocumentSnapshot? _lastEntityParticipantDoc;
+  DocumentSnapshot? _lastProgramParticipantDoc;
 
-  // Keep old stream-based fields for backward compatibility (e.g. my_participants_list)
-  List<UserEnreda>? cachedParticipants;
-  StreamSubscription? _assignedSubscription;
-  StreamSubscription? _programSubscription;
-  final StreamController<List<UserEnreda>> _participantsController = StreamController<List<UserEnreda>>.broadcast();
-  Stream<List<UserEnreda>> get participantsStream => _participantsController.stream;
-
-  // --- Preview Participant State (Dashboard) ---
-  List<UserEnreda>? cachedParticipantsPreview;
-  StreamSubscription? _assignedPreviewSubscription;
-  StreamSubscription? _programsPreviewSubscription;
-  final StreamController<List<UserEnreda>> _participantsPreviewController = StreamController<List<UserEnreda>>.broadcast();
-  Stream<List<UserEnreda>> get participantsPreviewStream => _participantsPreviewController.stream;
-
-  /// Listeners for pagination state changes
+  /// Stream to notify listeners when allParticipants changes
   final StreamController<void> _paginationController = StreamController<void>.broadcast();
   Stream<void> get paginationUpdates => _paginationController.stream;
 
@@ -121,157 +106,99 @@ class LocationCache {
     }
   }
 
-  void startParticipantsStream(Database database, String socialEntityId, List<String> programs) {
-    if (_assignedSubscription != null) return; // already started
+  /// Loads all participants for the active entity/programs into session cache.
+  /// Data is fetched in paginated batches internally to avoid giant single queries.
+  Future<void> loadAllParticipants(Database database, String socialEntityId, List<String> programs, {int pageSize = 30}) async {
+    final normalizedPrograms = programs.toSet().toList();
+    final sameScope = _currentEntityId == socialEntityId &&
+        _currentPrograms.length == normalizedPrograms.length &&
+        _currentPrograms.toSet().containsAll(normalizedPrograms);
 
-    List<UserEnreda> assigned = [];
-    List<UserEnreda> programList = [];
-
-    void emit() {
-      final Map<String, UserEnreda> allUsersMap = {};
-      for (var u in assigned) if (u.userId != null) allUsersMap[u.userId!] = u;
-      for (var u in programList) if (u.userId != null) allUsersMap[u.userId!] = u;
-      final users = allUsersMap.values.toList();
-      users.sort((lhs, rhs) => (lhs.firstName ?? '').compareTo(rhs.firstName ?? ''));
-      cachedParticipants = users;
-      _participantsController.add(users);
-    }
-
-    _assignedSubscription = database.getParticipantsByEntityStream(socialEntityId).listen((data) {
-      assigned = data;
-      emit();
-    });
-
-    if (programs.isNotEmpty) {
-      _programSubscription = database.getParticipantsByProgramsStream(programs).listen((data) {
-        programList = data;
-        emit();
-      });
-    }
-  }
-
-  void startParticipantsPreview(Database database, String socialEntityId, List<String> programs) {
-    if (_assignedPreviewSubscription != null) return; // already started
-
-    List<UserEnreda> assigned = [];
-    List<UserEnreda> programList = [];
-
-    void emit() {
-      final Map<String, UserEnreda> allUsersMap = {};
-      for (var u in assigned) if (u.userId != null) allUsersMap[u.userId!] = u;
-      for (var u in programList) if (u.userId != null) allUsersMap[u.userId!] = u;
-      final users = allUsersMap.values.toList();
-      users.sort((lhs, rhs) => (lhs.firstName ?? '').compareTo(rhs.firstName ?? ''));
-      cachedParticipantsPreview = users;
-      _participantsPreviewController.add(users);
-    }
-
-    _assignedPreviewSubscription = database.getParticipantsBySocialEntityStream(socialEntityId, limit: 10).listen((data) {
-      assigned = data;
-      emit();
-    });
-
-    if (programs.isNotEmpty) {
-      _programsPreviewSubscription = database.getParticipantsByProgramsStream(programs, limit: 10).listen((data) {
-        programList = data;
-        emit();
-      });
-    }
-  }
-
-  /// Initialize paginated loading for participants.
-  /// Call this once when the participants page is first shown.
-  Future<void> initPaginatedParticipants(Database database, String socialEntityId, List<String> programs) async {
-    if (_initialLoadDone && _currentEntityId == socialEntityId) return;
+    if (_initialLoadDone && sameScope && allParticipants.isNotEmpty) return;
 
     _currentEntityId = socialEntityId;
-    _currentPrograms = programs;
-    _lastEntityDoc = null;
-    _lastProgramDoc = null;
-    hasMoreEntityParticipants = true;
-    hasMoreProgramParticipants = programs.isNotEmpty;
+    _currentPrograms = normalizedPrograms;
     allParticipants.clear();
     _participantCache.clear();
-    _initialLoadDone = true;
-
-    await fetchNextParticipantsPage(database);
-  }
-
-  /// Fetch the next page of 10 participants, deduplicating as we go.
-  Future<void> fetchNextParticipantsPage(Database database) async {
-    if (isLoadingParticipants || !hasMoreParticipants) return;
+    _lastEntityParticipantDoc = null;
+    _lastProgramParticipantDoc = null;
+    _hasMoreEntityParticipants = true;
+    _hasMoreProgramParticipants = normalizedPrograms.isNotEmpty;
     isLoadingParticipants = true;
+    _initialLoadDone = false;
     _notifyPaginationListeners();
 
     try {
-      int added = 0;
-
-      // Fetch from entity query
-      if (hasMoreEntityParticipants) {
-        final (entityUsers, lastEntityDoc) = await database.getParticipantsByEntityPaginated(
-          _currentEntityId!,
-          limit: 10,
-          startAfterDocument: _lastEntityDoc,
+      while (_hasMoreEntityParticipants || _hasMoreProgramParticipants) {
+        await _fetchParticipantPage(
+          database,
+          socialEntityId,
+          normalizedPrograms,
+          pageSize,
         );
-
-        if (entityUsers.isEmpty) {
-          hasMoreEntityParticipants = false;
-        } else {
-          _lastEntityDoc = lastEntityDoc;
-          for (var user in entityUsers) {
-            final key = user.userId ?? user.email;
-            if (!_participantCache.containsKey(key)) {
-              _participantCache[key] = user;
-              allParticipants.add(user);
-              added++;
-            }
-          }
-          if (entityUsers.length < 10) {
-            hasMoreEntityParticipants = false;
-          }
-        }
       }
-
-      // Fetch from programs query
-      if (hasMoreProgramParticipants && _currentPrograms.isNotEmpty) {
-        final (programUsers, lastProgramDoc) = await database.getParticipantsByProgramsPaginated(
-          _currentPrograms,
-          limit: 10,
-          startAfterDocument: _lastProgramDoc,
-        );
-
-        if (programUsers.isEmpty) {
-          hasMoreProgramParticipants = false;
-        } else {
-          _lastProgramDoc = lastProgramDoc;
-          for (var user in programUsers) {
-            final key = user.userId ?? user.email;
-            if (!_participantCache.containsKey(key)) {
-              _participantCache[key] = user;
-              allParticipants.add(user);
-              added++;
-            }
-          }
-          if (programUsers.length < 10) {
-            hasMoreProgramParticipants = false;
-          }
-        }
-      }
+      _initialLoadDone = true;
     } catch (e) {
-      print('Error fetching paginated participants: $e');
+      print('Error loading participants: $e');
     } finally {
       isLoadingParticipants = false;
       _notifyPaginationListeners();
     }
   }
 
-  /// Reset pagination state (e.g., when navigating away)
-  void resetPagination() {
+  Future<void> _fetchParticipantPage(
+    Database database,
+    String socialEntityId,
+    List<String> programs,
+    int pageSize,
+  ) async {
+    List<UserEnreda> entityUsers = <UserEnreda>[];
+    DocumentSnapshot? entityLastDoc;
+    if (_hasMoreEntityParticipants) {
+      final entityPage = await database.getParticipantsByEntityPaginated(
+        socialEntityId,
+        limit: pageSize,
+        startAfterDocument: _lastEntityParticipantDoc,
+      );
+      entityUsers = entityPage.$1;
+      entityLastDoc = entityPage.$2;
+    }
+    _lastEntityParticipantDoc = entityLastDoc;
+    _hasMoreEntityParticipants = entityUsers.length == pageSize && _lastEntityParticipantDoc != null;
+
+    List<UserEnreda> programUsers = <UserEnreda>[];
+    DocumentSnapshot? programLastDoc;
+    if (_hasMoreProgramParticipants && programs.isNotEmpty) {
+      final programPage = await database.getParticipantsByProgramsPaginated(
+        programs,
+        limit: pageSize,
+        startAfterDocument: _lastProgramParticipantDoc,
+      );
+      programUsers = programPage.$1;
+      programLastDoc = programPage.$2;
+    }
+    _lastProgramParticipantDoc = programLastDoc;
+    _hasMoreProgramParticipants = programs.isNotEmpty && programUsers.length == pageSize && _lastProgramParticipantDoc != null;
+
+    for (final user in [...entityUsers, ...programUsers]) {
+      final key = user.userId ?? user.email;
+      if (!_participantCache.containsKey(key)) {
+        _participantCache[key] = user;
+        allParticipants.add(user);
+      }
+    }
+    allParticipants.sort((a, b) => (a.firstName ?? '').compareTo(b.firstName ?? ''));
+  }
+
+  /// Reset cached participants (e.g., when navigating away or force refresh)
+  void resetParticipants() {
     _initialLoadDone = false;
-    _lastEntityDoc = null;
-    _lastProgramDoc = null;
-    hasMoreEntityParticipants = true;
-    hasMoreProgramParticipants = true;
+    _currentEntityId = null;
+    _currentPrograms = [];
+    _lastEntityParticipantDoc = null;
+    _lastProgramParticipantDoc = null;
+    _hasMoreEntityParticipants = true;
+    _hasMoreProgramParticipants = true;
     allParticipants.clear();
     _participantCache.clear();
   }

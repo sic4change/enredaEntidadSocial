@@ -138,7 +138,7 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                                 return MyIpilEntries(
                                   user: widget.participantUser,
                                   ipilEntries: ipilEntries,
-                                  techName: widget.techNameComplete!,
+                                  techName: widget.techNameComplete ?? '',
                                   subsidy: subsidy,
                                 );
                               }

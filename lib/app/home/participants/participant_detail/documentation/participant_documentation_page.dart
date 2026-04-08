@@ -1,15 +1,13 @@
 
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/expandable_document_category.dart';
-import 'package:enreda_empresas/app/home/resources/list_item_builder.dart';
 import 'package:enreda_empresas/app/models/documentCategory.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
-import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ParticipantDocumentationPage extends StatefulWidget {
   ParticipantDocumentationPage({required this.participantUser, super.key});
@@ -21,20 +19,6 @@ class ParticipantDocumentationPage extends StatefulWidget {
 }
 
 class _ParticipantDocumentationPageState extends State<ParticipantDocumentationPage> {
-  Stream<UserEnreda>? _userStream;
-  Stream<List<DocumentCategory>>? _documentCategoriesStream;
-  Database? _db;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_db == null) {
-      _db = Provider.of<Database>(context, listen: false);
-      _userStream = _db!.userEnredaStreamByUserId(widget.participantUser.userId);
-      _documentCategoriesStream = _db!.documentCategoriesStream();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.participantUser.userId == null || widget.participantUser.userId!.isEmpty) {
@@ -43,10 +27,7 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
       );
     }
     
-    return StreamBuilder<UserEnreda>(
-        stream: _userStream,
-        builder: (context, snapshot) {
-            return Container(
+    return Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(15.0), topRight: Radius.circular(15.0)),
                     border: Responsive.isMobile(context) ? Border.all(color: Colors.transparent) : Border.all(color: AppColors.greyBorder)
@@ -109,20 +90,19 @@ class _ParticipantDocumentationPageState extends State<ParticipantDocumentationP
                       )),
                   ],
                 ));
-          }
-      );
   }
 
   Widget documentCategoriesList(UserEnreda participantUser) {
-    return StreamBuilder<List<DocumentCategory>>(
-      stream: _documentCategoriesStream,
-      builder: (context, documentCategoriesSnapshot) {
-        if (!documentCategoriesSnapshot.hasData) return Container();
-        return ListItemBuilder<DocumentCategory>(
-          snapshot: documentCategoriesSnapshot,
-          itemBuilder: (context, documentCategory) {
-            return ExpandableDocCategoryTile(documentCategory: documentCategory, participantUser: participantUser);
-          },
+    final documentCategories = LocationCache.instance.documentCategories;
+    if (documentCategories.isEmpty) return Container();
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: documentCategories.length,
+      itemBuilder: (context, index) {
+        return ExpandableDocCategoryTile(
+          documentCategory: documentCategories[index],
+          participantUser: participantUser,
         );
       },
     );

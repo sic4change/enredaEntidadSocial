@@ -5,19 +5,18 @@ import 'package:enreda_empresas/app/home/external_social_entity/filter_text_fiel
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_item_builder.dart';
 import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
-import 'package:enreda_empresas/app/models/filterResource.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
+import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
-import 'package:enreda_empresas/app/services/algolia_search.dart';
 
 class ParticipantsListPage extends StatefulWidget {
   const ParticipantsListPage({super.key});
@@ -31,46 +30,33 @@ class ParticipantsListPage extends StatefulWidget {
 class _ParticipantsListPageState extends State<ParticipantsListPage> {
   late UserEnreda socialEntityUser;
   final _searchTextController = TextEditingController();
-  //late String searchText = '';
   static ValueNotifier<String> searchText = ValueNotifier('');
-  List<SocialEntity> finalSocialEntities = [];
-
 
   bool _isLoading = true;
-  final ScrollController _scrollController = ScrollController();
   SocialEntity? _socialEntity;
-
   String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initData();
     });
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      final db = Provider.of<Database>(context, listen: false);
-      LocationCache.instance.fetchNextParticipantsPage(db);
-    }
   }
 
   Future<void> _initData() async {
     try {
       final auth = Provider.of<AuthBase>(context, listen: false);
       final database = Provider.of<Database>(context, listen: false);
-      
+
       final user = await LocationCache.instance.getUser(database, auth.currentUser!.uid);
       if (user != null) {
         socialEntityUser = user;
         globals.currentSocialEntityUser = user;
-        
+
         _socialEntity = await LocationCache.instance.getSocialEntity(database, user.socialEntityId!);
         if (_socialEntity != null) {
-          await LocationCache.instance.initPaginatedParticipants(database, user.socialEntityId!, _socialEntity!.programs ?? []);
+          await LocationCache.instance.loadAllParticipants(database, user.socialEntityId!, _socialEntity!.programs ?? []);
         }
       }
     } catch (e, st) {
@@ -85,7 +71,6 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -120,7 +105,20 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                           },
                           child: selectedIndex != 0 ? CustomTextMedium(text: 'Participantes ') :
                           CustomTextMediumBold(text: 'Participantes ') ),
-                      selectedIndex == 1 ? CustomTextMediumBold(text:'> ${globals.currentParticipant!.firstName} ${globals.currentParticipant!.lastName}') : Container()
+                      if (selectedIndex == 1)
+                        Flexible(
+                          child: Text(
+                            '> ${globals.currentParticipant!.firstName} ${globals.currentParticipant!.lastName}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: AppColors.primary900,
+                              height: 1.5,
+                              fontSize: responsiveSize(context, 15, 20, md: 16),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -147,48 +145,49 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
     return ValueListenableBuilder<String>(
       valueListenable: searchText,
       builder: (context, selectedSearchValue, child) {
-        final query = selectedSearchValue.trim();
-        if (query.isNotEmpty) {
-          // Task 3: Switch to Algolia Search results
-          return FutureBuilder<List<UserEnreda>>(
-            future: AlgoliaSearch.queryParticipants(query),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final searchResults = snapshot.data ?? [];
-              return _buildListBody(context, searchResults, isAlgolia: true);
-            },
-          );
-        }
-
-        // Task 3 fallback: Firestore Paginated List
         return StreamBuilder<void>(
           stream: LocationCache.instance.paginationUpdates,
           builder: (context, snapshot) {
             final allUsers = LocationCache.instance.allParticipants;
-            return _buildListBody(context, allUsers, isAlgolia: false);
+            final query = selectedSearchValue.trim().toLowerCase();
+
+            // Client-side filtering by name, last name, or email
+            final filteredUsers = query.isEmpty
+                ? allUsers
+                : allUsers.where((u) {
+                    final firstName = (u.firstName ?? '').toLowerCase();
+                    final lastName = (u.lastName ?? '').toLowerCase();
+                    final email = u.email.toLowerCase();
+                    final fullName = '$firstName $lastName';
+                    return firstName.contains(query) ||
+                        lastName.contains(query) ||
+                        email.contains(query) ||
+                        fullName.contains(query);
+                  }).toList();
+
+            return _buildListBody(context, filteredUsers, isSearch: query.isNotEmpty);
           },
         );
       },
     );
   }
 
-  Widget _buildListBody(BuildContext context, List<UserEnreda> users, {required bool isAlgolia}) {
+  Widget _buildListBody(BuildContext context, List<UserEnreda> users, {required bool isSearch}) {
     final textTheme = Theme.of(context).textTheme;
-
-    // Filter by entity/curator (My vs All)
-    final myParticipants = users
-        .where((u) => u.assignedEntityId == socialEntityUser.socialEntityId! &&
-            u.assignedById == socialEntityUser.userId)
-        .toList();
-
-    final allOtherParticipants = users
-        .where((u) => !myParticipants.contains(u))
-        .toList();
+    final myParticipants = <UserEnreda>[];
+    final allOtherParticipants = <UserEnreda>[];
+    final currentEntityId = socialEntityUser.socialEntityId;
+    final currentUserId = socialEntityUser.userId;
+    for (final user in users) {
+      final isMine = user.assignedEntityId == currentEntityId && user.assignedById == currentUserId;
+      if (isMine) {
+        myParticipants.add(user);
+      } else {
+        allOtherParticipants.add(user);
+      }
+    }
 
     return SingleChildScrollView(
-      controller: _scrollController,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
         child: Column(
@@ -210,7 +209,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             ),
             SpaceH12(),
             Text(
-              isAlgolia ? "Resultados de búsqueda: Mis" : StringConst.MY_PARTICIPANTS,
+              isSearch ? "Resultados de búsqueda: Mis" : StringConst.MY_PARTICIPANTS,
               style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.turquoiseBlue),
@@ -218,7 +217,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             SpaceH20(),
             ParticipantsItemBuilder(
                 usersList: myParticipants,
-                emptyMessage: isAlgolia ? 'No se encontraron resultados en tus participantes' : 'No hay participantes gestionados por ti',
+                emptyMessage: isSearch ? 'No se encontraron resultados en tus participantes' : 'No hay participantes gestionados por ti',
                 itemBuilder: (context, user) {
                   return ParticipantsListTile(
                       user: user,
@@ -230,7 +229,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                 }),
             SpaceH40(),
             Text(
-              isAlgolia ? "Resultados de búsqueda: Todos" : StringConst.allParticipants(_socialEntity?.name ?? ''),
+              isSearch ? "Resultados de búsqueda: Todos" : StringConst.allParticipants(_socialEntity?.name ?? ''),
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.turquoiseBlue,
@@ -239,7 +238,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             SpaceH20(),
             ParticipantsItemBuilder(
                 usersList: allOtherParticipants,
-                emptyMessage: isAlgolia ? 'No se encontraron resultados en la entidad' : 'No hay participantes gestionados por tu entidad',
+                emptyMessage: isSearch ? 'No se encontraron resultados en la entidad' : 'No hay participantes gestionados por tu entidad',
                 itemBuilder: (context, user) {
                   return ParticipantsListTile(
                       user: user,
@@ -249,7 +248,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                             ParticipantsListPage.selectedIndex.value = 1;
                           }));
                 }),
-            if (!isAlgolia && LocationCache.instance.isLoadingParticipants)
+            if (LocationCache.instance.isLoadingParticipants)
               const Padding(
                 padding: EdgeInsets.all(20.0),
                 child: Center(child: CircularProgressIndicator()),

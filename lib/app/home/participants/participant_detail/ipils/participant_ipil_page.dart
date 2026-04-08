@@ -3,38 +3,20 @@ import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/pdf_ipil_preview.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
-import 'package:enreda_empresas/app/models/ipilConnectionTerritory.dart';
-import 'package:enreda_empresas/app/models/ipilContextualization.dart';
-import 'package:enreda_empresas/app/models/ipilCoordination.dart';
-import 'package:enreda_empresas/app/models/ipilDigitalSkills.dart';
-import 'package:enreda_empresas/app/models/ipilEconomicBag.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
-import 'package:enreda_empresas/app/models/ipilImprovementEmployment.dart';
-import 'package:enreda_empresas/app/models/ipilIntermediations.dart';
-import 'package:enreda_empresas/app/models/ipilInterviews.dart';
-import 'package:enreda_empresas/app/models/ipilLaborSkills.dart';
-import 'package:enreda_empresas/app/models/ipilLegal.dart';
 import 'package:enreda_empresas/app/models/ipilObjectives.dart';
-import 'package:enreda_empresas/app/models/ipilObtainingEmployment.dart';
-import 'package:enreda_empresas/app/models/ipilPostWorkSupport.dart';
-import 'package:enreda_empresas/app/models/ipilSoftSkills.dart';
-import 'package:enreda_empresas/app/models/ipilSpecificSkills.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'expandable_ipil.dart';
 
 import '../../../../common_widgets/alert_dialog.dart';
 import '../../../../common_widgets/empty-list.dart';
 import '../../../../common_widgets/enreda_button.dart';
-import '../../../../models/ipilReinforcement.dart';
-import '../../../resources/list_item_builder.dart';
 import 'create_ipil_form.dart';
 import 'expandable_ipil.dart';
 
@@ -52,7 +34,6 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
   List<String> _menuOptions = [
     StringConst.IPIL_FOLLOW, StringConst.FORM_GOALS];
   String? _value;
-  var bodyWidget = <Widget>[];
   List<IpilEntry> ipilEntriesPage = [];
   IpilEntry? selectedIpil;
 
@@ -72,15 +53,32 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
     _ipilEntriesStream = _database.getIpilEntriesByUserStream(widget.participantUser.userId!);
     _initialReportStream = _database.initialReportsStreamByUserId(widget.participantUser.userId);
     _ipilObjectivesStream = _database.ipilObjectivesStreamByUserId(widget.participantUser.userId!);
-    
+    ParticipantIPILPage.selectedIndexIpils.value = 0;
     _value = _menuOptions[0];
-    bodyWidget = [
-      followPage(),
-      objectivePage(),
-      CreateIpilForm(participantUser: widget.participantUser),
-      CreateIpilForm(participantUser: widget.participantUser, selectedIpil: selectedIpil),
-    ];
+
+    // Load the assigned tech user name for downloads
+    final assignedId = widget.participantUser.assignedById;
+    if (assignedId != null && assignedId.isNotEmpty) {
+      LocationCache.instance.getUser(_database, assignedId).then((user) {
+        if (mounted && user != null) {
+          setState(() {
+            techNameComplete = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+          });
+        }
+      });
+    }
+
     super.initState();
+  }
+
+  Widget _buildPageByIndex(int selectedIndex) {
+    switch (selectedIndex) {
+      case 0: return followPage();
+      case 1: return objectivePage();
+      case 2: return CreateIpilForm(participantUser: widget.participantUser);
+      case 3: return CreateIpilForm(participantUser: widget.participantUser, selectedIpil: selectedIpil);
+      default: return followPage();
+    }
   }
 
   @override
@@ -98,64 +96,33 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                 Padding(
                   padding: Responsive.isMobile(context) ? EdgeInsets.only(left: 20.0 , top: 10)
                       : EdgeInsets.only(left: 40, top: 15, bottom: 5),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CustomTextBoldTitle(title: StringConst.IPIL),
-                      Padding(
-                        padding: Responsive.isMobile(context) ? EdgeInsets.symmetric(horizontal: 10.0) :
-                        EdgeInsets.symmetric(horizontal: 40),
-                        child: Row(
-                          children:
-                          List<Widget>.generate(
-                            2,
-                                (int index) {
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 30),
-                                child: ChoiceChip(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(25)),
-                                      side: BorderSide(color: _value == _menuOptions[index] ?
-                                      Colors.transparent : AppColors.violet)),
-                                  disabledColor: Colors.white,
-                                  selectedColor: AppColors.turquoiseBlue,
-                                  labelStyle: TextStyle(
-                                    fontSize: Responsive.isMobile(context)? 12.0: 16.0,
-                                    fontWeight: FontWeight.w400,
-                                    color: _value == _menuOptions[index] ? AppColors.white : AppColors.greyTxtAlt,
-                                  ),
-
-                                  label: Text(_menuOptions[index]),
-                                  selected: _value == _menuOptions[index],
-                                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                  showCheckmark: false,
-                                  onSelected: (bool selected) {
-                                    setState(() {
-                                      _value = _menuOptions[index];
-                                      switch (index) {
-                                        case 0:
-                                          ParticipantIPILPage.selectedIndexIpils.value = 0;
-                                          break;
-                                        case 1:
-                                          ParticipantIPILPage.selectedIndexIpils.value = 1;
-                                          break;
-                                      }
-
-                                    });
-                                  },
-                                ),
-                              );
-                            },
-                          ).toList(),
+                  child: Responsive.isMobile(context)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomTextBoldTitle(title: StringConst.IPIL),
+                            const SizedBox(height: 10),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(children: _buildIplTabs()),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            CustomTextBoldTitle(title: StringConst.IPIL),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 40),
+                              child: Row(children: _buildIplTabs()),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
                 Divider(color: AppColors.greyBorder,),
                 SingleChildScrollView(
                   child: Container(
-                      child: bodyWidget[selectedIndex]),
+                      child: _buildPageByIndex(selectedIndex)),
                 )
               ],
             ),
@@ -163,6 +130,41 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
         }
     );
 
+  }
+
+  List<Widget> _buildIplTabs() {
+    return List<Widget>.generate(
+      2,
+      (int index) {
+        return Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: ChoiceChip(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25)),
+                side: BorderSide(color: _value == _menuOptions[index]
+                    ? Colors.transparent
+                    : AppColors.violet)),
+            disabledColor: Colors.white,
+            selectedColor: AppColors.turquoiseBlue,
+            labelStyle: TextStyle(
+              fontSize: Responsive.isMobile(context) ? 12.0 : 16.0,
+              fontWeight: FontWeight.w400,
+              color: _value == _menuOptions[index] ? AppColors.white : AppColors.greyTxtAlt,
+            ),
+            label: Text(_menuOptions[index]),
+            selected: _value == _menuOptions[index],
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            showCheckmark: false,
+            onSelected: (bool selected) {
+              setState(() {
+                _value = _menuOptions[index];
+                ParticipantIPILPage.selectedIndexIpils.value = index;
+              });
+            },
+          ),
+        );
+      },
+    ).toList();
   }
 
   Widget followPage(){
@@ -193,7 +195,9 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
             Padding(
               padding: Responsive.isMobile(context) ? EdgeInsets.symmetric(horizontal: 8.0)
                   : EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-              child: Row(
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
                 children: [
                   EnredaButtonIconSmall(
                     buttonTitle: StringConst.ADD_IPIL_ENTRY,
@@ -230,7 +234,6 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                       });
                     },
                   ),
-                  SizedBox(width: 20,),
                   EnredaButtonIconSmall(
                     buttonTitle: StringConst.DOWNLOAD_ALL,
                     buttonColor: AppColors.greySearch,
@@ -241,7 +244,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                       height: 24,
                     ),
                     onPressed: () async {
-                      if(ipilEntries.isEmpty || ipilEntries.length == 0){
+                      if(ipilEntries.isEmpty){
                         showAlertDialog(
                           context,
                           title: StringConst.FORM_WARNING,
@@ -257,7 +260,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                               MyIpilEntries(
                                 user: widget.participantUser,
                                 ipilEntries: ipilEntriesPage,
-                                techName: techNameComplete!,
+                                techName: techNameComplete ?? '',
                                 subsidy: subsidy,
                               )),
                       );
@@ -273,15 +276,6 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
               subtitle: StringConst.ADD_IPIL_ENTRY,
               imagePath: ImagePath.EMPTY_LiST_ICON,
               onPressed: () {
-                /*if(!isInitialReportFinished){
-                        showAlertDialog(
-                          context,
-                          title: StringConst.FORM_WARNING,
-                          content: StringConst.IPIL_WARNING_INITIAL_REPORT,
-                          defaultActionText: StringConst.FORM_ACCEPT,
-                        );
-                        return;
-                      }*/
                 if(widget.participantUser.assignedById == null ||
                     widget.participantUser.assignedById == ''){
                   showAlertDialog(
@@ -297,7 +291,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                 });
               },
             ) :
-            listIpils(),
+            listIpils(ipilEntries),
             SizedBox(height: 20),
           ],
         );
@@ -305,27 +299,22 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
     );
   }
 
-  Widget listIpils(){
-    return StreamBuilder<List<IpilEntry>>(
-      stream: _ipilEntriesStream,
-      builder: (context, entriesSnapshot) {
-        if (!entriesSnapshot.hasData) return Container();
-        ipilEntriesPage = entriesSnapshot.data!;
-        return ListItemBuilder<IpilEntry>(
-          snapshot: entriesSnapshot,
-          itemBuilder: (context, ipilEntry) {
-            return ExpandableIpilEntryWrapper(
-              ipilEntry: ipilEntry,
-              participantUser: widget.participantUser,
-              editIpilEntry: () {
-                setState(() {
-                  selectedIpil = ipilEntry;
-                  print("ipil en pag general: $selectedIpil");
-                  bodyWidget[3] = CreateIpilForm(participantUser: widget.participantUser, selectedIpil: selectedIpil);
-                  ParticipantIPILPage.selectedIndexIpils.value = 3;
-                });
-              },
-            );
+  Widget listIpils(List<IpilEntry> ipilEntries) {
+    ipilEntriesPage = ipilEntries;
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: ipilEntries.length,
+      itemBuilder: (context, index) {
+        final ipilEntry = ipilEntries[index];
+        return ExpandableIpilEntryWrapper(
+          ipilEntry: ipilEntry,
+          participantUser: widget.participantUser,
+          editIpilEntry: () {
+            setState(() {
+              selectedIpil = ipilEntry;
+              ParticipantIPILPage.selectedIndexIpils.value = 3;
+            });
           },
         );
       },

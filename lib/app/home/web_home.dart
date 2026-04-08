@@ -120,6 +120,10 @@ class _WebHomeState extends State<WebHome> {
                                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                                 if (snapshot.hasData) {
                                   var socialEntity = snapshot.data!;
+                                  final socialEntityId = socialEntity.socialEntityId;
+                                  if (socialEntityId != null && socialEntityId.isNotEmpty) {
+                                    LocationCache.instance.socialEntitiesCache[socialEntityId] = socialEntity;
+                                  }
                                   LocationCache.instance.warmUpAll(database);
                                   globals.currentUserSocialEntity = socialEntity;
                                   return _buildContent(context, socialEntity, user, profilePic, userName);

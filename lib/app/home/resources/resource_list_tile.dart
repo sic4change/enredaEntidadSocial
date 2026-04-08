@@ -95,51 +95,52 @@ class _ResourceListTileState extends State<ResourceListTile> {
                                     : const SizedBox(
                                         width: 5,
                                       ),
-                                Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      widget.resource.promotor != null
-                                        ? widget.resource.promotor != ""
-                                            ? widget.resource.promotor!
-                                            : widget.resource.organizerName!
-                                        : widget.resource.organizerName!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                      style: textTheme.bodySmall?.copyWith(
-                                        color: AppColors.greyDark,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.place,
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        widget.resource.promotor != null
+                                          ? widget.resource.promotor != ""
+                                              ? widget.resource.promotor!
+                                              : widget.resource.organizerName!
+                                          : widget.resource.organizerName!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                        style: textTheme.bodySmall?.copyWith(
                                           color: AppColors.greyDark,
-                                          size: 12,
+                                          height: 1.5,
                                         ),
-                                        Container(
-                                          width: Responsive.isDesktop(context) ? 300 : 250,
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8.0),
-                                            child: Text(
-                                              getLocationText(widget.resource),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style:
-                                                  textTheme.bodySmall?.copyWith(
-                                                color: AppColors.greyDark,
-                                                height: 1.5,
+                                      ),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.place,
+                                            color: AppColors.greyDark,
+                                            size: 12,
+                                          ),
+                                          Flexible(
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 8.0),
+                                              child: Text(
+                                                getLocationText(widget.resource),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style:
+                                                    textTheme.bodySmall?.copyWith(
+                                                  color: AppColors.greyDark,
+                                                  height: 1.5,
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),

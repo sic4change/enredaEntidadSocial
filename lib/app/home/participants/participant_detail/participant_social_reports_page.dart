@@ -19,7 +19,6 @@ import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -44,21 +43,37 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
   int totalReports = 1;
   late UserEnreda user;
   late Widget currentPage;
-  var bodyWidget = <Widget>[];
   String? participantAssignedUserId;
   late InitialReport initialReport = InitialReport();
   bool? noneAreSet;
+  Database? _database;
+  Stream<UserEnreda>? _participantStream;
+  String? _reportsStreamUserId;
+  Stream<InitialReport>? _initialReportStream;
+  Stream<ClosureReport>? _closureReportStream;
+  Stream<FollowReport>? _followReportStream;
+  Stream<DerivationReport>? _derivationReportStream;
 
   @override
   void initState() {
-    bodyWidget = [
-      selectionPage(),
-      InitialReportForm(user: widget.participantUser),
-      FollowReportForm(user: widget.participantUser),
-      DerivationReportForm(user: widget.participantUser),
-      ClosureReportForm(user: widget.participantUser),
-    ];
+    ParticipantSocialReportPage.selectedIndexInforms.value = 0;
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _database ??= Provider.of<Database>(context, listen: false);
+    _participantStream ??= _database!.userEnredaStreamByUserId(widget.participantUser.userId);
+  }
+
+  void _ensureReportStreams(String? userId) {
+    if (_database == null || userId == null || userId.isEmpty || _reportsStreamUserId == userId) return;
+    _reportsStreamUserId = userId;
+    _initialReportStream = _database!.initialReportsStreamByUserId(userId);
+    _closureReportStream = _database!.closureReportsStreamByUserId(userId);
+    _followReportStream = _database!.followReportsStreamByUserId(userId);
+    _derivationReportStream = _database!.derivationReportsStreamByUserId(userId);
   }
 
   @override
@@ -68,23 +83,41 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
         builder: (context, selectedIndex, child) {
           return SingleChildScrollView(
             child: Container(
-                child: bodyWidget[selectedIndex]),
+                child: _buildPageByIndex(selectedIndex)),
           );
         }
     );
     //return currentPage;
   }
 
+  Widget _buildPageByIndex(int selectedIndex) {
+    switch (selectedIndex) {
+      case 0:
+        return selectionPage();
+      case 1:
+        return InitialReportForm(user: widget.participantUser);
+      case 2:
+        return FollowReportForm(user: widget.participantUser);
+      case 3:
+        return DerivationReportForm(user: widget.participantUser);
+      case 4:
+        return ClosureReportForm(user: widget.participantUser);
+      default:
+        return selectionPage();
+    }
+  }
+
   Widget selectionPage(){
-    final database = Provider.of<Database>(context, listen: false);
+    if (_participantStream == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     late InitialReport initialReportUser = InitialReport();
     late ClosureReport closureReportUser = ClosureReport();
     late FollowReport followReportUser = FollowReport();
     late DerivationReport derivationReportUser = DerivationReport();
 
     return StreamBuilder<UserEnreda>(
-        stream: database.userEnredaStreamByUserId(
-            widget.participantUser.userId),
+        stream: _participantStream,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             user = snapshot.data!;
@@ -105,29 +138,30 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
           }else{
             user = widget.participantUser;
           }
+          _ensureReportStreams(user.userId);
           return StreamBuilder<InitialReport>(
-            stream: database.initialReportsStreamByUserId(user.userId),
+            stream: _initialReportStream,
             builder: (context, snapshot) {
               if(snapshot.hasData){
                 globals.currentInitialReportUser = snapshot.data!;
                 initialReportUser = snapshot.data!;
               }
               return StreamBuilder<ClosureReport>(
-                stream: database.closureReportsStreamByUserId(user.userId),
+                stream: _closureReportStream,
                 builder: (context, snapshot) {
                   if(snapshot.hasData){
                     globals.currentClosureReportUser = snapshot.data!;
                     closureReportUser = snapshot.data!;
                   }
                   return StreamBuilder<FollowReport>(
-                    stream: database.followReportsStreamByUserId(user.userId),
+                    stream: _followReportStream,
                     builder: (context, snapshot) {
                       if(snapshot.hasData){
                         globals.currentFollowReportUser = snapshot.data!;
                         followReportUser = snapshot.data!;
                       }
                       return StreamBuilder<DerivationReport>(
-                        stream: database.derivationReportsStreamByUserId(user.userId),
+                        stream: _derivationReportStream,
                         builder: (context, snapshot) {
                           if(snapshot.hasData){
                             globals.currentDerivationReportUser = snapshot.data!;
