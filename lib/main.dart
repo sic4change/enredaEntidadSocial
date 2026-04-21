@@ -21,6 +21,19 @@ Future<void> main() async {
   );
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
+  // Surface full stack traces for every framework error. Flutter otherwise
+  // collapses nested widget exceptions to just the message ("Unexpected null
+  // value."), which hides *where* the null is. Keeping this always-on is cheap
+  // and only triggers on already-caught exceptions.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    // ignore: avoid_print
+    print('[FlutterError] ${details.exceptionAsString()}');
+    // ignore: avoid_print
+    print(details.stack);
+  };
+
   runApp(MyApp());
 }
 
