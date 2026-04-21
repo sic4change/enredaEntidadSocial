@@ -27,10 +27,22 @@ import '../../../../utils/adaptative.dart';
 import '../../../../utils/responsive.dart';
 
 class FollowReportForm extends StatefulWidget {
-  const FollowReportForm({super.key, required this.user,
+  const FollowReportForm({
+    super.key,
+    required this.user,
+    this.overrideReportId,
+    this.viewOnly = false,
   });
 
   final UserEnreda user;
+
+  /// Forces the form to load a specific report document (instead of
+  /// the user's currently-active `followReportId`). Used for viewing
+  /// historical reports.
+  final String? overrideReportId;
+
+  /// When true, renders the form read-only regardless of `finished`.
+  final bool viewOnly;
 
   @override
   State<FollowReportForm> createState() => _FollowReportFormState();
@@ -235,7 +247,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
             }
             if (snapshot.hasData) {
               userEnreda = snapshot.data!;
-              if(userEnreda.followReportId == null && !_isCreatingReport) {
+              if(widget.overrideReportId == null &&
+                  userEnreda.followReportId == null &&
+                  !_isCreatingReport) {
                 _isCreatingReport = true;
                 Future.microtask(() async {
                   try {
@@ -417,7 +431,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
             ),
             Divider(color: AppColors.greyBorder,),
             StreamBuilder<FollowReport?>(
-                stream: _ensureReportStream(database, userEnreda.followReportId),
+                stream: _ensureReportStream(
+                    database,
+                    widget.overrideReportId ?? userEnreda.followReportId),
                 builder: (context, snapshot) {
                   final followReportSaved = snapshot.data;
                   if (followReportSaved != null) {
@@ -606,7 +622,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
     final textTheme = Theme.of(context).textTheme;
     double fontSize = responsiveSize(context, 13, 20, md: 16);
     double fontSizeSubTitle = responsiveSize(context, 14, 18, md: 15);
-    bool _finished = report.finished ?? false;
+    bool _finished = widget.viewOnly || (report.finished ?? false);
     print('Entra en el completeFollowForm');
 
     //Pre-Selection

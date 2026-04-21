@@ -28,10 +28,22 @@ import '../participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class ClosureReportForm extends StatefulWidget {
-  const ClosureReportForm({super.key, required this.user,
+  const ClosureReportForm({
+    super.key,
+    required this.user,
+    this.overrideReportId,
+    this.viewOnly = false,
   });
 
   final UserEnreda user;
+
+  /// Forces the form to load a specific report document (instead of
+  /// the user's currently-active `closureReportId`). Used for viewing
+  /// historical reports.
+  final String? overrideReportId;
+
+  /// When true, renders the form read-only regardless of `finished`.
+  final bool viewOnly;
 
   @override
   State<ClosureReportForm> createState() => _ClosureReportFormState();
@@ -239,7 +251,9 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             }
             if (snapshot.hasData) {
               userEnreda = snapshot.data!;
-              if(userEnreda.closureReportId == null && !_isCreatingReport) {
+              if(widget.overrideReportId == null &&
+                  userEnreda.closureReportId == null &&
+                  !_isCreatingReport) {
                 _isCreatingReport = true;
                 if(globals.currentFollowReportUser.finished == true) {
                   Future.microtask(() async {
@@ -512,7 +526,9 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             ),
             Divider(color: AppColors.greyBorder,),
             StreamBuilder<ClosureReport?>(
-                stream: _ensureReportStream(database, userEnreda.closureReportId),
+                stream: _ensureReportStream(
+                    database,
+                    widget.overrideReportId ?? userEnreda.closureReportId),
                 builder: (context, snapshot) {
                   final closureReportSaved = snapshot.data;
                   if (closureReportSaved != null) {
@@ -730,7 +746,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     final database = Provider.of<Database>(context, listen: false);
     final _formKey = GlobalKey<FormState>();
 
-    bool _finished = report.finished ?? false;
+    bool _finished = widget.viewOnly || (report.finished ?? false);
 
     //Pre-Selection
     if (_controllers['subsidy']!.text.trim().isEmpty) {

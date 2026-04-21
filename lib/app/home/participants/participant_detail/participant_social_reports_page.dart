@@ -63,10 +63,52 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
   Stream<FollowReport?>? _followReportStream;
   Stream<DerivationReport?>? _derivationReportStream;
 
+  // When a history-cycle "eye" is tapped, the corresponding id is
+  // stashed here and passed to the matching form as an override so
+  // the form renders the historical document in read-only mode.
+  // They are cleared whenever the user returns to the selection page
+  // or opens an active-cycle row.
+  String? _historyViewInitialReportId;
+  String? _historyViewFollowReportId;
+  String? _historyViewDerivationReportId;
+  String? _historyViewClosureReportId;
+
+  void _clearHistoryOverrides() {
+    _historyViewInitialReportId = null;
+    _historyViewFollowReportId = null;
+    _historyViewDerivationReportId = null;
+    _historyViewClosureReportId = null;
+  }
+
   @override
   void initState() {
     ParticipantSocialReportPage.selectedIndexInforms.value = 0;
     super.initState();
+    ParticipantSocialReportPage.selectedIndexInforms
+        .addListener(_onIndexChanged);
+  }
+
+  @override
+  void dispose() {
+    ParticipantSocialReportPage.selectedIndexInforms
+        .removeListener(_onIndexChanged);
+    super.dispose();
+  }
+
+  void _onIndexChanged() {
+    // When the user returns to the list, drop any stale history
+    // overrides so the next open of an active-cycle row shows the
+    // active report again.
+    if (ParticipantSocialReportPage.selectedIndexInforms.value == 0) {
+      if (!mounted) return;
+      final hadOverride = _historyViewInitialReportId != null ||
+          _historyViewFollowReportId != null ||
+          _historyViewDerivationReportId != null ||
+          _historyViewClosureReportId != null;
+      if (hadOverride) {
+        setState(_clearHistoryOverrides);
+      }
+    }
   }
 
   @override
@@ -115,13 +157,37 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
       case 0:
         return selectionPage();
       case 1:
-        return InitialReportForm(user: widget.participantUser);
+        return InitialReportForm(
+          // A different key per override id forces a fresh
+          // form state so cached controllers don't leak between
+          // the active report and a historical one.
+          key: ValueKey('initial_${_historyViewInitialReportId ?? 'active'}'),
+          user: widget.participantUser,
+          overrideReportId: _historyViewInitialReportId,
+          viewOnly: _historyViewInitialReportId != null,
+        );
       case 2:
-        return FollowReportForm(user: widget.participantUser);
+        return FollowReportForm(
+          key: ValueKey('follow_${_historyViewFollowReportId ?? 'active'}'),
+          user: widget.participantUser,
+          overrideReportId: _historyViewFollowReportId,
+          viewOnly: _historyViewFollowReportId != null,
+        );
       case 3:
-        return DerivationReportForm(user: widget.participantUser);
+        return DerivationReportForm(
+          key: ValueKey(
+              'derivation_${_historyViewDerivationReportId ?? 'active'}'),
+          user: widget.participantUser,
+          overrideReportId: _historyViewDerivationReportId,
+          viewOnly: _historyViewDerivationReportId != null,
+        );
       case 4:
-        return ClosureReportForm(user: widget.participantUser);
+        return ClosureReportForm(
+          key: ValueKey('closure_${_historyViewClosureReportId ?? 'active'}'),
+          user: widget.participantUser,
+          overrideReportId: _historyViewClosureReportId,
+          viewOnly: _historyViewClosureReportId != null,
+        );
       default:
         return selectionPage();
     }
@@ -313,6 +379,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               bannerOffset,
               () {
                 setState(() {
+                  _clearHistoryOverrides();
                   ParticipantSocialReportPage.selectedIndexInforms.value = 1;
                 });
               },
@@ -339,6 +406,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               bannerOffset + 1,
               () {
                 setState(() {
+                  _clearHistoryOverrides();
                   ParticipantSocialReportPage.selectedIndexInforms.value = 2;
                 });
               },
@@ -365,6 +433,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               bannerOffset + (user.followReportId == null ? 1 : 2),
               () {
                 setState(() {
+                  _clearHistoryOverrides();
                   ParticipantSocialReportPage.selectedIndexInforms.value = 3;
                 });
               },
@@ -391,6 +460,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               bannerOffset + _closureReportNumber(),
               () {
                 setState(() {
+                  _clearHistoryOverrides();
                   ParticipantSocialReportPage.selectedIndexInforms.value = 4;
                 });
               },
@@ -441,7 +511,17 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               totalRows: historyTotal,
               stream: _database!.initialReportStreamById(cycle.initialReportId),
               completedDateSelector: (r) => r.completedDate,
-              onView: (report) => Navigator.push(
+              // Eye: open the inline read-only form with the
+              // historical report id overridden.
+              onView: () {
+                setState(() {
+                  _clearHistoryOverrides();
+                  _historyViewInitialReportId = cycle.initialReportId;
+                  ParticipantSocialReportPage.selectedIndexInforms.value = 1;
+                });
+              },
+              // Download: open the PDF preview page.
+              onDownload: (report) => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyInitialReport(
@@ -458,7 +538,14 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               totalRows: historyTotal,
               stream: _database!.followReportStreamById(cycle.followReportId),
               completedDateSelector: (r) => r.completedDate,
-              onView: (report) => Navigator.push(
+              onView: () {
+                setState(() {
+                  _clearHistoryOverrides();
+                  _historyViewFollowReportId = cycle.followReportId;
+                  ParticipantSocialReportPage.selectedIndexInforms.value = 2;
+                });
+              },
+              onDownload: (report) => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyFollowReport(
@@ -478,7 +565,14 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               stream: _database!
                   .derivationReportStreamById(cycle.derivationReportId),
               completedDateSelector: (r) => r.completedDate,
-              onView: (report) => Navigator.push(
+              onView: () {
+                setState(() {
+                  _clearHistoryOverrides();
+                  _historyViewDerivationReportId = cycle.derivationReportId;
+                  ParticipantSocialReportPage.selectedIndexInforms.value = 3;
+                });
+              },
+              onDownload: (report) => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyDerivationReport(
@@ -499,7 +593,14 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
               stream:
                   _database!.closureReportStreamById(cycle.closureReportId),
               completedDateSelector: (r) => r.completedDate,
-              onView: (report) => Navigator.push(
+              onView: () {
+                setState(() {
+                  _clearHistoryOverrides();
+                  _historyViewClosureReportId = cycle.closureReportId;
+                  ParticipantSocialReportPage.selectedIndexInforms.value = 4;
+                });
+              },
+              onDownload: (report) => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyClosureReport(
@@ -520,7 +621,8 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
     required int totalRows,
     required Stream<T?> stream,
     required DateTime? Function(T) completedDateSelector,
-    required void Function(T) onView,
+    required VoidCallback onView,
+    required void Function(T) onDownload,
   }) {
     return StreamBuilder<T?>(
       stream: stream,
@@ -534,10 +636,13 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
           title,
           date != null ? formatter.format(date) : '',
           order,
+          // Eye -> expand the historical report inline in the form.
+          onView,
+          // Download -> open the PDF preview (only when the report
+          // has actually loaded).
           () {
-            if (report != null) onView(report);
+            if (report != null) onDownload(report);
           },
-          () {},
           date != null,
           totalOverride: totalRows,
         );

@@ -27,10 +27,22 @@ import '../../../../utils/responsive.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class DerivationReportForm extends StatefulWidget {
-  const DerivationReportForm({super.key, required this.user,
+  const DerivationReportForm({
+    super.key,
+    required this.user,
+    this.overrideReportId,
+    this.viewOnly = false,
   });
 
   final UserEnreda user;
+
+  /// Forces the form to load a specific report document (instead of
+  /// the user's currently-active `derivationReportId`). Used for
+  /// viewing historical reports.
+  final String? overrideReportId;
+
+  /// When true, renders the form read-only regardless of `finished`.
+  final bool viewOnly;
 
   @override
   State<DerivationReportForm> createState() => _DerivationReportFormState();
@@ -272,7 +284,9 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             }
             if (snapshot.hasData) {
               userEnreda = snapshot.data!;
-              if(userEnreda.derivationReportId == null && !_isCreatingReport) {
+              if(widget.overrideReportId == null &&
+                  userEnreda.derivationReportId == null &&
+                  !_isCreatingReport) {
                 _isCreatingReport = true;
                 if(globals.currentFollowReportUser.finished == true) {
                   Future.microtask(() async { try {
@@ -576,7 +590,9 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             Divider(color: AppColors.greyBorder,),
             StreamBuilder<DerivationReport?>(
-                stream: _ensureReportStream(database, userEnreda.derivationReportId),
+                stream: _ensureReportStream(
+                    database,
+                    widget.overrideReportId ?? userEnreda.derivationReportId),
                 builder: (context, snapshot) {
                   final derivationReportSaved = snapshot.data;
                   if (derivationReportSaved != null) {
@@ -819,7 +835,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
     final textTheme = Theme.of(context).textTheme;
     double fontSize = responsiveSize(context, 13, 20, md: 16);
     double fontSizeSubTitle = responsiveSize(context, 14, 18, md: 15);
-    bool _finished = report.finished ?? false;
+    bool _finished = widget.viewOnly || (report.finished ?? false);
 
 /*
     _allow1Notifier.value = report.allow1!;

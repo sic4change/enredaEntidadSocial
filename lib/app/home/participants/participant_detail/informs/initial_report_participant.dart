@@ -25,9 +25,24 @@ import '../../../../utils/adaptative.dart';
 import '../../../../utils/responsive.dart';
 
 class InitialReportForm extends StatefulWidget {
-  const InitialReportForm({super.key, required this.user});
+  const InitialReportForm({
+    super.key,
+    required this.user,
+    this.overrideReportId,
+    this.viewOnly = false,
+  });
 
   final UserEnreda user;
+
+  /// Forces the form to load a specific report document (instead of
+  /// the user's currently-active `initialReportId`). Used to inspect
+  /// historical reports from `socialItineraryHistory`.
+  final String? overrideReportId;
+
+  /// When true, the form is rendered in read-only mode regardless of
+  /// the report's `finished` flag. Used together with [overrideReportId]
+  /// when viewing historical reports.
+  final bool viewOnly;
 
   @override
   State<InitialReportForm> createState() => _InitialReportFormState();
@@ -230,8 +245,10 @@ class _InitialReportFormState extends State<InitialReportForm> {
             builder: (context, snapshotUser) {
               if (snapshotUser.hasData) {
                 UserEnreda userStream = snapshotUser.data!;
+                final String? effectiveReportId =
+                    widget.overrideReportId ?? userStream.initialReportId;
                 return StreamBuilder<InitialReport?>(
-                    stream: _ensureReportStream(database, userStream.initialReportId),
+                    stream: _ensureReportStream(database, effectiveReportId),
                     builder: (context, snapshot) {
                       if (snapshot.data != null) {
                         initialReportSaved = snapshot.data!;
@@ -239,7 +256,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
                             context, initialReportSaved, userStream);
                       }
                       else {
-                        if (userStream.initialReportId == null && !_isCreatingReport) {
+                        if (widget.overrideReportId == null &&
+                            userStream.initialReportId == null &&
+                            !_isCreatingReport) {
                           _isCreatingReport = true;
                           Future.microtask(() async {
                             try {
@@ -431,7 +450,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
     final textTheme = Theme.of(context).textTheme;
     double fontSize = responsiveSize(context, 13, 20, md: 16);
     double fontSizeSubTitle = responsiveSize(context, 14, 18, md: 15);
-    bool _finished = report.finished ?? false;
+    bool _finished = widget.viewOnly || (report.finished ?? false);
 
     //Pre-Selection
     if (_controllers['subsidy']!.text.trim().isEmpty) {
