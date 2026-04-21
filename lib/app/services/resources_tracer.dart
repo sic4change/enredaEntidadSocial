@@ -33,6 +33,11 @@ class ResourcesTracer {
 
     final int id = _nextId++;
     final DateTime startedAt = DateTime.now();
+    // Capture the stack at call-time (synchronous caller = database.dart
+    // method invoked by a widget). Capturing inside `onListen` only yields
+    // async-runtime frames, so this is the critical difference for
+    // pinpointing the real consumer of the stream.
+    final String? origin = _captureOrigin();
 
     late final StreamSubscription<T> sub;
     late final StreamController<T> controller;
@@ -42,7 +47,6 @@ class ResourcesTracer {
           'op=$op path=$path '
           '${_fmtParams(params)} '
           'at=${startedAt.toIso8601String()}');
-      final origin = _captureOrigin();
       if (origin != null && origin.isNotEmpty) {
         _log('📚 [RESOURCES TRACE #$id] ORIGIN\n$origin');
       }
@@ -117,18 +121,22 @@ class ResourcesTracer {
   }
 
   /// Best-effort capture of the call site that requested this stream. We
-  /// skip frames inside the tracer + `database.dart` wrapper so the first
-  /// surfaced frame is usually the consumer widget.
+  /// drop frames inside the tracer itself and all async-runtime frames
+  /// (`dart-sdk/lib/async/*`, `dart-sdk/lib/_internal/*`) so the first
+  /// surfaced frames are the `database.dart` wrapper and the consumer
+  /// widget / service that actually opened the stream.
   static String? _captureOrigin() {
     try {
       final frames = StackTrace.current.toString().split('\n');
-      // Drop this frame + the frames inside the tracer so we land in the
-      // caller (usually database.dart -> widget layer).
-      return frames
-          .skip(1)
-          .where((f) => !f.contains('resources_tracer.dart'))
-          .take(8)
-          .join('\n');
+      final filtered = frames.where((f) {
+        if (f.trim().isEmpty) return false;
+        if (f.contains('resources_tracer.dart')) return false;
+        if (f.contains('dart-sdk/lib/async/')) return false;
+        if (f.contains('dart-sdk/lib/_internal/')) return false;
+        return true;
+      }).toList();
+      if (filtered.isEmpty) return null;
+      return filtered.take(8).join('\n');
     } catch (_) {
       return null;
     }
