@@ -44,8 +44,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
 
   Database? _db;
   Stream<UserEnreda>? _participantStream;
-  Stream<ClosureReport>? _closureReportStream;
-  String? _closureReportUserId;
+  Stream<ClosureReport?>? _closureReportStream;
+  String? _closureReportId;
   final ScrollController _webScrollController = ScrollController();
 
   // Cached futures/streams for _buildDniWidget to avoid re-creating on every build
@@ -92,7 +92,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
       stream: _participantStream,
       builder: (context, participantSnapshot) {
         UserEnreda currentUser = participantSnapshot.data ?? participantUser;
-        _ensureClosureReportStream(currentUser.userId);
+        _ensureClosureReportStream(currentUser.closureReportId);
 
         return FutureBuilder<UserEnreda?>(
           future: currentUser.assignedById != null 
@@ -113,10 +113,11 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     );
   }
 
-  void _ensureClosureReportStream(String? userId) {
-    if (_db == null || userId == null || userId.isEmpty || _closureReportUserId == userId) return;
-    _closureReportUserId = userId;
-    _closureReportStream = _db!.closureReportsStreamByUserId(userId);
+  void _ensureClosureReportStream(String? closureReportId) {
+    if (_db == null) return;
+    if (_closureReportId == closureReportId) return;
+    _closureReportId = closureReportId;
+    _closureReportStream = _db!.closureReportStreamById(closureReportId);
   }
 
   Widget _buildParticipantWeb(BuildContext context, UserEnreda user, String? techNameComplete) {
@@ -323,43 +324,36 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                           Builder(
                             builder: (context) {
                               DateTime? startDateItinerary = user.startDateItinerary;
-                              if (startDateItinerary != null) {
-                                return StreamBuilder(
-                                  stream: _closureReportStream,
-                                  builder: (context, snapshotClosure){
-                                        if(snapshotClosure.hasData){
-                                          if(snapshotClosure.data!.completedDate != null && snapshotClosure.data!.finished == true){
-                                            return CustomTextSmallBold( 
-                                              title: 'CERRADO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)} - ${DateFormat('dd/MM/yyyy').format(snapshotClosure.data!.completedDate!)}',
-                                              color: AppColors.redClose,
-                                              height: 0.5,
-                                            );
-                                          }
-                                          else{
-                                            return CustomTextSmallBold(
-                                              title: 'ACTIVO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)}',
-                                              color: AppColors.primary900,
-                                              height: 0.5,
-                                            );
-                                      }
-                                    }
-                                    else {
-                                      return CustomTextSmallBold(
-                                        title: 'ACTIVO: ${DateFormat(
-                                            'dd/MM/yyyy').format(
-                                            startDateItinerary)}',
-                                        color: AppColors.primary900,
-                                        height: 0.5,
-                                      );
-                                    }
-                                });
-                              } else {
+                              if (startDateItinerary == null) {
                                 return CustomTextSmallBold(
                                   title: 'No iniciado',
                                   color: AppColors.primary900,
                                   height: 0.5,
                                 );
                               }
+                              return StreamBuilder<ClosureReport?>(
+                                stream: _closureReportStream,
+                                builder: (context, snapshotClosure) {
+                                  final closure = snapshotClosure.data;
+                                  final isClosed = closure != null &&
+                                      closure.completedDate != null &&
+                                      closure.finished == true;
+                                  if (isClosed) {
+                                    return CustomTextSmallBold(
+                                      title:
+                                          'CERRADO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)} - ${DateFormat('dd/MM/yyyy').format(closure.completedDate!)}',
+                                      color: AppColors.redClose,
+                                      height: 0.5,
+                                    );
+                                  }
+                                  return CustomTextSmallBold(
+                                    title:
+                                        'ACTIVO: ${DateFormat('dd/MM/yyyy').format(startDateItinerary)}',
+                                    color: AppColors.primary900,
+                                    height: 0.5,
+                                  );
+                                },
+                              );
                             },
                           ),
                         ],

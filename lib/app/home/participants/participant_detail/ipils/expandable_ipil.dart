@@ -151,13 +151,12 @@ class _ExpandableIpilEntryTileState extends State<ExpandableIpilEntryTile> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  StreamBuilder<InitialReport>(
-                              stream: database.initialReportsStreamByUserId(widget.participantUser.userId),
+                                  StreamBuilder<InitialReport?>(
+                              stream: database.initialReportStreamById(widget.participantUser.initialReportId),
                               builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  if (snapshot.data!.finished ?? false) {
-                                    subsidy = StringConst.getSubsidyIndex(snapshot.data!.subsidy);
-                                  }
+                                final report = snapshot.data;
+                                if (report != null && (report.finished ?? false)) {
+                                  subsidy = StringConst.getSubsidyIndex(report.subsidy);
                                 }
                                 return MyIpilEntries(
                                   user: widget.participantUser,

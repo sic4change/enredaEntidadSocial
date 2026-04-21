@@ -5,6 +5,7 @@ import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
 import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
+import 'package:enreda_empresas/app/models/socialItineraryCycle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserEnreda {
@@ -56,6 +57,7 @@ class UserEnreda {
     this.startDateItinerary,
     this.programId,
     this.dni,
+    this.socialItineraryHistory = const [],
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
@@ -250,6 +252,20 @@ class UserEnreda {
     final String? programId = data['programId'];
     final String? dni = data['dni'] ?? '';
 
+    List<SocialItineraryCycle> socialItineraryHistory = [];
+    if (data['socialItineraryHistory'] != null) {
+      try {
+        for (final entry in (data['socialItineraryHistory'] as List)) {
+          if (entry is Map) {
+            socialItineraryHistory.add(
+                SocialItineraryCycle.fromMap(Map<String, dynamic>.from(entry)));
+          }
+        }
+      } catch (_) {
+        // Defensive: malformed legacy entries are ignored.
+      }
+    }
+
     return UserEnreda(
       email: email,
       firstName: firstName,
@@ -298,6 +314,7 @@ class UserEnreda {
       startDateItinerary: startDateItinerary,
       programId: programId,
       dni: dni,
+      socialItineraryHistory: socialItineraryHistory,
     );
   }
 
@@ -348,6 +365,7 @@ class UserEnreda {
   DateTime? startDateItinerary;
   late String? programId;
   late String? dni;
+  List<SocialItineraryCycle> socialItineraryHistory;
 
   @override
   bool operator ==(Object other){
@@ -401,6 +419,8 @@ class UserEnreda {
       'startDateItinerary': startDateItinerary,
       'programId': programId,
       'dni': dni,
+      'socialItineraryHistory':
+          socialItineraryHistory.map((c) => c.toMap()).toList(),
     };
   }
 
@@ -454,6 +474,7 @@ class UserEnreda {
     DateTime? startDateItinerary,
     String? programId,
     String? dni,
+    List<SocialItineraryCycle>? socialItineraryHistory,
   }) {
     return UserEnreda(
       email: email ?? this.email,
@@ -501,6 +522,8 @@ class UserEnreda {
       startDateItinerary: startDateItinerary ?? this.startDateItinerary,
       programId: programId ?? this.programId,
       dni: dni ?? this.dni,
+      socialItineraryHistory:
+          socialItineraryHistory ?? this.socialItineraryHistory,
     );
   }
 

@@ -297,7 +297,7 @@ class InitialReport {
     return InitialReport(
 
         //Basic
-      initialReportId: data['initialReportId'],
+      initialReportId: data['initialReportId'] ?? documentId,
       userId: data['userId'],
       finished: data['finished'],
       completedDate: data['completedDate'] != null ? data['completedDate'].toDate() : null,

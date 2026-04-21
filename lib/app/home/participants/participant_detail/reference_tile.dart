@@ -49,7 +49,7 @@ class ReferenceTile extends StatelessWidget {
                   ],
                 ),
                 SpaceH4(),
-                certificationRequest.phone != "" ? Row(
+                (certificationRequest.phone != null && certificationRequest.phone != "" && certificationRequest.phone != "+34" && certificationRequest.phone != "+34 ") ? Row(
                   children: [
                     Icon(
                       Icons.phone,

@@ -277,7 +277,7 @@ Future<Uint8List> generateResume2(
                               title: '${reference.certifierName}',
                               description1: '${reference.certifierPosition} - ${reference.certifierCompany}',
                               description2: '${reference.email}',
-                              description3: '${reference.phone}',
+                              description3: (reference.phone != null && reference.phone != "" && reference.phone != "+34" && reference.phone != "+34 ") ? '${reference.phone}' : "",
                             ),
                         ]
                       )

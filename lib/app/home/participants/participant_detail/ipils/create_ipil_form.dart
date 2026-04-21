@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/home/participants/participant_detail/ipils/participant_ipil_page.dart';
 import 'package:enreda_empresas/app/models/ipilCoordination.dart';
 import 'package:enreda_empresas/app/models/ipilDigitalSkills.dart';
@@ -142,16 +143,17 @@ void initState() {
   postWorkSupport = ipil?.postWorkSupport ?? [];
   other = ipil?.other ?? '';
   lastUpdateDate = ipil?.lastUpdateDate ?? DateTime.now();
-  techId = ipil?.techId ?? widget.participantUser.assignedById;
-  techName.value = ipil?.techName ?? '';
+  final currentUser = globals.currentSocialEntityUser;
+  techId = ipil?.techId ?? currentUser?.userId ?? widget.participantUser.assignedById;
+  techName.value = ipil?.techName ?? (currentUser != null ? '${currentUser.firstName} ${currentUser.lastName}' : '');
 
   userConnectionTerritory = ipil?.connectionTerritory ?? [];
   userContextualization = ipil?.contextualization ?? [];
   userReinforcement = ipil?.reinforcement ?? [];
   userInterviews = ipil?.interviews ?? [];
   userIntermediations = ipil?.intermediations ?? [];
-  userObtainingEmployment = ipil?.obtainingEmployment ?? [];;
-  userImprovingEmployment = ipil?.improvingEmployment ?? [];;
+  userObtainingEmployment = ipil?.obtainingEmployment ?? [];
+  userImprovingEmployment = ipil?.improvingEmployment ?? [];
   userCoordination = ipil?.coordination ?? [];
   userLegal = ipil?.legal ?? [];
   userPostWorkSupport = ipil?.postWorkSupport ?? [];
@@ -259,7 +261,9 @@ void initState() {
                     if (snapshot.hasData && !wasManuallyChanged) {
                       final newName = '${snapshot.data!.firstName} ${snapshot.data!.lastName}';
                       if (techName.value != newName) {
-                        techName.value = newName;
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          techName.value = newName;
+                        });
                       }
                     }
                     return StreamBuilder<List<UserEnreda>>(
@@ -327,7 +331,7 @@ void initState() {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: Sizes.kDefaultPaddingDouble / 2),
               child: StreamBuilder(
-                stream: database.getIpilEntriesByUserStream(widget.participantUser.userId!), 
+                stream: database.getIpilEntriesByUserStream(widget.participantUser.userId ?? ''), 
                 builder: (context, snapshot){
                   bool initialInterviewSelectable = true;
                   bool initialQuestionarySelectable = true;
@@ -336,19 +340,19 @@ void initState() {
                   if(snapshot.hasData){
                     List<IpilEntry> ipilsFromUser = snapshot.data!;
                     for(IpilEntry entry in ipilsFromUser){
-                      if(entry.initialInterview!){
+                      if(entry.initialInterview == true){
                         initialInterview = true;
                         initialInterviewSelectable = false;
                       }
-                      if(entry.initialJobValorationQuestionary!){
+                      if(entry.initialJobValorationQuestionary == true){
                         initialQuestionary = true;
                         initialQuestionarySelectable = false;
                       }
-                      if(entry.finalInterview!){
+                      if(entry.finalInterview == true){
                         closeInterview = true;
                         closeInterviewSelectable = false;
                       }
-                      if(entry.finalJobValorationQuestionary!){
+                      if(entry.finalJobValorationQuestionary == true){
                         closeQuestionary = true;
                         closeQuestionarySelectable = false;
                       }
@@ -422,7 +426,7 @@ void initState() {
               title: StringConst.IPIL_SPECIFIC_SKILLS,
               options: LocationCache.instance.ipilSpecificSkills,
               selectedIds: userSpecificSkills,
-              getId: (e) => (e as IpilSpecificSkills).ipilSpecificSkillsId!,
+              getId: (e) => (e as IpilSpecificSkills).ipilSpecificSkillsId ?? '',
               getLabel: (e) => (e as IpilSpecificSkills).label,
               cornerTop: true,
               cornerBottom: false,
@@ -432,7 +436,7 @@ void initState() {
               title: StringConst.IPIL_SOFT_SKILLS,
               options: LocationCache.instance.ipilSoftSkills,
               selectedIds: userSoftSkills,
-              getId: (e) => (e as IpilSoftSkills).ipilSoftSkillsId!,
+              getId: (e) => (e as IpilSoftSkills).ipilSoftSkillsId ?? '',
               getLabel: (e) => (e as IpilSoftSkills).label,
               cornerTop: false,
               cornerBottom: false,
@@ -442,7 +446,7 @@ void initState() {
               title: StringConst.IPIL_DIGITAL_SKILLS,
               options: LocationCache.instance.ipilDigitalSkills,
               selectedIds: userDigitalSkills,
-              getId: (e) => (e as IpilDigitalSkills).ipilDigitalSkillsId!,
+              getId: (e) => (e as IpilDigitalSkills).ipilDigitalSkillsId ?? '',
               getLabel: (e) => (e as IpilDigitalSkills).label,
               cornerTop: false,
               cornerBottom: false,
@@ -452,7 +456,7 @@ void initState() {
               title: StringConst.IPIL_LABOR_SKILLS,
               options: LocationCache.instance.ipilLaborSkills,
               selectedIds: userLaborSkills,
-              getId: (e) => (e as IpilLaborSkills).ipilLaborSkillsId!,
+              getId: (e) => (e as IpilLaborSkills).ipilLaborSkillsId ?? '',
               getLabel: (e) => (e as IpilLaborSkills).label,
               cornerTop: false,
               cornerBottom: true,
@@ -463,7 +467,7 @@ void initState() {
               title: StringConst.IPIL_CONTEXTUALIZATION,
               options: LocationCache.instance.ipilContextualizations,
               selectedIds: userContextualization,
-              getId: (e) => (e as IpilContextualization).ipilContextualizationId!,
+              getId: (e) => (e as IpilContextualization).ipilContextualizationId ?? '',
               getLabel: (e) => (e as IpilContextualization).label,
               onChanged: (ids) => setState(() { userContextualization = ids; contextualization = ids; }),
             ),
@@ -471,7 +475,7 @@ void initState() {
               title: StringConst.IPIL_CONNECTION_TERRITORY,
               options: LocationCache.instance.ipilConnectionTerritories,
               selectedIds: userConnectionTerritory,
-              getId: (e) => (e as IpilConnectionTerritory).ipilConnectionTerritoryId!,
+              getId: (e) => (e as IpilConnectionTerritory).ipilConnectionTerritoryId ?? '',
               getLabel: (e) => (e as IpilConnectionTerritory).label,
               onChanged: (ids) => setState(() { userConnectionTerritory = ids; connectionTerritory = ids; }),
             ),
@@ -479,7 +483,7 @@ void initState() {
               title: StringConst.IPIL_INTERMEDIATIONS,
               options: LocationCache.instance.ipilIntermediations,
               selectedIds: userIntermediations,
-              getId: (e) => (e as IpilIntermediations).ipilIntermediationsId!,
+              getId: (e) => (e as IpilIntermediations).ipilIntermediationsId ?? '',
               getLabel: (e) => (e as IpilIntermediations).label,
               onChanged: (ids) => setState(() { userIntermediations = ids; intermediations = ids; }),
             ),
@@ -487,7 +491,7 @@ void initState() {
               title: StringConst.IPIL_INTERVIEWS,
               options: LocationCache.instance.ipilInterviews,
               selectedIds: userInterviews,
-              getId: (e) => (e as IpilInterviews).ipilInterviewsId!,
+              getId: (e) => (e as IpilInterviews).ipilInterviewsId ?? '',
               getLabel: (e) => (e as IpilInterviews).label,
               onChanged: (ids) => setState(() { userInterviews = ids; interviews = ids; }),
             ),
@@ -495,7 +499,7 @@ void initState() {
               title: StringConst.IPIL_OBTAINING_EMPLOYMENT,
               options: LocationCache.instance.ipilObtainingEmployments,
               selectedIds: userObtainingEmployment,
-              getId: (e) => (e as IpilObtainingEmployment).ipilObtainingEmploymentId!,
+              getId: (e) => (e as IpilObtainingEmployment).ipilObtainingEmploymentId ?? '',
               getLabel: (e) => (e as IpilObtainingEmployment).label,
               onChanged: (ids) => setState(() { userObtainingEmployment = ids; obtainingEmployment = ids; }),
             ),
@@ -503,7 +507,7 @@ void initState() {
               title: StringConst.IPIL_IMPROVING_EMPLOYMENT,
               options: LocationCache.instance.ipilImprovingEmployments,
               selectedIds: userImprovingEmployment,
-              getId: (e) => (e as IpilImprovingEmployment).ipilImprovingEmploymentId!,
+              getId: (e) => (e as IpilImprovingEmployment).ipilImprovingEmploymentId ?? '',
               getLabel: (e) => (e as IpilImprovingEmployment).label,
               onChanged: (ids) => setState(() { userImprovingEmployment = ids; improvingEmployment = ids; }),
             ),
@@ -511,7 +515,7 @@ void initState() {
               title: StringConst.IPIL_COORDINATION,
               options: LocationCache.instance.ipilCoordinations,
               selectedIds: userCoordination,
-              getId: (e) => (e as IpilCoordination).ipilCoordinationId!,
+              getId: (e) => (e as IpilCoordination).ipilCoordinationId ?? '',
               getLabel: (e) => (e as IpilCoordination).label,
               onChanged: (ids) => setState(() { userCoordination = ids; coordination = ids; }),
             ),
@@ -519,7 +523,7 @@ void initState() {
               title: StringConst.IPIL_LEGAL,
               options: LocationCache.instance.ipilLegals,
               selectedIds: userLegal,
-              getId: (e) => (e as IpilLegal).ipilLegalId!,
+              getId: (e) => (e as IpilLegal).ipilLegalId ?? '',
               getLabel: (e) => (e as IpilLegal).label,
               onChanged: (ids) => setState(() { userLegal = ids; legal = ids; }),
             ),
@@ -527,7 +531,7 @@ void initState() {
               title: StringConst.IPIL_POST_WORK_SUPPORT,
               options: LocationCache.instance.ipilPostWorkSupports,
               selectedIds: userPostWorkSupport,
-              getId: (e) => (e as IpilPostWorkSupport).ipilPostWorkSupportId!,
+              getId: (e) => (e as IpilPostWorkSupport).ipilPostWorkSupportId ?? '',
               getLabel: (e) => (e as IpilPostWorkSupport).label,
               onChanged: (ids) => setState(() { userPostWorkSupport = ids; postWorkSupport = ids; }),
             ),
@@ -535,7 +539,7 @@ void initState() {
               title: StringConst.IPIL_ECONOMIC_BAG,
               options: LocationCache.instance.ipilEconomicBags,
               selectedIds: userEconomicBag,
-              getId: (e) => (e as IpilEconomicBag).ipilEconomicBagId!,
+              getId: (e) => (e as IpilEconomicBag).ipilEconomicBagId ?? '',
               getLabel: (e) => (e as IpilEconomicBag).label,
               onChanged: (ids) => setState(() { userEconomicBag = ids; economicBag = ids; }),
             ),

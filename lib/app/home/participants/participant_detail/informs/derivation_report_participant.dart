@@ -123,7 +123,8 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
   String? _selectedProgramId;
   late UserEnreda userEnreda;
   late Stream<UserEnreda> _userStream;
-  late Stream<DerivationReport> _reportStream;
+  Stream<DerivationReport?>? _reportStream;
+  String? _cachedDerivationReportId;
 
   @override
   void initState() {
@@ -238,9 +239,16 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
     };
     final database = Provider.of<Database>(context, listen: false);
     _userStream = database.userEnredaStreamByUserId(widget.user.userId);
-    _reportStream = database.derivationReportsStreamByUserId(widget.user.userId);
     super.initState();
     }
+
+  Stream<DerivationReport?> _ensureReportStream(Database database, String? reportId) {
+    if (_reportStream == null || _cachedDerivationReportId != reportId) {
+      _cachedDerivationReportId = reportId;
+      _reportStream = database.derivationReportStreamById(reportId);
+    }
+    return _reportStream!;
+  }
 
   @override
   void dispose() {
@@ -389,7 +397,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                     ));
                     if(newId.isNotEmpty){
                       userEnreda.derivationReportId = newId;
-                      await database.setUserEnreda(userEnreda); } } catch (e) { print("Error creating derivation report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de derivacion. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } } 
+                      await database.updateUserEnredaFields(userEnreda.userId!, {'derivationReportId': newId}); } } catch (e) { print("Error creating derivation report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de derivacion. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } } 
                   });
                 } else {
                   Future.microtask(() async { try {
@@ -492,7 +500,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                     ));
                     if(newId.isNotEmpty){
                       userEnreda.derivationReportId = newId;
-                      await database.setUserEnreda(userEnreda); } } catch (e) { print("Error creating derivation report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de derivacion. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } } 
+                      await database.updateUserEnredaFields(userEnreda.userId!, {'derivationReportId': newId}); } } catch (e) { print("Error creating derivation report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de derivacion. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } } 
                   });
                 }
                 return const Center(child: CircularProgressIndicator());
@@ -567,11 +575,11 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               ],
             ),
             Divider(color: AppColors.greyBorder,),
-            StreamBuilder<DerivationReport>(
-                stream: _reportStream,
+            StreamBuilder<DerivationReport?>(
+                stream: _ensureReportStream(database, userEnreda.derivationReportId),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    DerivationReport derivationReportSaved = snapshot.data!;
+                  final derivationReportSaved = snapshot.data;
+                  if (derivationReportSaved != null) {
                     return completeDerivationForm(context, derivationReportSaved, userEnreda);
                   }
                   return Container();

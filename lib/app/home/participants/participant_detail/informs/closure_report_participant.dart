@@ -81,7 +81,8 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
   late UserEnreda userEnreda;
   String? _selectedProgramId;
   late Stream<UserEnreda> _userStream;
-  late Stream<ClosureReport> _reportStream;
+  Stream<ClosureReport?>? _reportStream;
+  String? _cachedClosureReportId;
 
   late final Map<String, TextEditingController> _controllers;
   late Map<String, DateTime?> _dateValues;
@@ -204,9 +205,16 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     };
     final database = Provider.of<Database>(context, listen: false);
     _userStream = database.userEnredaStreamByUserId(widget.user.userId);
-    _reportStream = database.closureReportsStreamByUserId(widget.user.userId);
     super.initState();
     }
+
+  Stream<ClosureReport?> _ensureReportStream(Database database, String? reportId) {
+    if (_reportStream == null || _cachedClosureReportId != reportId) {
+      _cachedClosureReportId = reportId;
+      _reportStream = database.closureReportStreamById(reportId);
+    }
+    return _reportStream!;
+  }
   bool _isCreatingReport = false;
 
   @override
@@ -356,7 +364,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                   ));
                   if(newId.isNotEmpty){
                     userEnreda.closureReportId = newId;
-                    await database.setUserEnreda(userEnreda); } } catch (e) { print("Error creating closure report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de seguimiento. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } }
+                    await database.updateUserEnredaFields(userEnreda.userId!, {'closureReportId': newId}); } } catch (e) { print("Error creating closure report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de seguimiento. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } }
                   });
                 } else {
                   Future.microtask(() async { try {
@@ -458,7 +466,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                   ));
                   if(newId.isNotEmpty){
                     userEnreda.closureReportId = newId;
-                    await database.setUserEnreda(userEnreda); } } catch (e) { print("Error creating closure report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de cierre. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } } 
+                    await database.updateUserEnredaFields(userEnreda.userId!, {'closureReportId': newId}); } } catch (e) { print("Error creating closure report: $e"); if (mounted) { showAlertDialog(context, title: "Error de servidor", content: "No se pudo crear el informe de cierre. Por favor, inténtelo de nuevo más tarde.", defaultActionText: "Ok"); } } finally { if (mounted) { setState(() { _isCreatingReport = false; }); } } 
                   });
                 }
                 return const Center(child: CircularProgressIndicator());
@@ -503,11 +511,11 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               ],
             ),
             Divider(color: AppColors.greyBorder,),
-            StreamBuilder<ClosureReport>(
-                stream: _reportStream,
+            StreamBuilder<ClosureReport?>(
+                stream: _ensureReportStream(database, userEnreda.closureReportId),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    ClosureReport closureReportSaved = snapshot.data!;
+                  final closureReportSaved = snapshot.data;
+                  if (closureReportSaved != null) {
                     return completeClosureForm(context, closureReportSaved, userEnreda);
                   }
                   return Container();

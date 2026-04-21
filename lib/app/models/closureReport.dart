@@ -374,7 +374,7 @@ class ClosureReport {
     return ClosureReport(
 
       //Basic
-      closureReportId: data['closureReportId'],
+      closureReportId: data['closureReportId'] ?? documentId,
       userId: data['userId'],
       finished: data['finished'],
       completedDate: data['completedDate'] != null ? data['completedDate'].toDate() : null,

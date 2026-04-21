@@ -1171,7 +1171,9 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
                     Expanded(
                       child: Text(
                         l.name,
-                        style: textTheme.bodySmall?.copyWith(),
+                        style: textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -1208,7 +1210,9 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
       children: [
         Row(
           children: [
-            CustomTextTitle(title: StringConst.PERSONAL_REFERENCES.toUpperCase(), color: AppColors.primary900,),
+            Flexible(
+              child: CustomTextTitle(title: StringConst.PERSONAL_REFERENCES.toUpperCase(), color: AppColors.primary900,),
+            ),
             SpaceW12(),
           ],
         ),

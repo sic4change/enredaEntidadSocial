@@ -14,7 +14,7 @@ class AlgoliaSearch {
     try {
       final result = await _client.searchIndex(
         request: SearchForHits(
-          indexName: 'users_index', // Assuming this is the index name
+          indexName: 'users', // Assuming this is the index name
           query: searchQuery,
         ),
       );

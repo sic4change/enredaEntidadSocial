@@ -81,7 +81,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
   bool _isCreatingReport = false;
   String? _selectedProgramId;
   late Stream<UserEnreda> _userStream;
-  late Stream<FollowReport> _reportStream;
+  Stream<FollowReport?>? _reportStream;
+  String? _cachedFollowReportId;
 
   late final Map<String, TextEditingController> _controllers;
   late Map<String, DateTime?> _dateValues;
@@ -201,9 +202,16 @@ class _FollowReportFormState extends State<FollowReportForm> {
     print('Se inicializa el follow report');
     final database = Provider.of<Database>(context, listen: false);
     _userStream = database.userEnredaStreamByUserId(widget.user.userId);
-    _reportStream = database.followReportsStreamByUserId(widget.user.userId);
     super.initState();
     }
+
+  Stream<FollowReport?> _ensureReportStream(Database database, String? reportId) {
+    if (_reportStream == null || _cachedFollowReportId != reportId) {
+      _cachedFollowReportId = reportId;
+      _reportStream = database.followReportStreamById(reportId);
+    }
+    return _reportStream!;
+  }
 
   @override
   void dispose() {
@@ -330,7 +338,10 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     ));
                     if(newId.isNotEmpty){
                       userEnreda.followReportId = newId;
-                      await database.setUserEnreda(userEnreda);
+                      await database.updateUserEnredaFields(
+                        userEnreda.userId!,
+                        {'followReportId': newId},
+                      );
                     }
                   } catch (e) {
                     print('Error creating follow report: $e');
@@ -405,11 +416,11 @@ class _FollowReportFormState extends State<FollowReportForm> {
               ],
             ),
             Divider(color: AppColors.greyBorder,),
-            StreamBuilder<FollowReport>(
-                stream: _reportStream,
+            StreamBuilder<FollowReport?>(
+                stream: _ensureReportStream(database, userEnreda.followReportId),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    FollowReport followReportSaved = snapshot.data!;
+                  final followReportSaved = snapshot.data;
+                  if (followReportSaved != null) {
                     return completeFollowForm(context, followReportSaved, userEnreda);
                   }
                   return Container();
@@ -3028,7 +3039,12 @@ class _FollowReportFormState extends State<FollowReportForm> {
                         setState(() {
                           widget.user.dni = _controllers['dniParticipant']!.text;
                         });
-                        database.setUserEnreda(widget.user);
+                        // Surgical update so we don't clobber freshly archived
+                        // pointers / socialItineraryHistory on UserEnreda.
+                        await database.updateUserEnredaFields(
+                          widget.user.userId!,
+                          {'dni': _controllers['dniParticipant']!.text},
+                        );
                         database.setFollowReport(FollowReport(
                           userId: report.userId,
                           followReportId: report.followReportId,
@@ -3345,7 +3361,12 @@ class _FollowReportFormState extends State<FollowReportForm> {
                                       setState(() {
                                         widget.user.dni = _controllers['dniParticipant']!.text;
                                       });
-                                      database.setUserEnreda(widget.user);
+                                      // Surgical update so we don't clobber
+                                      // freshly archived pointers / history.
+                                      await database.updateUserEnredaFields(
+                                        widget.user.userId!,
+                                        {'dni': _controllers['dniParticipant']!.text},
+                                      );
                                       database.setFollowReport(
                                           FollowReport(
                                             userId: report.userId,

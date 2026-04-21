@@ -358,7 +358,7 @@ class FollowReport {
     return FollowReport(
 
       //Basic
-      followReportId: data['followReportId'],
+      followReportId: data['followReportId'] ?? documentId,
       userId: data['userId'],
       finished: data['finished'],
       completedDate: data['completedDate'] != null ? data['completedDate'].toDate() : null,

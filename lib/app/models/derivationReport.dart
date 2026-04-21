@@ -408,7 +408,7 @@ class DerivationReport {
     return DerivationReport(
 
       //Basic
-      derivationReportId: data['derivationReportId'],
+      derivationReportId: data['derivationReportId'] ?? documentId,
       userId: data['userId'],
       finished: data['finished'],
       completedDate: data['completedDate'] != null ? data['completedDate'].toDate() : null,

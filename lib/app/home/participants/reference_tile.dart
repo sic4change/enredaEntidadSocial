@@ -53,7 +53,7 @@ class ReferenceTile extends StatelessWidget {
                 CustomTextSmall(text: '${certificationRequest.email}'),
               ],
             ),
-            certificationRequest.phone != "" ? Row(
+            (certificationRequest.phone != null && certificationRequest.phone != "" && certificationRequest.phone != "+34" && certificationRequest.phone != "+34 ") ? Row(
               children: [
                 Icon(
                   Icons.phone,

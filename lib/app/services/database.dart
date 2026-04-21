@@ -50,11 +50,13 @@ import 'package:enreda_empresas/app/models/resourceInvitation.dart';
 import 'package:enreda_empresas/app/models/resourcetype.dart';
 import 'package:enreda_empresas/app/models/scope.dart';
 import 'package:enreda_empresas/app/models/size.dart';
+import 'package:enreda_empresas/app/models/socialItineraryCycle.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
 import 'package:enreda_empresas/app/models/timeSearching.dart';
 import 'package:enreda_empresas/app/models/timeSpentWeekly.dart';
 import 'package:enreda_empresas/app/models/unemployedUser.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/services/api_path.dart';
 import 'package:enreda_empresas/app/services/firestore_service.dart';
 import 'package:enreda_empresas/app/models/resourcePicture.dart';
@@ -165,6 +167,7 @@ abstract class Database {
 
      Future<List<SpecificInterest>> getSpecificInterests();
      Future<void> setUserEnreda(UserEnreda userEnreda);
+     Future<void> updateUserEnredaFields(String userId, Map<String, dynamic> fields);
      Future<void> deleteUser(UserEnreda userEnreda);
      Future<void> uploadUserAvatar(String userId, Uint8List data);
      Future<void> uploadLogoAvatar(String socialEntityId, Uint8List data);
@@ -197,20 +200,29 @@ abstract class Database {
      Future<void> editFileDocumentationParticipant(String userId, String fileName, Uint8List data, DocumentationParticipant document);
      Future<void> updateDocumentationParticipant(DocumentationParticipant document);
      Stream<InitialReport> initialReportsStreamByUserId(String? userId);
+     Stream<InitialReport?> initialReportStreamById(String? initialReportId);
      Future<void> setInitialReport(InitialReport initialReport);
      Future<String> addInitialReport(InitialReport initialReport);
      Stream<List<String>> languagesStream();
      Stream<List<String>> nationsSpanishStream();
      Stream<ClosureReport> closureReportsStreamByUserId(String? userId);
+     Stream<ClosureReport?> closureReportStreamById(String? closureReportId);
      Future<void> setClosureReport(ClosureReport closureReport);
      Future<String> addClosureReport(ClosureReport closureReport);
      Stream<List<KeepLearningOption>> keepLearningOptionsStream();
      Stream<FollowReport> followReportsStreamByUserId(String? userId);
+     Stream<FollowReport?> followReportStreamById(String? followReportId);
      Future<void> setFollowReport(FollowReport followReport);
      Future<String> addFollowReport(FollowReport followReport);
      Stream<DerivationReport> derivationReportsStreamByUserId(String? userId);
+     Stream<DerivationReport?> derivationReportStreamById(String? derivationReportId);
      Future<void> setDerivationReport(DerivationReport derivationReport);
      Future<String> addDerivationReport(DerivationReport derivationReport);
+     /// Archives the currently-active social-reports cycle into the user's
+     /// `socialItineraryHistory` and clears the active pointers on the user doc
+     /// so a new cycle can begin. IPIL pointers are left untouched so IPILs
+     /// remain persistent and cross-cycle.
+     Future<void> archiveItinerary(UserEnreda user, ClosureReport closureReport);
      Future<void> updateDerivationReportField(String derivationReportId, Map<String, dynamic> fieldsToUpdate);
      Stream<List<IpilReinforcement>> ipilReinforcementStream();
      Stream<List<IpilReinforcement>> ipilReinforcementStreamByUser(List<String> idList);
@@ -831,6 +843,18 @@ class FirestoreDatabase implements Database {
     }
 
     @override
+    Future<void> updateUserEnredaFields(
+        String userId, Map<String, dynamic> fields) {
+      // Surgical update for UserEnreda: only the keys provided are written.
+      // Use this instead of `setUserEnreda` whenever the in-memory UserEnreda
+      // object could be stale (e.g. after `archiveItinerary` mutated the
+      // Firestore doc), because `setUserEnreda` writes the full `toMap()` and
+      // would otherwise overwrite freshly-archived state.
+      return _service.updateData(
+          path: APIPath.user(userId), data: fields);
+    }
+
+    @override
     Future<void> deleteUser(UserEnreda userEnreda) {
       return _service.deleteData(path: APIPath.user(userEnreda.userId!));
     }
@@ -1282,6 +1306,21 @@ class FirestoreDatabase implements Database {
   }
 
   @override
+  Stream<InitialReport?> initialReportStreamById(String? initialReportId) {
+    if (initialReportId == null || initialReportId.isEmpty) {
+      return _emptyBroadcastStream<InitialReport?>();
+    }
+    return FirebaseFirestore.instance
+        .doc(APIPath.initialReport(initialReportId))
+        .snapshots()
+        .map<InitialReport?>((snap) {
+      final data = snap.data();
+      if (data == null) return null;
+      return InitialReport.fromMap(data, snap.id);
+    });
+  }
+
+  @override
   Future<void> setInitialReport(InitialReport initialReport) {
     return _service.updateData(
         path: APIPath.initialReport(initialReport.initialReportId!), data: initialReport.toMap());
@@ -1329,6 +1368,21 @@ class FirestoreDatabase implements Database {
   }
 
   @override
+  Stream<ClosureReport?> closureReportStreamById(String? closureReportId) {
+    if (closureReportId == null || closureReportId.isEmpty) {
+      return _emptyBroadcastStream<ClosureReport?>();
+    }
+    return FirebaseFirestore.instance
+        .doc(APIPath.closureReport(closureReportId))
+        .snapshots()
+        .map<ClosureReport?>((snap) {
+      final data = snap.data();
+      if (data == null) return null;
+      return ClosureReport.fromMap(data, snap.id);
+    });
+  }
+
+  @override
   Future<void> setClosureReport(ClosureReport closureReport) {
     return _service.updateData(
         path: APIPath.closureReport(closureReport.closureReportId!), data: closureReport.toMap());
@@ -1368,6 +1422,21 @@ class FirestoreDatabase implements Database {
   }
 
   @override
+  Stream<FollowReport?> followReportStreamById(String? followReportId) {
+    if (followReportId == null || followReportId.isEmpty) {
+      return _emptyBroadcastStream<FollowReport?>();
+    }
+    return FirebaseFirestore.instance
+        .doc(APIPath.followReport(followReportId))
+        .snapshots()
+        .map<FollowReport?>((snap) {
+      final data = snap.data();
+      if (data == null) return null;
+      return FollowReport.fromMap(data, snap.id);
+    });
+  }
+
+  @override
   Future<void> setFollowReport(FollowReport followReport) {
     return _service.updateData(
         path: APIPath.followReport(followReport.followReportId!), data: followReport.toMap());
@@ -1397,6 +1466,32 @@ class FirestoreDatabase implements Database {
       queryBuilder: (query) => query.where('userId', isEqualTo: userId),
     );
   }
+
+  @override
+  Stream<DerivationReport?> derivationReportStreamById(
+      String? derivationReportId) {
+    if (derivationReportId == null || derivationReportId.isEmpty) {
+      return _emptyBroadcastStream<DerivationReport?>();
+    }
+    return FirebaseFirestore.instance
+        .doc(APIPath.derivationReport(derivationReportId))
+        .snapshots()
+        .map<DerivationReport?>((snap) {
+      final data = snap.data();
+      if (data == null) return null;
+      return DerivationReport.fromMap(data, snap.id);
+    });
+  }
+
+  /// A safe, reusable broadcast stream for "no id / no report yet" cases.
+  /// StreamBuilder treats the absence of emissions as `snapshot.data == null`,
+  /// which is the semantic we want. Broadcast semantics guarantee we can hand
+  /// this stream to any number of StreamBuilders / rebuilds without hitting
+  /// `Bad state: Stream has already been listened to`.
+  static final Stream<dynamic> _nullBroadcastStream =
+      StreamController<dynamic>.broadcast().stream;
+
+  Stream<T?> _emptyBroadcastStream<T>() => _nullBroadcastStream.cast<T?>();
 
   @override
   Future<void> setDerivationReport(DerivationReport derivationReport) {
@@ -2188,6 +2283,54 @@ class FirestoreDatabase implements Database {
       limit: 1,
     );
     return reports.isNotEmpty ? reports.first : null;
+  }
+
+  @override
+  Future<void> archiveItinerary(
+      UserEnreda user, ClosureReport closureReport) async {
+    if (user.userId == null || user.userId!.isEmpty) {
+      throw StateError('archiveItinerary: user.userId is required');
+    }
+
+    final cycle = SocialItineraryCycle(
+      initialReportId: user.initialReportId,
+      followReportId: user.followReportId,
+      derivationReportId: user.derivationReportId,
+      closureReportId: user.closureReportId,
+      startDate: user.startDateItinerary,
+      closureDate: closureReport.completedDate,
+      programId: user.programId,
+      archivedAt: DateTime.now(),
+    );
+
+    final Map<String, dynamic> archiveUpdate = <String, dynamic>{
+      'initialReportId': null,
+      'followReportId': null,
+      'derivationReportId': null,
+      'closureReportId': null,
+      'startDateItinerary': null,
+      'socialItineraryHistory': FieldValue.arrayUnion([cycle.toMap()]),
+    };
+
+    await _service.updateData(
+      path: APIPath.user(user.userId!),
+      data: archiveUpdate,
+    );
+
+    user.initialReportId = null;
+    user.followReportId = null;
+    user.derivationReportId = null;
+    user.closureReportId = null;
+    user.startDateItinerary = null;
+    user.socialItineraryHistory = [
+      ...user.socialItineraryHistory,
+      cycle,
+    ];
+
+    globals.currentInitialReportUser = InitialReport();
+    globals.currentFollowReportUser = FollowReport();
+    globals.currentDerivationReportUser = DerivationReport();
+    globals.currentClosureReportUser = ClosureReport();
   }
 }
 

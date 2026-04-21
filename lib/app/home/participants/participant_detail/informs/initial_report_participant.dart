@@ -73,7 +73,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
   late final Map<String, List<String>> _listValues;
   bool _isCreatingReport = false;
   late Stream<UserEnreda?> _userStream;
-  late Stream<InitialReport> _reportStream;
+  Stream<InitialReport?>? _reportStream;
+  String? _cachedInitialReportId;
 
   @override
   void initState() {
@@ -148,7 +149,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
     _selectedProgramId = widget.user.programId;
     _dateValues = {
       'arriveDate': null,
-      'completedDate': widget.user.startDateItinerary ?? DateTime.now(),
+      'completedDate': null,
       'adminDateAsk': null,
       'adminDateResolution': null,
       'adminDateConcession': null,
@@ -166,8 +167,15 @@ class _InitialReportFormState extends State<InitialReportForm> {
     };
     final database = Provider.of<Database>(context, listen: false);
     _userStream = database.userEnredaStreamByUserId(widget.user.userId);
-    _reportStream = database.initialReportsStreamByUserId(widget.user.userId);
     super.initState();
+  }
+
+  Stream<InitialReport?> _ensureReportStream(Database database, String? reportId) {
+    if (_reportStream == null || _cachedInitialReportId != reportId) {
+      _cachedInitialReportId = reportId;
+      _reportStream = database.initialReportStreamById(reportId);
+    }
+    return _reportStream!;
   }
 
   @override
@@ -222,13 +230,13 @@ class _InitialReportFormState extends State<InitialReportForm> {
             builder: (context, snapshotUser) {
               if (snapshotUser.hasData) {
                 UserEnreda userStream = snapshotUser.data!;
-                return StreamBuilder<InitialReport>(
-                    stream: _reportStream,
+                return StreamBuilder<InitialReport?>(
+                    stream: _ensureReportStream(database, userStream.initialReportId),
                     builder: (context, snapshot) {
-                      if (snapshot.hasData) {
+                      if (snapshot.data != null) {
                         initialReportSaved = snapshot.data!;
                         return completeInitialForm(
-                            context, initialReportSaved);
+                            context, initialReportSaved, userStream);
                       }
                       else {
                         if (userStream.initialReportId == null && !_isCreatingReport) {
@@ -236,11 +244,19 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           Future.microtask(() async {
                             try {
                               String newId = await database.addInitialReport(InitialReport(
-                                userId: user.userId,
+                                userId: userStream.userId,
                               ));
                               if(newId.isNotEmpty){
+                                // Surgical update: only write the new initialReportId
+                                // back. Using `setUserEnreda(widget.user)` would
+                                // write the stale `widget.user.toMap()` and wipe
+                                // the freshly-archived socialItineraryHistory /
+                                // previously-cleared pointer fields.
+                                await database.updateUserEnredaFields(
+                                  userStream.userId!,
+                                  {'initialReportId': newId},
+                                );
                                 widget.user.initialReportId = newId;
-                                await database.setUserEnreda(widget.user);
                               }
                             } catch (e) {
                               print('Error creating initial report: $e');
@@ -408,7 +424,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
     }
   }
 
-  Widget completeInitialForm(BuildContext context, InitialReport report) {
+  Widget completeInitialForm(
+      BuildContext context, InitialReport report, UserEnreda currentUser) {
     final database = Provider.of<Database>(context, listen: false);
     final _formKey = GlobalKey<FormState>();
     final textTheme = Theme.of(context).textTheme;
@@ -420,14 +437,16 @@ class _InitialReportFormState extends State<InitialReportForm> {
     if (_controllers['subsidy']!.text.trim().isEmpty) {
       _controllers['subsidy']!.text = report.subsidy ?? '';
     }
-    if (_selectedProgramId == null && widget.user.programId != null) {
-      _selectedProgramId = widget.user.programId;
+    if (_selectedProgramId == null && currentUser.programId != null) {
+      _selectedProgramId = currentUser.programId;
     }
     if (_controllers['techPerson']!.text.trim().isEmpty) {
-      _controllers['techPerson']!.text = report.techPerson ?? widget.user.assignedById ?? '';
+      _controllers['techPerson']!.text =
+          report.techPerson ?? currentUser.assignedById ?? '';
     } 
     if (_dateValues['completedDate'] == null) {
-      _dateValues['completedDate'] = report.completedDate ?? widget.user.startDateItinerary ?? DateTime.now();
+      _dateValues['completedDate'] =
+          report.completedDate ?? currentUser.startDateItinerary ?? DateTime.now();
     } 
     if (_controllers['dniParticipant']!.text.trim().isEmpty) {
       _controllers['dniParticipant']!.text = report.dniParticipant ?? '';
@@ -2208,16 +2227,30 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         width: 250,
                         child: ElevatedButton(
                             onPressed: () async {
+                              final activeInitialReportId =
+                                  report.initialReportId ??
+                                  initialReportSaved.initialReportId ??
+                                  widget.user.initialReportId;
                               setState(() {
                                 widget.user.startDateItinerary = _dateValues['completedDate'];
-                                widget.user.initialReportId = initialReportSaved.initialReportId;
+                                widget.user.initialReportId = activeInitialReportId;
                                 widget.user.programId = _selectedProgramId;
                                 widget.user.dni = _controllers['dniParticipant']!.text;
                               });
-                              database.setUserEnreda(widget.user);
-                              database.setInitialReport(InitialReport(
+                              // Surgical update so we don't clobber freshly
+                              // archived pointers / socialItineraryHistory.
+                              await database.updateUserEnredaFields(
+                                widget.user.userId!,
+                                {
+                                  'startDateItinerary': _dateValues['completedDate'],
+                                  'initialReportId': activeInitialReportId,
+                                  'programId': _selectedProgramId,
+                                  'dni': _controllers['dniParticipant']!.text,
+                                },
+                              );
+                              await database.setInitialReport(InitialReport(
                                 userId: report.userId,
-                                initialReportId: report.initialReportId,
+                                initialReportId: activeInitialReportId,
                                 subsidy: _controllers['subsidy']!.text,
                                 techPerson: _controllers['techPerson']!.text,
                                 dniParticipant: _controllers['dniParticipant']!.text,
@@ -2504,16 +2537,30 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                         )),
                                     ElevatedButton(
                                         onPressed: () async {
+                                          final activeInitialReportId =
+                                              report.initialReportId ??
+                                              initialReportSaved.initialReportId ??
+                                              widget.user.initialReportId;
                                           setState(() {
                                             widget.user.startDateItinerary = _dateValues['completedDate'];
-                                            widget.user.initialReportId = initialReportSaved.initialReportId;
+                                            widget.user.initialReportId = activeInitialReportId;
                                             widget.user.programId = _selectedProgramId;
                                             widget.user.dni = _controllers['dniParticipant']!.text;
                                           });
-                                          database.setUserEnreda(widget.user);
-                                          database.setInitialReport(InitialReport(
+                                          // Surgical update so we don't clobber freshly
+                                          // archived pointers / socialItineraryHistory.
+                                          await database.updateUserEnredaFields(
+                                            widget.user.userId!,
+                                            {
+                                              'startDateItinerary': _dateValues['completedDate'],
+                                              'initialReportId': activeInitialReportId,
+                                              'programId': _selectedProgramId,
+                                              'dni': _controllers['dniParticipant']!.text,
+                                            },
+                                          );
+                                          await database.setInitialReport(InitialReport(
                                             userId: report.userId,
-                                            initialReportId: report.initialReportId,
+                                            initialReportId: activeInitialReportId,
                                             subsidy: _controllers['subsidy']!.text,
                                             techPerson: _controllers['techPerson']!.text,
                                             completedDate: _dateValues['completedDate'],

@@ -61,72 +61,74 @@ class _ParticipantsListTileState extends State<ParticipantsListTile> {
               ),
               child: Column(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: Sizes.kDefaultPaddingDouble,
-                        horizontal: Sizes.kDefaultPaddingDouble/2
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          StringConst.GAMIFICATION,
-                          style: textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.seaBlue,
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: Sizes.kDefaultPaddingDouble,
+                          horizontal: Sizes.kDefaultPaddingDouble/2
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            StringConst.GAMIFICATION,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.seaBlue,
+                            ),
                           ),
-                        ),
-                        GamificationSlider(
-                            value: gamificationFlagsCount,
-                        ),
-                        SpaceH8(),
-                        widget.user.photo != null && widget.user.photo!.isNotEmpty?
-                        PrecacheAvatarCard(
-                          imageUrl: widget.user.photo!,
-                          height: 80,
-                          width: 80,
-                        ):
-                        ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(60)),
-                          child: Container(
+                          GamificationSlider(
+                              value: gamificationFlagsCount,
+                          ),
+                          SpaceH8(),
+                          widget.user.photo != null && widget.user.photo!.isNotEmpty?
+                          PrecacheAvatarCard(
+                            imageUrl: widget.user.photo!,
                             height: 80,
                             width: 80,
-                            color: AppColors.pink600,
-                            child: Center(child: Text(
-                              '${(widget.user.firstName??'-').toUpperCase().substring(0, 1)} '
-                              '${(widget.user.lastName??'-').toUpperCase().substring(0, 1)}',
-                              style: textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.white,
-                              ),
-                            ),),
+                          ):
+                          ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(60)),
+                            child: Container(
+                              height: 80,
+                              width: 80,
+                              color: AppColors.pink600,
+                              child: Center(child: Text(
+                                '${(widget.user.firstName??'-').toUpperCase().substring(0, 1)} '
+                                '${(widget.user.lastName??'-').toUpperCase().substring(0, 1)}',
+                                style: textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.white,
+                                ),
+                              ),),
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${widget.user.firstName!} ${widget.user.lastName!}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.greyDark2,
+                          Text(
+                            '${widget.user.firstName!} ${widget.user.lastName!}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.greyDark2,
+                            ),
                           ),
-                        ),
-                        SpaceH20(),
-                        AddYellowButtonSmall(
-                          text: StringConst.INVITE_RESOURCE,
-                          onPressed: () => showDialog(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  ShowInvitationDialog(
-                                    user: widget.user,
-                                    organizerId: widget.socialEntityUserId,
-                                  )),
-                          height: 40,
-                          circleHeight: 41,
-                          circleWidth: 41,
-                        ),
-                        SpaceH30(),
-                        _buildContactRow(textTheme),
-                      ],
+                          SpaceH20(),
+                          AddYellowButtonSmall(
+                            text: StringConst.INVITE_RESOURCE,
+                            onPressed: () => showDialog(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    ShowInvitationDialog(
+                                      user: widget.user,
+                                      organizerId: widget.socialEntityUserId,
+                                    )),
+                            height: 40,
+                            circleHeight: 41,
+                            circleWidth: 41,
+                          ),
+                          SpaceH30(),
+                          _buildContactRow(textTheme),
+                        ],
+                      ),
                     ),
                   ),
                   InkWell(
