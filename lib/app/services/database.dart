@@ -59,6 +59,7 @@ import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/services/api_path.dart';
 import 'package:enreda_empresas/app/services/firestore_service.dart';
+import 'package:enreda_empresas/app/services/resources_tracer.dart';
 import 'package:enreda_empresas/app/models/resourcePicture.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -274,12 +275,25 @@ class FirestoreDatabase implements Database {
   final Set<String> _pendingCreations = {};
 
   @override
-  Future<void> setResource(Resource resource) => _service.updateData(
-      path: APIPath.resource(resource.resourceId!), data: resource.toMap());
+  Future<void> setResource(Resource resource) {
+    ResourcesTracer.logWrite(
+      op: 'setResource',
+      path: APIPath.resource(resource.resourceId!),
+      params: {'resourceId': resource.resourceId},
+    );
+    return _service.updateData(
+        path: APIPath.resource(resource.resourceId!), data: resource.toMap());
+  }
 
   @override
-  Future<void> deleteResource(Resource resource) =>
-      _service.deleteData(path: APIPath.resource(resource.resourceId!));
+  Future<void> deleteResource(Resource resource) {
+    ResourcesTracer.logWrite(
+      op: 'deleteResource',
+      path: APIPath.resource(resource.resourceId!),
+      params: {'resourceId': resource.resourceId},
+    );
+    return _service.deleteData(path: APIPath.resource(resource.resourceId!));
+  }
 
   @override
   Future<void> deleteExternalSocialEntity(ExternalSocialEntity socialEntity) =>
@@ -291,31 +305,48 @@ class FirestoreDatabase implements Database {
 
   @override
     Stream<List<Resource>> myResourcesStream(String socialEntityId) =>
-        _service.collectionStream(
+        ResourcesTracer.traceStream<List<Resource>>(
+          op: 'myResourcesStream',
           path: APIPath.resources(),
-          queryBuilder: (query) =>
-              query.where('organizer', isEqualTo: socialEntityId),
-          builder: (data, documentId) => Resource.fromMap(data, documentId),
-          sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+          params: {'organizer': socialEntityId},
+          countOf: (list) => list.length,
+          source: _service.collectionStream(
+            path: APIPath.resources(),
+            queryBuilder: (query) =>
+                query.where('organizer', isEqualTo: socialEntityId),
+            builder: (data, documentId) => Resource.fromMap(data, documentId),
+            sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+          ),
         );
 
     @override
     Stream<List<Resource>> myLimitResourcesStream(String socialEntityId, int limit) =>
-      _service.collectionStream(
+      ResourcesTracer.traceStream<List<Resource>>(
+        op: 'myLimitResourcesStream',
         path: APIPath.resources(),
-        queryBuilder: (query) => query
-            .where('organizer', isEqualTo: socialEntityId)
-            .limit(limit),
-        builder: (data, documentId) => Resource.fromMap(data, documentId),
-        sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+        params: {'organizer': socialEntityId, 'limit': limit},
+        countOf: (list) => list.length,
+        source: _service.collectionStream(
+          path: APIPath.resources(),
+          queryBuilder: (query) => query
+              .where('organizer', isEqualTo: socialEntityId)
+              .limit(limit),
+          builder: (data, documentId) => Resource.fromMap(data, documentId),
+          sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+        ),
       );
 
   @override
   Stream<List<Resource>> filteredMyResourcesStream(String socialEntityId, String searchText) {
-    return _service.filteredCollectionStream(
+    return ResourcesTracer.traceStream<List<Resource>>(
+      op: 'filteredMyResourcesStream',
       path: APIPath.resources(),
-      queryBuilder: (query) => query.where('organizer', isEqualTo: socialEntityId),
-      builder: (data, documentId) {
+      params: {'organizer': socialEntityId, 'searchText': searchText},
+      countOf: (list) => list.length,
+      source: _service.filteredCollectionStream(
+        path: APIPath.resources(),
+        queryBuilder: (query) => query.where('organizer', isEqualTo: socialEntityId),
+        builder: (data, documentId) {
         final searchTextCommunity = removeDiacritics((data['searchText'] ?? '').toLowerCase());
         final searchListCommunity = searchTextCommunity.split(';');
         final searchTextFilter = removeDiacritics(searchText.toLowerCase());
@@ -340,45 +371,71 @@ class FirestoreDatabase implements Database {
         return textFilterSelection ? Resource.fromMap(data, documentId) : null;
       },
       sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+      ),
     );
   }
 
   @override
     Stream<List<Resource>> participantsResourcesStream(String? userId, String? organizerId) =>
-      _service.collectionStream(
+      ResourcesTracer.traceStream<List<Resource>>(
+        op: 'participantsResourcesStream',
         path: APIPath.resources(),
-        queryBuilder: (query) {
-              query = query.where('participants', arrayContains: userId).where('organizer', isEqualTo: organizerId);
-              return query;
-            },
-        builder: (data, documentId) => Resource.fromMap(data, documentId),
-        sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+        params: {'userId': userId, 'organizer': organizerId},
+        countOf: (list) => list.length,
+        source: _service.collectionStream(
+          path: APIPath.resources(),
+          queryBuilder: (query) {
+                query = query.where('participants', arrayContains: userId).where('organizer', isEqualTo: organizerId);
+                return query;
+              },
+          builder: (data, documentId) => Resource.fromMap(data, documentId),
+          sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+        ),
       );
 
     @override
     Stream<Resource> resourceStream(String? resourceId) =>
-        _service.documentStream<Resource>(
-          path: APIPath.resource(resourceId!),
-          builder: (data, documentId) => Resource.fromMap(data, documentId),
+        ResourcesTracer.traceStream<Resource>(
+          op: 'resourceStream',
+          path: APIPath.resource(resourceId ?? ''),
+          params: {'resourceId': resourceId},
+          source: _service.documentStream<Resource>(
+            path: APIPath.resource(resourceId!),
+            builder: (data, documentId) => Resource.fromMap(data, documentId),
+          ),
         );
 
     @override
-    Stream<List<Resource>> resourcesStream() => _service.collectionStream(
-      path: APIPath.resources(),
-      queryBuilder: (query) => query.where('organizerType', isEqualTo: "Entidad Social"),
-      builder: (data, documentId) => Resource.fromMap(data, documentId),
-      sort: (lhs, rhs) => lhs.createdate.compareTo(rhs.createdate),
-    );
+    Stream<List<Resource>> resourcesStream() =>
+        ResourcesTracer.traceStream<List<Resource>>(
+          op: 'resourcesStream',
+          path: APIPath.resources(),
+          params: {'organizerType': 'Entidad Social'},
+          countOf: (list) => list.length,
+          source: _service.collectionStream(
+            path: APIPath.resources(),
+            queryBuilder: (query) =>
+                query.where('organizerType', isEqualTo: "Entidad Social"),
+            builder: (data, documentId) => Resource.fromMap(data, documentId),
+            sort: (lhs, rhs) => lhs.createdate.compareTo(rhs.createdate),
+          ),
+        );
 
   @override
   Stream<List<Resource>> limitResourcesStream(int limit) =>
-      _service.collectionStream(
+      ResourcesTracer.traceStream<List<Resource>>(
+        op: 'limitResourcesStream',
         path: APIPath.resources(),
-        queryBuilder: (query) => query
-            .where('organizerType', isEqualTo: "Entidad Social")
-            .limit(limit),
-        builder: (data, documentId) => Resource.fromMap(data, documentId),
-        sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+        params: {'organizerType': 'Entidad Social', 'limit': limit},
+        countOf: (list) => list.length,
+        source: _service.collectionStream(
+          path: APIPath.resources(),
+          queryBuilder: (query) => query
+              .where('organizerType', isEqualTo: "Entidad Social")
+              .limit(limit),
+          builder: (data, documentId) => Resource.fromMap(data, documentId),
+          sort: (rhs, lhs) => lhs.createdate.compareTo(rhs.createdate),
+        ),
       );
 
     @override
@@ -726,11 +783,18 @@ class FirestoreDatabase implements Database {
 
   @override
   Stream<List<Resource>> resourcesParticipantsStream(List<String?> participantsIdList) {
-    return _service.collectionStream<Resource>(
+    return ResourcesTracer.traceStream<List<Resource>>(
+      op: 'resourcesParticipantsStream',
       path: APIPath.resources(),
-      queryBuilder: (query) => query.where('participants', arrayContainsAny: participantsIdList),
-      builder: (data, documentId) => Resource.fromMap(data, documentId),
-      sort: (lhs, rhs) => lhs.title.compareTo(rhs.title),
+      params: {'participantsCount': participantsIdList.length},
+      countOf: (list) => list.length,
+      source: _service.collectionStream<Resource>(
+        path: APIPath.resources(),
+        queryBuilder: (query) =>
+            query.where('participants', arrayContainsAny: participantsIdList),
+        builder: (data, documentId) => Resource.fromMap(data, documentId),
+        sort: (lhs, rhs) => lhs.title.compareTo(rhs.title),
+      ),
     );
   }
 
@@ -1022,8 +1086,15 @@ class FirestoreDatabase implements Database {
       _service.addData(path: APIPath.resourcesInvitations(), data: resourceInvitation.toMap());
 
   @override
-  Future<void> addResource(Resource resource) =>
-      _service.addData(path: APIPath.resources(), data: resource.toMap());
+  Future<void> addResource(Resource resource) {
+    ResourcesTracer.logWrite(
+      op: 'addResource',
+      path: APIPath.resources(),
+      params: {'organizer': resource.organizer, 'title': resource.title},
+    );
+    return _service.addData(
+        path: APIPath.resources(), data: resource.toMap());
+  }
 
 
   @override
