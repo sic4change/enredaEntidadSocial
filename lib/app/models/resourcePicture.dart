@@ -2,11 +2,23 @@ class ResourcePicture {
   ResourcePicture({required this.id, required this.resourcePhoto, required this.name, required this.role});
 
   factory ResourcePicture.fromMap(Map<String, dynamic> data, String documentId) {
+    String extractSrc(dynamic field) {
+      if (field is String) return field;
+      if (field is Map && field['src'] != null) return field['src'].toString();
+      return '';
+    }
+
+    String extractTitle(dynamic field) {
+      if (field is String) return '';
+      if (field is Map && field['title'] != null) return field['title'].toString();
+      return '';
+    }
+
     return ResourcePicture(
-      id: data['id'],
-      resourcePhoto: data['resourcePhoto']['src'],
-      name: data['resourcePhoto']['title'],
-      role: data['role'],
+      id: data['id'] ?? documentId,
+      resourcePhoto: extractSrc(data['resourcePhoto']),
+      name: extractTitle(data['resourcePhoto']) != '' ? extractTitle(data['resourcePhoto']) : (data['name']?.toString() ?? ''),
+      role: data['role']?.toString() ?? '',
     );
   }
   final String id;

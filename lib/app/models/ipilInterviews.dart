@@ -7,9 +7,9 @@ class IpilInterviews {
 
   factory IpilInterviews.fromMap(Map<String, dynamic> data, String documentId) {
     return IpilInterviews(
-      ipilInterviewsId: data['ipilInterviewsId'],
-      label: data['label'],
-      order: data['order'],
+      ipilInterviewsId: data['ipilInterviewsId']?.toString(),
+      label: data['label']?.toString() ?? '',
+      order: data['order'] is int ? data['order'] : int.tryParse(data['order']?.toString() ?? '0') ?? 0,
 
     );
   }

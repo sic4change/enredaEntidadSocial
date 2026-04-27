@@ -7,9 +7,9 @@ class IpilSoftSkills {
 
   factory IpilSoftSkills.fromMap(Map<String, dynamic> data, String documentId) {
     return IpilSoftSkills(
-      ipilSoftSkillsId: data['ipilSoftSkillsId'],
-      label: data['label'],
-      order: data['order'],
+      ipilSoftSkillsId: data['ipilSoftSkillsId']?.toString(),
+      label: data['label']?.toString() ?? '',
+      order: data['order'] is int ? data['order'] : int.tryParse(data['order']?.toString() ?? '0') ?? 0,
 
     );
   }

@@ -385,7 +385,7 @@ class FirestoreDatabase implements Database {
         source: _service.collectionStream(
           path: APIPath.resources(),
           queryBuilder: (query) {
-                query = query.where('participants', arrayContains: userId).where('organizer', isEqualTo: organizerId);
+                query = query.where('participants', arrayContains: userId ?? '').where('organizer', isEqualTo: organizerId);
                 return query;
               },
           builder: (data, documentId) => Resource.fromMap(data, documentId),
@@ -1724,64 +1724,56 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilReinforcement>> ipilReinforcementStream() => _service.collectionStream(
     path: APIPath.ipilReinforcement(),
-    queryBuilder: (query) => query.where('ipilReinforcementId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilReinforcement.fromMap(data, documentId),
+    builder: (data, documentId) => IpilReinforcement.fromMap({...data, 'ipilReinforcementId': data['ipilReinforcementId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
   @override
   Stream<List<IpilContextualization>> ipilContextualizationStream() => _service.collectionStream(
     path: APIPath.ipilContextualization(),
-    queryBuilder: (query) => query.where('ipilContextualizationId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilContextualization.fromMap(data, documentId),
+    builder: (data, documentId) => IpilContextualization.fromMap({...data, 'ipilContextualizationId': data['ipilContextualizationId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
   @override
   Stream<List<IpilConnectionTerritory>> ipilConnectionTerritoryStream() => _service.collectionStream(
     path: APIPath.ipilConnectionTerritory(),
-    queryBuilder: (query) => query.where('ipilConnectionTerritoryId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilConnectionTerritory.fromMap(data, documentId),
+    builder: (data, documentId) => IpilConnectionTerritory.fromMap({...data, 'ipilConnectionTerritoryId': data['ipilConnectionTerritoryId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
   @override
   Stream<List<IpilInterviews>> ipilInterviewsStream() => _service.collectionStream(
     path: APIPath.ipilInterviews(),
-    queryBuilder: (query) => query.where('ipilInterviewsId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilInterviews.fromMap(data, documentId),
+    builder: (data, documentId) => IpilInterviews.fromMap({...data, 'ipilInterviewsId': data['ipilInterviewsId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
   @override
   Stream<List<IpilIntermediations>> ipilIntermediationsStream() => _service.collectionStream(
     path: APIPath.ipilIntermediations(),
-    queryBuilder: (query) => query.where('ipilIntermediationsId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilIntermediations.fromMap(data, documentId),
+    builder: (data, documentId) => IpilIntermediations.fromMap({...data, 'ipilIntermediationsId': data['ipilIntermediationsId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
   @override
   Stream<List<IpilObtainingEmployment>> ipilObtainingEmploymentStream() => _service.collectionStream(
     path: APIPath.ipilObtainingEmployment(),
-    queryBuilder: (query) => query.where('ipilObtainingEmploymentId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilObtainingEmployment.fromMap(data, documentId),
+    builder: (data, documentId) => IpilObtainingEmployment.fromMap({...data, 'ipilObtainingEmploymentId': data['ipilObtainingEmploymentId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
   @override
   Stream<List<IpilLegal>> ipilLegalStream() => _service.collectionStream(
     path: APIPath.ipilLegal(),
-    queryBuilder: (query) => query.where('ipilLegalId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilLegal.fromMap(data, documentId),
+    builder: (data, documentId) => IpilLegal.fromMap({...data, 'ipilLegalId': data['ipilLegalId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
   @override
   Stream<List<IpilEconomicBag>> ipilEconomicBagStream() => _service.collectionStream(
     path: APIPath.ipilEconomicBag(),
-    queryBuilder: (query) => query.where('ipilEconomicBagId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilEconomicBag.fromMap(data, documentId),
+    builder: (data, documentId) => IpilEconomicBag.fromMap({...data, 'ipilEconomicBagId': data['ipilEconomicBagId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
@@ -1806,8 +1798,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilImprovingEmployment>> ipilImprovingEmploymentStream() => _service.collectionStream(
     path: APIPath.ipilImprovingEmployment(),
-    queryBuilder: (query) => query.where('ipilImprovingEmploymentId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilImprovingEmployment.fromMap(data, documentId),
+    builder: (data, documentId) => IpilImprovingEmployment.fromMap({...data, 'ipilImprovingEmploymentId': data['ipilImprovingEmploymentId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
@@ -1832,8 +1823,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilPostWorkSupport>> ipilPostWorkSupportStream() => _service.collectionStream(
     path: APIPath.ipilPostWorkSupport(),
-    queryBuilder: (query) => query.where('ipilPostWorkSupportId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilPostWorkSupport.fromMap(data, documentId),
+    builder: (data, documentId) => IpilPostWorkSupport.fromMap({...data, 'ipilPostWorkSupportId': data['ipilPostWorkSupportId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
@@ -1858,8 +1848,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilSpecificSkills>> ipilSpecificSkillsStream() => _service.collectionStream(
     path: APIPath.ipilSpecificSkills(),
-    queryBuilder: (query) => query.where('ipilSpecificSkillsId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilSpecificSkills.fromMap(data, documentId),
+    builder: (data, documentId) => IpilSpecificSkills.fromMap({...data, 'ipilSpecificSkillsId': data['ipilSpecificSkillsId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
@@ -1884,8 +1873,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilSoftSkills>> ipilSoftSkillsStream() => _service.collectionStream(
     path: APIPath.ipilSoftSkills(),
-    queryBuilder: (query) => query.where('ipilSoftSkillsId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilSoftSkills.fromMap(data, documentId),
+    builder: (data, documentId) => IpilSoftSkills.fromMap({...data, 'ipilSoftSkillsId': data['ipilSoftSkillsId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
@@ -1910,8 +1898,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilDigitalSkills>> ipilDigitalSkillsStream() => _service.collectionStream(
     path: APIPath.ipilDigitalSkills(),
-    queryBuilder: (query) => query.where('ipilDigitalSkillsId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilDigitalSkills.fromMap(data, documentId),
+    builder: (data, documentId) => IpilDigitalSkills.fromMap({...data, 'ipilDigitalSkillsId': data['ipilDigitalSkillsId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
@@ -1936,8 +1923,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilLaborSkills>> ipilLaborSkillsStream() => _service.collectionStream(
     path: APIPath.ipilLaborSkills(),
-    queryBuilder: (query) => query.where('ipilLaborSkillsId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilLaborSkills.fromMap(data, documentId),
+    builder: (data, documentId) => IpilLaborSkills.fromMap({...data, 'ipilLaborSkillsId': data['ipilLaborSkillsId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
@@ -1962,8 +1948,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilCoordination>> ipilCoordinationStream() => _service.collectionStream(
     path: APIPath.ipilCoordination(),
-    queryBuilder: (query) => query.where('ipilCoordinationId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilCoordination.fromMap(data, documentId),
+    builder: (data, documentId) => IpilCoordination.fromMap({...data, 'ipilCoordinationId': data['ipilCoordinationId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 
@@ -1988,8 +1973,7 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<IpilResults>> ipilResultsStream() => _service.collectionStream(
     path: APIPath.ipilResults(),
-    queryBuilder: (query) => query.where('ipilResultsId', isNotEqualTo: null),
-    builder: (data, documentId) => IpilResults.fromMap(data, documentId),
+    builder: (data, documentId) => IpilResults.fromMap({...data, 'ipilResultsId': data['ipilResultsId'] ?? documentId}, documentId),
     sort: (lhs, rhs) => lhs.order.compareTo(rhs.order),
   );
 

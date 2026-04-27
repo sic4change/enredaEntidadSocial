@@ -7,9 +7,9 @@ class IpilReinforcement {
 
   factory IpilReinforcement.fromMap(Map<String, dynamic> data, String documentId) {
     return IpilReinforcement(
-      ipilReinforcementId: data['ipilReinforcementId'],
-      label: data['label'],
-      order: data['order'],
+      ipilReinforcementId: data['ipilReinforcementId']?.toString(),
+      label: data['label']?.toString() ?? '',
+      order: data['order'] is int ? data['order'] : int.tryParse(data['order']?.toString() ?? '0') ?? 0,
 
     );
   }

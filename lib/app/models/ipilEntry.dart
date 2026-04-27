@@ -177,11 +177,11 @@ class IpilEntry {
     }
 
     return IpilEntry(
-      ipilId: data['ipilId'],
+      ipilId: data['ipilId']?.toString(),
       content: data['content'],
-      techId: data['techId'],
+      techId: data['techId']?.toString(),
       techName: data['techName'] == null ? '' : data['techName'],
-      userId: data['userId'],
+      userId: data['userId']?.toString() ?? '',
       date: data['date'].toDate(),
       lastUpdateDate: data['lastUpdateDate'] != null ? data['lastUpdateDate'].toDate() : DateTime.now(),
       reinforcement: reinforcements,

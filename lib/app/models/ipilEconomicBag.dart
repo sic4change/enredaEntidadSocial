@@ -7,9 +7,9 @@ class IpilEconomicBag {
 
   factory IpilEconomicBag.fromMap(Map<String, dynamic> data, String documentId) {
     return IpilEconomicBag(
-      ipilEconomicBagId: data['ipilEconomicBagId'],
-      label: data['label'],
-      order: data['order'],
+      ipilEconomicBagId: data['ipilEconomicBagId']?.toString(),
+      label: data['label']?.toString() ?? '',
+      order: data['order'] is int ? data['order'] : int.tryParse(data['order']?.toString() ?? '0') ?? 0,
 
     );
   }

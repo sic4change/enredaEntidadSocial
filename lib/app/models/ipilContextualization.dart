@@ -7,9 +7,9 @@ class IpilContextualization {
 
   factory IpilContextualization.fromMap(Map<String, dynamic> data, String documentId) {
     return IpilContextualization(
-      ipilContextualizationId: data['ipilContextualizationId'],
-      label: data['label'],
-      order: data['order'],
+      ipilContextualizationId: data['ipilContextualizationId']?.toString(),
+      label: data['label']?.toString() ?? '',
+      order: data['order'] is int ? data['order'] : int.tryParse(data['order']?.toString() ?? '0') ?? 0,
 
     );
   }

@@ -47,7 +47,7 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
     _experiencesStream = database.myExperiencesStream(widget.participantUser.userId ?? '');
     _allEducations = LocationCache.instance.educations;
     _participantResourcesStream = database.participantsResourcesStream(
-      widget.participantUser.userId,
+      widget.participantUser.userId ?? '',
       widget.participantUser.assignedEntityId,
     );
   }

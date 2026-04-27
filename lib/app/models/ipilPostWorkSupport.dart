@@ -7,9 +7,9 @@ class IpilPostWorkSupport {
 
   factory IpilPostWorkSupport.fromMap(Map<String, dynamic> data, String documentId) {
     return IpilPostWorkSupport(
-      ipilPostWorkSupportId: data['ipilPostWorkSupportId'],
-      label: data['label'],
-      order: data['order'],
+      ipilPostWorkSupportId: data['ipilPostWorkSupportId']?.toString(),
+      label: data['label']?.toString() ?? '',
+      order: data['order'] is int ? data['order'] : int.tryParse(data['order']?.toString() ?? '0') ?? 0,
 
     );
   }
