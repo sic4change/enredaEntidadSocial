@@ -257,9 +257,9 @@ void initState() {
               childRight: 
                 StreamBuilder<UserEnreda>(
                   stream: _assignedUserStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && !wasManuallyChanged) {
-                      final newName = '${snapshot.data!.firstName} ${snapshot.data!.lastName}';
+                  builder: (context, assignedUserSnapshot) {
+                    if (assignedUserSnapshot.hasData && !wasManuallyChanged) {
+                      final newName = '${assignedUserSnapshot.data!.firstName} ${assignedUserSnapshot.data!.lastName}';
                       if (techName.value != newName) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           techName.value = newName;
@@ -272,14 +272,28 @@ void initState() {
                         List<DropdownMenuItem<String>> techUsers = [];
                         List<UserEnreda> techUsersComplete = [];
                         if (snapshot.hasData) {
-                          techUsersComplete = snapshot.data!;
-                          techUsers = techUsersComplete.map((userTech) {
-                            return DropdownMenuItem<String>(
-                              value: userTech.userId,
-                              child: Text('${userTech.firstName ?? ''} ${userTech.lastName ?? ''}'),
-                            );
-                          }).toList();
+                          techUsersComplete = List.from(snapshot.data!);
                         }
+                        
+                        final currentUser = globals.currentSocialEntityUser;
+                        if (currentUser != null && !techUsersComplete.any((u) => u.userId == currentUser.userId)) {
+                          techUsersComplete.add(currentUser);
+                        }
+
+                        if (assignedUserSnapshot.hasData) {
+                          final assignedUser = assignedUserSnapshot.data!;
+                          if (!techUsersComplete.any((u) => u.userId == assignedUser.userId)) {
+                            techUsersComplete.add(assignedUser);
+                          }
+                        }
+
+                        techUsers = techUsersComplete.map((userTech) {
+                          return DropdownMenuItem<String>(
+                            value: userTech.userId,
+                            child: Text('${userTech.firstName ?? ''} ${userTech.lastName ?? ''}'),
+                          );
+                        }).toList();
+
                         String? currentTechId = (techId == '' ? widget.participantUser.assignedById : techId);
                         if (!techUsers.any((item) => item.value == currentTechId)) {
                           currentTechId = null;
