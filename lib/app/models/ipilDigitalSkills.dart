@@ -7,7 +7,7 @@ class IpilDigitalSkills {
 
   factory IpilDigitalSkills.fromMap(Map<String, dynamic> data, String documentId) {
     return IpilDigitalSkills(
-      ipilDigitalSkillsId: data['ipilDigitalSkillsId']?.toString(),
+      ipilDigitalSkillsId: data['ipilDigitalSkillsId']?.toString() ?? documentId,
       label: data['label']?.toString() ?? '',
       order: data['order'] is int ? data['order'] : int.tryParse(data['order']?.toString() ?? '0') ?? 0,
 

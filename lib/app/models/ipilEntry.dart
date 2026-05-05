@@ -177,9 +177,9 @@ class IpilEntry {
     }
 
     return IpilEntry(
-      ipilId: data['ipilId']?.toString(),
+      ipilId: data['ipilId']?.toString() ?? documentId,
       content: data['content'],
-      techId: data['techId']?.toString(),
+      techId: data['techId']?.toString() ?? documentId,
       techName: data['techName'] == null ? '' : data['techName'],
       userId: data['userId']?.toString() ?? '',
       date: data['date'].toDate(),

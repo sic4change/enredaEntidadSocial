@@ -33,8 +33,8 @@ class IpilObjectives {
   factory IpilObjectives.fromMap(Map<String, dynamic> data, String documentId) {
 
     return IpilObjectives(
-      userId: data['userId']?.toString(),
-      ipilObjectivesId: data['ipilObjectivesId']?.toString(),
+      userId: data['userId']?.toString() ?? documentId,
+      ipilObjectivesId: data['ipilObjectivesId']?.toString() ?? documentId,
       monthShort1: data['monthShort1'],
       monthShort2: data['monthShort2'],
       monthShort3: data['monthShort3'],

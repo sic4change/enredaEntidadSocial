@@ -7,7 +7,7 @@ class IpilConnectionTerritory {
 
   factory IpilConnectionTerritory.fromMap(Map<String, dynamic> data, String documentId) {
     return IpilConnectionTerritory(
-      ipilConnectionTerritoryId: data['ipilConnectionTerritoryId']?.toString(),
+      ipilConnectionTerritoryId: data['ipilConnectionTerritoryId']?.toString() ?? documentId,
       label: data['label']?.toString() ?? '',
       order: data['order'] is int ? data['order'] : int.tryParse(data['order']?.toString() ?? '0') ?? 0,
 

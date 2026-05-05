@@ -291,7 +291,7 @@ class LocationCache {
     return _warmUpFuture!;
   }
 
-  static const int _cacheVersion = 2;
+  static const int _cacheVersion = 3;
 
   /// Batched warm-up: max ~5 concurrent Firestore reads at a time.
   /// All catalogs use persistence cache so subsequent launches skip Firestore entirely.
@@ -318,7 +318,7 @@ class LocationCache {
 
     // Batch 1: Core lookup data
     await Future.wait([
-      _loadOrFetchCatalog<Country>('countries', () => database.countriesStream().first, (data, id) => Country.fromMap(data, id)).then((v) => countries = v),
+      _loadOrFetchCatalog<Country>('countries', () => database.countriesStream().first, (data, id) => Country.fromMap(data, id), getDocId: (e) => e.countryId ?? '').then((v) => countries = v),
       _loadOrFetchCatalog<GamificationFlag>('gamificationFlags', () => database.gamificationFlagsStream().first, (data, id) => GamificationFlag.fromMap(data, id)).then((v) => gamificationFlags = v),
       _loadOrFetchCatalog<Competency>('competencies', () => database.getCompetencies(), (data, id) => Competency.fromMap(data, id)).then((v) => competencies = v),
       _loadOrFetchCatalog<Interest>('interests', () => database.getInterests(), (data, id) => Interest.fromMap(data, id)).then((v) => interests = v),
@@ -347,33 +347,33 @@ class LocationCache {
     await Future.wait([
       _loadOrFetchCatalog<ResourceCategory>('resourceCategories', () => database.resourceCategoryStream().first, (data, id) => ResourceCategory.fromMap(data, id), getDocId: (r) => r.id).then((v) => resourceCategories = v).catchError((e) { print("Error: e"); return <ResourceCategory>[]; }),
       _loadOrFetchCatalog<ResourcePicture>('resourcePictures', () => database.resourcePicturesStream().first, (data, id) => ResourcePicture.fromMap(data, id)).then((v) => resourcePictures = v).catchError((e) { print("Error: e"); return <ResourcePicture>[]; }),
-      _loadOrFetchCatalog<IpilReinforcement>('ipilReinforcements', () => database.ipilReinforcementStream().first, (data, id) => IpilReinforcement.fromMap(data, id)).then((v) => ipilReinforcements = v).catchError((e) { print("Error: e"); return <IpilReinforcement>[]; }),
-      _loadOrFetchCatalog<IpilContextualization>('ipilContextualizations', () => database.ipilContextualizationStream().first, (data, id) => IpilContextualization.fromMap(data, id)).then((v) => ipilContextualizations = v).catchError((e) { print("Error: e"); return <IpilContextualization>[]; }),
-      _loadOrFetchCatalog<IpilConnectionTerritory>('ipilConnectionTerritories', () => database.ipilConnectionTerritoryStream().first, (data, id) => IpilConnectionTerritory.fromMap(data, id)).then((v) => ipilConnectionTerritories = v).catchError((e) { print("Error: e"); return <IpilConnectionTerritory>[]; }),
+      _loadOrFetchCatalog<IpilReinforcement>('ipilReinforcements', () => database.ipilReinforcementStream().first, (data, id) => IpilReinforcement.fromMap(data, id), getDocId: (e) => e.ipilReinforcementId ?? '').then((v) => ipilReinforcements = v).catchError((e) { print("Error: e"); return <IpilReinforcement>[]; }),
+      _loadOrFetchCatalog<IpilContextualization>('ipilContextualizations', () => database.ipilContextualizationStream().first, (data, id) => IpilContextualization.fromMap(data, id), getDocId: (e) => e.ipilContextualizationId ?? '').then((v) => ipilContextualizations = v).catchError((e) { print("Error: e"); return <IpilContextualization>[]; }),
+      _loadOrFetchCatalog<IpilConnectionTerritory>('ipilConnectionTerritories', () => database.ipilConnectionTerritoryStream().first, (data, id) => IpilConnectionTerritory.fromMap(data, id), getDocId: (e) => e.ipilConnectionTerritoryId ?? '').then((v) => ipilConnectionTerritories = v).catchError((e) { print("Error: e"); return <IpilConnectionTerritory>[]; }),
     ]);
 
     // Batch 5: IPIL master data (part 2)
     await Future.wait([
-      _loadOrFetchCatalog<IpilInterviews>('ipilInterviews', () => database.ipilInterviewsStream().first, (data, id) => IpilInterviews.fromMap(data, id)).then((v) => ipilInterviews = v).catchError((e) { print("Error: e"); return <IpilInterviews>[]; }),
-      _loadOrFetchCatalog<IpilIntermediations>('ipilIntermediations', () => database.ipilIntermediationsStream().first, (data, id) => IpilIntermediations.fromMap(data, id)).then((v) => ipilIntermediations = v).catchError((e) { print("Error: e"); return <IpilIntermediations>[]; }),
-      _loadOrFetchCatalog<IpilObtainingEmployment>('ipilObtainingEmployments', () => database.ipilObtainingEmploymentStream().first, (data, id) => IpilObtainingEmployment.fromMap(data, id)).then((v) => ipilObtainingEmployments = v).catchError((e) { print("Error: e"); return <IpilObtainingEmployment>[]; }),
-      _loadOrFetchCatalog<IpilImprovingEmployment>('ipilImprovingEmployments', () => database.ipilImprovingEmploymentStream().first, (data, id) => IpilImprovingEmployment.fromMap(data, id)).then((v) => ipilImprovingEmployments = v).catchError((e) { print("Error: e"); return <IpilImprovingEmployment>[]; }),
-      _loadOrFetchCatalog<IpilPostWorkSupport>('ipilPostWorkSupports', () => database.ipilPostWorkSupportStream().first, (data, id) => IpilPostWorkSupport.fromMap(data, id)).then((v) => ipilPostWorkSupports = v).catchError((e) { print("Error: e"); return <IpilPostWorkSupport>[]; }),
+      _loadOrFetchCatalog<IpilInterviews>('ipilInterviews', () => database.ipilInterviewsStream().first, (data, id) => IpilInterviews.fromMap(data, id), getDocId: (e) => e.ipilInterviewsId ?? '').then((v) => ipilInterviews = v).catchError((e) { print("Error: e"); return <IpilInterviews>[]; }),
+      _loadOrFetchCatalog<IpilIntermediations>('ipilIntermediations', () => database.ipilIntermediationsStream().first, (data, id) => IpilIntermediations.fromMap(data, id), getDocId: (e) => e.ipilIntermediationsId ?? '').then((v) => ipilIntermediations = v).catchError((e) { print("Error: e"); return <IpilIntermediations>[]; }),
+      _loadOrFetchCatalog<IpilObtainingEmployment>('ipilObtainingEmployments', () => database.ipilObtainingEmploymentStream().first, (data, id) => IpilObtainingEmployment.fromMap(data, id), getDocId: (e) => e.ipilObtainingEmploymentId ?? '').then((v) => ipilObtainingEmployments = v).catchError((e) { print("Error: e"); return <IpilObtainingEmployment>[]; }),
+      _loadOrFetchCatalog<IpilImprovingEmployment>('ipilImprovingEmployments', () => database.ipilImprovingEmploymentStream().first, (data, id) => IpilImprovingEmployment.fromMap(data, id), getDocId: (e) => e.ipilImprovingEmploymentId ?? '').then((v) => ipilImprovingEmployments = v).catchError((e) { print("Error: e"); return <IpilImprovingEmployment>[]; }),
+      _loadOrFetchCatalog<IpilPostWorkSupport>('ipilPostWorkSupports', () => database.ipilPostWorkSupportStream().first, (data, id) => IpilPostWorkSupport.fromMap(data, id), getDocId: (e) => e.ipilPostWorkSupportId ?? '').then((v) => ipilPostWorkSupports = v).catchError((e) { print("Error: e"); return <IpilPostWorkSupport>[]; }),
     ]);
 
     // Batch 6: IPIL master data (part 3)
     await Future.wait([
-      _loadOrFetchCatalog<IpilCoordination>('ipilCoordinations', () => database.ipilCoordinationStream().first, (data, id) => IpilCoordination.fromMap(data, id)).then((v) => ipilCoordinations = v).catchError((e) { print("Error: e"); return <IpilCoordination>[]; }),
-      _loadOrFetchCatalog<IpilLegal>('ipilLegals', () => database.ipilLegalStream().first, (data, id) => IpilLegal.fromMap(data, id)).then((v) => ipilLegals = v).catchError((e) { print("Error: e"); return <IpilLegal>[]; }),
-      _loadOrFetchCatalog<IpilEconomicBag>('ipilEconomicBags', () => database.ipilEconomicBagStream().first, (data, id) => IpilEconomicBag.fromMap(data, id)).then((v) => ipilEconomicBags = v).catchError((e) { print("Error: e"); return <IpilEconomicBag>[]; }),
-      _loadOrFetchCatalog<IpilSpecificSkills>('ipilSpecificSkills', () => database.ipilSpecificSkillsStream().first, (data, id) => IpilSpecificSkills.fromMap(data, id)).then((v) => ipilSpecificSkills = v).catchError((e) { print("Error: e"); return <IpilSpecificSkills>[]; }),
-      _loadOrFetchCatalog<IpilSoftSkills>('ipilSoftSkills', () => database.ipilSoftSkillsStream().first, (data, id) => IpilSoftSkills.fromMap(data, id)).then((v) => ipilSoftSkills = v).catchError((e) { print("Error: e"); return <IpilSoftSkills>[]; }),
+      _loadOrFetchCatalog<IpilCoordination>('ipilCoordinations', () => database.ipilCoordinationStream().first, (data, id) => IpilCoordination.fromMap(data, id), getDocId: (e) => e.ipilCoordinationId ?? '').then((v) => ipilCoordinations = v).catchError((e) { print("Error: e"); return <IpilCoordination>[]; }),
+      _loadOrFetchCatalog<IpilLegal>('ipilLegals', () => database.ipilLegalStream().first, (data, id) => IpilLegal.fromMap(data, id), getDocId: (e) => e.ipilLegalId ?? '').then((v) => ipilLegals = v).catchError((e) { print("Error: e"); return <IpilLegal>[]; }),
+      _loadOrFetchCatalog<IpilEconomicBag>('ipilEconomicBags', () => database.ipilEconomicBagStream().first, (data, id) => IpilEconomicBag.fromMap(data, id), getDocId: (e) => e.ipilEconomicBagId ?? '').then((v) => ipilEconomicBags = v).catchError((e) { print("Error: e"); return <IpilEconomicBag>[]; }),
+      _loadOrFetchCatalog<IpilSpecificSkills>('ipilSpecificSkills', () => database.ipilSpecificSkillsStream().first, (data, id) => IpilSpecificSkills.fromMap(data, id), getDocId: (e) => e.ipilSpecificSkillsId ?? '').then((v) => ipilSpecificSkills = v).catchError((e) { print("Error: e"); return <IpilSpecificSkills>[]; }),
+      _loadOrFetchCatalog<IpilSoftSkills>('ipilSoftSkills', () => database.ipilSoftSkillsStream().first, (data, id) => IpilSoftSkills.fromMap(data, id), getDocId: (e) => e.ipilSoftSkillsId ?? '').then((v) => ipilSoftSkills = v).catchError((e) { print("Error: e"); return <IpilSoftSkills>[]; }),
     ]);
 
     // Batch 7: Final IPIL data
     await Future.wait([
-      _loadOrFetchCatalog<IpilDigitalSkills>('ipilDigitalSkills', () => database.ipilDigitalSkillsStream().first, (data, id) => IpilDigitalSkills.fromMap(data, id)).then((v) => ipilDigitalSkills = v).catchError((e) { print("Error: e"); return <IpilDigitalSkills>[]; }),
-      _loadOrFetchCatalog<IpilLaborSkills>('ipilLaborSkills', () => database.ipilLaborSkillsStream().first, (data, id) => IpilLaborSkills.fromMap(data, id)).then((v) => ipilLaborSkills = v).catchError((e) { print("Error: e"); return <IpilLaborSkills>[]; }),
+      _loadOrFetchCatalog<IpilDigitalSkills>('ipilDigitalSkills', () => database.ipilDigitalSkillsStream().first, (data, id) => IpilDigitalSkills.fromMap(data, id), getDocId: (e) => e.ipilDigitalSkillsId ?? '').then((v) => ipilDigitalSkills = v).catchError((e) { print("Error: e"); return <IpilDigitalSkills>[]; }),
+      _loadOrFetchCatalog<IpilLaborSkills>('ipilLaborSkills', () => database.ipilLaborSkillsStream().first, (data, id) => IpilLaborSkills.fromMap(data, id), getDocId: (e) => e.ipilLaborSkillsId ?? '').then((v) => ipilLaborSkills = v).catchError((e) { print("Error: e"); return <IpilLaborSkills>[]; }),
     ]);
   }
 
