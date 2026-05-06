@@ -7,7 +7,7 @@ class Dedication {
 
   factory Dedication.fromMap(Map<String, dynamic> data, String documentId) {
     return Dedication(
-      dedicationId: data['dedicationId'],
+      dedicationId: data['dedicationId']?.toString() ?? documentId,
       label: data['label'],
       value: data['value'],
     );
@@ -21,8 +21,12 @@ class Dedication {
             other.dedicationId == dedicationId);
   }
 
+  @override
+  int get hashCode => dedicationId.hashCode;
+
   Map<String, dynamic> toMap() {
     return {
+      'dedicationId': dedicationId,
       'label': label,
       'value': value,
     };

@@ -291,7 +291,7 @@ class LocationCache {
     return _warmUpFuture!;
   }
 
-  static const int _cacheVersion = 3;
+  static const int _cacheVersion = 4;
 
   /// Batched warm-up: max ~5 concurrent Firestore reads at a time.
   /// All catalogs use persistence cache so subsequent launches skip Firestore entirely.

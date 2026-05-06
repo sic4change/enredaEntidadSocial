@@ -340,6 +340,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
       itemBuilder: (context, index) {
         final ipilEntry = ipilEntries[index];
         return ExpandableIpilEntryWrapper(
+          key: ValueKey(ipilEntry.ipilId),
           ipilEntry: ipilEntry,
           participantUser: widget.participantUser,
           editIpilEntry: () {
