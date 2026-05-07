@@ -137,7 +137,12 @@ class MyAppState extends State<MyInitialReport> with SingleTickerProviderStateMi
           }, icon: Icon(Icons.arrow_back)),
         actionsIconTheme: const IconThemeData(color: AppColors.white,),
         foregroundColor: Colors.white,
-        title: CustomTextBoldCenter(title: 'Informe inicial de ${widget.user.firstName}', color: AppColors.turquoiseBlue,),
+        title: CustomTextBoldCenter(
+          title: (widget.initialReport.reopeningMotive != null && widget.initialReport.reopeningMotive!.trim().isNotEmpty)
+              ? 'Informe de reapertura de ${widget.user.firstName}'
+              : 'Informe inicial de ${widget.user.firstName}',
+          color: AppColors.turquoiseBlue,
+        ),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -152,10 +157,14 @@ class MyAppState extends State<MyInitialReport> with SingleTickerProviderStateMi
       ),
       body: PdfPreview(
         maxPageWidth: 700,
-        pdfFileName: 'Informe_Inicial_${widget.user.firstName}.pdf',
+        pdfFileName: (widget.initialReport.reopeningMotive != null && widget.initialReport.reopeningMotive!.trim().isNotEmpty)
+            ? 'Informe_Reapertura_${widget.user.firstName}.pdf'
+            : 'Informe_Inicial_${widget.user.firstName}.pdf',
         build: (format){ 
           setWebPdfTitle(
-            'Informe_Inicial_${widget.user.firstName}',
+            (widget.initialReport.reopeningMotive != null && widget.initialReport.reopeningMotive!.trim().isNotEmpty)
+                ? 'Informe_Reapertura_${widget.user.firstName}'
+                : 'Informe_Inicial_${widget.user.firstName}',
           );
           return examplesInitialReport[_tab].builder(
           format,

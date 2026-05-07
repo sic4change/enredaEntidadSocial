@@ -28,7 +28,8 @@ Future<Uint8List> generateInitialReportFile(
     UserEnreda user,
     InitialReport initialReport,
     ) async {
-  final doc = pw.Document(title: StringConst.INITIAL_REPORT);
+  final bool isReopening = initialReport.reopeningMotive != null && initialReport.reopeningMotive!.trim().isNotEmpty;
+  final doc = pw.Document(title: isReopening ? 'Informe de reapertura' : StringConst.INITIAL_REPORT);
 
   format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,
@@ -79,7 +80,9 @@ Future<Uint8List> generateInitialReportFile(
       },
       build: (pw.Context context) => [
         pw.Text(
-          'Informe inicial de ${user.firstName} ${user.lastName}',
+          isReopening 
+              ? 'Informe de reapertura de ${user.firstName} ${user.lastName}'
+              : 'Informe inicial de ${user.firstName} ${user.lastName}',
           textAlign: pw.TextAlign.center,
           style: pw.Theme.of(context)
               .defaultTextStyle
@@ -103,6 +106,10 @@ Future<Uint8List> generateInitialReportFile(
         CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: initialReport.subsidy ?? ''),
         SpaceH12(),
         CustomItem(title: 'Técnico/a de referencia', content: initialReport.techPersonName ?? ''),
+        if (isReopening) ...[
+          SpaceH12(),
+          CustomItem(title: 'Motivo de la reapertura', content: initialReport.reopeningMotive ?? ''),
+        ],
 
 
         //Section 1
@@ -323,6 +330,23 @@ Future<Uint8List> generateInitialReportFile(
         CustomItem(title: 'Largo plazo', content: initialReport.longTerm ?? ''),
 
         SpaceH5(),
+        if (isReopening) ...[
+          SectionTitle(title: StringConst.CLOSURE_TITLE_10),
+          CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation10 ?? ''),
+          SpaceH5(),
+          CustomRow(
+            title1: StringConst.CLOSURE_CLOSE_MOTIVE,
+            title2: StringConst.CLOSURE_CLOSE_MOTIVE_DETAIL,
+            content1: initialReport.motiveClose ?? '',
+            content2: initialReport.motiveCloseDetail ?? '',
+          ),
+          SpaceH5(),
+          CustomItem(
+            title: 'Fecha de cierre anterior',
+            content: initialReport.closeDate == null ? '' : formatter.format(initialReport.closeDate!),
+          ),
+          SpaceH5(),
+        ],
         BottomSignatures(),
       ]
     )
