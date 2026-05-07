@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/home/participants/participant_detail/informs
 import 'package:enreda_empresas/app/home/participants/participant_detail/informs/derivation_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/informs/follow_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/informs/initial_report_participant.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/informs/reopening_report_participant.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_closure_follow_preview.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_derivation_preview.dart';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_follow_preview.dart';
@@ -157,15 +158,28 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
       case 0:
         return selectionPage();
       case 1:
-        return InitialReportForm(
-          // A different key per override id forces a fresh
-          // form state so cached controllers don't leak between
-          // the active report and a historical one.
-          key: ValueKey('initial_${_historyViewInitialReportId ?? 'active'}'),
-          user: widget.participantUser,
-          overrideReportId: _historyViewInitialReportId,
-          viewOnly: _historyViewInitialReportId != null,
-        );
+        bool isReopening = false;
+        if (_historyViewInitialReportId == null) {
+          isReopening = user.socialItineraryHistory.isNotEmpty;
+        } else {
+          isReopening = user.socialItineraryHistory.isNotEmpty &&
+              user.socialItineraryHistory.first.initialReportId != _historyViewInitialReportId;
+        }
+        if (isReopening) {
+          return ReopeningReportForm(
+            key: ValueKey('initial_${_historyViewInitialReportId ?? 'active'}'),
+            user: user,
+            overrideReportId: _historyViewInitialReportId,
+            viewOnly: _historyViewInitialReportId != null,
+          );
+        } else {
+          return InitialReportForm(
+            key: ValueKey('initial_${_historyViewInitialReportId ?? 'active'}'),
+            user: user,
+            overrideReportId: _historyViewInitialReportId,
+            viewOnly: _historyViewInitialReportId != null,
+          );
+        }
       case 2:
         return FollowReportForm(
           key: ValueKey('follow_${_historyViewFollowReportId ?? 'active'}'),
@@ -274,10 +288,10 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                             const SpaceH16(),
                             // History cycles first (oldest → newest). Each one
                             // renders as its own closed-state box.
-                            ...user.socialItineraryHistory
-                                .map((cycle) => Padding(
+                            ...user.socialItineraryHistory.asMap().entries
+                                .map((entry) => Padding(
                                       padding: const EdgeInsets.only(bottom: 20),
-                                      child: _buildHistoryCycleCard(cycle),
+                                      child: _buildHistoryCycleCard(entry.value, entry.key),
                                     )),
                             // Active cycle. Always rendered: when it has reports
                             // (post re-apertura) it shows "ABIERTO" + the new
@@ -373,7 +387,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
           if (user.initialReportId != null)
             _documentTile(
               context,
-              'INFORME INICIAL',
+              user.socialItineraryHistory.isNotEmpty ? 'INFORME DE REAPERTURA' : 'INFORME INICIAL',
               formatter.format(
                   initialReportUser.completedDate ?? DateTime.now()),
               bannerOffset,
@@ -483,7 +497,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
     );
   }
 
-  Widget _buildHistoryCycleCard(SocialItineraryCycle cycle) {
+  Widget _buildHistoryCycleCard(SocialItineraryCycle cycle, int cycleIndex) {
     // Count how many reports exist in this cycle to compute bottom-radius row.
     int historyTotal = 1; // banner row occupies index 0
     if (cycle.initialReportId != null) historyTotal++;
@@ -506,7 +520,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
           ),
           if (cycle.initialReportId != null)
             _buildHistoryReportRow<InitialReport>(
-              title: 'INFORME INICIAL',
+              title: cycleIndex > 0 ? 'INFORME DE REAPERTURA' : 'INFORME INICIAL',
               order: 1,
               totalRows: historyTotal,
               stream: _database!.initialReportStreamById(cycle.initialReportId),
@@ -870,7 +884,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
                     ),
                     PopupMenuItem<SampleItem>(
                         value: SampleItem.itemTwo,
-                        child: CustomTextTitle(title: 'INFORME INICIAL', color: AppColors.primary900),
+                        child: CustomTextTitle(title: user.socialItineraryHistory.isNotEmpty ? 'INFORME DE REAPERTURA' : 'INFORME INICIAL', color: AppColors.primary900),
                         onTap: (){
                           if(user.initialReportId != null){
                             showAlertDialog(

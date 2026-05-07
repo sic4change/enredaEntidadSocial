@@ -266,6 +266,7 @@ abstract class Database {
      Future<SocialEntity?> getSocialEntity(String id);
      Future<UserEnreda?> getUser(String id);
      Future<InitialReport?> getInitialReport(String userId);
+     Future<ClosureReport?> getClosureReport(String id);
 }
 
 class FirestoreDatabase implements Database {
@@ -2339,6 +2340,12 @@ class FirestoreDatabase implements Database {
     );
     return reports.isNotEmpty ? reports.first : null;
   }
+
+  @override
+  Future<ClosureReport?> getClosureReport(String id) => _service.getDocument(
+    path: APIPath.closureReport(id),
+    builder: (data, documentId) => ClosureReport.fromMap(data, documentId),
+  );
 
   @override
   Future<void> archiveItinerary(
