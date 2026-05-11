@@ -760,9 +760,22 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   }
 
   Widget _buildMyLocation(BuildContext context, UserEnreda? user) {
-    City? myCity = LocationCache.instance.cityById(user?.address?.city);
-    String city = myCity?.name ?? '';
+    if (user?.address?.city == null || user!.address!.city!.isEmpty) {
+      return _buildLocationRow(context, '');
+    }
 
+    final database = Provider.of<Database>(context, listen: false);
+
+    return FutureBuilder<City?>(
+      future: LocationCache.instance.getCity(database, user.address!.city!),
+      builder: (context, snapshot) {
+        String city = snapshot.data?.name ?? '';
+        return _buildLocationRow(context, city);
+      },
+    );
+  }
+
+  Widget _buildLocationRow(BuildContext context, String cityName) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -775,7 +788,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               : 14,
         ),
         const SpaceW4(),
-        CustomTextSmall(text: city),
+        CustomTextSmall(text: cityName),
       ],
     );
   }

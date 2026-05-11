@@ -93,6 +93,10 @@ class LocationCache {
   final Map<String, SocialEntity> socialEntitiesCache = {};
   final Map<String, UserEnreda> userCache = {};
   final Map<String, Future<UserEnreda?>> _pendingUserFetches = {};
+  final Map<String, City> cityCache = {};
+  final Map<String, Future<City?>> _pendingCityFetches = {};
+  final Map<String, Province> provinceCache = {};
+  final Map<String, Future<Province?>> _pendingProvinceFetches = {};
 
   // --- Participant State ---
   final List<UserEnreda> allParticipants = [];
@@ -486,6 +490,46 @@ class LocationCache {
     });
 
     _pendingUserFetches[id] = fetchFuture;
+    return fetchFuture;
+  }
+
+  Future<City?> getCity(Database database, String id) async {
+    if (cityCache.containsKey(id)) {
+      return cityCache[id];
+    }
+    if (id.isEmpty) return null;
+    
+    if (_pendingCityFetches.containsKey(id)) {
+      return _pendingCityFetches[id];
+    }
+
+    final fetchFuture = database.getCity(id).then((city) {
+      if (city != null) cityCache[id] = city;
+      _pendingCityFetches.remove(id);
+      return city;
+    });
+
+    _pendingCityFetches[id] = fetchFuture;
+    return fetchFuture;
+  }
+
+  Future<Province?> getProvince(Database database, String id) async {
+    if (provinceCache.containsKey(id)) {
+      return provinceCache[id];
+    }
+    if (id.isEmpty) return null;
+    
+    if (_pendingProvinceFetches.containsKey(id)) {
+      return _pendingProvinceFetches[id];
+    }
+
+    final fetchFuture = database.getProvince(id).then((province) {
+      if (province != null) provinceCache[id] = province;
+      _pendingProvinceFetches.remove(id);
+      return province;
+    });
+
+    _pendingProvinceFetches[id] = fetchFuture;
     return fetchFuture;
   }
 
