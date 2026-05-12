@@ -112,7 +112,8 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
       if (assignedById != null && assignedById.isNotEmpty) {
         _assignedUserStream = database.userEnredaStreamByUserId(assignedById);
       }
-      final entityId = widget.participantUser.assignedEntityId;
+      final entityId = globals.currentSocialEntityUser?.socialEntityId
+          ?? widget.participantUser.assignedEntityId;
       if (entityId != null && entityId.isNotEmpty) {
         _socialUsersStream = database.getSocialUsersByEntityId(entityId);
       }
@@ -275,16 +276,11 @@ void initState() {
                           techUsersComplete = List.from(snapshot.data!);
                         }
                         
+                        // Only add current user as fallback if the stream hasn't loaded yet
+                        // and they belong to the same entity (guaranteed by stream query).
                         final currentUser = globals.currentSocialEntityUser;
                         if (currentUser != null && !techUsersComplete.any((u) => u.userId == currentUser.userId)) {
                           techUsersComplete.add(currentUser);
-                        }
-
-                        if (assignedUserSnapshot.hasData) {
-                          final assignedUser = assignedUserSnapshot.data!;
-                          if (!techUsersComplete.any((u) => u.userId == assignedUser.userId)) {
-                            techUsersComplete.add(assignedUser);
-                          }
                         }
 
                         techUsers = techUsersComplete.map((userTech) {
