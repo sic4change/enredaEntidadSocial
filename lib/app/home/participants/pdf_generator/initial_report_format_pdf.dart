@@ -106,10 +106,6 @@ Future<Uint8List> generateInitialReportFile(
         CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: initialReport.subsidy ?? ''),
         SpaceH12(),
         CustomItem(title: 'Técnico/a de referencia', content: initialReport.techPersonName ?? ''),
-        if (isReopening) ...[
-          SpaceH12(),
-          CustomItem(title: 'Motivo de la reapertura', content: initialReport.reopeningMotive ?? ''),
-        ],
 
 
         //Section 1
@@ -345,6 +341,9 @@ Future<Uint8List> generateInitialReportFile(
             title: 'Fecha de cierre anterior',
             content: initialReport.closeDate == null ? '' : formatter.format(initialReport.closeDate!),
           ),
+          SpaceH5(),
+          SectionTitle(title: StringConst.REOPENING_TITLE_11),
+          CustomItem(title: 'Motivo de la reapertura', content: initialReport.reopeningMotive ?? ''),
           SpaceH5(),
         ],
         BottomSignatures(),

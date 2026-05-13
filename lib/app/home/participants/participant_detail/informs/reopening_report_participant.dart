@@ -1214,18 +1214,6 @@ class _ReopeningReportFormState extends State<ReopeningReportForm> {
                 _controllers['dniParticipant']!.text = val;
               },
             ),
-            SpaceH12(),
-            CustomTextFormFieldTitle(
-              labelText: 'Motivo de la reapertura *',
-              controller: _controllers['reopeningMotive'],
-              hintText: "Escribe el motivo de la reapertura del caso",
-              enabled: !_finished,
-              validator: (value) => (value != null && value.trim().isNotEmpty)
-                  ? null
-                  : "Por favor, indique el motivo de la reapertura",
-            ),
-
-
             //Section 1
             informSectionTitle(StringConst.INITIAL_TITLE1_ITINERARY),
             CustomTextFormFieldTitle(
@@ -3219,6 +3207,18 @@ class _ReopeningReportFormState extends State<ReopeningReportForm> {
                 // validator: (value) =>
                 // (value != null) ? null : StringConst.FORM_GENERIC_ERROR,
               ),
+            ),
+
+            //Section 11
+            informSectionTitle(StringConst.REOPENING_TITLE_11),
+            CustomTextFormFieldTitle(
+              labelText: 'Motivo de la reapertura *',
+              controller: _controllers['reopeningMotive'],
+              hintText: "Escribe el motivo de la reapertura del caso",
+              enabled: !_finished,
+              validator: (value) => (value != null && value.trim().isNotEmpty)
+                  ? null
+                  : "Por favor, indique el motivo de la reapertura",
             ),
 
             SpaceH12(),

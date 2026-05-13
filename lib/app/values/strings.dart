@@ -820,6 +820,7 @@ class StringConst {
   static const String FOLLOW_POST_LABOR_TOTAL_DAYS = 'Total de días';
   static const String FOLLOW_JOB_MAINTENANCE = 'Mantenimiento del empleo obtenido';
   static const String CLOSURE_TITLE_10 = '10. Cierre de la intervención';
+  static const String REOPENING_TITLE_11 = '11. Reapertura';
   static const String CLOSURE_CLOSE_MOTIVE = 'Motivo de cierre';
   static const String CLOSURE_CLOSE_MOTIVE_DETAIL = 'Detalle del motivo';
   static const String DERIVATION_ADDRESSED = 'Dirigido a:';

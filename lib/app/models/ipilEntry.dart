@@ -183,7 +183,7 @@ class IpilEntry {
       techName: data['techName'] == null ? '' : data['techName'],
       userId: data['userId']?.toString() ?? '',
       date: data['date'].toDate(),
-      lastUpdateDate: data['lastUpdateDate'] != null ? data['lastUpdateDate'].toDate() : DateTime.now(),
+      lastUpdateDate: data['lastUpdateDate'] != null ? data['lastUpdateDate'].toDate() : null,
       reinforcement: reinforcements,
       reinforcementsText: data['reinforcementsText'] ?? '',
       contextualization: contextualizations,

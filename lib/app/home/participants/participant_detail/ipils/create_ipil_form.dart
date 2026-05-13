@@ -619,10 +619,10 @@ void initState() {
           title: StringConst.FORM_ENTITY_ERROR,
           content: StringConst.FORM_ENTITY_CHECK,
           defaultActionText: StringConst.CLOSE);
+      return;
     }
     if (_validateAndSaveForm()) {
-      print("validado");
-      _formKey.currentState!.save();
+      debugPrint("validado");
       try {
         final database = Provider.of<Database>(context, listen: false);
         print('selectedIPIL: ${widget.selectedIpil}');
