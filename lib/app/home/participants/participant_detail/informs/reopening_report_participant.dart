@@ -3214,11 +3214,11 @@ class _ReopeningReportFormState extends State<ReopeningReportForm> {
             CustomTextFormFieldTitle(
               labelText: 'Motivo de la reapertura *',
               controller: _controllers['reopeningMotive'],
-              hintText: "Escribe el motivo de la reapertura del caso",
+              hintText: "Escriba el motivo de la reapertura",
               enabled: !_finished,
               validator: (value) => (value != null && value.trim().isNotEmpty)
                   ? null
-                  : "Por favor, indique el motivo de la reapertura",
+                  : "Indique el motivo de la reapertura",
             ),
 
             SpaceH12(),
