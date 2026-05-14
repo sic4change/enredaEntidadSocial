@@ -3,6 +3,7 @@ import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/account/personal_data.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/create_participant_page.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
 import 'package:enreda_empresas/app/home/side_bar_widget.dart';
 import 'package:enreda_empresas/app/home/control_panel/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
@@ -73,6 +74,10 @@ class _WebHomeState extends State<WebHome> {
   var bodyWidget = [];
   final _key = GlobalKey<ScaffoldState>();
   bool _warmUpStarted = false;
+  int _lastConfirmedIndex = 0;
+  int _lastConfirmedMajorIndex = 2;
+  bool _isHandlingSidebarChange = false;
+  bool _isHandlingMajorChange = false;
 
   @override
   void initState() {
@@ -82,6 +87,85 @@ class _WebHomeState extends State<WebHome> {
       Container(),
     ];
     super.initState();
+    _lastConfirmedIndex = WebHome.controller.selectedIndex;
+    _lastConfirmedMajorIndex = WebHome.selectedIndex.value;
+    WebHome.controller.addListener(_handleSidebarChange);
+    WebHome.selectedIndex.addListener(_handleMajorIndexChange);
+  }
+
+  void _handleMajorIndexChange() async {
+    if (_isHandlingMajorChange) return;
+
+    int newIndex = WebHome.selectedIndex.value;
+    if (newIndex != _lastConfirmedMajorIndex) {
+      if (ParticipantDetailPage.isEditing) {
+        _isHandlingMajorChange = true;
+        // Revert immediately so the new page doesn't render
+        WebHome.selectedIndex.value = _lastConfirmedMajorIndex;
+
+        final leave = await showAlertDialog(
+          context,
+          title: '¿Estás seguro que quieres dejar de editar?',
+          content: 'Si sales, los cambios no guardados se perderán.',
+          defaultActionText: 'Salir',
+          cancelActionText: 'Cancelar',
+        );
+
+        if (leave == true) {
+          ParticipantDetailPage.isEditing = false;
+          setState(() {
+            _lastConfirmedMajorIndex = newIndex;
+          });
+          WebHome.selectedIndex.value = newIndex;
+        }
+        _isHandlingMajorChange = false;
+      } else {
+        setState(() {
+          _lastConfirmedMajorIndex = newIndex;
+        });
+      }
+    }
+  }
+
+  void _handleSidebarChange() async {
+    if (_isHandlingSidebarChange) return;
+
+    int newIndex = WebHome.controller.selectedIndex;
+    if (newIndex != _lastConfirmedIndex) {
+      if (ParticipantDetailPage.isEditing) {
+        _isHandlingSidebarChange = true;
+        // Revert immediately so the new page doesn't render
+        WebHome.controller.selectIndex(_lastConfirmedIndex);
+        
+        final leave = await showAlertDialog(
+          context,
+          title: '¿Estás seguro que quieres dejar de editar?',
+          content: 'Si sales, los cambios no guardados se perderán.',
+          defaultActionText: 'Salir',
+          cancelActionText: 'Cancelar',
+        );
+
+        if (leave == true) {
+          ParticipantDetailPage.isEditing = false;
+          setState(() {
+            _lastConfirmedIndex = newIndex;
+          });
+          WebHome.controller.selectIndex(newIndex);
+        }
+        _isHandlingSidebarChange = false;
+      } else {
+        setState(() {
+          _lastConfirmedIndex = newIndex;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WebHome.controller.removeListener(_handleSidebarChange);
+    WebHome.selectedIndex.removeListener(_handleMajorIndexChange);
+    super.dispose();
   }
 
   void _ensureWarmUp(Database database) {
@@ -199,12 +283,12 @@ class _WebHomeState extends State<WebHome> {
                   child: Row(
                     children: [
                       if(!isSmallScreen) SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
-                      if (WebHome.selectedIndex.value == 0) Expanded(child: Center(child: bodyWidget[0]))
-                      else if (WebHome.selectedIndex.value == 1) Expanded(child: Center(child: bodyWidget[1]))
+                      if (_lastConfirmedMajorIndex == 0) Expanded(child: Center(child: bodyWidget[0]))
+                      else if (_lastConfirmedMajorIndex == 1) Expanded(child: Center(child: bodyWidget[1]))
                       else Expanded(child: Center(child: AnimatedBuilder(
                         animation: WebHome.controller,
                         builder: (context, child){
-                          switch(WebHome.controller.selectedIndex){
+                          switch(_lastConfirmedIndex){
                             case 0: _key.currentState?.closeDrawer();
                             return ControlPanelPage(socialEntity: socialEntity, user: user,);
                             case 1: _key.currentState?.closeDrawer();

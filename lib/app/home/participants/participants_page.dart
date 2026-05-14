@@ -1,6 +1,7 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/home/external_social_entity/filter_text_field_row.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_item_builder.dart';
@@ -98,10 +99,21 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                   child: Row(
                     children: [
                       InkWell(
-                          onTap: () => {
+                          onTap: () async {
+                            if (ParticipantDetailPage.isEditing) {
+                              final leave = await showAlertDialog(
+                                context,
+                                title: '¿Estás seguro que quieres dejar de editar?',
+                                content: 'Si sales, los cambios no guardados se perderán.',
+                                defaultActionText: 'Salir',
+                                cancelActionText: 'Cancelar',
+                              );
+                              if (leave != true) return;
+                              ParticipantDetailPage.isEditing = false;
+                            }
                             setState(() {
                               ParticipantsListPage.selectedIndex.value = 0;
-                            })
+                            });
                           },
                           child: selectedIndex != 0 ? CustomTextMedium(text: 'Participantes ') :
                           CustomTextMediumBold(text: 'Participantes ') ),
