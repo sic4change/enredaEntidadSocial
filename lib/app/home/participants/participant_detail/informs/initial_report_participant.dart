@@ -1855,7 +1855,13 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                     separatorSize: 20,
                                     childLeft: CustomDropDownButtonFormFieldTittle(
                                       labelText: StringConst.INITIAL_LANGUAGE,
-                                      value: language.name.isNotEmpty ? language.name : null,
+                                      // Guard: only pass a value when it exists in the
+                                      // (dynamic) cache list to avoid Flutter's
+                                      // "exactly one item" DropdownButtonFormField assertion.
+                                      value: language.name.isNotEmpty &&
+                                              _languageOptions.any((item) => item.value == language.name)
+                                          ? language.name
+                                          : null,
                                       source: _languageOptions,
                                       onChanged: _finished
                                           ? null
@@ -1867,7 +1873,12 @@ class _InitialReportFormState extends State<InitialReportForm> {
                                     ),
                                     childRight: CustomDropDownButtonFormFieldTittle(
                                       labelText: StringConst.INITIAL_LANGUAGE_LEVEL,
-                                      value: language.level.isNotEmpty ? language.level : null,
+                                      // Guard: LANGUAGE_LEVEL_SELECTION is static but
+                                      // sanitizeLanguageLevels() only runs once; defend here too.
+                                      value: language.level.isNotEmpty &&
+                                              StringConst.LANGUAGE_LEVEL_SELECTION.any((item) => item.value == language.level)
+                                          ? language.level
+                                          : null,
                                       source: StringConst.LANGUAGE_LEVEL_SELECTION,
                                       onChanged: _finished
                                           ? null

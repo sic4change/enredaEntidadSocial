@@ -2417,7 +2417,10 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                                     separatorSize: 20,
                                     childLeft: CustomDropDownButtonFormFieldTittle(
                                       labelText: StringConst.INITIAL_LANGUAGE,
-                                      value: language.name.isNotEmpty ? language.name : null,
+                                      value: language.name.isNotEmpty &&
+                                              _languageOptions.any((item) => item.value == language.name)
+                                          ? language.name
+                                          : null,
                                       source: _languageOptions,
                                       onChanged: _finished
                                           ? null
@@ -2429,7 +2432,10 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                                     ),
                                     childRight: CustomDropDownButtonFormFieldTittle(
                                       labelText: StringConst.INITIAL_LANGUAGE_LEVEL,
-                                      value: language.level.isNotEmpty ? language.level : null,
+                                      value: language.level.isNotEmpty &&
+                                              StringConst.LANGUAGE_LEVEL_SELECTION.any((item) => item.value == language.level)
+                                          ? language.level
+                                          : null,
                                       source: StringConst.LANGUAGE_LEVEL_SELECTION,
                                       onChanged: _finished
                                           ? null

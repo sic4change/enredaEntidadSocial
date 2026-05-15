@@ -7,6 +7,73 @@ const PdfColor black = PdfColor.fromInt(0xF44494B);
 const PdfColor white = PdfColor.fromInt(0xFFFFFFFF);
 const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
 
+/// Page-safe replacement for [CustomItem].
+///
+/// Returns a [List] of widgets that must be spread (`...`) into a
+/// `MultiPage.build` list.  Splitting the title and content into separate
+/// top-level children lets `MultiPage` place page breaks between them, and
+/// chunking long content prevents [TooManyPagesException] when a single
+/// [pw.Column] would be taller than one full page.
+List<pw.Widget> customItemPageSafe(
+  pw.Context context, {
+  required String title,
+  required String content,
+}) {
+  // Approximate character limit per chunk so the wrapped text never exceeds
+  // a full A4 page at textScaleFactor 0.8 (~8 pt effective font size).
+  // 600 chars ≈ 6-7 wrapped lines ≈ ~70 pt — well within any single page.
+  const int _maxCharsPerChunk = 600;
+
+  final pw.TextStyle titleStyle = pw.Theme.of(context)
+      .defaultTextStyle
+      .copyWith(fontWeight: pw.FontWeight.normal, color: black);
+  final pw.TextStyle contentStyle = pw.Theme.of(context)
+      .defaultTextStyle
+      .copyWith(fontWeight: pw.FontWeight.bold, color: black);
+
+  final List<pw.Widget> widgets = [
+    pw.Text(title, textScaleFactor: 0.8, style: titleStyle),
+  ];
+
+  if (content.isEmpty) {
+    widgets.add(pw.SizedBox(height: 2));
+    return widgets;
+  }
+
+  // Split on newlines first so paragraph breaks are preserved.
+  final rawParagraphs = content.split('\n');
+
+  for (final paragraph in rawParagraphs) {
+    if (paragraph.trim().isEmpty) continue;
+
+    // Further split any single paragraph that is still too long.
+    String remaining = paragraph.trim();
+    while (remaining.isNotEmpty) {
+      if (remaining.length <= _maxCharsPerChunk) {
+        widgets.add(pw.Text(
+          remaining,
+          textScaleFactor: 0.8,
+          textAlign: pw.TextAlign.justify,
+          style: contentStyle,
+        ));
+        break;
+      }
+      // Break at the last word boundary within the limit.
+      int breakPoint = remaining.lastIndexOf(' ', _maxCharsPerChunk);
+      if (breakPoint <= 0) breakPoint = _maxCharsPerChunk;
+      widgets.add(pw.Text(
+        remaining.substring(0, breakPoint),
+        textScaleFactor: 0.8,
+        textAlign: pw.TextAlign.justify,
+        style: contentStyle,
+      ));
+      remaining = remaining.substring(breakPoint).trimLeft();
+    }
+  }
+
+  return widgets;
+}
+
 class CustomRow extends pw.StatelessWidget {
   CustomRow({
     required this.title1,

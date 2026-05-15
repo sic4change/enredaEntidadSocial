@@ -80,7 +80,7 @@ Future<Uint8List> generateInitialReportFile(
       },
       build: (pw.Context context) => [
         pw.Text(
-          isReopening 
+          isReopening
               ? 'Informe de reapertura de ${user.firstName} ${user.lastName}'
               : 'Informe inicial de ${user.firstName} ${user.lastName}',
           textAlign: pw.TextAlign.center,
@@ -88,9 +88,7 @@ Future<Uint8List> generateInitialReportFile(
               .defaultTextStyle
               .copyWith(fontWeight: pw.FontWeight.bold, fontSize: 16, color: primary900)
         ),
-        pw.SizedBox(
-          height: 30,
-        ),
+        pw.SizedBox(height: 30),
         CustomItemSameLine(title: 'Nombre y apellidos', content: '${user.firstName} ${user.lastName}'),
         SpaceH5(),
         CustomItemSameLine(title: 'Fecha de nacimiento', content: formatter.format(user.birthday!)),
@@ -103,232 +101,193 @@ Future<Uint8List> generateInitialReportFile(
         SpaceH5(),
         CustomItemSameLine(title: StringConst.DNI_PARTICIPANT, content: initialReport.dniParticipant ?? ''),
         SpaceH12(),
-        CustomItem(title: 'Subvención a la que el/la participante está imputado/a', content: initialReport.subsidy ?? ''),
+        ...customItemPageSafe(context, title: 'Subvención a la que el/la participante está imputado/a', content: initialReport.subsidy ?? ''),
         SpaceH12(),
-        CustomItem(title: 'Técnico/a de referencia', content: initialReport.techPersonName ?? ''),
-
+        ...customItemPageSafe(context, title: 'Técnico/a de referencia', content: initialReport.techPersonName ?? ''),
 
         //Section 1
         SectionTitle(title: '1. Itinerario en España'),
-        CustomItem(title: 'Orientaciones:', content: initialReport.orientation1 ?? ''),
+        ...customItemPageSafe(context, title: 'Orientaciones:', content: initialReport.orientation1 ?? ''),
         SpaceH5(),
-        CustomRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: initialReport.arriveDate == null ? '' : formatter.format(initialReport.arriveDate!) , content2: initialReport.receptionResources ?? ''),
+        CustomRow(title1: 'Fecha de llegada a España', title2: 'Recursos de acogida', content1: initialReport.arriveDate == null ? '' : formatter.format(initialReport.arriveDate!), content2: initialReport.receptionResources ?? ''),
         SpaceH5(),
-        CustomItem(title: StringConst.INITIAL_EXTERNAL_RESOURCES, content: initialReport.administrativeExternalResources ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_EXTERNAL_RESOURCES, content: initialReport.administrativeExternalResources ?? ''),
 
         //Subsection 1.1
         SubSectionTitle(title: StringConst.INITIAL_TITLE_1_1_ADMINISTRATIVE_SITUATION),
-        CustomItem(title: StringConst.INITIAL_STATE, content: initialReport.adminState ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_STATE, content: initialReport.adminState ?? ''),
         SpaceH5(),
-        initialReport.adminState == 'Sin tramitar' ?
-        CustomItem(title: 'Sin tramitar', content: initialReport.adminNoThrough ?? '') :
-            initialReport.adminState == 'En trámite' ?
-            CustomRow(title1: 'Fecha de solicitud', title2: 'Fecha de resolución', content1: initialReport.adminDateAsk == null ? '' : formatter.format(initialReport.adminDateAsk!), content2: initialReport.adminDateResolution == null ? '' : formatter.format(initialReport.adminDateResolution!)) :
-            CustomItem(title: StringConst.INITIAL_DATE_CONCESSION, content: initialReport.adminDateConcession == null ? '' : formatter.format(initialReport.adminDateConcession!)),
+        if (initialReport.adminState == 'Sin tramitar')
+          ...customItemPageSafe(context, title: 'Sin tramitar', content: initialReport.adminNoThrough ?? '')
+        else if (initialReport.adminState == 'En trámite')
+          CustomRow(title1: 'Fecha de solicitud', title2: 'Fecha de resolución', content1: initialReport.adminDateAsk == null ? '' : formatter.format(initialReport.adminDateAsk!), content2: initialReport.adminDateResolution == null ? '' : formatter.format(initialReport.adminDateResolution!))
+        else
+          ...customItemPageSafe(context, title: StringConst.INITIAL_DATE_CONCESSION, content: initialReport.adminDateConcession == null ? '' : formatter.format(initialReport.adminDateConcession!)),
         SpaceH5(),
         CustomRow(title1: StringConst.INITIAL_TEMP, title2: initialReport.adminTemp == 'Inicial' || initialReport.adminTemp == 'Temporal' ? 'Fecha de resolución' : '', content1: initialReport.adminTemp ?? '', content2: initialReport.adminTemp == 'Inicial' || initialReport.adminTemp == 'Temporal' ? initialReport.adminDateRenovation == null ? '' : formatter.format(initialReport.adminDateRenovation!) : ''),
         SpaceH5(),
         CustomRow(title1: 'Tipo de residencia', title2: StringConst.INITIAL_JURIDIC_FIGURE, content1: initialReport.adminResidenceType ?? '', content2: initialReport.adminJuridicFigure ?? ''),
-        initialReport.adminJuridicFigure == 'Otros' ?pw.Column(
-          children: [
-            SpaceH5(),
-            CustomItem(title: StringConst.INITIAL_OTHERS, content: initialReport.adminOther ?? '')
-          ]
-        ) : pw.Container(),
+        if (initialReport.adminJuridicFigure == 'Otros') ...[
+          SpaceH5(),
+          ...customItemPageSafe(context, title: StringConst.INITIAL_OTHERS, content: initialReport.adminOther ?? ''),
+        ],
 
         //Section 2
         SectionTitle(title: '2. Situación Sanitaria'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2 ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Tarjeta sanitaria', title2: 'Fecha de caducidad', content1: initialReport.healthCard ?? '', content2: initialReport.expirationDate == null ? '' : formatter.format(initialReport.expirationDate!)),
         SpaceH5(),
-        CustomItem(title: 'Medicación/Tratamiento', content: initialReport.medication ?? ''),
+        ...customItemPageSafe(context, title: 'Medicación/Tratamiento', content: initialReport.medication ?? ''),
 
         //Subsection 2.1
         SubSectionTitle(title: '2.1 Salud Mental'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_1 ?? ''),
-        /*
-        SpaceH5(),
-        CustomRow(title1: 'Sueño y descanso', title2: 'Diagnostico', content1: initialReport.rest ?? '', content2: initialReport.diagnosis ?? ''),
-        SpaceH5(),
-        CustomRow(title1: 'Tratamiento', title2: 'Seguimiento', content1: initialReport.treatment ?? '', content2: initialReport.tracking ?? ''),
-        */
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_1 ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Derivación interna al área psicosocial', title2: StringConst.INITIAL_DERIVATION_DATE, content1: initialReport.psychosocialDerivationLegal ?? '', content2: initialReport.psychosocialDerivationDate == null ? '' : formatter.format(initialReport.psychosocialDerivationDate!)),
         SpaceH5(),
-        CustomItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.psychosocialDerivationMotive ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_MOTIVE, content: initialReport.psychosocialDerivationMotive ?? ''),
 
         //Subsection 2.2
         SubSectionTitle(title: '2.2 Discapacidad'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_2 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_2 ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Estado', content: initialReport.disabilityState ?? ''),
-        initialReport.disabilityState == 'Concedida' ?
-          CustomRow(title1: 'Concedida', title2: 'Fecha', content1: initialReport.granted ?? '', content2: initialReport.revisionDate == null ? '' : formatter.format(initialReport.revisionDate!)) :
-          pw.Container(),
-        initialReport.disabilityState == 'Concedida' ? SpaceH5() : pw.Container(),
+        ...customItemPageSafe(context, title: 'Estado', content: initialReport.disabilityState ?? ''),
+        if (initialReport.disabilityState == 'Concedida') ...[
+          CustomRow(title1: 'Concedida', title2: 'Fecha', content1: initialReport.granted ?? '', content2: initialReport.revisionDate == null ? '' : formatter.format(initialReport.revisionDate!)),
+          SpaceH5(),
+        ],
         SpaceH5(),
-        CustomItem(title: 'Profesional de referencia', content: initialReport.referenceProfessionalDisability ?? ''),
+        ...customItemPageSafe(context, title: 'Profesional de referencia', content: initialReport.referenceProfessionalDisability ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Grado de discapacidad', title2: 'Tipo de discapacidad', content1: initialReport.disabilityGrade ?? '', content2: initialReport.disabilityType ?? ''),
 
         //Subsection 2.3
         SubSectionTitle(title: '2.3 Dependencia'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_3 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_3 ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Estado', title2: 'Profesional de referencia', content1: initialReport.dependenceState ?? '', content2: initialReport.referenceProfessionalDependence ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Grado de dependencia', content: initialReport.dependenceGrade ?? ''),
+        ...customItemPageSafe(context, title: 'Grado de dependencia', content: initialReport.dependenceGrade ?? ''),
 
         //Subsection 2.4
         SubSectionTitle(title: '2.4 Adicciones'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_4 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation2_4 ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Derivación externa', title2: StringConst.INITIAL_MOTIVE, content1: initialReport.externalDerivation ?? '', content2: initialReport.motive ?? ''),
 
         //Section 3
         SectionTitle(title: '3. Situación legal'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation3 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation3 ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Derivación interma', title2: StringConst.INITIAL_DERIVATION_DATE, content1: initialReport.internalDerivationLegal ?? '', content2: initialReport.internalDerivationDate == null ? '' : formatter.format(initialReport.internalDerivationDate!)),
         SpaceH5(),
-        CustomItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.internalDerivationMotive ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_MOTIVE, content: initialReport.internalDerivationMotive ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Derivación externa', title2: StringConst.INITIAL_DERIVATION_DATE, content1: initialReport.externalDerivationLegal ?? '', content2: initialReport.externalDerivationDate == null ? '' : formatter.format(initialReport.externalDerivationDate!)),
         SpaceH5(),
-        CustomItem(title: StringConst.INITIAL_MOTIVE, content: initialReport.externalDerivationMotive ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_MOTIVE, content: initialReport.externalDerivationMotive ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Representación legal', content: initialReport.legalRepresentation ?? ''),
+        ...customItemPageSafe(context, title: 'Representación legal', content: initialReport.legalRepresentation ?? ''),
 
         //Section 4
         SectionTitle(title: '4. Situación alojativa'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation4 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation4 ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Situación alojativa', title2: initialReport.ownershipType == 'Con hogar' ? 'Tipo de tenencia' : 'Situación sinhogarismo', content1: initialReport.ownershipType ?? '', content2: initialReport.ownershipType == 'Con hogar' ? (initialReport.ownershipTypeConcrete ?? '') : (initialReport.homelessnessSituation ?? '')),
         SpaceH5(),
-        initialReport.ownershipTypeConcrete == 'Otros' ? pw.Column(
-          children: [
-            CustomItem(title: StringConst.INITIAL_OTHERS, content: initialReport.ownershipTypeOpen ?? ''),
-            SpaceH5(),
-          ]
-        ) : pw.Container(),
-        initialReport.homelessnessSituation== 'Otros' ? pw.Column(
-            children: [
-              CustomItem(title: StringConst.INITIAL_OTHERS, content: initialReport.homelessnessSituationOpen ?? ''),
-              SpaceH5(),
-            ]
-        ) : pw.Container(),
-        CustomItem(title: 'Datos de contacto del recurso alojativo', content: initialReport.centerContact ?? ''),
-        CustomItem(title: StringConst.INITIAL_LOCATION, content: initialReport.location ?? ''),
-        //_customEnumeration(enumeration: initialReport.hostingObservations ?? []),
+        if (initialReport.ownershipTypeConcrete == 'Otros') ...[
+          ...customItemPageSafe(context, title: StringConst.INITIAL_OTHERS, content: initialReport.ownershipTypeOpen ?? ''),
+          SpaceH5(),
+        ],
+        if (initialReport.homelessnessSituation == 'Otros') ...[
+          ...customItemPageSafe(context, title: StringConst.INITIAL_OTHERS, content: initialReport.homelessnessSituationOpen ?? ''),
+          SpaceH5(),
+        ],
+        ...customItemPageSafe(context, title: 'Datos de contacto del recurso alojativo', content: initialReport.centerContact ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_LOCATION, content: initialReport.location ?? ''),
         SubSectionTitle(title: StringConst.HABITABILITY_CONDITIONS),
         for (var data in initialReport.hostingObservations!)
-          BlockSimpleList(
-            title: data,
-            color: grey,
-          ),
+          BlockSimpleList(title: data, color: grey),
 
         //Section 5
         SectionTitle(title: '5. Redes de apoyo'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation5 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation5 ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Redes de apoyo natural', content: initialReport.informationNetworks ?? ''),
+        ...customItemPageSafe(context, title: 'Redes de apoyo natural', content: initialReport.informationNetworks ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Redes de apoyo institucional', title2: 'Conciliación familiar', content1: initialReport.institutionNetworks ?? '', content2: initialReport.familyConciliation ?? ''),
 
-        //Section7
+        //Section 6 — Idiomas
         SectionTitle(title: '6. Idiomas'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation7 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation7 ?? ''),
         SpaceH5(),
-        pw.Column(
-          children: [
-            for(LanguageReport language in initialReport.languages ?? [])
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  CustomRow(title1: StringConst.INITIAL_LANGUAGE, title2: StringConst.INITIAL_LANGUAGE_LEVEL, content1: language.name, content2: language.level),
-                  SpaceH5(),
-                  CustomItem(title: StringConst.INITIAL_LANGUAGE_ACCREDITATION, content: language.accreditation),
-                  SpaceH5(),
-                ]
-              )
-          ]
-        ),
+        for (final LanguageReport language in initialReport.languages ?? []) ...[
+          CustomRow(title1: StringConst.INITIAL_LANGUAGE, title2: StringConst.INITIAL_LANGUAGE_LEVEL, content1: language.name, content2: language.level),
+          SpaceH5(),
+          ...customItemPageSafe(context, title: StringConst.INITIAL_LANGUAGE_ACCREDITATION, content: language.accreditation),
+          SpaceH5(),
+        ],
 
-        //Section 9
+        //Section 7 — Atención social integral
         SectionTitle(title: '7. Atención social integral'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation9 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation9 ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Centro y TS de referencia', content: initialReport.centerTSReference ?? ''),
+        ...customItemPageSafe(context, title: 'Centro y TS de referencia', content: initialReport.centerTSReference ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Destinataria de subvención y/o programa de apoyo', content: initialReport.subsidyBeneficiary ?? ''),
-        initialReport.subsidyBeneficiary == 'Si' ? pw.Column(
-          children: [
-            CustomItem(title: 'Nombre/tipo', content: initialReport.subsidyName ?? ''),
-            SpaceH5(),
-          ]
-        ) : pw.Container(),
+        ...customItemPageSafe(context, title: 'Destinataria de subvención y/o programa de apoyo', content: initialReport.subsidyBeneficiary ?? ''),
+        if (initialReport.subsidyBeneficiary == 'Si') ...[
+          ...customItemPageSafe(context, title: 'Nombre/tipo', content: initialReport.subsidyName ?? ''),
+          SpaceH5(),
+        ],
         SpaceH5(),
-        CustomItem(title: 'Certificado de Exclusión Social', content: initialReport.socialExclusionCertificate ?? ''),
-        initialReport.socialExclusionCertificate == 'Si' ? pw.Column(
-            children: [
-              CustomRow(title1: StringConst.INITIAL_DATE, title2: 'Observaciones sobre el certificado', content1: initialReport.socialExclusionCertificateDate == null ? '' : formatter.format(initialReport.socialExclusionCertificateDate!), content2: initialReport.socialExclusionCertificateObservations ?? ''),
-              SpaceH5(),
-            ]
-        ) : pw.Container(),
+        ...customItemPageSafe(context, title: 'Certificado de Exclusión Social', content: initialReport.socialExclusionCertificate ?? ''),
+        if (initialReport.socialExclusionCertificate == 'Si') ...[
+          CustomRow(title1: StringConst.INITIAL_DATE, title2: 'Observaciones sobre el certificado', content1: initialReport.socialExclusionCertificateDate == null ? '' : formatter.format(initialReport.socialExclusionCertificateDate!), content2: initialReport.socialExclusionCertificateObservations ?? ''),
+          SpaceH5(),
+        ],
 
-        //Section 12
+        //Section 8 — Situación de Vulnerabilidad
         SectionTitle(title: '8. Situación de Vulnerabilidad'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation12 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation12 ?? ''),
         SpaceH5(),
-        //_customEnumeration(enumeration: initialReport.vulnerabilityOptions!.isNotEmpty ? initialReport.vulnerabilityOptions ?? [] : []),
         for (var data in initialReport.vulnerabilityOptions!)
-          BlockSimpleList(
-            title: data,
-            color: grey,
-          ),
+          BlockSimpleList(title: data, color: grey),
 
-
-        //Section 13
+        //Section 9 — Itinerario formativo laboral
         SectionTitle(title: '9. Itinerario formativo laboral'),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation13 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation13 ?? ''),
         SpaceH5(),
         CustomRow(title1: 'Nivel educativo', title2: 'Situación laboral inicial', content1: initialReport.educationLevel ?? '', content2: initialReport.laborSituation ?? ''),
         SpaceH5(),
-        CustomItem(title: StringConst.HOMOLOGATION, content: initialReport.homologation ?? ''),
+        ...customItemPageSafe(context, title: StringConst.HOMOLOGATION, content: initialReport.homologation ?? ''),
         SpaceH5(),
-        initialReport.laborSituation == 'Ocupada cuenta propia' || initialReport.laborSituation == 'Ocupada cuenta ajena' ?
-            pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.start,
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                CustomRow(title1: StringConst.INITIAL_TEMP, title2: 'Tipo jornada', content1: initialReport.tempLabor ?? '', content2: initialReport.workingDayLabor ?? ''),
-                SpaceH5(),
-                CustomItem(title: StringConst.LABOR_OTHER_CONSIDERATIONS, content: initialReport.laborOtherConsiderations ?? ''),
-              ]
-            )
-         : pw.Container(),
+        if (initialReport.laborSituation == 'Ocupada cuenta propia' || initialReport.laborSituation == 'Ocupada cuenta ajena') ...[
+          CustomRow(title1: StringConst.INITIAL_TEMP, title2: 'Tipo jornada', content1: initialReport.tempLabor ?? '', content2: initialReport.workingDayLabor ?? ''),
+          SpaceH5(),
+          ...customItemPageSafe(context, title: StringConst.LABOR_OTHER_CONSIDERATIONS, content: initialReport.laborOtherConsiderations ?? ''),
+        ],
 
         SubSectionTitle(title: StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
-        CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation13_2 ?? ''),
+        ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation13_2 ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: initialReport.competencies ?? ''),
+        ...customItemPageSafe(context, title: 'Competencias (competencias específicas, competencias prelaborales y competencias digitales)', content: initialReport.competencies ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Contextualización del territorio', content: initialReport.contextualization ?? ''),
+        ...customItemPageSafe(context, title: 'Contextualización del territorio', content: initialReport.contextualization ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Conexión del entorno', content: initialReport.connexion ?? ''),
+        ...customItemPageSafe(context, title: 'Conexión del entorno', content: initialReport.connexion ?? ''),
 
         SubSectionTitle(title: StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
-        CustomItem(title: 'Corto plazo', content: initialReport.shortTerm ?? ''),
+        ...customItemPageSafe(context, title: 'Corto plazo', content: initialReport.shortTerm ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Medio plazo', content: initialReport.mediumTerm ?? ''),
+        ...customItemPageSafe(context, title: 'Medio plazo', content: initialReport.mediumTerm ?? ''),
         SpaceH5(),
-        CustomItem(title: 'Largo plazo', content: initialReport.longTerm ?? ''),
+        ...customItemPageSafe(context, title: 'Largo plazo', content: initialReport.longTerm ?? ''),
 
         SpaceH5(),
         if (isReopening) ...[
           SectionTitle(title: StringConst.CLOSURE_TITLE_10),
-          CustomItem(title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation10 ?? ''),
+          ...customItemPageSafe(context, title: StringConst.INITIAL_OBSERVATIONS, content: initialReport.orientation10 ?? ''),
           SpaceH5(),
           CustomRow(
             title1: StringConst.CLOSURE_CLOSE_MOTIVE,
@@ -337,13 +296,10 @@ Future<Uint8List> generateInitialReportFile(
             content2: initialReport.motiveCloseDetail ?? '',
           ),
           SpaceH5(),
-          CustomItem(
-            title: 'Fecha de cierre anterior',
-            content: initialReport.closeDate == null ? '' : formatter.format(initialReport.closeDate!),
-          ),
+          ...customItemPageSafe(context, title: 'Fecha de cierre anterior', content: initialReport.closeDate == null ? '' : formatter.format(initialReport.closeDate!)),
           SpaceH5(),
           SectionTitle(title: StringConst.REOPENING_TITLE_11),
-          CustomItem(title: 'Motivo de la reapertura', content: initialReport.reopeningMotive ?? ''),
+          ...customItemPageSafe(context, title: 'Motivo de la reapertura', content: initialReport.reopeningMotive ?? ''),
           SpaceH5(),
         ],
         BottomSignatures(),
