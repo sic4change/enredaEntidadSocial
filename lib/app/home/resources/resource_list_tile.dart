@@ -6,6 +6,9 @@ import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 
 class ResourceListTile extends StatefulWidget {
   const ResourceListTile({Key? key, required this.resource, this.onTap})
@@ -125,15 +128,20 @@ class _ResourceListTileState extends State<ResourceListTile> {
                                             child: Padding(
                                               padding: const EdgeInsets.symmetric(
                                                   horizontal: 8.0),
-                                              child: Text(
-                                                getLocationText(widget.resource),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style:
-                                                    textTheme.bodySmall?.copyWith(
-                                                  color: AppColors.greyDark,
-                                                  height: 1.5,
-                                                ),
+                                              child: FutureBuilder<String>(
+                                                future: _getLocationTextAsync(context, widget.resource),
+                                                builder: (context, snapshot) {
+                                                  return Text(
+                                                    snapshot.data ?? getLocationText(widget.resource),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style:
+                                                        textTheme.bodySmall?.copyWith(
+                                                      color: AppColors.greyDark,
+                                                      height: 1.5,
+                                                    ),
+                                                  );
+                                                }
                                               ),
                                             ),
                                           ),
@@ -241,6 +249,53 @@ class _ResourceListTileState extends State<ResourceListTile> {
           ),
         ),
     );
+  }
+
+  Future<String> _getLocationTextAsync(BuildContext context, Resource resource) async {
+    String modality = resource.modality ?? '';
+    if (modality != StringConst.FACE_TO_FACE && modality != StringConst.BLENDED) {
+      return getLocationText(resource);
+    }
+
+    final db = Provider.of<Database>(context, listen: false);
+
+    String? resolvedCityName = resource.cityName;
+    if (resolvedCityName == null || resolvedCityName.isEmpty) {
+      if (resource.city != null && resource.city!.isNotEmpty) {
+        final city = await LocationCache.instance.getCity(db, resource.city!);
+        resolvedCityName = city?.name;
+      }
+    }
+
+    String? resolvedProvinceName = resource.provinceName;
+    if (resolvedProvinceName == null || resolvedProvinceName.isEmpty) {
+      if (resource.province != null && resource.province!.isNotEmpty) {
+        final province = await LocationCache.instance.getProvince(db, resource.province!);
+        resolvedProvinceName = province?.name;
+      }
+    }
+
+    String? resolvedCountryName = resource.countryName;
+    if (resolvedCountryName == null || resolvedCountryName.isEmpty) {
+      if (resource.country != null && resource.country!.isNotEmpty) {
+        final country = LocationCache.instance.countryById(resource.country!);
+        resolvedCountryName = country?.name;
+      }
+    }
+
+    if (resolvedCityName != null && resolvedCityName.isNotEmpty) {
+      return '$resolvedCityName, ${resolvedProvinceName ?? ''}, ${resolvedCountryName ?? ''}'.replaceAll(RegExp(r',\s*,\s*'), ', ').replaceAll(RegExp(r',\s*$'), '');
+    }
+
+    if (resolvedProvinceName != null && resolvedProvinceName.isNotEmpty) {
+      return '$resolvedProvinceName, ${resolvedCountryName ?? ''}'.replaceAll(RegExp(r',\s*$'), '');
+    }
+
+    if (resolvedCountryName != null && resolvedCountryName.isNotEmpty) {
+      return resolvedCountryName;
+    }
+
+    return resource.modality ?? '';
   }
 
   String getLocationText(Resource resource) {

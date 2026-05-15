@@ -298,7 +298,18 @@ class _EditParticipantInfoPageState extends State<EditParticipantInfoPage> {
                 ),
               ),
               TextButton.icon(
-                onPressed: widget.onCancel,
+                onPressed: () async {
+                  final leave = await showAlertDialog(
+                    context,
+                    title: '¿Estás seguro que quieres dejar de editar?',
+                    content: 'Si sales, los cambios no guardados se perderán.',
+                    defaultActionText: 'Salir',
+                    cancelActionText: 'Cancelar',
+                  );
+                  if (leave == true) {
+                    widget.onCancel();
+                  }
+                },
                 icon: Icon(Icons.close, size: 18, color: AppColors.greyTxtAlt),
                 label: Text(
                   'Cancelar',

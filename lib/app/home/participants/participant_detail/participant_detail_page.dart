@@ -7,6 +7,7 @@ import 'package:enreda_empresas/app/home/participants/participant_detail/partici
 import 'package:enreda_empresas/app/common_widgets/add_yellow_button.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/closureReport.dart';
@@ -29,6 +30,8 @@ class ParticipantDetailPage extends StatefulWidget {
     super.key,
   });
 
+  static bool isEditing = false;
+
   @override
   State<ParticipantDetailPage> createState() => _ParticipantDetailPageState();
 }
@@ -43,7 +46,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   ];
   Widget? _currentPage;
   String? _value;
-  bool _isEditing = false;
   late UserEnreda participantUser, socialEntityUser;
 
   String? techNameComplete;
@@ -220,9 +222,20 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             selected: _value == _menuOptions[index],
             padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             showCheckmark: false,
-            onSelected: (bool selected) {
+            onSelected: (bool selected) async {
+              if (ParticipantDetailPage.isEditing && _value != _menuOptions[index]) {
+                final leave = await showAlertDialog(
+                  context,
+                  title: '¿Estás seguro que quieres dejar de editar?',
+                  content: 'Si sales, los cambios no guardados se perderán.',
+                  defaultActionText: 'Salir',
+                  cancelActionText: 'Cancelar',
+                );
+                if (leave != true) return;
+              }
+
               setState(() {
-                _isEditing = false;
+                ParticipantDetailPage.isEditing = false;
                 _value = _menuOptions[index];
                 switch (index) {
                   case 0:
@@ -315,8 +328,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          if (!_isEditing) _buildEditInfoButton(context, user),
-                          if (!_isEditing) SpaceH8(),
+                          if (!ParticipantDetailPage.isEditing) _buildEditInfoButton(context, user),
+                          if (!ParticipantDetailPage.isEditing) SpaceH8(),
                           AddYellowButton(
                             text: StringConst.INVITE_RESOURCE,
                             onPressed: () => showDialog(
@@ -647,8 +660,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
         ),
         _buildMyLocation(context, user),
         SpaceH40(),
-        if (!_isEditing) Center(child: _buildEditInfoButton(context, user)),
-        if (!_isEditing) SpaceH12(),
+        if (!ParticipantDetailPage.isEditing) Center(child: _buildEditInfoButton(context, user)),
+        if (!ParticipantDetailPage.isEditing) SpaceH12(),
         Center(
           child: AddYellowButton(
             text: StringConst.INVITE_RESOURCE,
@@ -669,19 +682,19 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     return InkWell(
       onTap: () {
         setState(() {
-          _isEditing = true;
+          ParticipantDetailPage.isEditing = true;
           _currentPage = EditParticipantInfoPage(
             participant: user,
             onSaved: () {
               setState(() {
-                _isEditing = false;
+                ParticipantDetailPage.isEditing = false;
                 _currentPage =
                     ParticipantControlPanelPage(participantUser: user);
               });
             },
             onCancel: () {
               setState(() {
-                _isEditing = false;
+                ParticipantDetailPage.isEditing = false;
                 _currentPage =
                     ParticipantControlPanelPage(participantUser: user);
               });
@@ -760,9 +773,22 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   }
 
   Widget _buildMyLocation(BuildContext context, UserEnreda? user) {
-    City? myCity = LocationCache.instance.cityById(user?.address?.city);
-    String city = myCity?.name ?? '';
+    if (user?.address?.city == null || user!.address!.city!.isEmpty) {
+      return _buildLocationRow(context, '');
+    }
 
+    final database = Provider.of<Database>(context, listen: false);
+
+    return FutureBuilder<City?>(
+      future: LocationCache.instance.getCity(database, user.address!.city!),
+      builder: (context, snapshot) {
+        String city = snapshot.data?.name ?? '';
+        return _buildLocationRow(context, city);
+      },
+    );
+  }
+
+  Widget _buildLocationRow(BuildContext context, String cityName) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -775,7 +801,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               : 14,
         ),
         const SpaceW4(),
-        CustomTextSmall(text: city),
+        CustomTextSmall(text: cityName),
       ],
     );
   }

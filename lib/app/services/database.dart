@@ -265,6 +265,8 @@ abstract class Database {
      Future<List<Ability>> getAbilities();
      Future<SocialEntity?> getSocialEntity(String id);
      Future<UserEnreda?> getUser(String id);
+     Future<City?> getCity(String id);
+     Future<Province?> getProvince(String id);
      Future<InitialReport?> getInitialReport(String userId);
      Future<ClosureReport?> getClosureReport(String id);
 }
@@ -2108,6 +2110,18 @@ class FirestoreDatabase implements Database {
   Future<UserEnreda?> getUser(String id) => _service.getDocument(
     path: APIPath.user(id),
     builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+  );
+
+  @override
+  Future<City?> getCity(String id) => _service.getDocument(
+    path: APIPath.city(id),
+    builder: (data, documentId) => City.fromMap(data, documentId),
+  );
+
+  @override
+  Future<Province?> getProvince(String id) => _service.getDocument(
+    path: APIPath.province(id),
+    builder: (data, documentId) => Province.fromMap(data, documentId),
   );
 
   @override
