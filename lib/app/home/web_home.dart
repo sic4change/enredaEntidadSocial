@@ -71,9 +71,132 @@ class WebHome extends StatefulWidget {
 }
 
 class _WebHomeState extends State<WebHome> {
+  bool _warmUpStarted = false;
+
+  void _ensureWarmUp(Database database) {
+    if (_warmUpStarted) return;
+    _warmUpStarted = true;
+    LocationCache.instance.warmUpAll(database);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = Provider.of<AuthBase>(context, listen: false);
+    final database = Provider.of<Database>(context, listen: false);
+    return StreamBuilder<User?>(
+              stream: Provider.of<AuthBase>(context).authStateChanges(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const AccessPage();
+                if (snapshot.hasData &&
+                    snapshot.connectionState == ConnectionState.active) {
+                  return StreamBuilder<UserEnreda>(
+                      stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return _buildErrorPage(context, snapshot.error.toString());
+                        }
+                        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                        if (snapshot.hasData){
+                          var user = snapshot.data!;
+                          var userName = '${user.firstName ?? ""} ${user.lastName ?? ""}';
+                          var profilePic = user.photo ?? "";
+                          if (user.role != 'Entidad Social') {
+                            _unemployedSignOut(context);
+                            return Container();
+                          }
+                          if (user.socialEntityId == null || user.socialEntityId!.isEmpty) {
+                            return _buildErrorPage(context, "No se ha encontrado una entidad asociada a tu usuario.");
+                          }
+                          return StreamBuilder<SocialEntity>(
+                              stream: database.socialEntityStreamById(user.socialEntityId!),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return _buildErrorPage(context, snapshot.error.toString());
+                                }
+                                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                                if (snapshot.hasData) {
+                                  var socialEntity = snapshot.data!;
+                                  final socialEntityId = socialEntity.socialEntityId;
+                                  if (socialEntityId != null && socialEntityId.isNotEmpty) {
+                                    LocationCache.instance.socialEntitiesCache[socialEntityId] = socialEntity;
+                                  }
+                                  _ensureWarmUp(database);
+                                  globals.currentUserSocialEntity = socialEntity;
+                                  return _WebHomeContent(
+                                    socialEntity: socialEntity,
+                                    user: user,
+                                    profilePic: profilePic,
+                                    userName: userName,
+                                  );
+                                }
+                                return const Center(child: CircularProgressIndicator());
+                              });
+                        }
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                  );
+                } return const Center(child: CircularProgressIndicator());
+        });
+  }
+
+  Widget _buildErrorPage(BuildContext context, String error) {
+    final auth = Provider.of<AuthBase>(context, listen: false);
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 60),
+              const SpaceH20(),
+              const Text(
+                'Ha ocurrido un error al cargar tus datos',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SpaceH12(),
+              Text(
+                error,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SpaceH20(),
+              EnredaButton(
+                buttonTitle: 'Cerrar sesión',
+                onPressed: () async {
+                  await auth.signOut();
+                  GoRouter.of(context).go(StringConst.PATH_HOME);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WebHomeContent extends StatefulWidget {
+  final SocialEntity socialEntity;
+  final UserEnreda user;
+  final String profilePic;
+  final String userName;
+
+  const _WebHomeContent({
+    Key? key,
+    required this.socialEntity,
+    required this.user,
+    required this.profilePic,
+    required this.userName,
+  }) : super(key: key);
+
+  @override
+  State<_WebHomeContent> createState() => _WebHomeContentState();
+}
+
+class _WebHomeContentState extends State<_WebHomeContent> {
   var bodyWidget = [];
   final _key = GlobalKey<ScaffoldState>();
-  bool _warmUpStarted = false;
   int _lastConfirmedIndex = 0;
   int _lastConfirmedMajorIndex = 2;
   bool _isHandlingSidebarChange = false;
@@ -168,68 +291,8 @@ class _WebHomeState extends State<WebHome> {
     super.dispose();
   }
 
-  void _ensureWarmUp(Database database) {
-    if (_warmUpStarted) return;
-    _warmUpStarted = true;
-    LocationCache.instance.warmUpAll(database);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthBase>(context, listen: false);
-    final database = Provider.of<Database>(context, listen: false);
-    return StreamBuilder<User?>(
-              stream: Provider.of<AuthBase>(context).authStateChanges(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const AccessPage();
-                if (snapshot.hasData &&
-                    snapshot.connectionState == ConnectionState.active) {
-                  return StreamBuilder<UserEnreda>(
-                      stream: database.userEnredaStreamByUserId(auth.currentUser!.uid),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return _buildErrorPage(context, snapshot.error.toString());
-                        }
-                        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-                        if (snapshot.hasData){
-                          var user = snapshot.data!;
-                          var userName = '${user.firstName ?? ""} ${user.lastName ?? ""}';
-                          var profilePic = user.photo ?? "";
-                          if (user.role != 'Entidad Social') {
-                            _unemployedSignOut(context);
-                            return Container();
-                          }
-                          if (user.socialEntityId == null || user.socialEntityId!.isEmpty) {
-                            return _buildErrorPage(context, "No se ha encontrado una entidad asociada a tu usuario.");
-                          }
-                          return StreamBuilder<SocialEntity>(
-                              stream: database.socialEntityStreamById(user.socialEntityId!),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasError) {
-                                  return _buildErrorPage(context, snapshot.error.toString());
-                                }
-                                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-                                if (snapshot.hasData) {
-                                  var socialEntity = snapshot.data!;
-                                  final socialEntityId = socialEntity.socialEntityId;
-                                  if (socialEntityId != null && socialEntityId.isNotEmpty) {
-                                    LocationCache.instance.socialEntitiesCache[socialEntityId] = socialEntity;
-                                  }
-                                  _ensureWarmUp(database);
-                                  globals.currentUserSocialEntity = socialEntity;
-                                  return _buildContent(context, socialEntity, user, profilePic, userName);
-                                }
-                                return const Center(child: CircularProgressIndicator());
-                              });
-                        }
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                  );
-                } return const Center(child: CircularProgressIndicator());
-        });
-  }
-
-  Widget _buildContent(BuildContext context, SocialEntity socialEntity, UserEnreda user, String profilePic, String userName){
     final auth = Provider.of<AuthBase>(context, listen: false);
     return ValueListenableBuilder<int>(
         valueListenable: WebHome.selectedIndex,
@@ -255,7 +318,7 @@ class _WebHomeState extends State<WebHome> {
                       ImagePath.LOGO,
                       height: Responsive.isMobile(context) ? 35 : 50,
                     ),
-                    !isSmallScreen ? _buildMyCompanyName(context, socialEntity) : Container(),
+                    !isSmallScreen ? _buildMyCompanyName(context, widget.socialEntity) : Container(),
                   ],
                 ),
               ),
@@ -274,7 +337,7 @@ class _WebHomeState extends State<WebHome> {
                 const SizedBox(width: 50,)
               ],
             ),
-            drawer: SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
+            drawer: SideBarWidget(controller: WebHome.controller, profilePic: widget.profilePic, userName: widget.userName, keyWebHome: _key,),
             body: Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 1600),
@@ -282,7 +345,7 @@ class _WebHomeState extends State<WebHome> {
                   padding: Responsive.isMobile(context) ? const EdgeInsets.all(0.0) : const EdgeInsets.only(left: 20.0),
                   child: Row(
                     children: [
-                      if(!isSmallScreen) SideBarWidget(controller: WebHome.controller, profilePic: profilePic, userName: userName, keyWebHome: _key,),
+                      if(!isSmallScreen) SideBarWidget(controller: WebHome.controller, profilePic: widget.profilePic, userName: widget.userName, keyWebHome: _key,),
                       if (_lastConfirmedMajorIndex == 0) Expanded(child: Center(child: bodyWidget[0]))
                       else if (_lastConfirmedMajorIndex == 1) Expanded(child: Center(child: bodyWidget[1]))
                       else Expanded(child: Center(child: AnimatedBuilder(
@@ -290,17 +353,17 @@ class _WebHomeState extends State<WebHome> {
                         builder: (context, child){
                           switch(_lastConfirmedIndex){
                             case 0: _key.currentState?.closeDrawer();
-                            return ControlPanelPage(socialEntity: socialEntity, user: user,);
+                            return ControlPanelPage(socialEntity: widget.socialEntity, user: widget.user,);
                             case 1: _key.currentState?.closeDrawer();
                             return const ParticipantsListPage();
                             case 2: _key.currentState?.closeDrawer();
-                            return MyResourcesListPage(socialEntity: socialEntity);
+                            return MyResourcesListPage(socialEntity: widget.socialEntity);
                             case 3: _key.currentState?.closeDrawer();
                             return ToolBoxPage();
                             case 4: _key.currentState?.closeDrawer();
-                            return EntityDirectoryPage(socialEntity: socialEntity);
+                            return EntityDirectoryPage(socialEntity: widget.socialEntity);
                             default:
-                              return MyResourcesListPage(socialEntity: socialEntity);
+                              return MyResourcesListPage(socialEntity: widget.socialEntity);
                           }
                         },
                       ),))
@@ -312,7 +375,6 @@ class _WebHomeState extends State<WebHome> {
 
           );
         });
-
   }
 
   Widget _buildMyCompanyName(BuildContext context, SocialEntity socialEntity) {
@@ -345,42 +407,6 @@ class _WebHomeState extends State<WebHome> {
       await auth.signOut();
       GoRouter.of(context).go(StringConst.PATH_HOME);
     }
-  }
-
-  Widget _buildErrorPage(BuildContext context, String error) {
-    final auth = Provider.of<AuthBase>(context, listen: false);
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 60),
-              const SpaceH20(),
-              const Text(
-                'Ha ocurrido un error al cargar tus datos',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SpaceH12(),
-              Text(
-                error,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey),
-              ),
-              const SpaceH20(),
-              EnredaButton(
-                buttonTitle: 'Cerrar sesión',
-                onPressed: () async {
-                  await auth.signOut();
-                  GoRouter.of(context).go(StringConst.PATH_HOME);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

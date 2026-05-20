@@ -3388,6 +3388,13 @@ class _ReopeningReportFormState extends State<ReopeningReportForm> {
                           finished: false,
                           techPersonName: _techPersonController.text,
                         ));
+
+                        widget.user.startDateItinerary = _dateValues['completedDate'];
+                        await database.updateUserEnredaFields(
+                          widget.user.userId!,
+                          {'startDateItinerary': _dateValues['completedDate']},
+                        );
+
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -3535,7 +3542,8 @@ class _ReopeningReportFormState extends State<ReopeningReportForm> {
                               title: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('¿Está seguro de que desea finalizar el Informe de Cierre?',
+                                  Text('¿Está seguro de que desea finalizar el Informe de Reapertura?',
+                                      textAlign: TextAlign.center,
                                       style: textTheme.titleLarge?.copyWith(
                                         color: AppColors.primary900,
                                         fontSize: fontSize,
@@ -3731,6 +3739,13 @@ class _ReopeningReportFormState extends State<ReopeningReportForm> {
                                             completedDate: _dateValues['completedDate'],
                                             techPersonName: _techPersonController.text,
                                           ));
+
+                                      widget.user.startDateItinerary = _dateValues['completedDate'];
+                                      await database.updateUserEnredaFields(
+                                        widget.user.userId!,
+                                        {'startDateItinerary': _dateValues['completedDate']},
+                                      );
+
                                       Navigator.of(context).pop();
                                       ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                                       //setStateMenuPage();

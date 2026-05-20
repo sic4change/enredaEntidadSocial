@@ -44,7 +44,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     StringConst.PERSONAL_DOCUMENTATION,
     StringConst.QUESTIONNAIRES
   ];
-  Widget? _currentPage;
   String? _value;
   late UserEnreda participantUser, socialEntityUser;
 
@@ -93,12 +92,42 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     _dniDocumentationStream = _db!.documentationParticipantByUserStream(userId);
   }
 
+  Widget _buildCurrentPage(BuildContext context, UserEnreda currentUser) {
+    if (ParticipantDetailPage.isEditing) {
+      return EditParticipantInfoPage(
+        participant: currentUser,
+        onSaved: () {
+          setState(() {
+            ParticipantDetailPage.isEditing = false;
+          });
+        },
+        onCancel: () {
+          setState(() {
+            ParticipantDetailPage.isEditing = false;
+          });
+        },
+      );
+    }
+    
+    int index = _menuOptions.indexOf(_value!);
+    switch (index) {
+      case 0:
+        return ParticipantControlPanelPage(participantUser: currentUser);
+      case 1:
+        return ParticipantSocialReportPage(participantUser: currentUser, context: context);
+      case 2:
+        return ParticipantIPILPage(participantUser: currentUser);
+      case 3:
+        return ParticipantDocumentationPage(participantUser: currentUser);
+      case 4:
+        return Container();
+      default:
+        return Container();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_currentPage == null) {
-      _currentPage =
-          ParticipantControlPanelPage(participantUser: participantUser);
-    }
     return StreamBuilder<UserEnreda>(
         stream: _participantStream,
         builder: (context, participantSnapshot) {
@@ -168,7 +197,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
-              child: _currentPage!,
+              child: _buildCurrentPage(context, user),
             ),
           ],
         ),
@@ -187,7 +216,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
           SpaceH20(),
           _buildMenuSelectorChips(context, user),
           SpaceH20(),
-          _currentPage!,
+          _buildCurrentPage(context, user),
         ],
       ),
     );
@@ -237,29 +266,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
               setState(() {
                 ParticipantDetailPage.isEditing = false;
                 _value = _menuOptions[index];
-                switch (index) {
-                  case 0:
-                    _currentPage =
-                        ParticipantControlPanelPage(participantUser: user);
-                    break;
-                  case 1:
-                    _currentPage = ParticipantSocialReportPage(
-                        participantUser: user, context: context);
-                    break;
-                  case 2:
-                    _currentPage = ParticipantIPILPage(participantUser: user);
-                    break;
-                  case 3:
-                    _currentPage =
-                        ParticipantDocumentationPage(participantUser: user);
-                    break;
-                  case 4:
-                    _currentPage = Container();
-                    break;
-                  default:
-                    _currentPage = Container();
-                    break;
-                }
               });
             },
           );
@@ -683,23 +689,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
       onTap: () {
         setState(() {
           ParticipantDetailPage.isEditing = true;
-          _currentPage = EditParticipantInfoPage(
-            participant: user,
-            onSaved: () {
-              setState(() {
-                ParticipantDetailPage.isEditing = false;
-                _currentPage =
-                    ParticipantControlPanelPage(participantUser: user);
-              });
-            },
-            onCancel: () {
-              setState(() {
-                ParticipantDetailPage.isEditing = false;
-                _currentPage =
-                    ParticipantControlPanelPage(participantUser: user);
-              });
-            },
-          );
         });
       },
       child: Container(
