@@ -674,7 +674,214 @@ class StringConst {
   static const String DRAWER_MY_RESOURCES = 'Recursos';
   static const String DRAWER_TOOLS = 'Caja de herramientas';
   static const String DRAWER_ENTITIES = 'Agenda de contactos ';
+  static const String DRAWER_SESIONES = 'Sesiones';
+  static const String DRAWER_CALENDARIO = 'Mi calendario';
   static const String SEE_MORE = 'Ver más';
+
+  // Sesiones (admin dashboard) ─ list view + detail
+  static const String SESIONES = 'Sesiones';
+  static const String SESIONES_PROXIMAS = 'Próximas sesiones';
+  static const String SESIONES_PASADAS = 'Sesiones pasadas';
+  static const String SESION_INDIVIDUAL = 'Sesión individual';
+  static const String SESION_GRUPAL = 'Sesión grupal';
+  static const String CREAR_NUEVA_SESION = 'Crear nueva sesión';
+  static const String SESION_PARTICIPANTE_SINGULAR = 'participante';
+  static const String SESION_PARTICIPANTES_PLURAL = 'participantes';
+  static const String SESION_ONLINE_LABEL = 'ONLINE';
+  static const String SESION_PRESENCIAL_LABEL = 'PRESENCIAL';
+  static const String SESION_BLENDED_LABEL = 'SEMIPRESENCIAL';
+  static const String SESION_EMPTY_PROXIMAS = 'No hay sesiones próximas programadas.';
+  static const String SESION_EMPTY_PASADAS = 'Aún no se ha realizado ninguna sesión.';
+  static const String SESION_DESARROLLO = 'Desarrollo y evaluación:';
+  static const String SESION_OBSERVACIONES = 'Observaciones y/o incidencias:';
+  static const String SESION_PARTICIPANTES_HEADER = 'PARTICIPANTES';
+  static const String SESION_PARTICIPANTES_HELPER =
+      'Confirma si todos los participantes convocados asistieron a la sesión.';
+  static const String SESION_EXPORTAR = 'Exportar';
+
+  // Crear nueva sesión — multi-step form
+  static const String SESION_CREATE_TITLE =
+      'Crear nueva sesión/evento/taller/charla...';
+  static const String SESION_TAB_INFO = 'Información general';
+  static const String SESION_TAB_IPIL = 'IPIL';
+  static const String SESION_TAB_REVISION = 'Revisión';
+  static const String SESION_FIELD_TITLE_LABEL = 'Título de la sesión';
+  static const String SESION_FIELD_TITLE_HINT =
+      'Escribe el título de esta sesión.';
+  static const String SESION_FIELD_TIPO_LABEL = 'Tipo de sesión';
+  static const String SESION_FIELD_FECHA_LABEL = 'Fecha';
+  static const String SESION_FIELD_HORA_LABEL = 'Hora';
+  static const String SESION_FIELD_TODO_EL_DIA = 'Todo el día';
+  static const String SESION_TODO_EL_DIA_BADGE = 'Todo el día';
+  static const String SESION_HORA_PICKER_HINT = 'Seleccionar hora';
+  static const String SESION_FIELD_LUGAR_LABEL = 'Lugar de la actividad';
+  static const String SESION_FIELD_DURACION_LABEL = 'Duración';
+  static const String SESION_FIELD_CREAR_IPIL_LABEL = 'Creación de IPIL';
+  static const String SESION_FIELD_CONVOCAR_LABEL = 'Convocar participantes';
+  static const String SESION_FIELD_CONVOCAR_HINT =
+      'Introduce nombre y apellidos de los participantes que quieres convocar a esta sesión.';
+  static const String SESION_FIELD_SESION_SUBLABEL = 'Sesión';
+  static const String SESION_FIELD_SESION_HINT = 'Individual o grupal';
+  static const String SESION_FIELD_COMPETENCIAS_LABEL = 'Competencias';
+  static const String SESION_FIELD_COMPETENCIA_CAT_LABEL =
+      'Categoría de Competencias';
+  static const String SESION_FIELD_COMPETENCIA_SUBCAT_LABEL =
+      'Sub categoría de Competencias';
+  static const String SESION_FIELD_COMPETENCIA_CAT_HINT =
+      'Selecciona una categoría';
+  static const String SESION_FIELD_COMPETENCIA_SUBCAT_HINT_PICK =
+      'Selecciona una subcategoría';
+  static const String SESION_FIELD_COMPETENCIA_SUBCAT_HINT_DISABLED =
+      'Selecciona una categoría primero';
+  static const String SESION_FIELD_COMPETENCIA_SUBCAT_HINT_EMPTY =
+      'Sin subcategorías para esta categoría';
+  static const String SESION_FIELD_DESCRIPTION_LABEL =
+      'Descripción de la sesión';
+  static const String SESION_FIELD_DESCRIPTION_HINT =
+      'Escribe una descripción para esta sesión.';
+  static const String SESION_BUTTON_SIGUIENTE = 'Siguiente';
+  static const String SESION_BUTTON_GUARDAR = 'Guardar';
+  static const String SESION_BUTTON_CANCELAR = 'Cancelar';
+  static const String SESION_BUTTON_VOLVER = 'Volver';
+  static const String SESION_VALIDATION_TITLE_REQUIRED =
+      'El título es obligatorio.';
+  static const String SESION_VALIDATION_FECHA_REQUIRED =
+      'La fecha es obligatoria.';
+  static const String SESION_IPIL_STEP_TITLE =
+      'Detalle IPIL (próximamente)';
+  static const String SESION_IPIL_STEP_HINT =
+      'El detalle IPIL se rellenará en la siguiente iteración. Por ahora se marcará el campo y se podrá completar más adelante.';
+  static const String SESION_CREATE_SUCCESS = 'Sesión creada con éxito.';
+  static const String SESION_CREATE_ERROR =
+      'No se ha podido crear la sesión. Vuelve a intentarlo.';
+  static const String SESION_REVISION_PARTICIPANTES = 'Participantes:';
+  static const String SESION_REVISION_NINGUNO = '(Sin participantes)';
+  static const String SESION_IPIL_EMPTY =
+      'No se han registrado selecciones en el IPIL de esta sesión.';
+
+  // Participant picker (Figma overlay 1:493)
+  static const String SESION_PICKER_SEARCH_HINT = 'Busca por nombre...';
+  static const String SESION_PICKER_EMPTY =
+      'Aún no se han cargado participantes para esta entidad.';
+  static const String SESION_PICKER_NO_RESULTS =
+      'No se han encontrado participantes con ese nombre.';
+  static const String SESION_PICKER_UNKNOWN_USER = '(Sin nombre)';
+  static const String SESION_PICKER_LOADING = 'Cargando...';
+
+  // Sesion detail page (frame 1:94)
+  static const String SESION_DETAIL_DESARROLLO = 'Desarrollo y evaluación:';
+  static const String SESION_DETAIL_OBSERVACIONES =
+      'Observaciones y/o incidencias:';
+  static const String SESION_DETAIL_PARTICIPANTES_HEADER = 'PARTICIPANTES';
+  static const String SESION_DETAIL_PARTICIPANTES_HELPER =
+      'Confirma si todos los participantes convocados asistieron a la sesión.';
+  static const String SESION_DETAIL_NO_DESARROLLO =
+      'Sin texto de desarrollo y evaluación.';
+  static const String SESION_DETAIL_NO_OBSERVACIONES =
+      'Sin observaciones ni incidencias.';
+  static const String SESION_DETAIL_NO_PARTICIPANTES =
+      'Esta sesión no tiene participantes convocados.';
+  static const String SESION_BUTTON_EDITAR = 'Editar';
+  static const String SESION_BUTTON_EXPORTAR = 'Exportar';
+  static const String SESION_EXPORT_PRONTO =
+      'La exportación estará disponible próximamente.';
+
+  // Exportar view (frame derived from Figma 1:1834+ — export modal)
+  static const String SESION_EXPORTAR_TITLE = 'Exportar sesión';
+  static const String SESION_EXPORT_LISTADO_PARTICIPANTES =
+      'Listado de participantes';
+  static const String SESION_EXPORT_SELECCIONAR_SUBVENCION =
+      'Seleccionar subvención';
+  static const String SESION_EXPORT_SELECCIONA_OPCION =
+      'Selecciona una opción';
+  static const String SESION_EXPORT_PLACEHOLDER_SELECCIONAR = 'Seleccionar';
+  static const String SESION_EXPORT_NO_SUBVENCIONES =
+      'Sin subvenciones disponibles';
+  static const String SESION_EXPORT_ERROR =
+      'No se ha podido exportar la sesión. Vuelve a intentarlo.';
+  static const String SESION_EXPORT_GENERADO_POR = 'Generado por Enreda';
+  static const String SESION_EXPORT_CONVOCADOS = 'Convocados';
+  static const String SESION_EXPORT_ASISTENCIA = 'Asistencia';
+  static const String SESION_EXPORT_SUBVENCION = 'Subvención';
+  static const String SESION_EXPORT_SIN_ASIGNAR = '—';
+  static const String SESION_EXPORT_ATTENDED = 'Asistió';
+  static const String SESION_EXPORT_ABSENT = 'No asistió';
+  static const String SESION_EXPORT_UNCONFIRMED = 'Sin confirmar';
+  static const String SESION_EXPORT_NO_DESARROLLO =
+      'Sin texto de desarrollo y evaluación.';
+  static const String SESION_EXPORT_NO_OBSERVACIONES =
+      'Sin observaciones ni incidencias.';
+
+  // Calendar legend
+  static const String CALENDARIO_LEGEND_TODAY = 'Hoy';
+  static const String CALENDARIO_LEGEND_UPCOMING = 'Próxima';
+  static const String CALENDARIO_LEGEND_PAST = 'Pasada';
+  static const String CALENDARIO_LEGEND_SELECTED = 'Seleccionado';
+  static const String CALENDARIO_BUTTON_LABEL = 'Mi calendario';
+
+  // Row inline actions (Editar / Borrar / Campanita)
+  static const String SESION_ACTION_EDITAR_TOOLTIP = 'Editar sesión';
+  static const String SESION_ACTION_BORRAR_TOOLTIP = 'Borrar sesión';
+  static const String SESION_ACTION_RECORDATORIO_TOOLTIP =
+      'Activar/desactivar recordatorio';
+  static const String SESION_DELETE_CONFIRM_TITLE = '¿Borrar esta sesión?';
+  static const String SESION_DELETE_CONFIRM_BODY =
+      'Esta acción no se puede deshacer.';
+  static const String SESION_DELETE_CONFIRM_DEFAULT = 'Borrar';
+  static const String SESION_DELETE_CONFIRM_CANCEL = 'Cancelar';
+  static const String SESION_DELETE_SUCCESS = 'Sesión borrada con éxito.';
+  static const String SESION_DELETE_ERROR =
+      'No se ha podido borrar la sesión. Vuelve a intentarlo.';
+  static const String SESION_REMINDER_ON =
+      'Recordatorio activado.';
+  static const String SESION_REMINDER_OFF =
+      'Recordatorio desactivado.';
+  static const String SESION_REMINDER_ERROR =
+      'No se ha podido actualizar el recordatorio.';
+
+  // Inline row expansion (Figma 1:94 expanded session pattern)
+  static const String SESION_ROW_EXPAND_TOOLTIP = 'Ver detalles';
+  static const String SESION_ROW_COLLAPSE_TOOLTIP = 'Ocultar detalles';
+  static const String SESION_ROW_EXPANDED_NO_DESARROLLO =
+      'Sin texto de desarrollo y evaluación.';
+  static const String SESION_ROW_EXPANDED_NO_OBSERVACIONES =
+      'Sin observaciones ni incidencias.';
+  static const String SESION_ATTENDANCE_ERROR =
+      'No se pudo actualizar la asistencia. Inténtalo de nuevo.';
+  static const String SESION_DETAIL_NOT_FOUND =
+      'No se ha encontrado esta sesión.';
+  static const String SESION_UPDATE_SUCCESS = 'Sesión actualizada con éxito.';
+  static const String SESION_UPDATE_ERROR =
+      'No se ha podido actualizar la sesión. Vuelve a intentarlo.';
+
+  // Calendar view
+  static const String CALENDARIO_TITLE = 'Mi calendario de sesiones';
+  static const String CALENDARIO_EMPTY_DAY = 'No hay sesiones este día.';
+  static const String CALENDARIO_EMPTY = 'Aún no tienes sesiones programadas.';
+  static const String CALENDARIO_PANEL_MONTH = 'Sesiones del mes';
+  static const String CALENDARIO_PANEL_EMPTY_MONTH =
+      'No tienes sesiones programadas este mes.';
+  static const String CALENDARIO_HOVER_AND_MORE = 'y %COUNT% más';
+  static const String CALENDARIO_HOVER_SESION_SINGULAR = 'sesión';
+  static const String CALENDARIO_HOVER_SESION_PLURAL = 'sesiones';
+  static const List<String> CALENDARIO_WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+  // Unsaved-changes cancel confirmation
+  static const String SESION_CONFIRM_LEAVE_TITLE =
+      '¿Salir sin guardar?';
+  static const String SESION_CONFIRM_LEAVE_BODY =
+      'Si sales ahora se perderán los datos introducidos en esta sesión.';
+  static const String SESION_CONFIRM_LEAVE_DEFAULT = 'Salir';
+  static const String SESION_CONFIRM_LEAVE_CANCEL = 'Seguir editando';
+
+  /// Note shown at the top of the session IPIL step.
+  /// Use `.replaceFirst('{count}', n.toString())` before display.
+  static const String SESION_IPIL_INVITED_NOTE =
+      'Este IPIL se añadirá a los participantes que asistan a esta sesión '
+      '({count} convocados).';
+
+  static const String SESION_ATTENDANCE_ABSENT_ERROR =
+      'No se ha podido registrar la ausencia. Vuelve a intentarlo.';
 
   //ToolBox
   static const String TOOL_BOX = 'Caja de Herramientas ';
