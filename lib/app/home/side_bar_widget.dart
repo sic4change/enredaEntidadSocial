@@ -42,6 +42,13 @@ class _SideBarWidgetState extends State<SideBarWidget> {
     });
   }
 
+    void _setSelectedIndexSesiones() {
+    setState(() {
+      WebHome.goToSesiones();
+    });
+  }
+
+
   void _setSelectedIndexEntities() {
     setState(() {
       WebHome.goToEntities();
@@ -53,6 +60,7 @@ class _SideBarWidgetState extends State<SideBarWidget> {
       WebHome.goResources();
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -162,11 +170,30 @@ class _SideBarWidgetState extends State<SideBarWidget> {
         );
       },
       items: [
+        // index 0 — Panel de control
         SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PANEL), width: 20,), label: StringConst.DRAWER_CONTROL_PANEL, onTap: _setSelectedIndexToOne),
+        // index 1 — Participantes
         SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PARTICIPANTS), width: 20,), label: StringConst.DRAWER_PARTICIPANTS, onTap: _setSelectedIndexParticipants),
+        // index 2 — Sesiones (moved up — sits directly below Participantes)
+        // Uses the Figma-extracted calendar+people SVG, recoloured to
+        // turquoiseBlue to match the other sidebar icons.
+        SidebarXItem(
+          // Use the existing entity-styled PNG so the icon visual contract
+          // matches the other sidebar items (slightly larger at 24px to keep
+          // the bump-up the colleague requested).
+          iconWidget: Container(
+            width: 24,
+            child: Image.asset(ImagePath.ICON_SESSIONS),
+          ),
+          label: StringConst.DRAWER_SESIONES,
+          onTap: _setSelectedIndexSesiones,
+        ),
+        // index 3 — Recursos
         SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_RESOURCES), width: 20,), label: StringConst.DRAWER_MY_RESOURCES , onTap: _setSelectedIndexResources),
+        // index 4 — Caja de herramientas
         SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_TOOLS), width: 20,), label: StringConst.DRAWER_TOOLS , onTap: _setSelectedIndexToOne),
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_ENTITY), width: 20,), label: StringConst.DRAWER_ENTITIES, onTap: _setSelectedIndexEntities)
+        // index 5 — Agenda de contactos
+        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_ENTITY), width: 20,), label: StringConst.DRAWER_ENTITIES, onTap: _setSelectedIndexEntities),
       ],
     );
   }

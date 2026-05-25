@@ -8,6 +8,7 @@ import 'package:enreda_empresas/app/home/side_bar_widget.dart';
 import 'package:enreda_empresas/app/home/control_panel/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
 import 'package:enreda_empresas/app/home/resources/my_resources_list_page.dart';
+import 'package:enreda_empresas/app/home/sesiones/sesiones_page.dart';
 import 'package:enreda_empresas/app/home/tool_box/tool_box_page.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -38,6 +39,15 @@ class WebHome extends StatefulWidget {
   static final SidebarXController controller = SidebarXController(selectedIndex: 0, extended: true);
   static ValueNotifier<int> selectedIndex = ValueNotifier(2);
 
+  // ── Sidebar index mapping ─────────────────────────────────────────────
+  //   0 → Panel de control
+  //   1 → Participantes
+  //   2 → Sesiones      (moved up — sits directly below Participantes)
+  //   3 → Recursos
+  //   4 → Caja de herramientas
+  //   5 → Agenda de contactos (Entities)
+  // ──────────────────────────────────────────────────────────────────────
+
   static goToControlPanel() {
     WebHome.selectedIndex.value = 2; // Select empty Container
     WebHome.controller.selectIndex(0);
@@ -49,21 +59,26 @@ class WebHome extends StatefulWidget {
     ParticipantsListPage.selectedIndex.value = 0;
   }
 
-  static goToEntities() {
+  static goToSesiones() {
     WebHome.selectedIndex.value = 2; // Select empty Container
-    WebHome.controller.selectIndex(4);
-    EntityDirectoryPage.selectedIndex.value = 0;
+    WebHome.controller.selectIndex(2);
   }
 
   static goResources() {
     WebHome.selectedIndex.value = 2; // Select empty Container
-    WebHome.controller.selectIndex(2);
+    WebHome.controller.selectIndex(3);
     MyResourcesListPage.selectedIndex.value = 0;
   }
 
   static goToolBox() {
     WebHome.selectedIndex.value = 2; // Select empty Container
-    WebHome.controller.selectIndex(3);
+    WebHome.controller.selectIndex(4);
+  }
+
+  static goToEntities() {
+    WebHome.selectedIndex.value = 2; // Select empty Container
+    WebHome.controller.selectIndex(5);
+    EntityDirectoryPage.selectedIndex.value = 0;
   }
 
   @override
@@ -352,15 +367,23 @@ class _WebHomeContentState extends State<_WebHomeContent> {
                         animation: WebHome.controller,
                         builder: (context, child){
                           switch(_lastConfirmedIndex){
+                            // 0 → Panel de control
                             case 0: _key.currentState?.closeDrawer();
                             return ControlPanelPage(socialEntity: widget.socialEntity, user: widget.user,);
+                            // 1 → Participantes
                             case 1: _key.currentState?.closeDrawer();
                             return const ParticipantsListPage();
+                            // 2 → Sesiones (now sits directly below Participantes)
                             case 2: _key.currentState?.closeDrawer();
-                            return MyResourcesListPage(socialEntity: widget.socialEntity);
+                            return SesionesPage(socialEntity: widget.socialEntity);
+                            // 3 → Recursos
                             case 3: _key.currentState?.closeDrawer();
-                            return ToolBoxPage();
+                            return MyResourcesListPage(socialEntity: widget.socialEntity);
+                            // 4 → Caja de herramientas
                             case 4: _key.currentState?.closeDrawer();
+                            return ToolBoxPage();
+                            // 5 → Agenda de contactos
+                            case 5: _key.currentState?.closeDrawer();
                             return EntityDirectoryPage(socialEntity: widget.socialEntity);
                             default:
                               return MyResourcesListPage(socialEntity: widget.socialEntity);
