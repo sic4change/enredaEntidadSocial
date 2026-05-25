@@ -107,6 +107,10 @@ class AppColors {
   static const Color chatLightGray = Color(0xFFF1F3F4);
   static const Color chatButtonsGray = Color(0xFFA0A0A7);
   static const Color deleteRed = Color(0xFFAC0336);
+  /// Exact Figma green for the attendance ✓ button (`attendance_toggle.svg`).
+  static const Color attendanceGreen = Color(0xFF24F18F);
+  /// Exact Figma red for the attendance ✗ button (`attendance_toggle.svg`).
+  static const Color attendanceRed = Color(0xFFE81616);
 
   //Turquoise
   static const Color turquoise = Color(0xFF00D0CE);
