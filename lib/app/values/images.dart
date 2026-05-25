@@ -111,6 +111,35 @@ class ImagePath {
   static const String ICON_PARTICIPANTS = '$imageDir/icon-participantes-entidad.png';
   static const String ICON_RESOURCES = '$imageDir/icon-recursos-entidad.png';
   static const String ICON_SESSIONS = '$imageDir/icon-sesiones-entidad.png';
+  /// Sesiones SVG (Figma-extracted). NOT currently consumed — the sidebar
+  /// uses [ICON_SESSIONS] PNG to stay visually consistent with the other
+  /// nav icons. Kept on disk + as a constant so it can be swapped back in
+  /// with `SvgPicture.asset(ICON_SESIONES_SVG)` if product wants the
+  /// vector treatment instead.
+  static const String ICON_SESIONES_SVG = '$imageDir/icon_sesiones.svg';
+
+  // ── Sesiones-feature Figma-extracted icons ────────────────────────────
+  /// "Crear nueva sesión" CTA trailing plus icon — 50×50 teal circle
+  /// with yellow plus glyph (Figma node `1:607`).
+  static const String SESIONES_ICON_CTA_PLUS =
+      '$imageDir/sesiones/cta_plus.svg';
+  /// Row trailing share affordance — 20×20 teal circle with white up-arrow
+  /// (Figma node `1:569` — `Group 39497`).
+  static const String SESIONES_ICON_ROW_SHARE =
+      '$imageDir/sesiones/row_arrow.svg';
+  /// Attendance toggle widget — 46×20 combined ✓/✗ from Figma node `1:126`.
+  /// Used for reference / state-comparison; the runtime widget is drawn
+  /// directly in Flutter so it can react to per-participant state.
+  static const String SESIONES_ICON_ATTENDANCE_TOGGLE =
+      '$imageDir/sesiones/attendance_toggle.svg';
+  /// Leading row icon for **individual** sessions — 56×56 from Figma node
+  /// `1:562`. Pale-teal background + single person glyph + calendar.
+  static const String SESIONES_ICON_ROW_INDIVIDUAL =
+      '$imageDir/sesiones/row_icon_individual.svg';
+  /// Leading row icon for **grupal** sessions — 56×56 from Figma node
+  /// `1:584`. Same background, 3-person group glyph.
+  static const String SESIONES_ICON_ROW_GRUPAL =
+      '$imageDir/sesiones/row_icon_grupal.svg';
   static const String ICON_TOOLS = '$imageDir/icon-caja-entidad.png';
   static const String DOWNLOAD_FILLED = '$imageDir/download-icon.png';
   static const String ICON_PLUS = '$imageDir/plus_outline.png';
