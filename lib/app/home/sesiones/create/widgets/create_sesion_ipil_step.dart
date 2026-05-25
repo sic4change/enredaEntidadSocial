@@ -18,6 +18,7 @@ import 'package:enreda_empresas/app/models/ipilPostWorkSupport.dart';
 import 'package:enreda_empresas/app/models/ipilReinforcement.dart';
 import 'package:enreda_empresas/app/models/ipilSoftSkills.dart';
 import 'package:enreda_empresas/app/models/ipilSpecificSkills.dart';
+import 'package:enreda_empresas/app/models/sesion.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -190,6 +191,16 @@ class _CreateSesionIpilStepState extends State<CreateSesionIpilStep> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    // Individual sessions get the full IPIL template (14 sections + itinerary
+    // checkboxes). Grupal sessions only collect the four shared sections
+    // (Fortalecimiento, Contextualización, Conexión territorio,
+    // Entrevistas-laboral) plus Seguimiento + Otros free-text — fields that
+    // make sense to capture once for the whole group rather than per
+    // participant. Hidden field values are preserved on save (the existing
+    // _intermediations / _obtainingEmployment / etc. state variables are
+    // initialised from widget.initial* and never mutated in Grupal mode), so
+    // round-tripping an edit through a sessionType change won't drop data.
+    final isIndividual = widget.sessionType == SesionType.individual;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.altWhite,
@@ -244,58 +255,58 @@ class _CreateSesionIpilStepState extends State<CreateSesionIpilStep> {
                     ),
                     const SizedBox(height: Sizes.PADDING_20),
 
-                    // ── Inicio de itinerario ──────────────────────────
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: Sizes.kDefaultPaddingDouble / 2),
-                      child: CustomTextBold(
-                        title: StringConst.IPIL_INITIAL_ITINERARY,
-                        color: AppColors.primary900,
+                    // ── Inicio + Cierre de itinerario (Individual only) ──
+                    if (isIndividual) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: Sizes.kDefaultPaddingDouble / 2),
+                        child: CustomTextBold(
+                          title: StringConst.IPIL_INITIAL_ITINERARY,
+                          color: AppColors.primary900,
+                        ),
                       ),
-                    ),
-                    CustomCheckBoxSelectable(
-                      title: StringConst.IPIL_INITIAL_INTERVIEW,
-                      isSelected: _initialInterview,
-                      onTapItem: (value) {
-                        setState(() => _initialInterview = value);
-                      },
-                      selectable: true,
-                    ),
-                    CustomCheckBoxSelectable(
-                      title: StringConst.IPIL_INITIAL_QUESTIONARY,
-                      isSelected: _initialJobValoration,
-                      onTapItem: (value) {
-                        setState(() => _initialJobValoration = value);
-                      },
-                      selectable: true,
-                    ),
-
-                    // ── Cierre de itinerario ──────────────────────────
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: Sizes.kDefaultPaddingDouble / 2),
-                      child: CustomTextBold(
-                        title: StringConst.IPIL_CLOSE_ITINERARY,
-                        color: AppColors.primary900,
+                      CustomCheckBoxSelectable(
+                        title: StringConst.IPIL_INITIAL_INTERVIEW,
+                        isSelected: _initialInterview,
+                        onTapItem: (value) {
+                          setState(() => _initialInterview = value);
+                        },
+                        selectable: true,
                       ),
-                    ),
-                    CustomCheckBoxSelectable(
-                      title: StringConst.IPIL_CLOSE_INTERVIEW,
-                      isSelected: _finalInterview,
-                      onTapItem: (value) {
-                        setState(() => _finalInterview = value);
-                      },
-                      selectable: true,
-                    ),
-                    CustomCheckBoxSelectable(
-                      title: StringConst.IPIL_CLOSE_QUESTIONARY,
-                      isSelected: _finalJobValoration,
-                      onTapItem: (value) {
-                        setState(() => _finalJobValoration = value);
-                      },
-                      selectable: true,
-                    ),
-                    const SizedBox(height: Sizes.PADDING_12),
+                      CustomCheckBoxSelectable(
+                        title: StringConst.IPIL_INITIAL_QUESTIONARY,
+                        isSelected: _initialJobValoration,
+                        onTapItem: (value) {
+                          setState(() => _initialJobValoration = value);
+                        },
+                        selectable: true,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: Sizes.kDefaultPaddingDouble / 2),
+                        child: CustomTextBold(
+                          title: StringConst.IPIL_CLOSE_ITINERARY,
+                          color: AppColors.primary900,
+                        ),
+                      ),
+                      CustomCheckBoxSelectable(
+                        title: StringConst.IPIL_CLOSE_INTERVIEW,
+                        isSelected: _finalInterview,
+                        onTapItem: (value) {
+                          setState(() => _finalInterview = value);
+                        },
+                        selectable: true,
+                      ),
+                      CustomCheckBoxSelectable(
+                        title: StringConst.IPIL_CLOSE_QUESTIONARY,
+                        isSelected: _finalJobValoration,
+                        onTapItem: (value) {
+                          setState(() => _finalJobValoration = value);
+                        },
+                        selectable: true,
+                      ),
+                      const SizedBox(height: Sizes.PADDING_12),
+                    ],
 
                     // ── Fortalecimiento de las competencias ───────────
                     Padding(
@@ -391,90 +402,92 @@ class _CreateSesionIpilStepState extends State<CreateSesionIpilStep> {
                       onChanged: (ids) => setState(() => _interviews = ids),
                     ),
 
-                    // ── Intermediación laboral ────────────────────────
-                    _buildCachedCheckbox(
-                      title: StringConst.IPIL_INTERMEDIATIONS,
-                      options: LocationCache.instance.ipilIntermediations,
-                      selectedIds: _intermediations,
-                      getId: (e) =>
-                          (e as IpilIntermediations).ipilIntermediationsId ??
-                              '',
-                      getLabel: (e) => (e as IpilIntermediations).label,
-                      onChanged: (ids) =>
-                          setState(() => _intermediations = ids),
-                    ),
-
-                    // ── Obtención de empleo ───────────────────────────
-                    _buildCachedCheckbox(
-                      title: StringConst.IPIL_OBTAINING_EMPLOYMENT,
-                      options: LocationCache.instance.ipilObtainingEmployments,
-                      selectedIds: _obtainingEmployment,
-                      getId: (e) =>
-                          (e as IpilObtainingEmployment)
-                              .ipilObtainingEmploymentId ?? '',
-                      getLabel: (e) => (e as IpilObtainingEmployment).label,
-                      onChanged: (ids) =>
-                          setState(() => _obtainingEmployment = ids),
-                    ),
-
-                    // ── Mejora de empleo ──────────────────────────────
-                    _buildCachedCheckbox(
-                      title: StringConst.IPIL_IMPROVING_EMPLOYMENT,
-                      options: LocationCache.instance.ipilImprovingEmployments,
-                      selectedIds: _improvingEmployment,
-                      getId: (e) =>
-                          (e as IpilImprovingEmployment)
-                              .ipilImprovingEmploymentId ?? '',
-                      getLabel: (e) => (e as IpilImprovingEmployment).label,
-                      onChanged: (ids) =>
-                          setState(() => _improvingEmployment = ids),
-                    ),
-
-                    // ── Coordinación/derivación ───────────────────────
-                    _buildCachedCheckbox(
-                      title: StringConst.IPIL_COORDINATION,
-                      options: LocationCache.instance.ipilCoordinations,
-                      selectedIds: _coordination,
-                      getId: (e) =>
-                          (e as IpilCoordination).ipilCoordinationId ?? '',
-                      getLabel: (e) => (e as IpilCoordination).label,
-                      onChanged: (ids) => setState(() => _coordination = ids),
-                    ),
-
-                    // ── Jurídico ──────────────────────────────────────
-                    _buildCachedCheckbox(
-                      title: StringConst.IPIL_LEGAL,
-                      options: LocationCache.instance.ipilLegals,
-                      selectedIds: _legal,
-                      getId: (e) => (e as IpilLegal).ipilLegalId ?? '',
-                      getLabel: (e) => (e as IpilLegal).label,
-                      onChanged: (ids) => setState(() => _legal = ids),
-                    ),
-
-                    // ── Acompañamientos ───────────────────────────────
-                    _buildCachedCheckbox(
-                      title: StringConst.IPIL_POST_WORK_SUPPORT,
-                      options: LocationCache.instance.ipilPostWorkSupports,
-                      selectedIds: _postWorkSupport,
-                      getId: (e) =>
-                          (e as IpilPostWorkSupport).ipilPostWorkSupportId ??
-                              '',
-                      getLabel: (e) => (e as IpilPostWorkSupport).label,
-                      onChanged: (ids) =>
-                          setState(() => _postWorkSupport = ids),
-                    ),
-
-                    // ── Bolsas económicas ─────────────────────────────
-                    _buildCachedCheckbox(
-                      title: StringConst.IPIL_ECONOMIC_BAG,
-                      options: LocationCache.instance.ipilEconomicBags,
-                      selectedIds: _economicBag,
-                      getId: (e) =>
-                          (e as IpilEconomicBag).ipilEconomicBagId ?? '',
-                      getLabel: (e) => (e as IpilEconomicBag).label,
-                      onChanged: (ids) => setState(() => _economicBag = ids),
-                    ),
-                    const SizedBox(height: Sizes.kDefaultPaddingDouble / 2),
+                    // ── Individual-only IPIL sections ────────────────
+                    // Grupal sessions skip Intermediación / Obtención / Mejora
+                    // empleo / Coordinación / Jurídico / Acompañamientos /
+                    // Bolsas económicas. Their state variables are kept and
+                    // round-tripped via the initial-values pass-through, so
+                    // switching session type in edit mode never drops data.
+                    if (isIndividual) ...[
+                      _buildCachedCheckbox(
+                        title: StringConst.IPIL_INTERMEDIATIONS,
+                        options: LocationCache.instance.ipilIntermediations,
+                        selectedIds: _intermediations,
+                        getId: (e) =>
+                            (e as IpilIntermediations).ipilIntermediationsId ??
+                                '',
+                        getLabel: (e) => (e as IpilIntermediations).label,
+                        onChanged: (ids) =>
+                            setState(() => _intermediations = ids),
+                      ),
+                      _buildCachedCheckbox(
+                        title: StringConst.IPIL_OBTAINING_EMPLOYMENT,
+                        options:
+                            LocationCache.instance.ipilObtainingEmployments,
+                        selectedIds: _obtainingEmployment,
+                        getId: (e) =>
+                            (e as IpilObtainingEmployment)
+                                .ipilObtainingEmploymentId ?? '',
+                        getLabel: (e) =>
+                            (e as IpilObtainingEmployment).label,
+                        onChanged: (ids) =>
+                            setState(() => _obtainingEmployment = ids),
+                      ),
+                      _buildCachedCheckbox(
+                        title: StringConst.IPIL_IMPROVING_EMPLOYMENT,
+                        options:
+                            LocationCache.instance.ipilImprovingEmployments,
+                        selectedIds: _improvingEmployment,
+                        getId: (e) =>
+                            (e as IpilImprovingEmployment)
+                                .ipilImprovingEmploymentId ?? '',
+                        getLabel: (e) =>
+                            (e as IpilImprovingEmployment).label,
+                        onChanged: (ids) =>
+                            setState(() => _improvingEmployment = ids),
+                      ),
+                      _buildCachedCheckbox(
+                        title: StringConst.IPIL_COORDINATION,
+                        options: LocationCache.instance.ipilCoordinations,
+                        selectedIds: _coordination,
+                        getId: (e) =>
+                            (e as IpilCoordination).ipilCoordinationId ?? '',
+                        getLabel: (e) => (e as IpilCoordination).label,
+                        onChanged: (ids) =>
+                            setState(() => _coordination = ids),
+                      ),
+                      _buildCachedCheckbox(
+                        title: StringConst.IPIL_LEGAL,
+                        options: LocationCache.instance.ipilLegals,
+                        selectedIds: _legal,
+                        getId: (e) => (e as IpilLegal).ipilLegalId ?? '',
+                        getLabel: (e) => (e as IpilLegal).label,
+                        onChanged: (ids) => setState(() => _legal = ids),
+                      ),
+                      _buildCachedCheckbox(
+                        title: StringConst.IPIL_POST_WORK_SUPPORT,
+                        options:
+                            LocationCache.instance.ipilPostWorkSupports,
+                        selectedIds: _postWorkSupport,
+                        getId: (e) =>
+                            (e as IpilPostWorkSupport)
+                                .ipilPostWorkSupportId ?? '',
+                        getLabel: (e) =>
+                            (e as IpilPostWorkSupport).label,
+                        onChanged: (ids) =>
+                            setState(() => _postWorkSupport = ids),
+                      ),
+                      _buildCachedCheckbox(
+                        title: StringConst.IPIL_ECONOMIC_BAG,
+                        options: LocationCache.instance.ipilEconomicBags,
+                        selectedIds: _economicBag,
+                        getId: (e) =>
+                            (e as IpilEconomicBag).ipilEconomicBagId ?? '',
+                        getLabel: (e) => (e as IpilEconomicBag).label,
+                        onChanged: (ids) => setState(() => _economicBag = ids),
+                      ),
+                      const SizedBox(height: Sizes.kDefaultPaddingDouble / 2),
+                    ],
 
                     // ── Otros ─────────────────────────────────────────
                     CustomTextFormFieldLong(
