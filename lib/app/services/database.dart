@@ -72,6 +72,7 @@ import '../models/ipilCoordination.dart';
 import '../models/ipilImprovementEmployment.dart';
 import '../models/ipilObtainingEmployment.dart';
 import '../models/socialEntitiesCategories.dart';
+import '../models/sesion.dart';
 import '../utils/functions.dart';
 
 abstract class Database {
@@ -197,6 +198,12 @@ abstract class Database {
      Future<void> updateIpilEntryDate(IpilEntry ipilEntry, DateTime date);
      Future<void> deleteIpilEntry(IpilEntry ipilEntry);
      Future<void> setIpilEntry(IpilEntry ipilEntry);
+     /// Removes any IpilEntry documents that were auto-created from the given
+     /// session for the given participant. Used by the Sesion detail page
+     /// when attendance is toggled off / marked absent to reverse the IPIL
+     /// auto-creation. No-op when nothing matches.
+     Future<void> deleteIpilEntriesBySesionAndUser(
+         String sesionId, String userId);
      Future<void> addDocumentationParticipant(String userId, String fileName, Uint8List data, DocumentationParticipant document);
      Future<void> editFileDocumentationParticipant(String userId, String fileName, Uint8List data, DocumentationParticipant document);
      Future<void> updateDocumentationParticipant(DocumentationParticipant document);
@@ -269,6 +276,22 @@ abstract class Database {
      Future<Province?> getProvince(String id);
      Future<InitialReport?> getInitialReport(String userId);
      Future<ClosureReport?> getClosureReport(String id);
+
+     // Sesiones (admin dashboard) — new collection.
+     // Both list streams MUST include a server-side `where()` filter on
+     // socialEntityId AND a server-side date bucket on scheduledAt, plus
+     // a hard `.limit()` per CLAUDE.md §4.5 read-guards.
+     Stream<List<Sesion>> sesionesProximasStream(String socialEntityId);
+     Stream<List<Sesion>> sesionesPasadasStream(String socialEntityId);
+     Stream<Sesion> sesionStream(String sesionId);
+     Future<void> addSesion(Sesion sesion);
+     Future<void> setSesion(Sesion sesion);
+     Future<void> deleteSesion(Sesion sesion);
+     /// All sessions belonging to a specific técnico (for the calendar view).
+     /// Filtered by both socialEntityId and tecnicoId; no date filter so the
+     /// calendar can display past and upcoming sessions together.
+     Stream<List<Sesion>> sesionesCalendarioStream(
+         String socialEntityId, String tecnicoId);
 }
 
 class FirestoreDatabase implements Database {
@@ -1265,6 +1288,100 @@ class FirestoreDatabase implements Database {
   Future<void> setIpilEntry(IpilEntry ipilEntry) {
     return _service.updateData(
         path: APIPath.ipilEntryById(ipilEntry.ipilId!), data: ipilEntry.toMap());
+  }
+
+  @override
+  Future<void> deleteIpilEntriesBySesionAndUser(
+      String sesionId, String userId) async {
+    if (sesionId.isEmpty || userId.isEmpty) return;
+    // Two equality filters — Firestore handles this with the auto-generated
+    // single-field indexes (no composite index required).
+    final snapshot = await FirebaseFirestore.instance
+        .collection(APIPath.ipilEntry())
+        .where('sesionId', isEqualTo: sesionId)
+        .where('userId', isEqualTo: userId)
+        .get();
+    for (final doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+  // ── Sesiones (admin dashboard) ───────────────────────────────────────────
+  // Read-guards (CLAUDE.md §4.5):
+  //   * server-side `where('socialEntityId', isEqualTo: ...)` on every query
+  //   * server-side `where('scheduledAt', ...)` to bucket Próximas/Pasadas
+  //   * hard `.limit(50)` cap on every list stream
+
+  @override
+  Stream<List<Sesion>> sesionesProximasStream(String socialEntityId) {
+    return _service.collectionStream<Sesion>(
+      path: APIPath.sesiones(),
+      queryBuilder: (query) => query
+          .where('socialEntityId', isEqualTo: socialEntityId)
+          .where('scheduledAt', isGreaterThanOrEqualTo: Timestamp.now())
+          .orderBy('scheduledAt', descending: false)
+          .limit(50),
+      builder: (data, documentId) => Sesion.fromMap(data, documentId),
+      sort: (lhs, rhs) => lhs.scheduledAt.compareTo(rhs.scheduledAt),
+    );
+  }
+
+  @override
+  Stream<List<Sesion>> sesionesPasadasStream(String socialEntityId) {
+    return _service.collectionStream<Sesion>(
+      path: APIPath.sesiones(),
+      queryBuilder: (query) => query
+          .where('socialEntityId', isEqualTo: socialEntityId)
+          .where('scheduledAt', isLessThan: Timestamp.now())
+          .orderBy('scheduledAt', descending: true)
+          .limit(50),
+      builder: (data, documentId) => Sesion.fromMap(data, documentId),
+      // Most-recent-past first
+      sort: (lhs, rhs) => rhs.scheduledAt.compareTo(lhs.scheduledAt),
+    );
+  }
+
+  @override
+  Stream<Sesion> sesionStream(String sesionId) {
+    return _service.documentStreamByField(
+      path: APIPath.sesiones(),
+      builder: (data, documentId) => Sesion.fromMap(data, documentId),
+      queryBuilder: (query) =>
+          query.where(FieldPath.documentId, isEqualTo: sesionId),
+    );
+  }
+
+  @override
+  Future<void> addSesion(Sesion sesion) =>
+      _service.addData(path: APIPath.sesiones(), data: sesion.toMap());
+
+  @override
+  Future<void> setSesion(Sesion sesion) {
+    return _service.updateData(
+      path: APIPath.sesion(sesion.sesionId!),
+      data: sesion.toMap(),
+    );
+  }
+
+  @override
+  Future<void> deleteSesion(Sesion sesion) =>
+      _service.deleteData(path: APIPath.sesion(sesion.sesionId!));
+
+  @override
+  Stream<List<Sesion>> sesionesCalendarioStream(
+      String socialEntityId, String tecnicoId) {
+    // Two equality filters only — no orderBy in the queryBuilder to avoid
+    // requiring a composite Firestore index. Client-side sort via `sort:`
+    // produces the same ascending-scheduledAt order with zero index cost.
+    return _service.collectionStream<Sesion>(
+      path: APIPath.sesionesCalendario(),
+      queryBuilder: (query) => query
+          .where('socialEntityId', isEqualTo: socialEntityId)
+          .where('tecnicoId', isEqualTo: tecnicoId)
+          .limit(100),
+      builder: (data, documentId) => Sesion.fromMap(data, documentId),
+      sort: (lhs, rhs) => lhs.scheduledAt.compareTo(rhs.scheduledAt),
+    );
   }
 
   @override
