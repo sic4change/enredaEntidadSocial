@@ -100,4 +100,10 @@ class APIPath {
   static String ipilObjectives() => 'ipilObjectives';
   static String ipilObjective(String ipilObjectivesId) => 'ipilObjectives/$ipilObjectivesId';
   static String programs() => 'programs';
+
+  // Sesiones (admin dashboard) — new collection
+  static String sesiones() => 'sesiones';
+  static String sesion(String sesionId) => 'sesiones/$sesionId';
+  // Calendar query alias — same collection, different filter signature
+  static String sesionesCalendario() => 'sesiones';
 }
