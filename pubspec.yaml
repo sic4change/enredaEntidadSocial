@@ -58,6 +58,9 @@ dependencies:
   printing: ^5.11.1
   intl: ^0.20.2
   multi_select_flutter: ^4.1.3
+  # SVG rendering — used for the Sesiones sidebar icon (extracted from Figma).
+  # Asset SVGs live under `assets/images/`.
+  flutter_svg: ^2.0.10+1
 
   expandable: ^5.0.1
   dashed_circular_progress_bar: ^0.0.6
@@ -113,6 +116,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/sesiones/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
