@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/models/ipilReinforcement.dart';
 class IpilEntry {
   IpilEntry({
     this.ipilId,
+    this.sesionId,
     this.content,
     this.techId,
     this.techName,
@@ -51,6 +52,14 @@ class IpilEntry {
   });
 
   final String? ipilId;
+
+  /// Origin link: when an IpilEntry is auto-created from a Sesion (after
+  /// the participant is marked attended), the session's id is stored here
+  /// so the lifecycle can be reversed — toggling attendance off / absent
+  /// deletes the matching entry via [Database.deleteIpilEntriesBySesionAndUser].
+  /// Null for manually-created (per-participant) IPIL entries.
+  final String? sesionId;
+
   late String? content;
   final String? techId;
   final String? techName;
@@ -178,6 +187,7 @@ class IpilEntry {
 
     return IpilEntry(
       ipilId: data['ipilId']?.toString() ?? documentId,
+      sesionId: data['sesionId']?.toString(),
       content: data['content'],
       techId: data['techId']?.toString() ?? documentId,
       techName: data['techName'] == null ? '' : data['techName'],
@@ -234,6 +244,7 @@ class IpilEntry {
   Map<String, dynamic> toMap() {
     return {
       'ipilId': ipilId,
+      'sesionId': sesionId,
       'content': content,
       'techId': techId,
       'techName': techName,
