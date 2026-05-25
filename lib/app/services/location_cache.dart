@@ -9,6 +9,8 @@ import 'package:enreda_empresas/app/models/gamificationFlags.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
+import 'package:enreda_empresas/app/models/competencyCategory.dart';
+import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -54,6 +56,8 @@ class LocationCache {
   List<City> cities = [];
   List<GamificationFlag> gamificationFlags = [];
   List<Competency> competencies = [];
+  List<CompetencyCategory> competencyCategories = [];
+  List<CompetencySubCategory> competencySubCategories = [];
   List<Interest> interests = [];
   List<Ability> abilities = [];
   List<SpecificInterest> specificInterests = [];
@@ -295,7 +299,7 @@ class LocationCache {
     return _warmUpFuture!;
   }
 
-  static const int _cacheVersion = 4;
+  static const int _cacheVersion = 5;
 
   /// Batched warm-up: max ~5 concurrent Firestore reads at a time.
   /// All catalogs use persistence cache so subsequent launches skip Firestore entirely.
@@ -304,7 +308,7 @@ class LocationCache {
     final storedVersion = prefs.getInt('_cacheVersion') ?? 0;
     if (storedVersion < _cacheVersion) {
       const catalogKeys = [
-        'countries', 'gamificationFlags', 'competencies', 'interests', 'abilities',
+        'countries', 'gamificationFlags', 'competencies', 'competencyCategories', 'competencySubCategories', 'interests', 'abilities',
         'socialEntitiesTypes', 'personalDocumentTypes', 'educations', 'genders', 'dedications',
         'keepLearningOptions', 'documentCategories', 'programs', 'resourceTypes', 'languages',
         'resourceCategories', 'resourcePictures',
@@ -325,6 +329,8 @@ class LocationCache {
       _loadOrFetchCatalog<Country>('countries', () => database.countriesStream().first, (data, id) => Country.fromMap(data, id), getDocId: (e) => e.countryId ?? '').then((v) => countries = v),
       _loadOrFetchCatalog<GamificationFlag>('gamificationFlags', () => database.gamificationFlagsStream().first, (data, id) => GamificationFlag.fromMap(data, id)).then((v) => gamificationFlags = v),
       _loadOrFetchCatalog<Competency>('competencies', () => database.getCompetencies(), (data, id) => Competency.fromMap(data, id)).then((v) => competencies = v),
+      _loadOrFetchCatalog<CompetencyCategory>('competencyCategories', () => database.competenciesCategoriesStream().first, (data, id) => CompetencyCategory.fromMap(data, id), getDocId: (e) => e.competencyCategoryId ?? '').then((v) => competencyCategories = v).catchError((e) { print("Error: e"); return <CompetencyCategory>[]; }),
+      _loadOrFetchCatalog<CompetencySubCategory>('competencySubCategories', () => database.competenciesSubCategoriesStream().first, (data, id) => CompetencySubCategory.fromMap(data, id), getDocId: (e) => e.competencySubCategoryId ?? '').then((v) => competencySubCategories = v).catchError((e) { print("Error: e"); return <CompetencySubCategory>[]; }),
       _loadOrFetchCatalog<Interest>('interests', () => database.getInterests(), (data, id) => Interest.fromMap(data, id)).then((v) => interests = v),
       _loadOrFetchCatalog<Ability>('abilities', () => database.getAbilities(), (data, id) => Ability.fromMap(data, id)).then((v) => abilities = v),
     ]);
