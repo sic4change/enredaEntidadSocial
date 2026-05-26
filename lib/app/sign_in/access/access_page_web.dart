@@ -256,16 +256,25 @@ class _AccessPageWebState extends State<AccessPageWeb> {
                                         width: 34,
                                       ),
                                       Spacer(),
-                                      Text(
-                                        StringConst.LOOKING_FOR_OPPORTUNITIES,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 3,
-                                        style: textTheme.bodyLarge?.copyWith(
-                                          height: 1.5,
-                                          color: AppColors.primary900,
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: fontSize,
+                                      // Flexible so the long Spanish heading
+                                      // can shrink and engage its already-
+                                      // configured ellipsis on narrow
+                                      // viewports instead of overflowing the
+                                      // Row (was throwing "RenderFlex
+                                      // overflowed by 129 pixels" at ~600px
+                                      // wide).
+                                      Flexible(
+                                        child: Text(
+                                          StringConst.LOOKING_FOR_OPPORTUNITIES,
+                                          textAlign: TextAlign.center,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 3,
+                                          style: textTheme.bodyLarge?.copyWith(
+                                            height: 1.5,
+                                            color: AppColors.primary900,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: fontSize,
+                                          ),
                                         ),
                                       ),
                                       Spacer(),
