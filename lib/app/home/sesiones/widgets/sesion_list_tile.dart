@@ -140,59 +140,81 @@ class _SesionListTileState extends State<SesionListTile> {
                             vertical: Sizes.PADDING_22,
                             horizontal: Sizes.PADDING_24,
                           ),
-                          child: Row(
+                          // Stack layout so the participants label can sit at
+                          // the row's true horizontal centre (directly above
+                          // the expansion arrow below the card) regardless of
+                          // how wide the title and action cluster end up.
+                          // Title + leading icon hug the left; action cluster
+                          // hugs the right via Spacer. The label sits in a
+                          // non-interactive Positioned.fill overlay so taps
+                          // pass through to the InkWell beneath.
+                          child: Stack(
                             children: [
-                              _LeadingIcon(
-                                  sessionType: widget.sesion.sessionType),
-                              const SizedBox(width: Sizes.PADDING_24),
-                              Expanded(
-                                child: _TitleAndDate(
-                                    sesion: widget.sesion,
-                                    textTheme: textTheme),
-                              ),
-                              const SizedBox(width: Sizes.PADDING_16),
-                              Flexible(
-                                child: Text(
-                                  _participantsLabel(widget.sesion),
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.seaBlue,
-                                    fontWeight: FontWeight.w300,
+                              Row(
+                                children: [
+                                  _LeadingIcon(
+                                      sessionType:
+                                          widget.sesion.sessionType),
+                                  const SizedBox(width: Sizes.PADDING_24),
+                                  Flexible(
+                                    child: _TitleAndDate(
+                                        sesion: widget.sesion,
+                                        textTheme: textTheme),
                                   ),
-                                  overflow: TextOverflow.ellipsis,
+                                  const Spacer(),
+                                  // ── Right-aligned action cluster ─────────
+                                  // Próximas: Edit / Delete / Modality / Bell
+                                  // Pasadas: just Modality (far right)
+                                  if (widget.onEdit != null &&
+                                      widget.showEditPill) ...[
+                                    _PillIconButton(
+                                      icon: Icons.edit_outlined,
+                                      iconColor: AppColors.greyTxtAlt,
+                                      tooltip: StringConst
+                                          .SESION_ACTION_EDITAR_TOOLTIP,
+                                      onTap: widget.onEdit!,
+                                    ),
+                                    const SizedBox(width: Sizes.PADDING_8),
+                                  ],
+                                  if (widget.onDelete != null) ...[
+                                    _PillIconButton(
+                                      icon: Icons.delete_outline,
+                                      iconColor: AppColors.greyTxtAlt,
+                                      tooltip: StringConst
+                                          .SESION_ACTION_BORRAR_TOOLTIP,
+                                      onTap: widget.onDelete!,
+                                    ),
+                                    const SizedBox(width: Sizes.PADDING_12),
+                                  ],
+                                  _ModalityChip(
+                                      modality: widget.sesion.modality),
+                                  if (widget.showReminder &&
+                                      widget.onToggleReminder != null) ...[
+                                    const SizedBox(width: Sizes.PADDING_12),
+                                    _BellPlain(
+                                      enabled: widget.reminderEnabled,
+                                      onTap: widget.onToggleReminder!,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              // Centred participants label — above the
+                              // bottom-edge expansion arrow. IgnorePointer
+                              // so taps fall through to the InkWell.
+                              Positioned.fill(
+                                child: IgnorePointer(
+                                  child: Center(
+                                    child: Text(
+                                      _participantsLabel(widget.sesion),
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: AppColors.seaBlue,
+                                        fontWeight: FontWeight.w300,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              // ── Action cluster — Próximas only ─────────
-                              if (widget.onEdit != null &&
-                                  widget.showEditPill) ...[
-                                const SizedBox(width: Sizes.PADDING_12),
-                                _PillIconButton(
-                                  icon: Icons.edit_outlined,
-                                  iconColor: AppColors.greyTxtAlt,
-                                  tooltip: StringConst
-                                      .SESION_ACTION_EDITAR_TOOLTIP,
-                                  onTap: widget.onEdit!,
-                                ),
-                              ],
-                              if (widget.onDelete != null) ...[
-                                const SizedBox(width: Sizes.PADDING_8),
-                                _PillIconButton(
-                                  icon: Icons.delete_outline,
-                                  iconColor: AppColors.greyTxtAlt,
-                                  tooltip: StringConst
-                                      .SESION_ACTION_BORRAR_TOOLTIP,
-                                  onTap: widget.onDelete!,
-                                ),
-                              ],
-                              const SizedBox(width: Sizes.PADDING_16),
-                              _ModalityChip(modality: widget.sesion.modality),
-                              if (widget.showReminder &&
-                                  widget.onToggleReminder != null) ...[
-                                const SizedBox(width: Sizes.PADDING_12),
-                                _BellPlain(
-                                  enabled: widget.reminderEnabled,
-                                  onTap: widget.onToggleReminder!,
-                                ),
-                              ],
                             ],
                           ),
                         ),
