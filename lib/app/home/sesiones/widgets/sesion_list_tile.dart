@@ -156,12 +156,19 @@ class _SesionListTileState extends State<SesionListTile> {
                                       sessionType:
                                           widget.sesion.sessionType),
                                   const SizedBox(width: Sizes.PADDING_24),
-                                  Flexible(
+                                  // Expanded (not Flexible + Spacer): we need
+                                  // the title slot to fill ALL the slack between
+                                  // the leading icon and the action cluster,
+                                  // pushing the cluster flush against the right
+                                  // edge. The Column inside _TitleAndDate keeps
+                                  // its text left-aligned via
+                                  // CrossAxisAlignment.start, so the visual
+                                  // result is title-on-left, cluster-on-right.
+                                  Expanded(
                                     child: _TitleAndDate(
                                         sesion: widget.sesion,
                                         textTheme: textTheme),
                                   ),
-                                  const Spacer(),
                                   // ── Right-aligned action cluster ─────────
                                   // Próximas: Edit / Delete / Modality / Bell
                                   // Pasadas: just Modality (far right)
