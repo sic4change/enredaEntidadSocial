@@ -859,6 +859,14 @@ class StringConst {
   static const String CALENDARIO_EMPTY_DAY = 'No hay sesiones este día.';
   static const String CALENDARIO_EMPTY = 'Aún no tienes sesiones programadas.';
   static const String CALENDARIO_PANEL_MONTH = 'Sesiones del mes';
+  static const String CALENDARIO_EXPORT_ICS_LABEL = 'Descargar .ics';
+  static const String CALENDARIO_EXPORT_ICS_TOOLTIP =
+      'Descargar calendario (.ics)';
+  static const String CALENDARIO_EXPORT_ICS_SUCCESS = 'Calendario descargado.';
+  static const String CALENDARIO_EXPORT_ICS_UNSUPPORTED =
+      'La descarga .ics solo está disponible en la versión web.';
+  static const String CALENDARIO_EXPORT_ICS_EMPTY =
+      'No hay sesiones este mes para exportar.';
   static const String CALENDARIO_PANEL_EMPTY_MONTH =
       'No tienes sesiones programadas este mes.';
   static const String CALENDARIO_HOVER_AND_MORE = 'y %COUNT% más';

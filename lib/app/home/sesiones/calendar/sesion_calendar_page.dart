@@ -1,3 +1,5 @@
+import 'package:enreda_empresas/app/home/sesiones/calendar/ics_download.dart';
+import 'package:enreda_empresas/app/home/sesiones/calendar/ics_export.dart';
 import 'package:enreda_empresas/app/home/sesiones/widgets/sesion_list_tile.dart';
 import 'package:enreda_empresas/app/models/sesion.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -123,6 +125,11 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
                   isMobile: isMobile,
                   onClose: widget.onClose,
                 ),
+                SizedBox(height: isMobile ? Sizes.PADDING_8 : Sizes.PADDING_12),
+                _ExportIcsButton(
+                  isMobile: isMobile,
+                  onPressed: () => _handleExportIcs(context, allSesiones),
+                ),
                 SizedBox(height: isMobile ? Sizes.PADDING_12 : Sizes.PADDING_20),
                 if (isDesktop)
                   // Side-by-side: compact calendar (left) + sessions panel
@@ -175,6 +182,93 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
     final at = a.scheduledAt.hour * 60 + a.scheduledAt.minute;
     final bt = b.scheduledAt.hour * 60 + b.scheduledAt.minute;
     return at.compareTo(bt);
+  }
+
+  /// Filters [allSesiones] to the focused month, sorts chronologically, and
+  /// triggers a browser download of the resulting `.ics` payload. Shows a
+  /// snackbar on success / empty month / unsupported platform.
+  void _handleExportIcs(BuildContext context, List<Sesion> allSesiones) {
+    final monthSesiones = allSesiones
+        .where((s) =>
+            s.scheduledAt.year == _focusedMonth.year &&
+            s.scheduledAt.month == _focusedMonth.month)
+        .toList()
+      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    if (monthSesiones.isEmpty) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(StringConst.CALENDARIO_EXPORT_ICS_EMPTY),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final content = buildIcsCalendar(monthSesiones);
+      final yyyymm =
+          '${_focusedMonth.year}-${_focusedMonth.month.toString().padLeft(2, '0')}';
+      downloadIcs(content, 'enreda-sesiones-$yyyymm.ics');
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(StringConst.CALENDARIO_EXPORT_ICS_SUCCESS),
+        ),
+      );
+    } on UnsupportedError {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(StringConst.CALENDARIO_EXPORT_ICS_UNSUPPORTED),
+        ),
+      );
+    }
+  }
+}
+
+/// Right-aligned "Descargar .ics" button shown beneath the page header.
+/// Tap downloads the focused month's sessions as an iCalendar file.
+class _ExportIcsButton extends StatelessWidget {
+  const _ExportIcsButton({required this.isMobile, required this.onPressed});
+
+  final bool isMobile;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Tooltip(
+        message: StringConst.CALENDARIO_EXPORT_ICS_TOOLTIP,
+        child: OutlinedButton.icon(
+          onPressed: onPressed,
+          icon: const Icon(
+            Icons.file_download_outlined,
+            size: Sizes.ICON_SIZE_20,
+            color: AppColors.primary900,
+          ),
+          label: Text(
+            StringConst.CALENDARIO_EXPORT_ICS_LABEL,
+            style: (isMobile ? textTheme.bodySmall : textTheme.bodyMedium)
+                ?.copyWith(
+              color: AppColors.primary900,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppColors.greyBorder),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? Sizes.PADDING_12 : Sizes.PADDING_16,
+              vertical: isMobile ? Sizes.PADDING_8 : Sizes.PADDING_12,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
