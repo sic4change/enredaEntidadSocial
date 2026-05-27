@@ -5,7 +5,9 @@ import 'package:enreda_empresas/app/home/sesiones/calendar/ics_export.dart';
 import 'package:enreda_empresas/app/home/sesiones/widgets/sesion_list_tile.dart';
 import 'package:enreda_empresas/app/models/sesion.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
+import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -209,7 +211,13 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
     }
 
     try {
-      final content = buildIcsCalendar(monthSesiones);
+      // Collect every invited-participant id across the month and resolve
+      // them once so each VEVENT's DESCRIPTION can list real names.
+      final ids = <String>{
+        for (final s in monthSesiones) ...s.invitedParticipants,
+      };
+      final names = resolveParticipantNames(ids);
+      final content = buildIcsCalendar(monthSesiones, participantNames: names);
       final yyyymm =
           '${_focusedMonth.year}-${_focusedMonth.month.toString().padLeft(2, '0')}';
       downloadIcs(content, 'enreda-sesiones-$yyyymm.ics');
@@ -226,6 +234,37 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
       );
     }
   }
+}
+
+/// Resolves a set of participant user ids to `{id → "Firstname Lastname"}`
+/// using [LocationCache.instance]. Falls back to the bulk `allParticipants`
+/// list when an id misses the per-user cache. Unresolved ids are simply
+/// omitted from the returned map — the consumers in `ics_export.dart` /
+/// `gcal_link.dart` already handle that case (drop the missing entries,
+/// fall back to a count when every id is unresolved).
+///
+/// Returns an empty map when [ids] is empty.
+Map<String, String> resolveParticipantNames(Iterable<String> ids) {
+  final cache = LocationCache.instance;
+  final out = <String, String>{};
+  final seen = <String>{};
+  for (final id in ids) {
+    if (id.isEmpty || seen.contains(id)) continue;
+    seen.add(id);
+    UserEnreda? user = cache.userCache[id];
+    if (user == null) {
+      for (final u in cache.allParticipants) {
+        if (u.userId == id) {
+          user = u;
+          break;
+        }
+      }
+    }
+    if (user == null) continue;
+    final name = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+    if (name.isNotEmpty) out[id] = name;
+  }
+  return out;
 }
 
 /// Right-aligned "Descargar .ics" button shown beneath the page header.
@@ -1021,7 +1060,13 @@ class _GcalAddIconButton extends StatelessWidget {
   void _handleAdd(BuildContext context) {
     final messenger = ScaffoldMessenger.of(context);
     try {
-      openExternalUrl(buildGoogleCalendarUrl(sesion));
+      // Resolve the invited participants' names on-demand so the gCal
+      // compose form's description shows the actual attendee list rather
+      // than just a "{N} participantes" count.
+      final names = resolveParticipantNames(sesion.invitedParticipants);
+      openExternalUrl(
+        buildGoogleCalendarUrl(sesion, participantNames: names),
+      );
     } on UnsupportedError {
       messenger.showSnackBar(
         const SnackBar(

@@ -1,5 +1,6 @@
 import 'package:enreda_empresas/app/models/sesion.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
+import 'package:intl/intl.dart';
 
 /// Builds a Google Calendar "TEMPLATE" URL pre-filled with [s]'s data.
 ///
@@ -21,14 +22,18 @@ import 'package:enreda_empresas/app/values/strings.dart';
 ///
 /// All text params are URL-encoded with `Uri.encodeQueryComponent` which
 /// handles `&`, `=`, `?`, `+`, `#`, accented Spanish chars, line breaks, etc.
-String buildGoogleCalendarUrl(Sesion s, {Duration? fallbackDuration}) {
+String buildGoogleCalendarUrl(
+  Sesion s, {
+  Map<String, String>? participantNames,
+  Duration? fallbackDuration,
+}) {
   final params = <String, String>{
     'action': 'TEMPLATE',
     'text': _summaryFor(s),
     'dates': _datesParam(s, fallbackDuration ?? const Duration(hours: 1)),
   };
 
-  final details = _descriptionFor(s);
+  final details = _descriptionFor(s, participantNames);
   if (details.isNotEmpty) params['details'] = details;
 
   final lugar = s.lugar?.trim();
@@ -54,8 +59,20 @@ String _summaryFor(Sesion s) {
 
 /// Mirrors the description format used by the iCalendar export so a user who
 /// adopts both flows sees identical bodies in gCal and in their imported ICS.
-String _descriptionFor(Sesion s) {
-  final parts = <String>[];
+///
+/// Sections (in order, each omitted when its source is empty):
+///   1. Inicio + Fin — explicit start/end timestamps or the "Todo el día"
+///      badge when [Sesion.isAllDay] is true.
+///   2. Participantes — resolved names when [participantNames] is provided,
+///      otherwise a "{N} participante(s)" count fallback.
+///   3. Desarrollo y evaluación — `Sesion.description`.
+///   4. Observaciones y/o incidencias — `Sesion.observations`.
+String _descriptionFor(Sesion s, Map<String, String>? participantNames) {
+  final parts = <String>[_timingFor(s)];
+
+  final people = _participantsFor(s, participantNames);
+  if (people.isNotEmpty) parts.add(people);
+
   final desc = s.description?.trim() ?? '';
   if (desc.isNotEmpty) {
     parts.add('${StringConst.SESION_DETAIL_DESARROLLO}\n$desc');
@@ -65,6 +82,70 @@ String _descriptionFor(Sesion s) {
     parts.add('${StringConst.SESION_DETAIL_OBSERVACIONES}\n$obs');
   }
   return parts.join('\n\n');
+}
+
+/// Two-line `Inicio: …` + `Fin: …` block, or the single all-day badge.
+///
+/// The end timestamp is currently derived from [Sesion.duracion] via the
+/// heuristic [_parseDuration]. Once the model gains an explicit
+/// `Sesion.fechaFin` field (planned per `sesiones-correcciones-figma.md`
+/// item #5), swap this duration-derived end for `s.fechaFin` directly.
+String _timingFor(Sesion s) {
+  if (s.isAllDay) {
+    return '${StringConst.SESION_TODO_EL_DIA_BADGE} — ${_formatDateLong(s.scheduledAt)}';
+  }
+  final start = s.scheduledAt;
+  final end = start.add(_parseDuration(s.duracion) ?? const Duration(hours: 1));
+  return '${StringConst.CALENDARIO_EVENT_INICIO_LABEL}: ${_formatDateTimeLong(start)}\n'
+      '${StringConst.CALENDARIO_EVENT_FIN_LABEL}: ${_formatDateTimeLong(end)}';
+}
+
+/// Participantes block. When [names] is non-null we resolve user ids to
+/// display names and render a bulleted list; otherwise we fall back to a
+/// count (`"3 participantes"`).
+///
+/// Any id missing from [names] is silently dropped; if every id is missing,
+/// we fall back to the count.
+String _participantsFor(Sesion s, Map<String, String>? names) {
+  final ids = s.invitedParticipants;
+  if (ids.isEmpty) return '';
+  final header = '${StringConst.CALENDARIO_EVENT_PARTICIPANTES_LABEL}:';
+
+  if (names == null || names.isEmpty) {
+    return '$header\n${_countLabel(ids.length)}';
+  }
+  final resolved = <String>[];
+  for (final id in ids) {
+    final n = names[id];
+    if (n != null && n.isNotEmpty) resolved.add(n);
+  }
+  if (resolved.isEmpty) {
+    return '$header\n${_countLabel(ids.length)}';
+  }
+  return '$header\n${resolved.map((n) => '• $n').join('\n')}';
+}
+
+String _countLabel(int n) {
+  final word = n == 1
+      ? StringConst.SESION_PARTICIPANTE_SINGULAR
+      : StringConst.SESION_PARTICIPANTES_PLURAL;
+  return '$n $word';
+}
+
+/// `DD de MMMM yyyy` in es_ES with a graceful fallback when locale data
+/// hasn't been initialised yet (first build on cold start in some modes).
+String _formatDateLong(DateTime d) {
+  try {
+    return DateFormat("d 'de' MMMM yyyy", 'es_ES').format(d);
+  } catch (_) {
+    return DateFormat('d MMMM yyyy').format(d);
+  }
+}
+
+/// `DD de MMMM yyyy, HH:mm` — used by the Inicio / Fin lines.
+String _formatDateTimeLong(DateTime d) {
+  final hhmm = DateFormat('HH:mm').format(d);
+  return '${_formatDateLong(d)}, $hhmm';
 }
 
 String _datesParam(Sesion s, Duration fallbackDuration) {

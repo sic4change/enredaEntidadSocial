@@ -786,6 +786,11 @@ class StringConst {
   static const String SESION_BUTTON_GCAL = 'Añadir a Google Calendar';
   static const String SESION_GCAL_UNSUPPORTED =
       'La integración con Google Calendar solo está disponible en la versión web.';
+
+  // Calendar event description (gCal compose URL + ICS DESCRIPTION field).
+  static const String CALENDARIO_EVENT_INICIO_LABEL = 'Inicio';
+  static const String CALENDARIO_EVENT_FIN_LABEL = 'Fin';
+  static const String CALENDARIO_EVENT_PARTICIPANTES_LABEL = 'Participantes';
   static const String SESION_EXPORT_PRONTO =
       'La exportación estará disponible próximamente.';
 
