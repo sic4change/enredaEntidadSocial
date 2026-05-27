@@ -1,3 +1,5 @@
+import 'package:enreda_empresas/app/home/sesiones/calendar/gcal_link.dart';
+import 'package:enreda_empresas/app/home/sesiones/calendar/gcal_open.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/sesion.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -84,7 +86,9 @@ class _DetailContentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final showCtas = onEdit != null || onExport != null;
+    // CTA row is now always shown — the new "Añadir a Google Calendar"
+    // button is always available, even when Editar/Exportar are hidden
+    // (e.g. read-only consumers of SesionDetailContent).
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -146,10 +150,12 @@ class _DetailContentCard extends StatelessWidget {
               fontWeight: FontWeight.w300,
             ),
           ),
-          if (showCtas) ...[
-            const SizedBox(height: Sizes.PADDING_30),
-            _DetailCtaRow(onEdit: onEdit, onExport: onExport),
-          ],
+          const SizedBox(height: Sizes.PADDING_30),
+          _DetailCtaRow(
+            sesion: sesion,
+            onEdit: onEdit,
+            onExport: onExport,
+          ),
         ],
       ),
     );
@@ -164,7 +170,12 @@ class _DetailContentCard extends StatelessWidget {
 }
 
 class _DetailCtaRow extends StatelessWidget {
-  const _DetailCtaRow({required this.onEdit, required this.onExport});
+  const _DetailCtaRow({
+    required this.sesion,
+    required this.onEdit,
+    required this.onExport,
+  });
+  final Sesion sesion;
   final VoidCallback? onEdit;
   final VoidCallback? onExport;
 
@@ -172,7 +183,7 @@ class _DetailCtaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    Widget cta(String label, VoidCallback onTap, {Color? bg}) {
+    Widget filledCta(String label, VoidCallback onTap, {Color? bg}) {
       return SizedBox(
         width: 154,
         height: Sizes.HEIGHT_50,
@@ -196,17 +207,66 @@ class _DetailCtaRow extends StatelessWidget {
       );
     }
 
+    // "Añadir a Google Calendar" — outlined variant. Differentiates the
+    // external-link action from the in-app Editar / Exportar pills so the
+    // user has a clear visual cue that this opens a new browser tab.
+    Widget gcalCta() {
+      return SizedBox(
+        height: Sizes.HEIGHT_50,
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary900,
+            side: const BorderSide(color: AppColors.primary400),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Sizes.PADDING_20,
+            ),
+          ),
+          onPressed: () => _handleAddToGcal(context),
+          icon: const Icon(
+            Icons.event_available_outlined,
+            color: AppColors.primary400,
+            size: Sizes.ICON_SIZE_20,
+          ),
+          label: Text(
+            StringConst.SESION_BUTTON_GCAL,
+            style: textTheme.bodyLarge?.copyWith(
+              color: AppColors.primary900,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Wrap(
       spacing: Sizes.PADDING_16,
       runSpacing: Sizes.PADDING_12,
       alignment: WrapAlignment.end,
       children: [
+        gcalCta(),
         if (onEdit != null)
-          cta(StringConst.SESION_BUTTON_EDITAR, onEdit!),
+          filledCta(StringConst.SESION_BUTTON_EDITAR, onEdit!),
         if (onExport != null)
-          cta(StringConst.SESION_BUTTON_EXPORTAR, onExport!),
+          filledCta(StringConst.SESION_BUTTON_EXPORTAR, onExport!),
       ],
     );
+  }
+
+  void _handleAddToGcal(BuildContext context) {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final url = buildGoogleCalendarUrl(sesion);
+      openExternalUrl(url);
+    } on UnsupportedError {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(StringConst.SESION_GCAL_UNSUPPORTED),
+        ),
+      );
+    }
   }
 }
 

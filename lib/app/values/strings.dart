@@ -783,6 +783,9 @@ class StringConst {
       'Esta sesión no tiene participantes convocados.';
   static const String SESION_BUTTON_EDITAR = 'Editar';
   static const String SESION_BUTTON_EXPORTAR = 'Exportar';
+  static const String SESION_BUTTON_GCAL = 'Añadir a Google Calendar';
+  static const String SESION_GCAL_UNSUPPORTED =
+      'La integración con Google Calendar solo está disponible en la versión web.';
   static const String SESION_EXPORT_PRONTO =
       'La exportación estará disponible próximamente.';
 
