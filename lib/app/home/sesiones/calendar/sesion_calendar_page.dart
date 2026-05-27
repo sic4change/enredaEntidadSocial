@@ -1,3 +1,5 @@
+import 'package:enreda_empresas/app/home/sesiones/calendar/gcal_link.dart';
+import 'package:enreda_empresas/app/home/sesiones/calendar/gcal_open.dart';
 import 'package:enreda_empresas/app/home/sesiones/calendar/ics_download.dart';
 import 'package:enreda_empresas/app/home/sesiones/calendar/ics_export.dart';
 import 'package:enreda_empresas/app/home/sesiones/widgets/sesion_list_tile.dart';
@@ -957,23 +959,76 @@ class _ScheduledSessionRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Time prefix on the left + per-session "Añadir a Google Calendar"
+          // icon on the right. Tap → opens the gCal compose tab pre-filled
+          // with this session's data.
           Padding(
             padding: const EdgeInsets.only(
               left: Sizes.PADDING_8,
+              right: Sizes.PADDING_4,
               bottom: Sizes.PADDING_4,
             ),
-            child: Text(
-              _formatSessionTimePrefix(sesion),
-              style: textTheme.bodySmall?.copyWith(
-                color: AppColors.primary500,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  _formatSessionTimePrefix(sesion),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.primary500,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                _GcalAddIconButton(sesion: sesion),
+              ],
             ),
           ),
           SesionListTile(sesion: sesion, onTap: onTap),
         ],
       ),
     );
+  }
+}
+
+/// Compact icon button rendered next to the time prefix on each session row.
+/// Tap opens a Google Calendar TEMPLATE URL in a new browser tab pre-filled
+/// with the session's title, dates, description and location. The user
+/// clicks Save in their own calendar — no backend involvement.
+///
+/// On non-web platforms the underlying `openExternalUrl` throws
+/// [UnsupportedError]; we catch it and surface a Spanish snackbar.
+class _GcalAddIconButton extends StatelessWidget {
+  const _GcalAddIconButton({required this.sesion});
+
+  final Sesion sesion;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: StringConst.SESION_BUTTON_GCAL,
+      onPressed: () => _handleAdd(context),
+      padding: const EdgeInsets.all(Sizes.PADDING_4),
+      constraints: const BoxConstraints(),
+      visualDensity: VisualDensity.compact,
+      icon: const Icon(
+        Icons.event_available_outlined,
+        color: AppColors.primary400,
+        size: Sizes.ICON_SIZE_20,
+      ),
+    );
+  }
+
+  void _handleAdd(BuildContext context) {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      openExternalUrl(buildGoogleCalendarUrl(sesion));
+    } on UnsupportedError {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(StringConst.SESION_GCAL_UNSUPPORTED),
+        ),
+      );
+    }
   }
 }
 
