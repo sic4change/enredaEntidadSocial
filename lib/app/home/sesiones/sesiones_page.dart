@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
-import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/home/sesiones/calendar/sesion_calendar_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -345,15 +344,42 @@ class _HeaderRow extends StatelessWidget {
       ),
     );
 
-    final cta = EnredaButtonIcon(
-      buttonTitle: StringConst.CREAR_NUEVA_SESION,
+    // Rebuilt per Figma correction #1: a pill-shaped FilledButton with
+    // primary400 background, label "Crear nueva sesión" (bodyLarge w600),
+    // and the Figma-extracted plus glyph (`cta_plus.svg`) as the trailing
+    // icon. Replaces the previous EnredaButtonIcon, which inherited
+    // 0-right padding and rendered the icon flush against the edge — not
+    // matching the Figma CTA in frame 1:602.
+    final cta = FilledButton(
       onPressed: onCreate,
-      // Figma-extracted plus glyph (`SESIONES_ICON_CTA_PLUS`) instead of a
-      // Material outline icon — matches the exact CTA appearance in frame 1:602.
-      widget: SvgPicture.asset(
-        ImagePath.SESIONES_ICON_CTA_PLUS,
-        width: Sizes.ICON_SIZE_30,
-        height: Sizes.ICON_SIZE_30,
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.primary400,
+        foregroundColor: AppColors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Sizes.PADDING_24,
+          vertical: Sizes.PADDING_12,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            StringConst.CREAR_NUEVA_SESION,
+            style: textTheme.bodyLarge?.copyWith(
+              color: AppColors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: Sizes.PADDING_12),
+          SvgPicture.asset(
+            ImagePath.SESIONES_ICON_CTA_PLUS,
+            width: Sizes.ICON_SIZE_30,
+            height: Sizes.ICON_SIZE_30,
+          ),
+        ],
       ),
     );
 
