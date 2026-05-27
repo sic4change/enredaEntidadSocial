@@ -9,6 +9,7 @@ class SesionDraft {
     required this.title,
     required this.modality,
     required this.scheduledAt,
+    required this.fechaFin,
     required this.isAllDay,
     required this.lugar,
     required this.duracion,
@@ -25,6 +26,7 @@ class SesionDraft {
   final String? title;
   final String modality;
   final DateTime? scheduledAt;
+  final DateTime? fechaFin;
   final bool isAllDay;
   final String? lugar;
   final String? duracion;

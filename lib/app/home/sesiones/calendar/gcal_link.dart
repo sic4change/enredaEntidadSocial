@@ -86,16 +86,16 @@ String _descriptionFor(Sesion s, Map<String, String>? participantNames) {
 
 /// Two-line `Inicio: …` + `Fin: …` block, or the single all-day badge.
 ///
-/// The end timestamp is currently derived from [Sesion.duracion] via the
-/// heuristic [_parseDuration]. Once the model gains an explicit
-/// `Sesion.fechaFin` field (planned per `sesiones-correcciones-figma.md`
-/// item #5), swap this duration-derived end for `s.fechaFin` directly.
+/// Prefers the model's explicit [Sesion.fechaFin] when set. Legacy documents
+/// without that field fall back to the heuristic [_parseDuration] over
+/// `duracion`. The same precedence is used by [_datesParam] / DTEND.
 String _timingFor(Sesion s) {
   if (s.isAllDay) {
     return '${StringConst.SESION_TODO_EL_DIA_BADGE} — ${_formatDateLong(s.scheduledAt)}';
   }
   final start = s.scheduledAt;
-  final end = start.add(_parseDuration(s.duracion) ?? const Duration(hours: 1));
+  final end = s.fechaFin ??
+      start.add(_parseDuration(s.duracion) ?? const Duration(hours: 1));
   return '${StringConst.CALENDARIO_EVENT_INICIO_LABEL}: ${_formatDateTimeLong(start)}\n'
       '${StringConst.CALENDARIO_EVENT_FIN_LABEL}: ${_formatDateTimeLong(end)}';
 }
@@ -151,12 +151,16 @@ String _formatDateTimeLong(DateTime d) {
 String _datesParam(Sesion s, Duration fallbackDuration) {
   if (s.isAllDay) {
     // gCal expects exclusive end: a one-day all-day event is `D/D+1`.
+    // When the model carries an explicit `fechaFin`, honour it.
     final start = s.scheduledAt;
-    final end = start.add(const Duration(days: 1));
+    final end = s.fechaFin ?? start.add(const Duration(days: 1));
     return '${_date(start)}/${_date(end)}';
   }
   final start = s.scheduledAt.toUtc();
-  final end = start.add(_parseDuration(s.duracion) ?? fallbackDuration);
+  // Prefer the explicit end timestamp from the model; fall back to the
+  // heuristic duration parse for legacy docs that pre-date the field.
+  final end = s.fechaFin?.toUtc() ??
+      start.add(_parseDuration(s.duracion) ?? fallbackDuration);
   return '${_utc(start)}/${_utc(end)}';
 }
 

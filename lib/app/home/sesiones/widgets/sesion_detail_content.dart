@@ -490,6 +490,7 @@ class _ParticipantPanelState extends State<_ParticipantPanel> {
       sessionType: s.sessionType,
       modality: s.modality,
       scheduledAt: s.scheduledAt,
+      fechaFin: s.fechaFin,
       isAllDay: s.isAllDay,
       invitedParticipants: s.invitedParticipants,
       attendedParticipants: attendedParticipants,

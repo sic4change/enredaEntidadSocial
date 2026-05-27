@@ -69,6 +69,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
   String? _title;
   String _modality = SesionModality.presencial;
   DateTime? _scheduledAt;
+  DateTime? _fechaFin;
   bool _isAllDay = false;
   String? _lugar;
   String? _duracion;
@@ -112,6 +113,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       _title = seed.title;
       _modality = seed.modality;
       _scheduledAt = seed.scheduledAt;
+      _fechaFin = seed.fechaFin;
       _isAllDay = seed.isAllDay;
       _lugar = seed.lugar;
       _duracion = seed.duracion;
@@ -191,6 +193,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
           initialTitle: _title,
           initialModality: _modality,
           initialScheduledAt: _scheduledAt,
+          initialFechaFin: _fechaFin,
           initialIsAllDay: _isAllDay,
           initialLugar: _lugar,
           initialDuracion: _duracion,
@@ -245,6 +248,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
     required String? title,
     required String modality,
     required DateTime? scheduledAt,
+    required DateTime? fechaFin,
     required bool isAllDay,
     required String? lugar,
     required String? duracion,
@@ -259,6 +263,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       _title = title;
       _modality = modality;
       _scheduledAt = scheduledAt;
+      _fechaFin = fechaFin;
       _isAllDay = isAllDay;
       _lugar = lugar;
       _duracion = duracion;
@@ -390,6 +395,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       sessionType: _sessionType,
       modality: _modality,
       scheduledAt: _scheduledAt ?? seed?.scheduledAt ?? now,
+      fechaFin: _fechaFin ?? seed?.fechaFin,
       isAllDay: _isAllDay,
       invitedParticipants: List<String>.from(_invitedParticipants),
       // Preserve attendance when editing — it's edited from the detail page,
@@ -483,6 +489,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
         title: _title,
         modality: _modality,
         scheduledAt: _scheduledAt,
+        fechaFin: _fechaFin,
         isAllDay: _isAllDay,
         lugar: _lugar,
         duracion: _duracion,

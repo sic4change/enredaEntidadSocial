@@ -16,6 +16,7 @@ typedef Step1Submit = void Function({
   required String? title,
   required String modality,
   required DateTime? scheduledAt,
+  required DateTime? fechaFin,
   required bool isAllDay,
   required String? lugar,
   required String? duracion,
@@ -41,6 +42,7 @@ class CreateSesionStep1 extends StatefulWidget {
     required this.initialTitle,
     required this.initialModality,
     required this.initialScheduledAt,
+    required this.initialFechaFin,
     required this.initialIsAllDay,
     required this.initialLugar,
     required this.initialDuracion,
@@ -58,6 +60,7 @@ class CreateSesionStep1 extends StatefulWidget {
   final String? initialTitle;
   final String initialModality;
   final DateTime? initialScheduledAt;
+  final DateTime? initialFechaFin;
   final bool initialIsAllDay;
   final String? initialLugar;
   final String? initialDuracion;
@@ -84,6 +87,15 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
     widget.initialScheduledAt,
     widget.initialIsAllDay,
   );
+  // Hora de fin defaults to 1 hour after the start when no fechaFin was
+  // provided (i.e. a fresh "Crear nueva sesión" flow). In edit mode we
+  // seed from the existing `fechaFin` so the user sees their saved value.
+  late TimeOfDay _fechaFinTime = _fechaFinToTimeOfDay(
+    widget.initialFechaFin,
+    widget.initialScheduledAt,
+    widget.initialIsAllDay,
+  );
+  String? _horaFinError;
   late String? _lugar = widget.initialLugar;
   late String? _duracion = widget.initialDuracion;
   late bool _createIpil = widget.initialCreateIpil;
@@ -147,16 +159,39 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
                     ),
                   ),
                 ),
-                // Hora (hidden when Todo el día is on)
-                if (!_isAllDay)
+                // Hora de inicio + Hora de fin (hidden when Todo el día).
+                // Same-day end is the common case; when the técnica needs a
+                // multi-day session she can mark "Todo el día" or extend
+                // the duration field. Once the model gains a separate
+                // `fechaFin` date picker (per sesiones-correcciones-figma
+                // item #5), this row becomes Fecha de inicio + Fecha de fin.
+                if (!_isAllDay) ...[
                   _LabeledBlock(
                     label: StringConst.SESION_FIELD_HORA_LABEL,
                     child: _TimePickerField(
                       value: _scheduledTime,
-                      onChanged: (t) =>
-                          setState(() => _scheduledTime = t),
+                      onChanged: (t) {
+                        setState(() {
+                          _scheduledTime = t;
+                          _horaFinError = null;
+                        });
+                      },
                     ),
                   ),
+                  _LabeledBlock(
+                    label: StringConst.SESION_FIELD_HORA_FIN_LABEL,
+                    child: _TimePickerField(
+                      value: _fechaFinTime,
+                      errorText: _horaFinError,
+                      onChanged: (t) {
+                        setState(() {
+                          _fechaFinTime = t;
+                          _horaFinError = null;
+                        });
+                      },
+                    ),
+                  ),
+                ],
                 // Todo el día toggle — when on, time picker is hidden and
                 // session sorts to the top of its day in the calendar.
                 _LabeledBlock(
@@ -350,10 +385,26 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
   void _onSiguiente() {
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
+
+    // Cross-field validator: Hora de fin must be later than Hora de inicio
+    // when the session has a specific hour (not all-day). Same-day end is
+    // the supported case for now — see step1 comment for the multi-day
+    // future direction.
+    if (!_isAllDay) {
+      final startMin = _scheduledTime.hour * 60 + _scheduledTime.minute;
+      final endMin = _fechaFinTime.hour * 60 + _fechaFinTime.minute;
+      if (endMin <= startMin) {
+        setState(() =>
+            _horaFinError = StringConst.SESION_VALIDATION_HORA_FIN_INVALID);
+        return;
+      }
+    }
+
     widget.onNext(
       title: _title,
       modality: _modality,
       scheduledAt: _combinedScheduledAt(),
+      fechaFin: _combinedFechaFin(),
       isAllDay: _isAllDay,
       lugar: _lugar,
       duracion: _duracion,
@@ -384,6 +435,24 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
       _scheduledTime.minute,
     );
   }
+
+  /// Returns the end DateTime — same calendar day as the start, with the
+  /// chosen `_fechaFinTime`. For all-day sessions returns the next day at
+  /// midnight (matching gCal's exclusive-end convention).
+  DateTime? _combinedFechaFin() {
+    final d = _scheduledAt;
+    if (d == null) return null;
+    if (_isAllDay) {
+      return DateTime(d.year, d.month, d.day).add(const Duration(days: 1));
+    }
+    return DateTime(
+      d.year,
+      d.month,
+      d.day,
+      _fechaFinTime.hour,
+      _fechaFinTime.minute,
+    );
+  }
 }
 
 /// Seeds the time-of-day picker from an existing `scheduledAt` (edit mode)
@@ -394,14 +463,39 @@ TimeOfDay _scheduledAtToTimeOfDay(DateTime? scheduledAt, bool isAllDay) {
   return TimeOfDay(hour: scheduledAt.hour, minute: scheduledAt.minute);
 }
 
+/// Seeds the "Hora de fin" picker. Priority:
+///   1. The persisted `fechaFin` time (edit mode).
+///   2. One hour after the persisted `scheduledAt` (edit mode, no fechaFin).
+///   3. Default 11:00 (one hour after the default 10:00 start).
+TimeOfDay _fechaFinToTimeOfDay(
+  DateTime? fechaFin,
+  DateTime? scheduledAt,
+  bool isAllDay,
+) {
+  if (isAllDay) return const TimeOfDay(hour: 0, minute: 0);
+  if (fechaFin != null) {
+    return TimeOfDay(hour: fechaFin.hour, minute: fechaFin.minute);
+  }
+  if (scheduledAt != null) {
+    final plusHour = scheduledAt.add(const Duration(hours: 1));
+    return TimeOfDay(hour: plusHour.hour, minute: plusHour.minute);
+  }
+  return const TimeOfDay(hour: 11, minute: 0);
+}
+
 /// Read-only text field that opens the native [showTimePicker] on tap.
 /// Mirrors the visual chrome of `CustomDatePickerTitleOpen` so the Fecha /
-/// Hora pair reads as a unit.
+/// Hora pair reads as a unit. Renders [errorText] beneath when provided.
 class _TimePickerField extends StatelessWidget {
-  const _TimePickerField({required this.value, required this.onChanged});
+  const _TimePickerField({
+    required this.value,
+    required this.onChanged,
+    this.errorText,
+  });
 
   final TimeOfDay value;
   final ValueChanged<TimeOfDay> onChanged;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -432,6 +526,7 @@ class _TimePickerField extends StatelessWidget {
           decoration: InputDecoration(
             isDense: true,
             hintText: StringConst.SESION_HORA_PICKER_HINT,
+            errorText: errorText,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: Sizes.PADDING_12,
               vertical: Sizes.PADDING_12,

@@ -20,6 +20,7 @@ class Sesion {
     required this.sessionType,
     required this.modality,
     required this.scheduledAt,
+    this.fechaFin,
     this.isAllDay = false,
     required this.invitedParticipants,
     required this.attendedParticipants,
@@ -94,6 +95,13 @@ class Sesion {
   /// out as midnight scheduled sessions — flag them as all-day from the
   /// edit flow if that's the intended meaning.
   final bool isAllDay;
+
+  /// Optional explicit end timestamp. When set, the gCal / ICS exports use
+  /// this directly for the event's DTEND instead of deriving it from the
+  /// free-text `duracion` field. Nullable so legacy Firestore documents
+  /// (which only ever wrote `scheduledAt`) keep working — the exports fall
+  /// back to the duration heuristic in that case.
+  final DateTime? fechaFin;
 
   /// IDs of invited participants. Always an array — even for individual
   /// sessions (length 1). Type-mixing guard.
@@ -200,6 +208,7 @@ class Sesion {
       sessionType: data['sessionType']?.toString() ?? 'individual',
       modality: data['modality']?.toString() ?? 'presencial',
       scheduledAt: data['scheduledAt']?.toDate() ?? DateTime.now(),
+      fechaFin: data['fechaFin']?.toDate(),
       isAllDay: data['isAllDay'] == true,
       invitedParticipants: invited,
       attendedParticipants: attended,
@@ -268,6 +277,7 @@ class Sesion {
       'sessionType': sessionType,
       'modality': modality,
       'scheduledAt': scheduledAt,
+      'fechaFin': fechaFin,
       'isAllDay': isAllDay,
       'invitedParticipants': invitedParticipants,
       'attendedParticipants': attendedParticipants,

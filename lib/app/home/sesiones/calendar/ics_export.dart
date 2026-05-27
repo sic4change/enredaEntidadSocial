@@ -60,17 +60,19 @@ void _writeEvent(
     ..write('DTSTAMP:$dtstamp\r\n');
 
   if (s.isAllDay) {
-    // gCal / RFC 5545 convention: end date is exclusive — the day AFTER the
-    // last day the event occupies. For a single-day all-day event that means
-    // end = start + 1 day.
+    // RFC 5545 / gCal convention: end date is exclusive — the day AFTER the
+    // last day the event occupies. Honour `fechaFin` when the form supplied
+    // an explicit end; otherwise default to a single-day event (start + 1).
     final start = s.scheduledAt;
-    final end = start.add(const Duration(days: 1));
+    final end = s.fechaFin ?? start.add(const Duration(days: 1));
     buf
       ..write('DTSTART;VALUE=DATE:${_date(start)}\r\n')
       ..write('DTEND;VALUE=DATE:${_date(end)}\r\n');
   } else {
     final start = s.scheduledAt.toUtc();
-    final end = start.add(_parseDuration(s.duracion));
+    // Prefer the model's explicit end timestamp; fall back to duration
+    // heuristic for legacy documents that pre-date the `fechaFin` field.
+    final end = s.fechaFin?.toUtc() ?? start.add(_parseDuration(s.duracion));
     buf
       ..write('DTSTART:${_utc(start)}\r\n')
       ..write('DTEND:${_utc(end)}\r\n');
@@ -133,16 +135,15 @@ String _descriptionFor(Sesion s, Map<String, String>? participantNames) {
 
 /// `Inicio:` + `Fin:` block, or the single all-day badge.
 ///
-/// Once the model gains an explicit `Sesion.fechaFin` field (planned per
-/// `sesiones-correcciones-figma.md` item #5), replace the duration-derived
-/// end with `s.fechaFin` directly. The DTEND iCal property in [_writeEvent]
-/// will need the same swap.
+/// Prefers the model's explicit [Sesion.fechaFin] when set. Legacy documents
+/// without that field fall back to the heuristic [_parseDuration] over
+/// `duracion`. Same precedence used by [_writeEvent] for DTEND.
 String _timingFor(Sesion s) {
   if (s.isAllDay) {
     return '${StringConst.SESION_TODO_EL_DIA_BADGE} — ${_formatDateLong(s.scheduledAt)}';
   }
   final start = s.scheduledAt;
-  final end = start.add(_parseDuration(s.duracion));
+  final end = s.fechaFin ?? start.add(_parseDuration(s.duracion));
   return '${StringConst.CALENDARIO_EVENT_INICIO_LABEL}: ${_formatDateTimeLong(start)}\n'
       '${StringConst.CALENDARIO_EVENT_FIN_LABEL}: ${_formatDateTimeLong(end)}';
 }

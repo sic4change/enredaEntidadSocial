@@ -148,6 +148,7 @@ class _SesionExportPageState extends State<SesionExportPage> {
       sessionType: s.sessionType,
       modality: s.modality,
       scheduledAt: s.scheduledAt,
+      fechaFin: s.fechaFin,
       isAllDay: s.isAllDay,
       invitedParticipants: s.invitedParticipants,
       attendedParticipants: s.attendedParticipants,
