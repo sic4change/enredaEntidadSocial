@@ -213,8 +213,13 @@ class _SesionListTileState extends State<SesionListTile> {
                                   child: Center(
                                     child: Text(
                                       _participantsLabel(widget.sesion),
+                                      // Matches the date line — Inter 300 / 14 —
+                                      // so the centred participant label and the
+                                      // date under the title sit at the same
+                                      // visual weight.
                                       style: textTheme.bodyMedium?.copyWith(
                                         color: AppColors.seaBlue,
+                                        fontSize: Sizes.TEXT_SIZE_14,
                                         fontWeight: FontWeight.w300,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -331,16 +336,25 @@ class _TitleAndDate extends StatelessWidget {
       children: [
         Text(
           _titleFor(sesion),
+          // Figma `style_GWRSJ3`: Inter 500 / 20px. The theme's default
+          // titleMedium is 18 w400 — explicit fontSize + weight bump it
+          // to match the design without touching the global theme.
           style: textTheme.titleMedium?.copyWith(
             color: AppColors.primary900,
+            fontSize: Sizes.TEXT_SIZE_20,
+            fontWeight: FontWeight.w500,
           ),
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: Sizes.PADDING_4),
         Text(
           _formatDate(sesion.scheduledAt),
-          style: textTheme.bodySmall?.copyWith(
+          // Figma `style_R1WIEM`: Inter 300 / 14px. Was rendering at the
+          // theme's bodySmall (Outfit 12 w400) which looked anaemic next
+          // to the title.
+          style: textTheme.bodyMedium?.copyWith(
             color: AppColors.seaBlue,
+            fontSize: Sizes.TEXT_SIZE_14,
             fontWeight: FontWeight.w300,
           ),
           overflow: TextOverflow.ellipsis,
