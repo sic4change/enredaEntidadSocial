@@ -1,4 +1,3 @@
-import 'package:enreda_empresas/app/common_widgets/custom_date_picker_open.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/home/sesiones/create/widgets/participant_picker.dart';
@@ -9,6 +8,7 @@ import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 /// Callback signature emitted by Step 1 on a valid Siguiente tap. The parent
 /// flow widget consumes this and either jumps to the IPIL stub or Revisión.
@@ -86,18 +86,19 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
   // (`isAllDay` is hard-coded false) so the gCal compose URL + ICS DTEND
   // get accurate start / end timestamps.
   late DateTime? _scheduledAt = _stripTime(widget.initialScheduledAt);
-  late TimeOfDay _scheduledTime = _scheduledAtToTimeOfDay(
-    widget.initialScheduledAt,
-  );
-  late TimeOfDay _horaFin = _horaFinFromSeed(
-    widget.initialFechaFin,
-    widget.initialScheduledAt,
-  );
+  // Nullable so the pickers render their hint ("Hora de inicio" /
+  // "Hora de fin") on a fresh form instead of seeded defaults. Edit
+  // mode round-trips the persisted times.
+  late TimeOfDay? _scheduledTime =
+      _timeOfDayFromDate(widget.initialScheduledAt);
+  late TimeOfDay? _horaFin = _timeOfDayFromDate(widget.initialFechaFin);
   // `isAllDay = false` permanently now — every form submission produces a
   // session with explicit start / end timestamps. Kept as a private
   // constant so the rest of the file (save handler) reads the same way.
   static const bool _isAllDay = false;
+  String? _horaInicioError;
   String? _horaFinError;
+  String? _fechaError;
   late String? _lugar = widget.initialLugar;
   late bool _createIpil = widget.initialCreateIpil;
   late String _sessionType = widget.initialSessionType;
@@ -133,49 +134,47 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
             const SizedBox(height: Sizes.PADDING_20),
             // Fecha de inicio + Hora de inicio + Hora de fin on the left
             // (one date picker, two time pickers); Tipo de sesión pushed to
-            // the far right via Spacer. The three time-related fields drive
-            // accurate start/end timestamps for the gCal compose link and
-            // ICS DTEND export.
+            // the far right via Spacer. All three boxes share the same chrome
+            // (white fill, greyUltraLight border, RADIUS_6, HEIGHT_46) so they
+            // read as a unit matching the rest of the form fields.
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _LabeledBlock(
-                  label: StringConst.SESION_FIELD_FECHA_INICIO_LABEL,
+                  label: StringConst.SESION_FIELD_FECHA_LABEL,
                   child: SizedBox(
-                    width: 200,
-                    child: CustomDatePickerTitleOpen(
-                      labelText: '',
-                      initialValue: _scheduledAt,
+                    width: 240,
+                    child: _DatePickerField(
+                      value: _scheduledAt,
+                      errorText: _fechaError,
                       onChanged: (d) => setState(() {
                         _scheduledAt = _stripTime(d);
                         _horaFinError = null;
+                        _fechaError = null;
                       }),
-                      validator: (d) {
-                        if (d == null) {
-                          return StringConst
-                              .SESION_VALIDATION_FECHA_REQUIRED;
-                        }
-                        return null;
-                      },
                     ),
                   ),
                 ),
-                const SizedBox(width: Sizes.PADDING_16),
+                const SizedBox(width: Sizes.PADDING_20),
                 _LabeledBlock(
                   label: StringConst.SESION_FIELD_HORA_LABEL,
                   child: _TimePickerField(
                     value: _scheduledTime,
+                    hint: StringConst.SESION_FIELD_HORA_LABEL,
+                    errorText: _horaInicioError,
                     onChanged: (t) => setState(() {
                       _scheduledTime = t;
+                      _horaInicioError = null;
                       _horaFinError = null;
                     }),
                   ),
                 ),
-                const SizedBox(width: Sizes.PADDING_16),
+                const SizedBox(width: Sizes.PADDING_20),
                 _LabeledBlock(
                   label: StringConst.SESION_FIELD_HORA_FIN_LABEL,
                   child: _TimePickerField(
                     value: _horaFin,
+                    hint: StringConst.SESION_FIELD_HORA_FIN_LABEL,
                     errorText: _horaFinError,
                     onChanged: (t) => setState(() {
                       _horaFin = t;
@@ -393,12 +392,32 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
 
+    // Required-field checks for the three bespoke pickers (Fecha + 2 Horas).
+    // None of them are FormFields, so we surface their errors inline.
+    if (_scheduledAt == null) {
+      setState(() =>
+          _fechaError = StringConst.SESION_VALIDATION_FECHA_REQUIRED);
+      return;
+    }
+    final inicio = _scheduledTime;
+    if (inicio == null) {
+      setState(() => _horaInicioError =
+          StringConst.SESION_VALIDATION_HORA_INICIO_REQUIRED);
+      return;
+    }
+    final fin = _horaFin;
+    if (fin == null) {
+      setState(() => _horaFinError =
+          StringConst.SESION_VALIDATION_HORA_FIN_REQUIRED);
+      return;
+    }
+
     // Cross-field validator: Hora de fin must be later than Hora de
     // inicio (same calendar day — multi-day sessions can use the
     // Duración field on the model if needed, but the form treats the
     // event as same-day for now).
-    final startMin = _scheduledTime.hour * 60 + _scheduledTime.minute;
-    final endMin = _horaFin.hour * 60 + _horaFin.minute;
+    final startMin = inicio.hour * 60 + inicio.minute;
+    final endMin = fin.hour * 60 + fin.minute;
     if (endMin <= startMin) {
       setState(() => _horaFinError =
           StringConst.SESION_VALIDATION_HORA_FIN_INVALID);
@@ -425,17 +444,14 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
     );
   }
 
-  /// Combines the picked Fecha de inicio with Hora de inicio.
+  /// Combines the picked Fecha de inicio with Hora de inicio. Returns `null`
+  /// when either piece is unset — `_onSiguiente` guards against that path so
+  /// the parent only ever sees a fully-formed timestamp.
   DateTime? _combinedScheduledAt() {
     final d = _scheduledAt;
-    if (d == null) return null;
-    return DateTime(
-      d.year,
-      d.month,
-      d.day,
-      _scheduledTime.hour,
-      _scheduledTime.minute,
-    );
+    final t = _scheduledTime;
+    if (d == null || t == null) return null;
+    return DateTime(d.year, d.month, d.day, t.hour, t.minute);
   }
 
   /// Combines the picked Fecha de inicio with Hora de fin — assumed to be
@@ -443,14 +459,9 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
   /// DTEND.
   DateTime? _combinedFechaFin() {
     final d = _scheduledAt;
-    if (d == null) return null;
-    return DateTime(
-      d.year,
-      d.month,
-      d.day,
-      _horaFin.hour,
-      _horaFin.minute,
-    );
+    final t = _horaFin;
+    if (d == null || t == null) return null;
+    return DateTime(d.year, d.month, d.day, t.hour, t.minute);
   }
 }
 
@@ -459,57 +470,95 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
 DateTime? _stripTime(DateTime? d) =>
     d == null ? null : DateTime(d.year, d.month, d.day);
 
-/// Seeds the Hora de inicio picker from the persisted `scheduledAt`:
-///   * Edit mode: returns the hour/minute of the stored timestamp.
-///   * New session: defaults to 10:00.
-TimeOfDay _scheduledAtToTimeOfDay(DateTime? scheduledAt) {
-  if (scheduledAt == null) return const TimeOfDay(hour: 10, minute: 0);
-  return TimeOfDay(hour: scheduledAt.hour, minute: scheduledAt.minute);
-}
+/// Returns the hour/minute of [d] as a [TimeOfDay], or `null` when [d] is
+/// `null`. Used to seed the Hora pickers — only edit mode passes a value;
+/// fresh forms start empty so the hint stays visible.
+TimeOfDay? _timeOfDayFromDate(DateTime? d) =>
+    d == null ? null : TimeOfDay(hour: d.hour, minute: d.minute);
 
-/// Seeds the Hora de fin picker:
-///   1. Persisted `fechaFin` time (edit mode where fechaFin was stored).
-///   2. One hour after the persisted `scheduledAt` (edit, no fechaFin).
-///   3. Default 11:00 (one hour after the default start).
-TimeOfDay _horaFinFromSeed(
-  DateTime? fechaFin,
-  DateTime? scheduledAt,
-) {
-  if (fechaFin != null) {
-    return TimeOfDay(hour: fechaFin.hour, minute: fechaFin.minute);
-  }
-  if (scheduledAt != null) {
-    final plusHour = scheduledAt.add(const Duration(hours: 1));
-    return TimeOfDay(hour: plusHour.hour, minute: plusHour.minute);
-  }
-  return const TimeOfDay(hour: 11, minute: 0);
-}
-
-/// Read-only text field that opens the native [showTimePicker] on tap.
-/// Mirrors the visual chrome of `CustomDatePickerTitleOpen` so the date /
-/// time pickers read as a unit. Renders [errorText] beneath when provided.
-class _TimePickerField extends StatelessWidget {
-  const _TimePickerField({
+/// Read-only field that opens the native [showDatePicker] on tap. Delegates
+/// the visual shell to [_PickerBox] so Fecha / Hora inicio / Hora fin all
+/// render as identical boxes with a circle-bordered prefix glyph on the left.
+/// Renders [errorText] beneath when provided (used for the required-field
+/// check on Siguiente).
+class _DatePickerField extends StatelessWidget {
+  const _DatePickerField({
     required this.value,
     required this.onChanged,
     this.errorText,
   });
 
-  final TimeOfDay value;
+  final DateTime? value;
+  final ValueChanged<DateTime?> onChanged;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    return _PickerBox(
+      icon: Icons.calendar_today_outlined,
+      hint: StringConst.SESION_FECHA_PICKER_HINT,
+      formattedValue:
+          value == null ? null : DateFormat('dd/MM/yyyy').format(value!),
+      errorText: errorText,
+      onTap: () async {
+        final now = DateTime.now();
+        final picked = await showDatePicker(
+          context: context,
+          locale: const Locale('es', 'ES'),
+          initialDate: value ?? now,
+          firstDate: DateTime(now.year - 5),
+          lastDate: DateTime(now.year + 5),
+          builder: (context, child) => Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                    primary: AppColors.primary400,
+                    onPrimary: AppColors.white,
+                    onSurface: AppColors.primary900,
+                  ),
+            ),
+            child: child!,
+          ),
+        );
+        if (picked != null) onChanged(picked);
+      },
+    );
+  }
+}
+
+/// Read-only field that opens the native [showTimePicker] on tap. Shares the
+/// [_PickerBox] chrome with [_DatePickerField].
+///
+/// [value] is nullable so the picker starts empty on a fresh form — the
+/// hint stays visible until the user explicitly picks a time. Renders
+/// [errorText] beneath when provided (used by both the required-field
+/// check and the Hora-fin-must-exceed-Hora-inicio cross-field validator
+/// on Siguiente).
+class _TimePickerField extends StatelessWidget {
+  const _TimePickerField({
+    required this.value,
+    required this.hint,
+    required this.onChanged,
+    this.errorText,
+  });
+
+  final TimeOfDay? value;
+  final String hint;
   final ValueChanged<TimeOfDay> onChanged;
   final String? errorText;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return SizedBox(
-      width: 160,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Sizes.RADIUS_8),
+      width: 180,
+      child: _PickerBox(
+        icon: Icons.access_time,
+        hint: hint,
+        formattedValue: value == null ? null : _formatTime(value!),
+        errorText: errorText,
         onTap: () async {
           final picked = await showTimePicker(
             context: context,
-            initialTime: value,
+            initialTime: value ?? const TimeOfDay(hour: 10, minute: 0),
             builder: (context, child) => Theme(
               data: Theme.of(context).copyWith(
                 colorScheme: Theme.of(context).colorScheme.copyWith(
@@ -523,37 +572,6 @@ class _TimePickerField extends StatelessWidget {
           );
           if (picked != null) onChanged(picked);
         },
-        child: InputDecorator(
-          decoration: InputDecoration(
-            isDense: true,
-            hintText: StringConst.SESION_HORA_PICKER_HINT,
-            errorText: errorText,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: Sizes.PADDING_12,
-              vertical: Sizes.PADDING_12,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(Sizes.RADIUS_8),
-              borderSide: const BorderSide(color: AppColors.greyBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(Sizes.RADIUS_8),
-              borderSide: const BorderSide(color: AppColors.greyBorder),
-            ),
-            suffixIcon: const Icon(
-              Icons.access_time,
-              color: AppColors.primary400,
-              size: Sizes.ICON_SIZE_20,
-            ),
-          ),
-          child: Text(
-            _formatTime(value),
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.primary900,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -562,6 +580,119 @@ class _TimePickerField extends StatelessWidget {
     final h = t.hour.toString().padLeft(2, '0');
     final m = t.minute.toString().padLeft(2, '0');
     return '$h:$m';
+  }
+}
+
+/// Shared visual shell for the date / time pickers.
+///
+/// Outer pill: white fill, `AppColors.greyUltraLight` (`#D9D9D9`) 1px stroke,
+/// `RADIUS_6` corners, `HEIGHT_46` — same chrome as the rest of the form
+/// boxes (`CustomTextFormFieldTitle`, etc.).
+///
+/// Prefix glyph: a 32×32 circle with a 1px greyUltraLight outline and a
+/// primary900 icon centred inside — the calendar/clock affordance from the
+/// Figma frame.
+///
+/// Tapping anywhere on the pill fires [onTap]; the parent owns the actual
+/// `showDatePicker` / `showTimePicker` invocation so the locale + theme
+/// overrides stay in one place.
+class _PickerBox extends StatelessWidget {
+  const _PickerBox({
+    required this.icon,
+    required this.hint,
+    required this.formattedValue,
+    required this.onTap,
+    this.errorText,
+  });
+
+  final IconData icon;
+  final String hint;
+
+  /// `null` (or empty) → render [hint] in the muted dropdown-placeholder colour.
+  /// Non-empty → render in `primary900`.
+  final String? formattedValue;
+  final VoidCallback onTap;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final hasValue =
+        formattedValue != null && formattedValue!.isNotEmpty;
+    final hasError = errorText != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(Sizes.RADIUS_6),
+            onTap: onTap,
+            child: Container(
+              height: Sizes.HEIGHT_46,
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(Sizes.RADIUS_6),
+                border: Border.all(
+                  color:
+                      hasError ? AppColors.red : AppColors.greyUltraLight,
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Sizes.PADDING_6,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: Sizes.SIZE_32,
+                    height: Sizes.SIZE_32,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.greyUltraLight,
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: AppColors.primary900,
+                      size: Sizes.ICON_SIZE_18,
+                    ),
+                  ),
+                  const SizedBox(width: Sizes.PADDING_12),
+                  Expanded(
+                    child: Text(
+                      hasValue ? formattedValue! : hint,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: hasValue
+                            ? AppColors.primary900
+                            : AppColors.greyDropMenuBorder,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (hasError) ...[
+          const SizedBox(height: Sizes.PADDING_4),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: Sizes.PADDING_12),
+            child: Text(
+              errorText!,
+              style:
+                  textTheme.bodySmall?.copyWith(color: AppColors.red),
+            ),
+          ),
+        ],
+      ],
+    );
   }
 }
 

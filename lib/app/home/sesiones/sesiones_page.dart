@@ -344,24 +344,25 @@ class _HeaderRow extends StatelessWidget {
       ),
     );
 
-    // Rebuilt per Figma correction #1: a pill-shaped FilledButton with
-    // primary400 background, label "Crear nueva sesión" (bodyLarge w600),
-    // and the Figma-extracted plus glyph (`cta_plus.svg`) as the trailing
-    // icon. Replaces the previous EnredaButtonIcon, which inherited
-    // 0-right padding and rendered the icon flush against the edge — not
-    // matching the Figma CTA in frame 1:602.
+    // Pill-shaped CTA matching the updated Figma frame: primary500 fill, label
+    // "Crear nueva sesión" (bodyLarge w600), and the trailing `cta_plus.svg`
+    // at its native 50×50 so its yellow disc (r=25) aligns flush with the
+    // button's right rounded corner (RADIUS_25).
     final cta = FilledButton(
       onPressed: onCreate,
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary400,
+        backgroundColor: AppColors.primary500,
         foregroundColor: AppColors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: Sizes.PADDING_24,
-          vertical: Sizes.PADDING_12,
+        padding: const EdgeInsets.only(
+          left: Sizes.PADDING_24,
+          right: Sizes.PADDING_0,
+          top: Sizes.PADDING_0,
+          bottom: Sizes.PADDING_0,
         ),
+        minimumSize: const Size(0, Sizes.HEIGHT_50),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -373,11 +374,11 @@ class _HeaderRow extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: Sizes.PADDING_12),
+          const SizedBox(width: Sizes.PADDING_8),
           SvgPicture.asset(
             ImagePath.SESIONES_ICON_CTA_PLUS,
-            width: Sizes.ICON_SIZE_30,
-            height: Sizes.ICON_SIZE_30,
+            width: Sizes.ICON_SIZE_50,
+            height: Sizes.ICON_SIZE_50,
           ),
         ],
       ),

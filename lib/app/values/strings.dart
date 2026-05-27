@@ -723,7 +723,7 @@ class StringConst {
   static const String SESION_FIELD_CREAR_IPIL_HINT = 'Selecciona una opción';
   static const String SESION_FIELD_TODO_EL_DIA = 'Todo el día';
   static const String SESION_TODO_EL_DIA_BADGE = 'Todo el día';
-  static const String SESION_HORA_PICKER_HINT = 'Seleccionar hora';
+  static const String SESION_FECHA_PICKER_HINT = 'Fecha de inicio';
   static const String SESION_FIELD_LUGAR_LABEL = 'Lugar de la actividad';
   static const String SESION_FIELD_DURACION_LABEL = 'Duración';
   static const String SESION_FIELD_CREAR_IPIL_LABEL = 'Creación de IPIL';
@@ -757,6 +757,10 @@ class StringConst {
       'El título es obligatorio.';
   static const String SESION_VALIDATION_FECHA_REQUIRED =
       'La fecha es obligatoria.';
+  static const String SESION_VALIDATION_HORA_INICIO_REQUIRED =
+      'La hora de inicio es obligatoria.';
+  static const String SESION_VALIDATION_HORA_FIN_REQUIRED =
+      'La hora de fin es obligatoria.';
   static const String SESION_IPIL_STEP_TITLE =
       'Detalle IPIL (próximamente)';
   static const String SESION_IPIL_STEP_HINT =

@@ -657,70 +657,21 @@ class _StepPill extends StatelessWidget {
   }
 }
 
-/// Horizontal arrow connecting two adjacent step pills — 2px shaft + small
-/// filled triangle head pointing right. Yellow when the step on the right
-/// has been reached; otherwise a muted grey. Matches the small arrow in the
-/// Figma reference between Info → IPIL and IPIL → Revisión.
+/// Thin horizontal rule between adjacent step pills — matches the updated
+/// Figma reference (no arrowhead). Stays muted grey throughout the flow
+/// since the active state already lives in the pills themselves.
 class _Connector extends StatelessWidget {
   const _Connector({required this.active});
   final bool active;
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? AppColors.yellow : AppColors.violet;
     return Container(
-      height: 14,
-      margin: const EdgeInsets.symmetric(horizontal: Sizes.PADDING_8),
-      child: CustomPaint(
-        size: const Size(double.infinity, 14),
-        painter: _ArrowPainter(color: color),
-      ),
+      height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: Sizes.PADDING_12),
+      color: active ? AppColors.greyBorder : AppColors.greyUltraLight,
     );
   }
-}
-
-/// Draws a horizontal arrow that fills the painter's allotted width.
-///
-/// Geometry:
-///   • Shaft: 2px thick, vertically centred, runs from x=0 to the base of
-///     the arrowhead (with a 1px overlap so they merge cleanly).
-///   • Arrowhead: 10×10 filled triangle. Apex at the far right, base flush
-///     against the right end of the shaft.
-class _ArrowPainter extends CustomPainter {
-  _ArrowPainter({required this.color});
-  final Color color;
-
-  static const double _headWidth = 10;
-  static const double _headHeight = 10;
-  static const double _shaftThickness = 2;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final cy = size.height / 2;
-
-    // Shaft — overlaps the arrowhead base by 1px so the seam is invisible.
-    canvas.drawRect(
-      Rect.fromLTWH(
-        0,
-        cy - _shaftThickness / 2,
-        (size.width - _headWidth + 1).clamp(0, size.width),
-        _shaftThickness,
-      ),
-      paint,
-    );
-
-    // Arrowhead — filled triangle, apex pointing right.
-    final path = Path()
-      ..moveTo(size.width - _headWidth, cy - _headHeight / 2)
-      ..lineTo(size.width, cy)
-      ..lineTo(size.width - _headWidth, cy + _headHeight / 2)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_ArrowPainter old) => old.color != color;
 }
 
 // SesionDraft is exported from `sesion_draft.dart` to avoid a circular

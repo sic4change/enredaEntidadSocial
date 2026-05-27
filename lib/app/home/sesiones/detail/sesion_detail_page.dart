@@ -109,10 +109,30 @@ class _DetailBody extends StatelessWidget {
             const SizedBox(height: Sizes.PADDING_12),
             SesionListTile(sesion: sesion),
             const SizedBox(height: Sizes.PADDING_20),
-            SesionDetailContent(
-              sesion: sesion,
-              onEdit: onEdit,
-              onExport: onExport,
+            // SesionDetailContent renders without chrome (parent provides it).
+            // This Container restores the shadowed card the body used to
+            // carry inline — keeping the detail page visually intact while
+            // the expanded-row case continues to use SesionListTile's outer
+            // card as the unifying surface.
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary900.withOpacity(0.12),
+                    blurRadius: Sizes.PADDING_20,
+                    offset: const Offset(0, 0),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(Sizes.PADDING_12),
+              clipBehavior: Clip.antiAlias,
+              child: SesionDetailContent(
+                sesion: sesion,
+                onEdit: onEdit,
+                onExport: onExport,
+              ),
             ),
           ],
         ),

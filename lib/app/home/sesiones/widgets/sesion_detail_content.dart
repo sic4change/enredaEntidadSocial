@@ -13,9 +13,13 @@ import 'package:provider/provider.dart';
 /// [SesionDetailPage] and inline beneath an expanded [SesionListTile].
 ///
 /// Layout (Figma frame `1:94`):
-///   * Wide viewports: left content card + right participants panel side-by-side.
-///   * Compact viewports: same two cards stacked vertically.
+///   * Wide viewports: left text column + right participants sub-card
+///     side-by-side, with the Editar / Exportar CTAs centred underneath.
+///   * Compact viewports: text column on top, participants sub-card under it,
+///     CTAs centred at the bottom.
 ///
+/// **No outer chrome** — the parent surface (expanded list row, detail page)
+/// supplies the shadowed/rounded card. This widget just lays out the body.
 /// Editar / Exportar CTAs are rendered only when their callback is non-null,
 /// so the same widget can be reused on read-only surfaces.
 class SesionDetailContent extends StatelessWidget {
@@ -33,44 +37,24 @@ class SesionDetailContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCompact = !Responsive.isDesktop(context);
-    // Single unified card per Figma correction #4 — was two side-by-side
-    // shadowed cards. Now one outer Container provides the chrome and the
-    // sub-widgets render flat (no individual shadow / border).
+    final showCtas = onEdit != null || onExport != null;
+
     final body = isCompact
         ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _DetailContentCard(
-                sesion: sesion,
-                onEdit: onEdit,
-                onExport: onExport,
-              ),
-              const SizedBox(height: Sizes.PADDING_20),
-              const Divider(
-                color: AppColors.greyBorder,
-                height: 1,
-                thickness: 1,
-              ),
-              const SizedBox(height: Sizes.PADDING_20),
+              _DetailContentCard(sesion: sesion),
+              const SizedBox(height: Sizes.PADDING_8),
               _ParticipantPanel(sesion: sesion),
             ],
           )
         : IntrinsicHeight(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   flex: 2,
-                  child: _DetailContentCard(
-                    sesion: sesion,
-                    onEdit: onEdit,
-                    onExport: onExport,
-                  ),
-                ),
-                const VerticalDivider(
-                  color: AppColors.greyBorder,
-                  width: 1,
-                  thickness: 1,
+                  child: _DetailContentCard(sesion: sesion),
                 ),
                 Expanded(
                   flex: 1,
@@ -80,41 +64,33 @@ class SesionDetailContent extends StatelessWidget {
             ),
           );
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary900.withOpacity(0.12),
-            blurRadius: Sizes.PADDING_20,
-            offset: const Offset(0, 0),
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        body,
+        if (showCtas) ...[
+          const SizedBox(height: Sizes.PADDING_20),
+          _DetailCtaRow(onEdit: onEdit, onExport: onExport),
+          const SizedBox(height: Sizes.PADDING_8),
         ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: body,
+      ],
     );
   }
 }
 
 class _DetailContentCard extends StatelessWidget {
-  const _DetailContentCard({
-    required this.sesion,
-    required this.onEdit,
-    required this.onExport,
-  });
+  const _DetailContentCard({required this.sesion});
 
   final Sesion sesion;
-  final VoidCallback? onEdit;
-  final VoidCallback? onExport;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final showCtas = onEdit != null || onExport != null;
-    // No outer Container — the wrapping SesionDetailContent provides the
-    // shared shadowed chrome. Just padding + content here.
+    // No outer Container — the parent (SesionDetailContent → expanded row
+    // wrapper / detail page) provides the shadowed card chrome. CTAs no
+    // longer live in this column either; SesionDetailContent renders them
+    // full-width and centred underneath.
     return Padding(
       padding: const EdgeInsets.all(Sizes.PADDING_30),
       child: Column(
@@ -168,10 +144,6 @@ class _DetailContentCard extends StatelessWidget {
               fontWeight: FontWeight.w300,
             ),
           ),
-          if (showCtas) ...[
-            const SizedBox(height: Sizes.PADDING_30),
-            _DetailCtaRow(onEdit: onEdit, onExport: onExport),
-          ],
         ],
       ),
     );
@@ -294,56 +266,73 @@ class _ParticipantPanelState extends State<_ParticipantPanel> {
     final invited = widget.sesion.invitedParticipants;
     final count = invited.length;
 
-    // No outer card chrome — SesionDetailContent's unified Container
-    // provides the shadow + rounded border. Just padding + content here.
+    // Participants live inside their own bordered + softly shadowed
+    // sub-card per the updated Figma — visually separated from the
+    // Título / Desarrollo / Observaciones column but still contained
+    // within the outer SesionDetailContent shell.
     return Padding(
       padding: const EdgeInsets.all(Sizes.PADDING_24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Figma correction #4: "el título de '3 PARTICIPANTES' centrado".
-          // Full-width Center so the count title sits centred regardless
-          // of the panel width.
-          Center(
-            child: Text(
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: Sizes.PADDING_20,
+          vertical: Sizes.PADDING_24,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary900.withOpacity(0.1),
+              blurRadius: Sizes.PADDING_12,
+              offset: const Offset(0, 0),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Figma correction #4: "el título de '3 PARTICIPANTES' centrado".
+            Text(
               '$count ${StringConst.SESION_DETAIL_PARTICIPANTES_HEADER}',
               textAlign: TextAlign.center,
               style: textTheme.headlineSmall?.copyWith(
                 color: AppColors.primary900,
               ),
             ),
-          ),
-          const SizedBox(height: Sizes.PADDING_8),
-          Text(
-            StringConst.SESION_DETAIL_PARTICIPANTES_HELPER,
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.greyTxtAlt,
-              fontWeight: FontWeight.w300,
+            const SizedBox(height: Sizes.PADDING_8),
+            Text(
+              StringConst.SESION_DETAIL_PARTICIPANTES_HELPER,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.greyTxtAlt,
+                fontWeight: FontWeight.w300,
+              ),
             ),
-          ),
-          const SizedBox(height: Sizes.PADDING_20),
-          if (invited.isEmpty)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: Sizes.PADDING_20),
-              child: Text(
-                StringConst.SESION_DETAIL_NO_PARTICIPANTES,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.greyTxtAlt,
+            const SizedBox(height: Sizes.PADDING_20),
+            if (invited.isEmpty)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: Sizes.PADDING_20),
+                child: Text(
+                  StringConst.SESION_DETAIL_NO_PARTICIPANTES,
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: AppColors.greyTxtAlt,
+                  ),
+                ),
+              )
+            else
+              ...invited.map(
+                (id) => _ParticipantAttendanceChip(
+                  userId: id,
+                  attendanceState: _stateFor(id),
+                  saving: _saving,
+                  onMarkAttended: () => _markAttended(id),
+                  onMarkAbsent: () => _markAbsent(id),
                 ),
               ),
-            )
-          else
-            ...invited.map(
-              (id) => _ParticipantAttendanceChip(
-                userId: id,
-                attendanceState: _stateFor(id),
-                saving: _saving,
-                onMarkAttended: () => _markAttended(id),
-                onMarkAbsent: () => _markAbsent(id),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

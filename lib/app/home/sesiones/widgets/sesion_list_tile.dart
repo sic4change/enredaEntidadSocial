@@ -540,19 +540,24 @@ class _ExpandedDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Pure-white body to match the image — the unified row card has one
+    // continuous fill, with just a thin top divider separating the header
+    // strip from the body. Horizontal padding aligns the inner two-column
+    // layout with the header above; vertical padding leaves room for the
+    // centred CTAs at the bottom.
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: AppColors.altWhite,
+        color: AppColors.white,
         border: Border(
           top: BorderSide(color: AppColors.greyBorder),
         ),
       ),
       padding: const EdgeInsets.fromLTRB(
+        Sizes.PADDING_12,
+        Sizes.PADDING_12,
+        Sizes.PADDING_12,
         Sizes.PADDING_24,
-        Sizes.PADDING_22,
-        Sizes.PADDING_24,
-        Sizes.PADDING_22,
       ),
       child: SesionDetailContent(
         sesion: sesion,
