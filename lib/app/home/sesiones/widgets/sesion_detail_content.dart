@@ -33,39 +33,67 @@ class SesionDetailContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCompact = !Responsive.isDesktop(context);
-    if (isCompact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _DetailContentCard(
-            sesion: sesion,
-            onEdit: onEdit,
-            onExport: onExport,
-          ),
-          const SizedBox(height: Sizes.PADDING_20),
-          _ParticipantPanel(sesion: sesion),
-        ],
-      );
-    }
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: _DetailContentCard(
-              sesion: sesion,
-              onEdit: onEdit,
-              onExport: onExport,
+    // Single unified card per Figma correction #4 — was two side-by-side
+    // shadowed cards. Now one outer Container provides the chrome and the
+    // sub-widgets render flat (no individual shadow / border).
+    final body = isCompact
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _DetailContentCard(
+                sesion: sesion,
+                onEdit: onEdit,
+                onExport: onExport,
+              ),
+              const SizedBox(height: Sizes.PADDING_20),
+              const Divider(
+                color: AppColors.greyBorder,
+                height: 1,
+                thickness: 1,
+              ),
+              const SizedBox(height: Sizes.PADDING_20),
+              _ParticipantPanel(sesion: sesion),
+            ],
+          )
+        : IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: _DetailContentCard(
+                    sesion: sesion,
+                    onEdit: onEdit,
+                    onExport: onExport,
+                  ),
+                ),
+                const VerticalDivider(
+                  color: AppColors.greyBorder,
+                  width: 1,
+                  thickness: 1,
+                ),
+                Expanded(
+                  flex: 1,
+                  child: _ParticipantPanel(sesion: sesion),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(width: Sizes.PADDING_20),
-          Expanded(
-            flex: 1,
-            child: _ParticipantPanel(sesion: sesion),
+          );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary900.withOpacity(0.12),
+            blurRadius: Sizes.PADDING_20,
+            offset: const Offset(0, 0),
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
+      child: body,
     );
   }
 }
@@ -85,18 +113,9 @@ class _DetailContentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final showCtas = onEdit != null || onExport != null;
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary900.withOpacity(0.12),
-            blurRadius: Sizes.PADDING_20,
-            offset: const Offset(0, 0),
-          ),
-        ],
-      ),
+    // No outer Container — the wrapping SesionDetailContent provides the
+    // shared shadowed chrome. Just padding + content here.
+    return Padding(
       padding: const EdgeInsets.all(Sizes.PADDING_30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,8 +130,10 @@ class _DetailContentCard extends StatelessWidget {
           const SizedBox(height: Sizes.PADDING_22),
           Text(
             StringConst.SESION_DETAIL_DESARROLLO,
+            // Figma correction #4: section headers now render in turquoise
+            // (primary900 = #054D5E) — was greyTxtAlt.
             style: textTheme.bodyLarge?.copyWith(
-              color: AppColors.greyTxtAlt,
+              color: AppColors.primary900,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -130,8 +151,9 @@ class _DetailContentCard extends StatelessWidget {
           const SizedBox(height: Sizes.PADDING_22),
           Text(
             StringConst.SESION_DETAIL_OBSERVACIONES,
+            // Same turquoise treatment as the Desarrollo header above.
             style: textTheme.bodyLarge?.copyWith(
-              color: AppColors.greyTxtAlt,
+              color: AppColors.primary900,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -196,10 +218,12 @@ class _DetailCtaRow extends StatelessWidget {
       );
     }
 
+    // Centered per Figma correction #4: "los botones de 'editar' y
+    // 'exportar' en el centro" — was right-aligned.
     return Wrap(
       spacing: Sizes.PADDING_16,
       runSpacing: Sizes.PADDING_12,
-      alignment: WrapAlignment.end,
+      alignment: WrapAlignment.center,
       children: [
         if (onEdit != null)
           cta(StringConst.SESION_BUTTON_EDITAR, onEdit!),
@@ -270,20 +294,23 @@ class _ParticipantPanelState extends State<_ParticipantPanel> {
     final invited = widget.sesion.invitedParticipants;
     final count = invited.length;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
-        border: Border.all(color: AppColors.greyBorder),
-      ),
+    // No outer card chrome — SesionDetailContent's unified Container
+    // provides the shadow + rounded border. Just padding + content here.
+    return Padding(
       padding: const EdgeInsets.all(Sizes.PADDING_24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$count ${StringConst.SESION_DETAIL_PARTICIPANTES_HEADER}',
-            style: textTheme.headlineSmall?.copyWith(
-              color: AppColors.primary900,
+          // Figma correction #4: "el título de '3 PARTICIPANTES' centrado".
+          // Full-width Center so the count title sits centred regardless
+          // of the panel width.
+          Center(
+            child: Text(
+              '$count ${StringConst.SESION_DETAIL_PARTICIPANTES_HEADER}',
+              textAlign: TextAlign.center,
+              style: textTheme.headlineSmall?.copyWith(
+                color: AppColors.primary900,
+              ),
             ),
           ),
           const SizedBox(height: Sizes.PADDING_8),
