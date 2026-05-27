@@ -125,7 +125,11 @@ class _AccessPageWebState extends State<AccessPageWeb> {
                                             StringConst.LOOKING_FOR_OPPORTUNITIES,
                                             textAlign: TextAlign.center,
                                             overflow: TextOverflow.ellipsis,
-                                            maxLines: 3,
+                                            // Bumped 3 → 5 so the long
+                                            // Spanish heading wraps fully
+                                            // on 90% zoom / 13" laptops
+                                            // without ellipsising.
+                                            maxLines: 5,
                                             style: textTheme.bodyLarge?.copyWith(
                                               height: 1.5,
                                               color: AppColors.primary900,
@@ -250,35 +254,42 @@ class _AccessPageWebState extends State<AccessPageWeb> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: 34,
-                                      ),
-                                      Spacer(),
-                                      // Flexible so the long Spanish heading
-                                      // can shrink and engage its already-
-                                      // configured ellipsis on narrow
-                                      // viewports instead of overflowing the
-                                      // Row (was throwing "RenderFlex
-                                      // overflowed by 129 pixels" at ~600px
-                                      // wide).
-                                      Flexible(
-                                        child: Text(
-                                          StringConst.LOOKING_FOR_OPPORTUNITIES,
-                                          textAlign: TextAlign.center,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 3,
-                                          style: textTheme.bodyLarge?.copyWith(
-                                            height: 1.5,
-                                            color: AppColors.primary900,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: fontSize,
+                                  // Mirror the _buildLargeBody structure:
+                                  // Padding(symmetric horizontal) + Row with
+                                  // a single Expanded(Text). The previous
+                                  // Container(34) + Spacer + Flexible + Spacer
+                                  // arrangement squeezed the Text to its
+                                  // intrinsic width, so on ~600px laptops
+                                  // (and 90% browser zoom) the long Spanish
+                                  // heading ellipsised before reaching its
+                                  // maxLines budget. Padding gives consistent
+                                  // breathing room; Expanded uses the full
+                                  // remaining width so maxLines (now 5) can
+                                  // actually wrap the text instead of cutting
+                                  // it off.
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: Sizes.PADDING_30,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            StringConst
+                                                .LOOKING_FOR_OPPORTUNITIES,
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 5,
+                                            style: textTheme.bodyLarge?.copyWith(
+                                              height: 1.5,
+                                              color: AppColors.primary900,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: fontSize,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Spacer(),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                   SpaceH12(),
                                   Padding(
