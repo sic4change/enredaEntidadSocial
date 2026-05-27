@@ -557,56 +557,31 @@ class _SesionesListState extends State<_SesionesList> {
         if (items.isEmpty) {
           return _EmptyState(message: widget.emptyMessage);
         }
-        // Single shadowed card wrapping every row, with thin dividers
-        // between sessions. Matches Figma correction #2: "Envolver las
-        // filas en un único contenedor con líneas separadoras".
-        return SingleChildScrollView(
+        // Individual session cards per Figma — each SesionListTile owns
+        // its own shadowed white card with breathing space between rows.
+        // Reverted the shared-container experiment (commit e28f9f3) at the
+        // user's request: the new mockup keeps cards standalone.
+        return ListView.builder(
           padding: const EdgeInsets.only(bottom: Sizes.PADDING_24),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
-              boxShadow: [
-                BoxShadow(
-                  // Same Figma shadow (primary900 @ 20%, 20px blur) — now
-                  // applied once to the wrapper instead of per-row.
-                  color: AppColors.primary900.withOpacity(0.1),
-                  blurRadius: Sizes.PADDING_20,
-                  offset: const Offset(0, 0),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                for (int i = 0; i < items.length; i++) ...[
-                  SesionListTile(
-                    sesion: items[i],
-                    onTap: () => widget.onTapSesion(items[i]),
-                    onEdit: () => widget.onEditSesion(items[i]),
-                    showEditPill: widget.isProximas,
-                    onDelete: widget.isProximas
-                        ? () => widget.onDeleteSesion(items[i])
-                        : null,
-                    onExport: () => widget.onExportSesion(items[i]),
-                    onToggleReminder: widget.isProximas
-                        ? () => widget.onToggleReminder(items[i])
-                        : null,
-                    reminderEnabled:
-                        items[i].reminderUserIds.contains(currentUserId),
-                    showReminder: widget.isProximas,
-                    expandable: true,
-                    inSharedContainer: true,
-                  ),
-                  if (i < items.length - 1)
-                    const Divider(
-                      color: AppColors.greyBorder,
-                      height: 1,
-                      thickness: 1,
-                    ),
-                ],
-              ],
-            ),
-          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final s = items[index];
+            return SesionListTile(
+              sesion: s,
+              onTap: () => widget.onTapSesion(s),
+              onEdit: () => widget.onEditSesion(s),
+              showEditPill: widget.isProximas,
+              onDelete:
+                  widget.isProximas ? () => widget.onDeleteSesion(s) : null,
+              onExport: () => widget.onExportSesion(s),
+              onToggleReminder: widget.isProximas
+                  ? () => widget.onToggleReminder(s)
+                  : null,
+              reminderEnabled: s.reminderUserIds.contains(currentUserId),
+              showReminder: widget.isProximas,
+              expandable: true,
+            );
+          },
         );
       },
     );

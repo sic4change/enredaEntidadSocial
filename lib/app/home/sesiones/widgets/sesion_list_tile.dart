@@ -38,7 +38,6 @@ class SesionListTile extends StatefulWidget {
     this.showReminder = false,
     this.showEditPill = true,
     this.expandable = false,
-    this.inSharedContainer = false,
   });
 
   final Sesion sesion;
@@ -86,12 +85,6 @@ class SesionListTile extends StatefulWidget {
   /// reused inside the detail page, export page, or calendar day list.
   final bool expandable;
 
-  /// When `true`, the tile drops its own card chrome (shadow + rounded
-  /// border) and its bottom-edge arrow tucks just inside the row so it
-  /// doesn't bleed into the divider beneath. Used by the Próximas /
-  /// Pasadas list where every row shares a single outer Container.
-  final bool inSharedContainer;
-
   @override
   State<SesionListTile> createState() => _SesionListTileState();
 }
@@ -116,31 +109,23 @@ class _SesionListTileState extends State<SesionListTile> {
         clipBehavior: Clip.none,
         children: [
           // ── Card (row header + optional expanded details) ──────────────
-          // When [inSharedContainer] is true the outer Próximas / Pasadas
-          // list already provides the shadowed card chrome and renders
-          // Dividers between rows; we drop the per-row shadow and rounded
-          // border so the row blends into the shared surface.
           Material(
             color: Colors.transparent,
             child: Container(
-              decoration: widget.inSharedContainer
-                  ? const BoxDecoration(color: AppColors.white)
-                  : BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
-                      boxShadow: [
-                        BoxShadow(
-                          // Figma: 0 0 20 0 rgba(5,77,94,0.2) — primary900 @ 20%
-                          color: AppColors.primary900.withOpacity(0.2),
-                          blurRadius: Sizes.PADDING_20,
-                          offset: const Offset(0, 0),
-                        ),
-                      ],
-                    ),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
+                boxShadow: [
+                  BoxShadow(
+                    // Figma: 0 0 20 0 rgba(5,77,94,0.2) — primary900 @ 20%
+                    color: AppColors.primary900.withOpacity(0.2),
+                    blurRadius: Sizes.PADDING_20,
+                    offset: const Offset(0, 0),
+                  ),
+                ],
+              ),
               child: ClipRRect(
-                borderRadius: widget.inSharedContainer
-                    ? BorderRadius.zero
-                    : BorderRadius.circular(Sizes.RADIUS_16),
+                borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
                 child: AnimatedSize(
                   duration: const Duration(milliseconds: 200),
                   alignment: Alignment.topCenter,
@@ -266,14 +251,7 @@ class _SesionListTileState extends State<SesionListTile> {
             Positioned(
               left: 0,
               right: 0,
-              // When the tile sits inside a shared container with dividers
-              // between rows, the arrow can't dangle off the bottom edge
-              // (it would clash with the divider). Tuck it 4px inside the
-              // row instead. Stand-alone tiles keep the classic
-              // half-overhang offset.
-              bottom: widget.inSharedContainer
-                  ? Sizes.PADDING_4
-                  : -Sizes.PADDING_12,
+              bottom: -Sizes.PADDING_12,
               child: Align(
                 alignment: Alignment.center,
                 child: _ExpandToggle(
