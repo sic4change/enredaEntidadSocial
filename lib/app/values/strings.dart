@@ -710,10 +710,17 @@ class StringConst {
       'Escribe el título de esta sesión.';
   static const String SESION_FIELD_TIPO_LABEL = 'Tipo de sesión';
   static const String SESION_FIELD_FECHA_LABEL = 'Fecha';
+  static const String SESION_FIELD_FECHA_INICIO_LABEL = 'Fecha de inicio';
+  static const String SESION_FIELD_FECHA_FIN_LABEL = 'Fecha de fin';
   static const String SESION_FIELD_HORA_LABEL = 'Hora de inicio';
   static const String SESION_FIELD_HORA_FIN_LABEL = 'Hora de fin';
   static const String SESION_VALIDATION_HORA_FIN_INVALID =
       'La hora de fin debe ser posterior a la de inicio.';
+  static const String SESION_VALIDATION_FECHA_FIN_INVALID =
+      'La fecha de fin debe ser igual o posterior a la fecha de inicio.';
+  static const String SESION_FIELD_CREAR_IPIL_SI = 'Sí';
+  static const String SESION_FIELD_CREAR_IPIL_NO = 'No';
+  static const String SESION_FIELD_CREAR_IPIL_HINT = 'Selecciona una opción';
   static const String SESION_FIELD_TODO_EL_DIA = 'Todo el día';
   static const String SESION_TODO_EL_DIA_BADGE = 'Todo el día';
   static const String SESION_HORA_PICKER_HINT = 'Seleccionar hora';
