@@ -249,7 +249,10 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
                 children: [
                   Text(
                     StringConst.SESION_FIELD_CONVOCAR_HINT,
-                    style: textTheme.bodySmall?.copyWith(
+                    // Bumped from bodySmall to bodyMedium per Figma
+                    // correction #6 — the previous Inter 14 was too small
+                    // to read comfortably under the section label.
+                    style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.greyTxtAlt,
                       fontWeight: FontWeight.w400,
                     ),
@@ -273,6 +276,14 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
                 width: 320,
                 child: DropdownButtonFormField<String>(
                   value: _sessionType,
+                  // Shrink selected-value typography to bodyMedium (Inter 16)
+                  // per Figma correction #7 — the default Material dropdown
+                  // style rendered "Sesión grupal" oversized vs the rest of
+                  // the form labels.
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: AppColors.primary900,
+                    fontWeight: FontWeight.w500,
+                  ),
                   items: const [
                     DropdownMenuItem(
                       value: SesionType.individual,
