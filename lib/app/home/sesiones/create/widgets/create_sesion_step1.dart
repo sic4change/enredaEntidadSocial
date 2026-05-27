@@ -1,4 +1,3 @@
-import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/home/sesiones/create/widgets/participant_picker.dart';
 import 'package:enreda_empresas/app/models/competencyCategory.dart';
@@ -119,100 +118,144 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTextFormFieldTitle(
-              labelText: StringConst.SESION_FIELD_TITLE_LABEL,
-              hintText: StringConst.SESION_FIELD_TITLE_HINT,
-              initialValue: _title,
-              onChanged: (v) => _title = v,
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) {
-                  return StringConst.SESION_VALIDATION_TITLE_REQUIRED;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: Sizes.PADDING_20),
-            // Fecha de inicio + Hora de inicio + Hora de fin on the left
-            // (one date picker, two time pickers); Tipo de sesión pushed to
-            // the far right via Spacer. All three boxes share the same chrome
-            // (white fill, greyUltraLight border, RADIUS_6, HEIGHT_46) so they
-            // read as a unit matching the rest of the form fields.
+            // ── Top section ─── two stacked columns ─────────────────────
+            // LEFT (flex 3): Título on top, then Fecha + 2 Horas underneath.
+            // RIGHT (fixed 280): Sesión on top, then Tipo de sesión directly
+            // beneath it so the modality toggle aligns vertically with the
+            // session-type dropdown.
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _LabeledBlock(
-                  label: StringConst.SESION_FIELD_FECHA_LABEL,
-                  child: SizedBox(
-                    width: 240,
-                    child: _DatePickerField(
-                      value: _scheduledAt,
-                      errorText: _fechaError,
-                      onChanged: (d) => setState(() {
-                        _scheduledAt = _stripTime(d);
-                        _horaFinError = null;
-                        _fechaError = null;
-                      }),
-                    ),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomTextFormFieldTitle(
+                        labelText: StringConst.SESION_FIELD_TITLE_LABEL,
+                        hintText: StringConst.SESION_FIELD_TITLE_HINT,
+                        initialValue: _title,
+                        onChanged: (v) => _title = v,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return StringConst
+                                .SESION_VALIDATION_TITLE_REQUIRED;
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: Sizes.PADDING_20),
+                      // Fecha + Hora inicio + Hora fin — all share the same
+                      // chrome (white fill, greyUltraLight border, RADIUS_6,
+                      // HEIGHT_46) so they read as a unit.
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _LabeledBlock(
+                            label: StringConst.SESION_FIELD_FECHA_LABEL,
+                            child: SizedBox(
+                              width: 200,
+                              child: _DatePickerField(
+                                value: _scheduledAt,
+                                errorText: _fechaError,
+                                onChanged: (d) => setState(() {
+                                  _scheduledAt = _stripTime(d);
+                                  _horaFinError = null;
+                                  _fechaError = null;
+                                }),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: Sizes.PADDING_20),
+                          _LabeledBlock(
+                            label: StringConst.SESION_FIELD_HORA_LABEL,
+                            child: _TimePickerField(
+                              value: _scheduledTime,
+                              hint: StringConst.SESION_FIELD_HORA_LABEL,
+                              errorText: _horaInicioError,
+                              onChanged: (t) => setState(() {
+                                _scheduledTime = t;
+                                _horaInicioError = null;
+                                _horaFinError = null;
+                              }),
+                            ),
+                          ),
+                          const SizedBox(width: Sizes.PADDING_20),
+                          _LabeledBlock(
+                            label: StringConst.SESION_FIELD_HORA_FIN_LABEL,
+                            child: _TimePickerField(
+                              value: _horaFin,
+                              hint: StringConst.SESION_FIELD_HORA_FIN_LABEL,
+                              errorText: _horaFinError,
+                              onChanged: (t) => setState(() {
+                                _horaFin = t;
+                                _horaFinError = null;
+                              }),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: Sizes.PADDING_20),
-                _LabeledBlock(
-                  label: StringConst.SESION_FIELD_HORA_LABEL,
-                  child: _TimePickerField(
-                    value: _scheduledTime,
-                    hint: StringConst.SESION_FIELD_HORA_LABEL,
-                    errorText: _horaInicioError,
-                    onChanged: (t) => setState(() {
-                      _scheduledTime = t;
-                      _horaInicioError = null;
-                      _horaFinError = null;
-                    }),
-                  ),
-                ),
-                const SizedBox(width: Sizes.PADDING_20),
-                _LabeledBlock(
-                  label: StringConst.SESION_FIELD_HORA_FIN_LABEL,
-                  child: _TimePickerField(
-                    value: _horaFin,
-                    hint: StringConst.SESION_FIELD_HORA_FIN_LABEL,
-                    errorText: _horaFinError,
-                    onChanged: (t) => setState(() {
-                      _horaFin = t;
-                      _horaFinError = null;
-                    }),
-                  ),
-                ),
-                const Spacer(),
-                _LabeledBlock(
-                  label: StringConst.SESION_FIELD_TIPO_LABEL,
-                  child: _ModalityToggle(
-                    value: _modality,
-                    onChanged: (v) => setState(() => _modality = v),
+                const SizedBox(width: Sizes.PADDING_24),
+                SizedBox(
+                  width: 280,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _LabeledBlock(
+                        label: StringConst.SESION_FIELD_SESION_SUBLABEL,
+                        child: _BorderedDropdown<String>(
+                          value: _sessionType,
+                          hint: StringConst.SESION_FIELD_SESION_HINT,
+                          items: const [
+                            DropdownMenuItem(
+                              value: SesionType.individual,
+                              child: Text(StringConst.SESION_INDIVIDUAL),
+                            ),
+                            DropdownMenuItem(
+                              value: SesionType.grupal,
+                              child: Text(StringConst.SESION_GRUPAL),
+                            ),
+                          ],
+                          onChanged: (v) => setState(() {
+                            _sessionType = v ?? SesionType.individual;
+                            if (_sessionType == SesionType.individual &&
+                                _invitedIds.length > 1) {
+                              _invitedIds = [_invitedIds.last];
+                            }
+                          }),
+                        ),
+                      ),
+                      const SizedBox(height: Sizes.PADDING_20),
+                      _LabeledBlock(
+                        label: StringConst.SESION_FIELD_TIPO_LABEL,
+                        child: _ModalityToggle(
+                          value: _modality,
+                          onChanged: (v) =>
+                              setState(() => _modality = v),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: Sizes.PADDING_20),
-            // Lugar de la actividad — full row, no more Duración alongside
-            // (start + end times now carry the same information more
-            // precisely).
+            // ── Lugar de la actividad ─ full row ─────────────────────────
             CustomTextFormFieldTitle(
               labelText: StringConst.SESION_FIELD_LUGAR_LABEL,
               initialValue: _lugar,
               onChanged: (v) => _lugar = v,
             ),
             const SizedBox(height: Sizes.PADDING_20),
-            // Creación de IPIL — Sí / No dropdown per the Figma chevron
-            // visual. Was a Switch.adaptive; semantics are still boolean
-            // but the picker rhythm matches the rest of the form.
+            // ── Creación de IPIL ─ Sí / No dropdown ──────────────────────
             _LabeledBlock(
               label: StringConst.SESION_FIELD_CREAR_IPIL_LABEL,
-              child: DropdownButtonFormField<bool>(
+              child: _BorderedDropdown<bool>(
                 value: _createIpil,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.primary900,
-                  fontWeight: FontWeight.w500,
-                ),
+                hint: StringConst.SESION_FIELD_CREAR_IPIL_HINT,
                 items: const [
                   DropdownMenuItem(
                     value: false,
@@ -224,141 +267,131 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
                   ),
                 ],
                 onChanged: (v) => setState(() => _createIpil = v ?? false),
-                decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.white,
-                  hintText: StringConst.SESION_FIELD_CREAR_IPIL_HINT,
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.greyBorder),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary500),
-                  ),
-                ),
               ),
             ),
             const SizedBox(height: Sizes.PADDING_20),
-            // Convocar participantes (left) + Sesión (right) — same row in
-            // the Figma. Wrap so it stacks gracefully on narrow viewports.
-            Wrap(
-              spacing: Sizes.PADDING_24,
-              runSpacing: Sizes.PADDING_20,
-              crossAxisAlignment: WrapCrossAlignment.start,
+            // ── Competencias section ─────────────────────────────────────
+            // One bold section header above three dropdowns (no per-dropdown
+            // labels — placeholders inside each box read as the field name).
+            Text(
+              StringConst.SESION_FIELD_COMPETENCIAS_LABEL,
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.greyDark,
+                fontWeight: FontWeight.w700,
+                fontSize: Sizes.TEXT_SIZE_14,
+              ),
+            ),
+            const SizedBox(height: Sizes.PADDING_8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 420,
+                Expanded(
+                  flex: 2,
+                  child: _CompetenciaCategoriaDropdown(
+                    value: _competenciaCategoriaId,
+                    onChanged: (id) => setState(() {
+                      _competenciaCategoriaId = id;
+                      _competenciaSubCategoriaId = null;
+                    }),
+                  ),
+                ),
+                const SizedBox(width: Sizes.PADDING_20),
+                Expanded(
+                  flex: 1,
+                  child: _CompetenciaSubCategoriaDropdown(
+                    categoriaId: _competenciaCategoriaId,
+                    value: _competenciaSubCategoriaId,
+                    onChanged: (id) =>
+                        setState(() => _competenciaSubCategoriaId = id),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: Sizes.PADDING_12),
+            // Third Competencias dropdown — TODO: wire to a competency
+            // multi-select once product confirms which collection drives it
+            // and adds a field to Sesion. Visual placeholder for now so the
+            // form matches the Figma layout.
+            _BorderedDropdown<String>(
+              value: null,
+              hint: StringConst.SESION_FIELD_COMPETENCIAS_LABEL,
+              items: const <DropdownMenuItem<String>>[],
+              onChanged: null,
+            ),
+            const SizedBox(height: Sizes.PADDING_20),
+            // ── Row N: Descripción (wide textarea) + Convocar (list) ─────
+            // Fixed-height textarea so the two columns line up visually
+            // (the picker's list caps at 280; with label + search the right
+            // column is ~340 tall, so we match).
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
                   child: _LabeledBlock(
-                    label: StringConst.SESION_FIELD_CONVOCAR_LABEL,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          StringConst.SESION_FIELD_CONVOCAR_HINT,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.greyTxtAlt,
-                            fontWeight: FontWeight.w400,
+                    label: StringConst.SESION_FIELD_DESCRIPTION_LABEL,
+                    child: SizedBox(
+                      height: 320,
+                      child: TextFormField(
+                        initialValue: _description,
+                        maxLines: null,
+                        minLines: null,
+                        expands: true,
+                        textAlignVertical: TextAlignVertical.top,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.greyDark,
+                        ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: AppColors.white,
+                          hintText:
+                              StringConst.SESION_FIELD_DESCRIPTION_HINT,
+                          hintStyle: const TextStyle(
+                            color: AppColors.greyDropMenuBorder,
+                          ),
+                          contentPadding:
+                              const EdgeInsets.all(Sizes.PADDING_12),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(Sizes.RADIUS_6),
+                            borderSide: const BorderSide(
+                              color: AppColors.greyUltraLight,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(Sizes.RADIUS_6),
+                            borderSide: const BorderSide(
+                              color: AppColors.greyUltraLight,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: Sizes.PADDING_8),
-                        ParticipantPicker(
-                          socialEntityId: widget.socialEntityId,
-                          entityPrograms: widget.entityPrograms,
-                          selectedIds: _invitedIds,
-                          singleSelect:
-                              _sessionType == SesionType.individual,
-                          onChanged: (ids) =>
-                              setState(() => _invitedIds = ids),
-                        ),
-                      ],
+                        onChanged: (v) => _description = v,
+                      ),
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: 260,
+                const SizedBox(width: Sizes.PADDING_24),
+                Expanded(
+                  flex: 2,
                   child: _LabeledBlock(
-                    label: StringConst.SESION_FIELD_SESION_SUBLABEL,
-                    child: DropdownButtonFormField<String>(
-                      value: _sessionType,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.primary900,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: SesionType.individual,
-                          child: Text(StringConst.SESION_INDIVIDUAL),
-                        ),
-                        DropdownMenuItem(
-                          value: SesionType.grupal,
-                          child: Text(StringConst.SESION_GRUPAL),
-                        ),
-                      ],
-                      onChanged: (v) => setState(() {
-                        _sessionType = v ?? SesionType.individual;
-                        if (_sessionType == SesionType.individual &&
-                            _invitedIds.length > 1) {
-                          _invitedIds = [_invitedIds.last];
-                        }
-                      }),
-                      decoration: const InputDecoration(
-                        filled: true,
-                        fillColor: AppColors.white,
-                        hintText: StringConst.SESION_FIELD_SESION_HINT,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.greyBorder),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.primary500),
-                        ),
-                      ),
+                    label: StringConst.SESION_FIELD_CONVOCAR_LABEL,
+                    child: ParticipantPicker(
+                      socialEntityId: widget.socialEntityId,
+                      entityPrograms: widget.entityPrograms,
+                      selectedIds: _invitedIds,
+                      singleSelect:
+                          _sessionType == SesionType.individual,
+                      onChanged: (ids) =>
+                          setState(() => _invitedIds = ids),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: Sizes.PADDING_20),
-            // Competencias — cascading dropdowns sourced from LocationCache.
-            _CompetenciaCategoriaDropdown(
-              value: _competenciaCategoriaId,
-              onChanged: (id) => setState(() {
-                _competenciaCategoriaId = id;
-                _competenciaSubCategoriaId = null;
-              }),
-            ),
-            const SizedBox(height: Sizes.PADDING_16),
-            _CompetenciaSubCategoriaDropdown(
-              categoriaId: _competenciaCategoriaId,
-              value: _competenciaSubCategoriaId,
-              onChanged: (id) => setState(() => _competenciaSubCategoriaId = id),
-            ),
-            const SizedBox(height: Sizes.PADDING_20),
-            // Descripción — multi-line textarea
-            _LabeledBlock(
-              label: StringConst.SESION_FIELD_DESCRIPTION_LABEL,
-              child: TextFormField(
-                initialValue: _description,
-                maxLines: 5,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.greyDark,
-                ),
-                decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.white,
-                  hintText: StringConst.SESION_FIELD_DESCRIPTION_HINT,
-                  contentPadding: EdgeInsets.all(Sizes.PADDING_12),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.greyBorder),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary500),
-                  ),
-                ),
-                onChanged: (v) => _description = v,
-              ),
-            ),
             const SizedBox(height: Sizes.PADDING_30),
+            // ── Siguiente ────────────────────────────────────────────────
             Align(
-              // Centred per Figma layout — was right-aligned previously.
               alignment: Alignment.center,
               child: SizedBox(
                 width: 154,
@@ -726,7 +759,8 @@ class _LabeledBlock extends StatelessWidget {
 
 /// Categoría dropdown sourced from `LocationCache.competencyCategories`.
 /// Static collection — must come from the cache, never via a fresh stream
-/// (CLAUDE.md §0 HIGH strictness).
+/// (CLAUDE.md §0 HIGH strictness). No internal label — sits under the
+/// shared "Competencias" section header in the form.
 class _CompetenciaCategoriaDropdown extends StatelessWidget {
   const _CompetenciaCategoriaDropdown({
     required this.value,
@@ -751,18 +785,18 @@ class _CompetenciaCategoriaDropdown extends StatelessWidget {
     // failed silently) we still render a usable, validating widget. The
     // user can still proceed with no selection; the field is optional.
     final selected = items.any((i) => i.value == value) ? value : null;
-    return CustomDropDownButtonFormFieldTittle(
-      labelText: StringConst.SESION_FIELD_COMPETENCIA_CAT_LABEL,
-      hintText: StringConst.SESION_FIELD_COMPETENCIA_CAT_HINT,
+    return _BorderedDropdown<String>(
       value: selected,
-      source: items,
+      hint: StringConst.SESION_FIELD_COMPETENCIA_CAT_LABEL,
+      items: items,
       onChanged: onChanged,
     );
   }
 }
 
 /// Sub-categoría dropdown — filtered by the currently-selected categoría.
-/// Disabled (single placeholder item) when no categoría is selected.
+/// Disabled (no onChanged) when no categoría is selected. No internal
+/// label — sits under the shared "Competencias" section header.
 class _CompetenciaSubCategoriaDropdown extends StatelessWidget {
   const _CompetenciaSubCategoriaDropdown({
     required this.categoriaId,
@@ -791,23 +825,79 @@ class _CompetenciaSubCategoriaDropdown extends StatelessWidget {
           ),
     ];
     final selected = items.any((i) => i.value == value) ? value : null;
-    // Hint message switches with state so the user knows *why* the dropdown
-    // is empty or disabled — the colleague reported confusion about whether
-    // this field even existed.
-    final String hint;
-    if (categoriaId == null) {
-      hint = StringConst.SESION_FIELD_COMPETENCIA_SUBCAT_HINT_DISABLED;
-    } else if (items.isEmpty) {
-      hint = StringConst.SESION_FIELD_COMPETENCIA_SUBCAT_HINT_EMPTY;
-    } else {
-      hint = StringConst.SESION_FIELD_COMPETENCIA_SUBCAT_HINT_PICK;
-    }
-    return CustomDropDownButtonFormFieldTittle(
-      labelText: StringConst.SESION_FIELD_COMPETENCIA_SUBCAT_LABEL,
-      hintText: hint,
+    return _BorderedDropdown<String>(
       value: selected,
-      source: items,
+      hint: StringConst.SESION_FIELD_COMPETENCIA_SUBCAT_LABEL,
+      items: items,
       onChanged: categoriaId == null ? null : onChanged,
+    );
+  }
+}
+
+/// Shared dropdown chrome — matches the natural Material height of
+/// `CustomTextFormFieldTitle`'s `TextFormField` (no `isDense`, light content
+/// padding) so the Sesión / IPIL / Competencias dropdowns line up vertically
+/// with the Título input above them and the rest of the form's text fields.
+/// White fill, greyUltraLight border, RADIUS_6.
+class _BorderedDropdown<T> extends StatelessWidget {
+  const _BorderedDropdown({
+    required this.value,
+    required this.hint,
+    required this.items,
+    required this.onChanged,
+  });
+
+  final T? value;
+  final String hint;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    // Drive height via vertical contentPadding — DropdownButtonFormField's
+    // InputDecorator computes its own size from its content + padding and
+    // ignores outer SizedBox constraints in many cases, so the SizedBox
+    // approach left the rendered box unchanged. Bumping the vertical padding
+    // directly grows the visible box, matching the height of the Título
+    // TextFormField above.
+    return DropdownButtonFormField<T>(
+      isExpanded: true,
+      value: value,
+      items: items,
+      onChanged: onChanged,
+      icon: const Icon(
+        Icons.keyboard_arrow_down,
+        color: AppColors.primary400,
+      ),
+      style: textTheme.bodySmall?.copyWith(
+        color: AppColors.greyDark,
+        fontWeight: FontWeight.w400,
+        height: 1.5,
+        fontSize: Sizes.TEXT_SIZE_14,
+      ),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: AppColors.white,
+        hintText: hint,
+        hintStyle: const TextStyle(color: AppColors.greyDropMenuBorder),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: Sizes.PADDING_12,
+          vertical: Sizes.PADDING_17_5,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Sizes.RADIUS_6),
+          borderSide: const BorderSide(color: AppColors.greyUltraLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Sizes.RADIUS_6),
+          borderSide: const BorderSide(color: AppColors.greyUltraLight),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Sizes.RADIUS_6),
+          borderSide: const BorderSide(color: AppColors.greyUltraLight),
+        ),
+      ),
     );
   }
 }

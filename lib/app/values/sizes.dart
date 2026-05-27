@@ -83,7 +83,9 @@ class Sizes {
   static const double HEIGHT_150 = 150.0;
   static const double HEIGHT_130 = 130.0;
   static const double HEIGHT_100 = 100.0;
+  static const double HEIGHT_80 = 80.0;
   static const double HEIGHT_74 = 74.0;
+  static const double HEIGHT_65 = 65.0;
   static const double HEIGHT_64 = 64.0;
   static const double HEIGHT_60 = 60.0;
   static const double HEIGHT_56 = 56.0;
@@ -186,8 +188,11 @@ class Sizes {
   static const double PADDING_30 = 30.0;
   static const double PADDING_24 = 24.0;
   static const double PADDING_22 = 22.0;
+  static const double PADDING_21 = 21.0;
   static const double PADDING_20 = 20.0;
   static const double PADDING_18 = 18.0;
+  static const double PADDING_17_5 = 17.35;
+  static const double PADDING_17 = 17.0;
   static const double PADDING_16 = 16.0;
   static const double PADDING_14 = 14.0;
   static const double PADDING_12 = 12.0;

@@ -18,8 +18,9 @@ import 'package:provider/provider.dart';
 ///   * Subscribes to `LocationCache.instance.paginationUpdates` via a
 ///     `StreamBuilder<void>` so the list rebuilds as pages stream in.
 ///   * Search filter is name-only (`firstName lastName`), case-insensitive.
-///   * Selected participants are rendered as removable chips above the list,
-///     matching the Figma layout.
+///   * Each candidate is its own rounded chip card; selection is the right-
+///     side square checkbox affordance — no separate "selected chips"
+///     cluster above the list.
 class ParticipantPicker extends StatefulWidget {
   const ParticipantPicker({
     super.key,
@@ -97,7 +98,6 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
       stream: LocationCache.instance.paginationUpdates,
       builder: (context, _) {
         final all = LocationCache.instance.allParticipants;
-        final selected = _buildSelectedUsers(all);
         final filtered = _applySearch(all);
         final isLoading = LocationCache.instance.isLoadingParticipants &&
             all.isEmpty;
@@ -111,26 +111,7 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
                   setState(() => _searchLower = v.trim().toLowerCase()),
             ),
             const SizedBox(height: Sizes.PADDING_12),
-            if (selected.isNotEmpty) ...[
-              Wrap(
-                spacing: Sizes.PADDING_8,
-                runSpacing: Sizes.PADDING_8,
-                children: [
-                  for (final user in selected)
-                    _SelectedChip(
-                      user: user,
-                      onRemove: () => _toggle(user.userId!, false),
-                    ),
-                ],
-              ),
-              const SizedBox(height: Sizes.PADDING_12),
-            ],
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(Sizes.RADIUS_12),
-                border: Border.all(color: AppColors.greyBorder),
-              ),
+            ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 280),
               child: _buildBody(
                 context,
@@ -170,23 +151,25 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
         ),
       );
     }
-    return ListView.separated(
+    // Per the updated Figma: each candidate row renders as its own rounded
+    // card (white fill, subtle shadow, no outer container). Selection state
+    // is the right-side square checkbox — primary900 fill when checked,
+    // white with greyUltraLight border when not.
+    return ListView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(vertical: Sizes.PADDING_4),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        thickness: 1,
-        color: AppColors.violet,
-      ),
       itemBuilder: (context, index) {
         final user = items[index];
         final id = user.userId ?? '';
         final isSelected = widget.selectedIds.contains(id);
-        return _ParticipantRow(
-          user: user,
-          isSelected: isSelected,
-          onToggle: (v) => _toggle(id, v),
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: Sizes.PADDING_4),
+          child: _ParticipantRow(
+            user: user,
+            isSelected: isSelected,
+            onToggle: (v) => _toggle(id, v),
+          ),
         );
       },
     );
@@ -198,18 +181,6 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
       final name = '${u.firstName ?? ''} ${u.lastName ?? ''}'.toLowerCase();
       return name.contains(_searchLower);
     }).toList(growable: false);
-  }
-
-  List<UserEnreda> _buildSelectedUsers(List<UserEnreda> source) {
-    final ids = widget.selectedIds.toSet();
-    final byId = <String, UserEnreda>{
-      for (final u in source)
-        if (u.userId != null) u.userId!: u,
-    };
-    return [
-      for (final id in widget.selectedIds)
-        if (byId.containsKey(id)) byId[id]!,
-    ].toList(growable: false);
   }
 
   void _toggle(String id, bool nowSelected) {
@@ -274,35 +245,10 @@ class _SearchField extends StatelessWidget {
   }
 }
 
-class _SelectedChip extends StatelessWidget {
-  const _SelectedChip({required this.user, required this.onRemove});
-  final UserEnreda user;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
-    return InputChip(
-      label: Text(
-        fullName.isEmpty ? StringConst.SESION_PICKER_UNKNOWN_USER : fullName,
-        style: textTheme.bodySmall?.copyWith(
-          color: AppColors.primary900,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      backgroundColor: AppColors.primary050,
-      side: const BorderSide(color: AppColors.primary100),
-      deleteIcon: const Icon(
-        Icons.close,
-        size: Sizes.ICON_SIZE_14,
-        color: AppColors.primary900,
-      ),
-      onDeleted: onRemove,
-    );
-  }
-}
-
+/// Single participant chip card — white pill with the name on the left and
+/// a square checkbox affordance on the right. Matches the Figma list rhythm:
+/// each row is its own rounded card with a thin border + subtle shadow, not
+/// a flat list item with a divider.
 class _ParticipantRow extends StatelessWidget {
   const _ParticipantRow({
     required this.user,
@@ -318,34 +264,90 @@ class _ParticipantRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
-    return InkWell(
-      onTap: () => onToggle(!isSelected),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: Sizes.PADDING_12,
-          vertical: Sizes.PADDING_8,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                fullName.isEmpty
-                    ? StringConst.SESION_PICKER_UNKNOWN_USER
-                    : fullName,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.greyDark,
-                  fontWeight: FontWeight.w400,
-                ),
-                overflow: TextOverflow.ellipsis,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(Sizes.RADIUS_8),
+        onTap: () => onToggle(!isSelected),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Sizes.PADDING_16,
+            vertical: Sizes.PADDING_10,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(Sizes.RADIUS_8),
+            border: Border.all(color: AppColors.greyUltraLight),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary900.withOpacity(0.06),
+                blurRadius: Sizes.PADDING_6,
+                offset: const Offset(0, 1),
               ),
-            ),
-            Checkbox(
-              value: isSelected,
-              activeColor: AppColors.primary500,
-              onChanged: (v) => onToggle(v ?? false),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  fullName.isEmpty
+                      ? StringConst.SESION_PICKER_UNKNOWN_USER
+                      : fullName,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: AppColors.seaBlue,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: Sizes.PADDING_8),
+              _SquareCheckbox(
+                value: isSelected,
+                onChanged: onToggle,
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// Square checkbox affordance — primary900 fill with a white checkmark
+/// when checked; white fill with a greyUltraLight border when not.
+/// Matches the right-side selector glyph in the Figma "Convocar
+/// participantes" list.
+class _SquareCheckbox extends StatelessWidget {
+  const _SquareCheckbox({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(Sizes.RADIUS_4),
+      onTap: () => onChanged(!value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: Sizes.SIZE_20,
+        height: Sizes.SIZE_20,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: value ? AppColors.primary900 : AppColors.white,
+          borderRadius: BorderRadius.circular(Sizes.RADIUS_4),
+          border: Border.all(
+            color: value ? AppColors.primary900 : AppColors.greyUltraLight,
+            width: 1,
+          ),
+        ),
+        child: value
+            ? const Icon(
+                Icons.check,
+                size: Sizes.ICON_SIZE_14,
+                color: AppColors.white,
+              )
+            : null,
       ),
     );
   }
