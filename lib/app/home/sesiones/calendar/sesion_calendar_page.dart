@@ -51,12 +51,19 @@ class SesionCalendarPage extends StatefulWidget {
 /// the cells start to feel oversized for what is now a compact overview.
 const double _kCalendarMaxWidth = 520;
 
+/// Filter buttons above the calendar — pill bar mirroring the Próximas /
+/// Pasadas tabs from `sesiones_page.dart`, plus an additional "Todas" view.
+/// Defaults to [proximas] when the page opens so the user lands on upcoming
+/// sessions first.
+enum _CalendarFilter { proximas, pasadas, todas }
+
 class _SesionCalendarPageState extends State<SesionCalendarPage> {
   DateTime _focusedMonth = DateTime(
     DateTime.now().year,
     DateTime.now().month,
   );
   DateTime? _selectedDay;
+  _CalendarFilter _filter = _CalendarFilter.proximas;
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +125,7 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
             allSesiones: allSesiones,
             sessionsByDay: byDay,
             isMobile: isMobile,
+            filter: _filter,
             onTapSesion: widget.onTapSesion,
           );
 
@@ -134,15 +142,22 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
                   isMobile: isMobile,
                   onPressed: () => _handleExportIcs(context, allSesiones),
                 ),
-                SizedBox(height: isMobile ? Sizes.PADDING_12 : Sizes.PADDING_20),
+                SizedBox(height: isMobile ? Sizes.PADDING_16 : Sizes.PADDING_20),
+                // Filter pills — Próximas / Pasadas / Todas. Default = Próximas.
+                // Mounted directly above the sessions panel (NOT above the
+                // full-width content) so the pills visually scope to the
+                // right rail they actually control. Tapping a filter also
+                // clears any day selection so the panel re-renders from the
+                // new filter rather than the previously selected day.
                 if (isDesktop)
-                  // Side-by-side: compact calendar (left) + sessions panel
-                  // (right). No `IntrinsicHeight` here — `SesionListTile`
-                  // uses `Stack` + `Positioned` which can't report intrinsic
-                  // size, and wrapping the Row in IntrinsicHeight crashes
-                  // hit-testing with "render box with no size". Letting
-                  // each side grow independently looks identical on screen
-                  // because the calendar card is fixed-height anyway.
+                  // Side-by-side: compact calendar (left) + filter pills +
+                  // sessions panel (right). No `IntrinsicHeight` here —
+                  // `SesionListTile` uses `Stack` + `Positioned` which can't
+                  // report intrinsic size, and wrapping the Row in
+                  // IntrinsicHeight crashes hit-testing with "render box
+                  // with no size". Letting each side grow independently
+                  // looks identical on screen because the calendar card is
+                  // fixed-height anyway.
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -153,15 +168,39 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
                         child: calendarCard,
                       ),
                       const SizedBox(width: Sizes.PADDING_24),
-                      Expanded(child: sessionsPanel),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _CalendarFilterBar(
+                              activeFilter: _filter,
+                              onSelect: (f) => setState(() {
+                                _filter = f;
+                                _selectedDay = null;
+                              }),
+                            ),
+                            const SizedBox(height: Sizes.PADDING_16),
+                            sessionsPanel,
+                          ],
+                        ),
+                      ),
                     ],
                   )
                 else ...[
-                  // Mobile / tablet: vertical stack — calendar full width on top,
-                  // sessions panel below. Avoids horizontal cramping.
+                  // Mobile / tablet: vertical stack — calendar full width on
+                  // top, then filter pills, then sessions panel below.
+                  // Avoids horizontal cramping.
                   calendarCard,
                   SizedBox(
                       height: isMobile ? Sizes.PADDING_16 : Sizes.PADDING_20),
+                  _CalendarFilterBar(
+                    activeFilter: _filter,
+                    onSelect: (f) => setState(() {
+                      _filter = f;
+                      _selectedDay = null;
+                    }),
+                  ),
+                  const SizedBox(height: Sizes.PADDING_12),
                   sessionsPanel,
                 ],
                 SizedBox(height: isMobile ? Sizes.PADDING_30 : Sizes.PADDING_20),
@@ -876,10 +915,14 @@ class _DayCell extends StatelessWidget {
 
 // ── Sessions panel (right side on desktop) ────────────────────────────────
 
-/// Right-rail panel showing either the selected day's sessions OR — when
-/// no day is selected — every session in the currently focused month.
-/// Each row prefixes its title with the scheduled time ("10:30 — …") or
-/// "Todo el día — …" when [Sesion.isAllDay] is true.
+/// Right-rail panel. Two modes:
+///   * **Selected day** → that day's sessions; header says "Próxima sesión"
+///     or "Sesión pasada" depending on whether the day is in the future or
+///     in the past relative to today.
+///   * **No day selected** → driven by [filter]:
+///       - `proximas` → upcoming sessions (asc by scheduledAt)
+///       - `pasadas`  → past sessions (desc by scheduledAt)
+///       - `todas`    → Próximas section first, Pasadas section below
 class _SessionsPanel extends StatelessWidget {
   const _SessionsPanel({
     required this.focusedMonth,
@@ -887,6 +930,7 @@ class _SessionsPanel extends StatelessWidget {
     required this.allSesiones,
     required this.sessionsByDay,
     required this.isMobile,
+    required this.filter,
     required this.onTapSesion,
   });
 
@@ -895,13 +939,12 @@ class _SessionsPanel extends StatelessWidget {
   final List<Sesion> allSesiones;
   final Map<String, List<Sesion>> sessionsByDay;
   final bool isMobile;
+  final _CalendarFilter filter;
   final ValueChanged<Sesion> onTapSesion;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final sessions = _resolveSessions();
-    final headerLabel = _resolveHeader();
 
     return Container(
       decoration: BoxDecoration(
@@ -921,69 +964,272 @@ class _SessionsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            headerLabel,
+            _resolveHeader(),
             style: (isMobile ? textTheme.titleMedium : textTheme.headlineSmall)
                 ?.copyWith(color: AppColors.primary900),
           ),
           SizedBox(height: isMobile ? Sizes.PADDING_8 : Sizes.PADDING_12),
-          if (sessions.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: Sizes.PADDING_16),
-              child: Text(
-                selectedDay != null
-                    ? StringConst.CALENDARIO_EMPTY_DAY
-                    : (allSesiones.isEmpty
-                        ? StringConst.CALENDARIO_EMPTY
-                        : StringConst.CALENDARIO_PANEL_EMPTY_MONTH),
-                style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.greyTxtAlt,
-                ),
-              ),
-            )
-          else
-            ...sessions.map(
-              (s) => _ScheduledSessionRow(
-                sesion: s,
-                onTap: () => onTapSesion(s),
-              ),
-            ),
+          ..._buildBody(context, textTheme),
         ],
       ),
     );
   }
 
-  /// When a day is selected → that day's sessions (already sorted by the
-  /// caller). Otherwise → every session in the focused month, sorted by
-  /// scheduledAt asc.
-  List<Sesion> _resolveSessions() {
+  // ── Body ────────────────────────────────────────────────────────────────
+
+  List<Widget> _buildBody(BuildContext context, TextTheme textTheme) {
     if (selectedDay != null) {
-      final key = '${selectedDay!.year}-${selectedDay!.month}-${selectedDay!.day}';
-      return List<Sesion>.from(sessionsByDay[key] ?? const <Sesion>[]);
+      return _renderDayBody(textTheme);
     }
-    final monthSessions = allSesiones
-        .where((s) =>
-            s.scheduledAt.year == focusedMonth.year &&
-            s.scheduledAt.month == focusedMonth.month)
-        .toList()
-      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-    return monthSessions;
+    switch (filter) {
+      case _CalendarFilter.proximas:
+        return _renderFlatBody(
+          textTheme,
+          _futureSessions(),
+          emptyLabel: StringConst.SESION_EMPTY_PROXIMAS,
+        );
+      case _CalendarFilter.pasadas:
+        return _renderFlatBody(
+          textTheme,
+          _pastSessions(),
+          emptyLabel: StringConst.SESION_EMPTY_PASADAS,
+        );
+      case _CalendarFilter.todas:
+        return _renderTodasBody(textTheme);
+    }
   }
+
+  List<Widget> _renderDayBody(TextTheme textTheme) {
+    final key = _dayKey(selectedDay!);
+    final daySessions = List<Sesion>.from(sessionsByDay[key] ?? const <Sesion>[]);
+    if (daySessions.isEmpty) {
+      return [_emptyText(textTheme, StringConst.CALENDARIO_EMPTY_DAY)];
+    }
+    return daySessions.map(_row).toList();
+  }
+
+  List<Widget> _renderFlatBody(
+    TextTheme textTheme,
+    List<Sesion> sessions, {
+    required String emptyLabel,
+  }) {
+    if (sessions.isEmpty) {
+      return [
+        _emptyText(
+          textTheme,
+          allSesiones.isEmpty ? StringConst.CALENDARIO_EMPTY : emptyLabel,
+        ),
+      ];
+    }
+    return sessions.map(_row).toList();
+  }
+
+  /// "Todas las sesiones" view — Próximas section first, then Pasadas. Each
+  /// section has its own subheader; sections are skipped when empty.
+  List<Widget> _renderTodasBody(TextTheme textTheme) {
+    final proximas = _futureSessions();
+    final pasadas = _pastSessions();
+    if (proximas.isEmpty && pasadas.isEmpty) {
+      return [_emptyText(textTheme, StringConst.CALENDARIO_EMPTY)];
+    }
+    return [
+      if (proximas.isNotEmpty) ...[
+        _SectionHeader(
+            label: StringConst.SESIONES_PROXIMAS, isMobile: isMobile),
+        ...proximas.map(_row),
+      ],
+      if (pasadas.isNotEmpty) ...[
+        if (proximas.isNotEmpty) const SizedBox(height: Sizes.PADDING_20),
+        _SectionHeader(
+            label: StringConst.SESIONES_PASADAS, isMobile: isMobile),
+        ...pasadas.map(_row),
+      ],
+    ];
+  }
+
+  Widget _row(Sesion s) => _ScheduledSessionRow(
+        sesion: s,
+        onTap: () => onTapSesion(s),
+      );
+
+  Widget _emptyText(TextTheme textTheme, String label) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: Sizes.PADDING_16),
+        child: Text(
+          label,
+          style:
+              textTheme.bodyMedium?.copyWith(color: AppColors.greyTxtAlt),
+        ),
+      );
+
+  // ── Header ──────────────────────────────────────────────────────────────
 
   String _resolveHeader() {
     if (selectedDay != null) {
-      try {
-        return DateFormat("EEEE, d 'de' MMMM yyyy", 'es_ES')
-            .format(selectedDay!);
-      } catch (_) {
-        return DateFormat('EEEE d MMMM yyyy').format(selectedDay!);
-      }
+      return _isPastDay(selectedDay!)
+          ? StringConst.CALENDARIO_PANEL_SESION_PASADA
+          : StringConst.CALENDARIO_PANEL_PROXIMA_SESION;
     }
-    return StringConst.CALENDARIO_PANEL_MONTH;
+    switch (filter) {
+      case _CalendarFilter.proximas:
+        return StringConst.SESIONES_PROXIMAS;
+      case _CalendarFilter.pasadas:
+        return StringConst.SESIONES_PASADAS;
+      case _CalendarFilter.todas:
+        return StringConst.CALENDARIO_FILTER_TODAS;
+    }
+  }
+
+  // ── Session bucketing ───────────────────────────────────────────────────
+
+  /// Upcoming relative to "today" (today counts as upcoming). Sorted asc by
+  /// scheduledAt — same order as `sesionesProximasStream`.
+  List<Sesion> _futureSessions() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return allSesiones
+        .where((s) => !s.scheduledAt.isBefore(today))
+        .toList()
+      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+  }
+
+  /// Past (strictly before today). Sorted desc — most-recent-past first,
+  /// matching `sesionesPasadasStream`.
+  List<Sesion> _pastSessions() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return allSesiones
+        .where((s) => s.scheduledAt.isBefore(today))
+        .toList()
+      ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
+  }
+
+  bool _isPastDay(DateTime day) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dm = DateTime(day.year, day.month, day.day);
+    return dm.isBefore(today);
+  }
+
+  String _dayKey(DateTime d) => '${d.year}-${d.month}-${d.day}';
+}
+
+// ── Filter pill bar ─────────────────────────────────────────────────────────
+
+/// Three-pill filter bar shown above the calendar. Visual mirror of the
+/// `_SesionTabPill` from `sesiones_page.dart` (yellow fill + bold primary900
+/// text when active; white fill + violet border + greyTxtAlt text when not),
+/// kept private to the calendar so other usages of CustomChip aren't affected.
+class _CalendarFilterBar extends StatelessWidget {
+  const _CalendarFilterBar({
+    required this.activeFilter,
+    required this.onSelect,
+  });
+
+  final _CalendarFilter activeFilter;
+  final ValueChanged<_CalendarFilter> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: Sizes.PADDING_12,
+      runSpacing: Sizes.PADDING_8,
+      children: [
+        _FilterPill(
+          label: StringConst.CALENDARIO_FILTER_PROXIMAS,
+          isActive: activeFilter == _CalendarFilter.proximas,
+          onTap: () => onSelect(_CalendarFilter.proximas),
+        ),
+        _FilterPill(
+          label: StringConst.CALENDARIO_FILTER_PASADAS,
+          isActive: activeFilter == _CalendarFilter.pasadas,
+          onTap: () => onSelect(_CalendarFilter.pasadas),
+        ),
+        _FilterPill(
+          label: StringConst.CALENDARIO_FILTER_TODAS,
+          isActive: activeFilter == _CalendarFilter.todas,
+          onTap: () => onSelect(_CalendarFilter.todas),
+        ),
+      ],
+    );
   }
 }
 
-/// Single row in the right panel — wraps a `SesionListTile` with a leading
-/// time prefix so the user can scan the day without opening detail.
+class _FilterPill extends StatelessWidget {
+  const _FilterPill({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Sizes.PADDING_30,
+          vertical: Sizes.PADDING_12,
+        ),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.yellow : AppColors.white,
+          borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
+          border: Border.all(
+            color: isActive ? AppColors.yellow : AppColors.violet,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: textTheme.bodyLarge?.copyWith(
+            color:
+                isActive ? AppColors.primary900 : AppColors.greyTxtAlt,
+            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Section subheader used in the "Todas las sesiones" view to label the
+/// Próximas / Pasadas groupings.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label, required this.isMobile});
+
+  final String label;
+  final bool isMobile;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: Sizes.PADDING_4,
+        bottom: Sizes.PADDING_8,
+      ),
+      child: Text(
+        label,
+        style: (isMobile ? textTheme.bodyLarge : textTheme.titleMedium)
+            ?.copyWith(
+          color: AppColors.primary900,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// Single row in the right panel — wraps a `SesionListTile` with the
+/// per-session "Añadir a Google Calendar" icon. The time-range label (start
+/// — end) is rendered INSIDE the card via `SesionListTile.timeRangeLabel`,
+/// so the calendar row stays one visually unified container.
 class _ScheduledSessionRow extends StatelessWidget {
   const _ScheduledSessionRow({required this.sesion, required this.onTap});
 
@@ -992,37 +1238,29 @@ class _ScheduledSessionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: Sizes.PADDING_4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Time prefix on the left + per-session "Añadir a Google Calendar"
-          // icon on the right. Tap → opens the gCal compose tab pre-filled
-          // with this session's data.
+          // gCal action sits above the card. The time range that used to
+          // share this row moved INSIDE the card via [timeRangeLabel].
           Padding(
             padding: const EdgeInsets.only(
               left: Sizes.PADDING_8,
               right: Sizes.PADDING_4,
               bottom: Sizes.PADDING_4,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  _formatSessionTimePrefix(sesion),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.primary500,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                _GcalAddIconButton(sesion: sesion),
-              ],
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: _GcalAddIconButton(sesion: sesion),
             ),
           ),
-          SesionListTile(sesion: sesion, onTap: onTap),
+          SesionListTile(
+            sesion: sesion,
+            onTap: onTap,
+            timeRangeLabel: _formatSessionTimeRange(sesion),
+          ),
         ],
       ),
     );
@@ -1082,10 +1320,23 @@ class _GcalAddIconButton extends StatelessWidget {
 /// Either "10:30" (specific hour) or the localised "Todo el día" badge.
 String _formatSessionTimePrefix(Sesion s) {
   if (s.isAllDay) return StringConst.SESION_TODO_EL_DIA_BADGE;
-  final h = s.scheduledAt.hour.toString().padLeft(2, '0');
-  final m = s.scheduledAt.minute.toString().padLeft(2, '0');
-  return '$h:$m';
+  return _hhmm(s.scheduledAt);
 }
+
+/// "HH:mm — HH:mm" when [Sesion.fechaFin] is set; falls back to the start
+/// only when no explicit end is recorded. Returns the "Todo el día" badge
+/// for all-day sessions. Rendered inside the session card on the Mi
+/// calendario view; the hover tooltip still uses the shorter
+/// [_formatSessionTimePrefix] to keep its preview compact.
+String _formatSessionTimeRange(Sesion s) {
+  if (s.isAllDay) return StringConst.SESION_TODO_EL_DIA_BADGE;
+  final start = _hhmm(s.scheduledAt);
+  final end = s.fechaFin;
+  return end == null ? start : '$start — ${_hhmm(end)}';
+}
+
+String _hhmm(DateTime d) =>
+    '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
 /// Falls back to the default per-`sessionType` label when no title is set
 /// — mirrors the same rule used inside `SesionListTile`.
