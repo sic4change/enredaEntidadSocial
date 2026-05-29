@@ -38,6 +38,7 @@ class SesionListTile extends StatefulWidget {
     this.showReminder = false,
     this.showEditPill = true,
     this.expandable = false,
+    this.timeRangeLabel,
   });
 
   final Sesion sesion;
@@ -84,6 +85,12 @@ class SesionListTile extends StatefulWidget {
   /// Defaults to false so the tile renders as a clean read-only row when
   /// reused inside the detail page, export page, or calendar day list.
   final bool expandable;
+
+  /// When set, the card renders a small "HH:mm — HH:mm" range under the date
+  /// line (or the "Todo el día" badge for all-day sessions). Only the
+  /// calendar view passes this — Próximas / Pasadas list rows leave it null
+  /// so their layout is untouched.
+  final String? timeRangeLabel;
 
   @override
   State<SesionListTile> createState() => _SesionListTileState();
@@ -140,93 +147,95 @@ class _SesionListTileState extends State<SesionListTile> {
                             vertical: Sizes.PADDING_22,
                             horizontal: Sizes.PADDING_24,
                           ),
-                          // Stack layout so the participants label can sit at
-                          // the row's true horizontal centre (directly above
-                          // the expansion arrow below the card) regardless of
-                          // how wide the title and action cluster end up.
-                          // Title + leading icon hug the left; action cluster
-                          // hugs the right via Spacer. The label sits in a
-                          // non-interactive Positioned.fill overlay so taps
-                          // pass through to the InkWell beneath.
-                          child: Stack(
+                          // Single Row — title slot on the left, then the
+                          // right-aligned cluster:
+                          //   [edit] [delete] [participants] [modality] [bell]
+                          // The participants label was previously centred in
+                          // a Positioned.fill overlay; moved inline next to
+                          // the modality chip so it lives within the same
+                          // visual cluster as the chip rather than floating
+                          // alone in the middle of the row.
+                          child: Row(
                             children: [
-                              Row(
-                                children: [
-                                  _LeadingIcon(
-                                      sessionType:
-                                          widget.sesion.sessionType),
-                                  const SizedBox(width: Sizes.PADDING_24),
-                                  // Expanded (not Flexible + Spacer): we need
-                                  // the title slot to fill ALL the slack between
-                                  // the leading icon and the action cluster,
-                                  // pushing the cluster flush against the right
-                                  // edge. The Column inside _TitleAndDate keeps
-                                  // its text left-aligned via
-                                  // CrossAxisAlignment.start, so the visual
-                                  // result is title-on-left, cluster-on-right.
-                                  Expanded(
-                                    child: _TitleAndDate(
-                                        sesion: widget.sesion,
-                                        textTheme: textTheme),
-                                  ),
-                                  // ── Right-aligned action cluster ─────────
-                                  // Próximas: Edit / Delete / Modality / Bell
-                                  // Pasadas: just Modality (far right)
-                                  if (widget.onEdit != null &&
-                                      widget.showEditPill) ...[
-                                    _PillIconButton(
-                                      icon: Icons.edit_outlined,
-                                      iconColor: AppColors.greyTxtAlt,
-                                      tooltip: StringConst
-                                          .SESION_ACTION_EDITAR_TOOLTIP,
-                                      onTap: widget.onEdit!,
-                                    ),
-                                    const SizedBox(width: Sizes.PADDING_8),
-                                  ],
-                                  if (widget.onDelete != null) ...[
-                                    _PillIconButton(
-                                      icon: Icons.delete_outline,
-                                      iconColor: AppColors.greyTxtAlt,
-                                      tooltip: StringConst
-                                          .SESION_ACTION_BORRAR_TOOLTIP,
-                                      onTap: widget.onDelete!,
-                                    ),
-                                    const SizedBox(width: Sizes.PADDING_12),
-                                  ],
-                                  _ModalityChip(
-                                      modality: widget.sesion.modality),
-                                  if (widget.showReminder &&
-                                      widget.onToggleReminder != null) ...[
-                                    const SizedBox(width: Sizes.PADDING_12),
-                                    _BellPlain(
-                                      enabled: widget.reminderEnabled,
-                                      onTap: widget.onToggleReminder!,
-                                    ),
-                                  ],
-                                ],
+                              _LeadingIcon(
+                                  sessionType: widget.sesion.sessionType),
+                              const SizedBox(width: Sizes.PADDING_24),
+                              // Expanded: title slot eats all slack so the
+                              // right-aligned cluster sits flush right.
+                              Expanded(
+                                child: _TitleAndDate(
+                                  sesion: widget.sesion,
+                                  textTheme: textTheme,
+                                  timeRangeLabel: widget.timeRangeLabel,
+                                ),
                               ),
-                              // Centred participants label — above the
-                              // bottom-edge expansion arrow. IgnorePointer
-                              // so taps fall through to the InkWell.
-                              Positioned.fill(
-                                child: IgnorePointer(
-                                  child: Center(
-                                    child: Text(
-                                      _participantsLabel(widget.sesion),
-                                      // Matches the date line — Inter 300 / 14 —
-                                      // so the centred participant label and the
-                                      // date under the title sit at the same
-                                      // visual weight.
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: AppColors.seaBlue,
-                                        fontSize: Sizes.TEXT_SIZE_14,
-                                        fontWeight: FontWeight.w300,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
+                              // ── Right-aligned action cluster ─────────
+                              // Próximas: Edit / Delete / Participants / Modality / Bell
+                              // Pasadas / Calendar: Participants / Modality
+                              if (widget.onEdit != null &&
+                                  widget.showEditPill) ...[
+                                _PillIconButton(
+                                  icon: Icons.edit_outlined,
+                                  iconColor: AppColors.greyTxtAlt,
+                                  tooltip: StringConst
+                                      .SESION_ACTION_EDITAR_TOOLTIP,
+                                  onTap: widget.onEdit!,
+                                ),
+                                const SizedBox(width: Sizes.PADDING_8),
+                              ],
+                              if (widget.onDelete != null) ...[
+                                _PillIconButton(
+                                  icon: Icons.delete_outline,
+                                  iconColor: AppColors.greyTxtAlt,
+                                  tooltip: StringConst
+                                      .SESION_ACTION_BORRAR_TOOLTIP,
+                                  onTap: widget.onDelete!,
+                                ),
+                                const SizedBox(width: Sizes.PADDING_12),
+                              ],
+                              // Participants label — sits immediately next
+                              // to the modality chip on the right edge.
+                              // Same `seaBlue / 14 / w300` styling as the
+                              // date line so the two read as one paragraph.
+                              //
+                              // Intentionally NOT wrapped in `Flexible`:
+                              // a flex child here would compete with the
+                              // title's `Expanded` for slack, leaving a gap
+                              // between the label and the chip when the
+                              // title is short. Using a fixed-cap
+                              // `ConstrainedBox(maxWidth: 240)` instead so
+                              // long names ellipsise without affecting the
+                              // title slot's slack allocation — the chip
+                              // stays flush against the row's right edge.
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    right: Sizes.PADDING_16),
+                                child: ConstrainedBox(
+                                  constraints:
+                                      const BoxConstraints(maxWidth: 240),
+                                  child: Text(
+                                    _participantsLabel(widget.sesion),
+                                    textAlign: TextAlign.right,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: AppColors.seaBlue,
+                                      fontSize: Sizes.TEXT_SIZE_14,
+                                      fontWeight: FontWeight.w300,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ),
                               ),
+                              _ModalityChip(
+                                  modality: widget.sesion.modality),
+                              if (widget.showReminder &&
+                                  widget.onToggleReminder != null) ...[
+                                const SizedBox(width: Sizes.PADDING_12),
+                                _BellPlain(
+                                  enabled: widget.reminderEnabled,
+                                  onTap: widget.onToggleReminder!,
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -323,10 +332,15 @@ class _LeadingIcon extends StatelessWidget {
 }
 
 class _TitleAndDate extends StatelessWidget {
-  const _TitleAndDate({required this.sesion, required this.textTheme});
+  const _TitleAndDate({
+    required this.sesion,
+    required this.textTheme,
+    this.timeRangeLabel,
+  });
 
   final Sesion sesion;
   final TextTheme textTheme;
+  final String? timeRangeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -359,6 +373,21 @@ class _TitleAndDate extends StatelessWidget {
           ),
           overflow: TextOverflow.ellipsis,
         ),
+        if (timeRangeLabel != null) ...[
+          const SizedBox(height: Sizes.PADDING_2),
+          // Mirrors the date line above — same Inter 300 / 14 / seaBlue — so
+          // the date and the start–end range read as one paragraph rather
+          // than two competing emphasis levels.
+          Text(
+            timeRangeLabel!,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.seaBlue,
+              fontSize: Sizes.TEXT_SIZE_14,
+              fontWeight: FontWeight.w300,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ],
     );
   }
