@@ -127,6 +127,15 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
             isMobile: isMobile,
             filter: _filter,
             onTapSesion: widget.onTapSesion,
+            onFilterChange: (f) => setState(() {
+              _filter = f;
+              _selectedDay = null;
+            }),
+          );
+
+          final panelHeader = _PanelHeader(
+            isMobile: isMobile,
+            onExport: () => _handleExportIcs(context, allSesiones),
           );
 
           return SingleChildScrollView(
@@ -137,27 +146,20 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
                   isMobile: isMobile,
                   onClose: widget.onClose,
                 ),
-                SizedBox(height: isMobile ? Sizes.PADDING_8 : Sizes.PADDING_12),
-                _ExportIcsButton(
-                  isMobile: isMobile,
-                  onPressed: () => _handleExportIcs(context, allSesiones),
-                ),
                 SizedBox(height: isMobile ? Sizes.PADDING_16 : Sizes.PADDING_20),
-                // Filter pills — Próximas / Pasadas / Todas. Default = Próximas.
-                // Mounted directly above the sessions panel (NOT above the
-                // full-width content) so the pills visually scope to the
-                // right rail they actually control. Tapping a filter also
-                // clears any day selection so the panel re-renders from the
-                // new filter rather than the previously selected day.
                 if (isDesktop)
-                  // Side-by-side: compact calendar (left) + filter pills +
-                  // sessions panel (right). No `IntrinsicHeight` here —
-                  // `SesionListTile` uses `Stack` + `Positioned` which can't
-                  // report intrinsic size, and wrapping the Row in
-                  // IntrinsicHeight crashes hit-testing with "render box
-                  // with no size". Letting each side grow independently
-                  // looks identical on screen because the calendar card is
-                  // fixed-height anyway.
+                  // Side-by-side: compact calendar (left) + panel header +
+                  // sessions panel (right). The panel header (title +
+                  // Descargar .ics) and the filter pills are visually scoped
+                  // to the right rail — the title sits ABOVE the panel and
+                  // the pills are now rendered INSIDE the panel container.
+                  // The left column mirrors the panel header as an invisible
+                  // spacer so the calendar's top lines up with the sessions
+                  // panel (below the title), not with the panel header.
+                  // No `IntrinsicHeight` here — `SesionListTile` uses
+                  // `Stack` + `Positioned` which can't report intrinsic
+                  // size; wrapping the Row in IntrinsicHeight crashes
+                  // hit-testing with "render box with no size".
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -165,20 +167,27 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
                         constraints: const BoxConstraints(
                           maxWidth: _kCalendarMaxWidth,
                         ),
-                        child: calendarCard,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Visibility(
+                              visible: false,
+                              maintainSize: true,
+                              maintainAnimation: true,
+                              maintainState: true,
+                              child: panelHeader,
+                            ),
+                            const SizedBox(height: Sizes.PADDING_16),
+                            calendarCard,
+                          ],
+                        ),
                       ),
                       const SizedBox(width: Sizes.PADDING_24),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _CalendarFilterBar(
-                              activeFilter: _filter,
-                              onSelect: (f) => setState(() {
-                                _filter = f;
-                                _selectedDay = null;
-                              }),
-                            ),
+                            panelHeader,
                             const SizedBox(height: Sizes.PADDING_16),
                             sessionsPanel,
                           ],
@@ -188,18 +197,11 @@ class _SesionCalendarPageState extends State<SesionCalendarPage> {
                   )
                 else ...[
                   // Mobile / tablet: vertical stack — calendar full width on
-                  // top, then filter pills, then sessions panel below.
-                  // Avoids horizontal cramping.
+                  // top, then panel header (title + Descargar .ics), then
+                  // sessions panel (with filter pills inside) below.
                   calendarCard,
-                  SizedBox(
-                      height: isMobile ? Sizes.PADDING_16 : Sizes.PADDING_20),
-                  _CalendarFilterBar(
-                    activeFilter: _filter,
-                    onSelect: (f) => setState(() {
-                      _filter = f;
-                      _selectedDay = null;
-                    }),
-                  ),
+                  const SizedBox(height: Sizes.PADDING_20),
+                  panelHeader,
                   const SizedBox(height: Sizes.PADDING_12),
                   sessionsPanel,
                 ],
@@ -306,8 +308,9 @@ Map<String, String> resolveParticipantNames(Iterable<String> ids) {
   return out;
 }
 
-/// Right-aligned "Descargar .ics" button shown beneath the page header.
-/// Tap downloads the focused month's sessions as an iCalendar file.
+/// "Descargar .ics" button. Tap downloads the focused month's sessions as an
+/// iCalendar file. Rendered inside [_PanelHeader] — the parent Row pins it
+/// to the right with the title on the left.
 class _ExportIcsButton extends StatelessWidget {
   const _ExportIcsButton({required this.isMobile, required this.onPressed});
 
@@ -317,34 +320,31 @@ class _ExportIcsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Tooltip(
-        message: StringConst.CALENDARIO_EXPORT_ICS_TOOLTIP,
-        child: OutlinedButton.icon(
-          onPressed: onPressed,
-          icon: const Icon(
-            Icons.file_download_outlined,
-            size: Sizes.ICON_SIZE_20,
+    return Tooltip(
+      message: StringConst.CALENDARIO_EXPORT_ICS_TOOLTIP,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(
+          Icons.file_download_outlined,
+          size: Sizes.ICON_SIZE_20,
+          color: AppColors.primary900,
+        ),
+        label: Text(
+          StringConst.CALENDARIO_EXPORT_ICS_LABEL,
+          style: (isMobile ? textTheme.bodySmall : textTheme.bodyMedium)
+              ?.copyWith(
             color: AppColors.primary900,
+            fontWeight: FontWeight.w600,
           ),
-          label: Text(
-            StringConst.CALENDARIO_EXPORT_ICS_LABEL,
-            style: (isMobile ? textTheme.bodySmall : textTheme.bodyMedium)
-                ?.copyWith(
-              color: AppColors.primary900,
-              fontWeight: FontWeight.w600,
-            ),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: AppColors.greyBorder),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
           ),
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: AppColors.greyBorder),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? Sizes.PADDING_12 : Sizes.PADDING_16,
-              vertical: isMobile ? Sizes.PADDING_8 : Sizes.PADDING_12,
-            ),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? Sizes.PADDING_12 : Sizes.PADDING_16,
+            vertical: isMobile ? Sizes.PADDING_8 : Sizes.PADDING_12,
           ),
         ),
       ),
@@ -354,8 +354,10 @@ class _ExportIcsButton extends StatelessWidget {
 
 // ── Header ────────────────────────────────────────────────────────────────
 
-/// Page header: back-button (returns to list) + calendar title.
-/// On mobile the title sits below the back-button so neither truncates.
+/// Page header: back-button (returns to the sessions list). The calendar
+/// title moved out of this row and into [_PanelHeader] (above the right
+/// panel) so the title and the Descargar .ics button now share one line
+/// scoped to the panel they describe.
 class _CalendarHeader extends StatelessWidget {
   const _CalendarHeader({required this.isMobile, required this.onClose});
 
@@ -366,46 +368,53 @@ class _CalendarHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final backButton = TextButton.icon(
-      onPressed: onClose,
-      icon: const Icon(
-        Icons.arrow_back,
-        color: AppColors.primary900,
-        size: Sizes.ICON_SIZE_20,
-      ),
-      label: Text(
-        StringConst.SESIONES,
-        style: (isMobile ? textTheme.titleMedium : textTheme.headlineSmall)
-            ?.copyWith(color: AppColors.primary900),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: onClose,
+        icon: const Icon(
+          Icons.arrow_back,
+          color: AppColors.primary900,
+          size: Sizes.ICON_SIZE_20,
+        ),
+        label: Text(
+          StringConst.SESIONES,
+          style: (isMobile ? textTheme.titleMedium : textTheme.headlineSmall)
+              ?.copyWith(color: AppColors.primary900),
+        ),
       ),
     );
+  }
+}
 
-    final title = Text(
-      StringConst.CALENDARIO_TITLE,
-      style: (isMobile ? textTheme.bodyLarge : textTheme.titleMedium)?.copyWith(
-        color: AppColors.greyTxtAlt,
-        fontWeight: FontWeight.w400,
-      ),
-      overflow: TextOverflow.ellipsis,
-    );
+// ── Panel header ──────────────────────────────────────────────────────────
 
-    if (isMobile) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          backButton,
-          Padding(
-            padding: const EdgeInsets.only(left: Sizes.PADDING_8),
-            child: title,
-          ),
-        ],
-      );
-    }
+/// Header rendered immediately ABOVE the sessions panel (right rail on
+/// desktop, full width on mobile). Shows the section title
+/// ("Mi calendario de sesiones") on the left and the "Descargar .ics"
+/// export button flush to the right.
+class _PanelHeader extends StatelessWidget {
+  const _PanelHeader({required this.isMobile, required this.onExport});
+
+  final bool isMobile;
+  final VoidCallback onExport;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        backButton,
-        const Spacer(),
-        Flexible(child: title),
+        Expanded(
+          child: Text(
+            StringConst.CALENDARIO_TITLE,
+            style: (isMobile ? textTheme.titleMedium : textTheme.headlineSmall)
+                ?.copyWith(color: AppColors.primary900),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: Sizes.PADDING_12),
+        _ExportIcsButton(isMobile: isMobile, onPressed: onExport),
       ],
     );
   }
@@ -932,6 +941,7 @@ class _SessionsPanel extends StatelessWidget {
     required this.isMobile,
     required this.filter,
     required this.onTapSesion,
+    required this.onFilterChange,
   });
 
   final DateTime focusedMonth;
@@ -941,12 +951,18 @@ class _SessionsPanel extends StatelessWidget {
   final bool isMobile;
   final _CalendarFilter filter;
   final ValueChanged<Sesion> onTapSesion;
+  final ValueChanged<_CalendarFilter> onFilterChange;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
+      // Always fill the parent column. Without this the Container shrinks to
+      // its content width — which on an empty "Próximas sesiones" state
+      // (just a header + a one-line "No tienes ninguna sesión" message)
+      // leaves the panel visibly narrower than the panel header above it.
+      width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(Sizes.RADIUS_16),
@@ -963,6 +979,16 @@ class _SessionsPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Filter pills — Próximas / Pasadas / Todas. Mounted INSIDE the
+          // panel container so they read as part of the same surface as the
+          // sessions list they filter. Tapping a pill also clears any day
+          // selection so the panel re-renders from the new filter rather
+          // than the previously selected day.
+          _CalendarFilterBar(
+            activeFilter: filter,
+            onSelect: onFilterChange,
+          ),
+          SizedBox(height: isMobile ? Sizes.PADDING_16 : Sizes.PADDING_20),
           Text(
             _resolveHeader(),
             style: (isMobile ? textTheme.titleMedium : textTheme.headlineSmall)
@@ -1131,7 +1157,7 @@ class _CalendarFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: Sizes.PADDING_12,
+      spacing: Sizes.PADDING_8,
       runSpacing: Sizes.PADDING_8,
       children: [
         _FilterPill(
@@ -1169,17 +1195,17 @@ class _FilterPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return InkWell(
-      borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
+      borderRadius: BorderRadius.circular(Sizes.RADIUS_20),
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         padding: const EdgeInsets.symmetric(
-          horizontal: Sizes.PADDING_30,
-          vertical: Sizes.PADDING_12,
+          horizontal: Sizes.PADDING_16,
+          vertical: Sizes.PADDING_6,
         ),
         decoration: BoxDecoration(
           color: isActive ? AppColors.yellow : AppColors.white,
-          borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
+          borderRadius: BorderRadius.circular(Sizes.RADIUS_20),
           border: Border.all(
             color: isActive ? AppColors.yellow : AppColors.violet,
             width: 1,
@@ -1187,7 +1213,7 @@ class _FilterPill extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: textTheme.bodyLarge?.copyWith(
+          style: textTheme.bodySmall?.copyWith(
             color:
                 isActive ? AppColors.primary900 : AppColors.greyTxtAlt,
             fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
