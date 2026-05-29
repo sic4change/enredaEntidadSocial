@@ -881,6 +881,15 @@ class StringConst {
   static const String CALENDARIO_EMPTY_DAY = 'No hay sesiones este día.';
   static const String CALENDARIO_EMPTY = 'Aún no tienes sesiones programadas.';
   static const String CALENDARIO_PANEL_MONTH = 'Sesiones del mes';
+  // Filter pills above the calendar (mirrors the Próximas / Pasadas tabs
+  // on the main Sesiones list, plus a third "Todas las sesiones" option).
+  static const String CALENDARIO_FILTER_PROXIMAS = 'Próximas sesiones';
+  static const String CALENDARIO_FILTER_PASADAS = 'Sesiones pasadas';
+  static const String CALENDARIO_FILTER_TODAS = 'Todas las sesiones';
+  // Replaces the long localized date in the right panel when a single day
+  // is selected. Past / future relative to "today".
+  static const String CALENDARIO_PANEL_PROXIMA_SESION = 'Próxima sesión';
+  static const String CALENDARIO_PANEL_SESION_PASADA = 'Sesión pasada';
   static const String CALENDARIO_EXPORT_ICS_LABEL = 'Descargar .ics';
   static const String CALENDARIO_EXPORT_ICS_TOOLTIP =
       'Descargar calendario (.ics)';
