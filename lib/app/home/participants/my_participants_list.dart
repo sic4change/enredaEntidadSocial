@@ -100,8 +100,22 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
     return StreamBuilder<void>(
       stream: LocationCache.instance.paginationUpdates,
       builder: (context, _) {
+        // "Mis Participantes" must be scoped to participants whose
+        // `assignedById` matches the logged-in técnico's userId — not the
+        // entire social entity. LocationCache.allParticipants is entity-wide
+        // (loaded via getParticipantsByEntityPaginated), so we filter it
+        // client-side. Legacy participants with no assignedById are excluded
+        // (they need to be reassigned via a separate UI).
+        final myUserId = globals.currentSocialEntityUser?.userId
+            ?? _socialEntityUser?.userId;
         final participants = LocationCache.instance.allParticipants;
-        final myParticipants = participants.take(10).toList();
+        final myParticipants = (myUserId == null || myUserId.isEmpty)
+            ? const <UserEnreda>[]
+            : participants
+                .where((u) => (u.assignedById ?? '').isNotEmpty
+                    && u.assignedById == myUserId)
+                .take(10)
+                .toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

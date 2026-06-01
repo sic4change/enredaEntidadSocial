@@ -61,6 +61,12 @@ class _SideBarWidgetState extends State<SideBarWidget> {
     });
   }
 
+  void _setSelectedIndexTools() {
+    setState(() {
+      WebHome.goToolBox();
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -170,10 +176,38 @@ class _SideBarWidgetState extends State<SideBarWidget> {
         );
       },
       items: [
+        // Every Image.asset below is tinted to AppColors.turquoiseBlue via
+        // `colorBlendMode: BlendMode.srcIn` so every sidebar icon renders in
+        // the same color regardless of the source PNG's own palette. Without
+        // this, items whose source PNG was already turquoise looked correct
+        // while items whose PNG was gray (e.g. icon-caja-entidad.png) read
+        // as "washed out" — that's bug #1.
         // index 0 — Panel de control
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PANEL), width: 20,), label: StringConst.DRAWER_CONTROL_PANEL, onTap: _setSelectedIndexToOne),
+        SidebarXItem(
+          iconWidget: Container(
+            width: 20,
+            child: Image.asset(
+              ImagePath.ICON_PANEL,
+              color: AppColors.turquoiseBlue,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+          ),
+          label: StringConst.DRAWER_CONTROL_PANEL,
+          onTap: _setSelectedIndexToOne,
+        ),
         // index 1 — Participantes
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_PARTICIPANTS), width: 20,), label: StringConst.DRAWER_PARTICIPANTS, onTap: _setSelectedIndexParticipants),
+        SidebarXItem(
+          iconWidget: Container(
+            width: 20,
+            child: Image.asset(
+              ImagePath.ICON_PARTICIPANTS,
+              color: AppColors.turquoiseBlue,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+          ),
+          label: StringConst.DRAWER_PARTICIPANTS,
+          onTap: _setSelectedIndexParticipants,
+        ),
         // index 2 — Sesiones (moved up — sits directly below Participantes)
         // Uses the Figma-extracted calendar+people SVG, recoloured to
         // turquoiseBlue to match the other sidebar icons.
@@ -183,17 +217,58 @@ class _SideBarWidgetState extends State<SideBarWidget> {
           // the bump-up the colleague requested).
           iconWidget: Container(
             width: 24,
-            child: Image.asset(ImagePath.ICON_SESSIONS),
+            child: Image.asset(
+              ImagePath.ICON_SESSIONS,
+              color: AppColors.turquoiseBlue,
+              colorBlendMode: BlendMode.srcIn,
+            ),
           ),
           label: StringConst.DRAWER_SESIONES,
           onTap: _setSelectedIndexSesiones,
         ),
         // index 3 — Recursos
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_RESOURCES), width: 20,), label: StringConst.DRAWER_MY_RESOURCES , onTap: _setSelectedIndexResources),
+        SidebarXItem(
+          iconWidget: Container(
+            width: 20,
+            child: Image.asset(
+              ImagePath.ICON_RESOURCES,
+              color: AppColors.turquoiseBlue,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+          ),
+          label: StringConst.DRAWER_MY_RESOURCES,
+          onTap: _setSelectedIndexResources,
+        ),
         // index 4 — Caja de herramientas
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_TOOLS), width: 20,), label: StringConst.DRAWER_TOOLS , onTap: _setSelectedIndexToOne),
+        // onTap fixed: was `_setSelectedIndexToOne` (the Panel handler), so
+        // tapping Tools landed on whatever case 2 currently rendered instead
+        // of ToolBoxPage. Now wired to WebHome.goToolBox() via
+        // `_setSelectedIndexTools`.
+        SidebarXItem(
+          iconWidget: Container(
+            width: 20,
+            child: Image.asset(
+              ImagePath.ICON_TOOLS,
+              color: AppColors.turquoiseBlue,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+          ),
+          label: StringConst.DRAWER_TOOLS,
+          onTap: _setSelectedIndexTools,
+        ),
         // index 5 — Agenda de contactos
-        SidebarXItem(iconWidget: Container(child: Image.asset(ImagePath.ICON_ENTITY), width: 20,), label: StringConst.DRAWER_ENTITIES, onTap: _setSelectedIndexEntities),
+        SidebarXItem(
+          iconWidget: Container(
+            width: 20,
+            child: Image.asset(
+              ImagePath.ICON_ENTITY,
+              color: AppColors.turquoiseBlue,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+          ),
+          label: StringConst.DRAWER_ENTITIES,
+          onTap: _setSelectedIndexEntities,
+        ),
       ],
     );
   }

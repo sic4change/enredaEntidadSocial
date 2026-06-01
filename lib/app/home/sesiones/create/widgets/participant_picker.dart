@@ -6,6 +6,8 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
+
 /// Searchable multi-select participant picker for the "Convocar participantes"
 /// field in the Crear Nueva Sesión form (Figma overlay `1:493`).
 ///
@@ -97,7 +99,19 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
       // ──────────────────────────────────────────────────────────────────
       stream: LocationCache.instance.paginationUpdates,
       builder: (context, _) {
-        final all = LocationCache.instance.allParticipants;
+        // Scope the picker to the logged-in técnico's own participants.
+        // LocationCache.allParticipants is entity-wide; without this filter
+        // the técnico could invite participants assigned to a colleague.
+        // Mirrors the filter applied on the Panel de control "Mis
+        // Participantes" carousel and the full Participantes page.
+        final myUserId = globals.currentSocialEntityUser?.userId ?? '';
+        final all = myUserId.isEmpty
+            ? const <UserEnreda>[]
+            : LocationCache.instance.allParticipants
+                .where((u) =>
+                    (u.assignedById ?? '').isNotEmpty &&
+                    u.assignedById == myUserId)
+                .toList();
         final filtered = _applySearch(all);
         final isLoading = LocationCache.instance.isLoadingParticipants &&
             all.isEmpty;
