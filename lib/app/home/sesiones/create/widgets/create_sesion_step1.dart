@@ -880,7 +880,17 @@ class _BorderedDropdown<T> extends StatelessWidget {
         filled: true,
         fillColor: AppColors.white,
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.greyDropMenuBorder),
+        // Hint must mirror the value `style` line-metrics — without an
+        // explicit `height` + `fontSize` on `hintStyle`, the placeholder
+        // inherits Material's default and renders off-center vertically
+        // inside the box (visible on the IPIL + third-Competencias
+        // dropdowns where no value is selected by default).
+        hintStyle: textTheme.bodySmall?.copyWith(
+          color: AppColors.greyDropMenuBorder,
+          fontWeight: FontWeight.w400,
+          height: 1.5,
+          fontSize: Sizes.TEXT_SIZE_14,
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: Sizes.PADDING_12,
           vertical: Sizes.PADDING_17_5,
