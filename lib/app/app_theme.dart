@@ -29,6 +29,15 @@ class AppTheme {
   static ThemeData themeData(ColorScheme colorScheme, Color focusColor) {
     return ThemeData(
       dialogTheme: DialogThemeData().copyWith(surfaceTintColor: Colors.white,),
+      // The Material 3 time picker renders the hour/minute digits at ~57px by
+      // default, which overflows the dial on web. Shrink them to a readable
+      // size (the only time picker in the app is Crear sesión's Hora fields).
+      timePickerTheme: TimePickerThemeData(
+        hourMinuteTextStyle: GoogleFonts.outfit(
+          fontSize: Sizes.TEXT_SIZE_34,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
       primarySwatch: white,
       useMaterial3: true,
       textTheme: _textTheme,

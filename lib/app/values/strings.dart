@@ -700,8 +700,7 @@ class StringConst {
   static const String SESION_EXPORTAR = 'Exportar';
 
   // Crear nueva sesión — multi-step form
-  static const String SESION_CREATE_TITLE =
-      'Crear nueva sesión/evento/taller/charla...';
+  static const String SESION_CREATE_TITLE = 'Crear nueva sesión';
   static const String SESION_TAB_INFO = 'Información general';
   static const String SESION_TAB_IPIL = 'IPIL';
   static const String SESION_TAB_REVISION = 'Revisión';
@@ -749,6 +748,10 @@ class StringConst {
       'Descripción de la sesión';
   static const String SESION_FIELD_DESCRIPTION_HINT =
       'Escribe una descripción para esta sesión.';
+  static const String SESION_FIELD_OBSERVACIONES_LABEL =
+      'Observaciones y/o incidencias';
+  static const String SESION_FIELD_OBSERVACIONES_HINT =
+      'Añade observaciones, incidencias o una breve evaluación de la sesión.';
   static const String SESION_BUTTON_SIGUIENTE = 'Siguiente';
   static const String SESION_BUTTON_GUARDAR = 'Guardar';
   static const String SESION_BUTTON_CANCELAR = 'Cancelar';

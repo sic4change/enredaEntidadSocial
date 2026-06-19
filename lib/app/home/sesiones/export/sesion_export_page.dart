@@ -18,17 +18,19 @@ import 'package:provider/provider.dart';
 /// Layout follows the Figma export frame (loose nodes 1:1828+ on the canvas):
 ///   • Top: collapsed session info (reuses [SesionListTile])
 ///   • Left card: read-only Título / Desarrollo / Observaciones
-///   • Right card: 6 PARTICIPANTES + Listado + bulk "Seleccionar subvención"
-///     dropdown + per-participant row with its own dropdown
+///   • Right card: N PARTICIPANTES + Listado + a single "Seleccionar
+///     subvención" dropdown for the whole export + a per-participant
+///     include/exclude toggle.
 ///   • Bottom: Cancelar (outlined) + Exportar (filled)
 ///
 /// Subvenciones source: the [SocialEntity]'s `programs` list (program IDs
 /// the entity participates in). Programs come from [LocationCache.programs]
 /// — zero new Firestore reads.
 ///
-/// On Exportar: persists `_assignments` to `sesion.participantSubvenciones`
-/// via [Database.setSesion], then triggers [SesionExportPdf.generate] which
-/// opens the platform print/share dialog.
+/// On Exportar: persists the single subvención choice against each included
+/// participant (`sesion.participantSubvenciones`) via [Database.setSesion],
+/// then triggers [SesionExportPdf.generate] — which renders the grant logo
+/// at the top of the document and opens the platform print/share dialog.
 class SesionExportPage extends StatefulWidget {
   const SesionExportPage({
     super.key,
@@ -46,14 +48,22 @@ class SesionExportPage extends StatefulWidget {
 }
 
 class _SesionExportPageState extends State<SesionExportPage> {
-  late Map<String, String> _assignments;
-  String? _bulkSelected;
+  /// The single subvención (program id) applied to the whole export.
+  String? _selectedSubvencion;
+
+  /// Participants the user has toggled OFF — omitted from the printed list.
+  /// Empty by default → everyone invited is printed.
+  final Set<String> _excludedParticipants = <String>{};
+
   bool _exporting = false;
 
   @override
   void initState() {
     super.initState();
-    _assignments = Map<String, String>.from(widget.sesion.participantSubvenciones);
+    // Seed the selector from any previously-saved assignment so a re-export
+    // remembers the last subvención choice.
+    final existing = widget.sesion.participantSubvenciones.values;
+    _selectedSubvencion = existing.isNotEmpty ? existing.first : null;
   }
 
   List<Program> get _availableSubvenciones {
@@ -67,22 +77,12 @@ class _SesionExportPageState extends State<SesionExportPage> {
     ];
   }
 
-  void _applyBulk(String? programId) {
-    if (programId == null || programId.isEmpty) return;
+  void _toggleIncluded(String userId, bool included) {
     setState(() {
-      _bulkSelected = programId;
-      for (final id in widget.sesion.invitedParticipants) {
-        _assignments[id] = programId;
-      }
-    });
-  }
-
-  void _setAssignment(String userId, String? programId) {
-    setState(() {
-      if (programId == null || programId.isEmpty) {
-        _assignments.remove(userId);
+      if (included) {
+        _excludedParticipants.remove(userId);
       } else {
-        _assignments[userId] = programId;
+        _excludedParticipants.add(userId);
       }
     });
   }
@@ -93,34 +93,45 @@ class _SesionExportPageState extends State<SesionExportPage> {
 
     final database = Provider.of<Database>(context, listen: false);
     try {
-      // 1. Persist subvención assignments.
-      final updated = _cloneSesionWithAssignments();
+      final includedIds = widget.sesion.invitedParticipants
+          .where((id) => !_excludedParticipants.contains(id))
+          .toList(growable: false);
+
+      // 1. Persist the single subvención choice against each included
+      //    participant (keeps the existing model field populated).
+      final updated = _buildUpdatedSesion(includedIds);
       await database.setSesion(updated);
 
-      // 2. Resolve participants + subvenciones for the PDF (sync from cache).
+      // 2. Resolve included participants for the PDF (sync from cache, with an
+      //    async fetch fallback for any uncached participant).
       final participantsById = <String, UserEnreda>{};
-      for (final id in updated.invitedParticipants) {
+      for (final id in includedIds) {
         final u = LocationCache.instance.userCache[id];
         if (u != null) participantsById[id] = u;
       }
-      // Fall back to async fetch for any uncached participant (rare).
-      for (final id in updated.invitedParticipants) {
+      for (final id in includedIds) {
         if (!participantsById.containsKey(id)) {
           final u = await LocationCache.instance.getUser(database, id);
           if (u != null) participantsById[id] = u;
         }
       }
-      final subvencionesById = <String, Program>{
-        for (final p in _availableSubvenciones)
-          if (p.programId != null) p.programId!: p,
-      };
 
-      // 3. Generate + present PDF.
+      // 3. Resolve the selected Program for the logo + header.
+      Program? subvencion;
+      for (final p in _availableSubvenciones) {
+        if (p.programId == _selectedSubvencion) {
+          subvencion = p;
+          break;
+        }
+      }
+
+      // 4. Generate + present PDF.
       await SesionExportPdf.generate(
         sesion: updated,
         socialEntity: widget.socialEntity,
         participantsById: participantsById,
-        subvencionesById: subvencionesById,
+        includedParticipantIds: includedIds,
+        subvencion: subvencion,
       );
 
       if (!mounted) return;
@@ -137,10 +148,18 @@ class _SesionExportPageState extends State<SesionExportPage> {
     }
   }
 
-  /// Reconstructs the [Sesion] with the new `participantSubvenciones`
-  /// assignment (all other fields preserved).
-  Sesion _cloneSesionWithAssignments() {
+  /// Reconstructs the [Sesion] with `participantSubvenciones` set to the single
+  /// selected subvención for every included participant (all other fields
+  /// preserved).
+  Sesion _buildUpdatedSesion(List<String> includedIds) {
     final s = widget.sesion;
+    final Map<String, String> subvenciones = {};
+    final sel = _selectedSubvencion;
+    if (sel != null && sel.isNotEmpty) {
+      for (final id in includedIds) {
+        subvenciones[id] = sel;
+      }
+    }
     return Sesion(
       sesionId: s.sesionId,
       tecnicoId: s.tecnicoId,
@@ -184,7 +203,10 @@ class _SesionExportPageState extends State<SesionExportPage> {
       ipilFinalInterview: s.ipilFinalInterview,
       ipilFinalJobValoration: s.ipilFinalJobValoration,
       ipilOther: s.ipilOther,
-      participantSubvenciones: Map<String, String>.from(_assignments),
+      participantSubvenciones: subvenciones,
+      // Preserve reminders — setSesion writes the whole doc, so omitting this
+      // would reset reminderUserIds to [] on every export.
+      reminderUserIds: s.reminderUserIds,
     );
   }
 
@@ -212,11 +234,12 @@ class _SesionExportPageState extends State<SesionExportPage> {
               const SizedBox(height: Sizes.PADDING_20),
               _RightCard(
                 sesion: widget.sesion,
-                assignments: _assignments,
-                bulkSelected: _bulkSelected,
+                selectedSubvencion: _selectedSubvencion,
+                excludedParticipants: _excludedParticipants,
                 subvenciones: subvenciones,
-                onBulk: _applyBulk,
-                onAssign: _setAssignment,
+                onSubvencionChanged: (v) =>
+                    setState(() => _selectedSubvencion = v),
+                onToggleIncluded: _toggleIncluded,
               ),
             ] else
               IntrinsicHeight(
@@ -229,11 +252,12 @@ class _SesionExportPageState extends State<SesionExportPage> {
                       flex: 1,
                       child: _RightCard(
                         sesion: widget.sesion,
-                        assignments: _assignments,
-                        bulkSelected: _bulkSelected,
+                        selectedSubvencion: _selectedSubvencion,
+                        excludedParticipants: _excludedParticipants,
                         subvenciones: subvenciones,
-                        onBulk: _applyBulk,
-                        onAssign: _setAssignment,
+                        onSubvencionChanged: (v) =>
+                            setState(() => _selectedSubvencion = v),
+                        onToggleIncluded: _toggleIncluded,
                       ),
                     ),
                   ],
@@ -402,19 +426,19 @@ class _Section extends StatelessWidget {
 class _RightCard extends StatelessWidget {
   const _RightCard({
     required this.sesion,
-    required this.assignments,
-    required this.bulkSelected,
+    required this.selectedSubvencion,
+    required this.excludedParticipants,
     required this.subvenciones,
-    required this.onBulk,
-    required this.onAssign,
+    required this.onSubvencionChanged,
+    required this.onToggleIncluded,
   });
 
   final Sesion sesion;
-  final Map<String, String> assignments;
-  final String? bulkSelected;
+  final String? selectedSubvencion;
+  final Set<String> excludedParticipants;
   final List<Program> subvenciones;
-  final ValueChanged<String?> onBulk;
-  final void Function(String userId, String? programId) onAssign;
+  final ValueChanged<String?> onSubvencionChanged;
+  final void Function(String userId, bool included) onToggleIncluded;
 
   @override
   Widget build(BuildContext context) {
@@ -460,29 +484,27 @@ class _RightCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Sizes.PADDING_12),
-          if (!hasSubvenciones)
-            _NoSubvencionesMessage()
-          else ...[
+          if (hasSubvenciones)
             CustomDropDownButtonFormFieldTittle(
               labelText: StringConst.SESION_EXPORT_SELECCIONAR_SUBVENCION,
               hintText: StringConst.SESION_EXPORT_SELECCIONA_OPCION,
-              value: dropdownItems.any((i) => i.value == bulkSelected)
-                  ? bulkSelected
+              value: dropdownItems.any((i) => i.value == selectedSubvencion)
+                  ? selectedSubvencion
                   : null,
               source: dropdownItems,
-              onChanged: onBulk,
+              onChanged: onSubvencionChanged,
+            )
+          else
+            _NoSubvencionesMessage(),
+          const SizedBox(height: Sizes.PADDING_16),
+          const Divider(height: 1, color: AppColors.greyBorder),
+          const SizedBox(height: Sizes.PADDING_12),
+          for (final id in invited)
+            _ParticipantIncludeRow(
+              userId: id,
+              included: !excludedParticipants.contains(id),
+              onChanged: (v) => onToggleIncluded(id, v),
             ),
-            const SizedBox(height: Sizes.PADDING_16),
-            const Divider(height: 1, color: AppColors.greyBorder),
-            const SizedBox(height: Sizes.PADDING_12),
-            for (final id in invited)
-              _ParticipantSubvencionRow(
-                userId: id,
-                value: assignments[id],
-                dropdownItems: dropdownItems,
-                onChanged: (v) => onAssign(id, v),
-              ),
-          ],
         ],
       ),
     );
@@ -506,18 +528,18 @@ class _NoSubvencionesMessage extends StatelessWidget {
   }
 }
 
-class _ParticipantSubvencionRow extends StatelessWidget {
-  const _ParticipantSubvencionRow({
+/// One participant row: name on the left + an include/exclude checkbox on the
+/// right. Checked = the participant appears in the exported listado.
+class _ParticipantIncludeRow extends StatelessWidget {
+  const _ParticipantIncludeRow({
     required this.userId,
-    required this.value,
-    required this.dropdownItems,
+    required this.included,
     required this.onChanged,
   });
 
   final String userId;
-  final String? value;
-  final List<DropdownMenuItem<String>> dropdownItems;
-  final ValueChanged<String?> onChanged;
+  final bool included;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -542,36 +564,38 @@ class _ParticipantSubvencionRow extends StatelessWidget {
                   : '${u.firstName ?? ''} ${u.lastName ?? ''}'.trim());
           final displayName =
               name.isEmpty ? StringConst.SESION_PICKER_UNKNOWN_USER : name;
-          final effectiveValue =
-              dropdownItems.any((i) => i.value == value) ? value : null;
 
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 3,
-                child: Text(
-                  displayName,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: AppColors.primary900,
-                    fontWeight: FontWeight.w500,
+          return InkWell(
+            borderRadius: BorderRadius.circular(Sizes.RADIUS_8),
+            onTap: () => onChanged(!included),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: Sizes.PADDING_4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      displayName,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppColors.primary900,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                  // Same "check al lado" affordance as the CV builder
+                  // (my_curriculum_page.dart): a checked box when the person
+                  // is in the listado, an empty square when excluded.
+                  IconButton(
+                    icon: Icon(
+                      included ? Icons.check_box : Icons.crop_square,
+                    ),
+                    color: AppColors.primary900,
+                    iconSize: Sizes.ICON_SIZE_20,
+                    onPressed: () => onChanged(!included),
+                  ),
+                ],
               ),
-              const SizedBox(width: Sizes.PADDING_8),
-              Expanded(
-                flex: 4,
-                child: CustomDropDownButtonFormFieldTittle(
-                  labelText: '',
-                  hintText:
-                      StringConst.SESION_EXPORT_PLACEHOLDER_SELECCIONAR,
-                  value: effectiveValue,
-                  source: dropdownItems,
-                  onChanged: onChanged,
-                ),
-              ),
-            ],
+            ),
           );
         },
       ),

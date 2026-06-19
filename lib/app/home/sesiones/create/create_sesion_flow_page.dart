@@ -78,6 +78,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
   String? _competenciaCategoriaId;
   String? _competenciaSubCategoriaId;
   String? _description;
+  String? _observations;
   final List<String> _invitedParticipants = <String>[];
 
   // ── IPIL draft state ─────────────────────────────────────────────────────
@@ -122,6 +123,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       _competenciaCategoriaId = seed.competenciaCategoriaId;
       _competenciaSubCategoriaId = seed.competenciaSubCategoriaId;
       _description = seed.description;
+      _observations = seed.observations;
       _invitedParticipants.addAll(seed.invitedParticipants);
 
       // Seed IPIL template from existing sesion (edit mode).
@@ -202,6 +204,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
           initialCompetenciaCategoriaId: _competenciaCategoriaId,
           initialCompetenciaSubCategoriaId: _competenciaSubCategoriaId,
           initialDescription: _description,
+          initialObservations: _observations,
           initialInvitedParticipants: _invitedParticipants,
           onNext: _handleStep1Submit,
         );
@@ -257,6 +260,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
     required String? competenciaCategoriaId,
     required String? competenciaSubCategoriaId,
     required String? description,
+    required String? observations,
     required List<String> invitedParticipants,
   }) {
     setState(() {
@@ -272,6 +276,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       _competenciaCategoriaId = competenciaCategoriaId;
       _competenciaSubCategoriaId = competenciaSubCategoriaId;
       _description = description;
+      _observations = observations;
       _invitedParticipants
         ..clear()
         ..addAll(invitedParticipants);
@@ -406,7 +411,7 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       absentParticipants: seed?.absentParticipants ?? const <String>[],
       title: _title,
       description: _description,
-      observations: seed?.observations,
+      observations: _observations,
       lugar: _lugar,
       duracion: _duracion,
       createIpil: _createIpil,
@@ -436,6 +441,9 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       ipilFinalInterview: _ipilFinalInterview,
       ipilFinalJobValoration: _ipilFinalJobValoration,
       ipilOther: _ipilOther,
+      // Preserve reminders when editing — setSesion writes the whole doc, so
+      // omitting this would reset reminderUserIds to [] on save.
+      reminderUserIds: seed?.reminderUserIds ?? const <String>[],
     );
 
     try {

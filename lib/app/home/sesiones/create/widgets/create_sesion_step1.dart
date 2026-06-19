@@ -1,6 +1,5 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/home/sesiones/create/widgets/participant_picker.dart';
-import 'package:enreda_empresas/app/models/competencyCategory.dart';
 import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/sesion.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
@@ -24,6 +23,7 @@ typedef Step1Submit = void Function({
   required String? competenciaCategoriaId,
   required String? competenciaSubCategoriaId,
   required String? description,
+  required String? observations,
   required List<String> invitedParticipants,
 });
 
@@ -50,6 +50,7 @@ class CreateSesionStep1 extends StatefulWidget {
     required this.initialCompetenciaCategoriaId,
     required this.initialCompetenciaSubCategoriaId,
     required this.initialDescription,
+    required this.initialObservations,
     required this.initialInvitedParticipants,
     required this.onNext,
   });
@@ -68,6 +69,7 @@ class CreateSesionStep1 extends StatefulWidget {
   final String? initialCompetenciaCategoriaId;
   final String? initialCompetenciaSubCategoriaId;
   final String? initialDescription;
+  final String? initialObservations;
   final List<String> initialInvitedParticipants;
   final Step1Submit onNext;
 
@@ -105,6 +107,7 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
   late String? _competenciaSubCategoriaId =
       widget.initialCompetenciaSubCategoriaId;
   late String? _description = widget.initialDescription;
+  late String? _observations = widget.initialObservations;
   late List<String> _invitedIds =
       List<String>.from(widget.initialInvitedParticipants);
 
@@ -330,44 +333,11 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
                   flex: 3,
                   child: _LabeledBlock(
                     label: StringConst.SESION_FIELD_DESCRIPTION_LABEL,
-                    child: SizedBox(
+                    child: _MultilineField(
+                      initialValue: _description,
+                      hint: StringConst.SESION_FIELD_DESCRIPTION_HINT,
                       height: 320,
-                      child: TextFormField(
-                        initialValue: _description,
-                        maxLines: null,
-                        minLines: null,
-                        expands: true,
-                        textAlignVertical: TextAlignVertical.top,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: AppColors.greyDark,
-                        ),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: AppColors.white,
-                          hintText:
-                              StringConst.SESION_FIELD_DESCRIPTION_HINT,
-                          hintStyle: const TextStyle(
-                            color: AppColors.greyDropMenuBorder,
-                          ),
-                          contentPadding:
-                              const EdgeInsets.all(Sizes.PADDING_12),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(Sizes.RADIUS_6),
-                            borderSide: const BorderSide(
-                              color: AppColors.greyUltraLight,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(Sizes.RADIUS_6),
-                            borderSide: const BorderSide(
-                              color: AppColors.greyUltraLight,
-                            ),
-                          ),
-                        ),
-                        onChanged: (v) => _description = v,
-                      ),
+                      onChanged: (v) => _description = v,
                     ),
                   ),
                 ),
@@ -382,12 +352,26 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
                       selectedIds: _invitedIds,
                       singleSelect:
                           _sessionType == SesionType.individual,
+                      isGroupSession: _sessionType == SesionType.grupal,
                       onChanged: (ids) =>
                           setState(() => _invitedIds = ids),
                     ),
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: Sizes.PADDING_20),
+            // ── Observaciones y/o incidencias (full-width textarea) ───────
+            // Editable here so staff can add a brief evaluation when reviewing
+            // a past session via "Editar" (mirrors the Descripción field).
+            _LabeledBlock(
+              label: StringConst.SESION_FIELD_OBSERVACIONES_LABEL,
+              child: _MultilineField(
+                initialValue: _observations,
+                hint: StringConst.SESION_FIELD_OBSERVACIONES_HINT,
+                height: 160,
+                onChanged: (v) => _observations = v,
+              ),
             ),
             const SizedBox(height: Sizes.PADDING_30),
             // ── Siguiente ────────────────────────────────────────────────
@@ -473,6 +457,7 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
       competenciaCategoriaId: _competenciaCategoriaId,
       competenciaSubCategoriaId: _competenciaSubCategoriaId,
       description: _description,
+      observations: _observations,
       invitedParticipants: List<String>.from(_invitedIds),
     );
   }
@@ -725,6 +710,55 @@ class _PickerBox extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Fixed-height multiline textarea — shared by the Descripción and
+/// Observaciones fields (same chrome: white fill, greyUltraLight border,
+/// RADIUS_6).
+class _MultilineField extends StatelessWidget {
+  const _MultilineField({
+    required this.initialValue,
+    required this.hint,
+    required this.height,
+    required this.onChanged,
+  });
+
+  final String? initialValue;
+  final String hint;
+  final double height;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return SizedBox(
+      height: height,
+      child: TextFormField(
+        initialValue: initialValue,
+        maxLines: null,
+        minLines: null,
+        expands: true,
+        textAlignVertical: TextAlignVertical.top,
+        style: textTheme.bodyMedium?.copyWith(color: AppColors.greyDark),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: AppColors.white,
+          hintText: hint,
+          hintStyle: const TextStyle(color: AppColors.greyDropMenuBorder),
+          contentPadding: const EdgeInsets.all(Sizes.PADDING_12),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(Sizes.RADIUS_6),
+            borderSide: const BorderSide(color: AppColors.greyUltraLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(Sizes.RADIUS_6),
+            borderSide: const BorderSide(color: AppColors.greyUltraLight),
+          ),
+        ),
+        onChanged: onChanged,
+      ),
     );
   }
 }

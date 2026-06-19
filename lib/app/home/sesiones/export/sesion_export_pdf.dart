@@ -3,6 +3,7 @@ import 'package:enreda_empresas/app/models/sesion.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -12,9 +13,9 @@ import 'package:printing/printing.dart';
 /// the platform print/share dialog (`Printing.layoutPdf`) so the user can
 /// save it locally, print, or attach to an email.
 ///
-/// Inputs are pre-resolved (names + program labels) so this file is
-/// completely synchronous-friendly and doesn't touch Firestore. All caches
-/// are populated by the caller before invoking [generate].
+/// Inputs are pre-resolved (names + the selected subvención) so this file is
+/// completely synchronous-friendly apart from loading the grant logo asset.
+/// All caches are populated by the caller before invoking [generate].
 ///
 /// PdfColor literals are exempt from the §6 hardcoded-hex rule — PDF
 /// rendering can't consume Material theme tokens, so the colour values are
@@ -24,33 +25,48 @@ class SesionExportPdf {
   static const PdfColor _grey = PdfColor.fromInt(0xFF535A5F);
   static const PdfColor _greyLight = PdfColor.fromInt(0xFFBABAC7);
   static const PdfColor _yellow = PdfColor.fromInt(0xFFFFCB77);
-  static const PdfColor _white = PdfColor.fromInt(0xFFFFFFFF);
   static const PdfColor _altWhite = PdfColor.fromInt(0xFFFCFCFC);
 
   /// Builds and presents the PDF. Throws on PDF build failure; the caller
   /// is responsible for surfacing errors to the user.
+  ///
+  /// [includedParticipantIds] are the invited participants the user kept in
+  /// the export (excluded ones are omitted from the listado). [subvencion] is
+  /// the single grant chosen for the whole export — its logo is rendered at
+  /// the top of the document (matching the social reports) and its name is
+  /// shown in the summary card.
   static Future<void> generate({
     required Sesion sesion,
     required SocialEntity socialEntity,
     required Map<String, UserEnreda> participantsById,
-    required Map<String, Program> subvencionesById,
+    required List<String> includedParticipantIds,
+    Program? subvencion,
   }) async {
     final doc = pw.Document(
       title: 'Sesion ${sesion.title ?? ''}'.trim(),
     );
+
+    final logo = await _loadSubvencionLogo(subvencion);
 
     doc.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.fromLTRB(40, 40, 40, 40),
         build: (context) => [
+          if (logo != null) ...[
+            pw.Center(
+              child: pw.Image(logo, width: 320, fit: pw.BoxFit.contain),
+            ),
+            pw.SizedBox(height: 16),
+          ],
           _buildHeader(sesion, socialEntity),
           pw.SizedBox(height: 18),
-          _buildSummaryCard(sesion),
+          _buildSummaryCard(sesion, subvencion),
           pw.SizedBox(height: 18),
           _buildBody(sesion),
           pw.SizedBox(height: 18),
-          _buildParticipantsTable(sesion, participantsById, subvencionesById),
+          _buildParticipantsTable(
+              sesion, participantsById, includedParticipantIds),
           pw.SizedBox(height: 30),
           _buildFooter(socialEntity),
         ],
@@ -58,6 +74,29 @@ class SesionExportPdf {
     );
 
     await Printing.layoutPdf(onLayout: (_) => doc.save());
+  }
+
+  /// Loads the grant logo PNG for [subvencion], mirroring the social-reports
+  /// path exactly. The informes build a `'<code> - <name>'` subsidy string
+  /// from the same entity `programs`, resolve it through
+  /// [StringConst.getSubsidyIndex], and select the asset like
+  /// `doc_theme.dart` — including its FSE default for any grant that isn't
+  /// Médicos del Mundo (0) or SEIMLab (2). We replicate that so a session
+  /// export always stamps the same logo a report would for the same grant.
+  /// Returns `null` only when no subvención was selected.
+  static Future<pw.MemoryImage?> _loadSubvencionLogo(
+      Program? subvencion) async {
+    if (subvencion == null) return null;
+    final idx = StringConst.getSubsidyIndex(
+      '${subvencion.code ?? ''} - ${subvencion.name}',
+    );
+    final asset = idx == 0
+        ? 'assets/images/logos-mdm.png'
+        : idx == 2
+            ? 'assets/images/logos-seimlab.png'
+            : 'assets/images/logos-fse.png';
+    final bytes = await rootBundle.load(asset);
+    return pw.MemoryImage(bytes.buffer.asUint8List());
   }
 
   // ── Sections ────────────────────────────────────────────────────────────
@@ -88,7 +127,7 @@ class SesionExportPdf {
     );
   }
 
-  static pw.Widget _buildSummaryCard(Sesion s) {
+  static pw.Widget _buildSummaryCard(Sesion s, Program? subvencion) {
     final rows = <pw.Widget>[];
     void row(String label, String value) {
       rows.add(
@@ -117,6 +156,9 @@ class SesionExportPdf {
     }
     if (s.duracion != null && s.duracion!.trim().isNotEmpty) {
       row(StringConst.SESION_FIELD_DURACION_LABEL, s.duracion!);
+    }
+    if (subvencion != null) {
+      row(StringConst.SESION_EXPORT_SUBVENCION, subvencion.name);
     }
     row(
       StringConst.SESION_EXPORT_CONVOCADOS,
@@ -183,7 +225,7 @@ class SesionExportPdf {
   static pw.Widget _buildParticipantsTable(
     Sesion s,
     Map<String, UserEnreda> participantsById,
-    Map<String, Program> subvencionesById,
+    List<String> includedParticipantIds,
   ) {
     final attended = s.attendedParticipants.toSet();
     final absent = s.absentParticipants.toSet();
@@ -199,13 +241,6 @@ class SesionExportPdf {
       if (u == null) return id;
       final n = '${u.firstName ?? ''} ${u.lastName ?? ''}'.trim();
       return n.isEmpty ? id : n;
-    }
-
-    String subvencionFor(String id) {
-      final pid = s.participantSubvenciones[id];
-      if (pid == null) return StringConst.SESION_EXPORT_SIN_ASIGNAR;
-      final program = subvencionesById[pid];
-      return program?.name ?? pid;
     }
 
     final headerStyle = pw.TextStyle(
@@ -242,20 +277,17 @@ class SesionExportPdf {
           columnWidths: const {
             0: pw.FlexColumnWidth(3),
             1: pw.FlexColumnWidth(2),
-            2: pw.FlexColumnWidth(3),
           },
           children: [
             pw.TableRow(children: [
               headerCell(StringConst.SESION_REVISION_PARTICIPANTES
                   .replaceAll(':', '')),
               headerCell(StringConst.SESION_EXPORT_ASISTENCIA),
-              headerCell(StringConst.SESION_EXPORT_SUBVENCION),
             ]),
-            for (final id in s.invitedParticipants)
+            for (final id in includedParticipantIds)
               pw.TableRow(children: [
                 bodyCell(nameFor(id)),
                 bodyCell(statusFor(id)),
-                bodyCell(subvencionFor(id)),
               ]),
           ],
         ),

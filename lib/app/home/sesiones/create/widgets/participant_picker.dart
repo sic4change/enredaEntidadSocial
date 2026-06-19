@@ -31,6 +31,7 @@ class ParticipantPicker extends StatefulWidget {
     required this.selectedIds,
     required this.onChanged,
     this.singleSelect = false,
+    this.isGroupSession = false,
   });
 
   /// Owning entity (passed in from `widget.socialEntity` in the flow page).
@@ -49,6 +50,12 @@ class ParticipantPicker extends StatefulWidget {
   /// session mode). Selecting a new participant automatically replaces the
   /// previous one instead of adding to the list.
   final bool singleSelect;
+
+  /// When true (group session) the picker lists the whole entity's
+  /// participants — the técnico's own first, then the rest of the
+  /// organization. When false (individual session) only the técnico's own
+  /// assigned participants are shown.
+  final bool isGroupSession;
 
   @override
   State<ParticipantPicker> createState() => _ParticipantPickerState();
@@ -99,19 +106,31 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
       // ──────────────────────────────────────────────────────────────────
       stream: LocationCache.instance.paginationUpdates,
       builder: (context, _) {
-        // Scope the picker to the logged-in técnico's own participants.
-        // LocationCache.allParticipants is entity-wide; without this filter
-        // the técnico could invite participants assigned to a colleague.
-        // Mirrors the filter applied on the Panel de control "Mis
-        // Participantes" carousel and the full Participantes page.
+        // LocationCache.allParticipants is entity-wide.
+        //   * Individual session → scope to the logged-in técnico's own
+        //     participants (without this filter the técnico could invite
+        //     participants assigned to a colleague). Mirrors the filter on the
+        //     Panel de control "Mis Participantes" carousel and the full
+        //     Participantes page.
+        //   * Group session → list the whole entity (the rest of the
+        //     organization), but surface the técnico's own participants first.
         final myUserId = globals.currentSocialEntityUser?.userId ?? '';
-        final all = myUserId.isEmpty
-            ? const <UserEnreda>[]
-            : LocationCache.instance.allParticipants
-                .where((u) =>
-                    (u.assignedById ?? '').isNotEmpty &&
-                    u.assignedById == myUserId)
-                .toList();
+        final List<UserEnreda> all;
+        if (myUserId.isEmpty) {
+          all = const <UserEnreda>[];
+        } else if (widget.isGroupSession) {
+          final p = LocationCache.instance.allParticipants;
+          all = [
+            ...p.where((u) => (u.assignedById ?? '') == myUserId),
+            ...p.where((u) => (u.assignedById ?? '') != myUserId),
+          ];
+        } else {
+          all = LocationCache.instance.allParticipants
+              .where((u) =>
+                  (u.assignedById ?? '').isNotEmpty &&
+                  u.assignedById == myUserId)
+              .toList();
+        }
         final filtered = _applySearch(all);
         final isLoading = LocationCache.instance.isLoadingParticipants &&
             all.isEmpty;
