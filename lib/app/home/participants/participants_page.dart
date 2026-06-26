@@ -50,14 +50,17 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
       final auth = Provider.of<AuthBase>(context, listen: false);
       final database = Provider.of<Database>(context, listen: false);
 
-      final user = await LocationCache.instance.getUser(database, auth.currentUser!.uid);
+      final user =
+          await LocationCache.instance.getUser(database, auth.currentUser!.uid);
       if (user != null) {
         socialEntityUser = user;
         globals.currentSocialEntityUser = user;
 
-        _socialEntity = await LocationCache.instance.getSocialEntity(database, user.socialEntityId!);
+        _socialEntity = await LocationCache.instance
+            .getSocialEntity(database, user.socialEntityId!);
         if (_socialEntity != null) {
-          await LocationCache.instance.loadAllParticipants(database, user.socialEntityId!, _socialEntity!.programs ?? []);
+          await LocationCache.instance.loadAllParticipants(
+              database, user.socialEntityId!, _socialEntity!.programs ?? []);
         }
       }
     } catch (e, st) {
@@ -86,16 +89,22 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         builder: (context, selectedIndex, child) {
           return RoundedContainer(
             color: AppColors.grey80,
-            borderColor: Responsive.isMobile(context) ? Colors.transparent : AppColors.greyLight,
-            margin: Responsive.isMobile(context) ? EdgeInsets.all(20) : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
+            borderColor: Responsive.isMobile(context)
+                ? Colors.transparent
+                : AppColors.greyLight,
+            margin: Responsive.isMobile(context)
+                ? EdgeInsets.all(20)
+                : EdgeInsets.all(Sizes.kDefaultPaddingDouble),
             child: Stack(
               alignment: Alignment.topLeft,
               children: [
                 Container(
                   height: 80,
-                  padding:  Responsive.isDesktopS(context) ? EdgeInsets.symmetric(horizontal: 20, vertical: 10) :
-                    Responsive.isMobile(context) ? EdgeInsets.symmetric(horizontal: 0, vertical: 10) :
-                      EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                  padding: Responsive.isDesktopS(context)
+                      ? EdgeInsets.symmetric(horizontal: 20, vertical: 10)
+                      : Responsive.isMobile(context)
+                          ? EdgeInsets.symmetric(horizontal: 0, vertical: 10)
+                          : EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                   child: Row(
                     children: [
                       InkWell(
@@ -103,8 +112,10 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                             if (ParticipantDetailPage.isEditing) {
                               final leave = await showAlertDialog(
                                 context,
-                                title: '¿Estás seguro que quieres dejar de editar?',
-                                content: 'Si sales, los cambios no guardados se perderán.',
+                                title:
+                                    '¿Estás seguro que quieres dejar de editar?',
+                                content:
+                                    'Si sales, los cambios no guardados se perderán.',
                                 defaultActionText: 'Salir',
                                 cancelActionText: 'Cancelar',
                               );
@@ -115,35 +126,42 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                               ParticipantsListPage.selectedIndex.value = 0;
                             });
                           },
-                          child: selectedIndex != 0 ? CustomTextMedium(text: 'Participantes ') :
-                          CustomTextMediumBold(text: 'Participantes ') ),
+                          child: selectedIndex != 0
+                              ? CustomTextMedium(text: 'Participantes ')
+                              : CustomTextMediumBold(text: 'Participantes ')),
                       if (selectedIndex == 1)
                         Flexible(
                           child: Text(
                             '> ${globals.currentParticipant!.firstName} ${globals.currentParticipant!.lastName}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppColors.primary900,
-                              height: 1.5,
-                              fontSize: responsiveSize(context, 15, 20, md: 16),
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                  color: AppColors.primary900,
+                                  height: 1.5,
+                                  fontSize:
+                                      responsiveSize(context, 15, 20, md: 16),
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
                     ],
                   ),
                 ),
                 Container(
-                  height: double.infinity,
-                  margin: Responsive.isDesktopS(context) ? EdgeInsets.symmetric(horizontal: 20, vertical: 60) : EdgeInsets.only(top: 60),
-                  child: selectedIndex == 0 ? _buildParticipantsList() : const ParticipantDetailPage()
-                ),
+                    height: double.infinity,
+                    margin: Responsive.isDesktopS(context)
+                        ? EdgeInsets.symmetric(horizontal: 20, vertical: 60)
+                        : EdgeInsets.only(top: 60),
+                    child: selectedIndex == 0
+                        ? _buildParticipantsList()
+                        : const ParticipantDetailPage()),
               ],
             ),
           );
-      }
-    );
+        });
   }
 
   Widget _buildParticipantsList() {
@@ -151,7 +169,9 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
       return const Center(child: CircularProgressIndicator());
     }
     if (_errorMessage.isNotEmpty) {
-      return Center(child: Text(_errorMessage, style: const TextStyle(color: Colors.red)));
+      return Center(
+          child:
+              Text(_errorMessage, style: const TextStyle(color: Colors.red)));
     }
 
     return ValueListenableBuilder<String>(
@@ -177,25 +197,28 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                         fullName.contains(query);
                   }).toList();
 
-            return _buildListBody(context, filteredUsers, isSearch: query.isNotEmpty);
+            return _buildListBody(context, filteredUsers,
+                isSearch: query.isNotEmpty);
           },
         );
       },
     );
   }
 
-  Widget _buildListBody(BuildContext context, List<UserEnreda> users, {required bool isSearch}) {
+  Widget _buildListBody(BuildContext context, List<UserEnreda> users,
+      {required bool isSearch}) {
     final textTheme = Theme.of(context).textTheme;
     final myParticipants = <UserEnreda>[];
     final allOtherParticipants = <UserEnreda>[];
     final currentEntityId = socialEntityUser.socialEntityId;
     final currentUserId = socialEntityUser.userId;
     for (final user in users) {
-      final isMine = user.assignedEntityId == currentEntityId && user.assignedById == currentUserId;
-      if (isMine) {
-        myParticipants.add(user);
-      } else {
-        allOtherParticipants.add(user);
+      if (user.assignedEntityId == currentEntityId) {
+        if (user.assignedById == currentUserId) {
+          myParticipants.add(user);
+        } else {
+          allOtherParticipants.add(user);
+        }
       }
     }
 
@@ -214,22 +237,26 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                 onPressed: () async {
                   searchText.value = _searchTextController.text;
                 },
-                onFieldSubmitted: (value) => _setState(_searchTextController.text),
+                onFieldSubmitted: (value) =>
+                    _setState(_searchTextController.text),
                 clearFilter: () => _clearFilter(),
                 hintText: 'Busca por nombre, apellidos, correo electrónico...',
               ),
             ),
             SpaceH12(),
             Text(
-              isSearch ? "Resultados de búsqueda: Mis" : StringConst.MY_PARTICIPANTS,
+              isSearch
+                  ? "Resultados de búsqueda: Mis"
+                  : StringConst.MY_PARTICIPANTS,
               style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.turquoiseBlue),
+                  fontWeight: FontWeight.bold, color: AppColors.turquoiseBlue),
             ),
             SpaceH20(),
             ParticipantsItemBuilder(
                 usersList: myParticipants,
-                emptyMessage: isSearch ? 'No se encontraron resultados en tus participantes' : 'No hay participantes gestionados por ti',
+                emptyMessage: isSearch
+                    ? 'No se encontraron resultados en tus participantes'
+                    : 'No hay participantes gestionados por ti',
                 itemBuilder: (context, user) {
                   return ParticipantsListTile(
                       user: user,
@@ -241,7 +268,9 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                 }),
             SpaceH40(),
             Text(
-              isSearch ? "Resultados de búsqueda: Todos" : StringConst.allParticipants(_socialEntity?.name ?? ''),
+              isSearch
+                  ? "Resultados de búsqueda: Todos"
+                  : StringConst.allParticipants(_socialEntity?.name ?? ''),
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.turquoiseBlue,
@@ -250,7 +279,9 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             SpaceH20(),
             ParticipantsItemBuilder(
                 usersList: allOtherParticipants,
-                emptyMessage: isSearch ? 'No se encontraron resultados en la entidad' : 'No hay participantes gestionados por tu entidad',
+                emptyMessage: isSearch
+                    ? 'No se encontraron resultados en la entidad'
+                    : 'No hay participantes gestionados por tu entidad',
                 itemBuilder: (context, user) {
                   return ParticipantsListTile(
                       user: user,
@@ -272,7 +303,6 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
     );
   }
 
-
   void _clearFilter() {
     setStateIfMounted(() {
       _searchTextController.clear();
@@ -281,13 +311,10 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
     });
   }
 
-  void _setState(String text){
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-    setState(() {
-      searchText.value = text;
-    }));
+  void _setState(String text) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {
+          searchText.value = text;
+        }));
     ParticipantsListPage.selectedIndex.value = 0;
-
   }
-
 }
