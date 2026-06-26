@@ -186,20 +186,18 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
 
   Widget _buildListBody(BuildContext context, List<UserEnreda> users, {required bool isSearch}) {
     final textTheme = Theme.of(context).textTheme;
-    // Scope the full Participantes page to the logged-in técnico's own
-    // participants only. Previously this page split the entity-wide list
-    // into "Mis participantes" + a separate "Todos los participantes de
-    // {entidad}" section, exposing every other técnico's participants to
-    // the current one. The entity-wide list is dropped; technicians now
-    // only see participants whose assignedEntityId AND assignedById match
-    // their own. LocationCache.allParticipants is still entity-wide
-    // (other surfaces consume it); the filter is applied here at render.
+    final myParticipants = <UserEnreda>[];
+    final allOtherParticipants = <UserEnreda>[];
     final currentEntityId = socialEntityUser.socialEntityId;
     final currentUserId = socialEntityUser.userId;
-    final myParticipants = users.where((user) {
-      return user.assignedEntityId == currentEntityId
-          && user.assignedById == currentUserId;
-    }).toList();
+    for (final user in users) {
+      final isMine = user.assignedEntityId == currentEntityId && user.assignedById == currentUserId;
+      if (isMine) {
+        myParticipants.add(user);
+      } else {
+        allOtherParticipants.add(user);
+      }
+    }
 
     return SingleChildScrollView(
       child: Padding(
@@ -232,6 +230,27 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
             ParticipantsItemBuilder(
                 usersList: myParticipants,
                 emptyMessage: isSearch ? 'No se encontraron resultados en tus participantes' : 'No hay participantes gestionados por ti',
+                itemBuilder: (context, user) {
+                  return ParticipantsListTile(
+                      user: user,
+                      socialEntityUserId: socialEntityUser.socialEntityId!,
+                      onTap: () => setState(() {
+                            globals.currentParticipant = user;
+                            ParticipantsListPage.selectedIndex.value = 1;
+                          }));
+                }),
+            SpaceH40(),
+            Text(
+              isSearch ? "Resultados de búsqueda: Todos" : StringConst.allParticipants(_socialEntity?.name ?? ''),
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.turquoiseBlue,
+              ),
+            ),
+            SpaceH20(),
+            ParticipantsItemBuilder(
+                usersList: allOtherParticipants,
+                emptyMessage: isSearch ? 'No se encontraron resultados en la entidad' : 'No hay participantes gestionados por tu entidad',
                 itemBuilder: (context, user) {
                   return ParticipantsListTile(
                       user: user,

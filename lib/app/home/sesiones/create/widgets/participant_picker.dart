@@ -6,8 +6,6 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
-
 /// Searchable multi-select participant picker for the "Convocar participantes"
 /// field in the Crear Nueva Sesión form (Figma overlay `1:493`).
 ///
@@ -106,31 +104,7 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
       // ──────────────────────────────────────────────────────────────────
       stream: LocationCache.instance.paginationUpdates,
       builder: (context, _) {
-        // LocationCache.allParticipants is entity-wide.
-        //   * Individual session → scope to the logged-in técnico's own
-        //     participants (without this filter the técnico could invite
-        //     participants assigned to a colleague). Mirrors the filter on the
-        //     Panel de control "Mis Participantes" carousel and the full
-        //     Participantes page.
-        //   * Group session → list the whole entity (the rest of the
-        //     organization), but surface the técnico's own participants first.
-        final myUserId = globals.currentSocialEntityUser?.userId ?? '';
-        final List<UserEnreda> all;
-        if (myUserId.isEmpty) {
-          all = const <UserEnreda>[];
-        } else if (widget.isGroupSession) {
-          final p = LocationCache.instance.allParticipants;
-          all = [
-            ...p.where((u) => (u.assignedById ?? '') == myUserId),
-            ...p.where((u) => (u.assignedById ?? '') != myUserId),
-          ];
-        } else {
-          all = LocationCache.instance.allParticipants
-              .where((u) =>
-                  (u.assignedById ?? '').isNotEmpty &&
-                  u.assignedById == myUserId)
-              .toList();
-        }
+        final all = LocationCache.instance.allParticipants;
         final filtered = _applySearch(all);
         final isLoading = LocationCache.instance.isLoadingParticipants &&
             all.isEmpty;
