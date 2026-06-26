@@ -35,7 +35,7 @@ class SesionesPage extends StatefulWidget {
 
 class _SesionesPageState extends State<SesionesPage> {
   _SesionesTab _activeTab = _SesionesTab.proximas;
-  bool _misSesiones = false; // off = shared (grupal); on = mine (group+individual)
+  bool _misSesiones = false; // off = all group + my own; on = filter to mine only
   _Mode _mode = _Mode.list;
   Sesion? _viewingSesion;
   Sesion? _editingSesion;
@@ -575,12 +575,16 @@ class _SesionesListState extends State<_SesionesList> {
           return const Center(child: CircularProgressIndicator());
         }
         final raw = snapshot.data ?? <Sesion>[];
-        // Shared = entity-wide GROUP sessions (individual ones stay private to
-        // their técnico); "Mis sesiones" = all of mine. Filtered client-side.
+        // Default view = every entity GROUP session (any técnico) + my own
+        // individual sessions; other técnicos' individual sessions stay private.
+        // "Mis sesiones" is a filter on top — narrows to my own (group +
+        // individual). Filtered client-side.
         final items = widget.misSesiones
             ? raw.where((s) => s.tecnicoId == currentUserId).toList()
             : raw
-                .where((s) => s.sessionType == SesionType.grupal)
+                .where((s) =>
+                    s.sessionType == SesionType.grupal ||
+                    s.tecnicoId == currentUserId)
                 .toList();
         if (items.isEmpty) {
           return _EmptyState(message: widget.emptyMessage);
