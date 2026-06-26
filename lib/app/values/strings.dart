@@ -889,6 +889,9 @@ class StringConst {
   static const String CALENDARIO_FILTER_PROXIMAS = 'Próximas sesiones';
   static const String CALENDARIO_FILTER_PASADAS = 'Sesiones pasadas';
   static const String CALENDARIO_FILTER_TODAS = 'Todas las sesiones';
+  // Sesiones list "Mis sesiones" toggle: off = shared view (group sessions of
+  // the whole entity); on = all of my own sessions (group + individual).
+  static const String SESION_FILTER_MIS = 'Mis sesiones';
   // Replaces the long localized date in the right panel when a single day
   // is selected. Past / future relative to "today".
   static const String CALENDARIO_PANEL_PROXIMA_SESION = 'Próxima sesión';

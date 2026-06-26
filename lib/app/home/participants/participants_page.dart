@@ -186,71 +186,151 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
 
   Widget _buildListBody(BuildContext context, List<UserEnreda> users, {required bool isSearch}) {
     final textTheme = Theme.of(context).textTheme;
-    // Scope the full Participantes page to the logged-in técnico's own
-    // participants only. Previously this page split the entity-wide list
-    // into "Mis participantes" + a separate "Todos los participantes de
-    // {entidad}" section, exposing every other técnico's participants to
-    // the current one. The entity-wide list is dropped; technicians now
-    // only see participants whose assignedEntityId AND assignedById match
-    // their own. LocationCache.allParticipants is still entity-wide
-    // (other surfaces consume it); the filter is applied here at render.
+    // The Participantes page shows the técnico's own participants at the top
+    // ("Mis participantes") and the rest of the entity's participants below
+    // ("Todos los participantes de {entidad}"). Note: the Panel/dashboard
+    // carousel (my_participants_list.dart) stays scoped to "mis" only.
     final currentEntityId = socialEntityUser.socialEntityId;
     final currentUserId = socialEntityUser.userId;
-    final myParticipants = users.where((user) {
-      return user.assignedEntityId == currentEntityId
-          && user.assignedById == currentUserId;
-    }).toList();
+    final myParticipants = <UserEnreda>[];
+    final allOtherParticipants = <UserEnreda>[];
+    for (final user in users) {
+      final isMine = user.assignedEntityId == currentEntityId &&
+          user.assignedById == currentUserId;
+      if (isMine) {
+        myParticipants.add(user);
+      } else {
+        allOtherParticipants.add(user);
+      }
+    }
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: Responsive.isMobile(context)
-                  ? EdgeInsets.all(Sizes.mainPadding)
-                  : const EdgeInsets.all(8.0),
-              child: FilterTextFieldRow(
-                searchTextController: _searchTextController,
-                onPressed: () async {
-                  searchText.value = _searchTextController.text;
-                },
-                onFieldSubmitted: (value) => _setState(_searchTextController.text),
-                clearFilter: () => _clearFilter(),
-                hintText: 'Busca por nombre, apellidos, correo electrónico...',
+    // ponytail: lazy CustomScrollView so only on-screen participant cards
+    // build. The old SingleChildScrollView + shrinkWrap grids built every tile
+    // of the whole entity up front, which janked when entering the page.
+    Widget header(String text) => Text(
+          text,
+          style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold, color: AppColors.turquoiseBlue),
+        );
+    ParticipantsListTile tile(UserEnreda user) => ParticipantsListTile(
+          user: user,
+          socialEntityUserId: socialEntityUser.socialEntityId!,
+          onTap: () => setState(() {
+            globals.currentParticipant = user;
+            ParticipantsListPage.selectedIndex.value = 1;
+          }),
+        );
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final width = constraints.maxWidth.isFinite
+          ? constraints.maxWidth
+          : MediaQuery.of(context).size.width;
+      final raw = ((width - 80) / 265.0).floor(); // 40px padding each side
+      final crossAxisCount = raw < 1 ? 1 : raw;
+
+      Widget participantsSliver(List<UserEnreda> list, String emptyMessage) {
+        if (list.isEmpty) {
+          // Reuse ParticipantsItemBuilder's empty state (renders EmptyList).
+          return SliverToBoxAdapter(
+            child: ParticipantsItemBuilder(
+              usersList: const <UserEnreda>[],
+              emptyMessage: emptyMessage,
+              itemBuilder: (_, __) => const SizedBox.shrink(),
+            ),
+          );
+        }
+        return SliverGrid(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 15.0,
+            mainAxisSpacing: 15.0,
+            mainAxisExtent: 370.0,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, i) => tile(list[i]),
+            childCount: list.length,
+          ),
+        );
+      }
+
+      const pad = EdgeInsets.symmetric(horizontal: 40);
+      return CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: pad,
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: Responsive.isMobile(context)
+                        ? EdgeInsets.all(Sizes.mainPadding)
+                        : const EdgeInsets.all(8.0),
+                    child: FilterTextFieldRow(
+                      searchTextController: _searchTextController,
+                      onPressed: () async {
+                        searchText.value = _searchTextController.text;
+                      },
+                      onFieldSubmitted: (value) =>
+                          _setState(_searchTextController.text),
+                      clearFilter: () => _clearFilter(),
+                      hintText:
+                          'Busca por nombre, apellidos, correo electrónico...',
+                    ),
+                  ),
+                  SpaceH12(),
+                  header(isSearch
+                      ? "Resultados de búsqueda: Mis"
+                      : StringConst.MY_PARTICIPANTS),
+                  SpaceH20(),
+                ],
               ),
             ),
-            SpaceH12(),
-            Text(
-              isSearch ? "Resultados de búsqueda: Mis" : StringConst.MY_PARTICIPANTS,
-              style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.turquoiseBlue),
+          ),
+          SliverPadding(
+            padding: pad,
+            sliver: participantsSliver(
+              myParticipants,
+              isSearch
+                  ? 'No se encontraron resultados en tus participantes'
+                  : 'No hay participantes gestionados por ti',
             ),
-            SpaceH20(),
-            ParticipantsItemBuilder(
-                usersList: myParticipants,
-                emptyMessage: isSearch ? 'No se encontraron resultados en tus participantes' : 'No hay participantes gestionados por ti',
-                itemBuilder: (context, user) {
-                  return ParticipantsListTile(
-                      user: user,
-                      socialEntityUserId: socialEntityUser.socialEntityId!,
-                      onTap: () => setState(() {
-                            globals.currentParticipant = user;
-                            ParticipantsListPage.selectedIndex.value = 1;
-                          }));
-                }),
-            if (LocationCache.instance.isLoadingParticipants)
-              const Padding(
+          ),
+          SliverPadding(
+            padding: pad,
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SpaceH40(),
+                  header(isSearch
+                      ? "Resultados de búsqueda: Todos"
+                      : StringConst.allParticipants(_socialEntity?.name ?? '')),
+                  SpaceH20(),
+                ],
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: pad,
+            sliver: participantsSliver(
+              allOtherParticipants,
+              isSearch
+                  ? 'No se encontraron resultados en la entidad'
+                  : 'No hay participantes gestionados por tu entidad',
+            ),
+          ),
+          if (LocationCache.instance.isLoadingParticipants)
+            const SliverToBoxAdapter(
+              child: Padding(
                 padding: EdgeInsets.all(20.0),
                 child: Center(child: CircularProgressIndicator()),
               ),
-            SpaceH40(),
-          ],
-        ),
-      ),
-    );
+            ),
+          SliverToBoxAdapter(child: SpaceH40()),
+        ],
+      );
+    });
   }
 
 

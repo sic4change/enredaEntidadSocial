@@ -35,6 +35,7 @@ class SesionesPage extends StatefulWidget {
 
 class _SesionesPageState extends State<SesionesPage> {
   _SesionesTab _activeTab = _SesionesTab.proximas;
+  bool _misSesiones = false; // off = shared (grupal); on = mine (group+individual)
   _Mode _mode = _Mode.list;
   Sesion? _viewingSesion;
   Sesion? _editingSesion;
@@ -265,6 +266,8 @@ class _SesionesPageState extends State<SesionesPage> {
           _TabBar(
             activeTab: _activeTab,
             onSelect: (tab) => setState(() => _activeTab = tab),
+            misSesiones: _misSesiones,
+            onToggleMis: () => setState(() => _misSesiones = !_misSesiones),
           ),
           const SizedBox(height: Sizes.PADDING_30),
           Text(
@@ -290,6 +293,7 @@ class _SesionesPageState extends State<SesionesPage> {
               onExportSesion: _showExport,
               onToggleReminder: _toggleReminder,
               isProximas: _activeTab == _SesionesTab.proximas,
+              misSesiones: _misSesiones,
             ),
           ),
         ],
@@ -408,10 +412,17 @@ class _HeaderRow extends StatelessWidget {
 }
 
 class _TabBar extends StatelessWidget {
-  const _TabBar({required this.activeTab, required this.onSelect});
+  const _TabBar({
+    required this.activeTab,
+    required this.onSelect,
+    required this.misSesiones,
+    required this.onToggleMis,
+  });
 
   final _SesionesTab activeTab;
   final ValueChanged<_SesionesTab> onSelect;
+  final bool misSesiones;
+  final VoidCallback onToggleMis;
 
   @override
   Widget build(BuildContext context) {
@@ -428,6 +439,13 @@ class _TabBar extends StatelessWidget {
           label: StringConst.SESIONES_PASADAS,
           isActive: activeTab == _SesionesTab.pasadas,
           onTap: () => onSelect(_SesionesTab.pasadas),
+        ),
+        // Content filter, same pill UI: off = shared (group) sessions,
+        // on = all of my own sessions (group + individual).
+        _SesionTabPill(
+          label: StringConst.SESION_FILTER_MIS,
+          isActive: misSesiones,
+          onTap: onToggleMis,
         ),
       ],
     );
@@ -505,6 +523,7 @@ class _SesionesList extends StatefulWidget {
     required this.onExportSesion,
     required this.onToggleReminder,
     required this.isProximas,
+    required this.misSesiones,
   });
 
   final Stream<List<Sesion>> stream;
@@ -515,6 +534,7 @@ class _SesionesList extends StatefulWidget {
   final ValueChanged<Sesion> onExportSesion;
   final ValueChanged<Sesion> onToggleReminder;
   final bool isProximas;
+  final bool misSesiones;
 
   @override
   State<_SesionesList> createState() => _SesionesListState();
@@ -554,7 +574,14 @@ class _SesionesListState extends State<_SesionesList> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        final items = snapshot.data ?? <Sesion>[];
+        final raw = snapshot.data ?? <Sesion>[];
+        // Shared = entity-wide GROUP sessions (individual ones stay private to
+        // their técnico); "Mis sesiones" = all of mine. Filtered client-side.
+        final items = widget.misSesiones
+            ? raw.where((s) => s.tecnicoId == currentUserId).toList()
+            : raw
+                .where((s) => s.sessionType == SesionType.grupal)
+                .toList();
         if (items.isEmpty) {
           return _EmptyState(message: widget.emptyMessage);
         }

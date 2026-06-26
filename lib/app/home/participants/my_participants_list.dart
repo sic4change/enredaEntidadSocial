@@ -114,7 +114,6 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
             : participants
                 .where((u) => (u.assignedById ?? '').isNotEmpty
                     && u.assignedById == myUserId)
-                .take(10)
                 .toList();
 
         return Column(
@@ -125,10 +124,12 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
               color: Colors.white,
               child: ScrollConfiguration(
                 behavior: MyCustomScrollBehavior(),
-                child: ListView(
+                child: ListView.builder(
                   controller: _horizontalScrollController,
                   scrollDirection: Axis.horizontal,
-                  children: myParticipants.map((user) {
+                  itemCount: myParticipants.length,
+                  itemBuilder: (context, index) {
+                    final user = myParticipants[index];
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ParticipantsListTile(
@@ -141,7 +142,7 @@ class _MyParticipantsScrollPageState extends State<MyParticipantsScrollPage> {
                           })
                       ),
                     );
-                  }).toList(),
+                  },
                 ),
               ),
             ),
