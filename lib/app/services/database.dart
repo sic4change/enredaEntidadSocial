@@ -1370,18 +1370,25 @@ class FirestoreDatabase implements Database {
   @override
   Stream<List<Sesion>> sesionesCalendarioStream(
       String socialEntityId, String tecnicoId) {
-    // Two equality filters only — no orderBy in the queryBuilder to avoid
-    // requiring a composite Firestore index. Client-side sort via `sort:`
-    // produces the same ascending-scheduledAt order with zero index cost.
-    return _service.collectionStream<Sesion>(
-      path: APIPath.sesionesCalendario(),
-      queryBuilder: (query) => query
-          .where('socialEntityId', isEqualTo: socialEntityId)
-          .where('tecnicoId', isEqualTo: tecnicoId)
-          .limit(100),
-      builder: (data, documentId) => Sesion.fromMap(data, documentId),
-      sort: (lhs, rhs) => lhs.scheduledAt.compareTo(rhs.scheduledAt),
-    );
+    // Calendar shows every entity GROUP session (any técnico) plus the
+    // logged-in técnica's own sessions (group + individual); other técnicos'
+    // individual sessions stay private. Single equality filter keeps it
+    // index-free; the grupal/own narrowing + scheduledAt sort run client-side.
+    // ponytail: entity-wide limit(200) instead of a per-técnico 100 — bump if a
+    // busy entity ever exceeds it within a viewed month.
+    return _service
+        .collectionStream<Sesion>(
+          path: APIPath.sesionesCalendario(),
+          queryBuilder: (query) => query
+              .where('socialEntityId', isEqualTo: socialEntityId)
+              .limit(200),
+          builder: (data, documentId) => Sesion.fromMap(data, documentId),
+          sort: (lhs, rhs) => lhs.scheduledAt.compareTo(rhs.scheduledAt),
+        )
+        .map((sesiones) => sesiones
+            .where((s) =>
+                s.sessionType == SesionType.grupal || s.tecnicoId == tecnicoId)
+            .toList());
   }
 
   @override

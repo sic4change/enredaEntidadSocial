@@ -17,15 +17,16 @@ import 'package:provider/provider.dart';
 
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
-/// Técnico's personal calendar: monthly grid showing only the sessions they
-/// own (`sesion.tecnicoId == currentSocialEntityUser.userId`).
+/// Sessions calendar: monthly grid showing every entity GROUP session (any
+/// técnico) plus the logged-in técnica's own sessions (group + individual);
+/// other técnicos' individual sessions stay private.
 ///
 /// Desktop layout: calendar card (max-width 520px) on the left, sessions
 /// panel filling the remaining row to the right. Mobile / tablet keep the
 /// classic vertical stack so day-panel content has full width.
 ///
-/// Filtering is server-side: `sesionesCalendarioStream(entityId, tecnicoId)`
-/// uses `where('tecnicoId', isEqualTo: ...)` — no client-side scan needed.
+/// `sesionesCalendarioStream(entityId, tecnicoId)` fetches the entity's
+/// sessions and applies the grupal/own narrowing client-side.
 ///
 /// Forward-looking: the per-session `isAllDay` flag + the time component of
 /// `scheduledAt` are exactly the two fields Google Calendar's `events` API
