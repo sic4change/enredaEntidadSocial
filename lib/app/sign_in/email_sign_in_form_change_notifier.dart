@@ -1,5 +1,6 @@
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/sign_in/forgot_password_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/web_home.dart';
@@ -298,13 +299,16 @@ class _EmailSignInFormChangeNotifierState
   }
 
   Future<void> _confirmChangePassword(BuildContext context) async {
-    final didRequestSignOut = await showAlertDialog(context,
-        title: 'Cambiar contraseña',
-        content: 'Si pulsa en Aceptar se le envirá a su correo las acciones a '
-            'realizar para cambiar su contraseña. Si no aparece, revisa las carpetas de SPAM y Correo no deseado',
-        cancelActionText: 'Cancelar',
-        defaultActionText: 'Aceptar');
-    if (didRequestSignOut == true) {
+    final confirmed = await showForgotPasswordDialog(
+      context,
+      title: 'Cambiar contraseña',
+      content:
+          'Si pulsas en Aceptar te enviaremos a tu correo las acciones a '
+          'realizar para cambiar tu contraseña.',
+      cancelLabel: 'Cancelar',
+      confirmLabel: 'Aceptar',
+    );
+    if (confirmed == true) {
       _changePassword(context);
     }
   }
