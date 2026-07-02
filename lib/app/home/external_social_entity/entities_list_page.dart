@@ -10,6 +10,7 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
+import 'package:enreda_empresas/app/utils/functions.dart';
 import '../../models/externalSocialEntity.dart';
 import 'entity_directory_page.dart';
 import 'entity_list_tile.dart';
@@ -30,6 +31,10 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
   FilterResource filterResource = FilterResource("", []);
   List<SocialEntity> finalSocialEntities = [];
   bool create = false;  //Choose between show list of social entities or create form
+
+  // Created once (trust + owner only — never changes). Search/category filters
+  // are applied client-side in build, so setState never re-subscribes.
+  Stream<List<ExternalSocialEntity>>? _entitiesStream;
 
 
   @override
@@ -115,11 +120,16 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
 
   Widget _buildEntitiesStream(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
+    // Empty filter -> the stream builder returns every entity (see
+    // filteredExternalSocialEntitiesStream). Created once, reused across builds.
+    _entitiesStream ??= database.filteredExternalSocialEntitiesStream(
+        FilterResource("", []), widget.socialEntityId!);
     return StreamBuilder<List<ExternalSocialEntity>>(
-        stream: database.filteredExternalSocialEntitiesStream(filterResource, widget.socialEntityId!),
+        stream: _entitiesStream,
         builder: (context, snapshot) {
           if(snapshot.hasData) {
-            final List<ExternalSocialEntity> socialEntities = snapshot.data!.toList();
+            final List<ExternalSocialEntity> socialEntities =
+                _applyFilter(snapshot.data!);
             return SingleChildScrollView(
               controller: ScrollController(),
               child: Wrap(
@@ -144,6 +154,36 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
           }
           return const Center(child: CircularProgressIndicator());
         });
+  }
+
+  /// Client-side search + category filter over the already-loaded list
+  /// (0 Firestore reads). Mirrors the OR semantics of the old server-builder
+  /// filter, but matches search against `name` (the model has no searchText,
+  /// and imported directory contacts never had one).
+  List<ExternalSocialEntity> _applyFilter(List<ExternalSocialEntity> all) {
+    final searchText = removeDiacritics(filterResource.searchText.toLowerCase());
+    final searchWords =
+        searchText.split(' ').where((w) => w.isNotEmpty).toList();
+    final selectedCategories =
+        filterResource.externalSocialEntityTypesIds.toSet();
+
+    if (searchWords.isEmpty && selectedCategories.isEmpty) return all;
+
+    return all.where((e) {
+      bool textMatch = false;
+      if (searchWords.isNotEmpty) {
+        final name = removeDiacritics(e.name.toLowerCase());
+        textMatch = searchWords.any((w) => name.contains(w));
+      }
+      bool categoryMatch = false;
+      if (selectedCategories.isNotEmpty) {
+        categoryMatch = (e.types ?? const [])
+            .toSet()
+            .intersection(selectedCategories)
+            .isNotEmpty;
+      }
+      return textMatch || categoryMatch;
+    }).toList();
   }
 
   void _clearFilter() {
