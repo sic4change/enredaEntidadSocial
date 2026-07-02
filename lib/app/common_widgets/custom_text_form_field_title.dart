@@ -16,6 +16,8 @@ class CustomTextFormFieldTitle extends StatelessWidget {
     this.height,
     this.controller,
     this.color = AppColors.greyDark,
+    this.onTap,
+    this.readOnly = false,
   });
 
   final String labelText;
@@ -29,6 +31,8 @@ class CustomTextFormFieldTitle extends StatelessWidget {
   final double? height;
   final TextEditingController? controller;
   final Color color;
+  final VoidCallback? onTap;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +102,8 @@ class CustomTextFormFieldTitle extends StatelessWidget {
       keyboardType: keyboardType,
       onChanged: onChanged,
       enabled: enabled,
+      onTap: onTap,
+      readOnly: readOnly,
       style: textTheme.bodySmall?.copyWith(
         height: 1.5,
         color: AppColors.greyDark,

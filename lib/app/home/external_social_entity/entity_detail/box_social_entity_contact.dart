@@ -34,7 +34,6 @@ class BoxItemSocialEntityContact extends StatelessWidget {
   Widget defaultChild(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         OutlinedButton(
@@ -45,7 +44,7 @@ class BoxItemSocialEntityContact extends StatelessWidget {
               children: [
                 Icon(icon, color: AppColors.turquoiseBlue, size: 20),
                 SizedBox(width: 5),
-                CustomTextXSmall(text: title, color: AppColors.turquoiseBlue, height: 0,)
+                Flexible(child: CustomTextXSmall(text: title, color: AppColors.turquoiseBlue, height: 0,))
               ],
             ),
             style: OutlinedButton.styleFrom(

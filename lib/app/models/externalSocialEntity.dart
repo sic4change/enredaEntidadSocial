@@ -42,6 +42,8 @@ class ExternalSocialEntity {
     this.contactKOL,
     this.contactProject,
     this.signedAgreements,
+    this.offeredServices,
+    this.kolType,
     this.trust,
     required this.createdAt,
     required this.createdBy,
@@ -65,7 +67,7 @@ class ExternalSocialEntity {
   final SizeOrg? size;
   final String? photo;
   final List<String>? types;
-  final String? actionScope;
+  final List<String>? actionScope;
   final String? category;
   final String? subCategory;
   final String? entityPhone;
@@ -84,6 +86,8 @@ class ExternalSocialEntity {
   final String? contactKOL;
   final String? contactProject;
   final String? signedAgreements;
+  final String? offeredServices;
+  final String? kolType;
   final bool? trust;
   final DateTime createdAt;
   final String createdBy;
@@ -122,7 +126,14 @@ class ExternalSocialEntity {
       data['types'].forEach((type) {types.add(type.toString());});
     }
 
-    final String actionScope = data['actionScope'] ?? '';
+    List<String> actionScope = [];
+    final dynamic actionScopeData = data['actionScope'];
+    if (actionScopeData is List) {
+      actionScope = List<String>.from(actionScopeData.map((e) => e.toString()));
+    } else if (actionScopeData is String) {
+      actionScope = [];
+    }
+
     final String category = data['category'] ?? '';
     final String subCategory = data['subCategory'] ?? '';
     final String entityPhone = data['entityPhone'] ?? '';
@@ -145,6 +156,8 @@ class ExternalSocialEntity {
     final String? province = data['address']['province'];
     final String? city = data['address']['city'];
     final String signedAgreements = data['signedAgreements'] ?? '';
+    final String offeredServices = data['offeredServices'] ?? '';
+    final String kolType = data['kolType'] ?? '';
     final DateTime createdAt = data['createdAt'].toDate();
     final String associatedSocialEntityId = data['associatedSocialEntityId'] ?? '';
     final String createdBy = data['createdBy'];
@@ -181,6 +194,8 @@ class ExternalSocialEntity {
         province: province,
         city: city,
         signedAgreements: signedAgreements,
+        offeredServices: offeredServices,
+        kolType: kolType,
         createdAt: createdAt,
         createdBy: createdBy
     );
@@ -219,6 +234,8 @@ class ExternalSocialEntity {
       'province': province,
       'city': city,
       'signedAgreements': signedAgreements,
+      'offeredServices': offeredServices,
+      'kolType': kolType,
       'createdAt': createdAt,
       'createdBy': createdBy
     };
@@ -232,7 +249,7 @@ class ExternalSocialEntity {
     Address? address,
     String? website,
     List<String>? types,
-    String? actionScope,
+    List<String>? actionScope,
     String? category,
     String? subCategory,
     String? entityPhone,
@@ -257,6 +274,8 @@ class ExternalSocialEntity {
     String? city,
     String? cityName,
     String? signedAgreements,
+    String? offeredServices,
+    String? kolType,
     bool? trust,
     DateTime? createdAt,
     String? createdBy
@@ -294,6 +313,8 @@ class ExternalSocialEntity {
         city: city ?? this.city,
         cityName: cityName ?? this.cityName,
         signedAgreements: signedAgreements ?? this.signedAgreements,
+        offeredServices: offeredServices ?? this.offeredServices,
+        kolType: kolType ?? this.kolType,
         trust: trust ?? this.trust,
         createdAt: createdAt ?? this.createdAt,
         createdBy: createdBy ?? this.createdBy

@@ -56,6 +56,7 @@ import 'package:enreda_empresas/app/models/timeSearching.dart';
 import 'package:enreda_empresas/app/models/timeSpentWeekly.dart';
 import 'package:enreda_empresas/app/models/unemployedUser.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/models/scope_action.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/services/api_path.dart';
 import 'package:enreda_empresas/app/services/firestore_service.dart';
@@ -269,6 +270,8 @@ abstract class Database {
      Future<void> deleteDocumentationParticipant(DocumentationParticipant document);
      Future<List<Competency>> getCompetencies();
      Future<List<Interest>> getInterests();
+     Future<List<ScopeAction>> getScopeActions();
+     Future<void> populateScopeActions();
      Future<List<Ability>> getAbilities();
      Future<SocialEntity?> getSocialEntity(String id);
      Future<UserEnreda?> getUser(String id);
@@ -2216,6 +2219,26 @@ class FirestoreDatabase implements Database {
     builder: (data, documentId) => Interest.fromMap(data, documentId),
     limit: 1000,
   );
+
+  @override
+  Future<List<ScopeAction>> getScopeActions() => _service.getCollection(
+    path: APIPath.scopeActions(),
+    builder: (data, documentId) => ScopeAction.fromMap(data, documentId),
+    limit: 1000,
+  );
+
+  @override
+  Future<void> populateScopeActions() async {
+    final List<String> staticOptions = ['Juventud', 'Migraciones', 'Género', 'Colectivo LGBTIQ+', 'Salud mental', 'Familia', 'Menores', 'Ocio y tiempo libre', 'Diversidad funcional', 'Educación-Formación', 'Inserción sociolaboral', 'Dependencia', 'Deporte', 'Comunidad y participación sociocomunitaria', 'Violencia de género', 'Asociación cultural', 'Asociación vecinal'];
+    final collection = FirebaseFirestore.instance.collection(APIPath.scopeActions());
+    for (var option in staticOptions) {
+      final docRef = collection.doc();
+      await docRef.set({
+        'id': docRef.id,
+        'name': option,
+      });
+    }
+  }
 
   @override
   Future<List<Ability>> getAbilities() => _service.getCollection(

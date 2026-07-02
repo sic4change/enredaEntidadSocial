@@ -14,7 +14,7 @@ class CustomPhoneFormFieldTitle extends StatelessWidget {
     this.validator,
     this.onSaved,
     this.onCountryChange,
-
+    this.initialSelection = 'ES',
   });
 
   final String labelText;
@@ -24,6 +24,7 @@ class CustomPhoneFormFieldTitle extends StatelessWidget {
   final String ?Function(String?)? validator;
   final Function(String?)? onSaved;
   final Function(CountryCode)? onCountryChange;
+  final String initialSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class CustomPhoneFormFieldTitle extends StatelessWidget {
               prefixIcon: CountryCodePicker(
                 dialogSize: Size(350.0, MediaQuery.of(context).size.height * 0.6),
                 onChanged: onCountryChange,
-                initialSelection: 'ES',
+                initialSelection: initialSelection,
                 showFlagDialog: true,
               ),
               focusedBorder: OutlineInputBorder(

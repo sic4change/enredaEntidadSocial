@@ -29,15 +29,19 @@ class BoxItemNetwork extends StatelessWidget {
   Widget defaultChild(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-      ),
       key: Key("network-$title"),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.turquoiseBlue, size: 20),
+            Container(
+              padding: const EdgeInsets.all(6.0),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.greyBorder, width: 1.0),
+              ),
+              child: Icon(icon, color: AppColors.turquoiseBlue, size: 16),
+            ),
             SizedBox(width: 5),
             Text(
               title,

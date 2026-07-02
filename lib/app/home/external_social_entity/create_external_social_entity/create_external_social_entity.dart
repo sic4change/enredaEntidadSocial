@@ -34,6 +34,11 @@ import 'package:provider/provider.dart';
 import '../../../common_widgets/custom_drop_down.dart';
 import '../../../services/auth.dart';
 import '../entity_directory_page.dart';
+import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/scope_action.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_interests_create.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_scope_action_create.dart';
+import 'package:enreda_empresas/app/sign_up/validating_form_controls/multi_select_button.dart';
 
 class CreateExternalSocialEntityPage extends StatefulWidget {
   const CreateExternalSocialEntityPage({Key? key, required this.socialEntityId}) : super(key: key);
@@ -46,7 +51,8 @@ class CreateExternalSocialEntityPage extends StatefulWidget {
 class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEntityPage> {
   final _formKey = GlobalKey<FormState>();
 
-  String? _entityName, _actionScope;
+  String? _entityName;
+  List<String> _actionScope = [];
   late List<String> _entityTypes;
   String? _category, _subCategory;
   String? _entityPhone, _entityMobilePhone, _contactPhone, _contactMobilePhone;
@@ -54,6 +60,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
   String? _url;
   String? _email, _linkedin, _twitter, _otherSocialMedia;
   String? _contactName, _contactEmail, _contactPosition, _contactChoiceGrade, _contactKOL, _contactProject, _signedAgreements;
+  String? _offeredServices, _kolType;
   Country? selectedCountry;
   Province? selectedProvince;
   City? selectedCity;
@@ -66,12 +73,23 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
   late String cityName;
   String? createdBy;
 
+  TextEditingController textEditingControllerActionScope = TextEditingController();
+  Set<Interest> selectedInterests = {};
+  Set<ScopeAction> selectedScopeActions = {};
+
   //Country codes for phone numbers
   String entityPhoneCode = '+34';
   String entityMobilePhoneCode = '+34';
   String contactDeskPhoneCode = '+34';
   String contactMobilePhoneCode = '+34';
 
+
+  List<DropdownMenuItem<String>> categories = ['Organizaciones sociales', 'Administración pública', 'Empresas /Asociaciones empresariales/Clúster'].map<DropdownMenuItem<String>>((String value){
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
 
   List<DropdownMenuItem<String>> subCategories = ['Financiación', 'Cooperación técnica', 'Posicionamiento y reputación', 'Asociados'].map<DropdownMenuItem<String>>((String value){
     return DropdownMenuItem<String>(
@@ -101,13 +119,20 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
     );
   }).toList();
 
+  List<DropdownMenuItem<String>> kolTypes = ['Financiación', 'Cooperación Técnica', 'Posicionamiento y Reputación', 'Asociados'].map<DropdownMenuItem<String>>((String value){
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList();
+
   late TextTheme textTheme;
 
   @override
   void initState() {
     super.initState();
     _entityName = '';
-    _actionScope = '';
+    _actionScope = [];
     _entityTypes = [];
     _category = '';
     _subCategory = '';
@@ -129,6 +154,8 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
     _contactKOL = '';
     _contactProject = '';
     _signedAgreements = '';
+    _offeredServices = '';
+    _kolType = '';
     _countryId = null;
     _provinceId = null;
     _cityId = null;
@@ -243,6 +270,8 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
           contactKOL: _contactKOL,
           contactProject: _contactProject,
           signedAgreements: _signedAgreements,
+          offeredServices: _offeredServices,
+          kolType: _kolType,
           trust: true, //TODO asignarlo de otra forma
           address: address,
           createdAt: DateTime.now(),
@@ -291,46 +320,24 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
             validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
           ),
           SpaceH24(),
-          CustomTextFormFieldTitle(
-            labelText: 'Ambito de actuación',
-            onChanged: (value){
-              setState(() {
-                _actionScope = value;
-              });
-            },
-            validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-          ),
-          SpaceH24(),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              'Sectores/Campos/Etiquetas/Ecosistemas',
-              style: textTheme.bodySmall?.copyWith(
-                height: 1.5,
-                color: AppColors.greyDark,
-                fontWeight: FontWeight.w700,
-                fontSize: fontSize,
-              ),
-            ),
-          ),
-          chipContainer(),
-          SpaceH24(),
           CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
+              childLeft: CustomDropDownButtonFormFieldTittle(
                 labelText: 'Categoria',
-                hintText: 'Tercer sector',
-                enabled: false,
-                onSaved: (value){
+                source: categories,
+                onChanged: (value){
                   setState(() {
                     _category = value;
+                    _actionScope = [];
+                    textEditingControllerActionScope.text = '';
+                    selectedScopeActions.clear();
+                    selectedInterests.clear();
                   });
                 },
-                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-                initialValue: 'Tercer sector',
+                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
               ),
-              childRight: CustomDropDownButton(
+              childRight: CustomDropDownButtonFormFieldTittle(
                 labelText: 'Sub-categoría',
                 source: subCategories,
                 onChanged: (value){
@@ -342,10 +349,102 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
               )
           ),
           SpaceH24(),
+          TextFormField(
+            controller: textEditingControllerActionScope,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              labelText: 'Ámbito de actuación',
+              labelStyle: textTheme.bodySmall?.copyWith(
+                color: AppColors.greyDark,
+                fontSize: responsiveSize(context, 14, 16, md: 15),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: AppColors.greyUltraLight,
+                  width: 1.0,
+                ),
+              ),
+            ),
+            onTap: () {
+              if (_category == 'Empresas /Asociaciones empresariales/Clúster') {
+                _showMultiSelectActionScopeInterests(context);
+              } else if (_category == 'Organizaciones sociales' || _category == 'Administración pública') {
+                _showMultiSelectActionScope(context);
+              }
+            },
+            readOnly: true,
+            validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
+            style: textTheme.bodySmall?.copyWith(
+              height: 1.5,
+              color: AppColors.greyDark,
+              fontWeight: FontWeight.w400,
+              fontSize: responsiveSize(context, 14, 16, md: 15),
+            ),
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                labelText: 'Acuerdos firmados',
+                onChanged: (value){
+                  _signedAgreements = value;
+                },
+              ),
+              childRight: CustomTextFormFieldTitle(
+                labelText: '¿Qué iniciativas o servicios ofrece?',
+                onChanged: (value){
+                  _offeredServices = value;
+                },
+              )
+          ),
+          SpaceH24(),
+          CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomDropDownButtonFormFieldTittle(
+                labelText: 'Grado de decisión',
+                source: choiceGrade,
+                onChanged: (value){
+                  _contactChoiceGrade = value;
+                },
+              ),
+              childRight: CustomDropDownButtonFormFieldTittle(
+                labelText: '¿Se considera un KOL (Key Opinion Leader)?',
+                source: yesNo,
+                onChanged: (value){
+                  setState(() {
+                    _contactKOL = value;
+                    if (_contactKOL != 'Si') {
+                      _kolType = '';
+                    }
+                  });
+                },
+              )
+          ),
+          if (_contactKOL == 'Si') ...[
+            SpaceH24(),
+            CustomDropDownButtonFormFieldTittle(
+              labelText: 'Tipo de KOL',
+              source: kolTypes,
+              onChanged: (value) {
+                _kolType = value;
+              },
+            ),
+          ],
+          SpaceH24(),
           CustomFlexRowColumn(
             contentPadding: EdgeInsets.zero,
             separatorSize: 20,
-            childLeft: CustomDropDownButton(
+            childLeft: CustomDropDownButtonFormFieldTittle(
               labelText: 'Zona geográfica de influencia',
               source: geographicZone,
               onChanged: (value){
@@ -381,7 +480,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
                 validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
               ),
               childRight: CustomPhoneFormFieldTitle(
-                labelText: 'Teléfono fijo',
+                labelText: 'Teléfono fijo de la organización',
                 phoneCode: entityPhoneCode,
                 onCountryChange: (code){
                   entityPhoneCode = code.toString();
@@ -413,7 +512,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
-                labelText: 'Twitter',
+                labelText: 'X',
                 onChanged: (value){
                   _twitter = value;
                 },
@@ -426,28 +525,6 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
               )
           ),
           SpaceH24(),
-          CustomFlexRowColumn(
-              childLeft: streamBuilderForCountryCreate(context, selectedCountry,
-                  buildCountryStreamBuilderSetState),
-              childRight:streamBuilderForProvinceCreate(
-                  context,
-                  selectedCountry,
-                  selectedProvince,
-                  buildProvinceStreamBuilderSetState)),
-          CustomFlexRowColumn(
-            childLeft: streamBuilderForCityCreate(
-                context,
-                selectedCountry,
-                selectedProvince,
-                selectedCity,
-                buildCityStreamBuilderSetState),
-            childRight: customTextFormMultilineNotValidator(
-                context,
-                _postalCode!,
-                StringConst.FORM_POSTAL_CODE,
-                addressSetState),
-          ),
-          SpaceH30(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: Sizes.MARGIN_20),
             child: Text(
@@ -499,51 +576,12 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
               },
               validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
             ),
-
-            childRight: CustomTextFormFieldTitle(
-              labelText: 'Cargo de la persona de contacto',
-              onChanged: (value){
-                _contactPosition = value;
-              },
-            ),
-          ),
-          SpaceH24(),
-          CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomDropDownButtonFormFieldTittle(
-                labelText: 'Grado de decisión',
-                source: choiceGrade,
-                onChanged: (value){
-                  _contactChoiceGrade = value;
-                },
-              ),
-              childRight: CustomDropDownButtonFormFieldTittle(
-                labelText: '¿Se considera un KOL (Key Opinion Leader)?',
-                source: yesNo,
-                onChanged: (value){
-                  _contactKOL = value;
-                },
-              )
-          ),
-          SpaceH24(),
-          CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Acuerdos firmados',
-                onChanged: (value){
-                  _signedAgreements = value;
-                },
-                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
               childRight: CustomTextFormFieldTitle(
-                labelText: 'Proyecto o programa',
+                labelText: 'Cargo de la persona de contacto',
                 onChanged: (value){
-                  _contactProject = value;
+                  _contactPosition = value;
                 },
-                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-              )
+              ),
           ),
         ],
       ),
@@ -637,6 +675,38 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
 
   void addressSetState(String? val) {
     setState(() => _postalCode = val!);
+  }
+
+  void _showMultiSelectActionScope(BuildContext context) async {
+    final selectedValues = await showDialog<Set<ScopeAction>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownScopeActionCreate(context, selectedScopeActions);
+      },
+    );
+    if (selectedValues != null) {
+      setState(() {
+        selectedScopeActions = selectedValues;
+        _actionScope = selectedValues.map((e) => e.id ?? '').toList();
+        textEditingControllerActionScope.text = selectedValues.map((e) => e.name).join(', ');
+      });
+    }
+  }
+
+  void _showMultiSelectActionScopeInterests(BuildContext context) async {
+    final selectedValues = await showDialog<Set<Interest>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownInterestsCreate(context, selectedInterests);
+      },
+    );
+    if (selectedValues != null) {
+      setState(() {
+        selectedInterests = selectedValues;
+        _actionScope = selectedValues.map((e) => e.interestId ?? '').toList();
+        textEditingControllerActionScope.text = selectedValues.map((e) => e.name).join(', ');
+      });
+    }
   }
 
 }

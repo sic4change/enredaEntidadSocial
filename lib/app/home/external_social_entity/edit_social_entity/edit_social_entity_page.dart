@@ -5,9 +5,13 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_chip.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_phone_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/common_widgets/show_exception_alert_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/text_form_field.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_province.dart';
 import 'package:enreda_empresas/app/home/external_social_entity/entity_detail/entity_detail_page.dart';
@@ -33,14 +37,18 @@ import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 import '../../../models/externalSocialEntity.dart';
 import '../entity_directory_page.dart';
+import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/scope_action.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_interests_create.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_scope_action_create.dart';
+import 'package:enreda_empresas/app/sign_up/validating_form_controls/multi_select_button.dart';
 
 const double contactBtnWidthLg = 200.0;
 const double contactBtnWidthSm = 100.0;
 const double contactBtnWidthMd = 140.0;
 
 class EditSocialEntity extends StatefulWidget {
-  EditSocialEntity(
-      {Key? key, required this.socialEntityId}) : super(key: key);
+  EditSocialEntity({Key? key, required this.socialEntityId}) : super(key: key);
   final String? socialEntityId;
 
   @override
@@ -54,7 +62,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   int currentStep = 0;
   late String _externalSocialEntityId;
   String? _socialEntityName;
-  String? _socialEntityActionScope;
+  List<String> _socialEntityActionScope = [];
   String? _category;
   String? _subCategory;
   String? _geographicZone;
@@ -75,6 +83,9 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   String? _contactKOL;
   String? _contactProject;
   String? _signedAgreements;
+  String? _offeredServices;
+  String? _kolType;
+  bool _trust = false;
   String _entityLandlinePhoneCode = '+34';
   String _entityMobilePhoneCode = '+34';
   String _contactLandlinePhoneCode = '+34';
@@ -87,55 +98,135 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   Country? selectedCountry;
   Province? selectedProvince;
   City? selectedCity;
-  bool? _trust;
-  List<String> subCategories = ['Financiación', 'Cooperación técnica', 'Posicionamiento y reputación', 'Asociados'];
+  List<String> subCategories = [
+    'Financiación',
+    'Cooperación técnica',
+    'Posicionamiento y reputación',
+    'Asociados'
+  ];
   List<String> geographicZone = ['Global', 'Regional', 'Local'];
   List<String> choiceGrade = ['Alto', 'Intermedio', 'Bajo'];
   List<String> yesNo = ['Si', 'No'];
+  List<String> kolTypes = [
+    'Financiación',
+    'Cooperación Técnica',
+    'Posicionamiento y Reputación',
+    'Asociados'
+  ];
   final ImagePicker _imagePicker = ImagePicker();
   DateTime? _createdAt;
   String? _createdBy;
+
+  TextEditingController textEditingControllerActionScope =
+      TextEditingController();
+  Set<Interest> selectedInterests = {};
+  Set<ScopeAction> selectedScopeActions = {};
+  late TextTheme textTheme;
 
   @override
   void initState() {
     super.initState();
     externalSocialEntity = globals.currentExternalSocialEntity!;
-    _externalSocialEntityId = globals.currentExternalSocialEntity?.externalSocialEntityId ?? '';
+    _externalSocialEntityId =
+        globals.currentExternalSocialEntity?.externalSocialEntityId ?? '';
     _socialEntityName = globals.currentExternalSocialEntity?.name;
-    _socialEntityActionScope = globals.currentExternalSocialEntity?.actionScope;
+    _socialEntityActionScope =
+        globals.currentExternalSocialEntity?.actionScope ?? [];
     _category = globals.currentExternalSocialEntity?.category ?? '';
     _subCategory = globals.currentExternalSocialEntity?.subCategory ?? '';
     _geographicZone = globals.currentExternalSocialEntity?.geographicZone ?? '';
-    _subGeographicZone = globals.currentExternalSocialEntity?.subGeographicZone ?? '';
-    _website = globals.currentExternalSocialEntity?.website ?? '';
+    _subGeographicZone =
+        globals.currentExternalSocialEntity?.subGeographicZone ?? '';
     _website = globals.currentExternalSocialEntity?.website ?? '';
     _entityPhone = globals.currentExternalSocialEntity?.entityPhone ?? '';
-    _entityMobilePhone = globals.currentExternalSocialEntity?.entityMobilePhone ?? '';
+    _entityMobilePhone =
+        globals.currentExternalSocialEntity?.entityMobilePhone ?? '';
     _contactPhone = globals.currentExternalSocialEntity?.contactPhone ?? '';
-    _contactMobilePhone = globals.currentExternalSocialEntity?.contactMobilePhone ?? '';
-    _entityLandlinePhoneCode = globals.currentExternalSocialEntity?.entityPhone == null || globals.currentExternalSocialEntity?.entityPhone == '' ? '+34' : '${globals.currentExternalSocialEntity?.entityPhone?[0]}${globals.currentExternalSocialEntity?.entityPhone?[1]}${globals.currentExternalSocialEntity?.entityPhone?[2]}';
-    _entityMobilePhoneCode = globals.currentExternalSocialEntity?.entityMobilePhone == null || globals.currentExternalSocialEntity?.entityMobilePhone == '' ? '+34' : '${globals.currentExternalSocialEntity?.entityMobilePhone?[0]}${globals.currentExternalSocialEntity?.entityMobilePhone?[1]}${globals.currentExternalSocialEntity?.entityMobilePhone?[2]}';
-    _contactLandlinePhoneCode = globals.currentExternalSocialEntity?.contactPhone == null || globals.currentExternalSocialEntity?.contactPhone == '' ? '+34' : '${globals.currentExternalSocialEntity?.contactPhone?[0]}${globals.currentExternalSocialEntity?.contactPhone?[1]}${globals.currentExternalSocialEntity?.contactPhone?[2]}';
-    _contactMobilePhoneCode = globals.currentExternalSocialEntity?.contactMobilePhone == null || globals.currentExternalSocialEntity?.contactMobilePhone == ''? '+34' : '${globals.currentExternalSocialEntity?.contactMobilePhone?[0]}${globals.currentExternalSocialEntity?.contactMobilePhone?[1]}${globals.currentExternalSocialEntity?.contactMobilePhone?[2]}';
-    _postalCode = globals.currentExternalSocialEntity?.address?.postalCode ?? '';
+    _contactMobilePhone =
+        globals.currentExternalSocialEntity?.contactMobilePhone ?? '';
+    _entityLandlinePhoneCode = globals
+                    .currentExternalSocialEntity?.entityPhone ==
+                null ||
+            globals.currentExternalSocialEntity?.entityPhone == ''
+        ? '+34'
+        : '${globals.currentExternalSocialEntity?.entityPhone?[0]}${globals.currentExternalSocialEntity?.entityPhone?[1]}${globals.currentExternalSocialEntity?.entityPhone?[2]}';
+    _entityMobilePhoneCode = globals
+                    .currentExternalSocialEntity?.entityMobilePhone ==
+                null ||
+            globals.currentExternalSocialEntity?.entityMobilePhone == ''
+        ? '+34'
+        : '${globals.currentExternalSocialEntity?.entityMobilePhone?[0]}${globals.currentExternalSocialEntity?.entityMobilePhone?[1]}${globals.currentExternalSocialEntity?.entityMobilePhone?[2]}';
+    _contactLandlinePhoneCode = globals
+                    .currentExternalSocialEntity?.contactPhone ==
+                null ||
+            globals.currentExternalSocialEntity?.contactPhone == ''
+        ? '+34'
+        : '${globals.currentExternalSocialEntity?.contactPhone?[0]}${globals.currentExternalSocialEntity?.contactPhone?[1]}${globals.currentExternalSocialEntity?.contactPhone?[2]}';
+    _contactMobilePhoneCode = globals
+                    .currentExternalSocialEntity?.contactMobilePhone ==
+                null ||
+            globals.currentExternalSocialEntity?.contactMobilePhone == ''
+        ? '+34'
+        : '${globals.currentExternalSocialEntity?.contactMobilePhone?[0]}${globals.currentExternalSocialEntity?.contactMobilePhone?[1]}${globals.currentExternalSocialEntity?.contactMobilePhone?[2]}';
+    _postalCode =
+        globals.currentExternalSocialEntity?.address?.postalCode ?? '';
     _countryId = globals.currentExternalSocialEntity?.address?.country ?? '';
     _provinceId = globals.currentExternalSocialEntity?.address?.province ?? '';
     _cityId = globals.currentExternalSocialEntity?.address?.city ?? '';
     _email = globals.currentExternalSocialEntity?.email ?? '';
     _linkedin = globals.currentExternalSocialEntity?.linkedin ?? '';
     _twitter = globals.currentExternalSocialEntity?.twitter ?? '';
-    _otherSocialMedia = globals.currentExternalSocialEntity?.otherSocialMedia ?? '';
+    _otherSocialMedia =
+        globals.currentExternalSocialEntity?.otherSocialMedia ?? '';
     _contactName = globals.currentExternalSocialEntity?.contactName ?? '';
     _contactEmail = globals.currentExternalSocialEntity?.contactEmail ?? '';
-    _contactPosition = globals.currentExternalSocialEntity?.contactPosition ?? '';
-    _contactChoiceGrade = globals.currentExternalSocialEntity?.contactChoiceGrade ?? '';
+    _contactPosition =
+        globals.currentExternalSocialEntity?.contactPosition ?? '';
+    _contactChoiceGrade =
+        globals.currentExternalSocialEntity?.contactChoiceGrade ?? '';
     _contactKOL = globals.currentExternalSocialEntity?.contactKOL ?? '';
     _contactProject = globals.currentExternalSocialEntity?.contactProject ?? '';
-    _signedAgreements = globals.currentExternalSocialEntity?.signedAgreements ?? '';
-    _entityTypes = globals.currentExternalSocialEntity?.types ?? [];
+    _signedAgreements =
+        globals.currentExternalSocialEntity?.signedAgreements ?? '';
+    _offeredServices =
+        globals.currentExternalSocialEntity?.offeredServices ?? '';
+    _kolType = globals.currentExternalSocialEntity?.kolType ?? '';
     _trust = globals.currentExternalSocialEntity?.trust ?? false;
-    _createdAt = globals.currentExternalSocialEntity?.createdAt ?? DateTime.now();
+    _createdAt =
+        globals.currentExternalSocialEntity?.createdAt ?? DateTime.now();
     _createdBy = globals.currentExternalSocialEntity?.createdBy ?? '';
+
+    _initActionScope();
+  }
+
+  void _initActionScope() {
+    if (_socialEntityActionScope.isEmpty) {
+      textEditingControllerActionScope.text = '';
+      return;
+    }
+    if (_category == 'Empresas /Asociaciones empresariales/Clúster') {
+      selectedInterests = _socialEntityActionScope.map((id) {
+        try {
+          return LocationCache.instance.interests
+              .firstWhere((e) => e.interestId == id);
+        } catch (_) {
+          return Interest(interestId: id, name: '');
+        }
+      }).toSet();
+      textEditingControllerActionScope.text =
+          selectedInterests.map((e) => e.name).join(', ');
+    } else {
+      selectedScopeActions = _socialEntityActionScope.map((id) {
+        try {
+          return LocationCache.instance.scopeActions
+              .firstWhere((e) => e.id == id);
+        } catch (_) {
+          return ScopeAction(id: id, name: '');
+        }
+      }).toSet();
+      textEditingControllerActionScope.text =
+          selectedScopeActions.map((e) => e.name).join(', ');
+    }
   }
 
   @override
@@ -154,6 +245,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
 
   @override
   Widget build(BuildContext context) {
+    textTheme = Theme.of(context).textTheme;
     return _buildContent(context);
   }
 
@@ -167,36 +259,34 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     final database = Provider.of<Database>(context, listen: false);
     return Center(
       child: Container(
-        height: Responsive.isMobile(context) ||
-            Responsive.isTablet(context)
+        height: Responsive.isMobile(context) || Responsive.isTablet(context)
             ? MediaQuery.of(context).size.height
             : MediaQuery.of(context).size.height * 0.80,
-        width: Responsive.isMobile(context) ||
-            Responsive.isTablet(context)
+        width: Responsive.isMobile(context) || Responsive.isTablet(context)
             ? MediaQuery.of(context).size.width
             : MediaQuery.of(context).size.width * 0.80,
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(
-              Sizes.kDefaultPaddingDouble / 2),
+          borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble / 2),
         ),
         child: SingleChildScrollView(
           child: Column(
             children: [
               StreamBuilder<ExternalSocialEntity>(
-                  stream: database.externalSocialEntityByIdStream(_externalSocialEntityId),
+                  stream: database
+                      .externalSocialEntityByIdStream(_externalSocialEntityId),
                   builder: (context, snapshot) {
-                    if(!snapshot.hasData) {
+                    if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     final photoUrl = snapshot.data!.photo;
                     return _buildLogo(context, photoUrl!);
-                  }
-              ),
+                  }),
               _buildForm(context),
               Container(
                 height: Sizes.kDefaultPaddingDouble * 2,
-                margin: const EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
+                margin:
+                    const EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -253,8 +343,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: AppColors.primary020,
-                      )
-                  ),
+                      )),
                   child: !kIsWeb
                       ? ClipRRect(
                           borderRadius:
@@ -265,8 +354,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                                     color: Colors.transparent,
                                     height: 100,
                                     width: 100,
-                                    child:
-                                        Image.asset(ImagePath.IMAGE_DEFAULT),
+                                    child: Image.asset(ImagePath.IMAGE_DEFAULT),
                                   )
                                 : CachedNetworkImage(
                                     width: 100,
@@ -285,8 +373,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                                     color: Colors.transparent,
                                     height: 100,
                                     width: 100,
-                                    child:
-                                        Image.asset(ImagePath.IMAGE_DEFAULT),
+                                    child: Image.asset(ImagePath.IMAGE_DEFAULT),
                                   )
                                 : FadeInImage.assetNetwork(
                                     placeholder: ImagePath.IMAGE_DEFAULT,
@@ -306,7 +393,8 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.turquoiseBlue, width: 1.0),
+                      border: Border.all(
+                          color: AppColors.turquoiseBlue, width: 1.0),
                     ),
                     child: const Icon(
                       Icons.mode_edit_outlined,
@@ -330,178 +418,225 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             CustomFlexRowColumn(
-              childLeft: customTextFormField(context, _socialEntityName!,
-                  StringConst.FORM_NAME_ENTITY, StringConst.FORM_COMPANY_ERROR, nameSetState),
-              childRight: customTextFormField(
-                  context,
-                  _socialEntityActionScope!,
-                  StringConst.ACTION_SCOPE,
-                  StringConst.FORM_COMPANY_ERROR,
-                  socialEntityActionScopeSetState),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-              child: CustomTextBold(title: StringConst.FORM_ENTITY_LABELS,),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: chipContainer(),
-            ),
-            CustomFlexRowColumn(
-              childLeft: customTextFormField(context, _category!,
-                  StringConst.CATEGORY, StringConst.FORM_COMPANY_ERROR, categorySetState),
-              childRight: customTextFormStringList(
-                  context,
-                  subCategories,
-                  _subCategory!,
-                  StringConst.SUB_CATEGORY,
-                  StringConst.FORM_COMPANY_ERROR,
-                  subCategorySetState),
-            ),
-            CustomFlexRowColumn(
-              childLeft: customTextFormStringList(
-                  context,
-                  geographicZone,
-                  _geographicZone!,
-                  StringConst.ZONE,
-                  StringConst.FORM_COMPANY_ERROR,
-                  geographicZoneSetState),
-              childRight: customTextFormField(
-                  context,
-                  _subGeographicZone!,
-                  StringConst.SUB_ZONE,
-                  StringConst.FORM_COMPANY_ERROR,
-                  subGeographicZoneSetState),
-            ),
-            CustomFlexRowColumn(
-              childLeft: customTextFormField(context, _website!,
-                  StringConst.FORM_WEBSITE, StringConst.FORM_ERROR, websiteSetState),
-              childRight: customTextFormField(context, _email!,
-              StringConst.EMAIL, StringConst.FORM_COMPANY_ERROR, emailSetState),
-            ),
-            CustomFlexRowColumn(
-              childLeft: customTextFormPhone(
-                context,
-                _entityPhone!,
-                _entityLandlinePhoneCode,
-                StringConst.FORM_PHONE,
-                StringConst.FORM_COMPANY_ERROR,
-                _onCountryChangeEntityLandline,
-                _onSavedPhone,
-              ),
-              childRight: customTextFormPhone(
-                context,
-                _entityMobilePhone!,
-                _entityMobilePhoneCode,
-                StringConst.FORM_MOBILE_PHONE,
-                StringConst.FORM_COMPANY_ERROR,
-                _onChangeMobilePhone,
-                _onSavedMobilePhone,
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                  initialValue: _socialEntityName!,
+                  labelText: StringConst.FORM_NAME_ENTITY,
+                  validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
+                  onChanged: nameSetState),
+              childRight: CustomTextFormFieldTitle(
+                controller: textEditingControllerActionScope,
+                labelText: 'Ámbito de actuación',
+                onTap: () {
+                  if (_category == 'Empresas /Asociaciones empresariales/Clúster') {
+                    _showMultiSelectActionScopeInterests(context);
+                  } else if (_category == 'Organizaciones sociales' || _category == 'Administración pública') {
+                    _showMultiSelectActionScope(context);
+                  }
+                },
+                readOnly: true,
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
             CustomFlexRowColumn(
-              childLeft: streamBuilderForCountry(context, selectedCountry,
-                  buildCountryStreamBuilderSetState, externalSocialEntity),
-              childRight: streamBuilderForProvince(
-                  context,
-                  selectedCountry == null
-                      ? externalSocialEntity.address?.country
-                      : selectedCountry?.countryId,
-                  selectedProvince,
-                  buildProvinceStreamBuilderSetState,
-                  externalSocialEntity)),
-            CustomFlexRowColumn(
-              childLeft: streamBuilderForCity(
-                  context,
-                  selectedCountry == null
-                      ? externalSocialEntity.address?.country
-                      : selectedCountry?.countryId,
-                  selectedProvince == null
-                      ? externalSocialEntity.address?.province
-                      : selectedProvince?.provinceId,
-                  selectedCity,
-                  buildCityStreamBuilderSetState,
-                  externalSocialEntity),
-              childRight: customTextFormFieldNotValidator(context, _postalCode!,
-                  StringConst.FORM_POSTAL_CODE, postalCodeSetState),
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomDropDownButtonFormFieldTittle(
+                value: _category == '' ? null : _category,
+                labelText: StringConst.CATEGORY,
+                source: buildDropdownMenuItems([
+                  'Organizaciones sociales',
+                  'Administración pública',
+                  'Empresas /Asociaciones empresariales/Clúster'
+                ]),
+                onChanged: (val) {
+                  categorySetState(val);
+                  setState(() {
+                    _socialEntityActionScope = [];
+                    textEditingControllerActionScope.text = '';
+                    selectedScopeActions.clear();
+                    selectedInterests.clear();
+                  });
+                },
+              ),
+              childRight: CustomDropDownButtonFormFieldTittle(
+                value: _subCategory == '' ? null : _subCategory,
+                labelText: StringConst.SUB_CATEGORY,
+                source: buildDropdownMenuItems(subCategories),
+                onChanged: subCategorySetState,
+              ),
             ),
             CustomFlexRowColumn(
-              childLeft: customTextFormFieldNotValidator(context, _linkedin!,
-                  StringConst.FORM_LINKEDIN, linkedinSetState),
-              childRight: customTextFormFieldNotValidator(context, _twitter!,
-                  StringConst.FORM_TWITTER, twitterSetState),
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                initialValue: _signedAgreements!,
+                labelText: StringConst.FORM_ENTITY_SIGNED_AGREEMENTS,
+                onChanged: signedAgreementsSetState,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                initialValue: _offeredServices!,
+                labelText: '¿Qué iniciativas o servicios ofrece?',
+                onChanged: offeredServicesSetState,
+              ),
             ),
             CustomFlexRowColumn(
-              childLeft: customTextFormFieldNotValidator(context, _otherSocialMedia!,
-                  StringConst.FORM_OTHER_SOCIAL_MEDIA, otherSocialMediaSetState),
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomDropDownButtonFormFieldTittle(
+                value: _contactChoiceGrade == '' ? null : _contactChoiceGrade,
+                labelText: StringConst.CONTACT_CHOICE_GRADE,
+                source: buildDropdownMenuItems(choiceGrade),
+                onChanged: contactChoiceGradeSetState,
+              ),
+              childRight: CustomDropDownButtonFormFieldTittle(
+                value: _contactKOL == '' ? null : _contactKOL,
+                labelText: StringConst.CONTACT_OPINION_LEADER,
+                source: buildDropdownMenuItems(yesNo),
+                onChanged: (val) {
+                  contactKOLSetState(val);
+                  setState(() {
+                    if (_contactKOL != 'Si') {
+                      _kolType = '';
+                    }
+                  });
+                },
+              ),
+            ),
+            if (_contactKOL == 'Si') ...[
+              CustomDropDownButtonFormFieldTittle(
+                value: _kolType == '' ? null : _kolType,
+                labelText: 'Tipo de KOL',
+                source: buildDropdownMenuItems(kolTypes),
+                onChanged: kolTypeSetState,
+              ),
+            ],
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomDropDownButtonFormFieldTittle(
+                value: _geographicZone == '' ? null : _geographicZone,
+                labelText: StringConst.ZONE,
+                source: buildDropdownMenuItems(geographicZone),
+                onChanged: geographicZoneSetState,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                initialValue: _subGeographicZone!,
+                labelText: StringConst.SUB_ZONE,
+                onChanged: subGeographicZoneSetState,
+              ),
+            ),
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                initialValue: _website!,
+                labelText: StringConst.FORM_WEBSITE,
+                onChanged: websiteSetState,
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_ERROR,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                initialValue: _email!,
+                labelText: StringConst.EMAIL,
+                onChanged: emailSetState,
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
+              ),
+            ),
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomPhoneFormFieldTitle(
+                initialValue: _entityPhone!,
+                initialSelection: _entityLandlinePhoneCode == '' ? 'ES' : _entityLandlinePhoneCode,
+                phoneCode: _entityLandlinePhoneCode,
+                labelText: 'Teléfono fijo de la organización',
+                onCountryChange: _onCountryChangeEntityLandline,
+                onSaved: _onSavedPhone,
+              ),
+              childRight: CustomPhoneFormFieldTitle(
+                initialValue: _entityMobilePhone!,
+                initialSelection: _entityMobilePhoneCode == '' ? 'ES' : _entityMobilePhoneCode,
+                phoneCode: _entityMobilePhoneCode,
+                labelText: StringConst.FORM_MOBILE_PHONE,
+                onCountryChange: _onChangeMobilePhone,
+                onSaved: _onSavedMobilePhone,
+              ),
+            ),
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                initialValue: _linkedin!,
+                labelText: StringConst.FORM_LINKEDIN,
+                onChanged: linkedinSetState,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                initialValue: _twitter!,
+                labelText: 'X',
+                onChanged: twitterSetState,
+              ),
+            ),
+            CustomFlexRowColumn(
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                initialValue: _otherSocialMedia!,
+                labelText: StringConst.FORM_OTHER_SOCIAL_MEDIA,
+                onChanged: otherSocialMediaSetState,
+              ),
               childRight: Container(),
             ),
-            SizedBox(height: 20.0,),
-            CustomTextMediumBold(text: StringConst.CONTACT_INFORMATION.toUpperCase(),),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: customTextFormField(
-                  context,
-                  _contactName!,
-                  StringConst.FORM_CONTACT_TEC_NAME,
-                  StringConst.FORM_COMPANY_ERROR,
-                  contactNameSetState),
+            SizedBox(
+              height: 20.0,
             ),
+            CustomTextMediumBold(
+              text: StringConst.CONTACT_INFORMATION.toUpperCase(),
+            ),
+            SpaceH24(),
+            CustomTextFormFieldTitle(
+              initialValue: _contactName!,
+              labelText: StringConst.FORM_CONTACT_TEC_NAME,
+              onChanged: contactNameSetState,
+              validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
+            ),
+            SpaceH24(),
             CustomFlexRowColumn(
-              childLeft: customTextFormPhone(
-                context,
-                _contactPhone!,
-                _contactLandlinePhoneCode,
-                StringConst.FORM_LANDLINE,
-                StringConst.FORM_COMPANY_ERROR,
-                _onChangeContactPhoneCode,
-                _onSavedContactPhone
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomPhoneFormFieldTitle(
+                initialValue: _contactPhone!,
+                initialSelection: _contactLandlinePhoneCode == '' ? 'ES' : _contactLandlinePhoneCode,
+                phoneCode: _contactLandlinePhoneCode,
+                labelText: StringConst.FORM_LANDLINE,
+                onCountryChange: _onChangeContactPhoneCode,
+                onSaved: _onSavedContactPhone,
               ),
-              childRight: customTextFormPhone(
-                context,
-                _contactMobilePhone!,
-                _contactMobilePhoneCode,
-                StringConst.FORM_MOBILE_PHONE,
-                StringConst.FORM_COMPANY_ERROR,
-                _onChangeContactMobileCode,
-                _onSavedContactMobilePhone
+              childRight: CustomPhoneFormFieldTitle(
+                initialValue: _contactMobilePhone!,
+                initialSelection: _contactMobilePhoneCode == '' ? 'ES' : _contactMobilePhoneCode,
+                phoneCode: _contactMobilePhoneCode,
+                labelText: StringConst.FORM_MOBILE_PHONE,
+                onCountryChange: _onChangeContactMobileCode,
+                onSaved: _onSavedContactMobilePhone,
               ),
             ),
+            SpaceH24(),
             CustomFlexRowColumn(
-              childLeft: customTextFormField(
-                  context,
-                  _contactEmail!,
-                  StringConst.FORM_EMAIL,
-                  StringConst.FORM_COMPANY_ERROR,
-                  contactEmailSetState),
-              childRight: customTextFormField(
-                  context,
-                  _contactPosition!,
-                  StringConst.FORM_CONTACT_POSITION,
-                  StringConst.FORM_COMPANY_ERROR,
-                  contactPositionSetState),
-            ),
-            CustomFlexRowColumn(
-              childLeft: customTextFormStringList(
-                  context,
-                  choiceGrade,
-                  _contactChoiceGrade!,
-                  StringConst.CONTACT_CHOICE_GRADE,
-                  StringConst.FORM_COMPANY_ERROR,
-                  contactChoiceGradeSetState),
-              childRight: customTextFormStringList(
-                  context,
-                  yesNo,
-                  _contactKOL!,
-                  StringConst.CONTACT_OPINION_LEADER,
-                  StringConst.FORM_COMPANY_ERROR,
-                  contactKOLSetState),
-            ),
-            CustomFlexRowColumn(
-              childLeft: customTextFormField(context, _signedAgreements!,
-                  StringConst.FORM_ENTITY_SIGNED_AGREEMENTS, StringConst.FORM_COMPANY_ERROR, signedAgreementsSetState),
-              childRight: customTextFormField(context, _contactProject!,
-                  StringConst.FORM_CONTACT_PROJECT, StringConst.FORM_COMPANY_ERROR, contactProjectSetState),
+              contentPadding: EdgeInsets.zero,
+              separatorSize: 20,
+              childLeft: CustomTextFormFieldTitle(
+                initialValue: _contactEmail!,
+                labelText: StringConst.FORM_EMAIL,
+                onChanged: contactEmailSetState,
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
+              ),
+              childRight: CustomTextFormFieldTitle(
+                initialValue: _contactPosition!,
+                labelText: StringConst.FORM_CONTACT_POSITION,
+                onChanged: contactPositionSetState,
+                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_COMPANY_ERROR,
+              ),
             ),
           ]),
     );
@@ -509,10 +644,6 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
 
   void nameSetState(String? val) {
     setState(() => _socialEntityName = val!);
-  }
-
-  void socialEntityActionScopeSetState(String? val) {
-    setState(() => _socialEntityActionScope = val!);
   }
 
   void categorySetState(String? val) {
@@ -538,6 +669,15 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   void emailSetState(String? val) {
     setState(() => _email = val!);
   }
+
+  void offeredServicesSetState(String? val) {
+    setState(() => _offeredServices = val!);
+  }
+
+  void kolTypeSetState(String? val) {
+    setState(() => _kolType = val!);
+  }
+
   void postalCodeSetState(String? val) {
     setState(() => _postalCode = val!);
   }
@@ -551,6 +691,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       this._entityPhone = _entityLandlinePhoneCode + ' ' + value!;
     });
   }
+
   void _onChangeMobilePhone(CountryCode countryCode) {
     _entityMobilePhoneCode = countryCode.toString();
   }
@@ -564,6 +705,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   void _onChangeContactPhoneCode(CountryCode countryCode) {
     _contactLandlinePhoneCode = countryCode.toString();
   }
+
   void _onSavedContactPhone(String? value) {
     setState(() {
       this._contactPhone = _contactLandlinePhoneCode + ' ' + value!;
@@ -609,7 +751,12 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   }
 
   void contactKOLSetState(String? val) {
-    setState(() => _contactKOL = val!);
+    setState(() {
+      _contactKOL = val!;
+      if (_contactKOL != 'Si') {
+        _kolType = '';
+      }
+    });
   }
 
   void contactProjectSetState(String? val) {
@@ -719,23 +866,26 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     }
   }
 
-  Widget chipContainer(){
+  Widget chipContainer() {
     return Container(
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: AppColors.greyUltraLight,
-          )
-      ),
-      height: Responsive.isMobile(context) ? 350 : Responsive.isDesktopS(context) ? 200 : 150,
+          )),
+      height: Responsive.isMobile(context)
+          ? 350
+          : Responsive.isDesktopS(context)
+              ? 200
+              : 150,
       child: Center(child: chipFilter()),
     );
   }
 
   Widget chipFilter() {
     final socialEntityTypes = LocationCache.instance.socialEntitiesTypes;
-    
+
     if (socialEntityTypes.isEmpty) {
       // Fallback if not warmed up
       final database = Provider.of<Database>(context, listen: false);
@@ -744,10 +894,9 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) return Container();
             return _buildChipsChoice(snapshot.data!);
-          }
-      );
+          });
     }
-    
+
     return _buildChipsChoice(socialEntityTypes);
   }
 
@@ -789,6 +938,43 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     });
   }
 
+  void _showMultiSelectActionScope(BuildContext context) async {
+    final selectedValues = await showDialog<Set<ScopeAction>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownScopeActionCreate(
+            context, selectedScopeActions);
+      },
+    );
+    if (selectedValues != null) {
+      setState(() {
+        selectedScopeActions = selectedValues;
+        _socialEntityActionScope =
+            selectedValues.map((e) => e.id ?? '').toList();
+        textEditingControllerActionScope.text =
+            selectedValues.map((e) => e.name).join(', ');
+      });
+    }
+  }
+
+  void _showMultiSelectActionScopeInterests(BuildContext context) async {
+    final selectedValues = await showDialog<Set<Interest>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownInterestsCreate(context, selectedInterests);
+      },
+    );
+    if (selectedValues != null) {
+      setState(() {
+        selectedInterests = selectedValues;
+        _socialEntityActionScope =
+            selectedValues.map((e) => e.interestId ?? '').toList();
+        textEditingControllerActionScope.text =
+            selectedValues.map((e) => e.name).join(', ');
+      });
+    }
+  }
+
   Future<void> _submit() async {
     final address = Address(
       country: _countryId,
@@ -823,8 +1009,10 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       contactPhone: _contactPhone,
       contactMobilePhone: _contactMobilePhone,
       signedAgreements: _signedAgreements,
+      offeredServices: _offeredServices,
+      kolType: _kolType,
       trust: _trust,
-      createdAt:_createdAt!,
+      createdAt: _createdAt!,
       createdBy: _createdBy!,
     );
     try {
@@ -837,15 +1025,16 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
         title: StringConst.FORM_SUCCESS,
         content: StringConst.FORM_ENTITY_UPDATED,
         defaultActionText: StringConst.FORM_ACCEPT,
-      ).then((value) {
-        setState(() {
-          EntityDirectoryPage.selectedIndex.value = 2;
-        });
-      },
+      ).then(
+        (value) {
+          setState(() {
+            EntityDirectoryPage.selectedIndex.value = 2;
+          });
+        },
       );
     } on FirebaseException catch (e) {
       showExceptionAlertDialog(context,
-          title: StringConst.FORM_ERROR, exception: e)
+              title: StringConst.FORM_ERROR, exception: e)
           .then((value) {
         setState(() {
           EntityDirectoryPage.selectedIndex.value = 2;
@@ -853,4 +1042,18 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       });
     }
   }
+
+  List<DropdownMenuItem<String>> buildDropdownMenuItems(List<String> listItems) {
+    List<DropdownMenuItem<String>> items = [];
+    for (String listItem in listItems) {
+      items.add(
+        DropdownMenuItem(
+          value: listItem,
+          child: Text(listItem),
+        ),
+      );
+    }
+    return items;
+  }
 }
+

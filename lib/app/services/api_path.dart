@@ -24,6 +24,7 @@ class APIPath {
   static String users() => 'users';
   static String user(String userId) => 'users/$userId';
   static String interests() => 'interests';
+  static String scopeActions() => 'scopeAction';
   static String photoUser(String userId) => 'users/$userId';
   static String logoSocialEntity(String socialEntityId) => 'socialEntities/$socialEntityId';
   static String contacts() => 'contact';

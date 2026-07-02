@@ -12,6 +12,7 @@ import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/competencyCategory.dart';
 import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
+import 'package:enreda_empresas/app/models/scope_action.dart';
 import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
@@ -59,6 +60,7 @@ class LocationCache {
   List<CompetencyCategory> competencyCategories = [];
   List<CompetencySubCategory> competencySubCategories = [];
   List<Interest> interests = [];
+  List<ScopeAction> scopeActions = [];
   List<Ability> abilities = [];
   List<SpecificInterest> specificInterests = [];
   List<SocialEntitiesType> socialEntitiesTypes = [];
@@ -308,7 +310,7 @@ class LocationCache {
     final storedVersion = prefs.getInt('_cacheVersion') ?? 0;
     if (storedVersion < _cacheVersion) {
       const catalogKeys = [
-        'countries', 'gamificationFlags', 'competencies', 'competencyCategories', 'competencySubCategories', 'interests', 'abilities',
+        'countries', 'gamificationFlags', 'competencies', 'competencyCategories', 'competencySubCategories', 'interests', 'scopeActions', 'abilities',
         'socialEntitiesTypes', 'personalDocumentTypes', 'educations', 'genders', 'dedications',
         'keepLearningOptions', 'documentCategories', 'programs', 'resourceTypes', 'languages',
         'resourceCategories', 'resourcePictures',
@@ -332,6 +334,7 @@ class LocationCache {
       _loadOrFetchCatalog<CompetencyCategory>('competencyCategories', () => database.competenciesCategoriesStream().first, (data, id) => CompetencyCategory.fromMap(data, id), getDocId: (e) => e.competencyCategoryId ?? '').then((v) => competencyCategories = v).catchError((e) { print("Error: e"); return <CompetencyCategory>[]; }),
       _loadOrFetchCatalog<CompetencySubCategory>('competencySubCategories', () => database.competenciesSubCategoriesStream().first, (data, id) => CompetencySubCategory.fromMap(data, id), getDocId: (e) => e.competencySubCategoryId ?? '').then((v) => competencySubCategories = v).catchError((e) { print("Error: e"); return <CompetencySubCategory>[]; }),
       _loadOrFetchCatalog<Interest>('interests', () => database.getInterests(), (data, id) => Interest.fromMap(data, id)).then((v) => interests = v),
+      _loadOrFetchCatalog<ScopeAction>('scopeActions', () => database.getScopeActions(), (data, id) => ScopeAction.fromMap(data, id)).then((v) => scopeActions = v),
       _loadOrFetchCatalog<Ability>('abilities', () => database.getAbilities(), (data, id) => Ability.fromMap(data, id)).then((v) => abilities = v),
     ]);
 
