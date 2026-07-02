@@ -116,7 +116,12 @@ class FirestoreService {
   }) {
     final reference = FirebaseFirestore.instance.doc(path);
     final snapshots = reference.snapshots();
-    return snapshots.map((snapshot) {
+    // Skip non-existent docs (e.g. `countries/null` when an entity has no
+    // country). Without this, `data()!` throws on every emission → the
+    // StreamBuilder rebuilds → recreates the stream → infinite read loop.
+    return snapshots
+        .where((snapshot) => snapshot.data() != null)
+        .map((snapshot) {
       FirestoreMonitor.logRead(path, count: 1);
       return builder(snapshot.data()!, snapshot.id);
     });
