@@ -578,7 +578,9 @@ class FirestoreDatabase implements Database {
 
     @override
     Stream<Country> countryStream(String? countryId) =>
-          _service.documentStream<Country>(
+        (countryId == null || countryId.isEmpty)
+          ? const Stream.empty()  // no location -> no read (avoids countries/null)
+          : _service.documentStream<Country>(
             path: APIPath.country(countryId),
             builder: (data, documentId) => Country.fromMap(data, documentId),
           );
@@ -624,7 +626,9 @@ class FirestoreDatabase implements Database {
 
     @override
     Stream<Province> provinceStream(String? provinceId) =>
-        _service.documentStream<Province>(
+        (provinceId == null || provinceId.isEmpty)
+          ? const Stream.empty()
+          : _service.documentStream<Province>(
           path: APIPath.province(provinceId),
           builder: (data, documentId) => Province.fromMap(data, documentId),
         );
@@ -668,7 +672,10 @@ class FirestoreDatabase implements Database {
     );
 
     @override
-    Stream<City> cityStream(String? cityId) => _service.documentStream<City>(
+    Stream<City> cityStream(String? cityId) =>
+        (cityId == null || cityId.isEmpty)
+          ? const Stream.empty()  // no location -> no read (avoids cities/null)
+          : _service.documentStream<City>(
         path: APIPath.city(cityId),
         builder: (data, documentId) => City.fromMap(data, documentId),
       );
