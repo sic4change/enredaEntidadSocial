@@ -3,6 +3,19 @@ import 'package:enreda_empresas/app/models/size.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'addressUser.dart';
 
+class ReferencePerson {
+  ReferencePerson({required this.name, required this.phone});
+  final String name;
+  final String phone;
+
+  factory ReferencePerson.fromMap(Map<String, dynamic> data) => ReferencePerson(
+        name: data['name']?.toString() ?? '',
+        phone: data['phone']?.toString() ?? '',
+      );
+
+  Map<String, dynamic> toMap() => {'name': name, 'phone': phone};
+}
+
 class ExternalSocialEntity {
   ExternalSocialEntity({
     this.externalSocialEntityId,
@@ -30,6 +43,8 @@ class ExternalSocialEntity {
     this.entityMobilePhone,
     this.contactPhone,
     this.contactMobilePhone,
+    this.phones,
+    this.referencePeople,
     this.geographicZone,
     this.subGeographicZone,
     this.linkedin,
@@ -74,6 +89,8 @@ class ExternalSocialEntity {
   final String? entityMobilePhone;
   final String? contactPhone;
   final String? contactMobilePhone;
+  final List<String>? phones;
+  final List<ReferencePerson>? referencePeople;
   final String? geographicZone;
   final String? subGeographicZone;
   final String? linkedin;
@@ -140,6 +157,18 @@ class ExternalSocialEntity {
     final String entityMobilePhone = data['entityMobilePhone'] ?? '';
     final String contactPhone = data['contactPhone'] ?? '';
     final String contactMobilePhone = data['contactMobilePhone'] ?? '';
+    final List<String> phones = [];
+    if (data['phones'] != null) {
+      data['phones'].forEach((p) {phones.add(p.toString());});
+    }
+    final List<ReferencePerson> referencePeople = [];
+    if (data['referencePeople'] is List) {
+      for (final p in data['referencePeople']) {
+        if (p is Map) {
+          referencePeople.add(ReferencePerson.fromMap(Map<String, dynamic>.from(p)));
+        }
+      }
+    }
     final String geographicZone = data['geographicZone'] ?? '';
     final String subGeographicZone = data['subGeographicZone'] ?? '';
     final String linkedin = data['linkedin'] ?? '';
@@ -178,6 +207,8 @@ class ExternalSocialEntity {
         entityMobilePhone: entityMobilePhone,
         contactPhone: contactPhone,
         contactMobilePhone: contactMobilePhone,
+        phones: phones,
+        referencePeople: referencePeople,
         geographicZone: geographicZone,
         subGeographicZone: subGeographicZone,
         linkedin: linkedin,
@@ -218,6 +249,8 @@ class ExternalSocialEntity {
       'entityMobilePhone': entityMobilePhone,
       'contactPhone': contactPhone,
       'contactMobilePhone': contactMobilePhone,
+      'phones': phones,
+      'referencePeople': referencePeople?.map((p) => p.toMap()).toList(),
       'geographicZone': geographicZone,
       'subGeographicZone': subGeographicZone,
       'linkedin': linkedin,
@@ -256,6 +289,8 @@ class ExternalSocialEntity {
     String? entityMobilePhone,
     String? contactPhone,
     String? contactMobilePhone,
+    List<String>? phones,
+    List<ReferencePerson>? referencePeople,
     String? geographicZone,
     String? subGeographicZone,
     String? linkedin,
@@ -295,6 +330,8 @@ class ExternalSocialEntity {
         entityMobilePhone: entityMobilePhone ?? this.entityMobilePhone,
         contactPhone: contactPhone ?? this.contactPhone,
         contactMobilePhone: contactMobilePhone ?? this.contactMobilePhone,
+        phones: phones ?? this.phones,
+        referencePeople: referencePeople ?? this.referencePeople,
         geographicZone: geographicZone ?? this.geographicZone,
         subGeographicZone: subGeographicZone ?? this.subGeographicZone,
         linkedin: linkedin ?? this.linkedin,

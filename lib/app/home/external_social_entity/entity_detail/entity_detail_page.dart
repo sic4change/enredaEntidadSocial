@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
@@ -7,6 +8,7 @@ import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/external_entities_cache.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
@@ -166,7 +168,8 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
                                     Responsive.isMobile(context) ? 28 : 40,
                                     backgroundColor: AppColors.white,
                                     backgroundImage:
-                                    NetworkImage(externalSocialEntity.photo!),
+                                    CachedNetworkImageProvider(externalSocialEntity.photo!),
+                                    onBackgroundImageError: (_, __) {},
                                   ),
                                 ),
                               ),
@@ -380,6 +383,15 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
 
         externalSocialEntity.contactKOL == 'Si' && externalSocialEntity.kolType != null && externalSocialEntity.kolType != '' ? CustomTextBold(title: 'TIPO DE KOL', color: AppColors.turquoiseBlue,) : Container(),
         externalSocialEntity.contactKOL == 'Si' && externalSocialEntity.kolType != null && externalSocialEntity.kolType != '' ? CustomTextSmallColor(text: externalSocialEntity.kolType!) : Container(),
+
+        (externalSocialEntity.referencePeople == null || externalSocialEntity.referencePeople!.isEmpty) ? Container() :
+        CustomTextMediumBold(text: StringConst.REFERENCE_PEOPLE.toUpperCase(),),
+        for (final person in externalSocialEntity.referencePeople ?? [])
+          CustomTextSmallColor(
+            text: [person.name, person.phone].where((s) => s.isNotEmpty).join(' - '),
+            padding: const EdgeInsets.only(bottom: 10.0),
+            height: 0,
+          ),
       ],
     );
   }
@@ -465,6 +477,7 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
     try {
       final database = Provider.of<Database>(context, listen: false);
       await database.deleteExternalSocialEntity(externalSocialEntity);
+      ExternalEntitiesCache.instance.invalidate();
     } catch (e) {
       print(e.toString());
     }

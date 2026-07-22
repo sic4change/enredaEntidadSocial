@@ -962,6 +962,12 @@ class StringConst {
   static const String FORM_CONTACT_POSITION = "Cargo de la persona de contacto";
   static const String FORM_CONTACT_PROJECT = "Proyecto o programa";
   static const String FORM_EDIT_ENTITY = "Editar entidad social";
+  static const String EDIT_CONTACT = "Editar contacto";
+  static const String ADDITIONAL_PHONES = "Otros teléfonos";
+  static const String ADD_PHONE = "Añadir teléfono";
+  static const String REFERENCE_PEOPLE = "Personas de referencia";
+  static const String ADD_REFERENCE_PERSON = "Añadir persona de referencia";
+  static const String REFERENCE_PERSON_NAME = "Nombre";
   static const String FORM_ENTITY_LABELS = "Sectores/Campos/Etiquetas/Ecosistemas";
   static const String FORM_ENTITY_SIGNED_AGREEMENTS = "Acuerdos firmados";
   static const String FORM_ENTITY_UPDATED = "La entidad social fue actualizada exitosamente.";

@@ -22,6 +22,7 @@ import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/external_entities_cache.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_city.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_country.dart';
@@ -119,6 +120,9 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
 
   TextEditingController textEditingControllerActionScope =
       TextEditingController();
+  List<TextEditingController> _phoneControllers = [];
+  // Each reference person = one name controller + one phone controller.
+  List<(TextEditingController, TextEditingController)> _referenceControllers = [];
   Set<Interest> selectedInterests = {};
   Set<ScopeAction> selectedScopeActions = {};
   late TextTheme textTheme;
@@ -191,6 +195,17 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     _offeredServices =
         globals.currentExternalSocialEntity?.offeredServices ?? '';
     _kolType = globals.currentExternalSocialEntity?.kolType ?? '';
+    _entityTypes = globals.currentExternalSocialEntity?.types ?? [];
+    _phoneControllers = (globals.currentExternalSocialEntity?.phones ?? [])
+        .map((p) => TextEditingController(text: p))
+        .toList();
+    _referenceControllers =
+        (globals.currentExternalSocialEntity?.referencePeople ?? [])
+            .map((r) => (
+                  TextEditingController(text: r.name),
+                  TextEditingController(text: r.phone),
+                ))
+            .toList();
     _trust = globals.currentExternalSocialEntity?.trust ?? false;
     _createdAt =
         globals.currentExternalSocialEntity?.createdAt ?? DateTime.now();
@@ -231,6 +246,13 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
 
   @override
   void dispose() {
+    for (final c in _phoneControllers) {
+      c.dispose();
+    }
+    for (final r in _referenceControllers) {
+      r.$1.dispose();
+      r.$2.dispose();
+    }
     super.dispose();
   }
 
@@ -431,7 +453,9 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                 onTap: () {
                   if (_category == 'Empresas /Asociaciones empresariales/Clúster') {
                     _showMultiSelectActionScopeInterests(context);
-                  } else if (_category == 'Organizaciones sociales' || _category == 'Administración pública') {
+                  } else {
+                    // Mirrors _initActionScope: any other category (including
+                    // CSV-imported ones like 'Tercer Sector') uses scope actions.
                     _showMultiSelectActionScope(context);
                   }
                 },
@@ -449,7 +473,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                   'Organizaciones sociales',
                   'Administración pública',
                   'Empresas /Asociaciones empresariales/Clúster'
-                ]),
+                ], _category),
                 onChanged: (val) {
                   categorySetState(val);
                   setState(() {
@@ -463,7 +487,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
               childRight: CustomDropDownButtonFormFieldTittle(
                 value: _subCategory == '' ? null : _subCategory,
                 labelText: StringConst.SUB_CATEGORY,
-                source: buildDropdownMenuItems(subCategories),
+                source: buildDropdownMenuItems(subCategories, _subCategory),
                 onChanged: subCategorySetState,
               ),
             ),
@@ -487,13 +511,13 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
               childLeft: CustomDropDownButtonFormFieldTittle(
                 value: _contactChoiceGrade == '' ? null : _contactChoiceGrade,
                 labelText: StringConst.CONTACT_CHOICE_GRADE,
-                source: buildDropdownMenuItems(choiceGrade),
+                source: buildDropdownMenuItems(choiceGrade, _contactChoiceGrade),
                 onChanged: contactChoiceGradeSetState,
               ),
               childRight: CustomDropDownButtonFormFieldTittle(
                 value: _contactKOL == '' ? null : _contactKOL,
                 labelText: StringConst.CONTACT_OPINION_LEADER,
-                source: buildDropdownMenuItems(yesNo),
+                source: buildDropdownMenuItems(yesNo, _contactKOL),
                 onChanged: (val) {
                   contactKOLSetState(val);
                   setState(() {
@@ -508,7 +532,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
               CustomDropDownButtonFormFieldTittle(
                 value: _kolType == '' ? null : _kolType,
                 labelText: 'Tipo de KOL',
-                source: buildDropdownMenuItems(kolTypes),
+                source: buildDropdownMenuItems(kolTypes, _kolType),
                 onChanged: kolTypeSetState,
               ),
             ],
@@ -518,7 +542,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
               childLeft: CustomDropDownButtonFormFieldTittle(
                 value: _geographicZone == '' ? null : _geographicZone,
                 labelText: StringConst.ZONE,
-                source: buildDropdownMenuItems(geographicZone),
+                source: buildDropdownMenuItems(geographicZone, _geographicZone),
                 onChanged: geographicZoneSetState,
               ),
               childRight: CustomTextFormFieldTitle(
@@ -534,7 +558,6 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                 initialValue: _website!,
                 labelText: StringConst.FORM_WEBSITE,
                 onChanged: websiteSetState,
-                validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_ERROR,
               ),
               childRight: CustomTextFormFieldTitle(
                 initialValue: _email!,
@@ -563,6 +586,11 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                 onSaved: _onSavedMobilePhone,
               ),
             ),
+            SpaceH24(),
+            _buildPhonesSection(),
+            SpaceH24(),
+            _buildReferencePeopleSection(),
+            SpaceH24(),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
@@ -639,6 +667,112 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
               ),
             ),
           ]),
+    );
+  }
+
+  /// Default country prefix is Spain (+34). Kept as-is if the user typed their
+  /// own '+' prefix. Idempotent: a saved '+34 6...' already starts with '+'.
+  String _withDefaultPrefix(String raw) {
+    final t = raw.trim();
+    return t.startsWith('+') ? t : '+34 $t';
+  }
+
+  Widget _buildReferencePeopleSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomTextMediumBold(text: StringConst.REFERENCE_PEOPLE),
+        SpaceH12(),
+        for (int i = 0; i < _referenceControllers.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: CustomTextFormFieldTitle(
+                    controller: _referenceControllers[i].$1,
+                    labelText: StringConst.REFERENCE_PERSON_NAME,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CustomTextFormFieldTitle(
+                    controller: _referenceControllers[i].$2,
+                    labelText: StringConst.FORM_PHONE,
+                    keyboardType: TextInputType.phone,
+                  ),
+                ),
+                IconButton(
+                  tooltip: StringConst.DELETE,
+                  onPressed: () => setState(() {
+                    final removed = _referenceControllers.removeAt(i);
+                    removed.$1.dispose();
+                    removed.$2.dispose();
+                  }),
+                  icon: const Icon(Icons.remove_circle_outline,
+                      color: AppColors.turquoiseBlue),
+                ),
+              ],
+            ),
+          ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => setState(() {
+              _referenceControllers
+                  .add((TextEditingController(), TextEditingController()));
+            }),
+            icon: const Icon(Icons.add_circle_outline,
+                color: AppColors.turquoiseBlue),
+            label: CustomTextMedium(text: StringConst.ADD_REFERENCE_PERSON),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhonesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomTextMediumBold(text: StringConst.ADDITIONAL_PHONES),
+        SpaceH12(),
+        for (int i = 0; i < _phoneControllers.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomTextFormFieldTitle(
+                    controller: _phoneControllers[i],
+                    labelText: '${StringConst.FORM_PHONE} ${i + 1}',
+                    keyboardType: TextInputType.phone,
+                  ),
+                ),
+                IconButton(
+                  tooltip: StringConst.DELETE,
+                  onPressed: () => setState(() {
+                    _phoneControllers.removeAt(i).dispose();
+                  }),
+                  icon: const Icon(Icons.remove_circle_outline,
+                      color: AppColors.turquoiseBlue),
+                ),
+              ],
+            ),
+          ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => setState(() {
+              _phoneControllers.add(TextEditingController());
+            }),
+            icon: const Icon(Icons.add_circle_outline,
+                color: AppColors.turquoiseBlue),
+            label: CustomTextMedium(text: StringConst.ADD_PHONE),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1008,6 +1142,20 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       entityMobilePhone: _entityMobilePhone,
       contactPhone: _contactPhone,
       contactMobilePhone: _contactMobilePhone,
+      phones: _phoneControllers
+          .map((c) => c.text.trim())
+          .where((t) => t.isNotEmpty)
+          .map(_withDefaultPrefix)
+          .toList(),
+      referencePeople: _referenceControllers
+          .map((r) => ReferencePerson(
+                name: r.$1.text.trim(),
+                phone: r.$2.text.trim().isEmpty
+                    ? ''
+                    : _withDefaultPrefix(r.$2.text.trim()),
+              ))
+          .where((p) => p.name.isNotEmpty || p.phone.isNotEmpty)
+          .toList(),
       signedAgreements: _signedAgreements,
       offeredServices: _offeredServices,
       kolType: _kolType,
@@ -1019,6 +1167,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
       final database = Provider.of<Database>(context, listen: false);
       setState(() => isLoading = true);
       await database.setExternalSocialEntity(externalSocialEntity);
+      ExternalEntitiesCache.instance.invalidate();
       setState(() => isLoading = false);
       showAlertDialog(
         context,
@@ -1043,7 +1192,15 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     }
   }
 
-  List<DropdownMenuItem<String>> buildDropdownMenuItems(List<String> listItems) {
+  List<DropdownMenuItem<String>> buildDropdownMenuItems(List<String> listItems,
+      [String? currentValue]) {
+    // CSV-imported contacts can hold values outside the fixed lists (e.g.
+    // 'Tercer Sector'); include them so DropdownButton's value is always valid.
+    if (currentValue != null &&
+        currentValue.isNotEmpty &&
+        !listItems.contains(currentValue)) {
+      listItems = [currentValue, ...listItems];
+    }
     List<DropdownMenuItem<String>> items = [];
     for (String listItem in listItems) {
       items.add(
