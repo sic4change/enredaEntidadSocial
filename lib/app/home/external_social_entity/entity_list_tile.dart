@@ -1,20 +1,19 @@
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/models/addressUser.dart';
-import 'package:enreda_empresas/app/models/city.dart';
-import 'package:enreda_empresas/app/models/country.dart';
-import 'package:enreda_empresas/app/models/socialEntity.dart';
-import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/functions.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../models/externalSocialEntity.dart';
 
 class EntityListTile extends StatefulWidget {
-  const EntityListTile({Key? key, required this.socialEntity, required this.onTap}) : super(key: key);
+  const EntityListTile({Key? key, required this.socialEntity, required this.onTap, this.onEdit}) : super(key: key);
   final ExternalSocialEntity? socialEntity;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
 
   @override
   State<EntityListTile> createState() => _EntityListTileState();
@@ -27,35 +26,27 @@ class _EntityListTileState extends State<EntityListTile> {
   }
 
   Widget _buildEntityContainer(ExternalSocialEntity currentSocialEntity){
-    final database = Provider.of<Database>(context, listen: false);
     String name = currentSocialEntity.name;
     String email = currentSocialEntity.email ?? '';
-    String phone = (currentSocialEntity.entityPhone == '' ? currentSocialEntity.entityPhone : currentSocialEntity.entityPhone) ?? '';
+    String phone = currentSocialEntity.entityPhone ?? '';
     String web = currentSocialEntity.website ?? '';
     Address fullLocation = currentSocialEntity.address ?? Address();
-    String cityName = '';
-    String countryName = '';
+    // Resolve city/country from the warmed LocationCache instead of opening a
+    // realtime stream per tile (hundreds of listeners → reads + scroll jank).
+    final cityName =
+        LocationCache.instance.cityById(fullLocation.city)?.name ?? '';
+    final countryName =
+        LocationCache.instance.countryById(fullLocation.country)?.name ?? '';
     String location = '';
-    List<String> types = currentSocialEntity.types ?? [];
-    return StreamBuilder<City>(
-        stream: database.cityStream(fullLocation.city),
-        builder: (context, snapshot) {
-          final city = snapshot.data;
-          cityName = city == null ? '' : city.name;
-          return StreamBuilder<Country>(
-              stream: database.countryStream(fullLocation.country),
-              builder: (context, snapshot) {
-                final country = snapshot.data;
-                countryName = country == null ? '' : country.name;
-                if(countryName != ''){
-                  location = countryName;
-                }else if(cityName != ''){
-                  location = cityName;
-                }
-                if(cityName != '' && countryName != ''){
-                  location = location + ', ' + cityName;
-                }
-                return Stack(
+    if (countryName != '') {
+      location = countryName;
+    } else if (cityName != '') {
+      location = cityName;
+    }
+    if (cityName != '' && countryName != '') {
+      location = location + ', ' + cityName;
+    }
+    return Stack(
                   clipBehavior: Clip.none,
                   alignment: Alignment.topCenter,
                   children: [
@@ -82,13 +73,17 @@ class _EntityListTileState extends State<EntityListTile> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(top: 20, right: 28),
+                              padding: const EdgeInsets.only(top: 12, right: 12),
                               child: Align(
                                 alignment: Alignment.topRight,
-                                child: Icon(
-                                  Icons.upload,
-                                  size: 20,
-                                  color: Colors.transparent,
+                                child: IconButton(
+                                  tooltip: StringConst.EDIT_CONTACT,
+                                  onPressed: widget.onEdit,
+                                  icon: const Icon(
+                                    Icons.mode_edit_outlined,
+                                    size: 20,
+                                    color: AppColors.turquoiseBlue,
+                                  ),
                                 ),
                               ),
                             ),
@@ -100,6 +95,8 @@ class _EntityListTileState extends State<EntityListTile> {
                                 child: Text(
                                   name,
                                   textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 16,
@@ -109,7 +106,7 @@ class _EntityListTileState extends State<EntityListTile> {
                             ),
                             //Email
                             Padding(
-                              padding: const EdgeInsets.only(left: 25),
+                              padding: const EdgeInsets.only(left: 25, right: 25),
                               child: email != '' ? Row(
                                 children: [
                                   Icon(
@@ -117,13 +114,17 @@ class _EntityListTileState extends State<EntityListTile> {
                                     color: AppColors.bluePetrol,
                                     size: 20,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8),
-                                    child: Text(
-                                      email,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      child: Text(
+                                        email,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                       ),
                                     ),
                                   )
@@ -133,7 +134,7 @@ class _EntityListTileState extends State<EntityListTile> {
                             ),
                             //Phone
                             Padding(
-                              padding: const EdgeInsets.only(left: 25, top: 8),
+                              padding: const EdgeInsets.only(left: 25, right: 25, top: 8),
                               child: phone != '' ? Row(
                                 children: [
                                   Icon(
@@ -141,13 +142,17 @@ class _EntityListTileState extends State<EntityListTile> {
                                     color: AppColors.bluePetrol,
                                     size: 20,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8),
-                                    child: Text(
-                                      phone,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      child: Text(
+                                        phone,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                       ),
                                     ),
                                   )
@@ -157,7 +162,7 @@ class _EntityListTileState extends State<EntityListTile> {
                             ),
                             //Location
                             Padding(
-                              padding: const EdgeInsets.only(left: 25, top: 8, bottom: 18),
+                              padding: const EdgeInsets.only(left: 25, right: 25, top: 8, bottom: 18),
                               child: location != '' ? Row(
                                 children: [
                                   Icon(
@@ -165,15 +170,17 @@ class _EntityListTileState extends State<EntityListTile> {
                                     color: AppColors.bluePetrol,
                                     size: 20,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8),
-                                    child: Text(
-                                      location,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      child: Text(
+                                        location,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -193,6 +200,9 @@ class _EntityListTileState extends State<EntityListTile> {
                                     },
                                     child: Text(
                                       web,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w400,
@@ -224,7 +234,8 @@ class _EntityListTileState extends State<EntityListTile> {
                           borderRadius:
                               const BorderRadius.all(Radius.circular(60)),
                           child: Center(
-                            child: currentSocialEntity.photo == ""
+                            child: (currentSocialEntity.photo == null ||
+                                    currentSocialEntity.photo!.isEmpty)
                                 ? Container(
                                     color: Colors.transparent,
                                     height: 100,
@@ -232,12 +243,15 @@ class _EntityListTileState extends State<EntityListTile> {
                                     child: Image.asset(
                                         ImagePath.IMAGE_DEFAULT),
                                   )
-                                : FadeInImage.assetNetwork(
-                                    placeholder: ImagePath.IMAGE_DEFAULT,
+                                : CachedNetworkImage(
                                     width: 100,
                                     height: 100,
                                     fit: BoxFit.fitWidth,
-                                    image: currentSocialEntity.photo!,
+                                    imageUrl: currentSocialEntity.photo!,
+                                    placeholder: (context, url) =>
+                                        Image.asset(ImagePath.IMAGE_DEFAULT),
+                                    errorWidget: (context, url, error) =>
+                                        Image.asset(ImagePath.IMAGE_DEFAULT),
                                   ),
                           ),
                         ),
@@ -245,10 +259,6 @@ class _EntityListTileState extends State<EntityListTile> {
                     ),
                   ],
                 );
-              }
-          );
-        }
-    );
   }
 
 

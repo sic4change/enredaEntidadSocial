@@ -1,9 +1,12 @@
 import 'package:chips_choice/chips_choice.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_chip.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/models/filterResource.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/external_entities_cache.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
@@ -32,14 +35,17 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
   List<SocialEntity> finalSocialEntities = [];
   bool create = false;  //Choose between show list of social entities or create form
 
-  // Created once (trust + owner only — never changes). Search/category filters
-  // are applied client-side in build, so setState never re-subscribes.
-  Stream<List<ExternalSocialEntity>>? _entitiesStream;
-
+  // Fetched once with .get() and cached in a session singleton, so returning
+  // to this list re-reads 0 documents. Search/category filters are applied
+  // client-side, so setState never re-fetches.
+  late Future<List<ExternalSocialEntity>> _entitiesFuture;
 
   @override
   void initState() {
     super.initState();
+    final database = Provider.of<Database>(context, listen: false);
+    _entitiesFuture =
+        ExternalEntitiesCache.instance.load(database, widget.socialEntityId!);
   }
 
   @override
@@ -59,13 +65,13 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
   }
 
   Widget _buildEntitiesList(){
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: Sizes.mainPadding,),
-          Padding(
+    // CustomScrollView + SliverGrid so only visible tiles are built/painted.
+    // The old SingleChildScrollView + Wrap laid out all ~400 cards per frame.
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(child: SizedBox(height: Sizes.mainPadding,)),
+        SliverToBoxAdapter(
+          child: Padding(
             padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
             child: FilterTextFieldRow(
               searchTextController: _searchTextController,
@@ -79,15 +85,17 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
               hintText: 'Nombre del contacto ...',
             ),
           ),
-          Padding(
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
             padding: Responsive.isMobile(context) ? EdgeInsets.all(Sizes.mainPadding) : const EdgeInsets.all(8.0),
             child: chipFilter(),
           ),
-          Container(
-              margin: EdgeInsets.only(top: Sizes.mainPadding * 3),
-              child: _buildEntitiesStream(context)),
-        ],
-      ),);
+        ),
+        SliverToBoxAdapter(child: SizedBox(height: Sizes.mainPadding * 3)),
+        _buildEntitiesStream(context),
+      ],
+    );
   }
 
   Widget chipFilter() {
@@ -118,41 +126,50 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
     );
   }
 
+  // Returns a sliver: SliverGrid for data, SliverToBoxAdapter for load/error.
   Widget _buildEntitiesStream(BuildContext context) {
-    final database = Provider.of<Database>(context, listen: false);
-    // Empty filter -> the stream builder returns every entity (see
-    // filteredExternalSocialEntitiesStream). Created once, reused across builds.
-    _entitiesStream ??= database.filteredExternalSocialEntitiesStream(
-        FilterResource("", []), widget.socialEntityId!);
-    return StreamBuilder<List<ExternalSocialEntity>>(
-        stream: _entitiesStream,
+    return FutureBuilder<List<ExternalSocialEntity>>(
+        future: _entitiesFuture,
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return SliverToBoxAdapter(
+                child: Center(child: CustomTextMedium(text: StringConst.FORM_ERROR)));
+          }
           if(snapshot.hasData) {
             final List<ExternalSocialEntity> socialEntities =
                 _applyFilter(snapshot.data!);
-            return SingleChildScrollView(
-              controller: ScrollController(),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                children: [
-                  for(ExternalSocialEntity currentExternalSocialEntity in socialEntities)
-                    Padding(
-                      padding: EdgeInsets.all(15),
-                      child: EntityListTile(
-                          socialEntity: currentExternalSocialEntity,
-                          onTap: () {
-                            setState(() {
-                              globals.currentExternalSocialEntity = currentExternalSocialEntity;
-                              EntityDirectoryPage.selectedIndex.value = 2;
-                            });
-                          }
-                      ),
-                    ),
-                ],
+            return SliverGrid.builder(
+              // Card is fixed 335x276 with a 27px avatar overhang; padding 15.
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 365,
+                mainAxisExtent: 306,
               ),
+              itemCount: socialEntities.length,
+              itemBuilder: (context, index) {
+                final currentExternalSocialEntity = socialEntities[index];
+                return Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: EntityListTile(
+                      socialEntity: currentExternalSocialEntity,
+                      onTap: () {
+                        setState(() {
+                          globals.currentExternalSocialEntity = currentExternalSocialEntity;
+                          EntityDirectoryPage.selectedIndex.value = 2;
+                        });
+                      },
+                      onEdit: () {
+                        setState(() {
+                          globals.currentExternalSocialEntity = currentExternalSocialEntity;
+                          EntityDirectoryPage.selectedIndex.value = 3;
+                        });
+                      }
+                  ),
+                );
+              },
             );
           }
-          return const Center(child: CircularProgressIndicator());
+          return const SliverToBoxAdapter(
+              child: Center(child: CircularProgressIndicator()));
         });
   }
 
