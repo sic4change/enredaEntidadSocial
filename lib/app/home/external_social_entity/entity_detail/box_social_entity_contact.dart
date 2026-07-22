@@ -1,5 +1,5 @@
-import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/utils/adaptative.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
@@ -32,6 +32,7 @@ class BoxItemSocialEntityContact extends StatelessWidget {
   }
 
   Widget defaultChild(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +45,19 @@ class BoxItemSocialEntityContact extends StatelessWidget {
               children: [
                 Icon(icon, color: AppColors.turquoiseBlue, size: 20),
                 SizedBox(width: 5),
-                Flexible(child: CustomTextXSmall(text: title, color: AppColors.turquoiseBlue, height: 0,))
+                // CSV values can be long (multiple numbers + name); wrap instead
+                // of ellipsizing so the whole block is visible in the detail view.
+                Flexible(
+                  child: Text(
+                    title,
+                    softWrap: true,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.turquoiseBlue,
+                      height: 1.3,
+                      fontSize: responsiveSize(context, 10, 12, md: 11),
+                    ),
+                  ),
+                ),
               ],
             ),
             style: OutlinedButton.styleFrom(
