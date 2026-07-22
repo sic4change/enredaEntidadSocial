@@ -19,6 +19,7 @@ import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
 import 'package:enreda_empresas/app/services/database.dart';
+import 'package:enreda_empresas/app/services/external_entities_cache.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/sign_up/validating_form_controls/stream_builder_city.dart';
 import 'package:enreda_empresas/app/sign_up/validating_form_controls/stream_builder_country.dart';
@@ -279,6 +280,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
 
       try {
         await database.addExternalSocialEntity(externalSocialEntity);
+        ExternalEntitiesCache.instance.invalidate();
         await showAlertDialog(
           context,
           title: StringConst.CREATE_ENTITY,

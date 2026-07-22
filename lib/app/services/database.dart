@@ -89,6 +89,7 @@ abstract class Database {
      Stream<List<UserEnreda>> getParticipantsByEntityStream(String socialEntityId);
      Stream<List<SocialEntity>> socialEntitiesStream();
      Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter, String socialEntityId);
+     Future<List<ExternalSocialEntity>> getExternalSocialEntities(String socialEntityId);
      Stream<List<SocialEntity>> socialEntityByIdStream(String socialEntityId);
      Stream<SocialEntity> socialEntityStream(String? socialEntityId);
      Stream<ExternalSocialEntity> externalSocialEntityByIdStream(String externalSocialEntityId);
@@ -474,6 +475,17 @@ class FirestoreDatabase implements Database {
       builder: (data, documentId) => SocialEntity.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
     );
+
+  @override
+  Future<List<ExternalSocialEntity>> getExternalSocialEntities(String socialEntityId) =>
+      _service.getCollection<ExternalSocialEntity>(
+        path: APIPath.externalSocialEntities(),
+        queryBuilder: (query) => query
+            .where('trust', isEqualTo: true)
+            .where('associatedSocialEntityId', isEqualTo: socialEntityId),
+        builder: (data, documentId) => ExternalSocialEntity.fromMap(data, documentId),
+        sort: (lhs, rhs) => rhs.createdAt.compareTo(lhs.createdAt),
+      );
 
   @override
   Stream<List<ExternalSocialEntity>> filteredExternalSocialEntitiesStream(FilterResource filter, String socialEntityId) {

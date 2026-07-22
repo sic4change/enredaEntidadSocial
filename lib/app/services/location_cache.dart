@@ -392,31 +392,50 @@ class LocationCache {
 
   int get gamificationFlagsCount => gamificationFlags.length;
 
+  // O(1) id lookups. A linear firstWhere (+ thrown StateError on miss) per
+  // call is too slow when hundreds of list tiles resolve locations per build.
+  // Maps are rebuilt only when the source list changes size (set at warm-up).
+  Map<String, Country>? _countryMap;
+  int _countryMapSourceLength = -1;
+  Map<String, Province>? _provinceMap;
+  int _provinceMapSourceLength = -1;
+  Map<String, City>? _cityMap;
+  int _cityMapSourceLength = -1;
+
   Country? countryById(String? id) {
-    if (id == null) return null;
-    try {
-      return countries.firstWhere((element) => element.countryId == id);
-    } catch (_) {
-      return null;
+    if (id == null || id.isEmpty) return null;
+    if (_countryMap == null || _countryMapSourceLength != countries.length) {
+      _countryMap = {
+        for (final c in countries)
+          if (c.countryId != null) c.countryId!: c
+      };
+      _countryMapSourceLength = countries.length;
     }
+    return _countryMap![id];
   }
 
   Province? provinceById(String? id) {
-    if (id == null) return null;
-    try {
-      return provinces.firstWhere((element) => element.provinceId == id);
-    } catch (_) {
-      return null;
+    if (id == null || id.isEmpty) return null;
+    if (_provinceMap == null || _provinceMapSourceLength != provinces.length) {
+      _provinceMap = {
+        for (final p in provinces)
+          if (p.provinceId != null) p.provinceId!: p
+      };
+      _provinceMapSourceLength = provinces.length;
     }
+    return _provinceMap![id];
   }
 
   City? cityById(String? id) {
-    if (id == null) return null;
-    try {
-      return cities.firstWhere((element) => element.cityId == id);
-    } catch (_) {
-      return null;
+    if (id == null || id.isEmpty) return null;
+    if (_cityMap == null || _cityMapSourceLength != cities.length) {
+      _cityMap = {
+        for (final c in cities)
+          if (c.cityId != null) c.cityId!: c
+      };
+      _cityMapSourceLength = cities.length;
     }
+    return _cityMap![id];
   }
 
   SpecificInterest? specificInterestById(String? id) {
