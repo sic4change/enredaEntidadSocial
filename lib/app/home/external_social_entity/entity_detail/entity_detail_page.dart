@@ -15,6 +15,7 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
@@ -308,10 +309,37 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
         externalSocialEntity.actionScope == null || externalSocialEntity.actionScope!.isEmpty ? Container() :
         CustomTextSmallColor(text: _getActionScopeNames(externalSocialEntity),),
 
-        externalSocialEntity.signedAgreements == null || externalSocialEntity.signedAgreements == '' ? Container() :
-        CustomTextBold(title: StringConst.FORM_ENTITY_SIGNED_AGREEMENTS.toUpperCase(), color: AppColors.turquoiseBlue,),
-        externalSocialEntity.signedAgreements == null || externalSocialEntity.signedAgreements == '' ? Container() :
-        CustomTextSmallColor(text: externalSocialEntity.signedAgreements!),
+        (() {
+          final bool hasPdfUrl = externalSocialEntity.signedAgreements != null &&
+              (externalSocialEntity.signedAgreements!.startsWith('http://') || externalSocialEntity.signedAgreements!.startsWith('https://'));
+          final bool hasAgreement = hasPdfUrl || externalSocialEntity.signedAgreementsDate != null;
+          if (!hasAgreement) return Container();
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomTextBold(title: StringConst.FORM_ENTITY_SIGNED_AGREEMENTS.toUpperCase(), color: AppColors.turquoiseBlue,),
+              if (externalSocialEntity.signedAgreementsDate != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: CustomTextSmallColor(
+                    text: 'Fecha de renovación: ${DateFormat('dd/MM/yyyy').format(externalSocialEntity.signedAgreementsDate!)}',
+                  ),
+                ),
+              if (hasPdfUrl)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: TextButton.icon(
+                    onPressed: () => launchURL(externalSocialEntity.signedAgreements!),
+                    icon: const Icon(Icons.picture_as_pdf, color: Colors.red, size: 20),
+                    label: const Text(
+                      'Descargar / Ver acuerdo (PDF)',
+                      style: TextStyle(color: AppColors.turquoiseBlue, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        })(),
 
         externalSocialEntity.offeredServices == null || externalSocialEntity.offeredServices == '' ? Container() :
         CustomTextBold(title: 'INICIATIVAS O SERVICIOS OFRECIDOS', color: AppColors.turquoiseBlue,),
@@ -322,11 +350,6 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
         CustomTextBold(title: StringConst.CATEGORY.toUpperCase(), color: AppColors.turquoiseBlue,),
         externalSocialEntity.category == null || externalSocialEntity.category == '' ? Container() :
         CustomTextSmallColor(text: externalSocialEntity.category!,),
-
-        externalSocialEntity.subCategory == null || externalSocialEntity.subCategory == '' ?  Container() :
-        CustomTextBold(title: StringConst.SUB_CATEGORY.toUpperCase(), color: AppColors.turquoiseBlue,),
-        externalSocialEntity.subCategory == null || externalSocialEntity.subCategory == '' ?  Container() :
-        CustomTextSmallColor(text: externalSocialEntity.subCategory!,),
 
         externalSocialEntity.geographicZone == null || externalSocialEntity.geographicZone == '' ? Container() :
         CustomTextBold(title: StringConst.ZONE.toUpperCase(), color: AppColors.turquoiseBlue,),

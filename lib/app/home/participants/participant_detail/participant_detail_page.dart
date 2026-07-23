@@ -363,7 +363,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 CustomTextSmallColor(
-                                  text: 'Técnica de referencia:',
+                                  text: 'Persona de referencia:',
                                   color: AppColors.primary900,
                                   height: 0.5,
                                 ),
@@ -585,7 +585,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       CustomTextSmallColor(
-                        text: 'Técnica de referencia:',
+                        text: 'Persona de referencia:',
                         color: AppColors.primary900,
                         height: 0.2,
                       ),

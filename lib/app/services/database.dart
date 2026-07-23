@@ -175,6 +175,8 @@ abstract class Database {
      Future<void> deleteUser(UserEnreda userEnreda);
      Future<void> uploadUserAvatar(String userId, Uint8List data);
      Future<void> uploadLogoAvatar(String socialEntityId, Uint8List data);
+     Future<String> uploadSignedAgreement(String contactId, Uint8List data);
+     Future<void> deleteSignedAgreement(String contactId);
      Future<void> addContact(Contact contact);
      Future<void> setResource(Resource resource);
      Future<void> setExternalSocialEntity(ExternalSocialEntity externalSocialEntity);
@@ -1109,6 +1111,35 @@ class FirestoreDatabase implements Database {
             'title': 'photo.jpg',
           }
         })
+      },
+    );
+  }
+
+  @override
+  Future<String> uploadSignedAgreement(String contactId, Uint8List data) async {
+    var firebaseStorageRef =
+        FirebaseStorage.instance.ref().child('externalSocialEntities/$contactId/signedAgreement.pdf');
+    UploadTask uploadTask = firebaseStorageRef.putData(
+      data,
+      SettableMetadata(contentType: 'application/pdf'),
+    );
+    TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    return downloadUrl;
+  }
+
+  @override
+  Future<void> deleteSignedAgreement(String contactId) async {
+    try {
+      var firebaseStorageRef =
+          FirebaseStorage.instance.ref().child('externalSocialEntities/$contactId/signedAgreement.pdf');
+      await firebaseStorageRef.delete();
+    } catch (_) {}
+    await _service.updateData(
+      path: APIPath.externalSocialEntity(contactId),
+      data: {
+        'signedAgreements': null,
+        'signedAgreementsDate': null,
       },
     );
   }

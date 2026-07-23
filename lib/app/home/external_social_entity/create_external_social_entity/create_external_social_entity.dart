@@ -41,6 +41,10 @@ import 'package:enreda_empresas/app/home/resources/validating_form_controls/stre
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_scope_action_create.dart';
 import 'package:enreda_empresas/app/sign_up/validating_form_controls/multi_select_button.dart';
 
+import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
+import '../widgets/signed_agreement_dialog.dart';
+
 class CreateExternalSocialEntityPage extends StatefulWidget {
   const CreateExternalSocialEntityPage({Key? key, required this.socialEntityId}) : super(key: key);
   final String? socialEntityId;
@@ -61,6 +65,9 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
   String? _url;
   String? _email, _linkedin, _twitter, _otherSocialMedia;
   String? _contactName, _contactEmail, _contactPosition, _contactChoiceGrade, _contactKOL, _contactProject, _signedAgreements;
+  Uint8List? _signedAgreementBytes;
+  String? _signedAgreementFileName;
+  DateTime? _signedAgreementsDate;
   String? _offeredServices, _kolType;
   Country? selectedCountry;
   Province? selectedProvince;
@@ -245,7 +252,16 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
         postalCode: _postalCode,
       );
 
+      String? agreementUrl = _signedAgreements;
+      String? newEntityId;
+
+      if (_signedAgreementBytes != null) {
+        newEntityId = FirebaseFirestore.instance.collection('externalSocialEntities').doc().id;
+        agreementUrl = await database.uploadSignedAgreement(newEntityId, _signedAgreementBytes!);
+      }
+
       ExternalSocialEntity externalSocialEntity = ExternalSocialEntity(
+          externalSocialEntityId: newEntityId,
           associatedSocialEntityId: widget.socialEntityId!,
           createdBy: auth.currentUser!.uid,
           name: _entityName!,
@@ -270,7 +286,8 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
           contactChoiceGrade: _contactChoiceGrade,
           contactKOL: _contactKOL,
           contactProject: _contactProject,
-          signedAgreements: _signedAgreements,
+          signedAgreements: agreementUrl,
+          signedAgreementsDate: _signedAgreementsDate,
           offeredServices: _offeredServices,
           kolType: _kolType,
           trust: true, //TODO asignarlo de otra forma
@@ -279,7 +296,11 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
       );
 
       try {
-        await database.addExternalSocialEntity(externalSocialEntity);
+        if (newEntityId != null) {
+          await database.setExternalSocialEntity(externalSocialEntity);
+        } else {
+          await database.addExternalSocialEntity(externalSocialEntity);
+        }
         ExternalEntitiesCache.instance.invalidate();
         await showAlertDialog(
           context,
@@ -322,59 +343,24 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
             validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
           ),
           SpaceH24(),
-          CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomDropDownButtonFormFieldTittle(
-                labelText: 'Categoria',
-                source: categories,
-                onChanged: (value){
-                  setState(() {
-                    _category = value;
-                    _actionScope = [];
-                    textEditingControllerActionScope.text = '';
-                    selectedScopeActions.clear();
-                    selectedInterests.clear();
-                  });
-                },
-                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              ),
-              childRight: CustomDropDownButtonFormFieldTittle(
-                labelText: 'Sub-categoría',
-                source: subCategories,
-                onChanged: (value){
-                  setState(() {
-                    _subCategory = value;
-                  });
-                },
-                validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
-              )
+          CustomDropDownButtonFormFieldTittle(
+            labelText: 'Categoria',
+            source: categories,
+            onChanged: (value){
+              setState(() {
+                _category = value;
+                _actionScope = [];
+                textEditingControllerActionScope.text = '';
+                selectedScopeActions.clear();
+                selectedInterests.clear();
+              });
+            },
+            validator: (value) => value != null ? null : StringConst.FORM_GENERIC_ERROR,
           ),
           SpaceH24(),
-          TextFormField(
+          CustomTextFormFieldTitle(
             controller: textEditingControllerActionScope,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              labelText: 'Ámbito de actuación',
-              labelStyle: textTheme.bodySmall?.copyWith(
-                color: AppColors.greyDark,
-                fontSize: responsiveSize(context, 14, 16, md: 15),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
-                borderSide: BorderSide(
-                  color: AppColors.greyUltraLight,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
-                borderSide: BorderSide(
-                  color: AppColors.greyUltraLight,
-                  width: 1.0,
-                ),
-              ),
-            ),
+            labelText: 'Ámbito de actuación',
             onTap: () {
               if (_category == 'Empresas /Asociaciones empresariales/Clúster') {
                 _showMultiSelectActionScopeInterests(context);
@@ -384,22 +370,77 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
             },
             readOnly: true,
             validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
-            style: textTheme.bodySmall?.copyWith(
-              height: 1.5,
-              color: AppColors.greyDark,
-              fontWeight: FontWeight.w400,
-              fontSize: responsiveSize(context, 14, 16, md: 15),
-            ),
           ),
           SpaceH24(),
           CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                labelText: 'Acuerdos firmados',
-                onChanged: (value){
-                  _signedAgreements = value;
-                },
+              childLeft: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Acuerdos firmados',
+                    style: textTheme.bodySmall?.copyWith(
+                      height: 1.5,
+                      color: AppColors.greyDark,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () async {
+                      final result = await SignedAgreementDialog.show(
+                        context: context,
+                        currentDate: _signedAgreementsDate,
+                      );
+                      if (result != null) {
+                        setState(() {
+                          if (result.isDeleted) {
+                            _signedAgreementBytes = null;
+                            _signedAgreementFileName = null;
+                            _signedAgreementsDate = null;
+                            _signedAgreements = null;
+                          } else {
+                            _signedAgreementBytes = result.fileBytes;
+                            _signedAgreementFileName = result.fileName;
+                            _signedAgreementsDate = result.renovationDate;
+                          }
+                        });
+                      }
+                    },
+                    child: Container(
+                      height: 50,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(color: AppColors.greyUltraLight, width: 1.0),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _signedAgreementBytes != null ? Icons.picture_as_pdf : Icons.upload_file,
+                            color: _signedAgreementBytes != null ? Colors.red : AppColors.turquoiseBlue,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _signedAgreementBytes != null
+                                  ? '${_signedAgreementFileName ?? "Acuerdo firmado"} (${_signedAgreementsDate != null ? DateFormat('dd/MM/yyyy').format(_signedAgreementsDate!) : ''})'
+                                  : 'Adjuntar acuerdo firmado (PDF)',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: _signedAgreementBytes != null ? AppColors.greyDark : AppColors.greyLetter,
+                                fontSize: responsiveSize(context, 14, 16, md: 15),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: '¿Qué iniciativas o servicios ofrece?',
@@ -540,7 +581,7 @@ class _CreateExternalSocialEntityPageState extends State<CreateExternalSocialEnt
             ),
           ),
           CustomTextFormFieldTitle(
-            labelText: 'Nombre completo de la técnico de referencia',
+            labelText: 'Nombre completo de la persona de referencia',
             onChanged: (value){
               _contactName = value;
             },

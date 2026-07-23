@@ -958,7 +958,7 @@ class StringConst {
   static const String FORM_LINKEDIN = "Linkedin";
   static const String FORM_TWITTER = "Twitter";
   static const String FORM_OTHER_SOCIAL_MEDIA = "Otra red social";
-  static const String FORM_CONTACT_TEC_NAME = "Nombre completo de la técnica de referencia";
+  static const String FORM_CONTACT_TEC_NAME = "Nombre completo de la persona de referencia";
   static const String FORM_CONTACT_POSITION = "Cargo de la persona de contacto";
   static const String FORM_CONTACT_PROJECT = "Proyecto o programa";
   static const String FORM_EDIT_ENTITY = "Editar entidad social";
@@ -977,7 +977,7 @@ class StringConst {
   //Initial Report
   static const String INITIAL_DATE_ERROR =  'No se puede poner una fecha posterior a la actual';
   static const String INITIAL_SUBSIDY = 'Subvención a la que el/la participante está imputado/a';
-  static const String INITIAL_TECH_PERSON = 'Técnica de referencia';
+  static const String INITIAL_TECH_PERSON = 'Persona de referencia';
   static const String INITIAL_TITLE1_ITINERARY = '1. Itinerario en España';
   static const String INITIAL_OBSERVATIONS = 'Observaciones';
   static const String INITIAL_ARRIVE_DATE = 'Fecha de llegada a España';

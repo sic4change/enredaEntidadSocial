@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/models/scope.dart';
 import 'package:enreda_empresas/app/models/size.dart';
 import 'package:enreda_empresas/app/models/socialEntitiesType.dart';
@@ -57,6 +58,7 @@ class ExternalSocialEntity {
     this.contactKOL,
     this.contactProject,
     this.signedAgreements,
+    this.signedAgreementsDate,
     this.offeredServices,
     this.kolType,
     this.trust,
@@ -103,6 +105,7 @@ class ExternalSocialEntity {
   final String? contactKOL;
   final String? contactProject;
   final String? signedAgreements;
+  final DateTime? signedAgreementsDate;
   final String? offeredServices;
   final String? kolType;
   final bool? trust;
@@ -185,6 +188,14 @@ class ExternalSocialEntity {
     final String? province = data['address']['province'];
     final String? city = data['address']['city'];
     final String signedAgreements = data['signedAgreements'] ?? '';
+    DateTime? signedAgreementsDate;
+    if (data['signedAgreementsDate'] != null) {
+      if (data['signedAgreementsDate'] is Timestamp) {
+        signedAgreementsDate = (data['signedAgreementsDate'] as Timestamp).toDate();
+      } else if (data['signedAgreementsDate'] is String) {
+        signedAgreementsDate = DateTime.tryParse(data['signedAgreementsDate']);
+      }
+    }
     final String offeredServices = data['offeredServices'] ?? '';
     final String kolType = data['kolType'] ?? '';
     final DateTime createdAt = data['createdAt'].toDate();
@@ -225,6 +236,7 @@ class ExternalSocialEntity {
         province: province,
         city: city,
         signedAgreements: signedAgreements,
+        signedAgreementsDate: signedAgreementsDate,
         offeredServices: offeredServices,
         kolType: kolType,
         createdAt: createdAt,
@@ -267,6 +279,7 @@ class ExternalSocialEntity {
       'province': province,
       'city': city,
       'signedAgreements': signedAgreements,
+      'signedAgreementsDate': signedAgreementsDate,
       'offeredServices': offeredServices,
       'kolType': kolType,
       'createdAt': createdAt,
@@ -309,6 +322,7 @@ class ExternalSocialEntity {
     String? city,
     String? cityName,
     String? signedAgreements,
+    DateTime? signedAgreementsDate,
     String? offeredServices,
     String? kolType,
     bool? trust,
@@ -350,6 +364,7 @@ class ExternalSocialEntity {
         city: city ?? this.city,
         cityName: cityName ?? this.cityName,
         signedAgreements: signedAgreements ?? this.signedAgreements,
+        signedAgreementsDate: signedAgreementsDate ?? this.signedAgreementsDate,
         offeredServices: offeredServices ?? this.offeredServices,
         kolType: kolType ?? this.kolType,
         trust: trust ?? this.trust,

@@ -33,11 +33,13 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 import '../../../models/externalSocialEntity.dart';
 import '../entity_directory_page.dart';
+import '../widgets/signed_agreement_dialog.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
 import 'package:enreda_empresas/app/models/scope_action.dart';
 import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_interests_create.dart';
@@ -84,6 +86,10 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   String? _contactKOL;
   String? _contactProject;
   String? _signedAgreements;
+  DateTime? _signedAgreementsDate;
+  Uint8List? _signedAgreementBytes;
+  String? _signedAgreementFileName;
+  bool _signedAgreementDeleted = false;
   String? _offeredServices;
   String? _kolType;
   bool _trust = false;
@@ -192,6 +198,8 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
     _contactProject = globals.currentExternalSocialEntity?.contactProject ?? '';
     _signedAgreements =
         globals.currentExternalSocialEntity?.signedAgreements ?? '';
+    _signedAgreementsDate =
+        globals.currentExternalSocialEntity?.signedAgreementsDate;
     _offeredServices =
         globals.currentExternalSocialEntity?.offeredServices ?? '';
     _kolType = globals.currentExternalSocialEntity?.kolType ?? '';
@@ -463,41 +471,112 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
                 validator: (value) => value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
               ),
             ),
-            CustomFlexRowColumn(
-              contentPadding: EdgeInsets.zero,
-              separatorSize: 20,
-              childLeft: CustomDropDownButtonFormFieldTittle(
-                value: _category == '' ? null : _category,
-                labelText: StringConst.CATEGORY,
-                source: buildDropdownMenuItems([
-                  'Organizaciones sociales',
-                  'Administración pública',
-                  'Empresas /Asociaciones empresariales/Clúster'
-                ], _category),
-                onChanged: (val) {
-                  categorySetState(val);
-                  setState(() {
-                    _socialEntityActionScope = [];
-                    textEditingControllerActionScope.text = '';
-                    selectedScopeActions.clear();
-                    selectedInterests.clear();
-                  });
-                },
-              ),
-              childRight: CustomDropDownButtonFormFieldTittle(
-                value: _subCategory == '' ? null : _subCategory,
-                labelText: StringConst.SUB_CATEGORY,
-                source: buildDropdownMenuItems(subCategories, _subCategory),
-                onChanged: subCategorySetState,
-              ),
+            CustomDropDownButtonFormFieldTittle(
+              value: _category == '' ? null : _category,
+              labelText: StringConst.CATEGORY,
+              source: buildDropdownMenuItems([
+                'Organizaciones sociales',
+                'Administración pública',
+                'Empresas /Asociaciones empresariales/Clúster'
+              ], _category),
+              onChanged: (val) {
+                categorySetState(val);
+                setState(() {
+                  _socialEntityActionScope = [];
+                  textEditingControllerActionScope.text = '';
+                  selectedScopeActions.clear();
+                  selectedInterests.clear();
+                });
+              },
             ),
+            SpaceH24(),
             CustomFlexRowColumn(
               contentPadding: EdgeInsets.zero,
               separatorSize: 20,
-              childLeft: CustomTextFormFieldTitle(
-                initialValue: _signedAgreements!,
-                labelText: StringConst.FORM_ENTITY_SIGNED_AGREEMENTS,
-                onChanged: signedAgreementsSetState,
+              childLeft: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    StringConst.FORM_ENTITY_SIGNED_AGREEMENTS,
+                    style: textTheme.bodySmall?.copyWith(
+                      height: 1.5,
+                      color: AppColors.greyDark,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Builder(
+                    builder: (context) {
+                      final bool hasPdfUrl = _signedAgreements != null &&
+                          (_signedAgreements!.startsWith('http://') || _signedAgreements!.startsWith('https://'));
+                      return InkWell(
+                        onTap: () async {
+                          final result = await SignedAgreementDialog.show(
+                            context: context,
+                            currentUrl: hasPdfUrl ? _signedAgreements : null,
+                            currentDate: _signedAgreementsDate,
+                            contactId: _externalSocialEntityId,
+                          );
+                          if (result != null) {
+                            setState(() {
+                              if (result.isDeleted) {
+                                _signedAgreements = null;
+                                _signedAgreementsDate = null;
+                                _signedAgreementBytes = null;
+                                _signedAgreementFileName = null;
+                                _signedAgreementDeleted = true;
+                              } else {
+                                _signedAgreementBytes = result.fileBytes;
+                                _signedAgreementFileName = result.fileName;
+                                _signedAgreementsDate = result.renovationDate;
+                                _signedAgreementDeleted = false;
+                              }
+                            });
+                          }
+                        },
+                        child: Container(
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(color: AppColors.greyUltraLight, width: 1.0),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                (_signedAgreementBytes != null || hasPdfUrl)
+                                    ? Icons.picture_as_pdf
+                                    : Icons.upload_file,
+                                color: (_signedAgreementBytes != null || hasPdfUrl)
+                                    ? Colors.red
+                                    : AppColors.turquoiseBlue,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _signedAgreementBytes != null
+                                      ? '${_signedAgreementFileName ?? "Nuevo acuerdo firmado"} (${_signedAgreementsDate != null ? DateFormat('dd/MM/yyyy').format(_signedAgreementsDate!) : ''})'
+                                      : hasPdfUrl
+                                          ? 'Acuerdo firmado (${_signedAgreementsDate != null ? DateFormat('dd/MM/yyyy').format(_signedAgreementsDate!) : 'Ver/Editar'})'
+                                          : 'Adjuntar acuerdo firmado (PDF)',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: (_signedAgreementBytes != null || hasPdfUrl)
+                                        ? AppColors.greyDark
+                                        : AppColors.greyLetter,
+                                    fontSize: responsiveSize(context, 14, 16, md: 15),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
               childRight: CustomTextFormFieldTitle(
                 initialValue: _offeredServices!,
@@ -1110,6 +1189,16 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
   }
 
   Future<void> _submit() async {
+    final database = Provider.of<Database>(context, listen: false);
+    if (_signedAgreementDeleted && _signedAgreementBytes == null) {
+      await database.deleteSignedAgreement(_externalSocialEntityId);
+      _signedAgreements = null;
+      _signedAgreementsDate = null;
+    } else if (_signedAgreementBytes != null) {
+      final downloadUrl = await database.uploadSignedAgreement(_externalSocialEntityId, _signedAgreementBytes!);
+      _signedAgreements = downloadUrl;
+    }
+
     final address = Address(
       country: _countryId,
       province: _provinceId,
@@ -1157,6 +1246,7 @@ class _EditSocialEntityState extends State<EditSocialEntity> {
           .where((p) => p.name.isNotEmpty || p.phone.isNotEmpty)
           .toList(),
       signedAgreements: _signedAgreements,
+      signedAgreementsDate: _signedAgreementsDate,
       offeredServices: _offeredServices,
       kolType: _kolType,
       trust: _trust,
