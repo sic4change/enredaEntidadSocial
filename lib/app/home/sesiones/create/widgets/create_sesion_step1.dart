@@ -1,5 +1,7 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/home/sesiones/create/widgets/participant_picker.dart';
+import 'package:enreda_empresas/app/models/competency.dart';
+import 'package:enreda_empresas/app/models/competencyCategory.dart';
 import 'package:enreda_empresas/app/models/competencySubCategory.dart';
 import 'package:enreda_empresas/app/models/sesion.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
@@ -7,6 +9,9 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_competencies.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_competencies_sub_categories.dart';
+import 'package:enreda_empresas/app/home/resources/validating_form_controls/stream_builder_competencies_categories.dart';
 
 /// Callback signature emitted by Step 1 on a valid Siguiente tap. The parent
 /// flow widget consumes this and either jumps to the IPIL stub or Revisión.
@@ -20,8 +25,9 @@ typedef Step1Submit = void Function({
   required String? duracion,
   required bool createIpil,
   required String sessionType,
-  required String? competenciaCategoriaId,
-  required String? competenciaSubCategoriaId,
+  required List<String> competenciaCategorias,
+  required List<String> competenciaSubCategorias,
+  required List<String> competencias,
   required String? description,
   required String? observations,
   required List<String> invitedParticipants,
@@ -47,8 +53,9 @@ class CreateSesionStep1 extends StatefulWidget {
     required this.initialDuracion,
     required this.initialCreateIpil,
     required this.initialSessionType,
-    required this.initialCompetenciaCategoriaId,
-    required this.initialCompetenciaSubCategoriaId,
+    required this.initialCompetenciaCategorias,
+    required this.initialCompetenciaSubCategorias,
+    required this.initialCompetencias,
     required this.initialDescription,
     required this.initialObservations,
     required this.initialInvitedParticipants,
@@ -66,8 +73,9 @@ class CreateSesionStep1 extends StatefulWidget {
   final String? initialDuracion;
   final bool initialCreateIpil;
   final String initialSessionType;
-  final String? initialCompetenciaCategoriaId;
-  final String? initialCompetenciaSubCategoriaId;
+  final List<String> initialCompetenciaCategorias;
+  final List<String> initialCompetenciaSubCategorias;
+  final List<String> initialCompetencias;
   final String? initialDescription;
   final String? initialObservations;
   final List<String> initialInvitedParticipants;
@@ -103,13 +111,149 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
   late String? _lugar = widget.initialLugar;
   late bool _createIpil = widget.initialCreateIpil;
   late String _sessionType = widget.initialSessionType;
-  late String? _competenciaCategoriaId = widget.initialCompetenciaCategoriaId;
-  late String? _competenciaSubCategoriaId =
-      widget.initialCompetenciaSubCategoriaId;
   late String? _description = widget.initialDescription;
   late String? _observations = widget.initialObservations;
   late List<String> _invitedIds =
       List<String>.from(widget.initialInvitedParticipants);
+
+  List<String> _competenciaCategorias = [];
+  List<String> _competenciaSubCategorias = [];
+  List<String> _competencias = [];
+  Set<CompetencyCategory> selectedCompetenciesCategories = {};
+  Set<CompetencySubCategory> selectedCompetenciesSubCategories = {};
+  Set<Competency> selectedCompetencies = {};
+
+  late String competenciesCategoriesNames;
+  late String competenciesSubCategoriesNames;
+  late String competenciesNames;
+
+  TextEditingController textEditingControllerCompetencies = TextEditingController();
+  TextEditingController textEditingControllerCompetenciesCategories = TextEditingController();
+  TextEditingController textEditingControllerCompetenciesSubCategories = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final cache = LocationCache.instance;
+
+    selectedCompetenciesCategories = cache.competencyCategories
+        .where((c) => widget.initialCompetenciaCategorias.contains(c.competencyCategoryId))
+        .toSet();
+
+    selectedCompetenciesSubCategories = cache.competencySubCategories
+        .where((sc) => widget.initialCompetenciaSubCategorias.contains(sc.competencySubCategoryId))
+        .toSet();
+
+    selectedCompetencies = cache.competencies
+        .where((c) => widget.initialCompetencias.contains(c.id))
+        .toSet();
+
+    _competenciaCategorias = selectedCompetenciesCategories.map((c) => c.competencyCategoryId!).toList();
+    _competenciaSubCategorias = selectedCompetenciesSubCategories.map((sc) => sc.competencySubCategoryId!).toList();
+    _competencias = selectedCompetencies.map((c) => c.id!).toList();
+
+    var concatCat = StringBuffer();
+    selectedCompetenciesCategories.forEach((item) {
+      concatCat.write(item.name + ' / ');
+    });
+    competenciesCategoriesNames = concatCat.toString();
+    textEditingControllerCompetenciesCategories.text = competenciesCategoriesNames;
+
+    var concatSub = StringBuffer();
+    selectedCompetenciesSubCategories.forEach((item) {
+      concatSub.write(item.name + ' / ');
+    });
+    competenciesSubCategoriesNames = concatSub.toString();
+    textEditingControllerCompetenciesSubCategories.text = competenciesSubCategoriesNames;
+
+    var concatComp = StringBuffer();
+    selectedCompetencies.forEach((item) {
+      concatComp.write(item.name + ' / ');
+    });
+    competenciesNames = concatComp.toString();
+    textEditingControllerCompetencies.text = competenciesNames;
+  }
+
+  void _showMultiSelectCompetenciesCategories(BuildContext context) async {
+    final selectedValues = await showDialog<Set<CompetencyCategory>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetenciesCategoriesCreate(context, selectedCompetenciesCategories);
+      },
+    );
+    if (selectedValues != null) {
+      getValuesFromKeyCompetenciesCategories(selectedValues);
+    }
+  }
+
+  void getValuesFromKeyCompetenciesCategories(Set<CompetencyCategory> selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesCategoriesIds = [];
+    selectedValues.forEach((item) {
+      concatenate.write(item.name + ' / ');
+      competenciesCategoriesIds.add(item.competencyCategoryId!);
+    });
+    setState(() {
+      competenciesCategoriesNames = concatenate.toString();
+      textEditingControllerCompetenciesCategories.text = concatenate.toString();
+      _competenciaCategorias = competenciesCategoriesIds;
+      selectedCompetenciesCategories = selectedValues;
+    });
+  }
+
+  void _showMultiSelectCompetenciesSubCategories(BuildContext context) async {
+    final selectedValues = await showDialog<Set<CompetencySubCategory>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetenciesSubCategories(context, selectedCompetenciesCategories, selectedCompetenciesSubCategories);
+      },
+    );
+    if (selectedValues != null) {
+      getValuesFromKeyCompetenciesSubCategories(selectedValues);
+    }
+  }
+
+  void getValuesFromKeyCompetenciesSubCategories(Set<CompetencySubCategory> selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesSubCategoriesIds = [];
+    selectedValues.forEach((item) {
+      concatenate.write(item.name + ' / ');
+      competenciesSubCategoriesIds.add(item.competencySubCategoryId!);
+    });
+    setState(() {
+      competenciesSubCategoriesNames = concatenate.toString();
+      textEditingControllerCompetenciesSubCategories.text = concatenate.toString();
+      _competenciaSubCategorias = competenciesSubCategoriesIds;
+      selectedCompetenciesSubCategories = selectedValues;
+    });
+  }
+
+  void _showMultiSelectCompetencies(BuildContext context) async {
+    final selectedValues = await showDialog<Set<Competency>>(
+      context: context,
+      builder: (BuildContext context) {
+        return streamBuilderDropdownCompetencies(context, selectedCompetenciesSubCategories, selectedCompetencies);
+      },
+    );
+    if (selectedValues != null) {
+      getValuesFromKeyCompetencies(selectedValues);
+    }
+  }
+
+  void getValuesFromKeyCompetencies(Set<Competency> selectedValues) {
+    var concatenate = StringBuffer();
+    List<String> competenciesIds = [];
+    selectedValues.forEach((item) {
+      concatenate.write(item.name + ' / ');
+      competenciesIds.add(item.id!);
+    });
+    setState(() {
+      competenciesNames = concatenate.toString();
+      textEditingControllerCompetencies.text = concatenate.toString();
+      _competencias = competenciesIds;
+      selectedCompetencies = selectedValues;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -276,50 +420,39 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
             // ── Competencias section ─────────────────────────────────────
             // One bold section header above three dropdowns (no per-dropdown
             // labels — placeholders inside each box read as the field name).
-            Text(
-              StringConst.SESION_FIELD_COMPETENCIAS_LABEL,
-              style: textTheme.bodySmall?.copyWith(
-                color: AppColors.greyDark,
-                fontWeight: FontWeight.w700,
-                fontSize: Sizes.TEXT_SIZE_14,
-              ),
-            ),
-            const SizedBox(height: Sizes.PADDING_8),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   flex: 2,
-                  child: _CompetenciaCategoriaDropdown(
-                    value: _competenciaCategoriaId,
-                    onChanged: (id) => setState(() {
-                      _competenciaCategoriaId = id;
-                      _competenciaSubCategoriaId = null;
-                    }),
+                  child: CustomTextFormFieldTitle(
+                    labelText: StringConst.FORM_COMPETENCIES_CATEGORIES,
+                    hintText: StringConst.FORM_COMPETENCIES_CATEGORIES,
+                    controller: textEditingControllerCompetenciesCategories,
+                    onTap: () => _showMultiSelectCompetenciesCategories(context),
+                    readOnly: true,
                   ),
                 ),
                 const SizedBox(width: Sizes.PADDING_20),
                 Expanded(
                   flex: 1,
-                  child: _CompetenciaSubCategoriaDropdown(
-                    categoriaId: _competenciaCategoriaId,
-                    value: _competenciaSubCategoriaId,
-                    onChanged: (id) =>
-                        setState(() => _competenciaSubCategoriaId = id),
+                  child: CustomTextFormFieldTitle(
+                    labelText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
+                    hintText: StringConst.FORM_COMPETENCIES_SUB_CATEGORIES,
+                    controller: textEditingControllerCompetenciesSubCategories,
+                    onTap: () => _showMultiSelectCompetenciesSubCategories(context),
+                    readOnly: true,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: Sizes.PADDING_12),
-            // Third Competencias dropdown — TODO: wire to a competency
-            // multi-select once product confirms which collection drives it
-            // and adds a field to Sesion. Visual placeholder for now so the
-            // form matches the Figma layout.
-            _BorderedDropdown<String>(
-              value: null,
-              hint: StringConst.SESION_FIELD_COMPETENCIAS_LABEL,
-              items: const <DropdownMenuItem<String>>[],
-              onChanged: null,
+            CustomTextFormFieldTitle(
+              labelText: StringConst.FORM_COMPETENCIES,
+              hintText: StringConst.FORM_COMPETENCIES,
+              controller: textEditingControllerCompetencies,
+              onTap: () => _showMultiSelectCompetencies(context),
+              readOnly: true,
             ),
             const SizedBox(height: Sizes.PADDING_20),
             // ── Row N: Descripción (wide textarea) + Convocar (list) ─────
@@ -454,8 +587,9 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
       duracion: widget.initialDuracion,
       createIpil: _createIpil,
       sessionType: _sessionType,
-      competenciaCategoriaId: _competenciaCategoriaId,
-      competenciaSubCategoriaId: _competenciaSubCategoriaId,
+      competenciaCategorias: _competenciaCategorias,
+      competenciaSubCategorias: _competenciaSubCategorias,
+      competencias: _competencias,
       description: _description,
       observations: _observations,
       invitedParticipants: List<String>.from(_invitedIds),
@@ -791,82 +925,7 @@ class _LabeledBlock extends StatelessWidget {
   }
 }
 
-/// Categoría dropdown sourced from `LocationCache.competencyCategories`.
-/// Static collection — must come from the cache, never via a fresh stream
-/// (CLAUDE.md §0 HIGH strictness). No internal label — sits under the
-/// shared "Competencias" section header in the form.
-class _CompetenciaCategoriaDropdown extends StatelessWidget {
-  const _CompetenciaCategoriaDropdown({
-    required this.value,
-    required this.onChanged,
-  });
 
-  final String? value;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final categories = LocationCache.instance.competencyCategories;
-    final items = <DropdownMenuItem<String>>[
-      for (final c in categories)
-        if (c.competencyCategoryId != null)
-          DropdownMenuItem<String>(
-            value: c.competencyCategoryId,
-            child: Text(c.name),
-          ),
-    ];
-    // Defensive fallback — if the cache is unexpectedly empty (e.g. warm-up
-    // failed silently) we still render a usable, validating widget. The
-    // user can still proceed with no selection; the field is optional.
-    final selected = items.any((i) => i.value == value) ? value : null;
-    return _BorderedDropdown<String>(
-      value: selected,
-      hint: StringConst.SESION_FIELD_COMPETENCIA_CAT_LABEL,
-      items: items,
-      onChanged: onChanged,
-    );
-  }
-}
-
-/// Sub-categoría dropdown — filtered by the currently-selected categoría.
-/// Disabled (no onChanged) when no categoría is selected. No internal
-/// label — sits under the shared "Competencias" section header.
-class _CompetenciaSubCategoriaDropdown extends StatelessWidget {
-  const _CompetenciaSubCategoriaDropdown({
-    required this.categoriaId,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String? categoriaId;
-  final String? value;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final allSubs = LocationCache.instance.competencySubCategories;
-    final filtered = (categoriaId == null)
-        ? const <CompetencySubCategory>[]
-        : allSubs
-            .where((s) => s.competencyCategoryId == categoriaId)
-            .toList(growable: false);
-    final items = <DropdownMenuItem<String>>[
-      for (final s in filtered)
-        if (s.competencySubCategoryId != null)
-          DropdownMenuItem<String>(
-            value: s.competencySubCategoryId,
-            child: Text(s.name),
-          ),
-    ];
-    final selected = items.any((i) => i.value == value) ? value : null;
-    return _BorderedDropdown<String>(
-      value: selected,
-      hint: StringConst.SESION_FIELD_COMPETENCIA_SUBCAT_LABEL,
-      items: items,
-      onChanged: categoriaId == null ? null : onChanged,
-    );
-  }
-}
 
 /// Shared dropdown chrome — matches the natural Material height of
 /// `CustomTextFormFieldTitle`'s `TextFormField` (no `isDense`, light content

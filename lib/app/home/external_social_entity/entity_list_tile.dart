@@ -54,7 +54,7 @@ class _EntityListTileState extends State<EntityListTile> {
                       mouseCursor: MaterialStateMouseCursor.clickable,
                       onTap: widget.onTap,
                       child: Container(
-                        height: 276,
+                        height: 290,
                         width: 335,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(17),
@@ -73,22 +73,7 @@ class _EntityListTileState extends State<EntityListTile> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(top: 12, right: 12),
-                              child: Align(
-                                alignment: Alignment.topRight,
-                                child: IconButton(
-                                  tooltip: StringConst.EDIT_CONTACT,
-                                  onPressed: widget.onEdit,
-                                  icon: const Icon(
-                                    Icons.mode_edit_outlined,
-                                    size: 20,
-                                    color: AppColors.turquoiseBlue,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 40, bottom: 10, left: 5, right: 5),
+                              padding: const EdgeInsets.only(top: 75, bottom: 10, left: 5, right: 5),
                               child: Container(
                                 height: 40,
                                 alignment:  Alignment.center,
@@ -220,6 +205,20 @@ class _EntityListTileState extends State<EntityListTile> {
                         ),
                       ),
                     ),
+                    if (widget.onEdit != null)
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: IconButton(
+                          tooltip: StringConst.EDIT_CONTACT,
+                          onPressed: widget.onEdit,
+                          icon: const Icon(
+                            Icons.mode_edit_outlined,
+                            size: 20,
+                            color: AppColors.turquoiseBlue,
+                          ),
+                        ),
+                      ),
                     Positioned(
                       top: -27,
                       child: Container(

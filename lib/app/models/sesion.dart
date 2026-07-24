@@ -30,8 +30,11 @@ class Sesion {
     this.lugar,
     this.duracion,
     this.createIpil = false,
-    this.competenciaCategoriaId,
-    this.competenciaSubCategoriaId,
+    List<String> competenciaCategorias = const <String>[],
+    List<String> competenciaSubCategorias = const <String>[],
+    List<String> competencias = const <String>[],
+    String? competenciaCategoriaId,
+    String? competenciaSubCategoriaId,
     this.createdAt,
     this.lastUpdated,
     this.absentParticipants = const <String>[],
@@ -58,7 +61,13 @@ class Sesion {
     this.ipilOther,
     this.participantSubvenciones = const <String, String>{},
     this.reminderUserIds = const <String>[],
-  });
+  }) : this.competenciaCategorias = competenciaCategorias.isNotEmpty
+            ? competenciaCategorias
+            : (competenciaCategoriaId != null && competenciaCategoriaId.isNotEmpty ? [competenciaCategoriaId] : const <String>[]),
+       this.competenciaSubCategorias = competenciaSubCategorias.isNotEmpty
+            ? competenciaSubCategorias
+            : (competenciaSubCategoriaId != null && competenciaSubCategoriaId.isNotEmpty ? [competenciaSubCategoriaId] : const <String>[]),
+       this.competencias = competencias;
 
   /// Firestore document id.
   final String? sesionId;
@@ -131,11 +140,17 @@ class Sesion {
   /// Drives the multi-step create flow's branch.
   final bool createIpil;
 
+  final List<String> competenciaCategorias;
+  final List<String> competenciaSubCategorias;
+  final List<String> competencias;
+
   /// `Categoría de Competencias` selection (FK into `competenciesCategories`).
-  final String? competenciaCategoriaId;
+  String? get competenciaCategoriaId =>
+      competenciaCategorias.isNotEmpty ? competenciaCategorias.first : null;
 
   /// `Sub categoría de Competencias` selection (FK into `competenciesSubCategories`).
-  final String? competenciaSubCategoriaId;
+  String? get competenciaSubCategoriaId =>
+      competenciaSubCategorias.isNotEmpty ? competenciaSubCategorias.first : null;
 
   /// Created timestamp. Set on initial write.
   final DateTime? createdAt;
@@ -218,8 +233,21 @@ class Sesion {
       lugar: data['lugar']?.toString(),
       duracion: data['duracion']?.toString(),
       createIpil: data['createIpil'] == true,
-      competenciaCategoriaId: data['competenciaCategoriaId']?.toString(),
-      competenciaSubCategoriaId: data['competenciaSubCategoriaId']?.toString(),
+      competenciaCategorias: data['competenciaCategorias'] != null
+          ? [for (final c in (data['competenciaCategorias'] as Iterable)) c.toString()]
+          : (data['competenciaCategoriaId'] != null && data['competenciaCategoriaId'].toString().isNotEmpty
+              ? [data['competenciaCategoriaId'].toString()]
+              : const <String>[]),
+      competenciaSubCategorias: data['competenciaSubCategorias'] != null
+          ? [for (final sc in (data['competenciaSubCategorias'] as Iterable)) sc.toString()]
+          : (data['competenciaSubCategoriaId'] != null && data['competenciaSubCategoriaId'].toString().isNotEmpty
+              ? [data['competenciaSubCategoriaId'].toString()]
+              : const <String>[]),
+      competencias: data['competencias'] != null
+          ? [for (final c in (data['competencias'] as Iterable)) c.toString()]
+          : (data['competenciaId'] != null && data['competenciaId'].toString().isNotEmpty
+              ? [data['competenciaId'].toString()]
+              : const <String>[]),
       createdAt: data['createdAt']?.toDate(),
       lastUpdated: data['lastUpdated']?.toDate(),
       absentParticipants: _parseStringList(data['absentParticipants']),
@@ -289,6 +317,9 @@ class Sesion {
       'createIpil': createIpil,
       'competenciaCategoriaId': competenciaCategoriaId,
       'competenciaSubCategoriaId': competenciaSubCategoriaId,
+      'competenciaCategorias': competenciaCategorias,
+      'competenciaSubCategorias': competenciaSubCategorias,
+      'competencias': competencias,
       'createdAt': createdAt,
       'lastUpdated': lastUpdated,
       'absentParticipants': absentParticipants,

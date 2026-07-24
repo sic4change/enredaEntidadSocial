@@ -139,10 +139,10 @@ class _EntitiesListPageState extends State<EntitiesListPage> {
             final List<ExternalSocialEntity> socialEntities =
                 _applyFilter(snapshot.data!);
             return SliverGrid.builder(
-              // Card is fixed 335x276 with a 27px avatar overhang; padding 15.
+              // Card is fixed 335x290 with a 27px avatar overhang; padding 15.
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 365,
-                mainAxisExtent: 306,
+                mainAxisExtent: 320,
               ),
               itemCount: socialEntities.length,
               itemBuilder: (context, index) {

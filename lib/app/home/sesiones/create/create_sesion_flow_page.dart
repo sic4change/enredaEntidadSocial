@@ -75,8 +75,9 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
   String? _duracion;
   bool _createIpil = false;
   String _sessionType = SesionType.individual;
-  String? _competenciaCategoriaId;
-  String? _competenciaSubCategoriaId;
+  List<String> _competenciaCategorias = <String>[];
+  List<String> _competenciaSubCategorias = <String>[];
+  List<String> _competencias = <String>[];
   String? _description;
   String? _observations;
   final List<String> _invitedParticipants = <String>[];
@@ -120,8 +121,9 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       _duracion = seed.duracion;
       _createIpil = seed.createIpil;
       _sessionType = seed.sessionType;
-      _competenciaCategoriaId = seed.competenciaCategoriaId;
-      _competenciaSubCategoriaId = seed.competenciaSubCategoriaId;
+      _competenciaCategorias = List<String>.from(seed.competenciaCategorias);
+      _competenciaSubCategorias = List<String>.from(seed.competenciaSubCategorias);
+      _competencias = List<String>.from(seed.competencias);
       _description = seed.description;
       _observations = seed.observations;
       _invitedParticipants.addAll(seed.invitedParticipants);
@@ -201,8 +203,9 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
           initialDuracion: _duracion,
           initialCreateIpil: _createIpil,
           initialSessionType: _sessionType,
-          initialCompetenciaCategoriaId: _competenciaCategoriaId,
-          initialCompetenciaSubCategoriaId: _competenciaSubCategoriaId,
+          initialCompetenciaCategorias: _competenciaCategorias,
+          initialCompetenciaSubCategorias: _competenciaSubCategorias,
+          initialCompetencias: _competencias,
           initialDescription: _description,
           initialObservations: _observations,
           initialInvitedParticipants: _invitedParticipants,
@@ -257,8 +260,9 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
     required String? duracion,
     required bool createIpil,
     required String sessionType,
-    required String? competenciaCategoriaId,
-    required String? competenciaSubCategoriaId,
+    required List<String> competenciaCategorias,
+    required List<String> competenciaSubCategorias,
+    required List<String> competencias,
     required String? description,
     required String? observations,
     required List<String> invitedParticipants,
@@ -273,8 +277,9 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       _duracion = duracion;
       _createIpil = createIpil;
       _sessionType = sessionType;
-      _competenciaCategoriaId = competenciaCategoriaId;
-      _competenciaSubCategoriaId = competenciaSubCategoriaId;
+      _competenciaCategorias = competenciaCategorias;
+      _competenciaSubCategorias = competenciaSubCategorias;
+      _competencias = competencias;
       _description = description;
       _observations = observations;
       _invitedParticipants
@@ -415,8 +420,9 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       lugar: _lugar,
       duracion: _duracion,
       createIpil: _createIpil,
-      competenciaCategoriaId: _competenciaCategoriaId,
-      competenciaSubCategoriaId: _competenciaSubCategoriaId,
+      competenciaCategorias: _competenciaCategorias,
+      competenciaSubCategorias: _competenciaSubCategorias,
+      competencias: _competencias,
       createdAt: seed?.createdAt ?? now,
       lastUpdated: now,
       // IPIL template fields.

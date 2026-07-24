@@ -1,4 +1,5 @@
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
@@ -106,6 +107,11 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
       builder: (context, _) {
         final all = LocationCache.instance.allParticipants;
         final filtered = _applySearch(all);
+
+        final auth = Provider.of<AuthBase>(context, listen: false);
+        final currentUserId = auth.currentUser?.uid;
+        final sorted = _sortParticipants(filtered, currentUserId);
+
         final isLoading = LocationCache.instance.isLoadingParticipants &&
             all.isEmpty;
 
@@ -123,7 +129,7 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
               child: _buildBody(
                 context,
                 textTheme: textTheme,
-                items: filtered,
+                items: sorted,
                 isLoading: isLoading,
               ),
             ),
@@ -188,6 +194,42 @@ class _ParticipantPickerState extends State<ParticipantPicker> {
       final name = '${u.firstName ?? ''} ${u.lastName ?? ''}'.toLowerCase();
       return name.contains(_searchLower);
     }).toList(growable: false);
+  }
+
+  List<UserEnreda> _sortParticipants(List<UserEnreda> participants, String? currentUserId) {
+    final list = List<UserEnreda>.from(participants);
+    list.sort((a, b) {
+      final aId = a.userId ?? '';
+      final bId = b.userId ?? '';
+
+      final aSelIndex = widget.selectedIds.indexOf(aId);
+      final bSelIndex = widget.selectedIds.indexOf(bId);
+
+      final aIsSel = aSelIndex != -1;
+      final bIsSel = bSelIndex != -1;
+
+      // 1. Group selected participants at the top, preserving selection order
+      if (aIsSel != bIsSel) {
+        return aIsSel ? -1 : 1;
+      }
+      if (aIsSel && bIsSel) {
+        return aSelIndex.compareTo(bSelIndex);
+      }
+
+      // 2. For non-selected participants, those belonging to the current user come first
+      final aIsOwn = a.assignedById == currentUserId && currentUserId != null && currentUserId.isNotEmpty;
+      final bIsOwn = b.assignedById == currentUserId && currentUserId != null && currentUserId.isNotEmpty;
+
+      if (aIsOwn != bIsOwn) {
+        return aIsOwn ? -1 : 1;
+      }
+
+      // 3. Fallback: sort alphabetically by full name
+      final aName = '${a.firstName ?? ''} ${a.lastName ?? ''}'.trim().toLowerCase();
+      final bName = '${b.firstName ?? ''} ${b.lastName ?? ''}'.trim().toLowerCase();
+      return aName.compareTo(bName);
+    });
+    return list;
   }
 
   void _toggle(String id, bool nowSelected) {
