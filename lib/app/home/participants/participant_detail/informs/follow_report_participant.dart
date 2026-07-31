@@ -417,9 +417,26 @@ class _FollowReportFormState extends State<FollowReportForm> {
               children: [
                 SpaceW8(),
                 IconButton(
-                  onPressed: () => setState(() {
-                    ParticipantSocialReportPage.selectedIndexInforms.value = 0;
-                  }),
+                  onPressed: () async {
+                    if (widget.viewOnly) {
+                      setState(() {
+                        ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+                      });
+                      return;
+                    }
+                    final leave = await showAlertDialog(
+                      context,
+                      title: '¿Estás seguro que quieres salir?',
+                      content: 'Si sales, los cambios no guardados se perderán.',
+                      defaultActionText: 'Salir',
+                      cancelActionText: 'Cancelar',
+                    );
+                    if (leave == true) {
+                      setState(() {
+                        ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+                      });
+                    }
+                  },
                   icon: Icon(Icons.arrow_back_rounded),
                   iconSize: 30,
                   color: AppColors.turquoiseBlue,

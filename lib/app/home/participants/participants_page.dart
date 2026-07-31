@@ -4,6 +4,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/home/external_social_entity/filter_text_field_row.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_item_builder.dart';
 import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -100,16 +101,19 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     children: [
                       InkWell(
                           onTap: () async {
-                            if (ParticipantDetailPage.isEditing) {
+                            if (ParticipantDetailPage.isEditing ||
+                                ParticipantSocialReportPage.isEditingReport) {
                               final leave = await showAlertDialog(
                                 context,
-                                title: '¿Estás seguro que quieres dejar de editar?',
+                                title: '¿Estás seguro que quieres salir?',
                                 content: 'Si sales, los cambios no guardados se perderán.',
                                 defaultActionText: 'Salir',
                                 cancelActionText: 'Cancelar',
                               );
                               if (leave != true) return;
                               ParticipantDetailPage.isEditing = false;
+                              ParticipantSocialReportPage.isEditingReport = false;
+                              ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                             }
                             setState(() {
                               ParticipantsListPage.selectedIndex.value = 0;

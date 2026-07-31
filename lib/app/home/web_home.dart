@@ -4,6 +4,7 @@ import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/account/personal_data.dart';
 import 'package:enreda_empresas/app/home/participants/create_participant/create_participant_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/home/side_bar_widget.dart';
 import 'package:enreda_empresas/app/home/control_panel/control_panel_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_page.dart';
@@ -236,14 +237,16 @@ class _WebHomeContentState extends State<_WebHomeContent> {
 
     int newIndex = WebHome.selectedIndex.value;
     if (newIndex != _lastConfirmedMajorIndex) {
-      if (ParticipantDetailPage.isEditing) {
+      final bool needsWarning = ParticipantDetailPage.isEditing ||
+          ParticipantSocialReportPage.isEditingReport;
+      if (needsWarning) {
         _isHandlingMajorChange = true;
         // Revert immediately so the new page doesn't render
         WebHome.selectedIndex.value = _lastConfirmedMajorIndex;
 
         final leave = await showAlertDialog(
           context,
-          title: '¿Estás seguro que quieres dejar de editar?',
+          title: '¿Estás seguro que quieres salir?',
           content: 'Si sales, los cambios no guardados se perderán.',
           defaultActionText: 'Salir',
           cancelActionText: 'Cancelar',
@@ -251,6 +254,8 @@ class _WebHomeContentState extends State<_WebHomeContent> {
 
         if (leave == true) {
           ParticipantDetailPage.isEditing = false;
+          ParticipantSocialReportPage.isEditingReport = false;
+          ParticipantSocialReportPage.selectedIndexInforms.value = 0;
           setState(() {
             _lastConfirmedMajorIndex = newIndex;
           });
@@ -270,14 +275,16 @@ class _WebHomeContentState extends State<_WebHomeContent> {
 
     int newIndex = WebHome.controller.selectedIndex;
     if (newIndex != _lastConfirmedIndex) {
-      if (ParticipantDetailPage.isEditing) {
+      final bool needsWarning = ParticipantDetailPage.isEditing ||
+          ParticipantSocialReportPage.isEditingReport;
+      if (needsWarning) {
         _isHandlingSidebarChange = true;
         // Revert immediately so the new page doesn't render
         WebHome.controller.selectIndex(_lastConfirmedIndex);
         
         final leave = await showAlertDialog(
           context,
-          title: '¿Estás seguro que quieres dejar de editar?',
+          title: '¿Estás seguro que quieres salir?',
           content: 'Si sales, los cambios no guardados se perderán.',
           defaultActionText: 'Salir',
           cancelActionText: 'Cancelar',
@@ -285,6 +292,8 @@ class _WebHomeContentState extends State<_WebHomeContent> {
 
         if (leave == true) {
           ParticipantDetailPage.isEditing = false;
+          ParticipantSocialReportPage.isEditingReport = false;
+          ParticipantSocialReportPage.selectedIndexInforms.value = 0;
           setState(() {
             _lastConfirmedIndex = newIndex;
           });

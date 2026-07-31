@@ -34,6 +34,10 @@ enum SampleItem { itemOne, itemTwo, itemThree, itemFour }
 class ParticipantSocialReportPage extends StatefulWidget {
   ParticipantSocialReportPage({required this.participantUser, super.key, required this.context});
   static ValueNotifier<int> selectedIndexInforms = ValueNotifier(0);
+  /// True when a non-viewOnly report form is currently open.
+  /// External widgets (web_home, participant_detail_page) read this
+  /// to decide whether to show the unsaved-changes warning.
+  static bool isEditingReport = false;
   final UserEnreda participantUser;
   final BuildContext context;
 
@@ -84,6 +88,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
   @override
   void initState() {
     ParticipantSocialReportPage.selectedIndexInforms.value = 0;
+    ParticipantSocialReportPage.isEditingReport = false;
     super.initState();
     ParticipantSocialReportPage.selectedIndexInforms
         .addListener(_onIndexChanged);
@@ -93,6 +98,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
   void dispose() {
     ParticipantSocialReportPage.selectedIndexInforms
         .removeListener(_onIndexChanged);
+    ParticipantSocialReportPage.isEditingReport = false;
     super.dispose();
   }
 
@@ -101,6 +107,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
     // overrides so the next open of an active-cycle row shows the
     // active report again.
     if (ParticipantSocialReportPage.selectedIndexInforms.value == 0) {
+      ParticipantSocialReportPage.isEditingReport = false;
       if (!mounted) return;
       final hadOverride = _historyViewInitialReportId != null ||
           _historyViewFollowReportId != null ||
@@ -156,6 +163,7 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
   Widget _buildPageByIndex(int selectedIndex) {
     switch (selectedIndex) {
       case 0:
+        ParticipantSocialReportPage.isEditingReport = false;
         return selectionPage();
       case 1:
         bool isReopening = false;
@@ -165,44 +173,53 @@ class _ParticipantSocialReportPageState extends State<ParticipantSocialReportPag
           isReopening = user.socialItineraryHistory.isNotEmpty &&
               user.socialItineraryHistory.first.initialReportId != _historyViewInitialReportId;
         }
+        final bool viewOnly1 = _historyViewInitialReportId != null;
+        ParticipantSocialReportPage.isEditingReport = !viewOnly1;
         if (isReopening) {
           return ReopeningReportForm(
             key: ValueKey('initial_${_historyViewInitialReportId ?? 'active'}'),
             user: user,
             overrideReportId: _historyViewInitialReportId,
-            viewOnly: _historyViewInitialReportId != null,
+            viewOnly: viewOnly1,
           );
         } else {
           return InitialReportForm(
             key: ValueKey('initial_${_historyViewInitialReportId ?? 'active'}'),
             user: user,
             overrideReportId: _historyViewInitialReportId,
-            viewOnly: _historyViewInitialReportId != null,
+            viewOnly: viewOnly1,
           );
         }
       case 2:
+        final bool viewOnly2 = _historyViewFollowReportId != null;
+        ParticipantSocialReportPage.isEditingReport = !viewOnly2;
         return FollowReportForm(
           key: ValueKey('follow_${_historyViewFollowReportId ?? 'active'}'),
           user: widget.participantUser,
           overrideReportId: _historyViewFollowReportId,
-          viewOnly: _historyViewFollowReportId != null,
+          viewOnly: viewOnly2,
         );
       case 3:
+        final bool viewOnly3 = _historyViewDerivationReportId != null;
+        ParticipantSocialReportPage.isEditingReport = !viewOnly3;
         return DerivationReportForm(
           key: ValueKey(
               'derivation_${_historyViewDerivationReportId ?? 'active'}'),
           user: widget.participantUser,
           overrideReportId: _historyViewDerivationReportId,
-          viewOnly: _historyViewDerivationReportId != null,
+          viewOnly: viewOnly3,
         );
       case 4:
+        final bool viewOnly4 = _historyViewClosureReportId != null;
+        ParticipantSocialReportPage.isEditingReport = !viewOnly4;
         return ClosureReportForm(
           key: ValueKey('closure_${_historyViewClosureReportId ?? 'active'}'),
           user: widget.participantUser,
           overrideReportId: _historyViewClosureReportId,
-          viewOnly: _historyViewClosureReportId != null,
+          viewOnly: viewOnly4,
         );
       default:
+        ParticipantSocialReportPage.isEditingReport = false;
         return selectionPage();
     }
   }

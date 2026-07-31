@@ -252,15 +252,20 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
             padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             showCheckmark: false,
             onSelected: (bool selected) async {
-              if (ParticipantDetailPage.isEditing && _value != _menuOptions[index]) {
+              if ((_value != _menuOptions[index]) &&
+                  (ParticipantDetailPage.isEditing ||
+                      ParticipantSocialReportPage.isEditingReport)) {
                 final leave = await showAlertDialog(
                   context,
-                  title: '¿Estás seguro que quieres dejar de editar?',
+                  title: '¿Estás seguro que quieres salir?',
                   content: 'Si sales, los cambios no guardados se perderán.',
                   defaultActionText: 'Salir',
                   cancelActionText: 'Cancelar',
                 );
                 if (leave != true) return;
+                // Reset report state so no stale flag lingers
+                ParticipantSocialReportPage.isEditingReport = false;
+                ParticipantSocialReportPage.selectedIndexInforms.value = 0;
               }
 
               setState(() {
