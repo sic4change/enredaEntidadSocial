@@ -50,6 +50,7 @@ class Resource {
     this.competencies,
     this.degree,
     this.invitationsList,
+    this.canSignUp,
   });
 
   factory Resource.fromMap(Map<String, dynamic> data, String documentId) {
@@ -112,6 +113,7 @@ class Resource {
     final String? searchText = data['searchText'];
     final String? link = data['link'];
     final bool? notExpire = data['notExpire'];
+    final bool? canSignUp = data['canSignUp'];
     final DateTime createdate = data['createdate'].toDate();
     final String? street = data['street'];
 
@@ -164,6 +166,7 @@ class Resource {
       searchText: searchText,
       link: link,
       notExpire: notExpire,
+      canSignUp: canSignUp,
       createdate: createdate,
       address: address,
       degree: degree,
@@ -216,6 +219,7 @@ class Resource {
   final String? link;
   final String? degree;
   final bool? notExpire;
+  final bool? canSignUp;
   final DateTime createdate;
   final Address? address;
   final List<String>? invitationsList;
@@ -258,6 +262,7 @@ class Resource {
       'link': link,
       'degree': degree,
       'notExpire': notExpire,
+      'canSignUp': canSignUp,
       'address': address?.toMap(),
       'createdate': createdate,
       'street': street,
@@ -295,6 +300,7 @@ class Resource {
     String? link,
     String? degree,
     bool? notExpire,
+    bool? canSignUp,
     DateTime? createdate,
     Address? address,
     List<String>? invitationsList,
@@ -332,6 +338,7 @@ class Resource {
       link: link?? this.link,
       degree: degree?? this.degree,
       notExpire: notExpire?? this.notExpire,
+      canSignUp: canSignUp?? this.canSignUp,
       address: address?? this.address,
       createdate: createdate?? this.createdate,
       invitationsList: invitationsList?? this.invitationsList,

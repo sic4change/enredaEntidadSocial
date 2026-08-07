@@ -113,6 +113,7 @@ abstract class Database {
      Stream<List<Interest>> resourcesInterestsStream(List<String?> interestsIdList);
      Stream<List<Competency>> resourcesCompetenciesStream(List<String?> competenciesIdList);
      Stream<List<UserEnreda>> participantsByResourceStream(String resourceId);
+     Stream<List<UserEnreda>> invitedByResourceStream(String resourceId);
      Stream<List<UserEnreda>> getSocialUsersByEntityId(String socialEntityId);
      Stream<SocialEntity> socialEntityStreamById(String? socialEntityId);
      Stream<Organization> organizationStreamById(String organizationId);
@@ -815,6 +816,16 @@ class FirestoreDatabase implements Database {
     return _service.collectionStream<UserEnreda>(
       path: APIPath.users(),
       queryBuilder: (query) => query.where('resources', arrayContains: resourceId),
+      builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
+      sort: (lhs, rhs) => lhs.email.compareTo(rhs.email),
+    );
+  }
+
+  @override
+  Stream<List<UserEnreda>> invitedByResourceStream(String? resourceId) {
+    return _service.collectionStream<UserEnreda>(
+      path: APIPath.users(),
+      queryBuilder: (query) => query.where('resourceInvites', arrayContains: resourceId),
       builder: (data, documentId) => UserEnreda.fromMap(data, documentId),
       sort: (lhs, rhs) => lhs.email.compareTo(rhs.email),
     );

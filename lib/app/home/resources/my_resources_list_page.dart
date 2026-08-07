@@ -114,7 +114,7 @@ class _MyResourcesListPageState extends State<MyResourcesListPage> {
                 Container(
                     margin: selectedIndex != 0 && Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 2) :
                     Responsive.isMobile(context) ? EdgeInsets.only(top: Sizes.mainPadding * 6, left: Sizes.mainPadding / 2) : EdgeInsets.only(top: Sizes.mainPadding * 3),
-                    child: bodyWidget[selectedIndex]),
+                    child: selectedIndex == 3 ? EditResource(key: UniqueKey()) : bodyWidget[selectedIndex]),
               ],
             ),
           );

@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
@@ -250,11 +251,19 @@ class _InviteUsersToResourcePageState extends State<InviteUsersToResourcePage> {
     }
   }
 
-  Future<void> _sendInvitations(Resource resource, List<String> usersEmailList) async {
+  Future<void> _sendInvitations(Resource resource, List<String?> usersEmailList) async {
     final database = Provider.of<Database>(context, listen: false);
     await database.setResource(resource.copyWith(
-      invitationsList: usersEmailList,
+      invitationsList: usersEmailList.whereType<String>().toList(),
     ));
+    // Guardar el ID del recurso en resourceInvites de cada usuario registrado
+    for (final user in _usersToInvite) {
+      if (user.userId != null && resource.resourceId != null) {
+        await database.updateUserEnredaFields(user.userId!, {
+          'resourceInvites': FieldValue.arrayUnion([resource.resourceId]),
+        });
+      }
+    }
   }
 
   bool _isUserInvited(String email) {

@@ -62,6 +62,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
           }
           if (snapshot.hasData) {
             Resource resource = snapshot.data!;
+            globals.currentResource = resource;
             resource.setResourceTypeName();
             resource.setResourceCategoryName();
             if (resource.resourceId == null) {
@@ -347,34 +348,70 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                       Responsive.isDesktopS(context)
                       ? 0
                       : 3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: AppColors.greyLight2.withOpacity(0.2),
-                          width: 1),
-                      borderRadius: BorderRadius.circular(Consts.padding),
-                    ),
-                    alignment: Alignment.center,
-                    margin: Responsive.isMobile(context) || Responsive.isDesktopS(context)
-                        ?  EdgeInsets.only(top: 10) : EdgeInsets.only(left: 10),
-                    padding: const EdgeInsets.all(20.0),
-                    child: SingleChildScrollView(
-                        child: Stack(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
+                    children: [
+                      // --- Participantes invitados ---
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: AppColors.greyLight2.withOpacity(0.2),
+                              width: 1),
+                          borderRadius: BorderRadius.circular(Consts.padding),
+                        ),
+                        alignment: Alignment.center,
+                        margin: Responsive.isMobile(context) || Responsive.isDesktopS(context)
+                            ? const EdgeInsets.only(top: 10) : const EdgeInsets.only(left: 10),
+                        padding: const EdgeInsets.all(20.0),
+                        child: SingleChildScrollView(
+                            child: Stack(
                               children: [
-                                CustomTextTitle(
-                                    title: '${resource.participants?.length.toString()} ${StringConst.PARTICIPANTS.toUpperCase()}',
-                                    color: AppColors.turquoiseBlue),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CustomTextTitle(
+                                        title: 'PARTICIPANTES INVITADOS',
+                                        color: AppColors.turquoiseBlue),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 30.0),
+                                  child: _buildInvitedUsersList(context, resource),
+                                ),
                               ],
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 30.0),
-                              child: _buildParticipantsList(context, resource),
-                            ),
-                          ],
-                        )),
+                            )),
+                      ),
+                      const SizedBox(height: 10),
+                      // --- Participantes inscritos ---
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: AppColors.greyLight2.withOpacity(0.2),
+                              width: 1),
+                          borderRadius: BorderRadius.circular(Consts.padding),
+                        ),
+                        alignment: Alignment.center,
+                        margin: Responsive.isMobile(context) || Responsive.isDesktopS(context)
+                            ? const EdgeInsets.only(top: 10) : const EdgeInsets.only(left: 10),
+                        padding: const EdgeInsets.all(20.0),
+                        child: SingleChildScrollView(
+                            child: Stack(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CustomTextTitle(
+                                        title: '${resource.participants?.length.toString()} ${StringConst.PARTICIPANTS.toUpperCase()}',
+                                        color: AppColors.turquoiseBlue),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 30.0),
+                                  child: _buildParticipantsList(context, resource),
+                                ),
+                              ],
+                            )),
+                      ),
+                    ],
                   )) : Container(),
             ],
           ),
@@ -519,6 +556,26 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
             ),
             _buildDetailResource(context, resource),
             SpaceH20(),
+            // --- Participantes invitados ---
+            SingleChildScrollView(
+                child: Stack(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomTextTitle(
+                            title: 'PARTICIPANTES INVITADOS',
+                            color: AppColors.turquoiseBlue),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30.0),
+                      child: _buildInvitedUsersList(context, resource),
+                    ),
+                  ],
+                )),
+            SpaceH20(),
+            // --- Participantes inscritos ---
             SingleChildScrollView(
                 child: Stack(
                   children: [
@@ -744,6 +801,70 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
     );
   }
   
+  Widget _buildInvitedUsersList(BuildContext context, Resource resource) {
+    final database = Provider.of<Database>(context, listen: false);
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StreamBuilder<List<UserEnreda>>(
+            stream: database.invitedByResourceStream(resource.resourceId!),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
+              return ListItemBuilder(
+                  snapshot: snapshot,
+                  emptyTitle: 'Sin invitados',
+                  emptyMessage: 'Aún no se ha invitado a ningún participante',
+                  itemBuilder: (context, user) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                            color: AppColors.greyLight2.withOpacity(0.2),
+                            width: 1),
+                        borderRadius: BorderRadius.circular(Consts.padding * 2),
+                      ),
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            userAvatar(context, user.photo!),
+                            const SpaceW20(),
+                            Text('${user.firstName!} ${user.lastName!}'),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+              );
+            },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: AddYellowButton(
+                  text: 'Invitar a este recurso',
+                  onPressed: () => showDialog(context: context, builder: (_) {
+                    return CustomDialog(
+                        width: Responsive.isMobile(context)? widthOfScreen(context) : widthOfScreen(context)/2,
+                        child: InviteUsersToResourcePage(resource: resource,)
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildParticipantsList(BuildContext context, Resource resource) {
     final database = Provider.of<Database>(context, listen: false);
     return SingleChildScrollView(
@@ -785,23 +906,6 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> {
                   }
               );
             },
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(15),
-                child: AddYellowButton(
-                  text: 'Invitar este recurso',
-                  onPressed: () => showDialog(context: context, builder: (_) {
-                    return CustomDialog(
-                        width: Responsive.isMobile(context)? widthOfScreen(context) : widthOfScreen(context)/2,
-                        child: InviteUsersToResourcePage(resource: resource,)
-                    );
-                  }),
-                ),
-              ),
-            ],
           ),
         ],
       ),

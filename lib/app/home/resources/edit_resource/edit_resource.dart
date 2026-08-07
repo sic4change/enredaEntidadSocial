@@ -1232,6 +1232,7 @@ class _EditResourceState extends State<EditResource> {
       final database = Provider.of<Database>(context, listen: false);
       setState(() => isLoading = true);
       await database.setResource(newResource);
+      globals.currentResource = newResource;
       setState(() => isLoading = false);
       showAlertDialog(
         context,

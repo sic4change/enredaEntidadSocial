@@ -273,7 +273,7 @@ class StringConst {
   static const String ENTER = 'Entrar';
   static const String CANCEL = 'Cancelar';
   static const String ADD = 'Añadir';
-  static const String ADD_DOC = 'Añadir documento';
+  static const String ADD_DOC = 'Subir documento';
   static const String EDIT_DOC = 'Editar documento';
   static const String CLOSE = 'Cerrar';
   static const String SAVE = 'Guardar';
@@ -582,7 +582,7 @@ class StringConst {
   static const String FORM_ENTITY_ERROR = 'Hay algún campo faltante en el formulario';
   static const String FORM_ENTITY_CHECK = 'Por favor, revisa los campos marcados en rojo.';
   static const String FORM_MISSING_DOCUMENT_TITLE = 'Falta añadir un nuevo documento.';
-  static const String FORM_MISSING_DOCUMENT = 'Añadir documento';
+  static const String FORM_MISSING_DOCUMENT = 'Guardar documento';
   static const String INITIAL_FORM = "Ficha de ingreso";
   static const String INITIAL_FORM_DATA = "Datos del formulario de inscripción";
   static const String RESOURCES_JOINED = "Se ha inscrito en los siguientes recursos:";
@@ -594,7 +594,7 @@ class StringConst {
   static const String SET_DOCUMENT_NAME = "Añadir documento:  ";
   static const String EDIT_DOCUMENT_TITLE = "Editar documento:  ";
   static const String DOCUMENT_NAME = "Nombre del documento";
-  static const String CREATION_DOCUMENT = "Fecha de creación";
+  static const String CREATION_DOCUMENT = "Fecha de obtención";
   static const String RENOVATION_DOCUMENT = "Fecha de renovación";
   static const String ADD_DOCUMENTS = "Añadir documentos";
   static const String CREATION_DATE = "Creado";
