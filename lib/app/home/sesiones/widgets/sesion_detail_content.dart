@@ -326,6 +326,8 @@ class _ParticipantPanelState extends State<_ParticipantPanel> {
                 (id) => _ParticipantAttendanceChip(
                   userId: id,
                   attendanceState: _stateFor(id),
+                  hasConfirmed:
+                      widget.sesion.confirmedParticipants.contains(id),
                   saving: _saving,
                   onMarkAttended: () => _markAttended(id),
                   onMarkAbsent: () => _markAbsent(id),
@@ -556,6 +558,7 @@ class _ParticipantAttendanceChip extends StatelessWidget {
   const _ParticipantAttendanceChip({
     required this.userId,
     required this.attendanceState,
+    required this.hasConfirmed,
     required this.saving,
     required this.onMarkAttended,
     required this.onMarkAbsent,
@@ -563,6 +566,9 @@ class _ParticipantAttendanceChip extends StatelessWidget {
 
   final String userId;
   final _AttendanceState attendanceState;
+
+  /// Participant tapped "Confirmar Asistencia" in enreda-app.
+  final bool hasConfirmed;
   final bool saving;
   final VoidCallback onMarkAttended;
   final VoidCallback onMarkAbsent;
@@ -602,6 +608,26 @@ class _ParticipantAttendanceChip extends StatelessWidget {
             ),
             child: Row(
               children: [
+                // Dot: green once the entity accepted/marked the attendance,
+                // yellow when only the participant confirmed so far.
+                if (hasConfirmed || isAttended) ...[
+                  Tooltip(
+                    message: isAttended
+                        ? StringConst.SESION_ACCEPTED_BY_ENTITY
+                        : StringConst.SESION_CONFIRMED_BY_PARTICIPANT,
+                    child: Container(
+                      width: Sizes.WIDTH_12,
+                      height: Sizes.HEIGHT_12,
+                      decoration: BoxDecoration(
+                        color: isAttended
+                            ? AppColors.attendanceGreen
+                            : AppColors.yellow,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: Sizes.PADDING_8),
+                ],
                 Expanded(
                   child: Text(
                     fullName.isEmpty

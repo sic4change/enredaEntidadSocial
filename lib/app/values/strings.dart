@@ -693,7 +693,7 @@ class StringConst {
   static const String SESION_EMPTY_PROXIMAS = 'No hay sesiones próximas programadas.';
   static const String SESION_EMPTY_PASADAS = 'Aún no se ha realizado ninguna sesión.';
   static const String SESION_DESARROLLO = 'Desarrollo y evaluación:';
-  static const String SESION_OBSERVACIONES = 'Observaciones y/o incidencias:';
+  static const String SESION_OBSERVACIONES = 'Observaciones:';
   static const String SESION_PARTICIPANTES_HEADER = 'PARTICIPANTES';
   static const String SESION_PARTICIPANTES_HELPER =
       'Confirma si todos los participantes convocados asistieron a la sesión.';
@@ -749,9 +749,9 @@ class StringConst {
   static const String SESION_FIELD_DESCRIPTION_HINT =
       'Escribe una descripción para esta sesión.';
   static const String SESION_FIELD_OBSERVACIONES_LABEL =
-      'Observaciones y/o incidencias';
+      'Observaciones';
   static const String SESION_FIELD_OBSERVACIONES_HINT =
-      'Añade observaciones, incidencias o una breve evaluación de la sesión.';
+      'Añade observaciones o una breve evaluación de la sesión.';
   static const String SESION_BUTTON_SIGUIENTE = 'Siguiente';
   static const String SESION_BUTTON_GUARDAR = 'Guardar';
   static const String SESION_BUTTON_CANCELAR = 'Cancelar';
@@ -788,14 +788,14 @@ class StringConst {
   // Sesion detail page (frame 1:94)
   static const String SESION_DETAIL_DESARROLLO = 'Desarrollo y evaluación:';
   static const String SESION_DETAIL_OBSERVACIONES =
-      'Observaciones y/o incidencias:';
+      'Observaciones:';
   static const String SESION_DETAIL_PARTICIPANTES_HEADER = 'PARTICIPANTES';
   static const String SESION_DETAIL_PARTICIPANTES_HELPER =
       'Confirma si todos los participantes convocados asistieron a la sesión.';
   static const String SESION_DETAIL_NO_DESARROLLO =
       'Sin texto de desarrollo y evaluación.';
   static const String SESION_DETAIL_NO_OBSERVACIONES =
-      'Sin observaciones ni incidencias.';
+      'Sin observaciones.';
   static const String SESION_DETAIL_NO_PARTICIPANTES =
       'Esta sesión no tiene participantes convocados.';
   static const String SESION_BUTTON_EDITAR = 'Editar';
@@ -835,7 +835,7 @@ class StringConst {
   static const String SESION_EXPORT_NO_DESARROLLO =
       'Sin texto de desarrollo y evaluación.';
   static const String SESION_EXPORT_NO_OBSERVACIONES =
-      'Sin observaciones ni incidencias.';
+      'Sin observaciones.';
 
   // Calendar legend
   static const String CALENDARIO_LEGEND_TODAY = 'Hoy';
@@ -870,7 +870,11 @@ class StringConst {
   static const String SESION_ROW_EXPANDED_NO_DESARROLLO =
       'Sin texto de desarrollo y evaluación.';
   static const String SESION_ROW_EXPANDED_NO_OBSERVACIONES =
-      'Sin observaciones ni incidencias.';
+      'Sin observaciones.';
+  static const String SESION_CONFIRMED_BY_PARTICIPANT =
+      'Asistencia confirmada por el participante';
+  static const String SESION_ACCEPTED_BY_ENTITY =
+      'Asistencia aceptada por la entidad';
   static const String SESION_ATTENDANCE_ERROR =
       'No se pudo actualizar la asistencia. Inténtalo de nuevo.';
   static const String SESION_DETAIL_NOT_FOUND =

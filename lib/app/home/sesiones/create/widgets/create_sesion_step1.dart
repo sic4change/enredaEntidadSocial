@@ -459,24 +459,26 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
             // Fixed-height textarea so the two columns line up visually
             // (the picker's list caps at 280; with label + search the right
             // column is ~340 tall, so we match).
+            // Desarrollo y evaluación is written AFTER the session takes
+            // place, so the field only shows when the selected date/time
+            // is already in the past (e.g. reviewing via "Editar").
+            if (_isPastSession) ...[
+              _LabeledBlock(
+                label: StringConst.SESION_FIELD_DESCRIPTION_LABEL,
+                child: _MultilineField(
+                  initialValue: _description,
+                  hint: StringConst.SESION_FIELD_DESCRIPTION_HINT,
+                  height: 200,
+                  onChanged: (v) => _description = v,
+                ),
+              ),
+              const SizedBox(height: Sizes.PADDING_20),
+            ],
+            // ── Convocar participantes + Observaciones, 50/50 ────────────
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 3,
-                  child: _LabeledBlock(
-                    label: StringConst.SESION_FIELD_DESCRIPTION_LABEL,
-                    child: _MultilineField(
-                      initialValue: _description,
-                      hint: StringConst.SESION_FIELD_DESCRIPTION_HINT,
-                      height: 320,
-                      onChanged: (v) => _description = v,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: Sizes.PADDING_24),
-                Expanded(
-                  flex: 2,
                   child: _LabeledBlock(
                     label: StringConst.SESION_FIELD_CONVOCAR_LABEL,
                     child: ParticipantPicker(
@@ -491,20 +493,19 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
                     ),
                   ),
                 ),
+                const SizedBox(width: Sizes.PADDING_24),
+                Expanded(
+                  child: _LabeledBlock(
+                    label: StringConst.SESION_FIELD_OBSERVACIONES_LABEL,
+                    child: _MultilineField(
+                      initialValue: _observations,
+                      hint: StringConst.SESION_FIELD_OBSERVACIONES_HINT,
+                      height: 320,
+                      onChanged: (v) => _observations = v,
+                    ),
+                  ),
+                ),
               ],
-            ),
-            const SizedBox(height: Sizes.PADDING_20),
-            // ── Observaciones y/o incidencias (full-width textarea) ───────
-            // Editable here so staff can add a brief evaluation when reviewing
-            // a past session via "Editar" (mirrors the Descripción field).
-            _LabeledBlock(
-              label: StringConst.SESION_FIELD_OBSERVACIONES_LABEL,
-              child: _MultilineField(
-                initialValue: _observations,
-                hint: StringConst.SESION_FIELD_OBSERVACIONES_HINT,
-                height: 160,
-                onChanged: (v) => _observations = v,
-              ),
             ),
             const SizedBox(height: Sizes.PADDING_30),
             // ── Siguiente ────────────────────────────────────────────────
@@ -604,6 +605,14 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
     final t = _scheduledTime;
     if (d == null || t == null) return null;
     return DateTime(d.year, d.month, d.day, t.hour, t.minute);
+  }
+
+  /// Whether the currently selected session date/time is already in the past.
+  /// Falls back to the bare date when no start time is picked yet; with no
+  /// date at all (fresh create) the session is treated as upcoming.
+  bool get _isPastSession {
+    final scheduled = _combinedScheduledAt() ?? _scheduledAt;
+    return scheduled != null && scheduled.isBefore(DateTime.now());
   }
 
   /// Combines the picked Fecha de inicio with Hora de fin — assumed to be

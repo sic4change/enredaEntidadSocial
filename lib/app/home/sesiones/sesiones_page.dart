@@ -269,6 +269,7 @@ class _SesionesPageState extends State<SesionesPage> {
             onSelect: (tab) => setState(() => _activeTab = tab),
             misSesiones: _misSesiones,
             onToggleMis: () => setState(() => _misSesiones = !_misSesiones),
+            entityName: widget.socialEntity.name ?? '',
           ),
           const SizedBox(height: Sizes.PADDING_30),
           Text(
@@ -418,12 +419,14 @@ class _TabBar extends StatelessWidget {
     required this.onSelect,
     required this.misSesiones,
     required this.onToggleMis,
+    required this.entityName,
   });
 
   final _SesionesTab activeTab;
   final ValueChanged<_SesionesTab> onSelect;
   final bool misSesiones;
   final VoidCallback onToggleMis;
+  final String entityName;
 
   @override
   Widget build(BuildContext context) {
@@ -442,11 +445,15 @@ class _TabBar extends StatelessWidget {
           onTap: () => onSelect(_SesionesTab.pasadas),
         ),
         // Content filter, same pill UI: off = shared (group) sessions,
-        // on = all of my own sessions (group + individual).
+        // on = all of my own sessions (group + individual). Shows the
+        // organization name while off and "Mis sesiones" once toggled on;
+        // brand teal (not yellow) so it reads as a different filter axis
+        // than the Próximas/Pasadas tabs.
         _SesionTabPill(
-          label: StringConst.SESION_FILTER_MIS,
+          label: misSesiones ? StringConst.SESION_FILTER_MIS : entityName,
           isActive: misSesiones,
           onTap: onToggleMis,
+          activeColor: AppColors.primaryColor,
         ),
       ],
     );
@@ -466,11 +473,13 @@ class _SesionTabPill extends StatelessWidget {
     required this.label,
     required this.isActive,
     required this.onTap,
+    this.activeColor = AppColors.yellow,
   });
 
   final String label;
   final bool isActive;
   final VoidCallback onTap;
+  final Color activeColor;
 
   @override
   Widget build(BuildContext context) {
@@ -486,10 +495,10 @@ class _SesionTabPill extends StatelessWidget {
           vertical: Sizes.PADDING_12,
         ),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.yellow : AppColors.white,
+          color: isActive ? activeColor : AppColors.white,
           borderRadius: BorderRadius.circular(Sizes.RADIUS_25),
           border: Border.all(
-            color: isActive ? AppColors.yellow : AppColors.violet,
+            color: isActive ? activeColor : AppColors.violet,
             width: 1,
           ),
         ),

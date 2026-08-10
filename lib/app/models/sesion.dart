@@ -61,6 +61,7 @@ class Sesion {
     this.ipilOther,
     this.participantSubvenciones = const <String, String>{},
     this.reminderUserIds = const <String>[],
+    this.confirmedParticipants = const <String>[],
   }) : this.competenciaCategorias = competenciaCategorias.isNotEmpty
             ? competenciaCategorias
             : (competenciaCategoriaId != null && competenciaCategoriaId.isNotEmpty ? [competenciaCategoriaId] : const <String>[]),
@@ -201,6 +202,10 @@ class Sesion {
   /// records the user's intent so the same toggle persists across devices.
   final List<String> reminderUserIds;
 
+  /// Participants who confirmed they will attend, written from enreda-app's
+  /// "Confirmar Asistencia" button on the participant calendar.
+  final List<String> confirmedParticipants;
+
   factory Sesion.fromMap(Map<String, dynamic> data, String documentId) {
     final invited = <String>[];
     if (data['invitedParticipants'] != null) {
@@ -275,6 +280,7 @@ class Sesion {
       participantSubvenciones:
           _parseStringStringMap(data['participantSubvenciones']),
       reminderUserIds: _parseStringList(data['reminderUserIds']),
+      confirmedParticipants: _parseStringList(data['confirmedParticipants']),
     );
   }
 
@@ -309,6 +315,9 @@ class Sesion {
       'isAllDay': isAllDay,
       'invitedParticipants': invitedParticipants,
       'attendedParticipants': attendedParticipants,
+      // confirmedParticipants intentionally NOT written from this app: the
+      // participant app owns it, and re-writing a stale copy on session edits
+      // (merge:true) would clobber confirmations made in the meantime.
       'title': title,
       'description': description,
       'observations': observations,

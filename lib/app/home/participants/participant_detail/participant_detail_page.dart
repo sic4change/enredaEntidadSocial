@@ -55,9 +55,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
   String? _closureReportId;
   final ScrollController _webScrollController = ScrollController();
 
-  // Cached futures/streams for _buildDniWidget to avoid re-creating on every build
+  // Cached future for _buildDniWidget to avoid re-creating on every build
   Future<InitialReport?>? _dniInitialReportFuture;
-  Stream<List<DocumentationParticipant>>? _dniDocumentationStream;
   String? _dniUserId;
 
   @override
@@ -89,7 +88,6 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
       return;
     _dniUserId = userId;
     _dniInitialReportFuture = _db!.getInitialReport(userId);
-    _dniDocumentationStream = _db!.documentationParticipantByUserStream(userId);
   }
 
   Widget _buildCurrentPage(BuildContext context, UserEnreda currentUser) {
@@ -748,20 +746,10 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
           return CustomTextSmall(text: user.dni!);
         }
 
-        // 3. Fall back to the name of the most recent documentación personal vigente
-        if (_dniDocumentationStream == null) return const SizedBox.shrink();
-        return StreamBuilder<List<DocumentationParticipant>>(
-          stream: _dniDocumentationStream,
-          builder: (context, snapshotDocs) {
-            if (snapshotDocs.hasData && snapshotDocs.data!.isNotEmpty) {
-              final sorted =
-                  List<DocumentationParticipant>.from(snapshotDocs.data!)
-                    ..sort((a, b) => b.createDate.compareTo(a.createDate));
-              return CustomTextSmall(text: sorted.first.name);
-            }
-            return const SizedBox.shrink();
-          },
-        );
+        // No DNI in the report or the user doc -> show nothing. (There used
+        // to be a fallback to the latest uploaded document's NAME, which
+        // surfaced garbage like "Prueba Google play" as if it were a DNI.)
+        return const SizedBox.shrink();
       },
     );
   }
