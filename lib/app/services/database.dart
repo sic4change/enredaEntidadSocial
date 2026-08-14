@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/models/ability.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
+import 'package:enreda_empresas/app/models/activity.dart';
+import 'package:enreda_empresas/app/models/choice.dart';
 import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/closureReport.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
@@ -134,6 +136,12 @@ abstract class Database {
      Stream<List<Competency>> competenciesBySubCategoryId(String? competencySubCategoryId);
      Stream<List<UserEnreda>> checkIfUserEmailRegistered(String email);
      Stream<List<Experience>> myExperiencesStream(String userId);
+     Future<void> addExperience(Experience experience);
+     Future<void> updateExperience(Experience experience);
+     Future<void> deleteExperience(Experience experience);
+     Stream<Activity> activityStreamProfessionId(String? activityId);
+     Stream<List<Choice>> choicesStream(String path, String? typeId, String? subtypeId);
+     Stream<List<Activity>> professionsActivitiesStream();
      Stream<List<Competency>> competenciesStream();
      Stream<List<CompetencyCategory>> competenciesCategoriesStream();
      Stream<List<CompetencySubCategory>> competenciesSubCategoriesStream();
@@ -189,6 +197,7 @@ abstract class Database {
      Future<void> addResource(Resource resource);
      Future<void> addResourceInvitation(ResourceInvitation resourceInvitation);
      Future<void> updateCertificationRequest(CertificationRequest certificationRequest, bool certified, bool referenced );
+     Future<void> setCertificationRequest(CertificationRequest certificationRequest);
      Stream<List<GamificationFlag>> gamificationFlagsStream();
      Future<void> addUnemployedUser(UnemployedUser unemployedUser);
      Stream<List<Dedication>> dedicationStream();
@@ -991,6 +1000,14 @@ class FirestoreDatabase implements Database {
       "certified": certified, 'referenced': referenced});
   }
 
+  @override
+  Future<void> setCertificationRequest(CertificationRequest certificationRequest) {
+    return _service.updateData(
+      path: APIPath.certificationRequest(certificationRequest.certificationRequestId!),
+      data: certificationRequest.toMap(),
+    );
+  }
+
     @override
     Stream<List<Interest>> interestStream() => _service.collectionStream(
       path: APIPath.interests(),
@@ -1207,6 +1224,56 @@ class FirestoreDatabase implements Database {
         sort: (lhs, rhs) => (rhs.startDate?? Timestamp.fromMicrosecondsSinceEpoch(0))
             .compareTo(lhs.startDate?? Timestamp.fromMicrosecondsSinceEpoch(0)),
       );
+
+  @override
+  Future<void> addExperience(Experience experience) =>
+      _service.addData(path: APIPath.experiences(), data: experience.toMap());
+
+  @override
+  Future<void> updateExperience(Experience experience) =>
+      _service.updateData(path: '${APIPath.experiences()}/${experience.id}', data: experience.toMap());
+
+  @override
+  Future<void> deleteExperience(Experience experience) =>
+      _service.deleteData(path: APIPath.experience(experience.id!));
+
+  @override
+  Stream<Activity> activityStreamProfessionId(String? activityId) {
+    return _service.documentStreamByField(
+      path: APIPath.activities(),
+      builder: (data, documentId) => Activity.fromMap(data, documentId),
+      queryBuilder: (query) => query.where('id', isEqualTo: activityId),
+    );
+  }
+
+  @override
+  Stream<List<Choice>> choicesStream(
+          String path, String? typeId, String? subtypeId) =>
+      _service.collectionStream(
+        path: path,
+        queryBuilder: (query) {
+          if (typeId != null) query = query.where('typeId', isEqualTo: typeId);
+          if (subtypeId != null) {
+            query = query.where('subtypeId', isEqualTo: subtypeId);
+          }
+          return query;
+        },
+        builder: (data, documentId) => Choice.fromMap(data, documentId),
+        sort: (lhs, rhs) {
+          if (lhs.order != null && rhs.order != null) {
+            return lhs.order!.compareTo(rhs.order!);
+          }
+          return lhs.name.compareTo(rhs.name);
+        },
+      );
+
+  @override
+  Stream<List<Activity>> professionsActivitiesStream() => _service.collectionStream(
+    path: APIPath.activities(),
+    queryBuilder: (query) => query.where('name', isNotEqualTo: null),
+    builder: (data, documentId) => Activity.fromMap(data, documentId),
+    sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
+  );
 
   @override
   Stream<List<Competency>> competenciesStream() => _service.collectionStream(

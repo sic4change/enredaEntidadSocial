@@ -13,7 +13,6 @@ import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 /// Contenedor del flujo de Currículum (3 pasos):
 ///   Paso 0 — [MyCurriculumPage] — visualización/edición del CV
@@ -76,6 +75,14 @@ class _ParticipantCurriculumPageState extends State<ParticipantCurriculumPage> {
   void initState() {
     super.initState();
     ParticipantCurriculumPage.selectedStep.value = 0;
+    final database = Provider.of<Database>(context, listen: false);
+    LocationCache.instance.warmUpAll(database);
+    if (LocationCache.instance.competencies.isEmpty) {
+      database.getCompetencies().then((comps) {
+        LocationCache.instance.competencies = comps;
+        if (mounted) setState(() {});
+      }).catchError((_) {});
+    }
   }
 
   @override
@@ -83,14 +90,25 @@ class _ParticipantCurriculumPageState extends State<ParticipantCurriculumPage> {
     super.dispose();
   }
 
-  void _goToStep1() {
-    // Snapshot current data from globals/MyCurriculumPage state.
-    // MyCurriculumPage already populates these via its internal state; we rely
-    // on them being updated in globals.currentParticipant and location cache.
-    final user = globals.currentParticipant;
-    if (user == null) return;
-
+  Future<void> _goToStep1() async {
+    final user = widget.participantUser;
     final database = Provider.of<Database>(context, listen: false);
+
+    var allCompetencies = LocationCache.instance.competencies;
+    if (allCompetencies.isEmpty) {
+      try {
+        allCompetencies = await database.getCompetencies();
+        LocationCache.instance.competencies = allCompetencies;
+      } catch (_) {}
+    }
+
+    var educations = LocationCache.instance.educations;
+    if (educations.isEmpty) {
+      try {
+        educations = await database.educationStream().first;
+        LocationCache.instance.educations = educations;
+      } catch (_) {}
+    }
 
     // Location from cache
     final myCountry = LocationCache.instance.countryById(user.address?.country);
@@ -105,7 +123,6 @@ class _ParticipantCurriculumPageState extends State<ParticipantCurriculumPage> {
     _phone = user.phone ?? '';
 
     // Education level
-    final educations = LocationCache.instance.educations;
     if (user.educationId?.isNotEmpty == true) {
       final edu = educations.firstWhere(
         (e) => e.educationId == user.educationId,
@@ -116,14 +133,15 @@ class _ParticipantCurriculumPageState extends State<ParticipantCurriculumPage> {
       _maxEducation = '';
     }
 
-    final allCompetencies = LocationCache.instance.competencies;
-    final competenciesIds = user.competencies.keys.toList();
+    final competenciesMap = user.competencies;
+    final competenciesIds = competenciesMap.keys.toList();
     final filtered = allCompetencies
-        .where((c) => competenciesIds.any((id) => c.id == id))
+        .where((c) => c.id != null && competenciesIds.contains(c.id))
         .toList();
     _competenciesNames = [];
     for (final c in filtered) {
-      final status = user.competencies[c.id] ?? StringConst.BADGE_EMPTY;
+      if (c.id == null) continue;
+      final status = competenciesMap[c.id] ?? StringConst.BADGE_EMPTY;
       if (c.name.isNotEmpty &&
           status != StringConst.BADGE_EMPTY &&
           status != StringConst.BADGE_IDENTIFIED) {
@@ -145,38 +163,37 @@ class _ParticipantCurriculumPageState extends State<ParticipantCurriculumPage> {
     _myCustomProvince = _province;
     _myCustomCountry = _country;
 
-    // Experiences will be fetched; we load them from the stream snapshot
-    // We already have them because MyCurriculumPage loads them.
-    // For simplicity we reload from database here:
-    database.myExperiencesStream(user.userId ?? '').first.then((allExp) {
+    // Load experiences
+    try {
+      final allExp = await database.myExperiencesStream(user.userId ?? '').first;
       if (!mounted) return;
-      setState(() {
-        _myExperiences = allExp.where((e) => e.type == 'Profesional').toList();
-        _myPersonalExperiences = allExp.where((e) => e.type == 'Personal').toList();
-        _myEducation = allExp.where((e) => e.type == 'Formativa').toList();
-        _mySecondaryEducation = allExp.where((e) => e.type == 'Complementaria').toList();
+      _myExperiences = allExp.where((e) => e.type == 'Profesional').toList();
+      _myPersonalExperiences = allExp.where((e) => e.type == 'Personal').toList();
+      _myEducation = allExp.where((e) => e.type == 'Formativa').toList();
+      _mySecondaryEducation = allExp.where((e) => e.type == 'Complementaria').toList();
 
-        _myCustomExperiences = List.from(_myExperiences);
-        _mySelectedExperiences = List.generate(_myExperiences.length, (i) => i);
-        _myPersonalCustomExperiences = List.from(_myPersonalExperiences);
-        _myPersonalSelectedExperiences = List.generate(_myPersonalExperiences.length, (i) => i);
-        _myCustomEducation = List.from(_myEducation);
-        _mySelectedEducation = List.generate(_myEducation.length, (i) => i);
-        _mySecondaryCustomEducation = List.from(_mySecondaryEducation);
-        _mySecondarySelectedEducation = List.generate(_mySecondaryEducation.length, (i) => i);
-
-        ParticipantCurriculumPage.selectedStep.value = 1;
-      });
-    });
+      _myCustomExperiences = List.from(_myExperiences);
+      _mySelectedExperiences = List.generate(_myExperiences.length, (i) => i);
+      _myPersonalCustomExperiences = List.from(_myPersonalExperiences);
+      _myPersonalSelectedExperiences = List.generate(_myPersonalExperiences.length, (i) => i);
+      _myCustomEducation = List.from(_myEducation);
+      _mySelectedEducation = List.generate(_myEducation.length, (i) => i);
+      _mySecondaryCustomEducation = List.from(_mySecondaryEducation);
+      _mySecondarySelectedEducation = List.generate(_mySecondaryEducation.length, (i) => i);
+    } catch (_) {}
 
     // Load certification requests for references
-    database.myCertificationRequestStream(user.userId ?? '').first.then((refs) {
+    try {
+      final refs = await database.myCertificationRequestStream(user.userId ?? '').first;
       if (!mounted) return;
       final referenced = refs.where((r) => r.referenced == true).toList();
-      setState(() {
-        _myCustomReferences = List.from(referenced);
-        _mySelectedReferences = List.generate(referenced.length, (i) => i);
-      });
+      _myCustomReferences = List.from(referenced);
+      _mySelectedReferences = List.generate(referenced.length, (i) => i);
+    } catch (_) {}
+
+    if (!mounted) return;
+    setState(() {
+      ParticipantCurriculumPage.selectedStep.value = 1;
     });
   }
 
@@ -275,12 +292,13 @@ class _ParticipantCurriculumPageState extends State<ParticipantCurriculumPage> {
       case 0:
         return MyCurriculumPage(
           key: ValueKey('curriculum_step0_${widget.participantUser.userId}'),
+          user: widget.participantUser,
           onPreview: _goToStep1,
         );
       case 1:
         return ParticipantCvModelsPage(
           key: ValueKey('curriculum_step1'),
-          user: globals.currentParticipant,
+          user: widget.participantUser,
           city: _city,
           province: _province,
           country: _country,

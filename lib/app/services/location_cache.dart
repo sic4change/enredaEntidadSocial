@@ -44,6 +44,9 @@ import 'package:enreda_empresas/app/models/program.dart';
 import 'package:enreda_empresas/app/models/resourcetype.dart';
 import 'package:enreda_empresas/app/models/resourceCategory.dart';
 import 'package:enreda_empresas/app/models/resourcePicture.dart';
+import 'package:enreda_empresas/app/models/activity.dart';
+import 'package:enreda_empresas/app/models/choice.dart';
+import 'package:enreda_empresas/app/services/api_path.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 
 class LocationCache {
@@ -64,6 +67,15 @@ class LocationCache {
   List<Ability> abilities = [];
   List<SpecificInterest> specificInterests = [];
   List<SocialEntitiesType> socialEntitiesTypes = [];
+
+  // Choices & Activities Data
+  List<Choice> experienceTypes = [];
+  List<Choice> experienceSubtypes = [];
+  List<Choice> activityLevelChoices = [];
+  List<Choice> activityRoleChoices = [];
+  List<Choice> activityChoices = [];
+  List<Choice> professions = [];
+  List<Activity> activities = [];
 
   // IPIL Master Data
   List<IpilReinforcement> ipilReinforcements = [];
@@ -387,6 +399,17 @@ class LocationCache {
     await Future.wait([
       _loadOrFetchCatalog<IpilDigitalSkills>('ipilDigitalSkills', () => database.ipilDigitalSkillsStream().first, (data, id) => IpilDigitalSkills.fromMap(data, id), getDocId: (e) => e.ipilDigitalSkillsId ?? '').then((v) => ipilDigitalSkills = v).catchError((e) { print("Error: e"); return <IpilDigitalSkills>[]; }),
       _loadOrFetchCatalog<IpilLaborSkills>('ipilLaborSkills', () => database.ipilLaborSkillsStream().first, (data, id) => IpilLaborSkills.fromMap(data, id), getDocId: (e) => e.ipilLaborSkillsId ?? '').then((v) => ipilLaborSkills = v).catchError((e) { print("Error: e"); return <IpilLaborSkills>[]; }),
+    ]);
+
+    // Batch 8: Choices and Experience metadata
+    await Future.wait([
+      _loadOrFetchCatalog<Choice>('experienceTypes', () => database.choicesStream(APIPath.experienceTypes(), null, null).first, (data, id) => Choice.fromMap(data, id), getDocId: (e) => e.id).then((v) => experienceTypes = v).catchError((e) => <Choice>[]),
+      _loadOrFetchCatalog<Choice>('experienceSubtypes', () => database.choicesStream(APIPath.experienceSubtypes(), null, null).first, (data, id) => Choice.fromMap(data, id), getDocId: (e) => e.id).then((v) => experienceSubtypes = v).catchError((e) => <Choice>[]),
+      _loadOrFetchCatalog<Choice>('activityLevelChoices', () => database.choicesStream(APIPath.activityLevelChoices(), null, null).first, (data, id) => Choice.fromMap(data, id), getDocId: (e) => e.id).then((v) => activityLevelChoices = v).catchError((e) => <Choice>[]),
+      _loadOrFetchCatalog<Choice>('activityRoleChoices', () => database.choicesStream(APIPath.activityRoleChoices(), null, null).first, (data, id) => Choice.fromMap(data, id), getDocId: (e) => e.id).then((v) => activityRoleChoices = v).catchError((e) => <Choice>[]),
+      _loadOrFetchCatalog<Choice>('activityChoices', () => database.choicesStream(APIPath.activityChoices(), null, null).first, (data, id) => Choice.fromMap(data, id), getDocId: (e) => e.id).then((v) => activityChoices = v).catchError((e) => <Choice>[]),
+      _loadOrFetchCatalog<Choice>('professions', () => database.choicesStream(APIPath.professions(), null, null).first, (data, id) => Choice.fromMap(data, id), getDocId: (e) => e.id).then((v) => professions = v).catchError((e) => <Choice>[]),
+      _loadOrFetchCatalog<Activity>('activities', () => database.professionsActivitiesStream().first, (data, id) => Activity.fromMap(data, id), getDocId: (e) => e.id ?? '').then((v) => activities = v).catchError((e) => <Activity>[]),
     ]);
   }
 

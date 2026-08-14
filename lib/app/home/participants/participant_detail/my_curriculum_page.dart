@@ -1,5 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
+import 'package:enreda_empresas/app/common_widgets/enreda_button.dart';
+import 'package:enreda_empresas/app/common_widgets/precached_avatar.dart';
+import 'package:enreda_empresas/app/common_widgets/show_custom_dialog.dart';
+import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/home/participants/experience_tile.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/curriculum/add_educational_level.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/curriculum/experience_form_update.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/curriculum/formation_form.dart';
+import 'package:enreda_empresas/app/home/participants/reference_tile.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
+import 'package:enreda_empresas/app/models/city.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/country.dart';
 import 'package:enreda_empresas/app/models/education.dart';
@@ -9,37 +22,25 @@ import 'package:enreda_empresas/app/models/province.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
+import 'package:enreda_empresas/app/utils/adaptative.dart';
+import 'package:enreda_empresas/app/utils/functions.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
+import 'package:enreda_empresas/app/values/strings.dart';
+import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_star_rating_null_safety/smooth_star_rating_null_safety.dart';
-import '../../../common_widgets/alert_dialog.dart';
-import '../../../common_widgets/custom_text.dart';
-import '../../../common_widgets/main_container.dart';
-import '../../../common_widgets/my_custom_behavior.dart';
-import '../../../common_widgets/precached_avatar.dart';
-import '../../../common_widgets/show_custom_dialog.dart';
-import '../../../common_widgets/spaces.dart';
-import '../../../models/city.dart';
-import '../../../utils/adaptative.dart';
-import '../../../utils/functions.dart';
-import '../../../utils/responsive.dart';
-import '../../../values/strings.dart';
-import '../../../values/values.dart';
-import '../experience_tile.dart';
-import '../pdf_generator/cv_print/my_cv_multiple_pages.dart';
-import '../reference_tile.dart';
-import 'competencies/competency_tile.dart';
-import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class MyCurriculumPage extends StatefulWidget {
-  const MyCurriculumPage({super.key, this.mini = false, this.onPreview});
+  const MyCurriculumPage({super.key, this.mini = false, this.onPreview, this.user});
 
   final bool mini;
-  /// Called when the user taps "Previsualizar y descargar".
-  /// If null the widget will push MyCvMultiplePages directly (legacy behaviour).
   final VoidCallback? onPreview;
+  final UserEnreda? user;
 
   @override
   State<MyCurriculumPage> createState() => _MyCurriculumPageState();
@@ -83,12 +84,14 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
   List<int> mySelectedLanguages = [];
   double speakingLevel = 1.0;
   double writingLevel = 1.0;
-  BuildContext? myContext;
-  String _userId = '';
+  final ImagePicker _imagePicker = ImagePicker();
   String _photo = '';
-  late Stream<List<Experience>> _experiencesStream;
-  late Stream<List<Education>> _educationsStream;
-  late Stream<List<UserEnreda>> _userStream;
+
+  Stream<List<Experience>>? _experiencesStream;
+  Stream<List<UserEnreda>>? _userStream;
+  Stream<Country>? _countryStream;
+  Stream<Province>? _provinceStream;
+  Stream<City>? _cityStream;
 
   void setStateIfMounted(f) {
     if (mounted) setState(f);
@@ -96,108 +99,136 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
 
   @override
   void initState() {
-    user = globals.currentParticipant!;
-    final database = Provider.of<Database>(context, listen: false);
-    _experiencesStream = database.myExperiencesStream(user?.userId ?? '');
-    _educationsStream = database.educationStream();
-    _userStream = database.userStream(user?.email ?? '');
     super.initState();
+    final database = Provider.of<Database>(context, listen: false);
+    LocationCache.instance.warmUpAll(database).then((_) {
+      if (mounted) setState(() {});
+    });
+
+    if (LocationCache.instance.competencies.isEmpty) {
+      database.getCompetencies().then((comps) {
+        LocationCache.instance.competencies = comps;
+        if (mounted) setState(() {});
+      }).catchError((_) {});
+    }
+
+    final currentUser = widget.user ?? globals.currentParticipant;
+    final userId = currentUser?.userId ?? '';
+    final email = currentUser?.email ?? '';
+
+    _experiencesStream = database.myExperiencesStream(userId);
+    _userStream = database.userStream(email);
   }
 
   @override
   Widget build(BuildContext context) {
+    final database = Provider.of<Database>(context, listen: false);
+
     return StreamBuilder<List<UserEnreda>>(
-        stream: _userStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasData &&
-              snapshot.connectionState == ConnectionState.active) {
-            user = snapshot.data!.isNotEmpty ? snapshot.data!.first : null;
-            var profilePic = user?.profilePic?.src ?? "";
-            
+      stream: _userStream,
+      builder: (context, su) {
+        if (su.hasData && su.connectionState == ConnectionState.active && su.data!.isNotEmpty) {
+          user = su.data!.first;
+        } else {
+          user = widget.user ?? globals.currentParticipant;
+        }
+
+        if (user == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final addr = user?.address;
+        if (_countryStream == null && (addr?.country ?? '').isNotEmpty) {
+          _countryStream = database.countryStream(addr!.country);
+        }
+        if (_provinceStream == null && (addr?.province ?? '').isNotEmpty) {
+          _provinceStream = database.provinceStream(addr!.province);
+        }
+        if (_cityStream == null && (addr?.city ?? '').isNotEmpty) {
+          _cityStream = database.cityStream(addr!.city);
+        }
+
+        _photo = user?.profilePic?.src ?? "";
+
+        return StreamBuilder<List<Experience>>(
+          stream: _experiencesStream,
+          builder: (context, expSnapshot) {
+            if (!expSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final allExp = expSnapshot.data!;
+            myEducation = allExp.where((e) => e.type == 'Formativa').toList();
+            mySecondaryEducation = allExp.where((e) => e.type == 'Complementaria').toList();
+            myExperiences = allExp.where((e) => e.type == 'Profesional').toList();
+            myPersonalExperiences = allExp.where((e) => e.type == 'Personal').toList();
+
+            final competenciesMap = user?.competencies ?? {};
+            final competenciesIds = competenciesMap.keys.toList();
             final competenciesList = LocationCache.instance.competencies;
-            List<Competency> competencies = List.from(competenciesList);
-            final competenciesIds = user!.competencies.keys.toList();
-            competencies = competencies
-                .where((competency) => competenciesIds.any((id) => competency.id == id))
+            final filtered = competenciesList
+                .where((c) => c.id != null && competenciesIds.contains(c.id))
                 .toList();
-            
+
             competenciesNames.clear();
-            competencies.forEach((competency) {
-              final status =
-                  user?.competencies[competency.id] ?? StringConst.BADGE_EMPTY;
-              if (competency.name != "" && status != StringConst.BADGE_EMPTY && status != StringConst.BADGE_IDENTIFIED) {
-                final index1 = competenciesNames.indexWhere((element) => element == competency.name);
-                if (index1 == -1) competenciesNames.add(competency.name);
+            for (final c in filtered) {
+              if (c.id == null) continue;
+              final status = competenciesMap[c.id] ?? StringConst.BADGE_EMPTY;
+              if (c.name.isNotEmpty &&
+                  status != StringConst.BADGE_EMPTY &&
+                  status != StringConst.BADGE_IDENTIFIED) {
+                if (!competenciesNames.contains(c.name)) {
+                  competenciesNames.add(c.name);
+                }
               }
-            });
+            }
 
-            final myAboutMe = user?.aboutMe ?? "";
-            myCustomAboutMe = myAboutMe;
+            myCustomAboutMe = user?.aboutMe ?? "";
+            myCustomEmail = user?.email ?? "";
+            myCustomPhone = user?.phone ?? "";
 
-            final myEmail = user?.email ?? "";
-            myCustomEmail = myEmail;
-
-            final myPhone = user?.phone ?? "";
-            myCustomPhone = myPhone;
-
-            myCustomCompetencies = competenciesNames.map((element) => element).toList();
+            myCustomCompetencies = competenciesNames.toList();
             mySelectedCompetencies = List.generate(myCustomCompetencies.length, (i) => i);
 
             final myDataOfInterest = user?.dataOfInterest ?? [];
-            myCustomDataOfInterest = myDataOfInterest.map((element) => element).toList();
+            myCustomDataOfInterest = myDataOfInterest.toList();
             mySelectedDataOfInterest = List.generate(myCustomDataOfInterest.length, (i) => i);
 
             final myLanguages = user?.languagesLevels ?? [];
-            myCustomLanguages = myLanguages.map((element) => element).toList();
+            myCustomLanguages = myLanguages.toList();
             mySelectedLanguages = List.generate(myCustomLanguages.length, (i) => i);
 
-            return StreamBuilder<List<Experience>>(
-              stream: _experiencesStream,
-              builder: (context, experiencesSnapshot) {
-                if (!experiencesSnapshot.hasData) return Center(child: CircularProgressIndicator());
-                
-                final allExp = experiencesSnapshot.data!;
-                myEducation = allExp.where((e) => e.type == 'Formativa').toList();
-                mySecondaryEducation = allExp.where((e) => e.type == 'Complementaria').toList();
-                myExperiences = allExp.where((e) => e.type == 'Profesional').toList();
-                myPersonalExperiences = allExp.where((e) => e.type == 'Personal').toList();
-
-                if (widget.mini) {
-                  return _myCurriculumMini(context, user, profilePic, competenciesNames, allExp);
-                } else {
-                  return Responsive.isDesktop(context)
-                      ? _myCurriculumWeb(context, user, profilePic, competenciesNames, allExp)
-                      : _myCurriculumMobile(context, user, profilePic, competenciesNames, allExp);
-                }
-              }
-            );
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        });
+            if (widget.mini) {
+              return _myCurriculumMini(context, user, _photo, competenciesNames, allExp);
+            } else {
+              return Responsive.isDesktop(context)
+                  ? _myCurriculumWeb(context, user, _photo, competenciesNames, allExp)
+                  : _myCurriculumMobile(context, user, _photo, competenciesNames, allExp);
+            }
+          },
+        );
+      },
+    );
   }
 
-  Widget _myCurriculumMini(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames, List<Experience> allExp){
+  Widget _myCurriculumMini(BuildContext context, UserEnreda? user,
+      String profilePic, List<String> compNames, List<Experience> allExp) {
     final textTheme = Theme.of(context).textTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: Responsive.isDesktop(context) ? 400 : Responsive.isDesktopS(context) ? 400.0 : 400,
-          padding: EdgeInsets.only(
-            left: Sizes.mainPadding * 2,
-            top: Sizes.mainPadding * 2,
-            right: Sizes.mainPadding * 2,
-          ),
+          width: 400,
+          padding: EdgeInsets.all(Sizes.mainPadding * 2),
           decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [
-                  AppColors.primary400.withOpacity(0.15),
-                  AppColors.primary020.withOpacity(0.13)
-                ],
-              )
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [
+                AppColors.primary400.withValues(alpha: 0.15),
+                AppColors.primary020.withValues(alpha: 0.13),
+              ],
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,421 +236,328 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    !kIsWeb ?
                     ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(60)),
-                      child:
-                      Center(
-                        child:
-                        profilePic == "" ?
-                        Container(
-                          color:  Colors.transparent,
-                          height: 120,
-                          width: 120,
-                          child: Image.asset(ImagePath.USER_DEFAULT),
-                        ):
-                        CachedNetworkImage(
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.center,
-                            imageUrl: profilePic),
-                      ),
-                    ):
-                    ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(60)),
-                      child:
-                      profilePic == "" ?
-                      Container(
-                        color:  Colors.transparent,
-                        height: 120,
-                        width: 120,
-                        child: Image.asset(ImagePath.USER_DEFAULT),
-                      ):
-                      PrecacheAvatarCard(
-                        imageUrl: profilePic,
-                        height: 120,
-                        width: 120,
-                      ),
-                    )
+                      borderRadius: const BorderRadius.all(Radius.circular(60)),
+                      child: profilePic == ""
+                          ? Image.asset(ImagePath.USER_DEFAULT, width: 120, height: 120)
+                          : CachedNetworkImage(
+                              width: 120,
+                              height: 120,
+                              fit: BoxFit.cover,
+                              imageUrl: profilePic,
+                            ),
+                    ),
                   ],
                 ),
               ),
-              SpaceH20(),
-              _buildPersonalData(context),
-              SpaceH20(),
-              _buildAboutMe(context),
-              SpaceH20(),
-              _buildMyDataOfInterest(context),
-              SpaceH20(),
-              _buildMyLanguages(context),
-              SpaceH20(),
+              const SpaceH20(),
+              _buildPersonalData(context, user),
+              const SpaceH20(),
+              _buildAboutMe(context, user),
+              const SpaceH20(),
+              _buildMyDataOfInterest(context, user),
+              const SpaceH20(),
+              _buildMyLanguages(context, user),
+              const SpaceH20(),
               _buildMyReferences(context, user),
             ],
           ),
         ),
-        SpaceW20(),
-        Container(
+        const SpaceW20(),
+        SizedBox(
           width: 600,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SpaceH50(),
               Text(
                 '${user?.firstName} ${user?.lastName}',
                 style: textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: Responsive.isDesktop(context) ? 45.0 : 32.0,
-                    color: AppColors.primary900),
+                  fontWeight: FontWeight.bold,
+                  fontSize: Responsive.isDesktop(context) ? 45.0 : 32.0,
+                  color: AppColors.primary900,
+                ),
               ),
-              SpaceH30(),
-              _buildMyEducation(context, user, allExp),
-              SpaceH30(),
-              _buildMySecondaryEducation(context, user, allExp),
-              SpaceH30(),
-              _buildMyExperiences(context, user, allExp),
-              SpaceH30(),
-              _buildMyCompetencies(context, user),
-              SpaceH30(),
+              const SpaceH30(),
+              _buildMyEducation(context, user),
+              const SpaceH30(),
+              _buildMySecondaryEducation(context, user),
+              const SpaceH30(),
+              _buildMyExperiences(context, user),
+              const SpaceH30(),
               _buildFinalCheck(context, user),
-              SpaceH30(),
+              const SpaceH30(),
             ],
           ),
-        )
+        ),
       ],
     );
   }
 
-  Widget _myCurriculumWeb(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames, List<Experience> allExp){
-    return Stack(
-      children: [
-        CustomTextMediumBold(text: StringConst.CV),
-        MainContainer(
-          height: MediaQuery.of(context).size.height,
-          padding: EdgeInsets.all(0),
-          margin: EdgeInsets.only(top: Sizes.kDefaultPaddingDouble * 2),
-          child: Row(
+  Widget _myCurriculumWeb(BuildContext context, UserEnreda? user,
+      String profilePic, List<String> compNames, List<Experience> allExp) {
+    return Padding(
+      padding: EdgeInsets.all(Sizes.mainPadding),
+      child: Column(
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                  width: Responsive.isDesktopS(context) ? MediaQuery.of(context).size.width * 0.25 :
-                    MediaQuery.of(context).size.width * 0.2,
-                  height: double.infinity,
+              Flexible(
+                fit: FlexFit.loose,
+                child: Container(
+                  width: Responsive.isDesktop(context)
+                      ? MediaQuery.of(context).size.width * 0.3
+                      : Responsive.isDesktopS(context)
+                          ? MediaQuery.of(context).size.width * 0.2
+                          : 200,
                   padding: EdgeInsets.only(
-                    left: Sizes.mainPadding * 1.3,
-                    top: Sizes.mainPadding,
+                    left: Sizes.mainPadding * 2,
+                    top: Sizes.mainPadding * 2,
                   ),
                   decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          AppColors.primary400.withOpacity(0.15),
-                          AppColors.primary020.withOpacity(0.13)
-                        ],
-                      )
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        AppColors.white,
+                        AppColors.primary020.withValues(alpha: 0.13),
+                        AppColors.primary400.withValues(alpha: 0.15),
+                      ],
+                    ),
                   ),
-                  child: SingleChildScrollView(
-                    controller: ScrollController(),
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 50.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildMyProfilePhoto(user),
-                          SpaceH20(),
-                          _buildPersonalData(context),
-                          SpaceH20(),
-                          _buildAboutMe(context),
-                          SpaceH20(),
-                          _buildMyDataOfInterest(context),
-                          SpaceH20(),
-                          _buildMyLanguages(context),
-                          SpaceH20(),
-                          _buildMyReferences(context, user),
-                        ],
-                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 50.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildMyProfilePhoto(user),
+                        const SpaceH20(),
+                        _buildPersonalData(context, user),
+                        const SpaceH20(),
+                        _buildAboutMe(context, user),
+                        const SpaceH20(),
+                        _buildMyDataOfInterest(context, user),
+                        const SpaceH20(),
+                        _buildMyLanguages(context, user),
+                        const SpaceH20(),
+                        _buildMyReferences(context, user),
+                      ],
                     ),
-                  )),
-              SpaceW40(),
-              Expanded(
-                  child: SingleChildScrollView(
-                    controller: ScrollController(),
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        right: Sizes.mainPadding * 2,
-                        top: Sizes.mainPadding * 2,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildCVHeader(context, user, profilePic, competenciesNames),
-                          SpaceH30(),
-                          _buildMyEducation(context, user, allExp),
-                          SpaceH30(),
-                          _buildMySecondaryEducation(context, user, allExp),
-                          SpaceH30(),
-                          _buildMyExperiences(context, user, allExp),
-                          SpaceH30(),
-                          _buildMyCompetencies(context, user),
-                          SpaceH30(),
-                          _buildFinalCheck(context, user),
-                          SpaceH30(),
-                        ],
-                      ),
-                    ),
-                  ))
+                  ),
+                ),
+              ),
+              const SpaceW40(),
+              Flexible(
+                fit: FlexFit.loose,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: Sizes.mainPadding * 2,
+                    top: Sizes.mainPadding * 2,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCVHeader(context, user, profilePic, compNames),
+                      const SpaceH30(),
+                      _buildMyEducation(context, user),
+                      const SpaceH30(),
+                      _buildMySecondaryEducation(context, user),
+                      const SpaceH30(),
+                      _buildMyExperiences(context, user),
+                      const SpaceH30(),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _myCurriculumMobile(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames, List<Experience> allExp) {
-    final textTheme = Theme.of(context).textTheme;
-    return SingleChildScrollView(
-      child: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Responsive.isMobile(context) ? Container() : SpaceH12(),
-                _buildMyProfilePhoto(user),
-                Text(
-                  '${user?.firstName} ${user?.lastName}',
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                  style: textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: AppColors.primary900),
-                  textAlign: TextAlign.left,
-                ),
-                SpaceH24(),
-                _buildMyEducation(context, user, allExp),
-                SpaceH24(),
-                _buildMySecondaryEducation(context, user, allExp),
-                SpaceH24(),
-                _buildMyExperiences(context, user, allExp),
-                SpaceH24(),
-                _buildMyCompetencies(context, user),
-              ],
-            ),
-            Container(
-              padding: EdgeInsets.all(Sizes.mainPadding),
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      AppColors.primary400.withOpacity(0.15),
-                      AppColors.primary020.withOpacity(0.13)
-                    ],
-                  )
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SpaceH24(),
-                  CustomTextTitle(title: StringConst.PERSONAL_DATA.toUpperCase(), color: AppColors.primary900),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.mail,
-                        color: Colors.black.withOpacity(0.7),
-                        size: 16,
-                      ),
-                      SpaceW4(),
-                      CustomTextSmall(text: user?.email ?? ''),
-                    ],
-                  ),
-                  SpaceH8(),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.phone,
-                        color: AppColors.darkGray,
-                        size: 12.0,
-                      ),
-                      SpaceW4(),
-                      Text(
-                        user?.phone ?? '',
-                        style: textTheme.bodySmall?.copyWith(
-                            fontSize: Responsive.isDesktop(context) ? 16 : 14.0,
-                            color: AppColors.darkGray),
-                      ),
-                    ],
-                  ),
-                  SpaceH8(),
-                  _buildMyLocation(context, user),
-                  SpaceH24(),
-                  _buildAboutMe(context),
-                  SpaceH24(),
-                  _buildMyDataOfInterest(context),
-                  SpaceH24(),
-                  _buildMyLanguages(context),
-                  SpaceH24(),
-                  _buildMyReferences(context, user),
-                  SpaceH24(),
-                  _buildFinalCheck(context, user),
-                  SpaceH24(),
-                ],
-              ),
-            ),
-          ],
-        ),
+          const SpaceH30(),
+          _buildFinalCheck(context, user),
+        ],
       ),
     );
   }
 
-  Widget _buildCVHeader(BuildContext context, UserEnreda? user, String profilePic, List<String> competenciesNames) {
+  Widget _myCurriculumMobile(BuildContext context, UserEnreda? user,
+      String profilePic, List<String> compNames, List<Experience> allExp) {
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 16.0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _buildDownloadCV(),
+            ],
+          ),
+          const SpaceH16(),
+          _buildMyProfilePhoto(user),
+          const SpaceH12(),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${user?.firstName} ${user?.lastName}',
+                  style: textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: AppColors.primary900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SpaceH24(),
+          _buildPersonalData(context, user),
+          const Divider(color: AppColors.greyBorder, thickness: 1, height: 40),
+          _buildAboutMe(context, user),
+          const Divider(color: AppColors.greyBorder, thickness: 1, height: 40),
+          _buildMyEducation(context, user),
+          const SpaceH24(),
+          _buildMySecondaryEducation(context, user),
+          const SpaceH24(),
+          _buildMyExperiences(context, user),
+          const SpaceH24(),
+          _buildMyDataOfInterest(context, user),
+          const SpaceH24(),
+          _buildMyLanguages(context, user),
+          const SpaceH24(),
+          _buildMyReferences(context, user),
+          const SpaceH24(),
+          _buildFinalCheck(context, user),
+          const SpaceH24(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCVHeader(BuildContext context, UserEnreda? user,
+      String profilePic, List<String> compNames) {
     final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              width: Responsive.isDesktopS(context) ? 200.0 : 300.0,
-              child: Text(
-                '${user?.firstName} ${user?.lastName}',
-                style: textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: Responsive.isDesktopS(context) ? 30.0 : 40.0,
-                    color: AppColors.primary900),
-              ),
+        _buildDownloadCV(),
+        const SpaceH20(),
+        SizedBox(
+          width: Responsive.isDesktopS(context) ? 200.0 : 300.0,
+          child: Text(
+            '${user?.firstName} ${user?.lastName}',
+            style: textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: Responsive.isDesktopS(context) ? 30.0 : 40.0,
+              color: AppColors.primary900,
             ),
-            Spacer(),
-            _buildDownloadCV(),
-            SpaceW8(),
-          ],
+          ),
         ),
       ],
     );
   }
 
   Widget _buildDownloadCV() {
-    return InkWell(
-      onTap: () async {
+    return EnredaButton(
+      borderRadius: const BorderRadius.all(Radius.circular(25)),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      buttonTitle: "Previsualizar y descargar",
+      width: 0,
+      onPressed: () async {
         final checkAgreeDownload = user?.checkAgreeCV ?? false;
         if (!checkAgreeDownload) {
-          showAlertDialog(context,
-              title: 'Aviso importante',
-              content: 'El participante debe autorizar el uso y tratamiento de datos personales antes de continuar',
-              defaultActionText: 'Aceptar');
+          showAlertDialog(
+            context,
+            title: 'Aviso',
+            content: 'Para continuar debe autorizar el uso de sus datos personales.',
+            defaultActionText: 'Aceptar',
+          );
           return;
         }
         await _hasEnoughExperiences(context);
-
-        // If the parent provided a callback, use it (step-based navigation).
-        // Otherwise fall back to pushing the full-page PDF viewer directly.
         if (widget.onPreview != null) {
           widget.onPreview!();
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return MyCvMultiplePages(
-                user: user!,
-                myPhoto: true,
-                city: city!,
-                province: province!,
-                country: country!,
-                myExperiences: myCustomExperiences,
-                myPersonalExperiences: myPersonalCustomExperiences,
-                myEducation: myCustomEducation,
-                mySecondaryEducation: mySecondaryCustomEducation,
-                competenciesNames: myCustomCompetencies,
-                aboutMe: myCustomAboutMe,
-                languagesNames: myCustomLanguages,
-                myDataOfInterest: myCustomDataOfInterest,
-                myCustomEmail: myCustomEmail,
-                myCustomPhone: myCustomPhone,
-                myCustomReferences: myCustomReferences,
-                myMaxEducation: myMaxEducation?.label ?? '',
-              );
-            }),
-          );
         }
       },
-      child: Image.asset(
-        ImagePath.DOWNLOAD,
-        height: Responsive.isTablet(context) || Responsive.isMobile(context)
-            ? Sizes.ICON_SIZE_40
-            : Sizes.ICON_SIZE_50,
-      ),
     );
   }
 
   Widget _buildMyProfilePhoto(UserEnreda? userEnreda) {
     return Container(
-      padding: Responsive.isMobile(context) ? EdgeInsets.symmetric(vertical: 25, horizontal: 0) :
-        EdgeInsets.symmetric(vertical: 10, horizontal: Sizes.mainPadding),
+      padding: EdgeInsets.symmetric(vertical: Sizes.mainPadding),
       width: double.infinity,
       child: Stack(
         children: [
           Theme(
             data: ThemeData(
-              iconTheme: IconThemeData(color: AppColors.white),
+              iconTheme: const IconThemeData(color: AppColors.white),
             ),
-            child: Container(
-              width: Responsive.isMobile(context) ? 80 : 120,
-              height:  Responsive.isMobile(context) ? 80 : 120,
-              color: Colors.transparent,
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(120),
+            child: InkWell(
+              mouseCursor: WidgetStateMouseCursor.clickable,
+              onTap: () => !kIsWeb
+                  ? _displayPickImageDialog()
+                  : _onImageButtonPressed(ImageSource.gallery),
+              child: SizedBox(
+                width: 120,
+                height: 120,
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(120),
+                      ),
+                      child: !kIsWeb
+                          ? ClipRRect(
+                              borderRadius: const BorderRadius.all(Radius.circular(60)),
+                              child: Center(
+                                child: _photo == ""
+                                    ? Image.asset(ImagePath.USER_DEFAULT, width: 120, height: 120)
+                                    : CachedNetworkImage(
+                                        width: 120,
+                                        height: 120,
+                                        fit: BoxFit.cover,
+                                        imageUrl: _photo,
+                                      ),
+                              ),
+                            )
+                          : ClipRRect(
+                              borderRadius: const BorderRadius.all(Radius.circular(60)),
+                              child: Center(
+                                child: _photo == ""
+                                    ? Image.asset(ImagePath.USER_DEFAULT, width: 120, height: 120)
+                                    : PrecacheAvatarCard(
+                                        imageUrl: _photo,
+                                        height: 120,
+                                        width: 120,
+                                      ),
+                              ),
+                            ),
                     ),
-                    child:
-                    ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(60)),
-                      child:
-                      Center(
-                        child:
-                        _photo == "" ?
-                        Container(
-                          color:  Colors.transparent,
-                          height: Responsive.isMobile(context) ? 80 :  120,
-                          width:  Responsive.isMobile(context) ? 80 : 120,
-                          child: Image.asset(ImagePath.USER_DEFAULT),
-                        ):
-                        FadeInImage.assetNetwork(
-                          placeholder: ImagePath.USER_DEFAULT,
-                          width:  Responsive.isMobile(context) ? 80 : 120,
-                          height:  Responsive.isMobile(context) ? 80 : 120,
-                          fit: BoxFit.cover,
-                          image: _photo,
+                    Positioned(
+                      left: 6,
+                      top: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(2.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.primary900, width: 1.0),
+                        ),
+                        child: const Icon(
+                          Icons.mode_edit_outlined,
+                          size: 22,
+                          color: AppColors.primary900,
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ),
-          Positioned(
-            right: 10,
-            top: 0,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Responsive.isDesktop(context) ? Container() : _buildDownloadCV(),
-                Responsive.isDesktop(context) ? Container() : SpaceH50(),
-              ],
             ),
           ),
         ],
@@ -627,38 +565,171 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     );
   }
 
-  Widget _buildMyCareer(BuildContext context, List<Experience> experiences) {
-    Education? myMaxEducation;
-    final educations = LocationCache.instance.educations;
+  Future<void> _displayPickImageDialog() async {
+    final textTheme = Theme.of(context).textTheme;
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: 150,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16.0, left: 24.0),
+            child: Row(
+              children: <Widget>[
+                Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.camera, color: Colors.indigo, size: 30),
+                      onPressed: () {
+                        _onImageButtonPressed(ImageSource.camera);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    Text('Cámara', style: textTheme.bodySmall?.copyWith(fontSize: 12.0)),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.photo, color: Colors.indigo, size: 30),
+                      onPressed: () {
+                        _onImageButtonPressed(ImageSource.gallery);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    Text('Galería', style: textTheme.bodySmall?.copyWith(fontSize: 12.0)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
-    if (user!.educationId!.isNotEmpty) {
-      myMaxEducation = educations.firstWhere((e) => e.educationId == user!.educationId, orElse: () => Education(label: "", value: "", order: 0));
-      return CustomTextBody(text: myMaxEducation?.label??"");
-    } else {
-      final myEducationalExperiencies = experiences
-          .where((experience) => experience.type == 'Formativa')
-          .toList();
-      if (myEducationalExperiencies.isNotEmpty) {
-        final areEduactions = myEducationalExperiencies.any((exp) => exp.education != null && exp.education!.isNotEmpty);
-        if (areEduactions) {
-          final myEduations = educations.where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label)).toList();
-          myEduations.sort((a, b) => a.order.compareTo(b.order));
-          if(myEduations.isNotEmpty){
-            myMaxEducation = myEduations.first;
-          } else {
-            myMaxEducation = Education(label: "", value: "", order: 0);
-          }
-        } else {
-          myMaxEducation = Education(label: "", value: "", order: 0);
+  Future<XFile?> _cropImage({required XFile imageFile}) async {
+    CroppedFile? croppedImage = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      uiSettings: [
+        WebUiSettings(
+          context: context,
+          presentStyle: WebPresentStyle.dialog,
+          viewwMode: WebViewMode.mode_1,
+          dragMode: WebDragMode.move,
+          size: CropperSize(
+            width: 420,
+            height: (heightOfScreen(context) * 0.5).round(),
+          ),
+          cropBoxMovable: true,
+          cropBoxResizable: true,
+          movable: true,
+          toggleDragModeOnDblclick: true,
+          translations: const WebTranslations(
+            title: 'Recortar imagen',
+            rotateLeftTooltip: 'Rotar 90 grados a la izquierda',
+            rotateRightTooltip: 'Rotar 90 grados a la derecha',
+            cancelButton: 'Cancelar',
+            cropButton: 'Recortar',
+          ),
+        ),
+        AndroidUiSettings(
+          toolbarTitle: 'Recortar imagen',
+          toolbarColor: AppColors.white,
+          toolbarWidgetColor: AppColors.primary900,
+          activeControlsWidgetColor: AppColors.primaryColor,
+          initAspectRatio: CropAspectRatioPreset.original,
+          hideBottomControls: false,
+          lockAspectRatio: false,
+        ),
+        IOSUiSettings(
+          title: 'Recortar imagen',
+          doneButtonTitle: 'Listo',
+          cancelButtonTitle: 'Cancelar',
+          resetAspectRatioEnabled: true,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio4x3,
+          ],
+        ),
+      ],
+    );
+    if (croppedImage == null) return null;
+    return XFile(croppedImage.path);
+  }
+
+  Future<void> _onImageButtonPressed(ImageSource source) async {
+    try {
+      XFile? pickedFile = await _imagePicker.pickImage(source: source);
+      if (pickedFile != null) {
+        pickedFile = await _cropImage(imageFile: pickedFile);
+        if (pickedFile != null) {
+          final database = Provider.of<Database>(context, listen: false);
+          final targetUserId = user?.userId ?? '';
+          await database.uploadUserAvatar(targetUserId, await pickedFile.readAsBytes());
+          setState(() {});
         }
-        return CustomTextBody(text: myMaxEducation?.label??"");
-      } else {
-        return Container();
       }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
     }
   }
 
-  Widget _buildAboutMe(BuildContext context) {
+  Widget _buildMyCareer(BuildContext context, UserEnreda? user) {
+    final database = Provider.of<Database>(context, listen: false);
+
+    return StreamBuilder<List<Education>>(
+      stream: database.educationStream(),
+      builder: (context, snapshotEducations) {
+        if (snapshotEducations.hasData) {
+          final educations = snapshotEducations.data!;
+
+          if (user?.educationId != null && user!.educationId!.isNotEmpty) {
+            myMaxEducation = educations.firstWhere(
+              (e) => e.educationId == user.educationId,
+              orElse: () => Education(label: "", value: "", order: 0),
+            );
+            return CustomTextBody(text: myMaxEducation?.label ?? "");
+          } else {
+            final myEducationalExperiencies = (myExperiences ?? [])
+                .where((experience) => experience.type == 'Formativa')
+                .toList();
+            if (myEducationalExperiencies.isNotEmpty) {
+              final areEduactions = myEducationalExperiencies
+                  .any((exp) => exp.education != null && exp.education!.isNotEmpty);
+              if (areEduactions) {
+                final myEducations = educations
+                    .where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label))
+                    .toList();
+                myEducations.sort((a, b) => a.order.compareTo(b.order));
+                if (myEducations.isNotEmpty) {
+                  myMaxEducation = myEducations.first;
+                } else {
+                  myMaxEducation = Education(label: "", value: "", order: 0);
+                }
+              } else {
+                myMaxEducation = Education(label: "", value: "", order: 0);
+              }
+              return CustomTextBody(text: myMaxEducation?.label ?? "");
+            }
+            return const SizedBox.shrink();
+          }
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildAboutMe(BuildContext context, UserEnreda? user) {
+    final database = Provider.of<Database>(context, listen: false);
+    final textTheme = Theme.of(context).textTheme;
+    var isEditable = false;
+    final textController = TextEditingController();
+    final focusNode = FocusNode();
+    textController.text = user?.aboutMe ?? '';
+
     return StatefulBuilder(builder: (context, setState) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -666,55 +737,72 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           Row(
             children: [
               Expanded(
-                child:
-                CustomTextTitle(title: StringConst.ABOUT_ME.toUpperCase(), color: AppColors.primary900,),
+                child: CustomTextTitle(title: StringConst.ABOUT_ME.toUpperCase()),
+              ),
+              InkWell(
+                onTap: () async {
+                  if (isEditable) {
+                    await database.setUserEnreda(
+                      user!.copyWith(aboutMe: textController.text),
+                    );
+                  }
+                  setState(() {
+                    isEditable = !isEditable;
+                    if (isEditable) focusNode.requestFocus();
+                  });
+                },
+                child: Icon(
+                  isEditable ? Icons.save : Icons.edit_outlined,
+                  size: Responsive.isDesktop(context) ? 18 : 15.0,
+                  color: AppColors.greyDark,
+                ),
               ),
             ],
           ),
+          if (!isEditable)
+            CustomTextBody(
+              text: user?.aboutMe != null && user!.aboutMe!.isNotEmpty
+                  ? user.aboutMe!
+                  : 'Aún no has añadido información adicional sobre ti',
+            ),
+          if (isEditable)
+            TextField(
+              controller: textController,
+              focusNode: focusNode,
+              minLines: 1,
+              maxLines: null,
+              style: textTheme.bodySmall?.copyWith(),
+            )
         ],
       );
     });
   }
 
-  Widget _buildPersonalData(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
+  Widget _buildPersonalData(BuildContext context, UserEnreda? user) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomTextTitle(title: StringConst.PERSONAL_DATA.toUpperCase(), color: AppColors.primary900,),
+        CustomTextTitle(
+          title: StringConst.PERSONAL_DATA.toUpperCase(),
+          color: AppColors.primary900,
+        ),
+        const SpaceH8(),
         Row(
           children: [
-            Icon(
-              Icons.mail,
-              color: AppColors.darkGray,
-              size: 12.0,
-            ),
-            SpaceW4(),
-            Flexible(
-              child: Text(
-                user?.email ?? '',
-                style: textTheme.bodyMedium?.copyWith(),
-              ),
-            ),
+            const Icon(Icons.mail, color: AppColors.greyDark, size: 16.0),
+            const SpaceW4(),
+            Flexible(child: CustomTextSmall(text: user?.email ?? '')),
           ],
         ),
+        const SpaceH8(),
         Row(
           children: [
-            Icon(
-              Icons.phone,
-              color: AppColors.darkGray,
-              size: 12.0,
-            ),
-            SpaceW4(),
-            Text(
-              user?.phone ?? '',
-              style: textTheme.bodyMedium?.copyWith(),
-            ),
+            const Icon(Icons.phone, color: AppColors.greyDark, size: 16.0),
+            const SpaceW4(),
+            Flexible(child: CustomTextSmall(text: user?.phone ?? '')),
           ],
         ),
-        SpaceH8(),
+        const SpaceH8(),
         _buildMyLocation(context, user),
       ],
     );
@@ -722,164 +810,91 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
 
   Widget _buildMyLocation(BuildContext context, UserEnreda? user) {
     final textTheme = Theme.of(context).textTheme;
-    final myCountry = LocationCache.instance.countryById(user?.address?.country);
-    final myProvince = LocationCache.instance.provinceById(user?.address?.province);
-    final myCity = LocationCache.instance.cityById(user?.address?.city);
 
-    myLocation = '${myCity?.name ?? ''}, ${myProvince?.name ?? ''}, ${myCountry?.name ?? ''}';
-    city = '${myCity?.name ?? ''}';
-    province = '${myProvince?.name ?? ''}';
-    country = '${myCountry?.name ?? ''}';
+    return StreamBuilder<Country>(
+      stream: _countryStream,
+      builder: (context, snapshotCountry) {
+        final myCountry = snapshotCountry.data;
+        return StreamBuilder<Province>(
+          stream: _provinceStream,
+          builder: (context, snapshotProvince) {
+            final myProvince = snapshotProvince.data;
+            return StreamBuilder<City>(
+              stream: _cityStream,
+              builder: (context, snapshotCity) {
+                final myCity = snapshotCity.data;
 
-    myCustomCity = city ?? "";
-    myCustomProvince = province ?? "";
-    myCustomCountry = country ?? "";
+                myLocation = '${myCity?.name ?? ''}, ${myProvince?.name ?? ''}, ${myCountry?.name ?? ''}';
+                city = myCity?.name ?? '';
+                province = myProvince?.name ?? '';
+                country = myCountry?.name ?? '';
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          Icons.location_on,
-          color: Colors.black.withOpacity(0.7),
-          size: 16,
-        ),
-        SpaceW4(),
-        Responsive.isMobile(context) ? CustomTextSmall(text: myLocation ?? '') :
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              city ?? '',
-              style: textTheme.bodyMedium?.copyWith(),
-            ),
-            Text(
-              province ?? '',
-              style: textTheme.bodyMedium?.copyWith(),
-            ),
-            Text(
-              country ?? '',
-              style: textTheme.bodyMedium?.copyWith(),
-            ),
-          ],
-        ),
-      ],
+                myCustomCity = city!;
+                myCustomProvince = province!;
+                myCustomCountry = country!;
+
+                return Row(
+                  crossAxisAlignment: Responsive.isMobile(context)
+                      ? CrossAxisAlignment.center
+                      : CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.location_on, color: AppColors.greyDark, size: 16),
+                    const SpaceW4(),
+                    Responsive.isMobile(context)
+                        ? CustomTextSmall(text: myLocation ?? '')
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(city ?? '', style: textTheme.bodySmall?.copyWith()),
+                              Text(province ?? '', style: textTheme.bodySmall?.copyWith()),
+                              Text(country ?? '', style: textTheme.bodySmall?.copyWith()),
+                            ],
+                          ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
-  Widget _buildMyCompetencies(BuildContext context, UserEnreda? user) {
-    if (user == null) return Container();
-    final competenciesIds = user.competencies.keys.toList();
-    final competenciesList = LocationCache.instance.competencies;
-    myCompetencies = competenciesList
-        .where((competency) => competenciesIds.any((id) => competency.id == id &&
-        (user.competencies[id] == StringConst.BADGE_VALIDATED ||
-            user.competencies[id] == StringConst.BADGE_CERTIFIED) ))
-        .toList();
-    
-    final textTheme = Theme.of(context).textTheme;
-    final controller = ScrollController();
-    var scrollJump = 137.5;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.rectangle,
-        border: Border.all(color: AppColors.primary900, width: 1),
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
-            child: Container(
-              height: 34,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CustomTextTitle(title: StringConst.COMPETENCIES.toUpperCase(), color: AppColors.primary900,),
-                ],
-              ),
-            ),
-          ),
-          myCompetencies!.isNotEmpty
-              ? Container(
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    controller.animateTo(
-                        controller.offset - scrollJump,
-                        curve: Curves.linear,
-                        duration: Duration(milliseconds: 500));
-                  },
-                  icon: Icon(
-                    Icons.arrow_back_ios,
-                    color: AppColors.primary900,
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    height: 180,
-                    child: ListView(
-                      controller: controller,
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      children: myCompetencies!
-                          .map((competency) =>
-                          CompetencyTile(
-                            competency: competency,
-                            status: user.competencies[competency.id] ?? StringConst.BADGE_EMPTY,
-                          ))
-                          .toList(),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    controller.animateTo(
-                        controller.offset + scrollJump,
-                        curve: Curves.linear,
-                        duration: Duration(milliseconds: 500));
-                  },
-                  icon: Icon(
-                    Icons.arrow_forward_ios,
-                    color: AppColors.primary900,
-                  ),
-                ),
-              ],
-            ),
-          )
-              : Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: Container(
-                child: Text(
-                  StringConst.NO_COMPETENCIES,
-                  style: textTheme.bodySmall,
-                )),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildFinalCheck(BuildContext context, UserEnreda? user){
+  Widget _buildFinalCheck(BuildContext context, UserEnreda? user) {
+    final database = Provider.of<Database>(context, listen: false);
     final bool checkFinal = user?.checkAgreeCV ?? false;
     TextTheme textTheme = Theme.of(context).textTheme;
     double fontSize = responsiveSize(context, 12, 14, md: 13);
-    return  Row(
+    return Row(
       children: [
         IconButton(
           icon: Icon(checkFinal ? Icons.check_box : Icons.crop_square),
           color: AppColors.primary900,
           iconSize: 20.0,
-          onPressed: () {}, // Empty function can be a const
+          onPressed: () {
+            showAlertDialog(
+              context,
+              title: 'Aviso',
+              content: 'Se ha guardado la autorización de uso de datos.',
+              defaultActionText: 'Aceptar',
+            );
+            database.setUserEnreda(user!.copyWith(checkAgreeCV: !checkFinal));
+          },
         ),
         Flexible(
           child: RichText(
             text: TextSpan(
               children: [
+                TextSpan(
+                  text: StringConst.FORM_ACCORDING,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.primary900,
+                    height: 1.5,
+                    fontSize: fontSize,
+                  ),
+                ),
                 TextSpan(
                   text: StringConst.PERSONAL_DATA_LAW,
                   style: textTheme.titleMedium?.copyWith(
@@ -908,215 +923,289 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     );
   }
 
-  Widget _buildMyEducation(BuildContext context, UserEnreda? user, List<Experience> experiences) {
-    myEducation = experiences
-        .where((experience) => experience.type == 'Formativa')
-        .toList();
-    myCustomEducation = myEducation!.map((element) => element).toList();
-    mySelectedEducation = List.generate(myCustomEducation.length, (i) => i);
-
+  Widget _buildMyEducation(BuildContext context, UserEnreda? user) {
+    final database = Provider.of<Database>(context, listen: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CustomTextTitle(title: StringConst.EDUCATIONAL_LEVEL.toUpperCase(), color: AppColors.primary900,),
+            CustomTextTitle(title: StringConst.EDUCATIONAL_LEVEL.toUpperCase()),
+            const SpaceW8(),
+            _addButton(() {
+              showDialog(
+                context: context,
+                builder: (context) => AddEducationalLevel(
+                  selectedEducation: myMaxEducation,
+                  onSaved: (selectedEducation) {
+                    database.setUserEnreda(
+                      user!.copyWith(educationId: selectedEducation?.educationId ?? ""),
+                    );
+                  },
+                ),
+              );
+            }),
           ],
         ),
-        _buildMyCareer(context, experiences),
-        SpaceH20(),
+        _buildMyCareer(context, user),
+        const Divider(color: AppColors.greyBorder, thickness: 1, height: 40),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CustomTextTitle(title: StringConst.EDUCATION.toUpperCase(), color: AppColors.primary900,),
+            CustomTextTitle(title: StringConst.EDUCATION.toUpperCase(), color: AppColors.primary900),
+            const SpaceW8(),
+            _addButton(() {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  content: FormationForm(
+                    isMainEducation: true,
+                    userId: user?.userId,
+                  ),
+                ),
+              );
+            }),
           ],
         ),
-        SpaceH4(),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.0),
-            color: Colors.white,
-          ),
-          child: myEducation!.isNotEmpty
-              ? Wrap(
-            children: myEducation!
-                .map((e) => Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                SpaceH12(),
-                Container(
-                  width: double.infinity,
-                  child: ExperienceTile(experience: e, type: e.type),
-                ),
-                Divider(color: AppColors.greyBorder,),
-              ],
-            ))
-                .toList(),
-          )
-              : CustomTextBody(text: StringConst.NO_EDUCATION),
-        ),
+        const SpaceH4(),
+        () {
+          myEducation = (myExperiences ?? []).where((e) => e.type == 'Formativa').toList();
+          myCustomEducation = myEducation!.toList();
+          mySelectedEducation = List.generate(myCustomEducation.length, (i) => i);
+          return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30.0),
+              color: Colors.white,
+            ),
+            child: myEducation!.isNotEmpty
+                ? Wrap(
+                    children: myEducation!
+                        .map((e) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SpaceH12(),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ExperienceTile(experience: e, type: e.type),
+                                ),
+                                const Divider(color: AppColors.greyBorder),
+                              ],
+                            ))
+                        .toList(),
+                  )
+                : CustomTextBody(text: StringConst.NO_EDUCATION),
+          );
+        }(),
       ],
     );
   }
 
-  Widget _buildMySecondaryEducation(BuildContext context, UserEnreda? user, List<Experience> experiences) {
-    mySecondaryEducation = experiences
-        .where((experience) => experience.type == 'Complementaria')
-        .toList();
-    mySecondaryCustomEducation = mySecondaryEducation!.map((element) => element).toList();
-    mySecondarySelectedEducation = List.generate(mySecondaryCustomEducation.length, (i) => i);
-
+  Widget _buildMySecondaryEducation(BuildContext context, UserEnreda? user) {
     return Column(
       children: [
         Row(
           children: [
-            CustomTextTitle(title: StringConst.SECONDARY_EDUCATION.toUpperCase(), color: AppColors.primary900,),
+            CustomTextTitle(title: StringConst.SECONDARY_EDUCATION.toUpperCase(), color: AppColors.primary900),
+            const SpaceW8(),
+            _addButton(() {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  content: FormationForm(
+                    isMainEducation: false,
+                    userId: user?.userId,
+                  ),
+                ),
+              );
+            }),
           ],
         ),
-        SpaceH4(),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.0),
-            color: Colors.white,
-          ),
-          child: mySecondaryEducation!.isNotEmpty
-              ? Wrap(
-            children: mySecondaryEducation!
-                .map((e) => Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                SpaceH12(),
-                Container(
-                  width: double.infinity,
-                  child: ExperienceTile(experience: e, type: e.type,),
-                ),
-                Divider(color: AppColors.greyBorder,),
-              ],
-            ))
-                .toList(),
-          )
-              : CustomTextBody(text: StringConst.NO_EDUCATION),
-        ),
+        const SpaceH4(),
+        () {
+          mySecondaryEducation = (myExperiences ?? []).where((e) => e.type == 'Complementaria').toList();
+          mySecondaryCustomEducation = mySecondaryEducation!.toList();
+          mySecondarySelectedEducation = List.generate(mySecondaryCustomEducation.length, (i) => i);
+          return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30.0),
+              color: Colors.white,
+            ),
+            child: mySecondaryEducation!.isNotEmpty
+                ? Wrap(
+                    children: mySecondaryEducation!
+                        .map((e) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SpaceH12(),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ExperienceTile(experience: e, type: e.type),
+                                ),
+                                const Divider(color: AppColors.greyBorder),
+                              ],
+                            ))
+                        .toList(),
+                  )
+                : CustomTextBody(text: StringConst.NO_EDUCATION),
+          );
+        }(),
       ],
     );
   }
 
-  Widget _buildProfesionalExperience(BuildContext context, UserEnreda? user, List<Experience> experiences) {
-    myExperiences = experiences
-        .where((experience) => experience.type == 'Profesional')
-        .toList();
-    myCustomExperiences = myExperiences!.map((element) => element).toList();
-    mySelectedExperiences = List.generate(myCustomExperiences.length, (i) => i);
-
+  Widget _buildProfesionalExperience(BuildContext context, UserEnreda? user) {
     return Column(
       children: [
         Row(
           children: [
-            CustomTextTitle(title: StringConst.MY_PROFESIONAL_EXPERIENCES.toUpperCase(), color: AppColors.primary900,),
+            CustomTextSubTitle(title: StringConst.MY_PROFESIONAL_EXPERIENCES.toUpperCase()),
+            const SpaceW8(),
+            _addButton(() {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  content: ExperienceFormUpdate(
+                    isProfesional: true,
+                    userId: user?.userId,
+                  ),
+                ),
+              );
+            }),
           ],
         ),
-        SpaceH4(),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.0),
-            color: Colors.white,
-          ),
-          child: myExperiences!.isNotEmpty
-              ? Wrap(
-            children: myExperiences!
-                .map((e) => Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                SpaceH4(),
-                Container(
-                  width: double.infinity,
-                  child: ExperienceTile(experience: e, type: e.type),
-                ),
-                Divider(color: AppColors.greyBorder,),
-              ],
-            ))
-                .toList(),
-          )
-              : CustomTextBody(text: StringConst.NO_EXPERIENCE),
-        ),
+        const SpaceH4(),
+        () {
+          final myProfExperiences = (myExperiences ?? []).where((e) => e.type == 'Profesional').toList();
+          myCustomExperiences = myProfExperiences.toList();
+          mySelectedExperiences = List.generate(myCustomExperiences.length, (i) => i);
+          return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30.0),
+              color: Colors.white,
+            ),
+            child: myProfExperiences.isNotEmpty
+                ? Wrap(
+                    children: myProfExperiences
+                        .map((e) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SpaceH4(),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ExperienceTile(experience: e, type: e.type),
+                                ),
+                                const Divider(color: AppColors.greyBorder),
+                              ],
+                            ))
+                        .toList(),
+                  )
+                : CustomTextBody(text: StringConst.NO_EXPERIENCE),
+          );
+        }(),
       ],
     );
   }
 
-  Widget _buildPersonalExperience(BuildContext context, UserEnreda? user, List<Experience> experiences) {
-    myPersonalExperiences = experiences
-        .where((experience) => experience.type == 'Personal')
-        .toList();
-    myPersonalCustomExperiences = myPersonalExperiences!.map((element) => element).toList();
-    myPersonalSelectedExperiences = List.generate(myPersonalCustomExperiences.length, (i) => i);
-
+  Widget _buildPersonalExperience(BuildContext context, UserEnreda? user) {
     return Column(
       children: [
         Row(
           children: [
-            CustomTextTitle(title: StringConst.MY_PERSONAL_EXPERIENCES.toUpperCase(), color: AppColors.primary900,),
+            CustomTextSubTitle(title: StringConst.MY_PERSONAL_EXPERIENCES.toUpperCase()),
+            const SpaceW8(),
+            _addButton(() {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  content: ExperienceFormUpdate(
+                    isProfesional: false,
+                    userId: user?.userId,
+                  ),
+                ),
+              );
+            }),
           ],
         ),
-        SpaceH4(),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30.0),
-            color: Colors.white,
-          ),
-          child: myPersonalExperiences!.isNotEmpty
-              ? Wrap(
-            children: myPersonalExperiences!
-                .map((e) => Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                SpaceH12(),
-                Container(
-                  width: double.infinity,
-                  child: ExperienceTile(experience: e, type: e.type,),
-                ),
-                Divider(color: AppColors.greyBorder,),
-              ],
-            ))
-                .toList(),
-          )
-              : CustomTextBody(text: StringConst.NO_EXPERIENCE),
-        ),
+        const SpaceH4(),
+        () {
+          myPersonalExperiences = (myExperiences ?? []).where((e) => e.type == 'Personal').toList();
+          myPersonalCustomExperiences = myPersonalExperiences!.toList();
+          myPersonalSelectedExperiences = List.generate(myPersonalCustomExperiences.length, (i) => i);
+          return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30.0),
+              color: Colors.white,
+            ),
+            child: myPersonalExperiences!.isNotEmpty
+                ? Wrap(
+                    children: myPersonalExperiences!
+                        .map((e) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SpaceH4(),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ExperienceTile(experience: e, type: e.type),
+                                ),
+                                const Divider(color: AppColors.greyBorder),
+                              ],
+                            ))
+                        .toList(),
+                  )
+                : CustomTextBody(text: StringConst.NO_EXPERIENCE),
+          );
+        }(),
       ],
     );
   }
 
-  Widget _buildMyExperiences(BuildContext context, UserEnreda? user, List<Experience> experiences) {
+  Widget _buildMyExperiences(BuildContext context, UserEnreda? user) {
     return Column(
       children: [
         Row(
           children: [
-            CustomTextTitle(title: StringConst.MY_EXPERIENCES.toUpperCase(), color: AppColors.primary900,),
+            CustomTextTitle(title: StringConst.MY_EXPERIENCES.toUpperCase(), color: AppColors.primary900),
+            const SpaceW8(),
+            _addButton(() {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  content: ExperienceFormUpdate(
+                    isProfesional: false,
+                    general: true,
+                    userId: user?.userId,
+                  ),
+                ),
+              );
+            }),
           ],
         ),
-        SpaceH4(),
-        _buildProfesionalExperience(context, user, experiences),
-        SpaceH4(),
-        _buildPersonalExperience(context, user, experiences),
+        const SpaceH4(),
+        _buildProfesionalExperience(context, user),
+        const SpaceH4(),
+        _buildPersonalExperience(context, user),
       ],
     );
   }
 
-  Widget _buildMyDataOfInterest(BuildContext context) {
+  Widget _buildMyDataOfInterest(BuildContext context, UserEnreda? user) {
+    final database = Provider.of<Database>(context, listen: false);
     final myDataOfInterest = user?.dataOfInterest ?? [];
+
     return Column(
       children: [
         Row(
           children: [
-            CustomTextTitle(title: StringConst.DATA_OF_INTEREST.toUpperCase(), color: AppColors.primary900,),
+            CustomTextTitle(title: StringConst.DATA_OF_INTEREST.toUpperCase()),
+            const SpaceW8(),
+            _addButton(() {
+              _showDataOfInterestDialog(context, '');
+            }),
           ],
         ),
         Container(
@@ -1127,37 +1216,54 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ),
           child: myDataOfInterest.isNotEmpty
               ? Wrap(
-            children: myDataOfInterest
-                .map((d) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SpaceH12(),
-                Container(
-                  height: 20.0,
-                  child: Row(
-                    children: [
-                      Expanded(child: CustomTextBody(text: d)),
-                    ],
-                  ),
-                ),
-              ],
-            ))
-                .toList(),
-          )
+                  children: myDataOfInterest
+                      .map((d) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SpaceH12(),
+                              SizedBox(
+                                height: 20.0,
+                                child: Row(
+                                  children: [
+                                    Expanded(child: CustomTextBody(text: d)),
+                                    const SpaceW12(),
+                                    InkWell(
+                                      onTap: () => _showDataOfInterestDialog(context, d),
+                                      child: const Icon(Icons.edit_outlined, color: AppColors.greyDark, size: 18.0),
+                                    ),
+                                    const SpaceW12(),
+                                    InkWell(
+                                      onTap: () {
+                                        user!.dataOfInterest.remove(d);
+                                        database.setUserEnreda(user);
+                                      },
+                                      child: Image.asset(ImagePath.ICON_TRASH, width: 18.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ))
+                      .toList(),
+                )
               : CustomTextBody(text: StringConst.NO_DATA_OF_INTEREST),
         ),
       ],
     );
   }
 
-  Widget _buildMyLanguages(BuildContext context) {
+  Widget _buildMyLanguages(BuildContext context, UserEnreda? user) {
+    final database = Provider.of<Database>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
     final myLanguages = user?.languagesLevels ?? [];
+
     return Column(
       children: [
         Row(
           children: [
-            CustomTextTitle(title: StringConst.LANGUAGES.toUpperCase(), color: AppColors.primary900,),
+            CustomTextTitle(title: StringConst.LANGUAGES.toUpperCase()),
+            const SpaceW8(),
+            _addButton(() => _showLanguagesDialog(context, null)),
           ],
         ),
         Container(
@@ -1168,44 +1274,57 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ),
           child: myLanguages.isNotEmpty
               ? Wrap(
-            children: myLanguages
-                .map((l) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SpaceH12(),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l.name,
-                        style: textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SpaceH12(),
-                _buildSpeakingLevelRow(
-                  value: l.speakingLevel.toDouble(),
-                  textTheme: textTheme,
-                  iconSize: 15.0,
-                  onValueChanged: null,),
-                SpaceH12(),
-                _buildWritingLevelRow(
-                  value: l.writingLevel.toDouble(),
-                  textTheme: textTheme,
-                  iconSize: 15.0,
-                  onValueChanged: null,),
-                Divider(color: AppColors.greyBorder,),
-              ],
-            ))
-                .toList(),
-          )
+                  children: myLanguages
+                      .map((l) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SpaceH12(),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      l.name,
+                                      style: textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () => _showLanguagesDialog(context, l),
+                                    child: const Icon(Icons.edit_outlined, color: AppColors.greyDark, size: 18.0),
+                                  ),
+                                  const SpaceW12(),
+                                  InkWell(
+                                    onTap: () {
+                                      user!.languagesLevels.remove(l);
+                                      database.setUserEnreda(user);
+                                    },
+                                    child: Image.asset(ImagePath.ICON_TRASH, width: 18.0),
+                                  ),
+                                ],
+                              ),
+                              const SpaceH12(),
+                              _buildSpeakingLevelRow(
+                                value: l.speakingLevel.toDouble(),
+                                textTheme: textTheme,
+                                iconSize: 15.0,
+                                onValueChanged: null,
+                              ),
+                              const SpaceH12(),
+                              _buildWritingLevelRow(
+                                value: l.writingLevel.toDouble(),
+                                textTheme: textTheme,
+                                iconSize: 15.0,
+                                onValueChanged: null,
+                              ),
+                            ],
+                          ))
+                      .toList(),
+                )
               : Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.0),
-            child: Center(child: CustomTextSmall(text: StringConst.NO_LANGUAGES)),
-          ),
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Center(child: CustomTextSmall(text: StringConst.NO_LANGUAGES)),
+                ),
         ),
       ],
     );
@@ -1213,62 +1332,316 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
 
   Widget _buildMyReferences(BuildContext context, UserEnreda? user) {
     final database = Provider.of<Database>(context, listen: false);
+
     return Column(
       children: [
         Row(
           children: [
-            Flexible(
-              child: CustomTextTitle(title: StringConst.PERSONAL_REFERENCES.toUpperCase(), color: AppColors.primary900,),
-            ),
-            SpaceW12(),
+            CustomTextTitle(title: StringConst.PERSONAL_REFERENCES.toUpperCase()),
+            const SpaceW12(),
           ],
         ),
-        SpaceH4(),
+        const SpaceH4(),
         StreamBuilder<List<CertificationRequest>>(
-            stream: database.myCertificationRequestStream(user?.userId ?? ''),
-            builder: (context, snapshot) {
-              if (snapshot.hasData &&
-                  snapshot.connectionState == ConnectionState.active) {
-                myReferences = snapshot.data!
-                    .where((certificationRequest) => certificationRequest.referenced == true)
-                    .toList();
-                myCustomReferences = myReferences!.map((element) => element).toList();
-                mySelectedReferences = List.generate(myCustomReferences.length, (i) => i);
-                return Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                  child: myReferences!.isNotEmpty
-                      ? Wrap(
-                    children: myReferences!
-                        .map((e) => Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                      children: [
-                        SpaceH12(),
-                        Container(
-                          width: double.infinity,
-                          child: Row(
-                            children: [
-                              ReferenceTile(certificationRequest: e),
-                            ],
-                          ),
-                        ),
-                        Divider(color: AppColors.greyBorder,),
-                      ],
-                    )).toList(),
-                  )
-                      : Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20.0),
-                    child: Center(child: CustomTextSmall(text: StringConst.NO_REFERENCES)),
-                  ),
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }),
+          stream: database.myCertificationRequestStream(user?.userId ?? ''),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.connectionState == ConnectionState.active) {
+              myReferences = snapshot.data!
+                  .where((r) => r.referenced == true)
+                  .toList();
+              myCustomReferences = myReferences!.toList();
+              mySelectedReferences = List.generate(myCustomReferences.length, (i) => i);
+              return Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                child: myReferences!.isNotEmpty
+                    ? Wrap(
+                        children: myReferences!
+                            .map((e) => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SpaceH12(),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: Row(
+                                        children: [
+                                          ReferenceTile(certificationRequest: e),
+                                          const Spacer(),
+                                          InkWell(
+                                            onTap: () => _showReferencesDialog(context, e),
+                                            child: const Icon(Icons.edit_outlined, color: AppColors.greyDark, size: 18.0),
+                                          ),
+                                          const SpaceW12(),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ))
+                            .toList(),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20.0),
+                        child: Center(child: CustomTextSmall(text: StringConst.NO_REFERENCES)),
+                      ),
+              );
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ],
+    );
+  }
+
+  Future<void> _showDataOfInterestDialog(BuildContext context, String currentText) async {
+    final database = Provider.of<Database>(context, listen: false);
+    final controller = TextEditingController();
+    final textTheme = Theme.of(context).textTheme;
+    final formKey = GlobalKey<FormState>();
+    if (currentText.isNotEmpty) {
+      controller.text = currentText;
+    }
+    await showCustomDialog(
+      context,
+      content: Card(
+        elevation: 0,
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                StringConst.NEW_DATA_OF_INTEREST,
+                style: textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.0,
+                ),
+              ),
+              const SpaceH12(),
+              Form(
+                key: formKey,
+                child: TextFormField(
+                  controller: controller,
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.normal,
+                    fontSize: 14.0,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Este campo no puede estar vacío';
+                    }
+                    return null;
+                  },
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+      defaultActionText: StringConst.FORM_ACCEPT,
+      cancelActionText: StringConst.CANCEL,
+      dismissible: true,
+      onDefaultActionPressed: (context) {
+        if (formKey.currentState!.validate()) {
+          if (currentText.isNotEmpty) {
+            user!.dataOfInterest.remove(currentText);
+          }
+          user!.dataOfInterest.add(controller.text);
+          database.setUserEnreda(user!);
+          Navigator.of(context).pop();
+        }
+      },
+    );
+  }
+
+  void _showReferencesDialog(BuildContext context, CertificationRequest certificationRequest) {
+    final database = Provider.of<Database>(context, listen: false);
+    final controllerName = TextEditingController();
+    final controllerPosition = TextEditingController();
+    final controllerCompany = TextEditingController();
+    final textTheme = Theme.of(context).textTheme;
+    if (certificationRequest.certifierName.isNotEmpty) {
+      controllerName.text = certificationRequest.certifierName;
+    }
+    if (certificationRequest.certifierPosition.isNotEmpty) {
+      controllerPosition.text = certificationRequest.certifierPosition;
+    }
+    if (certificationRequest.certifierCompany.isNotEmpty) {
+      controllerCompany.text = certificationRequest.certifierCompany;
+    }
+    showCustomDialog(
+      context,
+      content: Card(
+        elevation: 0,
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Text(
+                StringConst.NEW_REFERENCE,
+                style: textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.0,
+                ),
+              ),
+              const SpaceH16(),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controllerName,
+                      decoration: const InputDecoration(labelText: 'Nombre'),
+                      style: textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controllerPosition,
+                      decoration: const InputDecoration(labelText: 'Cargo'),
+                      style: textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controllerCompany,
+                      decoration: const InputDecoration(labelText: 'Empresa'),
+                      style: textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+      defaultActionText: StringConst.FORM_ACCEPT,
+      onDefaultActionPressed: (context) {
+        final index = myReferences?.indexWhere((element) =>
+            element.certifierName == certificationRequest.certifierName);
+        if (index != null && index >= 0) {
+          final updated = myReferences![index].copyWith(
+            certifierName: controllerName.text,
+            certifierPosition: controllerPosition.text,
+            certifierCompany: controllerCompany.text,
+          );
+          database.setCertificationRequest(updated);
+        }
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  void _showLanguagesDialog(BuildContext context, Language? language) {
+    final database = Provider.of<Database>(context, listen: false);
+    final controller = TextEditingController();
+    final textTheme = Theme.of(context).textTheme;
+    final formKey = GlobalKey<FormState>();
+    if (language != null) {
+      controller.text = language.name;
+      speakingLevel = language.speakingLevel.toDouble();
+      writingLevel = language.writingLevel.toDouble();
+    }
+    showCustomDialog(
+      context,
+      content: StatefulBuilder(builder: (context, setState) {
+        return Form(
+          key: formKey,
+          child: Card(
+            elevation: 0,
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    StringConst.NEW_LANGUAGE,
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.0,
+                    ),
+                  ),
+                  const SpaceH12(),
+                  TextFormField(
+                    controller: controller,
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 14.0,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return 'El nombre del idioma no puede estar vacío';
+                      if (language != null &&
+                          language.name != value &&
+                          user!.languagesLevels.any((l) => l.name == value)) {
+                        return 'Este idioma ya ha sido añadido';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SpaceH12(),
+                  _buildSpeakingLevelRow(
+                    value: speakingLevel,
+                    textTheme: textTheme,
+                    onValueChanged: (v) {
+                      setState(() {
+                        speakingLevel = v;
+                      });
+                    },
+                  ),
+                  const SpaceH12(),
+                  _buildWritingLevelRow(
+                    value: writingLevel,
+                    textTheme: textTheme,
+                    onValueChanged: (v) {
+                      setState(() {
+                        writingLevel = v;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
+      defaultActionText: StringConst.FORM_ACCEPT,
+      cancelActionText: StringConst.CANCEL,
+      dismissible: true,
+      onDefaultActionPressed: (context) {
+        if (formKey.currentState!.validate()) {
+          if (language != null) {
+            user!.languagesLevels.remove(language);
+          }
+          user!.languagesLevels.add(Language(
+            name: controller.text,
+            speakingLevel: speakingLevel.toInt(),
+            writingLevel: writingLevel.toInt(),
+          ));
+          database.setUserEnreda(user!);
+          Navigator.of(context).pop();
+        }
+      },
     );
   }
 
@@ -1276,7 +1649,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     required TextTheme textTheme,
     required double value,
     double iconSize = 20.0,
-    dynamic Function(double)? onValueChanged
+    dynamic Function(double)? onValueChanged,
   }) {
     return Row(
       children: [
@@ -1289,16 +1662,16 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ),
         ),
         SmoothStarRating(
-            allowHalfRating: false,
-            onRatingChanged: onValueChanged,
-            starCount: 3,
-            rating: value,
-            size: iconSize,
-            filledIconData: Icons.circle,
-            defaultIconData: Icons.circle_outlined,
-            color: AppColors.primary900,
-            borderColor: AppColors.primary900,
-            spacing: 5.0
+          allowHalfRating: false,
+          onRatingChanged: onValueChanged,
+          starCount: 3,
+          rating: value,
+          size: iconSize,
+          filledIconData: Icons.circle,
+          defaultIconData: Icons.circle_outlined,
+          color: AppColors.primary900,
+          borderColor: AppColors.primary900,
+          spacing: 5.0,
         )
       ],
     );
@@ -1308,7 +1681,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     required TextTheme textTheme,
     required double value,
     double iconSize = 20.0,
-    dynamic Function(double)? onValueChanged
+    dynamic Function(double)? onValueChanged,
   }) {
     return Row(
       children: [
@@ -1321,28 +1694,40 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           ),
         ),
         SmoothStarRating(
-            allowHalfRating: false,
-            onRatingChanged: onValueChanged,
-            starCount: 3,
-            rating: value,
-            size: iconSize,
-            filledIconData: Icons.circle,
-            defaultIconData: Icons.circle_outlined,
-            color: AppColors.primary900,
-            borderColor: AppColors.primary900,
-            spacing: 5.0
+          allowHalfRating: false,
+          onRatingChanged: onValueChanged,
+          starCount: 3,
+          rating: value,
+          size: iconSize,
+          filledIconData: Icons.circle,
+          defaultIconData: Icons.circle_outlined,
+          color: AppColors.primary900,
+          borderColor: AppColors.primary900,
+          spacing: 5.0,
         )
       ],
     );
   }
 
   Future<void> _hasEnoughExperiences(BuildContext context) async {
-    if (myCompetencies!.length < 3 || myExperiences!.length < 2) {
-      await showCustomDialog(context,
-          content: CustomTextBody(text: StringConst.ADD_MORE_EXPERIENCES_SUGGESTION),
-          defaultActionText: StringConst.FORM_ACCEPT,
-          onDefaultActionPressed: (dialogContext) => Navigator.of(dialogContext).pop(true));
+    if ((myExperiences?.length ?? 0) < 2) {
+      await showCustomDialog(
+        context,
+        content: CustomTextBody(text: StringConst.ADD_MORE_EXPERIENCES_SUGGESTION),
+        defaultActionText: StringConst.FORM_ACCEPT,
+        onDefaultActionPressed: (dialogContext) => Navigator.of(dialogContext).pop(true),
+      );
     }
   }
 
+  Widget _addButton(Function() onPress) {
+    return CircleAvatar(
+      radius: 10,
+      backgroundColor: AppColors.primary900,
+      child: InkWell(
+        onTap: onPress,
+        child: const Icon(Icons.add, size: 14, color: Colors.white),
+      ),
+    );
+  }
 }
