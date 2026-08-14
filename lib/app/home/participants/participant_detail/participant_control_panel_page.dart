@@ -2,7 +2,6 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
-import 'package:enreda_empresas/app/common_widgets/show_custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/my_curriculum_page.dart';
@@ -26,9 +25,16 @@ import 'package:provider/provider.dart';
 
 
 class ParticipantControlPanelPage extends StatefulWidget {
-  const ParticipantControlPanelPage({required this.participantUser, super.key});
+  const ParticipantControlPanelPage({
+    required this.participantUser,
+    this.onNavigateToCV,
+    this.onNavigateToSection,
+    super.key,
+  });
 
   final UserEnreda participantUser;
+  final VoidCallback? onNavigateToCV;
+  final void Function(String sectionName)? onNavigateToSection;
 
   @override
   State<ParticipantControlPanelPage> createState() => _ParticipantControlPanelPageState();
@@ -70,25 +76,22 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
       children: [
         _buildGamificationSection(context),
         SpaceH40(),
-        Container(
-          height: widget.participantUser.competencies.isEmpty ? 460 : 650,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildInitialFormSection(context),
-                    SpaceH20(),
-                    _buildCompetenciesSection(context),
-                  ],
-                ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInitialFormSection(context),
+                  SpaceH20(),
+                  _buildCompetenciesSection(context),
+                ],
               ),
-              SpaceW20(),
-              _buildCvSection(context),
-            ],
-          ),
+            ),
+            SpaceW20(),
+            _buildCvSection(context),
+          ],
         ),
         SpaceH20(),
         Row(
@@ -571,15 +574,11 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
           margin: EdgeInsets.all(0.0),
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           width: Responsive.isMobile(context) ? MediaQuery.sizeOf(context).width : 340.0,
-          height: Responsive.isMobile(context) || Responsive.isDesktopS(context)
-              ? 450.0
-              : widget.participantUser.competencies.isEmpty
-                  ? 430.0
-                  : 620.0,
           borderColor: AppColors.greyAlt.withOpacity(0.15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
@@ -588,16 +587,13 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
               ),
               const SizedBox(height: 12),
               InkWell(
-                onTap: () => showCustomDialog(
-                  context,
-                  content: SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.85,
-                    width: Responsive.isDesktop(context)
-                        ? MediaQuery.sizeOf(context).width * 0.6
-                        : MediaQuery.sizeOf(context).width,
-                    child: MyCurriculumPage(user: widget.participantUser),
-                  ),
-                ),
+                onTap: () {
+                  if (widget.onNavigateToCV != null) {
+                    widget.onNavigateToCV!();
+                  } else if (widget.onNavigateToSection != null) {
+                    widget.onNavigateToSection!(StringConst.MY_CV);
+                  }
+                },
                 child: SizedBox(
                   width: 300,
                   height: 350,
@@ -608,10 +604,12 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                       alignment: Alignment.topCenter,
                       child: SizedBox(
                         width: 1020,
-                        height: 1200,
-                        child: MyCurriculumPage(
-                          mini: true,
-                          user: widget.participantUser,
+                        child: SingleChildScrollView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          child: MyCurriculumPage(
+                            mini: true,
+                            user: widget.participantUser,
+                          ),
                         ),
                       ),
                     ),

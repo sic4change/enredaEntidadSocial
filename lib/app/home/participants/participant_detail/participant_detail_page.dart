@@ -112,7 +112,19 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     int index = _menuOptions.indexOf(_value!);
     switch (index) {
       case 0:
-        return ParticipantControlPanelPage(participantUser: currentUser);
+        return ParticipantControlPanelPage(
+          participantUser: currentUser,
+          onNavigateToCV: () {
+            setState(() {
+              _value = StringConst.MY_CV;
+            });
+          },
+          onNavigateToSection: (section) {
+            setState(() {
+              _value = section;
+            });
+          },
+        );
       case 1:
         return ParticipantSocialReportPage(participantUser: currentUser, context: context);
       case 2:
