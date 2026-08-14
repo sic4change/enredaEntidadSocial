@@ -27,6 +27,10 @@ class MyCvMultiplePages extends StatefulWidget {
     required this.myPersonalExperiences,
     required this.myEducation,
     required this.mySecondaryEducation,
+    this.idSelectedDateEducation,
+    this.idSelectedDateSecondaryEducation,
+    this.idSelectedDateExperience,
+    this.idSelectedDatePersonalExperience,
     required this.competenciesNames,
     required this.languagesNames,
     required this.aboutMe,
@@ -46,6 +50,10 @@ class MyCvMultiplePages extends StatefulWidget {
   final List<Experience>? myPersonalExperiences;
   final List<Experience>? myEducation;
   final List<Experience>? mySecondaryEducation;
+  final List<String>? idSelectedDateEducation;
+  final List<String>? idSelectedDateSecondaryEducation;
+  final List<String>? idSelectedDateExperience;
+  final List<String>? idSelectedDatePersonalExperience;
   final List<String> competenciesNames;
   final List<Language> languagesNames;
   final String? aboutMe;
@@ -156,7 +164,7 @@ class MyAppState extends State<MyCvMultiplePages> with SingleTickerProviderState
         backgroundColor: AppColors.primary100,
         foregroundColor: Colors.white,
         iconTheme: const IconThemeData(color: AppColors.primary900,),
-        title: const Text('Mi Currículum'),
+        title: const Text('Currículum'),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.primary900,
@@ -182,6 +190,10 @@ class MyAppState extends State<MyCvMultiplePages> with SingleTickerProviderState
             widget.myPersonalExperiences,
             widget.myEducation!,
             widget.mySecondaryEducation,
+            widget.idSelectedDateEducation,
+            widget.idSelectedDateSecondaryEducation,
+            widget.idSelectedDateExperience,
+            widget.idSelectedDatePersonalExperience,
             widget.competenciesNames,
             widget.languagesNames,
             widget.aboutMe,

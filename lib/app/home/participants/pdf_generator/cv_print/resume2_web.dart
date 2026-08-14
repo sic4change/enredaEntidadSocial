@@ -37,6 +37,10 @@ Future<Uint8List> generateResume2(
     List<Experience>? myPersonalExperiences,
     List<Experience>? myEducation,
     List<Experience>? mySecondaryEducation,
+    List<String>? idSelectedDateEducation,
+    List<String>? idSelectedDateSecondaryEducation,
+    List<String>? idSelectedDateExperience,
+    List<String>? idSelectedDatePersonalExperience,
     List<String>? competenciesNames,
     List<Language>? languagesNames,
     String? aboutMe,
@@ -47,7 +51,21 @@ Future<Uint8List> generateResume2(
     List<CertificationRequest>? myReferences,
     String myMaxEducation,
     ) async {
-  final doc = pw.Document(title: 'Mi Currículum');
+  // Filter experiences by selected IDs if provided
+  final filteredExperiences = (idSelectedDateExperience != null && idSelectedDateExperience.isNotEmpty)
+      ? myExperiences?.where((Experience e) => e.id != null && idSelectedDateExperience.contains(e.id!)).toList()
+      : myExperiences;
+  final filteredPersonalExperiences = (idSelectedDatePersonalExperience != null && idSelectedDatePersonalExperience.isNotEmpty)
+      ? myPersonalExperiences?.where((Experience e) => e.id != null && idSelectedDatePersonalExperience.contains(e.id!)).toList()
+      : myPersonalExperiences;
+  final filteredEducation = (idSelectedDateEducation != null && idSelectedDateEducation.isNotEmpty)
+      ? myEducation?.where((Experience e) => e.id != null && idSelectedDateEducation.contains(e.id!)).toList()
+      : myEducation;
+  final filteredSecondaryEducation = (idSelectedDateSecondaryEducation != null && idSelectedDateSecondaryEducation.isNotEmpty)
+      ? mySecondaryEducation?.where((Experience e) => e.id != null && idSelectedDateSecondaryEducation.contains(e.id!)).toList()
+      : mySecondaryEducation;
+
+  final doc = pw.Document(title: 'Currículum');
   var fontPoppins = await PdfGoogleFonts.poppinsExtraBold();
 
   var url = user?.profilePic?.src ?? "";
@@ -295,7 +313,7 @@ Future<Uint8List> generateResume2(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   mainAxisAlignment: pw.MainAxisAlignment.start,
                   children: <pw.Widget>[
-                    pw.Text(myMaxEducation.toUpperCase() ?? '',
+                    pw.Text(myMaxEducation.toUpperCase(),
                         textScaleFactor: 1.2,
                         style: pw.Theme.of(context)
                             .defaultTextStyle
@@ -304,7 +322,7 @@ Future<Uint8List> generateResume2(
                             color: grey)),
                     pw.SizedBox(height: 10),
                     myExperiences != null && myExperiences.isNotEmpty ? _Category(title: StringConst.MY_PROFESIONAL_EXPERIENCES, color: primary900) : pw.Container(),
-                    for (var experience in myExperiences!)
+                    for (var experience in (filteredExperiences ?? []))
                       _Block(
                           title: (experience.activity != null) ? experience.activity : '',
                           organization: experience.organization != "" && experience.organization != null && experience.position != "" && experience.position != null ? '${experience.position} - ${experience.organization}'
@@ -314,20 +332,20 @@ Future<Uint8List> generateResume2(
                               : '-'} / ${experience.endDate != null ? formatter.format(experience.endDate!.toDate()) : 'Actualmente'}',
                           descriptionPlace: '${experience.location}',
                           descriptionActivities:
-                          experience.professionActivitiesText != null ? experience.professionActivitiesText!
+                          experience.professionActivitiesText != null && experience.professionActivitiesText!.isNotEmpty ? experience.professionActivitiesText!
                               .split(' / ')
-                              .where((item) => item.isNotEmpty) // Filter out empty items.
-                              .map((item) => '• $item')         // Prefix each item with a bullet point.
+                              .where((String item) => item.isNotEmpty) // Filter out empty items.
+                              .map<String>((String item) => '• $item') // Prefix each item with a bullet point.
                               .join('\n') :
                           experience.professionActivities
-                              .where((item) => item.isNotEmpty) // Filter out empty items.
-                              .map((item) => '• $item')         // Prefix each item with a bullet point.
+                              .where((String item) => item.isNotEmpty) // Filter out empty items.
+                              .map<String>((String item) => '• $item') // Prefix each item with a bullet point.
                               .join('\n')
                       ),
                     pw.SizedBox(height: 10),
 
                     myPersonalExperiences != null && myPersonalExperiences.isNotEmpty ? _Category(title: StringConst.MY_PERSONAL_EXPERIENCES, color: primary900) : pw.Container(),
-                    for (var experience in myPersonalExperiences!)
+                    for (var experience in (filteredPersonalExperiences ?? []))
                       _Block(
                         title: experience.subtype == 'Responsabilidades familiares' || experience.subtype == "Compromiso social" ? experience.subtype :
                         experience.activityRole != null && experience.activity != null && experience.subtype != null
@@ -344,8 +362,8 @@ Future<Uint8List> generateResume2(
                       ),
                     pw.SizedBox(height: 10),
 
-                    myEducation!.isNotEmpty ? _Category(title: StringConst.EDUCATION, color: primary900) : pw.Container(),
-                    for (var education in myEducation)
+                    (filteredEducation?.isNotEmpty ?? false) ? _Category(title: StringConst.EDUCATION, color: primary900) : pw.Container(),
+                    for (var education in (filteredEducation ?? []))
                       _Block(
                         title: education.institution != null && education.nameFormation != null && education.nameFormation != ''
                             ? '${education.institution} - ${education.nameFormation}'
@@ -358,8 +376,8 @@ Future<Uint8List> generateResume2(
                       ),
                     pw.SizedBox(height: 10),
 
-                    mySecondaryEducation!.isNotEmpty ? _Category(title: StringConst.SECONDARY_EDUCATION, color: primary900) : pw.Container(),
-                    for (var education in mySecondaryEducation)
+                    (filteredSecondaryEducation?.isNotEmpty ?? false) ? _Category(title: StringConst.SECONDARY_EDUCATION, color: primary900) : pw.Container(),
+                    for (var education in (filteredSecondaryEducation ?? []))
                       _Block(
                         title: education.institution != null && education.nameFormation != null && education.nameFormation != ''
                             ? '${education.institution} - ${education.nameFormation}'

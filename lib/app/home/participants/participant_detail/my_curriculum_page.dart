@@ -34,9 +34,12 @@ import 'competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 class MyCurriculumPage extends StatefulWidget {
-  const MyCurriculumPage({super.key, this.mini = false});
+  const MyCurriculumPage({super.key, this.mini = false, this.onPreview});
 
   final bool mini;
+  /// Called when the user taps "Previsualizar y descargar".
+  /// If null the widget will push MyCvMultiplePages directly (legacy behaviour).
+  final VoidCallback? onPreview;
 
   @override
   State<MyCurriculumPage> createState() => _MyCurriculumPageState();
@@ -511,45 +514,49 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
     return InkWell(
       onTap: () async {
         final checkAgreeDownload = user?.checkAgreeCV ?? false;
-        if(!checkAgreeDownload){
+        if (!checkAgreeDownload) {
           showAlertDialog(context,
               title: 'Aviso importante',
               content: 'El participante debe autorizar el uso y tratamiento de datos personales antes de continuar',
-              defaultActionText: 'Aceptar'
-          );
+              defaultActionText: 'Aceptar');
           return;
         }
         await _hasEnoughExperiences(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute( builder: (context) {
-            return MyCvMultiplePages(
-              user: user!,
-              myPhoto: true,
-              city: city!,
-              province: province!,
-              country: country!,
-              myExperiences: myCustomExperiences,
-              myPersonalExperiences: myPersonalCustomExperiences,
-              myEducation: myCustomEducation,
-              mySecondaryEducation: mySecondaryCustomEducation,
-              competenciesNames: myCustomCompetencies,
-              aboutMe: myCustomAboutMe,
-              languagesNames: myCustomLanguages,
-              myDataOfInterest: myCustomDataOfInterest,
-              myCustomEmail: myCustomEmail,
-              myCustomPhone: myCustomPhone,
-              myCustomReferences: myCustomReferences,
-              myMaxEducation: myMaxEducation?.label ?? '',
-            );
 
-          }),
-        );
+        // If the parent provided a callback, use it (step-based navigation).
+        // Otherwise fall back to pushing the full-page PDF viewer directly.
+        if (widget.onPreview != null) {
+          widget.onPreview!();
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return MyCvMultiplePages(
+                user: user!,
+                myPhoto: true,
+                city: city!,
+                province: province!,
+                country: country!,
+                myExperiences: myCustomExperiences,
+                myPersonalExperiences: myPersonalCustomExperiences,
+                myEducation: myCustomEducation,
+                mySecondaryEducation: mySecondaryCustomEducation,
+                competenciesNames: myCustomCompetencies,
+                aboutMe: myCustomAboutMe,
+                languagesNames: myCustomLanguages,
+                myDataOfInterest: myCustomDataOfInterest,
+                myCustomEmail: myCustomEmail,
+                myCustomPhone: myCustomPhone,
+                myCustomReferences: myCustomReferences,
+                myMaxEducation: myMaxEducation?.label ?? '',
+              );
+            }),
+          );
+        }
       },
       child: Image.asset(
         ImagePath.DOWNLOAD,
-        height:
-        Responsive.isTablet(context) || Responsive.isMobile(context)
+        height: Responsive.isTablet(context) || Responsive.isMobile(context)
             ? Sizes.ICON_SIZE_40
             : Sizes.ICON_SIZE_50,
       ),

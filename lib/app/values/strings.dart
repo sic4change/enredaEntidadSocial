@@ -530,7 +530,7 @@ class StringConst {
 
   // Profile
   static const String MY_PROFILE = 'Mi perfil';
-  static const String MY_CV = "Mi Currículum";
+  static const String MY_CV = "Currículum";
   static const String PERSONAL_DATA = 'Datos personales';
   static const String ABOUT_ME = "Un poco más sobre mí...";
   static const String PROFILE = "Carrera";
