@@ -1580,7 +1580,8 @@ class FirestoreDatabase implements Database {
           "renovationDate": document.renovationDate,
           "documentCategoryId": document.documentCategoryId,
           "documentSubCategoryId": document.documentSubCategoryId,
-          "createdBy": document.createdBy
+          "createdBy": document.createdBy,
+          "techCreated": true,
         },).then((value) => _service.updateData(
             path: APIPath.oneDocumentationParticipant(value),
             data: {
