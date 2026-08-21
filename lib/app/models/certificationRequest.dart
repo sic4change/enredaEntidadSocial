@@ -59,17 +59,47 @@ class CertificationRequest {
 
   Map<String, dynamic> toMap() {
     return {
-      'email' : email,
-      'phone' : phone,
-      'certifierName' : certifierName,
-      'certifierCompany' : certifierCompany,
-      'certifierPosition' : certifierPosition,
-      'competencyId' : competencyId,
-      'competencyName' : competencyName,
-      'unemployedRequesterId' : unemployedRequesterId,
-      'unemployedRequesterName' : unemployedRequesterName,
-      'certified' : certified,
-      'referenced' : referenced,
+      'email': email,
+      'phone': phone,
+      'certifierName': certifierName,
+      'certifierCompany': certifierCompany,
+      'certifierPosition': certifierPosition,
+      'competencyId': competencyId,
+      'competencyName': competencyName,
+      'unemployedRequesterId': unemployedRequesterId,
+      'unemployedRequesterName': unemployedRequesterName,
+      'certified': certified,
+      'referenced': referenced,
     };
+  }
+
+  CertificationRequest copyWith({
+    String? certificationRequestId,
+    String? email,
+    String? phone,
+    String? certifierName,
+    String? certifierCompany,
+    String? certifierPosition,
+    String? competencyId,
+    String? competencyName,
+    String? unemployedRequesterId,
+    String? unemployedRequesterName,
+    bool? certified,
+    bool? referenced,
+  }) {
+    return CertificationRequest(
+      certificationRequestId: certificationRequestId ?? this.certificationRequestId,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      certifierName: certifierName ?? this.certifierName,
+      certifierCompany: certifierCompany ?? this.certifierCompany,
+      certifierPosition: certifierPosition ?? this.certifierPosition,
+      competencyId: competencyId ?? this.competencyId,
+      competencyName: competencyName ?? this.competencyName,
+      unemployedRequesterId: unemployedRequesterId ?? this.unemployedRequesterId,
+      unemployedRequesterName: unemployedRequesterName ?? this.unemployedRequesterName,
+      certified: certified ?? this.certified,
+      referenced: referenced ?? this.referenced,
+    );
   }
 }

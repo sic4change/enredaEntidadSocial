@@ -70,21 +70,22 @@ class CompetencyTile extends StatelessWidget {
             ),
           ),
           if (competency.badgesImages[status] != null)
-            !kIsWeb ? CachedNetworkImage(
-                width: imageWidth,
-                progressIndicatorBuilder:
-                    (context, url, downloadProgress) => Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                ),
-                alignment: Alignment.center,
-                imageUrl: competency.badgesImages[status]!)
+            !kIsWeb
+                ? CachedNetworkImage(
+                    width: imageWidth,
+                    progressIndicatorBuilder: (context, url, downloadProgress) => Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    imageUrl: competency.badgesImages[status]!,
+                  )
                 : PrecacheCompetencyCard(
-              imageUrl: competency.badgesImages[status]!,
-              imageWidth: imageWidth,
-            ),
+                    imageUrl: competency.badgesImages[status]!,
+                    imageWidth: imageWidth,
+                  ),
         ],
       ),
     );

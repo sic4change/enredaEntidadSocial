@@ -16,6 +16,7 @@ class DocumentationParticipant {
     this.deleteDate,
     this.isDeleted = false,
     this.observations,
+    this.techCreated = false,
   });
 
   final String? documentationParticipantId;
@@ -32,6 +33,7 @@ class DocumentationParticipant {
   final DateTime? deleteDate;
   final bool isDeleted;
   final String? observations;
+  final bool techCreated;
 
   factory DocumentationParticipant.fromMap(Map<String, dynamic> data, String documentId) {
 
@@ -76,6 +78,7 @@ class DocumentationParticipant {
       isDeleted: isDeleted,
       deleteDate: deleteDate,
       observations: observations,
+      techCreated: data['techCreated'] ?? false,
     );
   }
 
@@ -101,6 +104,7 @@ class DocumentationParticipant {
       'isDeleted': isDeleted,
       'deletedate': deleteDate,
       'observations': observations,
+      'techCreated': techCreated,
     };
   }
 
@@ -117,6 +121,7 @@ class DocumentationParticipant {
     DateTime? deleteDate,
     bool? isDeleted,
     String? observations,
+    bool? techCreated,
   }) {
     return DocumentationParticipant(
         documentationParticipantId: documentationParticipantId?? this.documentationParticipantId,
@@ -131,6 +136,7 @@ class DocumentationParticipant {
         deleteDate: deleteDate?? this.deleteDate,
         isDeleted: isDeleted?? this.isDeleted,
         observations: observations?? this.observations,
+        techCreated: techCreated?? this.techCreated,
     );
   }
 
