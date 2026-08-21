@@ -1,9 +1,10 @@
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class BoxSocialNetworkData {
-  final IconData icon;
+  final FaIconData icon;
   final String title;
 
   BoxSocialNetworkData({
@@ -18,7 +19,7 @@ class BoxItemNetwork extends StatelessWidget {
     this.title = "",
   });
 
-  final IconData? icon;
+  final FaIconData? icon;
   final String title;
 
   @override
@@ -40,7 +41,7 @@ class BoxItemNetwork extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.greyBorder, width: 1.0),
               ),
-              child: Icon(icon, color: AppColors.turquoiseBlue, size: 16),
+              child: FaIcon(icon, color: AppColors.turquoiseBlue, size: 16),
             ),
             SizedBox(width: 5),
             Text(
