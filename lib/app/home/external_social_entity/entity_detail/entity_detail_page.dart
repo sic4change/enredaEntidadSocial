@@ -471,7 +471,7 @@ class _ExternalEntityDetailPageState extends State<ExternalEntityDetailPage> {
         onPressed: () { launchURL('mailto:${externalSocialEntity.email}?subject=Contacto ${externalSocialEntity.name}');},
       ),
       BoxSocialEntityContactData(
-        icon: FontAwesomeIcons.phone,
+        icon: Icons.phone,
         title: externalSocialEntity.entityPhone!,
       ),
     ];

@@ -1478,14 +1478,14 @@ class FirestoreDatabase implements Database {
         .where('documentSubCategoryId', isEqualTo: documentSubCategory.personalDocId),
     builder: (data, documentId) => DocumentationParticipant.fromMap(data, documentId),
     sort: (lhs, rhs) => lhs.name.compareTo(rhs.name),
-  );
+  ).map((list) => list.where((doc) => doc.isDeleted != true).toList());
 
   @override
   Stream<List<DocumentationParticipant>> documentationParticipantByUserStream(String userId) => _service.collectionStream(
     path: APIPath.documentationParticipants(),
     queryBuilder: (query) => query.where('userId', isEqualTo: userId),
     builder: (data, documentId) => DocumentationParticipant.fromMap(data, documentId),
-  );
+  ).map((list) => list.where((doc) => doc.isDeleted != true).toList());
 
   @override
   Stream<DocumentationParticipant> documentationParticipantStream(String documentId) =>
@@ -1513,7 +1513,9 @@ class FirestoreDatabase implements Database {
           "renovationDate": document.renovationDate,
           "documentCategoryId": document.documentCategoryId,
           "documentSubCategoryId": document.documentSubCategoryId,
-          "createdBy": document.createdBy
+          "createdBy": document.createdBy,
+          "isDeleted": false,
+          "observations": document.observations,
         },).then((value) => _service.updateData(
             path: APIPath.oneDocumentationParticipant(value),
             data: {
@@ -1556,7 +1558,13 @@ class FirestoreDatabase implements Database {
 
   @override
   Future<void> deleteDocumentationParticipant(DocumentationParticipant document) =>
-      _service.deleteData(path: APIPath.oneDocumentationParticipant(document.documentationParticipantId!));
+      _service.updateData(
+        path: APIPath.oneDocumentationParticipant(document.documentationParticipantId!),
+        data: {
+          'isDeleted': true,
+          'deletedate': DateTime.now(),
+        },
+      );
 
   @override
   Stream<InitialReport> initialReportsStreamByUserId(String? userId) {

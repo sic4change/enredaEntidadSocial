@@ -13,6 +13,9 @@ class DocumentationParticipant {
     this.nameDocument,
     this.createdBy,
     this.documentSubCategoryName,
+    this.deleteDate,
+    this.isDeleted = false,
+    this.observations,
   });
 
   final String? documentationParticipantId;
@@ -26,6 +29,9 @@ class DocumentationParticipant {
   final String? nameDocument;
   final String? createdBy;
   final String? documentSubCategoryName;
+  final DateTime? deleteDate;
+  final bool isDeleted;
+  final String? observations;
 
   factory DocumentationParticipant.fromMap(Map<String, dynamic> data, String documentId) {
 
@@ -51,6 +57,10 @@ class DocumentationParticipant {
       typeName = LocationCache.instance.personalDocumentTypeById(subCategoryId)?.title;
     }
 
+    final isDeleted = data['isDeleted'] ?? false;
+    final deleteDate = data['deletedate'] != null ? DateTime.parse(data['deletedate'].toDate().toString()) : null;
+    final observations = data['observations'];
+
     return DocumentationParticipant(
       documentationParticipantId: data['documentationParticipantId'],
       name: data['name'],
@@ -63,6 +73,9 @@ class DocumentationParticipant {
       renovationDate: data['renovationDate'] != null ? DateTime.parse(data['renovationDate'].toDate().toString()) : null,
       urlDocument: urlDocument,
       nameDocument: nameDocument,
+      isDeleted: isDeleted,
+      deleteDate: deleteDate,
+      observations: observations,
     );
   }
 
@@ -85,6 +98,9 @@ class DocumentationParticipant {
       'documentCategoryId': documentCategoryId,
       'documentSubCategoryId': documentSubCategoryId,
       'documentSubCategoryName': documentSubCategoryName,
+      'isDeleted': isDeleted,
+      'deletedate': deleteDate,
+      'observations': observations,
     };
   }
 
@@ -98,7 +114,9 @@ class DocumentationParticipant {
     String? documentCategoryId,
     String? documentSubCategoryId,
     String? documentSubCategoryName,
-
+    DateTime? deleteDate,
+    bool? isDeleted,
+    String? observations,
   }) {
     return DocumentationParticipant(
         documentationParticipantId: documentationParticipantId?? this.documentationParticipantId,
@@ -110,6 +128,9 @@ class DocumentationParticipant {
         documentSubCategoryId: documentSubCategoryId?? this.documentSubCategoryId,
         documentSubCategoryName: documentSubCategoryName?? this.documentSubCategoryName,
         renovationDate: renovationDate?? this.renovationDate,
+        deleteDate: deleteDate?? this.deleteDate,
+        isDeleted: isDeleted?? this.isDeleted,
+        observations: observations?? this.observations,
     );
   }
 
