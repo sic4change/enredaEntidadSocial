@@ -35,8 +35,8 @@ class DocumentationParticipant {
   final String? observations;
   final bool techCreated;
 
-  factory DocumentationParticipant.fromMap(Map<String, dynamic> data, String documentId) {
-
+  factory DocumentationParticipant.fromMap(
+      Map<String, dynamic> data, String documentId) {
     String? urlDocument;
     try {
       urlDocument = data['file']['src'];
@@ -53,14 +53,17 @@ class DocumentationParticipant {
 
     final subCategoryId = data['documentSubCategoryId'];
     String? typeName = data['documentSubCategoryName'];
-    
+
     // Fallback to LocationCache if the name is not stored yet
     if (typeName == null || typeName.isEmpty) {
-      typeName = LocationCache.instance.personalDocumentTypeById(subCategoryId)?.title;
+      typeName =
+          LocationCache.instance.personalDocumentTypeById(subCategoryId)?.title;
     }
 
     final isDeleted = data['isDeleted'] ?? false;
-    final deleteDate = data['deletedate'] != null ? DateTime.parse(data['deletedate'].toDate().toString()) : null;
+    final deleteDate = data['deletedate'] != null
+        ? DateTime.parse(data['deletedate'].toDate().toString())
+        : null;
     final observations = data['observations'];
 
     return DocumentationParticipant(
@@ -72,7 +75,9 @@ class DocumentationParticipant {
       documentCategoryId: data['documentCategoryId'],
       documentSubCategoryId: subCategoryId,
       documentSubCategoryName: typeName,
-      renovationDate: data['renovationDate'] != null ? DateTime.parse(data['renovationDate'].toDate().toString()) : null,
+      renovationDate: data['renovationDate'] != null
+          ? DateTime.parse(data['renovationDate'].toDate().toString())
+          : null,
       urlDocument: urlDocument,
       nameDocument: nameDocument,
       isDeleted: isDeleted,
@@ -83,7 +88,7 @@ class DocumentationParticipant {
   }
 
   @override
-  bool operator ==(Object other){
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DocumentationParticipant &&
@@ -124,20 +129,18 @@ class DocumentationParticipant {
     bool? techCreated,
   }) {
     return DocumentationParticipant(
-        documentationParticipantId: documentationParticipantId?? this.documentationParticipantId,
-        name: name?? this.name,
-        userId: userId?? this.userId,
-        createdBy: createdBy?? this.createdBy,
-        createDate: createDate?? this.createDate,
-        documentCategoryId: documentCategoryId?? this.documentCategoryId,
-        documentSubCategoryId: documentSubCategoryId?? this.documentSubCategoryId,
-        documentSubCategoryName: documentSubCategoryName?? this.documentSubCategoryName,
-        renovationDate: renovationDate?? this.renovationDate,
-        deleteDate: deleteDate?? this.deleteDate,
-        isDeleted: isDeleted?? this.isDeleted,
-        observations: observations?? this.observations,
-        techCreated: techCreated?? this.techCreated,
+      documentationParticipantId:
+          documentationParticipantId ?? this.documentationParticipantId,
+      name: name ?? this.name,
+      userId: userId ?? this.userId,
+      createdBy: createdBy ?? this.createdBy,
+      createDate: createDate ?? this.createDate,
+      documentCategoryId: documentCategoryId ?? this.documentCategoryId,
+      documentSubCategoryId:
+          documentSubCategoryId ?? this.documentSubCategoryId,
+      documentSubCategoryName:
+          documentSubCategoryName ?? this.documentSubCategoryName,
+      renovationDate: renovationDate ?? this.renovationDate,
     );
   }
-
 }
