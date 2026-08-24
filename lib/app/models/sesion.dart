@@ -62,6 +62,7 @@ class Sesion {
     this.participantSubvenciones = const <String, String>{},
     this.reminderUserIds = const <String>[],
     this.confirmedParticipants = const <String>[],
+    this.rejectedParticipants = const <String>[],
   }) : this.competenciaCategorias = competenciaCategorias.isNotEmpty
             ? competenciaCategorias
             : (competenciaCategoriaId != null && competenciaCategoriaId.isNotEmpty ? [competenciaCategoriaId] : const <String>[]),
@@ -206,6 +207,10 @@ class Sesion {
   /// "Confirmar Asistencia" button on the participant calendar.
   final List<String> confirmedParticipants;
 
+  /// Participants who cancelled/rejected their attendance, written from
+  /// enreda-app's "Cancelar Asistencia" button. Shown as a red dot here.
+  final List<String> rejectedParticipants;
+
   factory Sesion.fromMap(Map<String, dynamic> data, String documentId) {
     final invited = <String>[];
     if (data['invitedParticipants'] != null) {
@@ -281,6 +286,7 @@ class Sesion {
           _parseStringStringMap(data['participantSubvenciones']),
       reminderUserIds: _parseStringList(data['reminderUserIds']),
       confirmedParticipants: _parseStringList(data['confirmedParticipants']),
+      rejectedParticipants: _parseStringList(data['rejectedParticipants']),
     );
   }
 
@@ -315,9 +321,10 @@ class Sesion {
       'isAllDay': isAllDay,
       'invitedParticipants': invitedParticipants,
       'attendedParticipants': attendedParticipants,
-      // confirmedParticipants intentionally NOT written from this app: the
-      // participant app owns it, and re-writing a stale copy on session edits
-      // (merge:true) would clobber confirmations made in the meantime.
+      // confirmedParticipants and rejectedParticipants intentionally NOT
+      // written from this app: the participant app owns them, and re-writing
+      // a stale copy on session edits (merge:true) would clobber
+      // confirmations/cancellations made in the meantime.
       'title': title,
       'description': description,
       'observations': observations,

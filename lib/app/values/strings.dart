@@ -873,6 +873,8 @@ class StringConst {
       'Sin observaciones.';
   static const String SESION_CONFIRMED_BY_PARTICIPANT =
       'Asistencia confirmada por el participante';
+  static const String SESION_CANCELLED_BY_PARTICIPANT =
+      'Asistencia cancelada por el participante';
   static const String SESION_ACCEPTED_BY_ENTITY =
       'Asistencia aceptada por la entidad';
   static const String SESION_ATTENDANCE_ERROR =

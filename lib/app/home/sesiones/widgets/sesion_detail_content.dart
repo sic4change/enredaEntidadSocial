@@ -328,6 +328,8 @@ class _ParticipantPanelState extends State<_ParticipantPanel> {
                   attendanceState: _stateFor(id),
                   hasConfirmed:
                       widget.sesion.confirmedParticipants.contains(id),
+                  hasRejected:
+                      widget.sesion.rejectedParticipants.contains(id),
                   saving: _saving,
                   onMarkAttended: () => _markAttended(id),
                   onMarkAbsent: () => _markAbsent(id),
@@ -559,6 +561,7 @@ class _ParticipantAttendanceChip extends StatelessWidget {
     required this.userId,
     required this.attendanceState,
     required this.hasConfirmed,
+    required this.hasRejected,
     required this.saving,
     required this.onMarkAttended,
     required this.onMarkAbsent,
@@ -569,6 +572,9 @@ class _ParticipantAttendanceChip extends StatelessWidget {
 
   /// Participant tapped "Confirmar Asistencia" in enreda-app.
   final bool hasConfirmed;
+
+  /// Participant tapped "Cancelar Asistencia" in enreda-app.
+  final bool hasRejected;
   final bool saving;
   final VoidCallback onMarkAttended;
   final VoidCallback onMarkAbsent;
@@ -608,20 +614,24 @@ class _ParticipantAttendanceChip extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // Dot: green once the entity accepted/marked the attendance,
-                // yellow when only the participant confirmed so far.
-                if (hasConfirmed || isAttended) ...[
+                // Dot: green when the participant confirmed (or the entity
+                // marked attendance), red when the participant cancelled.
+                // Never yellow — an entity mark ("attended") outranks a
+                // participant cancellation.
+                if (hasConfirmed || hasRejected || isAttended) ...[
                   Tooltip(
                     message: isAttended
                         ? StringConst.SESION_ACCEPTED_BY_ENTITY
-                        : StringConst.SESION_CONFIRMED_BY_PARTICIPANT,
+                        : (hasRejected
+                            ? StringConst.SESION_CANCELLED_BY_PARTICIPANT
+                            : StringConst.SESION_CONFIRMED_BY_PARTICIPANT),
                     child: Container(
                       width: Sizes.WIDTH_12,
                       height: Sizes.HEIGHT_12,
                       decoration: BoxDecoration(
-                        color: isAttended
-                            ? AppColors.attendanceGreen
-                            : AppColors.yellow,
+                        color: !isAttended && hasRejected
+                            ? AppColors.attendanceRed
+                            : AppColors.attendanceGreen,
                         shape: BoxShape.circle,
                       ),
                     ),
