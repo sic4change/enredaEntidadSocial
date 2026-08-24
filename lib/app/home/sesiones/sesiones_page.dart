@@ -444,15 +444,25 @@ class _TabBar extends StatelessWidget {
           isActive: activeTab == _SesionesTab.pasadas,
           onTap: () => onSelect(_SesionesTab.pasadas),
         ),
-        // Content filter, same pill UI: off = shared (group) sessions,
-        // on = all of my own sessions (group + individual). Shows the
-        // organization name while off and "Mis sesiones" once toggled on;
-        // brand teal (not yellow) so it reads as a different filter axis
-        // than the Próximas/Pasadas tabs.
+        // Content filter, same pill UI, as two mutually-exclusive pills:
+        // entity name = shared view (group sessions + my own individual),
+        // "Mis sesiones" = only my own (group + individual). Brand teal
+        // (not yellow) so it reads as a different filter axis than the
+        // Próximas/Pasadas tabs.
         _SesionTabPill(
-          label: misSesiones ? StringConst.SESION_FILTER_MIS : entityName,
+          label: entityName,
+          isActive: !misSesiones,
+          onTap: () {
+            if (misSesiones) onToggleMis();
+          },
+          activeColor: AppColors.primaryColor,
+        ),
+        _SesionTabPill(
+          label: StringConst.SESION_FILTER_MIS,
           isActive: misSesiones,
-          onTap: onToggleMis,
+          onTap: () {
+            if (!misSesiones) onToggleMis();
+          },
           activeColor: AppColors.primaryColor,
         ),
       ],
