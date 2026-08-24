@@ -799,6 +799,10 @@ class StringConst {
       'Sin texto de desarrollo y evaluación.';
   static const String SESION_DETAIL_EVALUACION = 'Evaluación:';
   static const String SESION_DETAIL_NO_EVALUACION = 'Sin evaluación.';
+  static const String SESION_DETAIL_EDIT_EVALUACION_TOOLTIP =
+      'Editar evaluación';
+  static const String SESION_EVALUACION_SAVE_ERROR =
+      'No se pudo guardar la evaluación. Inténtalo de nuevo.';
   static const String SESION_DETAIL_NO_OBSERVACIONES =
       'Sin observaciones.';
   static const String SESION_DETAIL_NO_PARTICIPANTES =
