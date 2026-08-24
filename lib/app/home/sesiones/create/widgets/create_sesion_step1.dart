@@ -30,6 +30,7 @@ typedef Step1Submit = void Function({
   required List<String> competencias,
   required String? description,
   required String? observations,
+  required String? evaluacion,
   required List<String> invitedParticipants,
 });
 
@@ -58,6 +59,7 @@ class CreateSesionStep1 extends StatefulWidget {
     required this.initialCompetencias,
     required this.initialDescription,
     required this.initialObservations,
+    required this.initialEvaluacion,
     required this.initialInvitedParticipants,
     required this.onNext,
   });
@@ -78,6 +80,7 @@ class CreateSesionStep1 extends StatefulWidget {
   final List<String> initialCompetencias;
   final String? initialDescription;
   final String? initialObservations;
+  final String? initialEvaluacion;
   final List<String> initialInvitedParticipants;
   final Step1Submit onNext;
 
@@ -113,6 +116,7 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
   late String _sessionType = widget.initialSessionType;
   late String? _description = widget.initialDescription;
   late String? _observations = widget.initialObservations;
+  late String? _evaluacion = widget.initialEvaluacion;
   late List<String> _invitedIds =
       List<String>.from(widget.initialInvitedParticipants);
 
@@ -473,6 +477,18 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
                 ),
               ),
               const SizedBox(height: Sizes.PADDING_20),
+              // Evaluación — like Desarrollo, only makes sense once the
+              // session already happened.
+              _LabeledBlock(
+                label: StringConst.SESION_FIELD_EVALUACION_LABEL,
+                child: _MultilineField(
+                  initialValue: _evaluacion,
+                  hint: StringConst.SESION_FIELD_EVALUACION_HINT,
+                  height: 160,
+                  onChanged: (v) => _evaluacion = v,
+                ),
+              ),
+              const SizedBox(height: Sizes.PADDING_20),
             ],
             // ── Convocar participantes + Observaciones, 50/50 ────────────
             Row(
@@ -593,6 +609,7 @@ class _CreateSesionStep1State extends State<CreateSesionStep1> {
       competencias: _competencias,
       description: _description,
       observations: _observations,
+      evaluacion: _evaluacion,
       invitedParticipants: List<String>.from(_invitedIds),
     );
   }

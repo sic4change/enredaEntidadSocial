@@ -752,6 +752,9 @@ class StringConst {
       'Observaciones';
   static const String SESION_FIELD_OBSERVACIONES_HINT =
       'Añade observaciones o una breve evaluación de la sesión.';
+  static const String SESION_FIELD_EVALUACION_LABEL = 'Evaluación';
+  static const String SESION_FIELD_EVALUACION_HINT =
+      'Escribe la evaluación una vez finalizada la sesión.';
   static const String SESION_BUTTON_SIGUIENTE = 'Siguiente';
   static const String SESION_BUTTON_GUARDAR = 'Guardar';
   static const String SESION_BUTTON_CANCELAR = 'Cancelar';
@@ -794,6 +797,8 @@ class StringConst {
       'Confirma si todos los participantes convocados asistieron a la sesión.';
   static const String SESION_DETAIL_NO_DESARROLLO =
       'Sin texto de desarrollo y evaluación.';
+  static const String SESION_DETAIL_EVALUACION = 'Evaluación:';
+  static const String SESION_DETAIL_NO_EVALUACION = 'Sin evaluación.';
   static const String SESION_DETAIL_NO_OBSERVACIONES =
       'Sin observaciones.';
   static const String SESION_DETAIL_NO_PARTICIPANTES =

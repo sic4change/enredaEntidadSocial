@@ -124,6 +124,30 @@ class _DetailContentCard extends StatelessWidget {
               fontWeight: FontWeight.w300,
             ),
           ),
+          // Evaluación — only surfaced once the session has already ended,
+          // mirroring the create/edit form gating.
+          if ((sesion.fechaFin ?? sesion.scheduledAt)
+              .isBefore(DateTime.now())) ...[
+            const SizedBox(height: Sizes.PADDING_22),
+            Text(
+              StringConst.SESION_DETAIL_EVALUACION,
+              style: textTheme.bodyLarge?.copyWith(
+                color: AppColors.primary900,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: Sizes.PADDING_8),
+            Text(
+              (sesion.evaluacion == null ||
+                      sesion.evaluacion!.trim().isEmpty)
+                  ? StringConst.SESION_DETAIL_NO_EVALUACION
+                  : sesion.evaluacion!,
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.greyTxtAlt,
+                fontWeight: FontWeight.w300,
+              ),
+            ),
+          ],
           const SizedBox(height: Sizes.PADDING_22),
           Text(
             StringConst.SESION_DETAIL_OBSERVACIONES,
