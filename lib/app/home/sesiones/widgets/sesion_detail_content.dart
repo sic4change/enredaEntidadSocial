@@ -84,15 +84,16 @@ class _DetailContentCard extends StatelessWidget {
 
   final Sesion sesion;
 
-  /// Inline edit of the Evaluación field via the small pencil — writes only
-  /// `evaluacion` (field-level update), so no need to open the full editor.
-  /// The surrounding `sesionStream` refreshes the card after the save.
-  Future<void> _editEvaluacion(BuildContext context) async {
+  /// Inline edit of the "Desarrollo y evaluación" body via the small pencil —
+  /// writes only `description` (field-level update), so no need to open the
+  /// full editor. The surrounding `sesionStream` refreshes the card after
+  /// the save.
+  Future<void> _editDesarrollo(BuildContext context) async {
     final sesionId = sesion.sesionId;
     if (sesionId == null || sesionId.isEmpty) return;
     final database = Provider.of<Database>(context, listen: false);
     final messenger = ScaffoldMessenger.of(context);
-    final controller = TextEditingController(text: sesion.evaluacion ?? '');
+    final controller = TextEditingController(text: sesion.description ?? '');
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) {
@@ -100,7 +101,7 @@ class _DetailContentCard extends StatelessWidget {
         return AlertDialog(
           backgroundColor: AppColors.white,
           title: Text(
-            StringConst.SESION_FIELD_EVALUACION_LABEL,
+            StringConst.SESION_FIELD_DESCRIPTION_LABEL,
             style: textTheme.bodyLarge?.copyWith(
               color: AppColors.primary900,
               fontWeight: FontWeight.w600,
@@ -115,7 +116,7 @@ class _DetailContentCard extends StatelessWidget {
               style: textTheme.bodyMedium
                   ?.copyWith(color: AppColors.greyTxtAlt),
               decoration: const InputDecoration(
-                hintText: StringConst.SESION_FIELD_EVALUACION_HINT,
+                hintText: StringConst.SESION_FIELD_DESCRIPTION_HINT,
               ),
             ),
           ),
@@ -144,11 +145,11 @@ class _DetailContentCard extends StatelessWidget {
     );
     if (saved != true) return;
     try {
-      await database.updateSesionEvaluacion(
+      await database.updateSesionDescription(
           sesionId, controller.text.trim());
     } catch (_) {
       messenger.showSnackBar(const SnackBar(
-          content: Text(StringConst.SESION_EVALUACION_SAVE_ERROR)));
+          content: Text(StringConst.SESION_DESARROLLO_SAVE_ERROR)));
     }
   }
 
@@ -172,14 +173,40 @@ class _DetailContentCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Sizes.PADDING_22),
-          Text(
-            StringConst.SESION_DETAIL_DESARROLLO,
-            // Figma correction #4: section headers now render in turquoise
-            // (primary900 = #054D5E) — was greyTxtAlt.
-            style: textTheme.bodyLarge?.copyWith(
-              color: AppColors.primary900,
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            children: [
+              Text(
+                StringConst.SESION_DETAIL_DESARROLLO,
+                // Figma correction #4: section headers now render in
+                // turquoise (primary900 = #054D5E) — was greyTxtAlt.
+                style: textTheme.bodyLarge?.copyWith(
+                  color: AppColors.primary900,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              // Pencil: inline edit of just this field once the session has
+              // ended — no need to open the full session editor.
+              if ((sesion.fechaFin ?? sesion.scheduledAt)
+                  .isBefore(DateTime.now())) ...[
+                const SizedBox(width: Sizes.PADDING_8),
+                Tooltip(
+                  message:
+                      StringConst.SESION_DETAIL_EDIT_DESARROLLO_TOOLTIP,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(Sizes.RADIUS_20),
+                    onTap: () => _editDesarrollo(context),
+                    child: Padding(
+                      padding: const EdgeInsets.all(Sizes.PADDING_4),
+                      child: Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: AppColors.primary900,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: Sizes.PADDING_8),
           Text(
@@ -192,53 +219,6 @@ class _DetailContentCard extends StatelessWidget {
               fontWeight: FontWeight.w300,
             ),
           ),
-          // Evaluación — only surfaced once the session has already ended,
-          // mirroring the create/edit form gating. The pencil edits just
-          // this field without opening the full session editor.
-          if ((sesion.fechaFin ?? sesion.scheduledAt)
-              .isBefore(DateTime.now())) ...[
-            const SizedBox(height: Sizes.PADDING_22),
-            Row(
-              children: [
-                Text(
-                  StringConst.SESION_DETAIL_EVALUACION,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: AppColors.primary900,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: Sizes.PADDING_8),
-                Tooltip(
-                  message:
-                      StringConst.SESION_DETAIL_EDIT_EVALUACION_TOOLTIP,
-                  child: InkWell(
-                    borderRadius:
-                        BorderRadius.circular(Sizes.RADIUS_20),
-                    onTap: () => _editEvaluacion(context),
-                    child: Padding(
-                      padding: const EdgeInsets.all(Sizes.PADDING_4),
-                      child: Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: AppColors.primary900,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: Sizes.PADDING_8),
-            Text(
-              (sesion.evaluacion == null ||
-                      sesion.evaluacion!.trim().isEmpty)
-                  ? StringConst.SESION_DETAIL_NO_EVALUACION
-                  : sesion.evaluacion!,
-              style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.greyTxtAlt,
-                fontWeight: FontWeight.w300,
-              ),
-            ),
-          ],
           const SizedBox(height: Sizes.PADDING_22),
           Text(
             StringConst.SESION_DETAIL_OBSERVACIONES,

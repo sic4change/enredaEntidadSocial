@@ -27,7 +27,6 @@ class Sesion {
     this.title,
     this.description,
     this.observations,
-    this.evaluacion,
     this.lugar,
     this.duracion,
     this.createIpil = false,
@@ -131,10 +130,6 @@ class Sesion {
 
   /// Long-form "Observaciones y/o incidencias" body.
   final String? observations;
-
-  /// Post-session "Evaluación" body — only surfaced once the session has
-  /// already taken place.
-  final String? evaluacion;
 
   /// "Lugar de la actividad" — free-text venue / address.
   final String? lugar;
@@ -245,7 +240,6 @@ class Sesion {
       title: data['title']?.toString(),
       description: data['description']?.toString(),
       observations: data['observations']?.toString(),
-      evaluacion: data['evaluacion']?.toString(),
       lugar: data['lugar']?.toString(),
       duracion: data['duracion']?.toString(),
       createIpil: data['createIpil'] == true,
@@ -334,7 +328,6 @@ class Sesion {
       'title': title,
       'description': description,
       'observations': observations,
-      'evaluacion': evaluacion,
       'lugar': lugar,
       'duracion': duracion,
       'createIpil': createIpil,

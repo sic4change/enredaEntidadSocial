@@ -302,7 +302,7 @@ abstract class Database {
      Stream<Sesion> sesionStream(String sesionId);
      Future<void> addSesion(Sesion sesion);
      Future<void> setSesion(Sesion sesion);
-     Future<void> updateSesionEvaluacion(String sesionId, String? evaluacion);
+     Future<void> updateSesionDescription(String sesionId, String? description);
      Future<void> deleteSesion(Sesion sesion);
      /// All sessions belonging to a specific técnico (for the calendar view).
      /// Filtered by both socialEntityId and tecnicoId; no date filter so the
@@ -1496,13 +1496,13 @@ class FirestoreDatabase implements Database {
   }
 
   @override
-  Future<void> updateSesionEvaluacion(String sesionId, String? evaluacion) =>
+  Future<void> updateSesionDescription(String sesionId, String? description) =>
       // Field-level write so the inline pencil never clobbers participant-app
       // owned fields (confirmed/rejectedParticipants) or the rest of the doc.
       _service.updateData(
         path: APIPath.sesion(sesionId),
         data: {
-          'evaluacion': evaluacion,
+          'description': description,
           'lastUpdated': DateTime.now(),
         },
       );

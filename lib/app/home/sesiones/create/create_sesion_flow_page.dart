@@ -80,7 +80,6 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
   List<String> _competencias = <String>[];
   String? _description;
   String? _observations;
-  String? _evaluacion;
   final List<String> _invitedParticipants = <String>[];
 
   // ── IPIL draft state ─────────────────────────────────────────────────────
@@ -127,7 +126,6 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       _competencias = List<String>.from(seed.competencias);
       _description = seed.description;
       _observations = seed.observations;
-      _evaluacion = seed.evaluacion;
       _invitedParticipants.addAll(seed.invitedParticipants);
 
       // Seed IPIL template from existing sesion (edit mode).
@@ -210,7 +208,6 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
           initialCompetencias: _competencias,
           initialDescription: _description,
           initialObservations: _observations,
-          initialEvaluacion: _evaluacion,
           initialInvitedParticipants: _invitedParticipants,
           onNext: _handleStep1Submit,
         );
@@ -268,7 +265,6 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
     required List<String> competencias,
     required String? description,
     required String? observations,
-    required String? evaluacion,
     required List<String> invitedParticipants,
   }) {
     setState(() {
@@ -286,7 +282,6 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       _competencias = competencias;
       _description = description;
       _observations = observations;
-      _evaluacion = evaluacion;
       _invitedParticipants
         ..clear()
         ..addAll(invitedParticipants);
@@ -422,7 +417,6 @@ class _CreateSesionFlowPageState extends State<CreateSesionFlowPage> {
       title: _title,
       description: _description,
       observations: _observations,
-      evaluacion: _evaluacion,
       lugar: _lugar,
       duracion: _duracion,
       createIpil: _createIpil,
