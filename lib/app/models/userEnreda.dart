@@ -1,9 +1,7 @@
 import 'package:enreda_empresas/app/models/addressUser.dart';
-import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/interestsUserEnreda.dart';
 import 'package:enreda_empresas/app/models/language.dart';
 import 'package:enreda_empresas/app/models/motivation.dart';
-import 'package:enreda_empresas/app/models/documentationParticipant.dart';
 import 'package:enreda_empresas/app/models/profilepic.dart';
 import 'package:enreda_empresas/app/models/socialItineraryCycle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -179,9 +177,11 @@ class UserEnreda {
     // final bool? showChatWelcome = data['showChatWelcome'];
 
     Map<String, String> competencies = {};
-    if (data['competencies'] != null) {
-      (data['competencies'] as Map<String, dynamic>).forEach((key, value) {
-        competencies[key] = value;
+    if (data['competencies'] != null && data['competencies'] is Map) {
+      (data['competencies'] as Map).forEach((key, value) {
+        if (key != null && value != null) {
+          competencies[key.toString()] = value.toString();
+        }
       });
     }
 

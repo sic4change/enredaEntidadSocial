@@ -1,6 +1,7 @@
 import 'package:enreda_empresas/app/common_widgets/edit_rounded_shape.dart';
 import 'package:enreda_empresas/app/home/participants/edit_participant/edit_participant_info_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_control_panel_page.dart';
+import 'package:enreda_empresas/app/home/participants/participant_detail/curriculum/participant_curriculum_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/documentation/participant_documentation_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/ipils/participant_ipil_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
@@ -42,6 +43,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     StringConst.SOCIAL_REPORTS,
     StringConst.IPIL,
     StringConst.PERSONAL_DOCUMENTATION,
+    StringConst.MY_CV,
     StringConst.QUESTIONNAIRES
   ];
   String? _value;
@@ -110,7 +112,19 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     int index = _menuOptions.indexOf(_value!);
     switch (index) {
       case 0:
-        return ParticipantControlPanelPage(participantUser: currentUser);
+        return ParticipantControlPanelPage(
+          participantUser: currentUser,
+          onNavigateToCV: () {
+            setState(() {
+              _value = StringConst.MY_CV;
+            });
+          },
+          onNavigateToSection: (section) {
+            setState(() {
+              _value = section;
+            });
+          },
+        );
       case 1:
         return ParticipantSocialReportPage(participantUser: currentUser, context: context);
       case 2:
@@ -118,6 +132,8 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
       case 3:
         return ParticipantDocumentationPage(participantUser: currentUser);
       case 4:
+        return ParticipantCurriculumPage(participantUser: currentUser);
+      case 5:
         return Container();
       default:
         return Container();
@@ -225,7 +241,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
       spacing: 20.0,
       runSpacing: 20.0,
       children: List<Widget>.generate(
-        5,
+        6,
         (int index) {
           return ChoiceChip(
             shape: RoundedRectangleBorder(

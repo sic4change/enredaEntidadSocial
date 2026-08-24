@@ -12,33 +12,35 @@ class Competency {
   });
 
   factory Competency.fromMap(Map<String, dynamic> data, String documentId) {
-    final String id = data['id'];
-    final String name = data['name'];
-    final String description = data['description'];
+    final String id = (data['id'] ?? documentId).toString();
+    final String name = (data['name'] ?? '').toString();
+    final String description = (data['description'] ?? '').toString();
 
     Map<String, String> badgesImages = {};
-    if (data['badgesImages'] != null) {
-      badgesImages[StringConst.BADGE_EMPTY] =
-          data['badgesImages'][StringConst.BADGE_EMPTY];
-      badgesImages[StringConst.BADGE_IDENTIFIED] =
-          data['badgesImages'][StringConst.BADGE_IDENTIFIED];
-      badgesImages[StringConst.BADGE_VALIDATED] =
-          data['badgesImages'][StringConst.BADGE_VALIDATED];
-      badgesImages[StringConst.BADGE_PROCESSING] =
-      data['badgesImages'][StringConst.BADGE_VALIDATED];
-      badgesImages[StringConst.BADGE_CERTIFIED] =
-          data['badgesImages'][StringConst.BADGE_CERTIFIED];
+    if (data['badgesImages'] != null && data['badgesImages'] is Map) {
+      (data['badgesImages'] as Map).forEach((k, v) {
+        if (k != null && v != null) {
+          badgesImages[k.toString()] = v.toString();
+        }
+      });
+      // Fallback for BADGE_PROCESSING if missing
+      if (!badgesImages.containsKey(StringConst.BADGE_PROCESSING) &&
+          badgesImages.containsKey(StringConst.BADGE_VALIDATED)) {
+        badgesImages[StringConst.BADGE_PROCESSING] =
+            badgesImages[StringConst.BADGE_VALIDATED]!;
+      }
     }
 
     List<String> testQuestions = [];
-    if (data['testQuestions'] != null) {
-      List<dynamic> list = data['testQuestions'];
-      list.forEach((element) {
-        testQuestions.add(element);
-      });
+    if (data['testQuestions'] != null && data['testQuestions'] is List) {
+      for (final element in (data['testQuestions'] as List)) {
+        if (element != null) {
+          testQuestions.add(element.toString());
+        }
+      }
     }
 
-    final String? trickQuestion = data['trickQuestion'];
+    final String? trickQuestion = data['trickQuestion']?.toString();
 
     return Competency(
       id: id,

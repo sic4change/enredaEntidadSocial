@@ -13,6 +13,10 @@ class DocumentationParticipant {
     this.nameDocument,
     this.createdBy,
     this.documentSubCategoryName,
+    this.deleteDate,
+    this.isDeleted = false,
+    this.observations,
+    this.techCreated = false,
   });
 
   final String? documentationParticipantId;
@@ -26,9 +30,13 @@ class DocumentationParticipant {
   final String? nameDocument;
   final String? createdBy;
   final String? documentSubCategoryName;
+  final DateTime? deleteDate;
+  final bool isDeleted;
+  final String? observations;
+  final bool techCreated;
 
-  factory DocumentationParticipant.fromMap(Map<String, dynamic> data, String documentId) {
-
+  factory DocumentationParticipant.fromMap(
+      Map<String, dynamic> data, String documentId) {
     String? urlDocument;
     try {
       urlDocument = data['file']['src'];
@@ -45,11 +53,18 @@ class DocumentationParticipant {
 
     final subCategoryId = data['documentSubCategoryId'];
     String? typeName = data['documentSubCategoryName'];
-    
+
     // Fallback to LocationCache if the name is not stored yet
     if (typeName == null || typeName.isEmpty) {
-      typeName = LocationCache.instance.personalDocumentTypeById(subCategoryId)?.title;
+      typeName =
+          LocationCache.instance.personalDocumentTypeById(subCategoryId)?.title;
     }
+
+    final isDeleted = data['isDeleted'] ?? false;
+    final deleteDate = data['deletedate'] != null
+        ? DateTime.parse(data['deletedate'].toDate().toString())
+        : null;
+    final observations = data['observations'];
 
     return DocumentationParticipant(
       documentationParticipantId: data['documentationParticipantId'],
@@ -60,14 +75,20 @@ class DocumentationParticipant {
       documentCategoryId: data['documentCategoryId'],
       documentSubCategoryId: subCategoryId,
       documentSubCategoryName: typeName,
-      renovationDate: data['renovationDate'] != null ? DateTime.parse(data['renovationDate'].toDate().toString()) : null,
+      renovationDate: data['renovationDate'] != null
+          ? DateTime.parse(data['renovationDate'].toDate().toString())
+          : null,
       urlDocument: urlDocument,
       nameDocument: nameDocument,
+      isDeleted: isDeleted,
+      deleteDate: deleteDate,
+      observations: observations,
+      techCreated: data['techCreated'] ?? false,
     );
   }
 
   @override
-  bool operator ==(Object other){
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DocumentationParticipant &&
@@ -85,6 +106,10 @@ class DocumentationParticipant {
       'documentCategoryId': documentCategoryId,
       'documentSubCategoryId': documentSubCategoryId,
       'documentSubCategoryName': documentSubCategoryName,
+      'isDeleted': isDeleted,
+      'deletedate': deleteDate,
+      'observations': observations,
+      'techCreated': techCreated,
     };
   }
 
@@ -98,19 +123,24 @@ class DocumentationParticipant {
     String? documentCategoryId,
     String? documentSubCategoryId,
     String? documentSubCategoryName,
-
+    DateTime? deleteDate,
+    bool? isDeleted,
+    String? observations,
+    bool? techCreated,
   }) {
     return DocumentationParticipant(
-        documentationParticipantId: documentationParticipantId?? this.documentationParticipantId,
-        name: name?? this.name,
-        userId: userId?? this.userId,
-        createdBy: createdBy?? this.createdBy,
-        createDate: createDate?? this.createDate,
-        documentCategoryId: documentCategoryId?? this.documentCategoryId,
-        documentSubCategoryId: documentSubCategoryId?? this.documentSubCategoryId,
-        documentSubCategoryName: documentSubCategoryName?? this.documentSubCategoryName,
-        renovationDate: renovationDate?? this.renovationDate,
+      documentationParticipantId:
+          documentationParticipantId ?? this.documentationParticipantId,
+      name: name ?? this.name,
+      userId: userId ?? this.userId,
+      createdBy: createdBy ?? this.createdBy,
+      createDate: createDate ?? this.createDate,
+      documentCategoryId: documentCategoryId ?? this.documentCategoryId,
+      documentSubCategoryId:
+          documentSubCategoryId ?? this.documentSubCategoryId,
+      documentSubCategoryName:
+          documentSubCategoryName ?? this.documentSubCategoryName,
+      renovationDate: renovationDate ?? this.renovationDate,
     );
   }
-
 }

@@ -2,7 +2,6 @@ import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
-import 'package:enreda_empresas/app/common_widgets/show_custom_dialog.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/my_curriculum_page.dart';
@@ -26,9 +25,16 @@ import 'package:provider/provider.dart';
 
 
 class ParticipantControlPanelPage extends StatefulWidget {
-  const ParticipantControlPanelPage({required this.participantUser, super.key});
+  const ParticipantControlPanelPage({
+    required this.participantUser,
+    this.onNavigateToCV,
+    this.onNavigateToSection,
+    super.key,
+  });
 
   final UserEnreda participantUser;
+  final VoidCallback? onNavigateToCV;
+  final void Function(String sectionName)? onNavigateToSection;
 
   @override
   State<ParticipantControlPanelPage> createState() => _ParticipantControlPanelPageState();
@@ -70,25 +76,22 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
       children: [
         _buildGamificationSection(context),
         SpaceH40(),
-        Container(
-          height: widget.participantUser.competencies.isEmpty ? 460 : 650,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildInitialFormSection(context),
-                    SpaceH20(),
-                    _buildCompetenciesSection(context),
-                  ],
-                ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInitialFormSection(context),
+                  SpaceH20(),
+                  _buildCompetenciesSection(context),
+                ],
               ),
-              SpaceW20(),
-              _buildCvSection(context),
-            ],
-          ),
+            ),
+            SpaceW20(),
+            _buildCvSection(context),
+          ],
         ),
         SpaceH20(),
         Row(
@@ -487,7 +490,7 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                                     CompetencyTile(
                                       competency: competency,
                                       status: status,
-                                      //mini: true,
+                                      height: 40.0,
                                     ),
                                     Positioned(
                                       bottom: 0,
@@ -515,12 +518,18 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                       children: [
                         InkWell(
                           onTap: () {
-                            if (controller.position.pixels >=
-                                controller.position.minScrollExtent)
+                            if (controller.hasClients &&
+                                controller.position.pixels >
+                                    controller.position.minScrollExtent) {
                               controller.animateTo(
-                                  controller.position.pixels - scrollJump,
-                                  duration: Duration(milliseconds: 500),
+                                  (controller.position.pixels - scrollJump)
+                                      .clamp(
+                                    controller.position.minScrollExtent,
+                                    controller.position.maxScrollExtent,
+                                  ),
+                                  duration: const Duration(milliseconds: 500),
                                   curve: Curves.ease);
+                            }
                           },
                           child: Image.asset(
                             ImagePath.ARROW_BACK,
@@ -530,12 +539,18 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                         SpaceW12(),
                         InkWell(
                           onTap: () {
-                            if (controller.position.pixels <=
-                                controller.position.maxScrollExtent)
+                            if (controller.hasClients &&
+                                controller.position.pixels <
+                                    controller.position.maxScrollExtent) {
                               controller.animateTo(
-                                  controller.position.pixels + scrollJump,
-                                  duration: Duration(milliseconds: 500),
+                                  (controller.position.pixels + scrollJump)
+                                      .clamp(
+                                    controller.position.minScrollExtent,
+                                    controller.position.maxScrollExtent,
+                                  ),
+                                  duration: const Duration(milliseconds: 500),
                                   curve: Curves.ease);
+                            }
                           },
                           child: Image.asset(
                             ImagePath.ARROW_FORWARD,
@@ -557,47 +572,53 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
       children: [
         RoundedContainer(
           margin: EdgeInsets.all(0.0),
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           width: Responsive.isMobile(context) ? MediaQuery.sizeOf(context).width : 340.0,
-          height: Responsive.isMobile(context) || Responsive.isDesktopS(context) ? 450.0 : widget.participantUser.competencies.isEmpty ? 430.0 : 620,
           borderColor: AppColors.greyAlt.withOpacity(0.15),
-          child: SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  children: [
-                    CustomTextBoldTitle(title: StringConst.CV),
-                  ],
-                ),
-                InkWell(
-                  onTap: () => showCustomDialog(
-                    context,
-                    content: Container(
-                        height: MediaQuery.sizeOf(context).height * 0.85,
-                        width: Responsive.isDesktop(context) ? MediaQuery.sizeOf(context).width * 0.6: MediaQuery.sizeOf(context).width,
-                        child: MyCurriculumPage()),
-                  ),
-                  child: SizedBox(
-                    width: 300,
-                    height: 350,
-                    child: OverflowBox(
-                      alignment: Alignment.topLeft,
-                      maxWidth: double.infinity,
-                      maxHeight: double.infinity,
-                      child: Transform.scale(
-                        scale: 0.3,
-                        alignment: Alignment.topLeft,
-                        child: MyCurriculumPage(mini: true),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  CustomTextBoldTitle(title: StringConst.CV),
+                ],
+              ),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: () {
+                  if (widget.onNavigateToCV != null) {
+                    widget.onNavigateToCV!();
+                  } else if (widget.onNavigateToSection != null) {
+                    widget.onNavigateToSection!(StringConst.MY_CV);
+                  }
+                },
+                child: SizedBox(
+                  width: 300,
+                  height: 350,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                        width: 1020,
+                        child: SingleChildScrollView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          child: MyCurriculumPage(
+                            mini: true,
+                            user: widget.participantUser,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),)
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

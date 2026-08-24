@@ -143,6 +143,7 @@ class ImagePath {
   static const String ICON_TOOLS = '$imageDir/icon-caja-entidad.png';
   static const String DOWNLOAD_FILLED = '$imageDir/download-icon.png';
   static const String ICON_PLUS = '$imageDir/plus_outline.png';
+  static const String ICON_OBSERVATIONS_BUBBLE = '$imageDir/observations_bubble.png';
   static const String ACCESS_VECTOR = '$imageDir/vector-access.png';
   static const String ACCESS_PHOTO = '$imageDir/photo_login.png';
 
