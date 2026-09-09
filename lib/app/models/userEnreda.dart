@@ -45,6 +45,7 @@ class UserEnreda {
     this.motivation,
     this.educationId,
     this.checkAgreeCV,
+    this.active,
     //this.personalDocuments = const [],
     this.initialReportId,
     this.closureReportId,
@@ -53,6 +54,7 @@ class UserEnreda {
     this.nationality,
     this.ipilObjectivesId,
     this.startDateItinerary,
+    this.createDate,
     this.programId,
     this.dni,
     this.socialItineraryHistory = const [],
@@ -243,6 +245,7 @@ class UserEnreda {
         timeSpentWeekly: data['timeSpentWeekly']
     );
     final bool? checkAgreeCV = data['checkAgreeCV'];
+    final bool? active = data['active'] is bool ? data['active'] : null;
     final String? initialReportId = data['initialReportId'];
     final String? closureReportId = data['closureReportId'];
     final String? followReportId = data['followReportId'];
@@ -251,6 +254,14 @@ class UserEnreda {
     final String? ipilObjectivesId = data['ipilObjectivesId'];
     final String? programId = data['programId'];
     final String? dni = data['dni'] ?? '';
+    DateTime? createDate;
+    if (data['createDate'] != null) {
+      if (data['createDate'] is Timestamp) {
+        createDate = (data['createDate'] as Timestamp).toDate();
+      } else if (data['createDate'] is String) {
+        createDate = DateTime.tryParse(data['createDate']);
+      }
+    }
 
     List<SocialItineraryCycle> socialItineraryHistory = [];
     if (data['socialItineraryHistory'] != null) {
@@ -304,6 +315,7 @@ class UserEnreda {
       resourcesAccessCount: resourcesAccessCount,
       motivation: motivation,
       checkAgreeCV: checkAgreeCV,
+      active: active,
       //personalDocuments: personalDocuments,
       initialReportId: initialReportId,
       closureReportId: closureReportId,
@@ -312,6 +324,7 @@ class UserEnreda {
       nationality: nationality,
       ipilObjectivesId: ipilObjectivesId,
       startDateItinerary: startDateItinerary,
+      createDate: createDate,
       programId: programId,
       dni: dni,
       socialItineraryHistory: socialItineraryHistory,
@@ -355,6 +368,9 @@ class UserEnreda {
   final int? resourcesAccessCount;
   final Motivation? motivation;
   final bool? checkAgreeCV;
+  /// Firestore `active` flag; null when the doc predates the field
+  /// (treated as active in the UI).
+  final bool? active;
   //final List<PersonalDocument> personalDocuments;
   late  String? initialReportId;
   late  String? closureReportId;
@@ -363,6 +379,7 @@ class UserEnreda {
   final String? nationality;
   final String? ipilObjectivesId;
   DateTime? startDateItinerary;
+  DateTime? createDate;
   late String? programId;
   late String? dni;
   List<SocialItineraryCycle> socialItineraryHistory;

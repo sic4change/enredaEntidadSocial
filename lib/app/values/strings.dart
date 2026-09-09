@@ -875,6 +875,33 @@ class StringConst {
       'Sin texto de desarrollo y evaluación.';
   static const String SESION_ROW_EXPANDED_NO_OBSERVACIONES =
       'Sin observaciones.';
+  // Participants detail table (Figma ADMIN-ENTIDAD-DASHBOARD)
+  static const String VISTA_GENERAL = 'Vista general';
+  static const String VISTA_DETALLE = 'Vista detalle';
+  static String entityParticipantsTab(String name) => 'Participantes $name';
+  static const String PARTICIPANTS_ACTIVE = 'Participantes activos';
+  static const String PARTICIPANTS_INACTIVE = 'Participantes inactivos';
+  static String tableShowing(int shown, int total) =>
+      'Mostrando $shown de $total participantes';
+  static const String COL_NOMBRE = 'NOMBRE Y APELLIDOS';
+  static const String COL_ESTADO_ITINERARIO = 'ESTADO ITINERARIO';
+  static const String COL_FECHA_INSCRIPCION = 'FECHA DE INSCRIPCIÓN';
+  static const String COL_DOCUMENTO = 'Nº DOCUMENTO PERSONAL';
+  static const String COL_GENERO = 'GÉNERO';
+  static const String COL_FECHA_NACIMIENTO = 'FECHA DE NACIMIENTO';
+  static const String COL_EDAD = 'EDAD';
+  static const String COL_NACIONALIDAD = 'NACIONALIDAD';
+  static const String COL_SITUACION_ADMIN = 'SITUACIÓN ADMINISTRATIVA';
+  static const String COL_TELEFONO = 'TELÉFONO';
+  static const String COL_TECNICA_REFERENCIA = 'TÉCNICA DE REFERENCIA';
+  static const String COL_RECURSOS = 'RECURSOS SOLICITADOS';
+  static const String COL_PROGRAMA = 'PROGRAMA ASIGNADO';
+  static const String COL_OBSERVACIONES = 'OBSERVACIONES';
+  static const String TABLE_NO_INICIADO = '*No iniciado';
+  static const String TABLE_SIN_ASIGNAR = '*Sin asignar';
+  static const String TABLE_SIN_ESPECIFICAR = '*Sin especificar';
+  static const String TABLE_ADD_OBSERVACIONES = 'Añadir observaciones';
+
   static const String SESION_CONFIRMED_BY_PARTICIPANT =
       'Asistencia confirmada por el participante';
   static const String SESION_CANCELLED_BY_PARTICIPANT =
