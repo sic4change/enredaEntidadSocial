@@ -693,18 +693,12 @@ class _SuggestionAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final photo = participant.photo ?? '';
     final initials =
         '${participant.firstName?.isNotEmpty == true ? participant.firstName![0] : ''}'
                 '${participant.lastName?.isNotEmpty == true ? participant.lastName![0] : ''}'
             .toUpperCase();
-    return Container(
-      width: 34,
-      height: 34,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        color: AppColors.pink600,
-        shape: BoxShape.circle,
-      ),
+    final fallback = Center(
       child: Text(
         initials,
         style: const TextStyle(
@@ -713,6 +707,25 @@ class _SuggestionAvatar extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
+    );
+
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: const BoxDecoration(
+        color: AppColors.pink600,
+        shape: BoxShape.circle,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: photo.isEmpty
+          ? fallback
+          : Image.network(
+              photo,
+              fit: BoxFit.cover,
+              width: 34,
+              height: 34,
+              errorBuilder: (context, error, stackTrace) => fallback,
+            ),
     );
   }
 }

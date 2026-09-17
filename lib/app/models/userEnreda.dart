@@ -72,9 +72,38 @@ class UserEnreda {
     final String? userId = data['userId'];
     final String? unemployedType = data['unemployedType'];
 
-    String photo;
+    String photo = '';
     try {
-      photo = data['profilePic']['src'];
+      if (data['profilePic'] != null) {
+        if (data['profilePic'] is Map) {
+          photo = data['profilePic']['src']?.toString() ??
+              data['profilePic']['url']?.toString() ??
+              '';
+        } else if (data['profilePic'] is String) {
+          photo = data['profilePic'];
+        }
+      }
+      if (photo.isEmpty && data['photo'] != null) {
+        if (data['photo'] is String) {
+          photo = data['photo'];
+        } else if (data['photo'] is Map) {
+          photo = data['photo']['src']?.toString() ??
+              data['photo']['url']?.toString() ??
+              '';
+        }
+      }
+      if (photo.isEmpty && data['photoUrl'] is String) {
+        photo = data['photoUrl'];
+      }
+      if (photo.isEmpty && data['picture'] != null) {
+        if (data['picture'] is String) {
+          photo = data['picture'];
+        } else if (data['picture'] is Map) {
+          photo = data['picture']['src']?.toString() ??
+              data['picture']['url']?.toString() ??
+              '';
+        }
+      }
     } catch (e) {
       photo = '';
     }

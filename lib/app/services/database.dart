@@ -64,7 +64,6 @@ import 'package:enreda_empresas/app/services/api_path.dart';
 import 'package:enreda_empresas/app/services/firestore_service.dart';
 import 'package:enreda_empresas/app/services/resources_tracer.dart';
 import 'package:enreda_empresas/app/models/resourcePicture.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models/companionData.dart';
@@ -313,6 +312,9 @@ abstract class Database {
 
      /// Returns the companion-data document for [userId], or null when none exists.
      Future<CompanionData?> getCompanionData(String userId);
+
+     /// Creates or updates a companion-data document.
+     Future<void> setCompanionData(CompanionData companionData);
 }
 
 class FirestoreDatabase implements Database {
@@ -2719,6 +2721,23 @@ class FirestoreDatabase implements Database {
       limit: 1,
     );
     return docs.isNotEmpty ? docs.first : null;
+  }
+
+  @override
+  Future<void> setCompanionData(CompanionData companionData) async {
+    if (companionData.companionDataId != null &&
+        companionData.companionDataId!.isNotEmpty) {
+      await _service.updateData(
+        path:
+            '${APIPath.companionDataCollection()}/${companionData.companionDataId}',
+        data: companionData.toMap(),
+      );
+    } else {
+      await _service.addData(
+        path: APIPath.companionDataCollection(),
+        data: companionData.toMap(),
+      );
+    }
   }
 }
 

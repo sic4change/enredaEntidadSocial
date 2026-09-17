@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/models/companionData.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
+import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -69,6 +69,7 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
   ];
 
   final _horizontalController = ScrollController();
+  final ValueNotifier<String?> _hoveredUserId = ValueNotifier(null);
   int _sortCol = 0;
   bool _asc = true;
   int _page = 0;
@@ -90,6 +91,7 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
   @override
   void dispose() {
     _horizontalController.dispose();
+    _hoveredUserId.dispose();
     super.dispose();
   }
 
@@ -109,7 +111,7 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
     // Keep a usable scroll viewport on narrow screens without giving up the
     // frozen name column.
     final nameWidth =
-        MediaQuery.sizeOf(context).width < 650 ? 196.0 : _nameWidth;
+        Responsive.isDesktopS(context) ? 220.0 : _nameWidth;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -180,6 +182,7 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
           ),
           for (final user in users)
             _rowCell(
+              user: user,
               selected: _isSelected(user),
               onTap: () => _openParticipant(user),
               child: Row(
@@ -243,7 +246,8 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
                   _CompanionDataRow(
                     user: user,
                     selected: _isSelected(user),
-                    onTap: () => _select(user),
+                    hoveredUserIdNotifier: _hoveredUserId,
+                    onTap: () => _openParticipant(user),
                     columns: _columns,
                     chipColors: _chipColors,
                     programName: _programName(user.programId),
@@ -259,38 +263,59 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
 
 
   Widget _rowCell({
+    required UserEnreda user,
     required Widget child,
     required bool selected,
     required VoidCallback onTap,
     double horizontalPadding = 12,
   }) {
-    return SizedBox(
-      height: _rowHeight,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          hoverColor: AppColors.primary010,
-          child: Container(
-            decoration: BoxDecoration(
-              color: selected ? _selectedBackground : AppColors.white,
-              border: Border(
-                top: BorderSide(
-                  color: selected ? _selectedBorder : _gridLine,
-                  width: selected ? 1.5 : 1,
-                ),
-                bottom: BorderSide(
-                  color: selected ? _selectedBorder : _gridLine,
-                  width: selected ? 1.5 : 1,
+    final userId = _identity(user);
+    return ValueListenableBuilder<String?>(
+      valueListenable: _hoveredUserId,
+      builder: (context, hoveredId, _) {
+        final isHovered = hoveredId == userId;
+        final isHighlighted = selected || isHovered;
+
+        return MouseRegion(
+          onEnter: (_) => _hoveredUserId.value = userId,
+          onExit: (_) {
+            if (_hoveredUserId.value == userId) {
+              _hoveredUserId.value = null;
+            }
+          },
+          child: SizedBox(
+            height: _rowHeight,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                hoverColor: Colors.transparent,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  decoration: BoxDecoration(
+                    color: isHighlighted
+                        ? _selectedBackground
+                        : AppColors.white,
+                    border: Border(
+                      top: BorderSide(
+                        color: isHighlighted ? _selectedBorder : _gridLine,
+                        width: isHighlighted ? 1.5 : 1,
+                      ),
+                      bottom: BorderSide(
+                        color: isHighlighted ? _selectedBorder : _gridLine,
+                        width: isHighlighted ? 1.5 : 1,
+                      ),
+                    ),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: child,
                 ),
               ),
             ),
-            alignment: Alignment.centerLeft,
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            child: child,
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -453,6 +478,7 @@ class _CompanionDataRow extends StatefulWidget {
   const _CompanionDataRow({
     required this.user,
     required this.selected,
+    required this.hoveredUserIdNotifier,
     required this.onTap,
     required this.columns,
     required this.chipColors,
@@ -462,6 +488,7 @@ class _CompanionDataRow extends StatefulWidget {
 
   final UserEnreda user;
   final bool selected;
+  final ValueNotifier<String?> hoveredUserIdNotifier;
   final VoidCallback onTap;
   final List<_TableColumn> columns;
   final List<Color> chipColors;
@@ -476,6 +503,11 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
   Future<CompanionData?>? _companionFuture;
   String? _loadedUserId;
 
+  bool _isEditingObs = false;
+  bool _isSavingObs = false;
+  late final TextEditingController _obsController = TextEditingController();
+  late final FocusNode _obsFocusNode = FocusNode();
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -484,6 +516,45 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
       _loadedUserId = userId;
       final db = Provider.of<Database>(context, listen: false);
       _companionFuture = db.getCompanionData(userId);
+    }
+  }
+
+  @override
+  void dispose() {
+    _obsController.dispose();
+    _obsFocusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveObservaciones(CompanionData? companion) async {
+    final userId = widget.user.userId;
+    if (userId == null || userId.isEmpty) return;
+    setState(() => _isSavingObs = true);
+
+    final db = Provider.of<Database>(context, listen: false);
+    final text = _obsController.text.trim();
+
+    final updatedCompanion = CompanionData(
+      companionDataId: companion?.companionDataId,
+      userId: userId,
+      companionDocumentNumber: companion?.companionDocumentNumber,
+      companionAdministrativeStatus: companion?.companionAdministrativeStatus,
+      companionHelpNeeds: companion?.companionHelpNeeds,
+      companionOtherRelevantData: text,
+    );
+
+    try {
+      await db.setCompanionData(updatedCompanion);
+      _companionFuture = db.getCompanionData(userId);
+    } catch (e) {
+      print('Error saving observations: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isEditingObs = false;
+          _isSavingObs = false;
+        });
+      }
     }
   }
 
@@ -512,39 +583,58 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
   }
 
   Widget _rowContainer({required Widget child}) {
-    final selected = widget.selected;
-    return SizedBox(
-      height: _ParticipantsDetailTableState._rowHeight,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: widget.onTap,
-          hoverColor: AppColors.primary010,
-          child: Container(
-            decoration: BoxDecoration(
-              color: selected
-                  ? _ParticipantsDetailTableState._selectedBackground
-                  : AppColors.white,
-              border: Border(
-                top: BorderSide(
-                  color: selected
-                      ? _ParticipantsDetailTableState._selectedBorder
-                      : _ParticipantsDetailTableState._gridLine,
-                  width: selected ? 1.5 : 1,
-                ),
-                bottom: BorderSide(
-                  color: selected
-                      ? _ParticipantsDetailTableState._selectedBorder
-                      : _ParticipantsDetailTableState._gridLine,
-                  width: selected ? 1.5 : 1,
+    final user = widget.user;
+    final userId = _ParticipantsDetailTableState._identity(user);
+
+    return ValueListenableBuilder<String?>(
+      valueListenable: widget.hoveredUserIdNotifier,
+      builder: (context, hoveredId, _) {
+        final isHovered = hoveredId == userId;
+        final isHighlighted = widget.selected || isHovered;
+
+        return MouseRegion(
+          onEnter: (_) => widget.hoveredUserIdNotifier.value = userId,
+          onExit: (_) {
+            if (widget.hoveredUserIdNotifier.value == userId) {
+              widget.hoveredUserIdNotifier.value = null;
+            }
+          },
+          child: SizedBox(
+            height: _ParticipantsDetailTableState._rowHeight,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onTap,
+                hoverColor: Colors.transparent,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  decoration: BoxDecoration(
+                    color: isHighlighted
+                        ? _ParticipantsDetailTableState._selectedBackground
+                        : AppColors.white,
+                    border: Border(
+                      top: BorderSide(
+                        color: isHighlighted
+                            ? _ParticipantsDetailTableState._selectedBorder
+                            : _ParticipantsDetailTableState._gridLine,
+                        width: isHighlighted ? 1.5 : 1,
+                      ),
+                      bottom: BorderSide(
+                        color: isHighlighted
+                            ? _ParticipantsDetailTableState._selectedBorder
+                            : _ParticipantsDetailTableState._gridLine,
+                        width: isHighlighted ? 1.5 : 1,
+                      ),
+                    ),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  child: child,
                 ),
               ),
             ),
-            alignment: Alignment.centerLeft,
-            child: child,
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -589,6 +679,104 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
     );
   }
 
+  Widget _buildObservationsCell(CompanionData? companion) {
+    const textStyle = TextStyle(
+      color: _ParticipantsDetailTableState._ink,
+      fontSize: 12,
+    );
+
+    if (_isSavingObs) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    if (_isEditingObs) {
+      return Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _obsController,
+              focusNode: _obsFocusNode,
+              maxLines: 2,
+              minLines: 1,
+              style: textStyle,
+              autofocus: true,
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.turquoiseBlue),
+                ),
+                hintText: 'Añadir observaciones...',
+                hintStyle: TextStyle(
+                  color: AppColors.greyTxtAlt,
+                  fontSize: 12,
+                ),
+              ),
+              onSubmitted: (_) => _saveObservaciones(companion),
+            ),
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.check_circle,
+                color: AppColors.turquoiseBlue, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            tooltip: 'Guardar',
+            onPressed: () => _saveObservaciones(companion),
+          ),
+          IconButton(
+            icon: const Icon(Icons.cancel_outlined,
+                color: AppColors.greyTxtAlt, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            tooltip: 'Cancelar',
+            onPressed: () => setState(() => _isEditingObs = false),
+          ),
+        ],
+      );
+    }
+
+    final obsCompanion = companion?.companionOtherRelevantData;
+    final hasObs = obsCompanion != null && obsCompanion.trim().isNotEmpty;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(4),
+      onTap: () {
+        _obsController.text = obsCompanion ?? '';
+        setState(() => _isEditingObs = true);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _obsFocusNode.requestFocus();
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                hasObs ? obsCompanion : StringConst.TABLE_ADD_OBSERVACIONES,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: textStyle,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.edit_outlined,
+              size: 15,
+              color: _ParticipantsDetailTableState._ink,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildRow(CompanionData? companion) {
     final user = widget.user;
 
@@ -603,10 +791,6 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
       companion?.companionAdministrativeStatus,
       StringConst.TABLE_SIN_ESPECIFICAR,
     );
-
-    // --- Observaciones ---
-    final obsCompanion = companion?.companionOtherRelevantData;
-    final hasObs = obsCompanion != null && obsCompanion.trim().isNotEmpty;
 
     // --- Recursos solicitados ---
     final helpNeeds = companion?.companionHelpNeeds;
@@ -645,29 +829,7 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
             width: 285,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: hasObs
-                  ? Text(
-                      obsCompanion,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: _ParticipantsDetailTableState._ink,
-                        fontSize: 12,
-                      ),
-                    )
-                  : Row(
-                      children: const [
-                        Expanded(
-                          child: Text(
-                            StringConst.TABLE_ADD_OBSERVACIONES,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Icon(Icons.edit_outlined,
-                            size: 15,
-                            color: _ParticipantsDetailTableState._ink),
-                      ],
-                    ),
+              child: _buildObservationsCell(companion),
             ),
           ),
         ],
@@ -839,39 +1001,41 @@ class _Avatar extends StatelessWidget {
         '${user.firstName?.isNotEmpty == true ? user.firstName![0] : ''}'
                 '${user.lastName?.isNotEmpty == true ? user.lastName![0] : ''}'
             .toUpperCase();
+    final fallback = ColoredBox(
+      color: const Color(0xFFAB1F8C),
+      child: Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+
     return Container(
       width: 42,
       height: 42,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: photo.isEmpty ? const Color(0xFFAB1F8C) : AppColors.white,
+        color: AppColors.white,
         border: Border.all(color: AppColors.primary020),
       ),
       clipBehavior: Clip.antiAlias,
       child: photo.isEmpty
-          ? Center(
-              child: Text(
-                initials,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            )
-          : CachedNetworkImage(
-              imageUrl: photo,
+          ? fallback
+          : Image.network(
+              photo,
               fit: BoxFit.cover,
-              errorWidget: (_, __, ___) => Center(
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    color: AppColors.turquoiseBlue,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              width: 42,
+              height: 42,
+              errorBuilder: (context, error, stackTrace) => fallback,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return fallback;
+              },
             ),
     );
   }

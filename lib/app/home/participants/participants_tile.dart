@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/home/participants/show_invitation_diaglog.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
@@ -206,6 +205,20 @@ class _ParticipantAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final photo = user.photo ?? '';
     final initials = _initials(user);
+    final fallback = ColoredBox(
+      color: AppColors.pink600,
+      child: Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            color: AppColors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+
     return Container(
       width: 58,
       height: 58,
@@ -216,34 +229,19 @@ class _ParticipantAvatar extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(2),
       child: ClipOval(
-        child: ColoredBox(
-          color: photo.isEmpty ? AppColors.pink600 : AppColors.white,
-          child: photo.isEmpty
-              ? Center(
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      color: AppColors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                )
-              : CachedNetworkImage(
-                  imageUrl: photo,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Center(
-                    child: Text(
-                      initials,
-                      style: const TextStyle(
-                        color: AppColors.turquoiseBlue,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-        ),
+        child: photo.isEmpty
+            ? fallback
+            : Image.network(
+                photo,
+                fit: BoxFit.cover,
+                width: 58,
+                height: 58,
+                errorBuilder: (context, error, stackTrace) => fallback,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return fallback;
+                },
+              ),
       ),
     );
   }
