@@ -35,10 +35,10 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
   static ValueNotifier<String> searchText = ValueNotifier('');
 
   bool _isLoading = true;
-  // Figma toggle: false = card grid ("Vista general"), true = wide table.
+  // View toggle: false = card grid ("Vista general"), true = wide table.
   bool _detailView = false;
-  // Detail view tabs (Figma 10919:8496): 0 = Mis participantes, 1 = entity.
-  int _detailTab = 0;
+  // Selected tab (Figma 10919:8496): 0 = Mis participantes, 1 = entity.
+  int _selectedTab = 0;
   // General view chips (Figma 7950:6029): activos / inactivos.
   bool _showInactive = false;
   SocialEntity? _socialEntity;
@@ -242,11 +242,16 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
       }
     }
 
-    // Activos / inactivos split of "mis" (Figma chips). Docs without the
-    // `active` flag count as active.
-    final activeCount = myParticipants.where((u) => u.active ?? true).length;
-    final inactiveCount = myParticipants.length - activeCount;
-    final myVisible = myParticipants
+    // Select participants based on active tab: 0 = Mis participantes, 1 = entity.
+    final selectedTabUsers =
+        _selectedTab == 1 ? allOtherParticipants : myParticipants;
+
+    // Activos / inactivos split of selected tab participants (Figma chips).
+    // Docs without the `active` flag count as active.
+    final activeCount =
+        selectedTabUsers.where((u) => u.active ?? true).length;
+    final inactiveCount = selectedTabUsers.length - activeCount;
+    final visibleUsers = selectedTabUsers
         .where((u) => (u.active ?? true) == !_showInactive)
         .toList();
 
@@ -335,26 +340,24 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     ),
                   ),
                   SpaceH12(),
-                  if (_detailView) ...[
-                    _TabsRow(
-                      labels: [
-                        StringConst.MY_PARTICIPANTS,
-                        StringConst.entityParticipantsTab(
-                            _socialEntity?.name ?? ''),
-                      ],
-                      selected: _detailTab,
-                      onSelect: (i) => setState(() => _detailTab = i),
-                    ),
-                    SpaceH20(),
-                  ],
+                  _TabsRow(
+                    labels: [
+                      StringConst.MY_PARTICIPANTS,
+                      StringConst.entityParticipantsTab(
+                          _socialEntity?.name ?? ''),
+                    ],
+                    selected: _selectedTab,
+                    onSelect: (i) => setState(() => _selectedTab = i),
+                  ),
+                  SpaceH20(),
                   Row(
                     children: [
                       Expanded(
                         child: header(isSearch
-                            ? (_detailView && _detailTab == 1
+                            ? (_selectedTab == 1
                                 ? "Resultados de búsqueda: Todos"
                                 : "Resultados de búsqueda: Mis")
-                            : (_detailView && _detailTab == 1
+                            : (_selectedTab == 1
                                 ? StringConst.allParticipants(
                                     _socialEntity?.name ?? '')
                                 : StringConst.MY_PARTICIPANTS)),
@@ -393,43 +396,16 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
           SliverPadding(
             padding: pad,
             sliver: participantsSliver(
-              // Detail view: the tab picks which list the single table shows.
-              // General view: chips pick activos / inactivos among "mis".
-              _detailView
-                  ? (_detailTab == 1 ? allOtherParticipants : myParticipants)
-                  : myVisible,
+              _detailView ? selectedTabUsers : visibleUsers,
               isSearch
-                  ? 'No se encontraron resultados en tus participantes'
-                  : 'No hay participantes gestionados por ti',
+                  ? (_selectedTab == 1
+                      ? 'No se encontraron resultados en la entidad'
+                      : 'No se encontraron resultados en tus participantes')
+                  : (_selectedTab == 1
+                      ? 'No hay participantes gestionados por tu entidad'
+                      : 'No hay participantes gestionados por ti'),
             ),
           ),
-          if (!_detailView) ...[
-            SliverPadding(
-              padding: pad,
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SpaceH40(),
-                    header(isSearch
-                        ? "Resultados de búsqueda: Todos"
-                        : StringConst.allParticipants(
-                            _socialEntity?.name ?? '')),
-                    SpaceH20(),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: pad,
-              sliver: participantsSliver(
-                allOtherParticipants,
-                isSearch
-                    ? 'No se encontraron resultados en la entidad'
-                    : 'No hay participantes gestionados por tu entidad',
-              ),
-            ),
-          ],
           if (LocationCache.instance.isLoadingParticipants)
             const SliverToBoxAdapter(
               child: Padding(

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
+import 'package:enreda_empresas/app/models/companionData.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
@@ -239,57 +240,14 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
                   ),
                 ),
                 for (final user in users)
-                  _rowCell(
+                  _CompanionDataRow(
+                    user: user,
                     selected: _isSelected(user),
                     onTap: () => _select(user),
-                    horizontalPadding: 0,
-                    child: Row(
-                      children: [
-                        _dataCell(_itineraryState(user), 190),
-                        _dataCell(_date(user.createDate), 175),
-                        _dataCell(_orDash(user.dni), 205),
-                        _dataCell(_orDash(user.gender), 125),
-                        _dataCell(_date(user.birthday), 180),
-                        _dataCell(_age(user.birthday), 95),
-                        _dataCell(_orDash(user.nationality), 155),
-                        _dataCell(StringConst.TABLE_SIN_ESPECIFICAR, 225),
-                        _dataCell(_orDash(user.phone), 165),
-                        SizedBox(
-                          width: 225,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child:
-                                _TecnicaCell(assignedById: user.assignedById),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 320,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: _resourceChips(user),
-                          ),
-                        ),
-                        _dataCell(_programName(user.programId), 205),
-                        SizedBox(
-                          width: 285,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Row(
-                              children: const [
-                                Expanded(
-                                  child: Text(
-                                    StringConst.TABLE_ADD_OBSERVACIONES,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Icon(Icons.edit_outlined,
-                                    size: 15, color: _ink),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    columns: _columns,
+                    chipColors: _chipColors,
+                    programName: _programName(user.programId),
+                    buildResourceChips: _resourceChips,
                   ),
               ],
             ),
@@ -299,20 +257,6 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
     );
   }
 
-  Widget _dataCell(String value, double width) {
-    return SizedBox(
-      width: width,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Text(
-          value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: _ink, fontSize: 12),
-        ),
-      ),
-    );
-  }
 
   Widget _rowCell({
     required Widget child,
@@ -499,6 +443,247 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
       age--;
     }
     return '$age años';
+  }
+}
+
+/// Per-row widget that fetches the [CompanionData] document for [user] once
+/// and renders the row using companion fields when they are non-empty,
+/// falling back to the user's own data for any missing values.
+class _CompanionDataRow extends StatefulWidget {
+  const _CompanionDataRow({
+    required this.user,
+    required this.selected,
+    required this.onTap,
+    required this.columns,
+    required this.chipColors,
+    required this.programName,
+    required this.buildResourceChips,
+  });
+
+  final UserEnreda user;
+  final bool selected;
+  final VoidCallback onTap;
+  final List<_TableColumn> columns;
+  final List<Color> chipColors;
+  final String programName;
+  final Widget Function(UserEnreda) buildResourceChips;
+
+  @override
+  State<_CompanionDataRow> createState() => _CompanionDataRowState();
+}
+
+class _CompanionDataRowState extends State<_CompanionDataRow> {
+  Future<CompanionData?>? _companionFuture;
+  String? _loadedUserId;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final userId = widget.user.userId;
+    if (userId != null && userId.isNotEmpty && userId != _loadedUserId) {
+      _loadedUserId = userId;
+      final db = Provider.of<Database>(context, listen: false);
+      _companionFuture = db.getCompanionData(userId);
+    }
+  }
+
+  /// Returns [companion] when non-null and non-empty, otherwise [fallback].
+  static String _withFallback(String? companion, String fallback) {
+    if (companion != null && companion.trim().isNotEmpty) return companion.trim();
+    return fallback;
+  }
+
+  Widget _dataCell(String value, double width) {
+    return SizedBox(
+      width: width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Text(
+          value,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: _ParticipantsDetailTableState._ink,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _rowContainer({required Widget child}) {
+    final selected = widget.selected;
+    return SizedBox(
+      height: _ParticipantsDetailTableState._rowHeight,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          hoverColor: AppColors.primary010,
+          child: Container(
+            decoration: BoxDecoration(
+              color: selected
+                  ? _ParticipantsDetailTableState._selectedBackground
+                  : AppColors.white,
+              border: Border(
+                top: BorderSide(
+                  color: selected
+                      ? _ParticipantsDetailTableState._selectedBorder
+                      : _ParticipantsDetailTableState._gridLine,
+                  width: selected ? 1.5 : 1,
+                ),
+                bottom: BorderSide(
+                  color: selected
+                      ? _ParticipantsDetailTableState._selectedBorder
+                      : _ParticipantsDetailTableState._gridLine,
+                  width: selected ? 1.5 : 1,
+                ),
+              ),
+            ),
+            alignment: Alignment.centerLeft,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompanionChips(List<String> helpNeeds) {
+    if (helpNeeds.isEmpty) return const Text('—');
+    final visible = helpNeeds.take(3).toList();
+    final chipColors = widget.chipColors;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < visible.length; i++)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 292),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: chipColors[i % chipColors.length],
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                visible[i],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: i % chipColors.length == 0
+                      ? Colors.white
+                      : AppColors.turquoiseBlue,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        if (helpNeeds.length > 3)
+          const Text(
+            '…',
+            style: TextStyle(color: AppColors.turquoiseBlue, fontSize: 16),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildRow(CompanionData? companion) {
+    final user = widget.user;
+
+    // --- Nº Documento personal ---
+    final dniDisplay = _withFallback(
+      companion?.companionDocumentNumber,
+      _ParticipantsDetailTableState._orDash(user.dni),
+    );
+
+    // --- Situación administrativa ---
+    final adminDisplay = _withFallback(
+      companion?.companionAdministrativeStatus,
+      StringConst.TABLE_SIN_ESPECIFICAR,
+    );
+
+    // --- Observaciones ---
+    final obsCompanion = companion?.companionOtherRelevantData;
+    final hasObs = obsCompanion != null && obsCompanion.trim().isNotEmpty;
+
+    // --- Recursos solicitados ---
+    final helpNeeds = companion?.companionHelpNeeds;
+    final hasHelpNeeds = helpNeeds != null && helpNeeds.isNotEmpty;
+
+    return _rowContainer(
+      child: Row(
+        children: [
+          _dataCell(_ParticipantsDetailTableState._itineraryState(user), 190),
+          _dataCell(_ParticipantsDetailTableState._date(user.createDate), 175),
+          _dataCell(dniDisplay, 205),
+          _dataCell(_ParticipantsDetailTableState._orDash(user.gender), 125),
+          _dataCell(_ParticipantsDetailTableState._date(user.birthday), 180),
+          _dataCell(_ParticipantsDetailTableState._age(user.birthday), 95),
+          _dataCell(_ParticipantsDetailTableState._orDash(user.nationality), 155),
+          _dataCell(adminDisplay, 225),
+          _dataCell(_ParticipantsDetailTableState._orDash(user.phone), 165),
+          SizedBox(
+            width: 225,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: _TecnicaCell(assignedById: user.assignedById),
+            ),
+          ),
+          SizedBox(
+            width: 320,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: hasHelpNeeds
+                  ? _buildCompanionChips(helpNeeds)
+                  : widget.buildResourceChips(user),
+            ),
+          ),
+          _dataCell(widget.programName, 205),
+          SizedBox(
+            width: 285,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: hasObs
+                  ? Text(
+                      obsCompanion,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: _ParticipantsDetailTableState._ink,
+                        fontSize: 12,
+                      ),
+                    )
+                  : Row(
+                      children: const [
+                        Expanded(
+                          child: Text(
+                            StringConst.TABLE_ADD_OBSERVACIONES,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Icon(Icons.edit_outlined,
+                            size: 15,
+                            color: _ParticipantsDetailTableState._ink),
+                      ],
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_companionFuture == null) {
+      return _buildRow(null);
+    }
+    return FutureBuilder<CompanionData?>(
+      future: _companionFuture,
+      builder: (context, snapshot) => _buildRow(snapshot.data),
+    );
   }
 }
 

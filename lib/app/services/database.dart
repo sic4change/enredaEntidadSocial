@@ -67,6 +67,7 @@ import 'package:enreda_empresas/app/models/resourcePicture.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+import '../models/companionData.dart';
 import '../models/documentCategory.dart';
 import '../models/externalSocialEntity.dart';
 import 'package:enreda_empresas/app/models/program.dart';
@@ -307,8 +308,11 @@ abstract class Database {
      /// All sessions belonging to a specific técnico (for the calendar view).
      /// Filtered by both socialEntityId and tecnicoId; no date filter so the
      /// calendar can display past and upcoming sessions together.
-     Stream<List<Sesion>> sesionesCalendarioStream(
-         String socialEntityId, String tecnicoId);
+      Stream<List<Sesion>> sesionesCalendarioStream(
+          String socialEntityId, String tecnicoId);
+
+     /// Returns the companion-data document for [userId], or null when none exists.
+     Future<CompanionData?> getCompanionData(String userId);
 }
 
 class FirestoreDatabase implements Database {
@@ -2704,6 +2708,17 @@ class FirestoreDatabase implements Database {
     globals.currentFollowReportUser = FollowReport();
     globals.currentDerivationReportUser = DerivationReport();
     globals.currentClosureReportUser = ClosureReport();
+  }
+
+  @override
+  Future<CompanionData?> getCompanionData(String userId) async {
+    final docs = await _service.getCollection(
+      path: APIPath.companionDataCollection(),
+      queryBuilder: (q) => q.where('userId', isEqualTo: userId),
+      builder: (data, documentId) => CompanionData.fromMap(data, documentId),
+      limit: 1,
+    );
+    return docs.isNotEmpty ? docs.first : null;
   }
 }
 

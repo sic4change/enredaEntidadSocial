@@ -107,4 +107,7 @@ class APIPath {
   static String sesion(String sesionId) => 'sesiones/$sesionId';
   // Calendar query alias — same collection, different filter signature
   static String sesionesCalendario() => 'sesiones';
+
+  // Companion data — override fields for participants enrolled via a companion
+  static String companionDataCollection() => 'companionData';
 }
