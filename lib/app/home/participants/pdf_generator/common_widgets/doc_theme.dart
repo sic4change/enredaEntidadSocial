@@ -17,44 +17,41 @@ const leftWidth = 230.0;
 const rightWidth = 350.0;
 
 Future<pw.PageTheme> MyPageTheme(PdfPageFormat format, int isMdm) async {
-/*final bgShape2 = isMdm == 0
-    ? await rootBundle.loadString('assets/images/logos-mdm.svg')
-    : isMdm == 2
-        ? await rootBundle.loadString('assets/images/logos-seimlab.svg')
-        : await rootBundle.loadString('assets/images/logos-fse.svg');*/
+  pw.MemoryImage? bgImage;
+  try {
+    final assetPath = isMdm == 0
+        ? 'assets/images/logos-mdm.png'
+        : isMdm == 2
+            ? 'assets/images/logos-seimlab.png'
+            : 'assets/images/logos-fse.png';
+    final bgBytes = await rootBundle.load(assetPath);
+    bgImage = pw.MemoryImage(bgBytes.buffer.asUint8List());
+  } catch (e) {
+    print('Error loading logo asset for PDF theme: $e');
+  }
 
-    final bgBytes = isMdm == 0
-    ? await rootBundle.load('assets/images/logos-mdm.png')
-    : isMdm == 2
-        ? await rootBundle.load('assets/images/logos-seimlab.png')
-        : await rootBundle.load('assets/images/logos-fse.png');
-        final bgImage = pw.MemoryImage(bgBytes.buffer.asUint8List());
-
+  pw.ThemeData themeData;
+  try {
+    themeData = pw.ThemeData.withFont(
+      base: await PdfGoogleFonts.poppinsLight(),
+      bold: await PdfGoogleFonts.poppinsMedium(),
+      icons: await PdfGoogleFonts.materialIcons(),
+    );
+  } catch (e) {
+    print('Error loading PdfGoogleFonts, falling back to standard Helvetica: $e');
+    themeData = pw.ThemeData.withFont(
+      base: pw.Font.helvetica(),
+      bold: pw.Font.helveticaBold(),
+    );
+  }
 
   return pw.PageTheme(
     pageFormat: format,
     margin: pw.EdgeInsets.fromLTRB(
       format.marginLeft, format.marginTop, format.marginRight, format.marginBottom),
-    theme: pw.ThemeData.withFont(
-      base: await PdfGoogleFonts.poppinsLight(),
-      bold: await PdfGoogleFonts.poppinsMedium(),
-      icons: await PdfGoogleFonts.materialIcons(),
-    ),
+    theme: themeData,
     buildBackground: (pw.Context context) {
-      // if (context.pageNumber > 1) {
-      //   return pw.FullPage(
-      //     ignoreMargins: true,
-      //     child: pw.Stack(
-      //       children: [
-      //         pw.Positioned(
-      //           child: pw.SvgImage(svg: bgShape2),
-      //           left: 0,
-      //           top: 10,
-      //         ),
-      //       ],
-      //     ),
-      //   );
-      // }
+      if (bgImage == null) return pw.SizedBox();
       return pw.FullPage(
         ignoreMargins: true,
         child: pw.Stack(
@@ -69,17 +66,18 @@ Future<pw.PageTheme> MyPageTheme(PdfPageFormat format, int isMdm) async {
                 children: [
                   pw.Container(
                     width: 550,
-                    decoration: pw.BoxDecoration(
+                    decoration: const pw.BoxDecoration(
                       shape: pw.BoxShape.rectangle,
                     ),
-                    child: /*pw.SvgImage(svg: bgShape2),*/pw.Image(
+                    child: pw.Image(
                       bgImage,
                       width: 550,
                       fit: pw.BoxFit.contain,
-                    )
+                    ),
                   ),
-                ],)
+                ],
               ),
+            ),
           ],
         ),
       );

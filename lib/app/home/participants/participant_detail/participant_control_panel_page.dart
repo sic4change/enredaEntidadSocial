@@ -3,6 +3,7 @@ import 'package:enreda_empresas/app/common_widgets/gamification_item.dart';
 import 'package:enreda_empresas/app/common_widgets/gamification_slider.dart';
 import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/home/participants/pdf_generator/pdf_initial_form_data_preview.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/my_curriculum_page.dart';
 import 'package:enreda_empresas/app/models/companionData.dart';
@@ -10,7 +11,6 @@ import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
 import 'package:enreda_empresas/app/models/interest.dart';
-import 'package:enreda_empresas/app/models/keepLearningOption.dart';
 import 'package:enreda_empresas/app/models/resource.dart';
 import 'package:enreda_empresas/app/models/specificinterest.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
@@ -239,6 +239,156 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
       ],);
   }
 
+  Future<String> _getResolvedEducation() async {
+    final educations = _allEducations ?? LocationCache.instance.educations;
+    final userEduId = widget.participantUser.educationId?.trim() ?? '';
+    final userEduName = widget.participantUser.educationName?.trim() ?? '';
+
+    String resolvedEducation = '';
+
+    if (userEduId.isNotEmpty) {
+      final match = educations.firstWhere(
+        (e) => e.educationId == userEduId || e.label == userEduId || e.value == userEduId,
+        orElse: () => Education(label: userEduId, value: userEduId, order: 0),
+      );
+      resolvedEducation = match.label.isNotEmpty ? match.label : userEduId;
+    }
+
+    if (resolvedEducation.isEmpty && userEduName.isNotEmpty) {
+      resolvedEducation = userEduName;
+    }
+
+    if (resolvedEducation.isEmpty && _experiencesStream != null) {
+      try {
+        final experiences = await _experiencesStream!.first;
+        final myEducationalExperiencies = experiences
+            .where((experience) => experience.type == 'Formativa')
+            .toList();
+        if (myEducationalExperiencies.isNotEmpty) {
+          final myEducations = educations
+              .where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label || exp.nameFormation == edu.label))
+              .toList();
+          myEducations.sort((a, b) => a.order.compareTo(b.order));
+          if (myEducations.isNotEmpty) {
+            resolvedEducation = myEducations.first.label;
+          } else if (myEducationalExperiencies.first.education != null && myEducationalExperiencies.first.education!.isNotEmpty) {
+            resolvedEducation = myEducationalExperiencies.first.education!;
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (resolvedEducation.isEmpty) {
+      resolvedEducation = 'No indicado';
+    }
+
+    return resolvedEducation;
+  }
+
+  String _getInterestsString() {
+    String interestsString = "";
+    final interestsList = LocationCache.instance.interests;
+    widget.participantUser.interests.forEach((interestId) {
+      final interest = interestsList.firstWhere(
+        (i) => interestId == i.interestId || interestId == i.name,
+        orElse: () => Interest(interestId: "", name: interestId),
+      );
+      final name = interest.name.isNotEmpty ? interest.name : interestId;
+      if (name.trim().isNotEmpty) {
+        interestsString = "$interestsString$name, ";
+      }
+    });
+    if (interestsString.isNotEmpty && interestsString.endsWith(", ")) {
+      interestsString = interestsString.substring(0, interestsString.length - 2);
+    }
+    if (interestsString.trim().isEmpty) {
+      interestsString = 'No indicado';
+    }
+    return interestsString;
+  }
+
+  String _getSpecificInterestsString() {
+    String specificInterestsString = "";
+    final specificInterestsList = LocationCache.instance.specificInterests;
+    widget.participantUser.specificInterests.forEach((specificInterestId) {
+      final specificInterest = specificInterestsList.firstWhere(
+        (s) => specificInterestId == s.specificInterestId || specificInterestId == s.name,
+        orElse: () => SpecificInterest(specificInterestId: "", name: specificInterestId),
+      );
+      final name = specificInterest.name.isNotEmpty ? specificInterest.name : specificInterestId;
+      if (name.trim().isNotEmpty) {
+        specificInterestsString = "$specificInterestsString$name, ";
+      }
+    });
+    if (specificInterestsString.isNotEmpty && specificInterestsString.endsWith(", ")) {
+      specificInterestsString = specificInterestsString.substring(0, specificInterestsString.length - 2);
+    }
+    if (specificInterestsString.trim().isEmpty) {
+      specificInterestsString = 'No indicado';
+    }
+    return specificInterestsString;
+  }
+
+  String _getKeepLearningString() {
+    String keepLearningString = "";
+    final options = LocationCache.instance.keepLearningOptions;
+    widget.participantUser.keepLearningOptions.forEach((id) {
+      try {
+        final name = options.firstWhere((i) => id == i.keepLearningOptionId).title;
+        keepLearningString = "$keepLearningString$name, ";
+      } catch (_) {}
+    });
+    if (keepLearningString.isNotEmpty) {
+      keepLearningString = keepLearningString.substring(0, keepLearningString.lastIndexOf(","));
+    }
+    if (keepLearningString.isEmpty || keepLearningString == " ") {
+      keepLearningString = 'No indicado';
+    }
+    return keepLearningString;
+  }
+
+  Future<void> _openInitialFormDataPdfPreview(BuildContext context) async {
+    final database = Provider.of<Database>(context, listen: false);
+    final companion = _companionFuture != null ? await _companionFuture : null;
+    final resolvedEducation = await _getResolvedEducation();
+    final interests = _getInterestsString();
+    final specificInterests = _getSpecificInterestsString();
+    final keepLearning = _getKeepLearningString();
+
+    int subsidyIndex = -1;
+    final initialReportId = widget.participantUser.initialReportId;
+    if (initialReportId != null && initialReportId.isNotEmpty) {
+      try {
+        final initialReport = await database
+            .initialReportStreamById(initialReportId)
+            .first;
+        if (initialReport != null &&
+            (initialReport.completedDate != null || initialReport.finished == true) &&
+            initialReport.subsidy != null &&
+            initialReport.subsidy!.trim().isNotEmpty) {
+          subsidyIndex = StringConst.getSubsidyIndex(initialReport.subsidy);
+        }
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyInitialFormDataPdfPreview(
+          user: widget.participantUser,
+          companion: companion,
+          resolvedEducation: resolvedEducation,
+          interests: interests,
+          specificInterests: specificInterests,
+          keepLearning: keepLearning,
+          subsidyIndex: subsidyIndex,
+        ),
+      ),
+    );
+  }
+
   Widget _buildInitialFormSection(BuildContext context) {
     final database = Provider.of<Database>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
@@ -261,8 +411,29 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: Sizes.kDefaultPaddingDouble, top: Sizes.kDefaultPaddingDouble),
-            child: CustomTextBoldTitle(title: StringConst.INITIAL_FORM_DATA),
+            padding: const EdgeInsets.only(
+              left: Sizes.kDefaultPaddingDouble,
+              right: Sizes.kDefaultPaddingDouble,
+              top: Sizes.kDefaultPaddingDouble,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CustomTextBoldTitle(title: StringConst.INITIAL_FORM_DATA),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(
+                    Icons.file_download_outlined,
+                    color: AppColors.primary900,
+                    size: 24,
+                  ),
+                  tooltip: 'Descargar datos del formulario',
+                  onPressed: () => _openInitialFormDataPdfPreview(context),
+                ),
+              ],
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: Sizes.kDefaultPaddingDouble, left: Sizes.kDefaultPaddingDouble, right: Sizes.kDefaultPaddingDouble),
