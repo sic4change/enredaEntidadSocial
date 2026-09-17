@@ -686,10 +686,12 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
         if (snapshotEducations.hasData) {
           final educations = snapshotEducations.data!;
 
-          if (user?.educationId != null && user!.educationId!.isNotEmpty) {
+          final userEduId = user?.educationId?.trim() ?? '';
+          final userEduName = user?.educationName?.trim() ?? '';
+          if (userEduId.isNotEmpty || userEduName.isNotEmpty) {
             myMaxEducation = educations.firstWhere(
-              (e) => e.educationId == user.educationId,
-              orElse: () => Education(label: "", value: "", order: 0),
+              (e) => e.educationId == userEduId || e.label == userEduId || e.label == userEduName || e.value == userEduId,
+              orElse: () => Education(label: userEduName.isNotEmpty ? userEduName : userEduId, value: "", order: 0),
             );
             return CustomTextBody(text: myMaxEducation?.label ?? "");
           } else {
@@ -701,20 +703,20 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
                   .any((exp) => exp.education != null && exp.education!.isNotEmpty);
               if (areEduactions) {
                 final myEducations = educations
-                    .where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label))
+                    .where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label || exp.nameFormation == edu.label))
                     .toList();
                 myEducations.sort((a, b) => a.order.compareTo(b.order));
                 if (myEducations.isNotEmpty) {
                   myMaxEducation = myEducations.first;
                 } else {
-                  myMaxEducation = Education(label: "", value: "", order: 0);
+                  myMaxEducation = Education(label: myEducationalExperiencies.first.education ?? "", value: "", order: 0);
                 }
               } else {
                 myMaxEducation = Education(label: "", value: "", order: 0);
               }
               return CustomTextBody(text: myMaxEducation?.label ?? "");
             }
-            return const SizedBox.shrink();
+            return const CustomTextBody(text: "No indicado");
           }
         }
         return const SizedBox.shrink();

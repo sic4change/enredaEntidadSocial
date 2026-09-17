@@ -108,9 +108,16 @@ class UserEnreda {
       photo = '';
     }
 
-    String educationName;
+    String educationName = '';
     try {
-      educationName = data['education']['label'];
+      final rawEdu = data['education'] ?? data['educationName'] ?? data['academicLevel'] ?? data['levelEducation'] ?? data['nivelEducativo'];
+      if (rawEdu != null) {
+        if (rawEdu is Map) {
+          educationName = (rawEdu['label'] ?? rawEdu['name'] ?? rawEdu['title'] ?? '').toString();
+        } else if (rawEdu is String) {
+          educationName = rawEdu.trim();
+        }
+      }
     } catch (e) {
       educationName = '';
     }
@@ -164,27 +171,63 @@ class UserEnreda {
 
     List<String> interests = [];
     try {
-      data['interests']['interests'].forEach((interest) {
-        interests.add(interest.toString());
-      });
+      if (data['interests'] is Map && data['interests']['interests'] != null) {
+        data['interests']['interests'].forEach((interest) {
+          if (interest != null && interest.toString().isNotEmpty) {
+            interests.add(interest.toString());
+          }
+        });
+      } else if (data['interests'] is List) {
+        data['interests'].forEach((interest) {
+          if (interest != null && interest.toString().isNotEmpty) {
+            interests.add(interest.toString());
+          }
+        });
+      }
     } catch (e) {
       // No interests
     }
 
     List<String> specificInterests = [];
     try {
-      data['interests']['specificInterests'].forEach((specificInterest) {
-        specificInterests.add(specificInterest.toString());
-      });
+      if (data['interests'] is Map && data['interests']['specificInterests'] != null) {
+        data['interests']['specificInterests'].forEach((specificInterest) {
+          if (specificInterest != null && specificInterest.toString().isNotEmpty) {
+            specificInterests.add(specificInterest.toString());
+          }
+        });
+      } else if (data['specificInterests'] is List) {
+        data['specificInterests'].forEach((specificInterest) {
+          if (specificInterest != null && specificInterest.toString().isNotEmpty) {
+            specificInterests.add(specificInterest.toString());
+          }
+        });
+      } else if (data['interests'] is Map && data['interests']['specificInterest'] != null) {
+        data['interests']['specificInterest'].forEach((specificInterest) {
+          if (specificInterest != null && specificInterest.toString().isNotEmpty) {
+            specificInterests.add(specificInterest.toString());
+          }
+        });
+      }
     } catch (e) {
       // No specificInterests
     }
 
     List<String> keepLearningOptions = [];
     try {
-      data['interests']['continueLearning'].forEach((keepLearningOption) {
-        keepLearningOptions.add(keepLearningOption.toString());
-      });
+      if (data['interests'] is Map && data['interests']['continueLearning'] != null) {
+        data['interests']['continueLearning'].forEach((keepLearningOption) {
+          if (keepLearningOption != null && keepLearningOption.toString().isNotEmpty) {
+            keepLearningOptions.add(keepLearningOption.toString());
+          }
+        });
+      } else if (data['keepLearningOptions'] is List) {
+        data['keepLearningOptions'].forEach((keepLearningOption) {
+          if (keepLearningOption != null && keepLearningOption.toString().isNotEmpty) {
+            keepLearningOptions.add(keepLearningOption.toString());
+          }
+        });
+      }
     } catch (e) {
       // No keepLearningOptions
     }
@@ -203,7 +246,7 @@ class UserEnreda {
         city: city,
         postalCode: postalCode);
 
-    final String educationId = data['educationId']?? "";
+    final String educationId = (data['educationId'] ?? (data['education'] is String ? data['education'] : "")).toString();
 
     // final bool? showChatWelcome = data['showChatWelcome'];
 

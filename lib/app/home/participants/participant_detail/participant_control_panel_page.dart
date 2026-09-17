@@ -5,6 +5,7 @@ import 'package:enreda_empresas/app/common_widgets/rounded_container.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/competencies/competency_tile.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/my_curriculum_page.dart';
+import 'package:enreda_empresas/app/models/companionData.dart';
 import 'package:enreda_empresas/app/models/competency.dart';
 import 'package:enreda_empresas/app/models/education.dart';
 import 'package:enreda_empresas/app/models/experience.dart';
@@ -44,6 +45,7 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
   late Stream<List<Experience>>? _experiencesStream;
   List<Education>? _allEducations;
   late Stream<List<Resource>> _participantResourcesStream;
+  Future<CompanionData?>? _companionFuture;
   final ScrollController _competenciesScrollController = ScrollController();
 
   @override
@@ -56,6 +58,24 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
       widget.participantUser.userId ?? '',
       widget.participantUser.assignedEntityId,
     );
+    final userId = widget.participantUser.userId;
+    if (userId != null && userId.isNotEmpty) {
+      _companionFuture = database.getCompanionData(userId);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ParticipantControlPanelPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.participantUser.userId != widget.participantUser.userId) {
+      final database = Provider.of<Database>(context, listen: false);
+      final userId = widget.participantUser.userId;
+      if (userId != null && userId.isNotEmpty) {
+        _companionFuture = database.getCompanionData(userId);
+      } else {
+        _companionFuture = null;
+      }
+    }
   }
 
   @override
@@ -257,94 +277,110 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                 ),
                 SpaceH12(),
                 (() {
-                   Education? myMaxEducation;
-                   final educations = _allEducations ?? [];
-                   if (widget.participantUser.educationId!.isNotEmpty) {
-                     myMaxEducation = educations.firstWhere((e) => e.educationId == widget.participantUser.educationId, orElse: () => Education(label: "", value: "", order: 0));
+                   final educations = _allEducations ?? LocationCache.instance.educations;
+                   final userEduId = widget.participantUser.educationId?.trim() ?? '';
+                   final userEduName = widget.participantUser.educationName?.trim() ?? '';
+
+                   String resolvedEducation = '';
+
+                   if (userEduId.isNotEmpty) {
+                     final match = educations.firstWhere(
+                       (e) => e.educationId == userEduId || e.label == userEduId || e.value == userEduId,
+                       orElse: () => Education(label: userEduId, value: userEduId, order: 0),
+                     );
+                     resolvedEducation = match.label.isNotEmpty ? match.label : userEduId;
+                   }
+
+                   if (resolvedEducation.isEmpty && userEduName.isNotEmpty) {
+                     resolvedEducation = userEduName;
+                   }
+
+                   if (resolvedEducation.isNotEmpty) {
                      return RichText(
                        text: TextSpan(
                          text: "${StringConst.FORM_EDUCATION_REV}: ",
                          style: textTheme.bodySmall?.copyWith(
                            fontWeight: FontWeight.bold,
-                           color: AppColors.turquoiseBlue,
+                           color: AppColors.primary900,
                            height: 1.5,
                            fontSize: fontSize,
                          ),
                          children: [
                            TextSpan(
-                             text: myMaxEducation.label??"",
+                             text: resolvedEducation,
                              style: textTheme.bodySmall?.copyWith(
                                fontSize: fontSize,
-                             ),)
+                             ),
+                           )
                          ],
                        ),
                      );
                    }
-                   else {
-                     return StreamBuilder<List<Experience>>(
-                         stream: _experiencesStream,
-                         builder: (context, snapshotExperiences) {
-                           if (snapshotExperiences.hasData) {
-                             final myEducationalExperiencies = snapshotExperiences.data!
-                                 .where((experience) => experience.type == 'Formativa')
-                                 .toList();
-                             if (myEducationalExperiencies.isNotEmpty) {
-                               final areEduactions = myEducationalExperiencies.any((exp) => exp.education != null && exp.education!.isNotEmpty);
-                               if (areEduactions) {
-                                 final myEducations = educations.where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label)).toList();
-                                 myEducations.sort((a, b) => a.order.compareTo(b.order));
-                                 if(myEducations.isNotEmpty){
-                                   myMaxEducation = myEducations.first;
-                                 } else {
-                                   myMaxEducation = Education(label: "", value: "", order: 0);
-                                 }
-                               } else {
-                                 myMaxEducation = Education(label: "", value: "", order: 0);
-                               }
-                               return RichText(
-                                 text: TextSpan(
-                                   text: "${StringConst.FORM_EDUCATION_REV}: ",
-                                   style: textTheme.bodySmall?.copyWith(
-                                     fontWeight: FontWeight.bold,
-                                     color: AppColors.turquoiseBlue,
-                                     height: 1.5,
-                                     fontSize: fontSize,
-                                   ),
-                                   children: [
-                                     TextSpan(
-                                       text: myMaxEducation?.label??"",
-                                       style: textTheme.bodySmall?.copyWith(
-                                         fontSize: fontSize,
-                                       ),)
-                                   ],
-                                 ),
-                               );
-                             } else {
-                               return Container();
-                             }
-                           } else {
-                             return Row(
-                               children: [
-                                 CustomTextBold(title: StringConst.FORM_EDUCATION_REV, color: AppColors.primary900,),
-                                 CustomTextSmall(text: 'No indicado'),
-                               ],
-                             );
+
+                   return StreamBuilder<List<Experience>>(
+                     stream: _experiencesStream,
+                     builder: (context, snapshotExperiences) {
+                       String streamEdu = '';
+                       if (snapshotExperiences.hasData && snapshotExperiences.data != null) {
+                         final myEducationalExperiencies = snapshotExperiences.data!
+                             .where((experience) => experience.type == 'Formativa')
+                             .toList();
+                         if (myEducationalExperiencies.isNotEmpty) {
+                           final myEducations = educations
+                               .where((edu) => myEducationalExperiencies.any((exp) => exp.education == edu.label || exp.nameFormation == edu.label))
+                               .toList();
+                           myEducations.sort((a, b) => a.order.compareTo(b.order));
+                           if (myEducations.isNotEmpty) {
+                             streamEdu = myEducations.first.label;
+                           } else if (myEducationalExperiencies.first.education != null && myEducationalExperiencies.first.education!.isNotEmpty) {
+                             streamEdu = myEducationalExperiencies.first.education!;
                            }
-                         });
-                   }
+                         }
+                       }
+                       if (streamEdu.isEmpty) {
+                         streamEdu = 'No indicado';
+                       }
+                       return RichText(
+                         text: TextSpan(
+                           text: "${StringConst.FORM_EDUCATION_REV}: ",
+                           style: textTheme.bodySmall?.copyWith(
+                             fontWeight: FontWeight.bold,
+                             color: AppColors.primary900,
+                             height: 1.5,
+                             fontSize: fontSize,
+                           ),
+                           children: [
+                             TextSpan(
+                               text: streamEdu,
+                               style: textTheme.bodySmall?.copyWith(
+                                 fontSize: fontSize,
+                               ),
+                             )
+                           ],
+                         ),
+                       );
+                     },
+                   );
                 })(),
                 SpaceH12(),
                 (() {
                   String interestsString = "";
                   final interestsList = LocationCache.instance.interests;
                   widget.participantUser.interests.forEach((interestId) {
-                    final interest = interestsList.firstWhere((i) => interestId == i.interestId, orElse: () => Interest(interestId: "", name: ""));
-                    if (interest.name.isNotEmpty) {
-                      interestsString = "$interestsString${interest.name}, ";
+                    final interest = interestsList.firstWhere(
+                      (i) => interestId == i.interestId || interestId == i.name,
+                      orElse: () => Interest(interestId: "", name: interestId),
+                    );
+                    final name = interest.name.isNotEmpty ? interest.name : interestId;
+                    if (name.trim().isNotEmpty) {
+                      interestsString = "$interestsString$name, ";
                     }
                   });
-                  if (interestsString.isNotEmpty) {
-                    interestsString = interestsString.substring(0, interestsString.lastIndexOf(","));
+                  if (interestsString.isNotEmpty && interestsString.endsWith(", ")) {
+                    interestsString = interestsString.substring(0, interestsString.length - 2);
+                  }
+                  if (interestsString.trim().isEmpty) {
+                    interestsString = 'No indicado';
                   }
                   return RichText(
                     text: TextSpan(
@@ -360,7 +396,8 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                           text: interestsString,
                           style: textTheme.bodySmall?.copyWith(
                             fontSize: fontSize,
-                          ),)
+                          ),
+                        )
                       ],
                     ),
                   );
@@ -370,13 +407,20 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                   String specificInterestsString = "";
                   final specificInterestsList = LocationCache.instance.specificInterests;
                   widget.participantUser.specificInterests.forEach((specificInterestId) {
-                    final specificInterest = specificInterestsList.firstWhere((s) => specificInterestId == s.specificInterestId, orElse: () => SpecificInterest(specificInterestId: "", name: ""));
-                    if (specificInterest.name.isNotEmpty) {
-                      specificInterestsString = "$specificInterestsString${specificInterest.name}, ";
+                    final specificInterest = specificInterestsList.firstWhere(
+                      (s) => specificInterestId == s.specificInterestId || specificInterestId == s.name,
+                      orElse: () => SpecificInterest(specificInterestId: "", name: specificInterestId),
+                    );
+                    final name = specificInterest.name.isNotEmpty ? specificInterest.name : specificInterestId;
+                    if (name.trim().isNotEmpty) {
+                      specificInterestsString = "$specificInterestsString$name, ";
                     }
                   });
-                  if (specificInterestsString.isNotEmpty) {
-                    specificInterestsString = specificInterestsString.substring(0, specificInterestsString.lastIndexOf(","));
+                  if (specificInterestsString.isNotEmpty && specificInterestsString.endsWith(", ")) {
+                    specificInterestsString = specificInterestsString.substring(0, specificInterestsString.length - 2);
+                  }
+                  if (specificInterestsString.trim().isEmpty) {
+                    specificInterestsString = 'No indicado';
                   }
 
                   return RichText(
@@ -393,7 +437,8 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                           text: specificInterestsString,
                           style: textTheme.bodySmall?.copyWith(
                             fontSize: fontSize,
-                          ),)
+                          ),
+                        )
                       ],
                     ),
                   );
@@ -434,6 +479,108 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                     ),
                   );
                 })(),
+                FutureBuilder<CompanionData?>(
+                  future: _companionFuture,
+                  builder: (context, snapshot) {
+                    final companion = snapshot.data;
+                    if (companion == null) return const SizedBox.shrink();
+
+                    final children = <Widget>[];
+
+                    void addCompanionField(String label, String? value) {
+                      if (value != null && value.trim().isNotEmpty) {
+                        children.add(
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12.0),
+                            child: RichText(
+                              text: TextSpan(
+                                text: label,
+                                style: textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary900,
+                                  height: 1.5,
+                                  fontSize: fontSize,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: value.trim(),
+                                    style: textTheme.bodySmall?.copyWith(
+                                      fontSize: fontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                    }
+
+                    // 1. Situación familiar
+                    addCompanionField('Situación familiar: ', companion.companionFamilyStatus);
+
+                    // 2. Fecha de llegada a España
+                    addCompanionField('Fecha de llegada a España: ', companion.companionArrivalDateInSpain);
+
+                    // 3. Situación administrativa
+                    addCompanionField('Situación administrativa: ', companion.companionAdministrativeStatus);
+
+                    // 4. Permiso de trabajo
+                    final rawPermit = companion.companionWorkPermit?.trim();
+                    if (rawPermit != null && rawPermit.isNotEmpty) {
+                      String permitDisplay = rawPermit;
+                      final lower = rawPermit.toLowerCase();
+                      if (lower == 'true' || lower == 'si' || lower == 'sí') {
+                        permitDisplay = 'Sí';
+                      } else if (lower == 'false' || lower == 'no') {
+                        permitDisplay = 'No';
+                      }
+                      addCompanionField('Permiso de trabajo: ', permitDisplay);
+                    }
+
+                    // 5. Tipo y número de documento
+                    final docType = companion.companionDocumentType?.trim() ?? '';
+                    final docNum = companion.companionDocumentNumber?.trim() ?? '';
+                    final docCombined = (docType.isNotEmpty && docNum.isNotEmpty)
+                        ? '$docType - $docNum'
+                        : (docNum.isNotEmpty ? docNum : docType);
+                    addCompanionField('Tipo y número de documento: ', docCombined);
+
+                    // 6. Ayudas seleccionadas
+                    final helpNeeds = companion.companionHelpNeeds;
+                    if (helpNeeds != null && helpNeeds.isNotEmpty) {
+                      final helpNeedsText = helpNeeds
+                          .where((s) => s.trim().isNotEmpty)
+                          .join(', ');
+                      addCompanionField('Ayudas seleccionadas: ', helpNeedsText);
+                    }
+
+                    // 7. Horario de contacto
+                    final rawSchedule = companion.companionContactSchedule?.trim();
+                    if (rawSchedule != null && rawSchedule.isNotEmpty) {
+                      final cleanSchedule = rawSchedule
+                          .replaceAll('[', '')
+                          .replaceAll(']', '')
+                          .trim();
+                      if (cleanSchedule.isNotEmpty) {
+                        addCompanionField('Horario de contacto: ', cleanSchedule);
+                      }
+                    }
+
+                    // 8. Ayuda al rellenar el formulario
+                    addCompanionField('Ayuda al rellenar el formulario: ', companion.companionFormHelp);
+
+                    // 9. Observaciones
+                    addCompanionField('Observaciones: ', companion.companionOtherRelevantData);
+
+                    if (children.isEmpty) return const SizedBox.shrink();
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: children,
+                    );
+                  },
+                ),
               ],
             ),
           ),

@@ -313,7 +313,7 @@ class LocationCache {
     return _warmUpFuture!;
   }
 
-  static const int _cacheVersion = 8;
+  static const int _cacheVersion = 9;
 
   /// Batched warm-up: max ~5 concurrent Firestore reads at a time.
   /// All catalogs use persistence cache so subsequent launches skip Firestore entirely.
@@ -322,7 +322,7 @@ class LocationCache {
     final storedVersion = prefs.getInt('_cacheVersion') ?? 0;
     if (storedVersion < _cacheVersion) {
       const catalogKeys = [
-        'countries', 'gamificationFlags', 'competencies', 'competencyCategories', 'competencySubCategories', 'interests', 'scopeActions', 'abilities',
+        'countries', 'gamificationFlags', 'competencies', 'competencyCategories', 'competencySubCategories', 'interests', 'specificInterests', 'scopeActions', 'abilities',
         'socialEntitiesTypes', 'personalDocumentTypes', 'educations', 'genders', 'dedications',
         'keepLearningOptions', 'documentCategories', 'programs', 'resourceTypes', 'languages',
         'resourceCategories', 'resourcePictures',
@@ -346,6 +346,7 @@ class LocationCache {
       _loadOrFetchCatalog<CompetencyCategory>('competencyCategories', () => database.competenciesCategoriesStream().first, (data, id) => CompetencyCategory.fromMap(data, id), getDocId: (e) => e.competencyCategoryId ?? '').then((v) => competencyCategories = v).catchError((e) { print("Error: e"); return <CompetencyCategory>[]; }),
       _loadOrFetchCatalog<CompetencySubCategory>('competencySubCategories', () => database.competenciesSubCategoriesStream().first, (data, id) => CompetencySubCategory.fromMap(data, id), getDocId: (e) => e.competencySubCategoryId ?? '').then((v) => competencySubCategories = v).catchError((e) { print("Error: e"); return <CompetencySubCategory>[]; }),
       _loadOrFetchCatalog<Interest>('interests', () => database.getInterests(), (data, id) => Interest.fromMap(data, id)).then((v) => interests = v),
+      _loadOrFetchCatalog<SpecificInterest>('specificInterests', () => database.getSpecificInterests(), (data, id) => SpecificInterest.fromMap(data, id)).then((v) => specificInterests = v).catchError((e) { print("Error loading specificInterests: $e"); return <SpecificInterest>[]; }),
       _loadOrFetchCatalog<ScopeAction>('scopeActions', () => database.getScopeActions(), (data, id) => ScopeAction.fromMap(data, id)).then((v) => scopeActions = v),
       _loadOrFetchCatalog<Ability>('abilities', () => database.getAbilities(), (data, id) => Ability.fromMap(data, id)).then((v) => abilities = v),
     ]);
@@ -464,7 +465,9 @@ class LocationCache {
   SpecificInterest? specificInterestById(String? id) {
     if (id == null) return null;
     try {
-      return specificInterests.firstWhere((element) => element.specificInterestId == id);
+      return specificInterests.firstWhere(
+        (element) => element.specificInterestId == id || element.name == id,
+      );
     } catch (_) {
       return null;
     }

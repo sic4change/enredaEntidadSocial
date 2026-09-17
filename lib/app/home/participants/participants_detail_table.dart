@@ -19,7 +19,7 @@ class ParticipantsDetailTable extends StatefulWidget {
     super.key,
     required this.users,
     required this.onTapUser,
-    this.pageSize = 40,
+    this.pageSize = 10,
   });
 
   final List<UserEnreda> users;
@@ -73,11 +73,14 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
   int _sortCol = 0;
   bool _asc = true;
   int _page = 0;
+  late int _pageSize;
   String? _selectedUserId;
 
   @override
   void initState() {
     super.initState();
+    _pageSize =
+        const [5, 10, 20, 50].contains(widget.pageSize) ? widget.pageSize : 10;
     _selectedUserId = _identity(globals.currentParticipant);
   }
 
@@ -95,6 +98,14 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
     super.dispose();
   }
 
+  void _onPageSizeChanged(int? newSize) {
+    if (newSize == null || newSize == _pageSize) return;
+    setState(() {
+      _pageSize = newSize;
+      _page = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final sorted = List<UserEnreda>.from(widget.users);
@@ -104,10 +115,14 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
     }
 
     final total = sorted.length;
-    final pageCount = total == 0 ? 1 : ((total - 1) ~/ widget.pageSize) + 1;
+    final pageCount = total == 0 ? 1 : ((total - 1) ~/ _pageSize) + 1;
     if (_page >= pageCount) _page = pageCount - 1;
+    if (_page < 0) _page = 0;
+
+    final startIndex = total == 0 ? 0 : _page * _pageSize + 1;
+    final endIndex = (_page * _pageSize + _pageSize).clamp(0, total);
     final pageUsers =
-        sorted.skip(_page * widget.pageSize).take(widget.pageSize).toList();
+        sorted.skip(_page * _pageSize).take(_pageSize).toList();
     // Keep a usable scroll viewport on narrow screens without giving up the
     // frozen name column.
     final nameWidth =
@@ -122,47 +137,150 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
           contentHeight: _headerHeight + pageUsers.length * _rowHeight,
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Text(
-              StringConst.tableShowing(pageUsers.length, total),
-              style: const TextStyle(color: AppColors.greyTxtAlt, fontSize: 12),
-            ),
-            const Spacer(),
-            _PageArrow(
-              icon: Icons.arrow_left,
-              enabled: _page > 0,
-              onTap: () => setState(() => _page--),
-            ),
-            const SizedBox(width: 8),
-            Text.rich(
-              TextSpan(
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: _border),
+          ),
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 16,
+            runSpacing: 12,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextSpan(
-                    text: '${_page + 1}',
-                    style: const TextStyle(
-                      color: _ink,
+                  const Text(
+                    'Mostrar:',
+                    style: TextStyle(
+                      color: AppColors.greyTxtAlt,
                       fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  TextSpan(
-                    text: ' / $pageCount',
+                  const SizedBox(width: 8),
+                  Container(
+                    height: 32,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: AppColors.greyBorder),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<int>(
+                        value: const [5, 10, 20, 50].contains(_pageSize)
+                            ? _pageSize
+                            : 10,
+                        icon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: AppColors.turquoiseBlue,
+                          size: 20,
+                        ),
+                        isDense: true,
+                        style: const TextStyle(
+                          color: _ink,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        items: const [5, 10, 20, 50].map((size) {
+                          return DropdownMenuItem<int>(
+                            value: size,
+                            child: Text('$size'),
+                          );
+                        }).toList(),
+                        onChanged: _onPageSizeChanged,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'por página',
+                    style: TextStyle(
+                      color: AppColors.greyTxtAlt,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Container(
+                    height: 16,
+                    width: 1,
+                    color: AppColors.greyBorder,
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    total == 0
+                        ? '0 participantes'
+                        : 'Mostrando $startIndex - $endIndex de $total participantes',
                     style: const TextStyle(
                       color: AppColors.greyTxtAlt,
                       fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            _PageArrow(
-              icon: Icons.arrow_right,
-              enabled: _page < pageCount - 1,
-              onTap: () => setState(() => _page++),
-            ),
-          ],
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _PageArrow(
+                    icon: Icons.first_page,
+                    enabled: _page > 0,
+                    onTap: () => setState(() => _page = 0),
+                  ),
+                  const SizedBox(width: 4),
+                  _PageArrow(
+                    icon: Icons.chevron_left,
+                    enabled: _page > 0,
+                    onTap: () => setState(() => _page--),
+                  ),
+                  const SizedBox(width: 12),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(
+                          text: 'Página ',
+                          style: TextStyle(
+                              color: AppColors.greyTxtAlt, fontSize: 12),
+                        ),
+                        TextSpan(
+                          text: '${_page + 1}',
+                          style: const TextStyle(
+                            color: _ink,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' de $pageCount',
+                          style: const TextStyle(
+                            color: AppColors.greyTxtAlt,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  _PageArrow(
+                    icon: Icons.chevron_right,
+                    enabled: _page < pageCount - 1,
+                    onTap: () => setState(() => _page++),
+                  ),
+                  const SizedBox(width: 4),
+                  _PageArrow(
+                    icon: Icons.last_page,
+                    enabled: _page < pageCount - 1,
+                    onTap: () => setState(() => _page = pageCount - 1),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -537,9 +655,15 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
     final updatedCompanion = CompanionData(
       companionDataId: companion?.companionDataId,
       userId: userId,
-      companionDocumentNumber: companion?.companionDocumentNumber,
+      companionFamilyStatus: companion?.companionFamilyStatus,
+      companionArrivalDateInSpain: companion?.companionArrivalDateInSpain,
       companionAdministrativeStatus: companion?.companionAdministrativeStatus,
+      companionWorkPermit: companion?.companionWorkPermit,
+      companionDocumentType: companion?.companionDocumentType,
+      companionDocumentNumber: companion?.companionDocumentNumber,
       companionHelpNeeds: companion?.companionHelpNeeds,
+      companionContactSchedule: companion?.companionContactSchedule,
+      companionFormHelp: companion?.companionFormHelp,
       companionOtherRelevantData: text,
     );
 

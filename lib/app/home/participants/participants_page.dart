@@ -286,7 +286,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
           return SliverToBoxAdapter(
             child: ParticipantsDetailTable(
               users: list,
-              pageSize: 40,
+              pageSize: 10,
               onTapUser: (user) => setState(() {
                 globals.currentParticipant = user;
                 ParticipantsListPage.selectedIndex.value = 1;
