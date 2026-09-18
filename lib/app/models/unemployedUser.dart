@@ -28,6 +28,7 @@ class UnemployedUser {
     this.assignedById,
     this.assignedEntityId,
     this.nationality,
+    this.nationalitySecond,
     this.checkAgreeCV,
     this.gamificationFlags = const {},
   });
@@ -54,6 +55,7 @@ class UnemployedUser {
   final String? assignedById;
   final String? assignedEntityId;
   final String? nationality;
+  final String? nationalitySecond;
   final String? educationId;
   final Map<String, bool> gamificationFlags;
   final bool? checkAgreeCV;
@@ -128,6 +130,7 @@ class UnemployedUser {
         assignedById: data['assignedById'],
         assignedEntityId: data['assignedEntityId'],
         nationality: data['nationality'],
+        nationalitySecond: data['nationalitySecond'],
         educationId: data['educationId'],
         gamificationFlags: gamificationFlags,
         checkAgreeCV: checkAgreeCV
@@ -151,6 +154,7 @@ class UnemployedUser {
       'assignedById': assignedById,
       'assignedEntityId': assignedEntityId,
       'nationality' : nationality,
+      'nationalitySecond': nationalitySecond,
       'gamificationFlags': gamificationFlags,
       'educationId': educationId,
       'checkAgreeCV': checkAgreeCV

@@ -6,14 +6,14 @@ import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Widget streamBuilderForNation (BuildContext context, String? selectedCountry,  functionToWriteBackThings, String title ) {
+Widget streamBuilderForNation (BuildContext context, String? selectedCountry,  functionToWriteBackThings, String title, {Widget? trailing, bool isRequired = true} ) {
   final cache = LocationCache.instance;
   TextTheme textTheme = Theme.of(context).textTheme;
   double fontSize = responsiveSize(context, 14, 16, md: 15);
 
   // If nations are already in memory (loaded lazily on first use), render synchronously
   if (cache.nations.isNotEmpty) {
-    return _buildNationDropdown(context, textTheme, fontSize, selectedCountry, cache.nations, functionToWriteBackThings, title);
+    return _buildNationDropdown(context, textTheme, fontSize, selectedCountry, cache.nations, functionToWriteBackThings, title, trailing: trailing, isRequired: isRequired);
   }
 
   // Otherwise fetch from Firestore, write back to cache, and show dropdown
@@ -26,11 +26,11 @@ Widget streamBuilderForNation (BuildContext context, String? selectedCountry,  f
           cache.nations = snapshotCountries.data!;
         }
         final countries = snapshotCountries.data ?? [];
-        return _buildNationDropdown(context, textTheme, fontSize, selectedCountry, countries, functionToWriteBackThings, title);
+        return _buildNationDropdown(context, textTheme, fontSize, selectedCountry, countries, functionToWriteBackThings, title, trailing: trailing, isRequired: isRequired);
       });
 }
 
-Widget _buildNationDropdown(BuildContext context, TextTheme textTheme, double fontSize, String? selectedCountry, List<String> countries, functionToWriteBackThings, String title) {
+Widget _buildNationDropdown(BuildContext context, TextTheme textTheme, double fontSize, String? selectedCountry, List<String> countries, functionToWriteBackThings, String title, {Widget? trailing, bool isRequired = true}) {
   final countryItems = countries.map((String c) =>
       DropdownMenuItem<String>(
         value: c,
@@ -44,14 +44,20 @@ Widget _buildNationDropdown(BuildContext context, TextTheme textTheme, double fo
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    title,
-                    style: textTheme.bodySmall?.copyWith(
-                      height: 1.5,
-                      color: AppColors.greyDark,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        title,
+                        style: textTheme.bodySmall?.copyWith(
+                          height: 1.5,
+                          color: AppColors.greyDark,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (trailing != null) trailing,
+                    ],
                   ),
                 ),
                 Container(
@@ -62,7 +68,7 @@ Widget _buildNationDropdown(BuildContext context, TextTheme textTheme, double fo
                     isExpanded: true,
                     onChanged: (value) => functionToWriteBackThings(value),
                     validator: (value) =>
-                    selectedCountry != null
+                    !isRequired || selectedCountry != null
                         ? null
                         : StringConst.COUNTRY_ERROR,
                     decoration: InputDecoration(

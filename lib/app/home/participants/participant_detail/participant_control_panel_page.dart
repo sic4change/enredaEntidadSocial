@@ -697,16 +697,8 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                     addCompanionField('Situación administrativa: ', companion.companionAdministrativeStatus);
 
                     // 4. Permiso de trabajo
-                    final rawPermit = companion.companionWorkPermit?.trim();
-                    if (rawPermit != null && rawPermit.isNotEmpty) {
-                      String permitDisplay = rawPermit;
-                      final lower = rawPermit.toLowerCase();
-                      if (lower == 'true' || lower == 'si' || lower == 'sí') {
-                        permitDisplay = 'Sí';
-                      } else if (lower == 'false' || lower == 'no') {
-                        permitDisplay = 'No';
-                      }
-                      addCompanionField('Permiso de trabajo: ', permitDisplay);
+                    if (companion.companionWorkPermit != null) {
+                      addCompanionField('Permiso de trabajo: ', companion.companionWorkPermit! ? 'Sí' : 'No');
                     }
 
                     // 5. Tipo y número de documento
@@ -727,19 +719,15 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
                     }
 
                     // 7. Horario de contacto
-                    final rawSchedule = companion.companionContactSchedule?.trim();
-                    if (rawSchedule != null && rawSchedule.isNotEmpty) {
-                      final cleanSchedule = rawSchedule
-                          .replaceAll('[', '')
-                          .replaceAll(']', '')
-                          .trim();
-                      if (cleanSchedule.isNotEmpty) {
-                        addCompanionField('Horario de contacto: ', cleanSchedule);
-                      }
+                    final schedule = companion.companionContactSchedule;
+                    if (schedule != null && schedule.isNotEmpty) {
+                      addCompanionField('Horario de contacto: ', schedule.join(', '));
                     }
 
                     // 8. Ayuda al rellenar el formulario
-                    addCompanionField('Ayuda al rellenar el formulario: ', companion.companionFormHelp);
+                    if (companion.companionFormHelp != null) {
+                      addCompanionField('Ayuda al rellenar el formulario: ', companion.companionFormHelp! ? 'Sí' : 'No');
+                    }
 
                     // 9. Observaciones
                     addCompanionField('Observaciones: ', companion.companionOtherRelevantData);

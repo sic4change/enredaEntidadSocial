@@ -57,7 +57,7 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
         child: ListTileTheme(
           contentPadding: EdgeInsets.fromLTRB(14.0, 0.0, 24.0, 0.0),
           child: ListBody(
-            children: widget.items!.map(_buildItem).toList(),
+            children: (widget.items ?? []).map(_buildItem).toList(),
           ),
         ),
       ),

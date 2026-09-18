@@ -199,7 +199,7 @@ abstract class Database {
      Future<void> updateCertificationRequest(CertificationRequest certificationRequest, bool certified, bool referenced );
      Future<void> setCertificationRequest(CertificationRequest certificationRequest);
      Stream<List<GamificationFlag>> gamificationFlagsStream();
-     Future<void> addUnemployedUser(UnemployedUser unemployedUser);
+     Future<String> addUnemployedUser(UnemployedUser unemployedUser);
      Stream<List<Dedication>> dedicationStream();
      Stream<List<Gender>> genderStream();
      Stream<List<Program>> programsStream();
@@ -1337,8 +1337,8 @@ class FirestoreDatabase implements Database {
   );
 
   @override
-  Future<void> addUnemployedUser(UnemployedUser unemployedUser) =>
-      _service.addData(path: APIPath.users(), data: unemployedUser.toMap());
+  Future<String> addUnemployedUser(UnemployedUser unemployedUser) =>
+      _service.addDataFile(path: APIPath.users(), data: unemployedUser.toMap());
 
   @override
   Stream<List<Dedication>> dedicationStream() => _service.collectionStream(

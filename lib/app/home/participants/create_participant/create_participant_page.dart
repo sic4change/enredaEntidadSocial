@@ -45,6 +45,7 @@ import 'package:enreda_empresas/app/models/timeSearching.dart';
 import 'package:enreda_empresas/app/models/timeSpentWeekly.dart';
 import 'package:enreda_empresas/app/models/unemployedUser.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/models/companionData.dart';
 import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/utils/adaptative.dart';
@@ -76,6 +77,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   final _formKey = GlobalKey<FormState>();
   final _formKeyMotivations = GlobalKey<FormState>();
   final _formKeyInterests = GlobalKey<FormState>();
+  final _formKeyCompanion = GlobalKey<FormState>();
   final _checkFieldKey = GlobalKey<FormState>();
   final _checkFieldKeyDataProtectionPolicy = GlobalKey<FormState>();
 
@@ -84,12 +86,29 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   String? _country, _province, _city, _postalCode;
   String? _belongOrganization;
   String? _nationality;
+  String? _nationalitySecond;
+
+  // Companion Data variables
+  String? _companionFamilySituation;
+  String? _companionDateArriveSpain;
+  String? _companionAdministrativeStatus;
+  bool? _companionWorkPermit;
+  String? _companionWorkPermitRenewalDate;
+  String? _companionDocumentType;
+  String? _companionDocumentNumber;
+  List<String> _companionHelpNeeds = [];
+  bool _companionHelpNeedsOther = false;
+  String? _companionHelpNeedsOtherText;
+  List<String> _companionContactSchedule = [];
+  bool? _companionProfessionalHelp;
+  String? _companionOtherRelevantData;
 
   int? isRegistered;
   int usersIds = 0;
   int currentStep = 0;
   bool _isChecked = false;
   bool _isCheckedDataProtectionPolicy = false;
+  bool _showSecondNationality = false;
 
   List<String> countries = [];
   List<String> provinces = [];
@@ -106,6 +125,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   String writtenEmail = '';
   Country? selectedCountry;
   String? selectedNationality;
+  String? selectedNationalitySecond;
   Province? selectedProvince;
   City? selectedCity;
   Ability? selectedAbility;
@@ -116,7 +136,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   Education? selectedEducation;
   Gender? selectedGender;
   SocialEntity? selectedSocialEntity;
-  late String countryName, provinceName, cityName, nationalityName;
+  late String countryName, provinceName, cityName, nationalityName, nationalitySecondName;
   String phoneCode = '+34';
   late String _formattedBirthdayDate;
 
@@ -181,6 +201,9 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     unemployedType = "";
     _nationality = '';
     nationalityName = '';
+    _nationalitySecond = '';
+    nationalitySecondName = '';
+    _showSecondNationality = false;
     keepLearningOptionsNames = '';
     selectedSocialEntity = globals.currentUserSocialEntity;
   }
@@ -314,7 +337,28 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                 ],
               ),
               SpaceH20(),
-              streamBuilderForNation(context, selectedNationality, _buildNationalityStreamBuilder_setState, 'Nacionalidad'),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  streamBuilderForNation(
+                    context, 
+                    selectedNationality, 
+                    _buildNationalityStreamBuilder_setState, 
+                    'Nacionalidad',
+                    trailing: _buildAddNationalityButton(),
+                  ),
+                  if (_showSecondNationality) ...[
+                    SpaceH20(),
+                    streamBuilderForNation(
+                      context, 
+                      selectedNationalitySecond, 
+                      _buildNationalitySecondStreamBuilder_setState, 
+                      'Segunda Nacionalidad (opcional)',
+                      isRequired: false,
+                    ),
+                  ],
+                ],
+              ),
               SpaceH20(),
               Flex(
                 direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
@@ -505,6 +549,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
                   ),
                 ),
               ),
+              if (!selectedInterests.any((i) => i.name.toLowerCase() == 'sin clasificar'))
               Padding(
                 padding: const EdgeInsets.all(Sizes.kDefaultPaddingDouble / 2),
                 child: Container(
@@ -762,6 +807,7 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           role: 'Desempleado',
           unemployedType: unemployedType,
           nationality: selectedNationality,
+          nationalitySecond: _showSecondNationality ? selectedNationalitySecond : null,
           assignedEntityId: selectedSocialEntity!.socialEntityId ?? null,
           assignedById: user.userId,
           checkAgreeCV: _isCheckedDataProtectionPolicy,
@@ -773,7 +819,30 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       );
       try {
         final database = Provider.of<Database>(context, listen: false);
-        await database.addUnemployedUser(unemployedUser);
+        final newUserId = await database.addUnemployedUser(unemployedUser);
+
+        final helpNeedsList = List<String>.from(_companionHelpNeeds);
+        if (_companionHelpNeedsOther && (_companionHelpNeedsOtherText?.isNotEmpty ?? false)) {
+          helpNeedsList.add('Otro: ${_companionHelpNeedsOtherText!}');
+        }
+
+        final companionData = CompanionData(
+          userId: newUserId,
+          companionFamilyStatus: _companionFamilySituation,
+          companionArrivalDateInSpain: _companionDateArriveSpain,
+          companionAdministrativeStatus: _companionAdministrativeStatus,
+          companionWorkPermit: _companionWorkPermit,
+          companionWorkPermitRenewalDate: _companionWorkPermitRenewalDate,
+          companionDocumentType: _companionDocumentType,
+          companionDocumentNumber: _companionDocumentNumber,
+          companionHelpNeeds: helpNeedsList,
+          companionContactSchedule: _companionContactSchedule,
+          companionFormHelp: _companionProfessionalHelp,
+          companionOtherRelevantData: _companionOtherRelevantData,
+        );
+        
+        await database.setCompanionData(companionData);
+
         await showAlertDialog(
           context,
           title: StringConst.CREATE_PARTICIPANT_TITLE,
@@ -839,6 +908,29 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       nationalityName = country != null ? country : "";
     });
     _nationality = country;
+  }
+
+  void _buildNationalitySecondStreamBuilder_setState(String? country) {
+    setState(() {
+      this.selectedNationalitySecond = country;
+      nationalitySecondName = country != null ? country : "";
+    });
+    _nationalitySecond = country;
+  }
+
+  Widget _buildAddNationalityButton() {
+    return _AddNationalityButton(
+      isActive: _showSecondNationality,
+      onTap: () {
+        setState(() {
+          _showSecondNationality = !_showSecondNationality;
+          if (!_showSecondNationality) {
+            _nationalitySecond = '';
+            selectedNationalitySecond = null;
+          }
+        });
+      },
+    );
   }
 
   void _buildProvinceStreamBuilder_setState(Province? province) {
@@ -981,6 +1073,13 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
       this.textEditingControllerInterests.text = concatenate.toString();
       this.interests = interestsIds;
       this.selectedInterests = selectedValues;
+      
+      if (selectedInterests.any((i) => i.name.toLowerCase() == 'sin clasificar')) {
+        this.selectedSpecificInterests.clear();
+        this.specificInterests.clear();
+        this.specificInterestsNames = '';
+        this.textEditingControllerSpecificInterests.clear();
+      }
     });
     print(interestsNames);
     print(interestsIds);
@@ -1029,6 +1128,352 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     });
     print(interestsNames);
     print(specificInterestsIds);
+  }
+
+  Widget _buildFormAcompanamiento(BuildContext context) {
+    TextTheme textTheme = Theme.of(context).textTheme;
+    double fontSize = responsiveSize(context, 14, 16, md: 15);
+
+    final inputDecoration = InputDecoration(
+      filled: true,
+      fillColor: AppColors.white,
+      errorStyle: const TextStyle(height: 0.01),
+      hintStyle: textTheme.bodySmall?.copyWith(
+        color: AppColors.darkGray,
+        fontSize: fontSize,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(color: AppColors.greyUltraLight),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(
+          color: AppColors.greyUltraLight,
+          width: 1.0,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(color: Colors.red, width: 1.0),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: const BorderSide(color: Colors.red, width: 1.0),
+      ),
+    );
+
+    Widget sectionTitle(String text) => Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, top: 16.0),
+      child: Text(
+        text,
+        style: textTheme.bodySmall?.copyWith(
+          height: 1.5,
+          color: AppColors.primaryColor,
+          fontWeight: FontWeight.w700,
+          fontSize: 16,
+        ),
+      ),
+    );
+
+    Widget fieldLabel(String text) => Padding(
+      padding: const EdgeInsets.only(bottom: 6.0, top: 8.0),
+      child: Text(
+        text,
+        style: textTheme.bodySmall?.copyWith(
+          height: 1.5,
+          color: AppColors.greyDark,
+          fontWeight: FontWeight.w600,
+          fontSize: fontSize,
+        ),
+      ),
+    );
+
+    bool isSpanish(String? nat) =>
+        nat != null && (nat.trim().toLowerCase() == 'españa' || nat.trim().toLowerCase() == 'espana');
+    final hasSpanishNationality =
+        isSpanish(selectedNationality) || isSpanish(selectedNationalitySecond);
+
+    return Form(
+      key: _formKeyCompanion,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Text(
+              'Información sobre la situación y necesidades de acompañamiento hacia el empleo del participante. Rellena los campos que apliquen.',
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.greyDark,
+                height: 1.4,
+                fontSize: fontSize,
+              ),
+            ),
+          ),
+          const Divider(color: AppColors.greyUltraLight),
+
+          if (!hasSpanishNationality) ...[
+            sectionTitle('Situación familiar'),
+            fieldLabel('¿Tiene alguna responsabilidad familiar? ¿Tiene familiares en España?'),
+            TextFormField(
+              initialValue: _companionFamilySituation,
+              minLines: 2,
+              maxLines: 4,
+              decoration: inputDecoration.copyWith(
+                hintText: 'Describe brevemente su situación familiar en España...',
+              ),
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.greyDark,
+                fontSize: fontSize,
+              ),
+              onSaved: (v) => _companionFamilySituation = v,
+              onChanged: (v) => _companionFamilySituation = v,
+            ),
+            SpaceH20(),
+
+            sectionTitle('Fecha de llegada a España'),
+            fieldLabel('Añade la fecha en la que llegó a España'),
+            TextFormField(
+              initialValue: _companionDateArriveSpain,
+              decoration: inputDecoration.copyWith(
+                hintText: 'Indica el año, mes o día...',
+              ),
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.greyDark,
+                fontSize: fontSize,
+              ),
+              onSaved: (v) => _companionDateArriveSpain = v,
+              onChanged: (v) => _companionDateArriveSpain = v,
+            ),
+            SpaceH20(),
+
+            fieldLabel('Situación administrativa'),
+            DropdownButtonFormField<String>(
+              value: _companionAdministrativeStatus,
+              isExpanded: true,
+              isDense: true,
+              decoration: inputDecoration.copyWith(hintText: 'Selecciona...'),
+              items: [
+                'Regular',
+                'Irregular',
+                'Protección Internacional',
+                'En trámite',
+                'No lo tiene claro',
+              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              onChanged: (v) {
+                setState(() {
+                  _companionAdministrativeStatus = v;
+                  if (v == 'Irregular') {
+                    _companionWorkPermit = false;
+                  }
+                });
+              },
+              onSaved: (v) => _companionAdministrativeStatus = v,
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.greyDark,
+                fontSize: fontSize,
+              ),
+            ),
+            SpaceH20(),
+
+            fieldLabel('Permiso de trabajo'),
+            Row(
+              children: [
+                Radio<bool>(
+                  value: true,
+                  groupValue: _companionWorkPermit,
+                  activeColor: AppColors.primaryColor,
+                  onChanged: (v) => setState(() => _companionWorkPermit = v),
+                ),
+                Text('Sí', style: textTheme.bodySmall?.copyWith(fontSize: 15, color: AppColors.greyDark)),
+                const SizedBox(width: 16),
+                Radio<bool>(
+                  value: false,
+                  groupValue: _companionWorkPermit,
+                  activeColor: AppColors.primaryColor,
+                  onChanged: (v) => setState(() => _companionWorkPermit = v),
+                ),
+                Text('No', style: textTheme.bodySmall?.copyWith(fontSize: 15, color: AppColors.greyDark)),
+              ],
+            ),
+            if (_companionWorkPermit == true) ...[
+              const SizedBox(height: 8),
+              fieldLabel('Fecha de renovación del permiso de trabajo'),
+              TextFormField(
+                initialValue: _companionWorkPermitRenewalDate,
+                decoration: inputDecoration,
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.greyDark,
+                  fontSize: fontSize,
+                ),
+                onSaved: (v) => _companionWorkPermitRenewalDate = v,
+                onChanged: (v) => _companionWorkPermitRenewalDate = v,
+              ),
+            ],
+            SpaceH20(),
+          ],
+
+          Flex(
+            direction: Responsive.isMobile(context) ? Axis.vertical : Axis.horizontal,
+            children: [
+              Expanded(
+                flex: Responsive.isMobile(context) ? 0 : 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    fieldLabel('Tipo de documento actual'),
+                    DropdownButtonFormField<String>(
+                      value: _companionDocumentType,
+                      isExpanded: true,
+                      isDense: true,
+                      decoration: inputDecoration.copyWith(hintText: 'Selecciona...'),
+                      items: ['DNI', 'NIE', 'Pasaporte o Cédula de Pasaporte']
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (v) => setState(() => _companionDocumentType = v),
+                      onSaved: (v) => _companionDocumentType = v,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppColors.greyDark,
+                        fontSize: fontSize,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (Responsive.isMobile(context)) SpaceH20() else const SizedBox(width: 16),
+              Expanded(
+                flex: Responsive.isMobile(context) ? 0 : 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    fieldLabel('Número de documento'),
+                    TextFormField(
+                      initialValue: _companionDocumentNumber,
+                      decoration: inputDecoration.copyWith(hintText: 'Escribe el número de documento'),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppColors.greyDark,
+                        fontSize: fontSize,
+                      ),
+                      onSaved: (v) => _companionDocumentNumber = v,
+                      onChanged: (v) => _companionDocumentNumber = v,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SpaceH20(),
+
+          sectionTitle('¿Cómo le podemos ayudar?'),
+          fieldLabel('Selecciona una o varias...'),
+          ...[
+            'Ocio y tiempo libre',
+            'Clases de español',
+            'Formación',
+            'Competencias digitales - Aula abierta',
+            'Acompañamiento jurídico',
+            'Acompañamiento hacia el empleo',
+          ].map((option) {
+            return CheckboxListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              activeColor: AppColors.primaryColor,
+              title: Text(option, style: textTheme.bodySmall?.copyWith(fontSize: fontSize, color: AppColors.greyDark)),
+              value: _companionHelpNeeds.contains(option),
+              onChanged: (checked) {
+                setState(() {
+                  if (checked == true) _companionHelpNeeds.add(option);
+                  else _companionHelpNeeds.remove(option);
+                });
+              },
+            );
+          }),
+          CheckboxListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            activeColor: AppColors.primaryColor,
+            title: Text('Otro...(desarrolla)', style: textTheme.bodySmall?.copyWith(fontSize: fontSize, color: AppColors.greyDark)),
+            value: _companionHelpNeedsOther,
+            onChanged: (checked) {
+              setState(() {
+                _companionHelpNeedsOther = checked ?? false;
+                if (!_companionHelpNeedsOther) _companionHelpNeedsOtherText = null;
+              });
+            },
+          ),
+          if (_companionHelpNeedsOther) ...[
+            const SizedBox(height: 8),
+            TextFormField(
+              initialValue: _companionHelpNeedsOtherText,
+              decoration: inputDecoration.copyWith(hintText: 'Describe brevemente...'),
+              style: textTheme.bodySmall?.copyWith(color: AppColors.greyDark, fontSize: fontSize),
+              onSaved: (v) => _companionHelpNeedsOtherText = v,
+              onChanged: (v) => _companionHelpNeedsOtherText = v,
+            ),
+          ],
+          SpaceH20(),
+
+          fieldLabel('Horario de contacto preferido'),
+          ...['Mañana', 'Tarde'].map((option) {
+            return CheckboxListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              activeColor: AppColors.primaryColor,
+              title: Text(option, style: textTheme.bodySmall?.copyWith(fontSize: fontSize, color: AppColors.greyDark)),
+              value: _companionContactSchedule.contains(option),
+              onChanged: (checked) {
+                setState(() {
+                  if (checked == true) _companionContactSchedule.add(option);
+                  else _companionContactSchedule.remove(option);
+                });
+              },
+            );
+          }),
+          SpaceH20(),
+
+          fieldLabel('¿Le ha ayudado algún/alguna profesional a rellenar este formulario?'),
+          Row(
+            children: [
+              Radio<bool>(
+                value: true,
+                groupValue: _companionProfessionalHelp,
+                activeColor: AppColors.primaryColor,
+                onChanged: (v) => setState(() => _companionProfessionalHelp = v),
+              ),
+              Text('Sí', style: textTheme.bodySmall?.copyWith(fontSize: 15, color: AppColors.greyDark)),
+              const SizedBox(width: 16),
+              Radio<bool>(
+                value: false,
+                groupValue: _companionProfessionalHelp,
+                activeColor: AppColors.primaryColor,
+                onChanged: (v) => setState(() => _companionProfessionalHelp = v),
+              ),
+              Text('No', style: textTheme.bodySmall?.copyWith(fontSize: 15, color: AppColors.greyDark)),
+            ],
+          ),
+          SpaceH20(),
+
+          sectionTitle('Otros datos relevantes'),
+          TextFormField(
+            initialValue: _companionOtherRelevantData,
+            minLines: 2,
+            maxLines: 5,
+            decoration: inputDecoration.copyWith(
+              hintText: 'Cualquier otro dato importante...',
+            ),
+            style: textTheme.bodySmall?.copyWith(
+              color: AppColors.greyDark,
+              fontSize: fontSize,
+            ),
+            onSaved: (v) => _companionOtherRelevantData = v,
+            onChanged: (v) => _companionOtherRelevantData = v,
+          ),
+        ],
+      ),
+    );
   }
 
   List<CustomStep> getSteps() => [
@@ -1082,6 +1527,25 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
           border: Border.all(color: AppColors.greyLight, width: 2.0,),
         ),
         child: Text(
+          "Acompañamiento",
+          style: textTheme.titleSmall!.copyWith(
+              color: AppColors.turquoiseBlue
+          ),
+        ),
+      ),
+      content: _buildFormAcompanamiento(context),
+    ),
+    CustomStep(
+      isActive: currentStep >= 3,
+      state: currentStep > 3 ? CustomStepState.complete : CustomStepState.disabled,
+      title: Container(
+        padding: EdgeInsets.all(Sizes.kDefaultPaddingDouble/2),
+        decoration: BoxDecoration(
+          color: currentStep >= 3? AppColors.yellow: AppColors.white,
+          borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble*2),
+          border: Border.all(color: AppColors.greyLight, width: 2.0,),
+        ),
+        child: Text(
           StringConst.FORM_REVISION,
           style: textTheme.titleSmall!.copyWith(
               color: AppColors.turquoiseBlue
@@ -1100,6 +1564,10 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
     if (currentStep == 1 && !_validateAndSaveInterestsForm())
       return;
 
+    if (currentStep == 2) {
+      if (!(_formKeyCompanion.currentState?.validate() ?? true)) return;
+      _formKeyCompanion.currentState?.save();
+    }
 
     // If not last step, advance and return
     final isLastStep = currentStep == getSteps().length - 1;
@@ -1117,5 +1585,55 @@ class _CreateParticipantPageState extends State<CreateParticipantPage> {
   onStepCancel() {
     if (currentStep > 0)
       goToStep(currentStep - 1);
+  }
+}
+
+// ── Botón + para segunda nacionalidad ────────────────────────────────────────
+// Widget independiente para que el estado de hover (_hovered) viva en su
+// propio State y no se reinicie con cada rebuild del formulario padre.
+class _AddNationalityButton extends StatefulWidget {
+  const _AddNationalityButton({
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  State<_AddNationalityButton> createState() => _AddNationalityButtonState();
+}
+
+class _AddNationalityButtonState extends State<_AddNationalityButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final filled = _hovered || widget.isActive;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: filled ? const Color(0xFF18C5C1) : Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: const Color(0xFF18C5C1),
+              width: 2,
+            ),
+          ),
+          child: Icon(
+            Icons.add,
+            color: filled ? Colors.white : const Color(0xFF18C5C1),
+            size: 20,
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -150,16 +150,8 @@ Future<Uint8List> generateInitialFormDataPdf(
     addField('Fecha de llegada a España', companion.companionArrivalDateInSpain);
     addField('Situación administrativa', companion.companionAdministrativeStatus);
 
-    final rawPermit = companion.companionWorkPermit?.trim();
-    if (rawPermit != null && rawPermit.isNotEmpty) {
-      final lower = rawPermit.toLowerCase();
-      final permitDisplay =
-          (lower == 'true' || lower == 'si' || lower == 'sí')
-              ? 'Sí'
-              : (lower == 'false' || lower == 'no')
-                  ? 'No'
-                  : rawPermit;
-      addField('Permiso de trabajo', permitDisplay);
+    if (companion.companionWorkPermit != null) {
+      addField('Permiso de trabajo', companion.companionWorkPermit! ? 'Sí' : 'No');
     }
 
     final docType = companion.companionDocumentType?.trim() ?? '';
@@ -176,14 +168,14 @@ Future<Uint8List> generateInitialFormDataPdf(
       if (helpNeedsText.isNotEmpty) addField('Ayudas seleccionadas', helpNeedsText);
     }
 
-    final rawSchedule = companion.companionContactSchedule?.trim();
-    if (rawSchedule != null && rawSchedule.isNotEmpty) {
-      final cleanSchedule =
-          rawSchedule.replaceAll('[', '').replaceAll(']', '').trim();
-      if (cleanSchedule.isNotEmpty) addField('Horario de contacto', cleanSchedule);
+    final schedule = companion.companionContactSchedule;
+    if (schedule != null && schedule.isNotEmpty) {
+      addField('Horario de contacto', schedule.join(', '));
     }
 
-    addField('Ayuda al rellenar el formulario', companion.companionFormHelp);
+    if (companion.companionFormHelp != null) {
+      addField('Ayuda al rellenar el formulario', companion.companionFormHelp! ? 'Sí' : 'No');
+    }
     addField('Observaciones', companion.companionOtherRelevantData);
   }
 

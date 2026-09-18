@@ -5,7 +5,10 @@ import 'package:enreda_empresas/app/models/interest.dart';
 import 'multi_select_button.dart';
 
 Widget streamBuilderDropdownInterests (BuildContext context, Set<Interest> selectedInterests) {
-  final interestItems = LocationCache.instance.interests
+  final allInterests = List<Interest>.from(LocationCache.instance.interests)
+    ..sort((a, b) => a.name.compareTo(b.name));
+  
+  final interestItems = allInterests
       .map((Interest interest) => MultiSelectDialogItem<Interest>(interest, interest.name))
       .toList();
 
