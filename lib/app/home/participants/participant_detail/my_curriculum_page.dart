@@ -972,7 +972,8 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
         ),
         const SpaceH4(),
         () {
-          myEducation = (myExperiences ?? []).where((e) => e.type == 'Formativa').toList();
+          // myEducation is already filtered from allExp (type == 'Formativa')
+          // in the parent StreamBuilder — no need to re-filter here.
           myCustomEducation = myEducation!.toList();
           mySelectedEducation = List.generate(myCustomEducation.length, (i) => i);
           return Container(
@@ -1026,7 +1027,8 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
         ),
         const SpaceH4(),
         () {
-          mySecondaryEducation = (myExperiences ?? []).where((e) => e.type == 'Complementaria').toList();
+          // mySecondaryEducation is already filtered from allExp (type == 'Complementaria')
+          // in the parent StreamBuilder — no need to re-filter here.
           mySecondaryCustomEducation = mySecondaryEducation!.toList();
           mySecondarySelectedEducation = List.generate(mySecondaryCustomEducation.length, (i) => i);
           return Container(
