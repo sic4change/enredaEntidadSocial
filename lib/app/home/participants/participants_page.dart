@@ -43,6 +43,8 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
   bool _showInactive = false;
   SocialEntity? _socialEntity;
   String _errorMessage = '';
+  // Set of userIds whose closure report has finished == true.
+  Set<String> _inactiveUserIds = {};
 
   @override
   void initState() {
@@ -73,6 +75,8 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
           await LocationCache.instance.loadAllParticipants(
               database, user.socialEntityId!, _socialEntity!.programs ?? []);
         }
+        // Resolve inactive users based on closure report finished flag.
+        await _resolveInactiveUsers(database);
       }
     } catch (e, st) {
       _errorMessage = 'Error en initData: $e\n$st';
@@ -82,6 +86,40 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
         _isLoading = false;
       });
     }
+  }
+
+  /// Fetches the closure report for every participant that has a
+  /// [closureReportId] and marks them as inactive when [finished] is true.
+  Future<void> _resolveInactiveUsers(Database database) async {
+    final participants = LocationCache.instance.allParticipants;
+    final inactive = <String>{};
+    await Future.wait(
+      participants
+          .where((u) =>
+              u.closureReportId != null && u.closureReportId!.isNotEmpty)
+          .map((u) async {
+        try {
+          final report =
+              await database.getClosureReport(u.closureReportId!);
+          if (report?.finished == true) {
+            final id = u.userId ?? u.email;
+            inactive.add(id);
+          }
+        } catch (_) {
+          // Skip if the report cannot be fetched.
+        }
+      }),
+    );
+    setStateIfMounted(() {
+      _inactiveUserIds = inactive;
+    });
+  }
+
+  /// Returns true when the participant should be considered inactive.
+  /// Inactive = has a closureReportId AND its report has finished == true.
+  bool _isInactive(UserEnreda u) {
+    final id = u.userId ?? u.email;
+    return _inactiveUserIds.contains(id);
   }
 
   @override
@@ -246,13 +284,13 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
     final selectedTabUsers =
         _selectedTab == 1 ? allOtherParticipants : myParticipants;
 
-    // Activos / inactivos split of selected tab participants (Figma chips).
-    // Docs without the `active` flag count as active.
+    // Activos / inactivos split of selected tab participants.
+    // Inactive = has a closureReportId AND its closure report has finished == true.
     final activeCount =
-        selectedTabUsers.where((u) => u.active ?? true).length;
+        selectedTabUsers.where((u) => !_isInactive(u)).length;
     final inactiveCount = selectedTabUsers.length - activeCount;
     final visibleUsers = selectedTabUsers
-        .where((u) => (u.active ?? true) == !_showInactive)
+        .where((u) => _isInactive(u) == _showInactive)
         .toList();
 
     // ponytail: lazy CustomScrollView so only on-screen participant cards
@@ -368,26 +406,24 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                       ),
                     ],
                   ),
-                  if (!_detailView) ...[
-                    SpaceH12(),
-                    Row(
-                      children: [
-                        _CountChip(
-                          label: StringConst.PARTICIPANTS_ACTIVE,
-                          count: activeCount,
-                          selected: !_showInactive,
-                          onTap: () => setState(() => _showInactive = false),
-                        ),
-                        const SizedBox(width: 12),
-                        _CountChip(
-                          label: StringConst.PARTICIPANTS_INACTIVE,
-                          count: inactiveCount,
-                          selected: _showInactive,
-                          onTap: () => setState(() => _showInactive = true),
-                        ),
-                      ],
-                    ),
-                  ],
+                  SpaceH12(),
+                  Row(
+                    children: [
+                      _CountChip(
+                        label: StringConst.PARTICIPANTS_ACTIVE,
+                        count: activeCount,
+                        selected: !_showInactive,
+                        onTap: () => setState(() => _showInactive = false),
+                      ),
+                      const SizedBox(width: 12),
+                      _CountChip(
+                        label: StringConst.PARTICIPANTS_INACTIVE,
+                        count: inactiveCount,
+                        selected: _showInactive,
+                        onTap: () => setState(() => _showInactive = true),
+                      ),
+                    ],
+                  ),
                   SpaceH20(),
                 ],
               ),
@@ -396,7 +432,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
           SliverPadding(
             padding: pad,
             sliver: participantsSliver(
-              _detailView ? selectedTabUsers : visibleUsers,
+              visibleUsers,
               isSearch
                   ? (_selectedTab == 1
                       ? 'No se encontraron resultados en la entidad'
