@@ -89,6 +89,8 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
   late bool initialQuestionary = false;
   late bool closeInterview = false;
   late bool closeQuestionary = false;
+  late bool contactedPersonEvaluation = false;
+  late bool contactedPersonNoIntervention = false;
   String? other;
   String? techId;
   final ValueNotifier<String> techName = ValueNotifier<String>("");
@@ -147,6 +149,9 @@ void initState() {
   final currentUser = globals.currentSocialEntityUser;
   techId = ipil?.techId ?? currentUser?.userId ?? widget.participantUser.assignedById;
   techName.value = ipil?.techName ?? (currentUser != null ? '${currentUser.firstName} ${currentUser.lastName}' : '');
+
+  contactedPersonEvaluation = ipil?.contactedPersonEvaluation ?? false;
+  contactedPersonNoIntervention = ipil?.contactedPersonNoIntervention ?? false;
 
   userConnectionTerritory = ipil?.connectionTerritory ?? [];
   userContextualization = ipil?.contextualization ?? [];
@@ -347,23 +352,47 @@ void initState() {
                   bool initialQuestionarySelectable = true;
                   bool closeInterviewSelectable = true;
                   bool closeQuestionarySelectable = true;
+                  bool contactedPersonEvaluationSelectable = true;
+                  bool contactedPersonNoInterventionSelectable = true;
                   if(snapshot.hasData){
                     List<IpilEntry> ipilsFromUser = snapshot.data!;
                     for(IpilEntry entry in ipilsFromUser){
+                      // Skip the currently-edited entry so its own values don't
+                      // block itself.
+                      if (widget.selectedIpil != null &&
+                          entry.ipilId == widget.selectedIpil!.ipilId) continue;
                       if(entry.initialInterview == true){
                         initialInterview = true;
                         initialInterviewSelectable = false;
+                        // Entrevista inicial already taken → block new option
+                        contactedPersonEvaluationSelectable = false;
                       }
                       if(entry.initialJobValorationQuestionary == true){
                         initialQuestionary = true;
+                        initialQuestionarySelectable = false;
+                        contactedPersonEvaluationSelectable = false;
+                      }
+                      if(entry.contactedPersonEvaluation == true){
+                        contactedPersonEvaluation = true;
+                        contactedPersonEvaluationSelectable = false;
+                        // "En evaluación" already taken → block the other initial options
+                        initialInterviewSelectable = false;
                         initialQuestionarySelectable = false;
                       }
                       if(entry.finalInterview == true){
                         closeInterview = true;
                         closeInterviewSelectable = false;
+                        contactedPersonNoInterventionSelectable = false;
                       }
                       if(entry.finalJobValorationQuestionary == true){
                         closeQuestionary = true;
+                        closeQuestionarySelectable = false;
+                        contactedPersonNoInterventionSelectable = false;
+                      }
+                      if(entry.contactedPersonNoIntervention == true){
+                        contactedPersonNoIntervention = true;
+                        contactedPersonNoInterventionSelectable = false;
+                        closeInterviewSelectable = false;
                         closeQuestionarySelectable = false;
                       }
                     }
@@ -376,11 +405,28 @@ void initState() {
                           child: CustomTextBold(title: StringConst.IPIL_INITIAL_ITINERARY, color: AppColors.primary900,),
                         ),
                         CustomCheckBoxSelectable(
+                          title: StringConst.IPIL_INITIAL_CONTACTED,
+                          isSelected: contactedPersonEvaluation,
+                          onTapItem: (value){
+                            setState(() {
+                              contactedPersonEvaluation = value;
+                              // Mutually exclusive with Entrevista inicial
+                              // and Cuestionario inicial
+                              if (value) {
+                                initialInterview = false;
+                                initialQuestionary = false;
+                              }
+                            });
+                          },
+                          selectable: contactedPersonEvaluationSelectable,
+                        ),
+                        CustomCheckBoxSelectable(
                           title:StringConst.IPIL_INITIAL_INTERVIEW, 
                           isSelected: initialInterview, 
                           onTapItem: (value){
                             setState(() {
                               initialInterview = value;
+                              if (value) contactedPersonEvaluation = false;
                             });
                           }, 
                           selectable: initialInterviewSelectable,
@@ -391,6 +437,7 @@ void initState() {
                           onTapItem: (value){
                             setState(() {
                               initialQuestionary = value;
+                              if (value) contactedPersonEvaluation = false;
                             });
                           }, 
                           selectable: initialQuestionarySelectable,
@@ -400,11 +447,26 @@ void initState() {
                           child: CustomTextBold(title: StringConst.IPIL_CLOSE_ITINERARY, color: AppColors.primary900,),
                         ),
                         CustomCheckBoxSelectable(
+                          title: StringConst.IPIL_CLOSE_CONTACTED_NO_INTERVENTION,
+                          isSelected: contactedPersonNoIntervention,
+                          onTapItem: (value){
+                            setState(() {
+                              contactedPersonNoIntervention = value;
+                              if (value) {
+                                closeInterview = false;
+                                closeQuestionary = false;
+                              }
+                            });
+                          },
+                          selectable: contactedPersonNoInterventionSelectable,
+                        ),
+                        CustomCheckBoxSelectable(
                           title:StringConst.IPIL_CLOSE_INTERVIEW, 
                           isSelected: closeInterview, 
                           onTapItem: (value){
                             setState(() {
                               closeInterview = value;
+                              if (value) contactedPersonNoIntervention = false;
                             });
                           }, 
                           selectable: closeInterviewSelectable,
@@ -415,6 +477,7 @@ void initState() {
                           onTapItem: (value){
                             setState(() {
                               closeQuestionary = value;
+                              if (value) contactedPersonNoIntervention = false;
                             });
                           }, 
                           selectable: closeQuestionarySelectable,
@@ -653,6 +716,8 @@ void initState() {
             initialJobValorationQuestionary: initialQuestionary,
             finalInterview: closeInterview,
             finalJobValorationQuestionary: closeQuestionary,
+            contactedPersonEvaluation: contactedPersonEvaluation,
+            contactedPersonNoIntervention: contactedPersonNoIntervention,
             other: other
           );
           await database.addIpilEntry(newIpilEntry);
@@ -690,6 +755,8 @@ void initState() {
             initialJobValorationQuestionary: initialQuestionary,
             finalInterview: closeInterview,
             finalJobValorationQuestionary: closeQuestionary,
+            contactedPersonEvaluation: contactedPersonEvaluation,
+            contactedPersonNoIntervention: contactedPersonNoIntervention,
             other: other
           );
           await database.setIpilEntry(updatedIpilEntry);

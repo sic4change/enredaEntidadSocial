@@ -1,5 +1,6 @@
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/models/companionData.dart';
+import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
@@ -619,6 +620,7 @@ class _CompanionDataRow extends StatefulWidget {
 
 class _CompanionDataRowState extends State<_CompanionDataRow> {
   Future<CompanionData?>? _companionFuture;
+  Stream<List<IpilEntry>>? _ipilStream;
   String? _loadedUserId;
 
   bool _isEditingObs = false;
@@ -634,6 +636,7 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
       _loadedUserId = userId;
       final db = Provider.of<Database>(context, listen: false);
       _companionFuture = db.getCompanionData(userId);
+      _ipilStream = db.getIpilEntriesByUserStream(userId);
     }
   }
 
@@ -923,7 +926,9 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
     return _rowContainer(
       child: Row(
         children: [
-          _dataCell(_ParticipantsDetailTableState._itineraryState(user), 190),
+          // ESTADO ITINERARIO — first check user-level fields, then fall back
+          // to IPIL data for the two new "Persona contactada" options.
+          _ItineraryStateCell(user: widget.user, ipilStream: _ipilStream),
           _dataCell(_ParticipantsDetailTableState._date(user.createDate), 175),
           _dataCell(dniDisplay, 205),
           _dataCell(_ParticipantsDetailTableState._orDash(user.gender), 125),
@@ -969,6 +974,72 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
     return FutureBuilder<CompanionData?>(
       future: _companionFuture,
       builder: (context, snapshot) => _buildRow(snapshot.data),
+    );
+  }
+}
+
+// ── _ItineraryStateCell ──────────────────────────────────────────────────────
+/// Shows the itinerary state for a participant row.
+///
+/// Priority (mirrors the existing [_ParticipantsDetailTableState._itineraryState]):
+///   1. Closure report attached → "Cierre"
+///   2. startDateItinerary set  → "Iniciado (dd/mm/aaaa)"
+///   3. initialReportId set     → "En evaluación"
+///   4. Any IPIL with contactedPersonEvaluation=true → "Persona contactada - En evaluación"
+///   5. Any IPIL with contactedPersonNoIntervention=true → "Persona contactada - No corresponde intervención"
+///   6. Fallback → "*No iniciado"
+class _ItineraryStateCell extends StatelessWidget {
+  const _ItineraryStateCell({
+    required this.user,
+    required this.ipilStream,
+  });
+
+  final UserEnreda user;
+  final Stream<List<IpilEntry>>? ipilStream;
+
+  static const _ink = _ParticipantsDetailTableState._ink;
+  static const _width = 190.0;
+
+  @override
+  Widget build(BuildContext context) {
+    // Resolve the user-level state first (no stream needed).
+    final staticState = _ParticipantsDetailTableState._itineraryState(user);
+    final needsIpilCheck = staticState == StringConst.TABLE_NO_INICIADO;
+
+    if (!needsIpilCheck || ipilStream == null) {
+      return _cell(staticState);
+    }
+
+    return StreamBuilder<List<IpilEntry>>(
+      stream: ipilStream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return _cell(staticState);
+        final ipils = snapshot.data!;
+        for (final entry in ipils) {
+          if (entry.contactedPersonEvaluation == true) {
+            return _cell(StringConst.IPIL_INITIAL_CONTACTED);
+          }
+          if (entry.contactedPersonNoIntervention == true) {
+            return _cell(StringConst.IPIL_CLOSE_CONTACTED_NO_INTERVENTION);
+          }
+        }
+        return _cell(staticState);
+      },
+    );
+  }
+
+  Widget _cell(String text) {
+    return SizedBox(
+      width: _width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Text(
+          text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: _ink, fontSize: 12),
+        ),
+      ),
     );
   }
 }

@@ -47,6 +47,8 @@ class IpilEntry {
     this.initialJobValorationQuestionary,
     this.finalInterview,
     this.finalJobValorationQuestionary,
+    this.contactedPersonEvaluation,
+    this.contactedPersonNoIntervention,
     this.other,
     this.results,
   });
@@ -100,6 +102,10 @@ class IpilEntry {
   late bool? initialJobValorationQuestionary;
   late bool? finalInterview;
   late bool? finalJobValorationQuestionary;
+  /// New option under "Inicio de itinerario": Persona contactada - En evaluación.
+  late bool? contactedPersonEvaluation;
+  /// New option under "Cierre de itinerario": Persona contactada - No corresponde intervención.
+  late bool? contactedPersonNoIntervention;
   late String? other;
   late List<String>? results;
 
@@ -228,6 +234,8 @@ class IpilEntry {
       initialJobValorationQuestionary: data['initialJobValorationQuestionary'] ?? false,
       finalInterview: data['finalInterview'] ?? false,
       finalJobValorationQuestionary: data['finalJobValorationQuestionary'] ?? false,
+      contactedPersonEvaluation: data['contactedPersonEvaluation'] ?? false,
+      contactedPersonNoIntervention: data['contactedPersonNoIntervention'] ?? false,
       other: data['other'] ?? '',
       results: results,
     );
@@ -285,6 +293,8 @@ class IpilEntry {
       "initialJobValorationQuestionary": initialJobValorationQuestionary,
       "finalInterview": finalInterview,
       "finalJobValorationQuestionary": finalJobValorationQuestionary,
+      "contactedPersonEvaluation": contactedPersonEvaluation,
+      "contactedPersonNoIntervention": contactedPersonNoIntervention,
       "other": other,
       'results': results,
     };

@@ -650,6 +650,8 @@ class StringConst {
   static const String IPIL_CLOSE_ITINERARY = "Cierre de itinerario";
   static const String IPIL_CLOSE_INTERVIEW = "Entrevista de cierre";
   static const String IPIL_CLOSE_QUESTIONARY = "Cuestionario de Valoración de la Empleabilidad Final";
+  static const String IPIL_INITIAL_CONTACTED = "Persona contactada - En evaluación";
+  static const String IPIL_CLOSE_CONTACTED_NO_INTERVENTION = "Persona contactada - No corresponde intervención";
   static const String IPIL_OTHERS = "Otros";
 
 
