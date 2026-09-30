@@ -240,7 +240,11 @@ class LocationCache {
         allParticipants.add(user);
       }
     }
-    allParticipants.sort((a, b) => (a.firstName ?? '').compareTo(b.firstName ?? ''));
+    allParticipants.sort((a, b) {
+      final nameA = '${a.firstName ?? ''} ${a.lastName ?? ''}'.trim().toLowerCase();
+      final nameB = '${b.firstName ?? ''} ${b.lastName ?? ''}'.trim().toLowerCase();
+      return nameA.compareTo(nameB);
+    });
   }
 
   /// Reset cached participants (e.g., when navigating away or force refresh)
