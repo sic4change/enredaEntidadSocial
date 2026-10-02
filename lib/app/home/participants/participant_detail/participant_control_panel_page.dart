@@ -70,6 +70,12 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
     if (oldWidget.participantUser.userId != widget.participantUser.userId) {
       final database = Provider.of<Database>(context, listen: false);
       final userId = widget.participantUser.userId;
+      // Rebuild all per-participant streams/futures when the participant changes.
+      _experiencesStream = database.myExperiencesStream(userId ?? '');
+      _participantResourcesStream = database.participantsResourcesStream(
+        userId ?? '',
+        widget.participantUser.assignedEntityId,
+      );
       if (userId != null && userId.isNotEmpty) {
         _companionFuture = database.getCompanionData(userId);
       } else {
@@ -373,6 +379,11 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
 
     if (!mounted) return;
 
+    // checkAgreePrivacy is not stored separately in the model (it was a required
+    // field to proceed), so we infer it from checkAgreeCV: if the user accepted
+    // the LOPD they also accepted the privacy policy.
+    final bool? checkAgreePrivacy = widget.participantUser.checkAgreeCV == true ? true : widget.participantUser.checkAgreeCV;
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -384,6 +395,8 @@ class _ParticipantControlPanelPageState extends State<ParticipantControlPanelPag
           specificInterests: specificInterests,
           keepLearning: keepLearning,
           subsidyIndex: subsidyIndex,
+          checkAgreePrivacy: checkAgreePrivacy,
+          checkAgreeCV: widget.participantUser.checkAgreeCV,
         ),
       ),
     );

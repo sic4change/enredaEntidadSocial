@@ -113,6 +113,7 @@ class _ParticipantDetailPageState extends State<ParticipantDetailPage> {
     switch (index) {
       case 0:
         return ParticipantControlPanelPage(
+          key: ValueKey(currentUser.userId ?? currentUser.email),
           participantUser: currentUser,
           onNavigateToCV: () {
             setState(() {

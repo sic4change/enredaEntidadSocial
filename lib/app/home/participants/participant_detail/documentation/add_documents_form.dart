@@ -40,6 +40,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
   List<FileData> filesList = [];
   final _formKey = GlobalKey<FormState>();
   TextEditingController textEditingControllerDateInput = TextEditingController();
+  final TextEditingController _documentNameController = TextEditingController();
   late String _documentName;
   late String _formattedBDate;
   DateTime _creationDate = new DateTime.now();
@@ -50,13 +51,22 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
+      final pickedFile = result.files.first;
+
+      // Auto-fill document name with filename (without extension) if still empty.
+      if (_documentNameController.text.trim().isEmpty) {
+        final rawName = pickedFile.name;
+        final dotIndex = rawName.lastIndexOf('.');
+        final nameWithoutExtension =
+            dotIndex > 0 ? rawName.substring(0, dotIndex) : rawName;
+        _documentNameController.text = nameWithoutExtension;
+      }
+
       setState(() {
         if (kIsWeb) {
-          filesList.add(FileData(
-              result.files.first.name, result.files.first.bytes, null));
+          filesList.add(FileData(pickedFile.name, pickedFile.bytes, null));
         } else {
-          filesList.add(FileData(
-              result.files.first.name, null, File(result.files.single.path!)));
+          filesList.add(FileData(pickedFile.name, null, File(result.files.single.path!)));
         }
       });
     }
@@ -66,6 +76,13 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
     setState(() {
       filesList.removeWhere((f) => f == file);
     });
+  }
+
+  @override
+  void dispose() {
+    textEditingControllerDateInput.dispose();
+    _documentNameController.dispose();
+    super.dispose();
   }
 
   @override
@@ -113,6 +130,7 @@ class _AddDocumentsFormState extends State<AddDocumentsForm> {
                   SizedBox(height: 20,),
                   CustomTextFormFieldTitle(
                     labelText: StringConst.DOCUMENT_NAME,
+                    controller: _documentNameController,
                     validator: (value) =>
                     value!.isNotEmpty ? null : StringConst.FORM_GENERIC_ERROR,
                     onSaved: (value) => _documentName = value!,

@@ -29,6 +29,8 @@ Future<Uint8List> generateInitialFormDataPdf(
   String specificInterests = '',
   String keepLearning = '',
   int subsidyIndex = -1,
+  bool? checkAgreePrivacy,
+  bool? checkAgreeCV,
 }) async {
   final doc = pw.Document(title: 'Datos del Formulario de Inscripción');
 
@@ -59,11 +61,23 @@ Future<Uint8List> generateInitialFormDataPdf(
     }
   }
 
+  // Load TrueType fonts with full Unicode/Spanish support (same as MyPageTheme).
+  pw.Font baseFont;
+  pw.Font boldFont;
+  try {
+    baseFont = await PdfGoogleFonts.poppinsLight();
+    boldFont = await PdfGoogleFonts.poppinsMedium();
+  } catch (_) {
+    // Network unavailable — fall back to built-in Type1 fonts (no accent support).
+    baseFont = pw.Font.helvetica();
+    boldFont = pw.Font.helveticaBold();
+  }
+
   final PdfPageFormat adjustedFormat = format.applyMargin(
     left: 2.0 * PdfPageFormat.cm,
     top: logoImage != null ? 3.0 * PdfPageFormat.cm : 2.0 * PdfPageFormat.cm,
     right: 2.0 * PdfPageFormat.cm,
-    bottom: 2.0 * PdfPageFormat.cm,
+    bottom: 3.0 * PdfPageFormat.cm,
   );
 
   final List<pw.Widget> items = [];
@@ -179,7 +193,77 @@ Future<Uint8List> generateInitialFormDataPdf(
     addField('Observaciones', companion.companionOtherRelevantData);
   }
 
-  // Build page theme using only native PDF fonts (no network calls)
+  // ── Consentimientos y autorizaciones ──────────────────────────────────────
+  items.add(pw.SizedBox(height: 16));
+  items.add(
+    pw.Text(
+      'Consentimientos y autorizaciones',
+      style: pw.TextStyle(
+        fontSize: 12,
+        fontWeight: pw.FontWeight.bold,
+        color: pdfPrimary900,
+      ),
+    ),
+  );
+  items.add(pw.SizedBox(height: 8));
+
+  void addConsentRow(String label, bool? accepted) {
+    final boxColor = (accepted == true)
+        ? PdfColor.fromInt(0xFF1A7A4A)
+        : PdfColor.fromInt(0xFFB00020);
+    final statusText = (accepted == true) ? 'Si' : 'No';
+    items.add(
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 6.0),
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Container(
+              width: 10,
+              height: 10,
+              margin: const pw.EdgeInsets.only(top: 1),
+              decoration: pw.BoxDecoration(
+                color: boxColor,
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
+              ),
+              child: pw.Center(
+                child: pw.Text(
+                  statusText,
+                  style: pw.TextStyle(
+                    fontSize: 5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.white,
+                  ),
+                ),
+              ),
+            ),
+            pw.SizedBox(width: 6),
+            pw.Expanded(
+              child: pw.Text(
+                label,
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  color: pdfBlack,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  addConsentRow(
+    'Acepto la Política de Privacidad y Condiciones de Uso.',
+    checkAgreePrivacy,
+  );
+  addConsentRow(
+    'Según la Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales, '
+    'autorizo a la empresa el uso y tratamiento de mis datos con fines exclusivamente de selección de personal y bolsas de empleo.',
+    checkAgreeCV,
+  );
+
+  // Build page theme using TrueType fonts with Unicode support
   pw.PageTheme? pageTheme;
   if (logoImage != null) {
     final capturedLogo = logoImage;
@@ -192,8 +276,8 @@ Future<Uint8List> generateInitialFormDataPdf(
         adjustedFormat.marginBottom,
       ),
       theme: pw.ThemeData.withFont(
-        base: pw.Font.helvetica(),
-        bold: pw.Font.helveticaBold(),
+        base: baseFont,
+        bold: boldFont,
       ),
       buildBackground: (pw.Context context) {
         return pw.FullPage(
@@ -227,18 +311,34 @@ Future<Uint8List> generateInitialFormDataPdf(
       pageFormat: pageTheme == null ? adjustedFormat : null,
       theme: pageTheme == null
           ? pw.ThemeData.withFont(
-              base: pw.Font.helvetica(),
-              bold: pw.Font.helveticaBold(),
+              base: baseFont,
+              bold: boldFont,
             )
           : null,
       footer: (pw.Context context) {
-        return pw.Container(
-          alignment: pw.Alignment.centerRight,
-          margin: const pw.EdgeInsets.only(top: 10),
-          child: pw.Text(
-            'Pág. ${context.pageNumber} de ${context.pagesCount}',
-            style: const pw.TextStyle(fontSize: 9, color: pdfGrey),
-          ),
+        return pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.end,
+          mainAxisSize: pw.MainAxisSize.min,
+          children: [
+            pw.Container(
+              alignment: pw.Alignment.centerRight,
+              margin: const pw.EdgeInsets.only(top: 2),
+              child: pw.Text(
+                StringConst.INFORMS_CONDITIONS,
+                textScaleFactor: 0.6,
+                style: const pw.TextStyle(color: pdfGrey),
+              ),
+            ),
+            pw.Container(
+              alignment: pw.Alignment.centerRight,
+              margin: const pw.EdgeInsets.only(top: 2),
+              child: pw.Text(
+                'Pág. ${context.pageNumber} de ${context.pagesCount}',
+                textScaleFactor: 0.8,
+                style: const pw.TextStyle(color: pdfGrey),
+              ),
+            ),
+          ],
         );
       },
       build: (pw.Context context) => items,
@@ -258,6 +358,8 @@ class MyInitialFormDataPdfPreview extends StatefulWidget {
     this.specificInterests = '',
     this.keepLearning = '',
     this.subsidyIndex = -1,
+    this.checkAgreePrivacy,
+    this.checkAgreeCV,
   }) : super(key: key);
 
   final UserEnreda user;
@@ -267,6 +369,8 @@ class MyInitialFormDataPdfPreview extends StatefulWidget {
   final String specificInterests;
   final String keepLearning;
   final int subsidyIndex;
+  final bool? checkAgreePrivacy;
+  final bool? checkAgreeCV;
 
   @override
   State<MyInitialFormDataPdfPreview> createState() =>
@@ -358,6 +462,8 @@ class _MyInitialFormDataPdfPreviewState
             specificInterests: widget.specificInterests,
             keepLearning: widget.keepLearning,
             subsidyIndex: widget.subsidyIndex,
+            checkAgreePrivacy: widget.checkAgreePrivacy,
+            checkAgreeCV: widget.checkAgreeCV,
           );
         },
         actions: actions,
