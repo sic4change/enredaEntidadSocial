@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 
-import '../../../../common_widgets/spaces.dart';
 import '../../../../models/ipilEntry.dart';
+import '../../../../services/location_cache.dart';
 import '../../../../utils/responsive.dart';
 import '../../../../values/strings.dart';
 
@@ -86,6 +86,8 @@ class IpilEntryTile extends StatelessWidget {
           ],
         ),
         _labelSection(StringConst.IPIL_FOLLOW, ipilEntry.content),
+        if (ipilEntry.fourWeeksCheck == true || ipilEntry.sixMonthsCheck == true)
+          _buildFollowUpDetail(context, ipilEntry),
         _labelSection(StringConst.IPIL_SPECIFIC_SKILLS, ipilEntry.specificSkillsText),
         _labelSection(StringConst.IPIL_SOFT_SKILLS, ipilEntry.softSkillsText),
         _labelSection(StringConst.IPIL_DIGITAL_SKILLS, ipilEntry.digitalSkillsText),
@@ -104,6 +106,69 @@ class IpilEntryTile extends StatelessWidget {
           _labelSection('Refuerzo', ipilEntry.reinforcementsText),
         const SizedBox(height: 20),
       ],
+    );
+  }
+
+  Widget _buildFollowUpDetail(BuildContext context, IpilEntry ipil) {
+    final isFourWeeks = ipil.fourWeeksCheck == true;
+    final situation = isFourWeeks ? ipil.fourWeeksSituation : ipil.sixMonthsSituation;
+    final employmentTypeId = isFourWeeks ? ipil.fourWeeksEmploymentTypeId : ipil.sixMonthsEmploymentTypeId;
+    final satisfaction = isFourWeeks ? ipil.fourWeeksSatisfaction : ipil.sixMonthsSatisfaction;
+    final impact = isFourWeeks ? ipil.fourWeeksImpact : ipil.sixMonthsImpact;
+    final improvement = isFourWeeks ? ipil.fourWeeksImprovement : ipil.sixMonthsImprovement;
+
+    String employmentTypeName = '';
+    if (employmentTypeId != null && employmentTypeId.isNotEmpty) {
+      final interest = LocationCache.instance.interests.where((i) =>
+          (i.interestId ?? i.name) == employmentTypeId || i.name == employmentTypeId).firstOrNull;
+      employmentTypeName = interest?.name ?? employmentTypeId;
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 16.0),
+      padding: const EdgeInsets.all(14.0),
+      decoration: BoxDecoration(
+        color: AppColors.primary010.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: AppColors.primary100, width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomTextBold(
+            title: isFourWeeks
+                ? StringConst.IPIL_FOLLOW_UP_FOUR_WEEKS
+                : StringConst.IPIL_FOLLOW_UP_SIX_MONTHS,
+            color: AppColors.primary900,
+          ),
+          if (situation != null && situation.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            CustomTextSmallBold(title: StringConst.IPIL_FOLLOW_UP_SITUATION, color: AppColors.primary900),
+            CustomTextSmall(text: situation),
+          ],
+          if (employmentTypeName.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            CustomTextSmallBold(title: StringConst.IPIL_FOLLOW_UP_EMPLOYMENT_TYPE, color: AppColors.primary900),
+            CustomTextSmall(text: employmentTypeName),
+          ],
+          if (satisfaction != null) ...[
+            const SizedBox(height: 10),
+            CustomTextSmallBold(title: StringConst.IPIL_FOLLOW_UP_SATISFACTION, color: AppColors.primary900),
+            CustomTextSmall(text: '$satisfaction / 4'),
+          ],
+          if (impact != null) ...[
+            const SizedBox(height: 10),
+            CustomTextSmallBold(title: StringConst.IPIL_FOLLOW_UP_IMPACT, color: AppColors.primary900),
+            CustomTextSmall(text: '$impact / 6'),
+          ],
+          if (improvement != null && improvement.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            CustomTextSmallBold(title: StringConst.IPIL_FOLLOW_UP_IMPROVEMENT, color: AppColors.primary900),
+            CustomTextSmall(text: improvement),
+          ],
+        ],
+      ),
     );
   }
 

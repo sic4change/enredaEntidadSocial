@@ -654,6 +654,38 @@ class StringConst {
   static const String IPIL_CLOSE_CONTACTED_NO_INTERVENTION = "Persona contactada - No corresponde intervención";
   static const String IPIL_OTHERS = "Otros";
 
+  // Seguimiento a las 4 semanas / 6 meses tras el Informe Inicial
+  static const String IPIL_FOLLOW_UP_PENDING = "¡Hey! Tienes pendiente un seguimiento";
+  static const String IPIL_FOLLOW_UP_FOUR_WEEKS = "Seguimiento a las 4 semanas";
+  static const String IPIL_FOLLOW_UP_SIX_MONTHS = "Seguimiento a los 6 meses";
+  static const String IPIL_FOLLOW_UP_SITUATION = "¿En qué situación se encuentra actualmente la persona?";
+  static const String IPIL_FOLLOW_UP_EMPLOYMENT_TYPE = "Tipo de empleo";
+  static const String IPIL_FOLLOW_UP_SATISFACTION = "Satisfacción";
+  static const String IPIL_FOLLOW_UP_IMPACT = "¿Cuál ha sido el impacto percibido por la persona por el acompañamiento Enreda?";
+  static const String IPIL_FOLLOW_UP_IMPROVEMENT = "¿Cómo cree la persona que podemos mejorar el acompañamiento?";
+  static const String IPIL_FOLLOW_UP_SELECT = "Selecciona una opción";
+
+  static const String IPIL_SITUATION_SEARCHING_JOB = "Buscan trabajo";
+  static const String IPIL_SITUATION_EDUCATION = "Integrado en los sistemas de educación o formación";
+  static const String IPIL_SITUATION_QUALIFICATION = "Obtienen una cualificación";
+  static const String IPIL_SITUATION_EMPLOYMENT = "Obtienen empleo";
+  static const String IPIL_SITUATION_IMPROVE_EMPLOYMENT = "Mejora empleo";
+  static const String IPIL_SITUATION_NO_RESULT = "No obtiene un resultado, se desconoce o no responde";
+
+  static const List<String> IPIL_FOUR_WEEKS_SITUATIONS = [
+    IPIL_SITUATION_SEARCHING_JOB,
+    IPIL_SITUATION_EDUCATION,
+    IPIL_SITUATION_QUALIFICATION,
+    IPIL_SITUATION_EMPLOYMENT,
+    IPIL_SITUATION_NO_RESULT,
+  ];
+
+  static const List<String> IPIL_SIX_MONTHS_SITUATIONS = [
+    IPIL_SITUATION_IMPROVE_EMPLOYMENT,
+    IPIL_SITUATION_EMPLOYMENT,
+    IPIL_SITUATION_NO_RESULT,
+  ];
+
 
 
   static const String IPIL_CREATE = "Crear nuevo IPIL";

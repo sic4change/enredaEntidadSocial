@@ -3,7 +3,6 @@ import 'package:enreda_empresas/app/common_widgets/custom_check_box_selectable.d
 import 'package:enreda_empresas/app/common_widgets/custom_drop_down-button_form_field_no_title_check.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_drop_down_button_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
-import 'package:enreda_empresas/app/common_widgets/custom_text_form_field.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_long.dart';
 import 'package:enreda_empresas/app/common_widgets/flex_row_column.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
@@ -29,16 +28,17 @@ import '../../../../common_widgets/custom_drop_down_button_form_field_title_chec
 import '../../../../common_widgets/custom_text_form_field_title.dart';
 import '../../../../common_widgets/enreda_button.dart';
 import '../../../../common_widgets/show_exception_alert_dialog.dart';
+import '../../../../models/initialReport.dart';
 import '../../../../models/ipilConnectionTerritory.dart';
 import '../../../../models/ipilContextualization.dart';
 import '../../../../models/ipilEntry.dart';
 import '../../../../models/ipilInterviews.dart';
-import '../../../../models/ipilReinforcement.dart';
 import '../../../../models/userEnreda.dart';
 import '../../../../services/database.dart';
 import '../../../../services/location_cache.dart';
 import '../../../../utils/responsive.dart';
 import '../../../../values/values.dart';
+import 'ipil_follow_up_section.dart';
 
 class CreateIpilForm extends StatefulWidget {
   const CreateIpilForm({super.key, required this.participantUser, this.selectedIpil});
@@ -98,6 +98,16 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
 
   Stream<UserEnreda>? _assignedUserStream;
   Stream<List<UserEnreda>>? _socialUsersStream;
+  Stream<InitialReport?>? _initialReportStream;
+
+  // Estado del bloque de seguimiento a 4 semanas / 6 meses
+  bool isFollowUpFourWeeksVisible = false;
+  bool isFollowUpSixMonthsVisible = false;
+  String? followUpSituation;
+  String? followUpEmploymentTypeId;
+  int? followUpSatisfaction;
+  int? followUpImpact;
+  String? followUpImprovement;
 
   @override
   void dispose() {
@@ -118,6 +128,15 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
           ?? widget.participantUser.assignedEntityId;
       if (entityId != null && entityId.isNotEmpty) {
         _socialUsersStream = database.getSocialUsersByEntityId(entityId);
+      }
+      final initialReportId = widget.participantUser.initialReportId;
+      if (initialReportId != null && initialReportId.isNotEmpty) {
+        _initialReportStream = database.initialReportStreamById(initialReportId);
+      } else if (widget.participantUser.userId != null) {
+        _initialReportStream = database
+            .initialReportsStreamByUserId(widget.participantUser.userId)
+            .map<InitialReport?>((r) => r)
+            .handleError((_) => null);
       }
     }
   }
@@ -168,6 +187,22 @@ void initState() {
   userSoftSkills = ipil?.softSkills ?? [];
   userDigitalSkills = ipil?.digitalSkills ?? [];
   userLaborSkills = ipil?.laborSkills ?? [];
+
+  if (ipil != null) {
+    if (ipil.fourWeeksCheck == true) {
+      followUpSituation = ipil.fourWeeksSituation;
+      followUpEmploymentTypeId = ipil.fourWeeksEmploymentTypeId;
+      followUpSatisfaction = ipil.fourWeeksSatisfaction;
+      followUpImpact = ipil.fourWeeksImpact;
+      followUpImprovement = ipil.fourWeeksImprovement;
+    } else if (ipil.sixMonthsCheck == true) {
+      followUpSituation = ipil.sixMonthsSituation;
+      followUpEmploymentTypeId = ipil.sixMonthsEmploymentTypeId;
+      followUpSatisfaction = ipil.sixMonthsSatisfaction;
+      followUpImpact = ipil.sixMonthsImpact;
+      followUpImprovement = ipil.sixMonthsImprovement;
+    }
+  }
 }
 
   @override
@@ -342,6 +377,9 @@ void initState() {
                 },
               ),
             ),
+
+            // Bloque de seguimiento a las 4 semanas o 6 meses si corresponde
+            _buildFollowUpSection(),
 
             Padding(
               padding: const EdgeInsets.symmetric(vertical: Sizes.kDefaultPaddingDouble / 2),
@@ -667,6 +705,121 @@ void initState() {
     );
   }
 
+  Widget _buildFollowUpSection() {
+    final database = Provider.of<Database>(context, listen: false);
+    return StreamBuilder<InitialReport?>(
+      stream: _initialReportStream,
+      builder: (context, initialReportSnapshot) {
+        final initialReport = initialReportSnapshot.data;
+        return StreamBuilder<List<IpilEntry>>(
+          stream: database.getIpilEntriesByUserStream(widget.participantUser.userId ?? ''),
+          builder: (context, ipilsSnapshot) {
+            final ipilsFromUser = ipilsSnapshot.data ?? [];
+
+            bool showFourWeeks = false;
+            bool showSixMonths = false;
+
+            // 1. Si se está editando un IPIL que ya tenía guardado el check:
+            if (widget.selectedIpil != null) {
+              if (widget.selectedIpil!.fourWeeksCheck == true) {
+                showFourWeeks = true;
+              } else if (widget.selectedIpil!.sixMonthsCheck == true) {
+                showSixMonths = true;
+              }
+            }
+
+            // 2. Si no viene ya marcado por edición, evaluamos el tiempo transcurrido
+            // desde la fecha de completado del Informe Inicial hasta la fecha del selector del IPIL
+            if (!showFourWeeks && !showSixMonths) {
+              if (initialReport != null &&
+                  (initialReport.finished ?? false) &&
+                  initialReport.completedDate != null) {
+                final completedDate = initialReport.completedDate!;
+                final selectedDate = lastUpdateDate ?? DateTime.now();
+                final diffDays = selectedDate.difference(completedDate).inDays;
+
+                final sixMonthsDate = DateTime(
+                  completedDate.year,
+                  completedDate.month + 6,
+                  completedDate.day,
+                );
+                final isAtLeastSixMonths = selectedDate.isAfter(sixMonthsDate) ||
+                    selectedDate.isAtSameMomentAs(sixMonthsDate) ||
+                    diffDays >= 182;
+                final isAtLeastFourWeeks = diffDays >= 28;
+
+                final hasFourWeeksDone = ipilsFromUser.any((e) =>
+                    e.ipilId != widget.selectedIpil?.ipilId && e.fourWeeksCheck == true);
+                final hasSixMonthsDone = ipilsFromUser.any((e) =>
+                    e.ipilId != widget.selectedIpil?.ipilId && e.sixMonthsCheck == true);
+
+                if (!hasFourWeeksDone) {
+                  // Si no se ha completado el de 4 semanas, solo se evalúa y muestra ese
+                  if (isAtLeastFourWeeks) {
+                    showFourWeeks = true;
+                  }
+                } else if (!hasSixMonthsDone) {
+                  // Si el de 4 semanas ya se completó y no se ha hecho el de 6 meses
+                  if (isAtLeastSixMonths) {
+                    showSixMonths = true;
+                  }
+                }
+              }
+            }
+
+            isFollowUpFourWeeksVisible = showFourWeeks;
+            isFollowUpSixMonthsVisible = showSixMonths;
+
+            if (!showFourWeeks && !showSixMonths) {
+              return const SizedBox.shrink();
+            }
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Sizes.kDefaultPaddingDouble / 2,
+              ),
+              child: IpilFollowUpSection(
+                isFourWeeks: showFourWeeks,
+                situation: followUpSituation,
+                employmentTypeId: followUpEmploymentTypeId,
+                satisfaction: followUpSatisfaction,
+                impact: followUpImpact,
+                improvement: followUpImprovement,
+                onSituationChanged: (val) {
+                  setState(() {
+                    followUpSituation = val;
+                    if (val != StringConst.IPIL_SITUATION_EMPLOYMENT) {
+                      followUpEmploymentTypeId = null;
+                      followUpSatisfaction = null;
+                    }
+                  });
+                },
+                onEmploymentTypeChanged: (val) {
+                  setState(() {
+                    followUpEmploymentTypeId = val;
+                  });
+                },
+                onSatisfactionChanged: (val) {
+                  setState(() {
+                    followUpSatisfaction = val;
+                  });
+                },
+                onImpactChanged: (val) {
+                  setState(() {
+                    followUpImpact = val;
+                  });
+                },
+                onImprovementChanged: (val) {
+                  followUpImprovement = val;
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   bool _validateAndSaveForm() {
     if (_formKey.currentState != null &&
         _formKey.currentState!.validate()) {
@@ -684,6 +837,58 @@ void initState() {
           defaultActionText: StringConst.CLOSE);
       return;
     }
+
+    // Validación obligatoria de los campos del seguimiento si está activo
+    if (isFollowUpFourWeeksVisible || isFollowUpSixMonthsVisible) {
+      if (followUpSituation == null || followUpSituation!.isEmpty) {
+        await showAlertDialog(
+          context,
+          title: StringConst.FORM_ENTITY_ERROR,
+          content: 'Por favor, selecciona en qué situación se encuentra la persona en el seguimiento pendiente.',
+          defaultActionText: StringConst.FORM_ACCEPT,
+        );
+        return;
+      }
+      if (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT) {
+        if (followUpEmploymentTypeId == null || followUpEmploymentTypeId!.isEmpty) {
+          await showAlertDialog(
+            context,
+            title: StringConst.FORM_ENTITY_ERROR,
+            content: 'Por favor, selecciona el tipo de empleo en el seguimiento pendiente.',
+            defaultActionText: StringConst.FORM_ACCEPT,
+          );
+          return;
+        }
+        if (followUpSatisfaction == null) {
+          await showAlertDialog(
+            context,
+            title: StringConst.FORM_ENTITY_ERROR,
+            content: 'Por favor, selecciona el nivel de satisfacción (1 al 4) en el seguimiento pendiente.',
+            defaultActionText: StringConst.FORM_ACCEPT,
+          );
+          return;
+        }
+      }
+      if (followUpImpact == null) {
+        await showAlertDialog(
+          context,
+          title: StringConst.FORM_ENTITY_ERROR,
+          content: 'Por favor, selecciona el impacto percibido (1 al 6) en el seguimiento pendiente.',
+          defaultActionText: StringConst.FORM_ACCEPT,
+        );
+        return;
+      }
+      if (followUpImprovement == null || followUpImprovement!.trim().isEmpty) {
+        await showAlertDialog(
+          context,
+          title: StringConst.FORM_ENTITY_ERROR,
+          content: 'Por favor, indica cómo cree la persona que podemos mejorar el acompañamiento.',
+          defaultActionText: StringConst.FORM_ACCEPT,
+        );
+        return;
+      }
+    }
+
     if (_validateAndSaveForm()) {
       debugPrint("validado");
       try {
@@ -718,7 +923,27 @@ void initState() {
             finalJobValorationQuestionary: closeQuestionary,
             contactedPersonEvaluation: contactedPersonEvaluation,
             contactedPersonNoIntervention: contactedPersonNoIntervention,
-            other: other
+            other: other,
+            fourWeeksCheck: isFollowUpFourWeeksVisible ? true : null,
+            fourWeeksSituation: isFollowUpFourWeeksVisible ? followUpSituation : null,
+            fourWeeksEmploymentTypeId: isFollowUpFourWeeksVisible
+                ? (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT ? followUpEmploymentTypeId : null)
+                : null,
+            fourWeeksSatisfaction: isFollowUpFourWeeksVisible
+                ? (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT ? followUpSatisfaction : null)
+                : null,
+            fourWeeksImpact: isFollowUpFourWeeksVisible ? followUpImpact : null,
+            fourWeeksImprovement: isFollowUpFourWeeksVisible ? followUpImprovement : null,
+            sixMonthsCheck: isFollowUpSixMonthsVisible ? true : null,
+            sixMonthsSituation: isFollowUpSixMonthsVisible ? followUpSituation : null,
+            sixMonthsEmploymentTypeId: isFollowUpSixMonthsVisible
+                ? (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT ? followUpEmploymentTypeId : null)
+                : null,
+            sixMonthsSatisfaction: isFollowUpSixMonthsVisible
+                ? (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT ? followUpSatisfaction : null)
+                : null,
+            sixMonthsImpact: isFollowUpSixMonthsVisible ? followUpImpact : null,
+            sixMonthsImprovement: isFollowUpSixMonthsVisible ? followUpImprovement : null,
           );
           await database.addIpilEntry(newIpilEntry);
           await showAlertDialog(
@@ -757,7 +982,27 @@ void initState() {
             finalJobValorationQuestionary: closeQuestionary,
             contactedPersonEvaluation: contactedPersonEvaluation,
             contactedPersonNoIntervention: contactedPersonNoIntervention,
-            other: other
+            other: other,
+            fourWeeksCheck: isFollowUpFourWeeksVisible ? true : widget.selectedIpil!.fourWeeksCheck,
+            fourWeeksSituation: isFollowUpFourWeeksVisible ? followUpSituation : widget.selectedIpil!.fourWeeksSituation,
+            fourWeeksEmploymentTypeId: isFollowUpFourWeeksVisible
+                ? (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT ? followUpEmploymentTypeId : null)
+                : widget.selectedIpil!.fourWeeksEmploymentTypeId,
+            fourWeeksSatisfaction: isFollowUpFourWeeksVisible
+                ? (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT ? followUpSatisfaction : null)
+                : widget.selectedIpil!.fourWeeksSatisfaction,
+            fourWeeksImpact: isFollowUpFourWeeksVisible ? followUpImpact : widget.selectedIpil!.fourWeeksImpact,
+            fourWeeksImprovement: isFollowUpFourWeeksVisible ? followUpImprovement : widget.selectedIpil!.fourWeeksImprovement,
+            sixMonthsCheck: isFollowUpSixMonthsVisible ? true : widget.selectedIpil!.sixMonthsCheck,
+            sixMonthsSituation: isFollowUpSixMonthsVisible ? followUpSituation : widget.selectedIpil!.sixMonthsSituation,
+            sixMonthsEmploymentTypeId: isFollowUpSixMonthsVisible
+                ? (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT ? followUpEmploymentTypeId : null)
+                : widget.selectedIpil!.sixMonthsEmploymentTypeId,
+            sixMonthsSatisfaction: isFollowUpSixMonthsVisible
+                ? (followUpSituation == StringConst.IPIL_SITUATION_EMPLOYMENT ? followUpSatisfaction : null)
+                : widget.selectedIpil!.sixMonthsSatisfaction,
+            sixMonthsImpact: isFollowUpSixMonthsVisible ? followUpImpact : widget.selectedIpil!.sixMonthsImpact,
+            sixMonthsImprovement: isFollowUpSixMonthsVisible ? followUpImprovement : widget.selectedIpil!.sixMonthsImprovement,
           );
           await database.setIpilEntry(updatedIpilEntry);
           await showAlertDialog(

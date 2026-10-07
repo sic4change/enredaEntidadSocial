@@ -4,11 +4,11 @@ import 'dart:typed_data';
 import 'package:enreda_empresas/app/home/participants/pdf_generator/cv_print/data.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
+import 'package:enreda_empresas/app/services/location_cache.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
-import 'package:flutter/material.dart' as mt;
 import 'package:pdf/widgets.dart' as pw;
 
 import 'doc_ipil_theme.dart';
@@ -29,7 +29,6 @@ Future<Uint8List> generateIpilFile(
       right: 2.0 * PdfPageFormat.cm,
       bottom: 3.0 * PdfPageFormat.cm);
 
-  const PdfColor grey = PdfColor.fromInt(0xFF535A5F);
   const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
   final pageTheme = await MyIpilPageTheme(format, isMdm);
 
@@ -88,6 +87,44 @@ class _IpilEntry extends pw.StatelessWidget {
           pw.SizedBox(height: 10),
 
           BlockText(title: StringConst.IPIL_FOLLOW, text: ipil.content!),
+
+          if (ipil.fourWeeksCheck == true || ipil.sixMonthsCheck == true) ...[
+            pw.SizedBox(height: 5),
+            SmallText(
+              text: ipil.fourWeeksCheck == true
+                  ? StringConst.IPIL_FOLLOW_UP_FOUR_WEEKS
+                  : StringConst.IPIL_FOLLOW_UP_SIX_MONTHS,
+              fontWeight: pw.FontWeight.bold,
+              color: primary900,
+            ),
+            if ((ipil.fourWeeksCheck == true ? ipil.fourWeeksSituation : ipil.sixMonthsSituation) != null &&
+                (ipil.fourWeeksCheck == true ? ipil.fourWeeksSituation : ipil.sixMonthsSituation)!.isNotEmpty)
+              BlockText(
+                title: StringConst.IPIL_FOLLOW_UP_SITUATION,
+                text: (ipil.fourWeeksCheck == true ? ipil.fourWeeksSituation : ipil.sixMonthsSituation)!,
+              ),
+            if (_resolveEmploymentTypeName(ipil).isNotEmpty)
+              BlockText(
+                title: StringConst.IPIL_FOLLOW_UP_EMPLOYMENT_TYPE,
+                text: _resolveEmploymentTypeName(ipil),
+              ),
+            if ((ipil.fourWeeksCheck == true ? ipil.fourWeeksSatisfaction : ipil.sixMonthsSatisfaction) != null)
+              BlockText(
+                title: StringConst.IPIL_FOLLOW_UP_SATISFACTION,
+                text: '${ipil.fourWeeksCheck == true ? ipil.fourWeeksSatisfaction : ipil.sixMonthsSatisfaction} / 4',
+              ),
+            if ((ipil.fourWeeksCheck == true ? ipil.fourWeeksImpact : ipil.sixMonthsImpact) != null)
+              BlockText(
+                title: StringConst.IPIL_FOLLOW_UP_IMPACT,
+                text: '${ipil.fourWeeksCheck == true ? ipil.fourWeeksImpact : ipil.sixMonthsImpact} / 6',
+              ),
+            if ((ipil.fourWeeksCheck == true ? ipil.fourWeeksImprovement : ipil.sixMonthsImprovement) != null &&
+                (ipil.fourWeeksCheck == true ? ipil.fourWeeksImprovement : ipil.sixMonthsImprovement)!.isNotEmpty)
+              BlockText(
+                title: StringConst.IPIL_FOLLOW_UP_IMPROVEMENT,
+                text: (ipil.fourWeeksCheck == true ? ipil.fourWeeksImprovement : ipil.sixMonthsImprovement)!,
+              ),
+          ],
 
           pw.SizedBox(height: 5),
           if((ipil.initialInterview != null && ipil.initialInterview!) || (ipil.initialJobValorationQuestionary != null && ipil.initialJobValorationQuestionary!))
@@ -159,6 +196,17 @@ class _IpilEntry extends pw.StatelessWidget {
           pw.SizedBox(height: 8),
           pw.Divider(color: grey, thickness: 0.5),
         ]);
+  }
+
+  String _resolveEmploymentTypeName(IpilEntry ipil) {
+    final typeId = ipil.fourWeeksCheck == true
+        ? ipil.fourWeeksEmploymentTypeId
+        : ipil.sixMonthsEmploymentTypeId;
+    if (typeId == null || typeId.isEmpty) return '';
+    final interest = LocationCache.instance.interests
+        .where((i) => (i.interestId ?? i.name) == typeId || i.name == typeId)
+        .firstOrNull;
+    return interest?.name ?? typeId;
   }
 }
 

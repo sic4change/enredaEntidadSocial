@@ -695,7 +695,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
             );
             return CustomTextBody(text: myMaxEducation?.label ?? "");
           } else {
-            final myEducationalExperiencies = (myExperiences ?? [])
+            final myEducationalExperiencies = (myEducation ?? [])
                 .where((experience) => experience.type == 'Formativa')
                 .toList();
             if (myEducationalExperiencies.isNotEmpty) {
@@ -1136,7 +1136,7 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
         ),
         const SpaceH4(),
         () {
-          myPersonalExperiences = (myExperiences ?? []).where((e) => e.type == 'Personal').toList();
+          myPersonalExperiences = (myPersonalExperiences ?? []).where((e) => e.type == 'Personal').toList();
           myPersonalCustomExperiences = myPersonalExperiences!.toList();
           myPersonalSelectedExperiences = List.generate(myPersonalCustomExperiences.length, (i) => i);
           return Container(

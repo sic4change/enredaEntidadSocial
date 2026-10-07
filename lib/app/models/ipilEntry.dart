@@ -1,7 +1,4 @@
-import 'package:enreda_empresas/app/models/ipilConnectionTerritory.dart';
-import 'package:enreda_empresas/app/models/ipilContextualization.dart';
-import 'package:enreda_empresas/app/models/ipilInterviews.dart';
-import 'package:enreda_empresas/app/models/ipilReinforcement.dart';
+
 
 class IpilEntry {
   IpilEntry({
@@ -51,6 +48,18 @@ class IpilEntry {
     this.contactedPersonNoIntervention,
     this.other,
     this.results,
+    this.fourWeeksCheck,
+    this.fourWeeksSituation,
+    this.fourWeeksEmploymentTypeId,
+    this.fourWeeksSatisfaction,
+    this.fourWeeksImpact,
+    this.fourWeeksImprovement,
+    this.sixMonthsCheck,
+    this.sixMonthsSituation,
+    this.sixMonthsEmploymentTypeId,
+    this.sixMonthsSatisfaction,
+    this.sixMonthsImpact,
+    this.sixMonthsImprovement,
   });
 
   final String? ipilId;
@@ -108,6 +117,28 @@ class IpilEntry {
   late bool? contactedPersonNoIntervention;
   late String? other;
   late List<String>? results;
+
+  /// Seguimiento a las 4 semanas tras completar el Informe Inicial.
+  /// Solo un IPIL por participante puede tener este flag a true.
+  final bool? fourWeeksCheck;
+  /// Texto de la opción elegida (ver [StringConst.IPIL_FOUR_WEEKS_SITUATIONS]).
+  final String? fourWeeksSituation;
+  /// Id del `interest` elegido como tipo de empleo (solo si "Obtienen empleo").
+  final String? fourWeeksEmploymentTypeId;
+  /// Satisfacción 1–4 (solo si "Obtienen empleo").
+  final int? fourWeeksSatisfaction;
+  /// Impacto percibido 1–6.
+  final int? fourWeeksImpact;
+  final String? fourWeeksImprovement;
+
+  /// Seguimiento a los 6 meses tras completar el Informe Inicial.
+  /// Solo se ofrece si otro IPIL ya tiene [fourWeeksCheck] a true.
+  final bool? sixMonthsCheck;
+  final String? sixMonthsSituation;
+  final String? sixMonthsEmploymentTypeId;
+  final int? sixMonthsSatisfaction;
+  final int? sixMonthsImpact;
+  final String? sixMonthsImprovement;
 
   factory IpilEntry.fromMap(Map<String, dynamic> data, String documentId) {
 
@@ -238,6 +269,18 @@ class IpilEntry {
       contactedPersonNoIntervention: data['contactedPersonNoIntervention'] ?? false,
       other: data['other'] ?? '',
       results: results,
+      fourWeeksCheck: data['fourWeeksCheck'] == true,
+      fourWeeksSituation: data['fourWeeksSituation']?.toString(),
+      fourWeeksEmploymentTypeId: data['fourWeeksEmploymentTypeId']?.toString(),
+      fourWeeksSatisfaction: (data['fourWeeksSatisfaction'] as num?)?.toInt(),
+      fourWeeksImpact: (data['fourWeeksImpact'] as num?)?.toInt(),
+      fourWeeksImprovement: data['fourWeeksImprovement']?.toString(),
+      sixMonthsCheck: data['sixMonthsCheck'] == true,
+      sixMonthsSituation: data['sixMonthsSituation']?.toString(),
+      sixMonthsEmploymentTypeId: data['sixMonthsEmploymentTypeId']?.toString(),
+      sixMonthsSatisfaction: (data['sixMonthsSatisfaction'] as num?)?.toInt(),
+      sixMonthsImpact: (data['sixMonthsImpact'] as num?)?.toInt(),
+      sixMonthsImprovement: data['sixMonthsImprovement']?.toString(),
     );
   }
 
@@ -297,6 +340,20 @@ class IpilEntry {
       "contactedPersonNoIntervention": contactedPersonNoIntervention,
       "other": other,
       'results': results,
+      // Follow-up fields: only written when set, so saving an IPIL from a
+      // code path unaware of them never clears an existing follow-up.
+      if (fourWeeksCheck == true) 'fourWeeksCheck': true,
+      if (fourWeeksSituation != null) 'fourWeeksSituation': fourWeeksSituation,
+      if (fourWeeksEmploymentTypeId != null) 'fourWeeksEmploymentTypeId': fourWeeksEmploymentTypeId,
+      if (fourWeeksSatisfaction != null) 'fourWeeksSatisfaction': fourWeeksSatisfaction,
+      if (fourWeeksImpact != null) 'fourWeeksImpact': fourWeeksImpact,
+      if (fourWeeksImprovement != null) 'fourWeeksImprovement': fourWeeksImprovement,
+      if (sixMonthsCheck == true) 'sixMonthsCheck': true,
+      if (sixMonthsSituation != null) 'sixMonthsSituation': sixMonthsSituation,
+      if (sixMonthsEmploymentTypeId != null) 'sixMonthsEmploymentTypeId': sixMonthsEmploymentTypeId,
+      if (sixMonthsSatisfaction != null) 'sixMonthsSatisfaction': sixMonthsSatisfaction,
+      if (sixMonthsImpact != null) 'sixMonthsImpact': sixMonthsImpact,
+      if (sixMonthsImprovement != null) 'sixMonthsImprovement': sixMonthsImprovement,
     };
   }
 }

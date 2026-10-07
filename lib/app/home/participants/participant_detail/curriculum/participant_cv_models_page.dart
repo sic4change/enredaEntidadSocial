@@ -963,9 +963,11 @@ class _ParticipantCvModelsPageState extends State<ParticipantCvModelsPage> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  exp.subtype ?? exp.activity ?? '',
+                                  _personalExperienceTitle(exp),
                                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87),
                                 ),
+                                if (exp.organization?.isNotEmpty == true)
+                                  Text(exp.organization!, style: const TextStyle(fontSize: 13, color: Colors.black54)),
                               ],
                             ),
                           ),
@@ -978,6 +980,20 @@ class _ParticipantCvModelsPageState extends State<ParticipantCvModelsPage> {
               ),
       ],
     );
+  }
+
+  /// Builds the title for a personal experience using the same rules as
+  /// [ExperienceTile]: "ROL - ACTIVIDAD", subtype, position or activity.
+  String _personalExperienceTitle(Experience exp) {
+    final role = exp.activityRole?.trim() ?? '';
+    final activity = exp.activity?.trim() ?? '';
+    final position = exp.position?.trim() ?? '';
+    final subtype = exp.subtype?.trim() ?? '';
+    if (role.isNotEmpty && activity.isNotEmpty) return '$role - $activity';
+    if (subtype == 'Responsabilidades familiares' || subtype == 'Compromiso social') return subtype;
+    if (position.isNotEmpty) return position;
+    if (activity.isNotEmpty) return activity;
+    return subtype;
   }
 
   Widget _buildEducationList(BuildContext context) {
