@@ -28,7 +28,7 @@ import '../../../../common_widgets/custom_drop_down_button_form_field_title_chec
 import '../../../../common_widgets/custom_text_form_field_title.dart';
 import '../../../../common_widgets/enreda_button.dart';
 import '../../../../common_widgets/show_exception_alert_dialog.dart';
-import '../../../../models/initialReport.dart';
+import '../../../../models/closureReport.dart';
 import '../../../../models/ipilConnectionTerritory.dart';
 import '../../../../models/ipilContextualization.dart';
 import '../../../../models/ipilEntry.dart';
@@ -98,7 +98,7 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
 
   Stream<UserEnreda>? _assignedUserStream;
   Stream<List<UserEnreda>>? _socialUsersStream;
-  Stream<InitialReport?>? _initialReportStream;
+  Stream<ClosureReport?>? _closureReportStream;
 
   // Estado del bloque de seguimiento a 4 semanas / 6 meses
   bool isFollowUpFourWeeksVisible = false;
@@ -129,13 +129,22 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
       if (entityId != null && entityId.isNotEmpty) {
         _socialUsersStream = database.getSocialUsersByEntityId(entityId);
       }
-      final initialReportId = widget.participantUser.initialReportId;
-      if (initialReportId != null && initialReportId.isNotEmpty) {
-        _initialReportStream = database.initialReportStreamById(initialReportId);
+      String? closureReportId = widget.participantUser.closureReportId;
+      if ((closureReportId == null || closureReportId.isEmpty) &&
+          widget.participantUser.socialItineraryHistory.isNotEmpty) {
+        for (final cycle in widget.participantUser.socialItineraryHistory.reversed) {
+          if (cycle.closureReportId != null && cycle.closureReportId!.isNotEmpty) {
+            closureReportId = cycle.closureReportId;
+            break;
+          }
+        }
+      }
+      if (closureReportId != null && closureReportId.isNotEmpty) {
+        _closureReportStream = database.closureReportStreamById(closureReportId);
       } else if (widget.participantUser.userId != null) {
-        _initialReportStream = database
-            .initialReportsStreamByUserId(widget.participantUser.userId)
-            .map<InitialReport?>((r) => r)
+        _closureReportStream = database
+            .closureReportsStreamByUserId(widget.participantUser.userId)
+            .map<ClosureReport?>((r) => r)
             .handleError((_) => null);
       }
     }
@@ -707,10 +716,10 @@ void initState() {
 
   Widget _buildFollowUpSection() {
     final database = Provider.of<Database>(context, listen: false);
-    return StreamBuilder<InitialReport?>(
-      stream: _initialReportStream,
-      builder: (context, initialReportSnapshot) {
-        final initialReport = initialReportSnapshot.data;
+    return StreamBuilder<ClosureReport?>(
+      stream: _closureReportStream,
+      builder: (context, closureReportSnapshot) {
+        final closureReport = closureReportSnapshot.data;
         return StreamBuilder<List<IpilEntry>>(
           stream: database.getIpilEntriesByUserStream(widget.participantUser.userId ?? ''),
           builder: (context, ipilsSnapshot) {
@@ -729,19 +738,30 @@ void initState() {
             }
 
             // 2. Si no viene ya marcado por edición, evaluamos el tiempo transcurrido
-            // desde la fecha de completado del Informe Inicial hasta la fecha del selector del IPIL
+            // desde la fecha de completado del Informe de Cierre hasta la fecha del selector del IPIL
             if (!showFourWeeks && !showSixMonths) {
-              if (initialReport != null &&
-                  (initialReport.finished ?? false) &&
-                  initialReport.completedDate != null) {
-                final completedDate = initialReport.completedDate!;
+              DateTime? completedDate = closureReport?.completedDate;
+              bool isFinished = closureReport?.finished ?? false;
+
+              if (completedDate == null && widget.participantUser.socialItineraryHistory.isNotEmpty) {
+                for (final cycle in widget.participantUser.socialItineraryHistory.reversed) {
+                  if (cycle.closureDate != null) {
+                    completedDate = cycle.closureDate;
+                    isFinished = true;
+                    break;
+                  }
+                }
+              }
+
+              if (isFinished && completedDate != null) {
+                final completedDateVal = completedDate;
                 final selectedDate = lastUpdateDate ?? DateTime.now();
-                final diffDays = selectedDate.difference(completedDate).inDays;
+                final diffDays = selectedDate.difference(completedDateVal).inDays;
 
                 final sixMonthsDate = DateTime(
-                  completedDate.year,
-                  completedDate.month + 6,
-                  completedDate.day,
+                  completedDateVal.year,
+                  completedDateVal.month + 6,
+                  completedDateVal.day,
                 );
                 final isAtLeastSixMonths = selectedDate.isAfter(sixMonthsDate) ||
                     selectedDate.isAtSameMomentAs(sixMonthsDate) ||

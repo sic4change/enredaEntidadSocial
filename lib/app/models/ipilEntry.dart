@@ -118,7 +118,7 @@ class IpilEntry {
   late String? other;
   late List<String>? results;
 
-  /// Seguimiento a las 4 semanas tras completar el Informe Inicial.
+  /// Seguimiento a las 4 semanas tras completar el Informe de Cierre (ClosureReport).
   /// Solo un IPIL por participante puede tener este flag a true.
   final bool? fourWeeksCheck;
   /// Texto de la opción elegida (ver [StringConst.IPIL_FOUR_WEEKS_SITUATIONS]).
@@ -131,7 +131,7 @@ class IpilEntry {
   final int? fourWeeksImpact;
   final String? fourWeeksImprovement;
 
-  /// Seguimiento a los 6 meses tras completar el Informe Inicial.
+  /// Seguimiento a los 6 meses tras completar el Informe de Cierre (ClosureReport).
   /// Solo se ofrece si otro IPIL ya tiene [fourWeeksCheck] a true.
   final bool? sixMonthsCheck;
   final String? sixMonthsSituation;
