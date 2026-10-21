@@ -71,6 +71,7 @@ dependencies:
   image_cropper: ^8.0.1
   algoliasearch: ^1.0.0
   shared_preferences: ^2.5.5
+  syncfusion_flutter_charts: ^35.1.40+1
 
 dev_dependencies:
   flutter_test:

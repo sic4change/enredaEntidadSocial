@@ -710,6 +710,7 @@ class StringConst {
   static const String DRAWER_ENTITIES = 'Agenda de contactos ';
   static const String DRAWER_SESIONES = 'Sesiones';
   static const String DRAWER_CALENDARIO = 'Mi calendario';
+  static const String DRAWER_KPIS = "KPI'S";
   static const String SEE_MORE = 'Ver más';
 
   // Sesiones (admin dashboard) ─ list view + detail

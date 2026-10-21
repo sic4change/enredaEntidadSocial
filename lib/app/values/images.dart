@@ -111,6 +111,7 @@ class ImagePath {
   static const String ICON_PARTICIPANTS = '$imageDir/icon-participantes-entidad.png';
   static const String ICON_RESOURCES = '$imageDir/icon-recursos-entidad.png';
   static const String ICON_SESSIONS = '$imageDir/icon-sesiones-entidad.png';
+  static const String ICON_KPIS = '$imageDir/icon-kpi.svg';
   /// Sesiones SVG (Figma-extracted). NOT currently consumed — the sidebar
   /// uses [ICON_SESSIONS] PNG to stay visually consistent with the other
   /// nav icons. Kept on disk + as a constant so it can be swapped back in

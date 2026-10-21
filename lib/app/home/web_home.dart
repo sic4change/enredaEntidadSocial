@@ -23,7 +23,6 @@ import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +30,7 @@ import 'package:sidebarx/sidebarx.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
 import 'external_social_entity/entity_directory_page.dart';
+import 'kpis/kpi_page.dart';
 
 
 class WebHome extends StatefulWidget {
@@ -47,6 +47,7 @@ class WebHome extends StatefulWidget {
   //   3 → Recursos
   //   4 → Caja de herramientas
   //   5 → Agenda de contactos (Entities)
+  //   6 → KPI'S
   // ──────────────────────────────────────────────────────────────────────
 
   static goToControlPanel() {
@@ -80,6 +81,11 @@ class WebHome extends StatefulWidget {
     WebHome.selectedIndex.value = 2; // Select empty Container
     WebHome.controller.selectIndex(5);
     EntityDirectoryPage.selectedIndex.value = 0;
+  }
+
+  static goToKpis() {
+    WebHome.selectedIndex.value = 2; // Select empty Container
+    WebHome.controller.selectIndex(6);
   }
 
   @override
@@ -394,6 +400,9 @@ class _WebHomeContentState extends State<_WebHomeContent> {
                             // 5 → Agenda de contactos
                             case 5: _key.currentState?.closeDrawer();
                             return EntityDirectoryPage(socialEntity: widget.socialEntity);
+                            // 6 → KPI'S
+                            case 6: _key.currentState?.closeDrawer();
+                            return KpiPage(socialEntity: widget.socialEntity, user: widget.user);
                             default:
                               return MyResourcesListPage(socialEntity: widget.socialEntity);
                           }
