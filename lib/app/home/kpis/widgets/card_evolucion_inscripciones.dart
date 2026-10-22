@@ -1,43 +1,238 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import '../../../models/userEnreda.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardEvolucionInscripciones extends StatefulWidget {
-  const CardEvolucionInscripciones({Key? key}) : super(key: key);
+  final List<UserEnreda>? users;
+  final bool isLoading;
+
+  const CardEvolucionInscripciones({
+    Key? key,
+    this.users,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   State<CardEvolucionInscripciones> createState() => _CardEvolucionInscripcionesState();
 }
 
 class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones> {
-  String _selectedPeriod = 'Año';
-  int _selectedYear = 2026;
-  late TooltipBehavior _tooltipBehavior;
+  String _selectedPeriod = 'Año'; // 'Semana', 'Mes', 'Año'
+  late int _selectedYear;
+  late int _selectedMonth;
+  late DateTime _selectedWeekStart;
+
+  static const List<String> _monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  static const List<String> _monthAbbr = [
+    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+  ];
+
+  static const List<String> _weekDays = [
+    'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'
+  ];
+
+  static const List<String> _weekDayFullNames = [
+    'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
+  ];
+
+  DateTime _getMonday(DateTime date) {
+    return DateTime(date.year, date.month, date.day).subtract(Duration(days: date.weekday - 1));
+  }
 
   @override
   void initState() {
     super.initState();
-    _tooltipBehavior = TooltipBehavior(
-      enable: true,
-      header: '',
-      canShowMarker: true,
-      format: 'point.x 2026\nInscripciones : point.y',
-      textStyle: GoogleFonts.outfit(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: KpiColors.primaryDark,
-      ),
-      color: Colors.white,
-      borderColor: KpiColors.borderLight,
-      borderWidth: 1,
-      elevation: 4,
-    );
+    final now = DateTime.now();
+    _selectedYear = now.year;
+    _selectedMonth = now.month;
+    _selectedWeekStart = _getMonday(now);
+  }
+
+  List<DateTime> _getValidDates() {
+    if (widget.users == null) return [];
+    return widget.users!
+        .map((u) => u.createDate ?? u.startDateItinerary)
+        .where((d) => d != null)
+        .cast<DateTime>()
+        .toList();
+  }
+
+  int _getMinYear(List<DateTime> dates) {
+    if (dates.isEmpty) return 2020;
+    final earliest = dates.map((d) => d.year).reduce(min);
+    return min(earliest, 2020);
   }
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final dates = _getValidDates();
+    final minYear = _getMinYear(dates);
+
+    // Compute chart data, totals, average, peak based on _selectedPeriod
+    List<MonthDataPoint> points = [];
+    int totalCount = 0;
+    String totalLabel = '';
+    String avgValue = '0,0';
+    String avgLabel = '';
+    String peakValue = '0';
+    String peakLabel = 'sin inscripciones';
+    String subtitle = 'Inscripciones nuevas por mes';
+    String tooltipFormat = 'point.x\nInscripciones : point.y';
+
+    if (_selectedPeriod == 'Año') {
+      subtitle = 'Inscripciones nuevas por mes en $_selectedYear';
+      tooltipFormat = 'point.x $_selectedYear\nInscripciones : point.y';
+      totalLabel = 'inscripciones en $_selectedYear';
+      avgLabel = 'media mensual';
+
+      int peakMonth = 1;
+      int peakMonthCount = 0;
+
+      for (int m = 1; m <= 12; m++) {
+        final count = dates.where((d) => d.year == _selectedYear && d.month == m).length;
+        final bool isFuture = _selectedYear == now.year && m > now.month;
+
+        if (isFuture) {
+          points.add(MonthDataPoint(_monthAbbr[m - 1], null));
+        } else {
+          points.add(MonthDataPoint(_monthAbbr[m - 1], count.toDouble()));
+          totalCount += count;
+          if (count > peakMonthCount) {
+            peakMonthCount = count;
+            peakMonth = m;
+          }
+        }
+      }
+
+      final int monthsElapsed = _selectedYear == now.year
+          ? now.month
+          : (_selectedYear < now.year ? 12 : 1);
+      final double avg = monthsElapsed > 0 ? totalCount / monthsElapsed : 0.0;
+      avgValue = avg.toStringAsFixed(1).replaceAll('.', ',');
+
+      if (totalCount > 0) {
+        peakValue = '$peakMonthCount';
+        peakLabel = 'pico (${_monthNames[peakMonth - 1].toLowerCase()})';
+      }
+    } else if (_selectedPeriod == 'Mes') {
+      final monthName = _monthNames[_selectedMonth - 1];
+      subtitle = 'Inscripciones nuevas por día en $monthName $_selectedYear';
+      tooltipFormat = 'Día point.x de $monthName\nInscripciones : point.y';
+      totalLabel = 'inscripciones en $monthName';
+      avgLabel = 'media diaria';
+
+      final totalDaysInMonth = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
+      int peakDay = 1;
+      int peakDayCount = 0;
+
+      for (int day = 1; day <= totalDaysInMonth; day++) {
+        final count = dates.where((d) =>
+            d.year == _selectedYear &&
+            d.month == _selectedMonth &&
+            d.day == day).length;
+        final bool isFuture = _selectedYear == now.year &&
+            _selectedMonth == now.month &&
+            day > now.day;
+
+        if (isFuture) {
+          points.add(MonthDataPoint('$day', null));
+        } else {
+          points.add(MonthDataPoint('$day', count.toDouble()));
+          totalCount += count;
+          if (count > peakDayCount) {
+            peakDayCount = count;
+            peakDay = day;
+          }
+        }
+      }
+
+      final int daysElapsed = (_selectedYear == now.year && _selectedMonth == now.month)
+          ? now.day
+          : (_selectedYear < now.year || (_selectedYear == now.year && _selectedMonth < now.month)
+              ? totalDaysInMonth
+              : 1);
+      final double avg = daysElapsed > 0 ? totalCount / daysElapsed : 0.0;
+      avgValue = avg.toStringAsFixed(1).replaceAll('.', ',');
+
+      if (totalCount > 0) {
+        peakValue = '$peakDayCount';
+        peakLabel = 'pico (día $peakDay)';
+      }
+    } else {
+      // Semana
+      subtitle = 'Inscripciones diarias de la semana';
+      tooltipFormat = 'point.x\nInscripciones : point.y';
+      totalLabel = 'inscripciones en la semana';
+      avgLabel = 'media diaria';
+
+      int peakWd = 1;
+      int peakWdCount = 0;
+      int elapsedDays = 0;
+
+      for (int i = 0; i < 7; i++) {
+        final dayDate = _selectedWeekStart.add(Duration(days: i));
+        final bool isFuture = dayDate.isAfter(DateTime(now.year, now.month, now.day));
+        final count = dates.where((d) =>
+            d.year == dayDate.year &&
+            d.month == dayDate.month &&
+            d.day == dayDate.day).length;
+
+        if (isFuture) {
+          points.add(MonthDataPoint(_weekDays[i], null));
+        } else {
+          elapsedDays++;
+          points.add(MonthDataPoint(_weekDays[i], count.toDouble()));
+          totalCount += count;
+          if (count > peakWdCount) {
+            peakWdCount = count;
+            peakWd = i + 1;
+          }
+        }
+      }
+
+      final double avg = elapsedDays > 0 ? totalCount / elapsedDays : 0.0;
+      avgValue = avg.toStringAsFixed(1).replaceAll('.', ',');
+
+      if (totalCount > 0) {
+        peakValue = '$peakWdCount';
+        peakLabel = 'pico (${_weekDayFullNames[peakWd - 1].toLowerCase()})';
+      }
+    }
+
+    // Dynamic Y-axis scale
+    final double maxVal = points
+        .where((p) => p.value != null)
+        .fold(0.0, (prev, p) => p.value! > prev ? p.value! : prev);
+
+    double maxY;
+    double interval;
+    if (maxVal <= 5) {
+      maxY = 5;
+      interval = 1;
+    } else if (maxVal <= 10) {
+      maxY = 10;
+      interval = 2;
+    } else if (maxVal <= 25) {
+      maxY = ((maxVal / 5).ceil() * 5).toDouble();
+      interval = 5;
+    } else if (maxVal <= 60) {
+      maxY = ((maxVal / 10).ceil() * 10).toDouble();
+      interval = (maxY / 5).ceilToDouble();
+    } else {
+      maxY = ((maxVal / 50).ceil() * 50).toDouble();
+      interval = (maxY / 5).ceilToDouble();
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: KpiColors.cardBackground,
@@ -56,7 +251,7 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeaderTitles(),
+                    _buildHeaderTitles(subtitle),
                     const SizedBox(height: 12),
                     _buildPeriodToggle(),
                   ],
@@ -66,7 +261,7 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _buildHeaderTitles()),
+                  Expanded(child: _buildHeaderTitles(subtitle)),
                   _buildPeriodToggle(),
                 ],
               );
@@ -74,108 +269,93 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
           ),
           const SizedBox(height: 16),
 
-          // Date stepper [<] 2026 [>]
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildArrowButton(
-                icon: Icons.chevron_left,
-                isEnabled: true,
-                onTap: () {
-                  setState(() {
-                    _selectedYear--;
-                  });
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  '$_selectedYear',
-                  style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: KpiColors.primaryDark,
-                  ),
-                ),
-              ),
-              _buildArrowButton(
-                icon: Icons.chevron_right,
-                isEnabled: _selectedYear < 2026,
-                onTap: () {
-                  if (_selectedYear < 2026) {
-                    setState(() {
-                      _selectedYear++;
-                    });
-                  }
-                },
-              ),
-            ],
-          ),
+          // Date stepper [<] label [>]
+          _buildDateStepper(now, minYear),
           const SizedBox(height: 16),
 
           // Syncfusion Area Spline Chart
           SizedBox(
             height: 320,
-            child: SfCartesianChart(
-              tooltipBehavior: _tooltipBehavior,
-              plotAreaBorderWidth: 0,
-              margin: EdgeInsets.zero,
-              primaryXAxis: CategoryAxis(
-                majorGridLines: const MajorGridLines(width: 0),
-                axisLine: const AxisLine(color: KpiColors.borderLight, width: 1),
-                majorTickLines: const MajorTickLines(size: 6, color: KpiColors.borderLight),
-                labelStyle: GoogleFonts.outfit(
-                  fontSize: 12,
-                  color: KpiColors.secondaryText,
-                ),
-              ),
-              primaryYAxis: NumericAxis(
-                minimum: 0,
-                maximum: 20,
-                interval: 5,
-                axisLine: const AxisLine(width: 0),
-                majorTickLines: const MajorTickLines(size: 0),
-                majorGridLines: const MajorGridLines(
-                  width: 1,
-                  color: KpiColors.divider,
-                  dashArray: [4, 4],
-                ),
-                labelStyle: GoogleFonts.outfit(
-                  fontSize: 12,
-                  color: KpiColors.secondaryText,
-                ),
-              ),
-              series: <CartesianSeries<MonthDataPoint, String>>[
-                SplineAreaSeries<MonthDataPoint, String>(
-                  dataSource: KpiFakeData.evolucionInscripciones,
-                  xValueMapper: (MonthDataPoint data, _) => data.month,
-                  yValueMapper: (MonthDataPoint data, _) => data.value,
-                  splineType: SplineType.natural,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      KpiColors.turquoise.withValues(alpha: 0.32),
-                      KpiColors.turquoise.withValues(alpha: 0.02),
+            child: widget.isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                    ),
+                  )
+                : SfCartesianChart(
+                    tooltipBehavior: TooltipBehavior(
+                      enable: true,
+                      header: '',
+                      canShowMarker: true,
+                      format: tooltipFormat,
+                      textStyle: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: KpiColors.primaryDark,
+                      ),
+                      color: Colors.white,
+                      borderColor: KpiColors.borderLight,
+                      borderWidth: 1,
+                      elevation: 4,
+                    ),
+                    plotAreaBorderWidth: 0,
+                    margin: EdgeInsets.zero,
+                    primaryXAxis: CategoryAxis(
+                      majorGridLines: const MajorGridLines(width: 0),
+                      axisLine: const AxisLine(color: KpiColors.borderLight, width: 1),
+                      majorTickLines: const MajorTickLines(size: 6, color: KpiColors.borderLight),
+                      labelStyle: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: KpiColors.secondaryText,
+                      ),
+                    ),
+                    primaryYAxis: NumericAxis(
+                      minimum: 0,
+                      maximum: maxY,
+                      interval: interval,
+                      axisLine: const AxisLine(width: 0),
+                      majorTickLines: const MajorTickLines(size: 0),
+                      majorGridLines: const MajorGridLines(
+                        width: 1,
+                        color: KpiColors.divider,
+                        dashArray: [4, 4],
+                      ),
+                      labelStyle: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: KpiColors.secondaryText,
+                      ),
+                    ),
+                    series: <CartesianSeries<MonthDataPoint, String>>[
+                      SplineAreaSeries<MonthDataPoint, String>(
+                        dataSource: points,
+                        xValueMapper: (MonthDataPoint data, _) => data.month,
+                        yValueMapper: (MonthDataPoint data, _) => data.value,
+                        splineType: SplineType.natural,
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            KpiColors.turquoise.withValues(alpha: 0.32),
+                            KpiColors.turquoise.withValues(alpha: 0.02),
+                          ],
+                        ),
+                        borderColor: KpiColors.turquoise,
+                        borderWidth: 2.2,
+                        markerSettings: const MarkerSettings(
+                          isVisible: true,
+                          shape: DataMarkerType.circle,
+                          color: Colors.white,
+                          borderColor: KpiColors.turquoise,
+                          borderWidth: 2,
+                          width: 7,
+                          height: 7,
+                        ),
+                        emptyPointSettings: EmptyPointSettings(
+                          mode: EmptyPointMode.drop,
+                        ),
+                      ),
                     ],
                   ),
-                  borderColor: KpiColors.turquoise,
-                  borderWidth: 2.2,
-                  markerSettings: const MarkerSettings(
-                    isVisible: true,
-                    shape: DataMarkerType.circle,
-                    color: Colors.white,
-                    borderColor: KpiColors.turquoise,
-                    borderWidth: 2,
-                    width: 7,
-                    height: 7,
-                  ),
-                  emptyPointSettings: EmptyPointSettings(
-                    mode: EmptyPointMode.drop,
-                  ),
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: 20),
 
@@ -186,21 +366,21 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
               if (isSmall) {
                 return Column(
                   children: [
-                    _buildStatCard('126', 'inscripciones en $_selectedYear'),
+                    _buildStatCard('$totalCount', totalLabel),
                     const SizedBox(height: 8),
-                    _buildStatCard('12,6', 'media mensual'),
+                    _buildStatCard(avgValue, avgLabel),
                     const SizedBox(height: 8),
-                    _buildStatCard('18', 'pico (septiembre)'),
+                    _buildStatCard(peakValue, peakLabel),
                   ],
                 );
               }
               return Row(
                 children: [
-                  Expanded(child: _buildStatCard('126', 'inscripciones en $_selectedYear')),
+                  Expanded(child: _buildStatCard('$totalCount', totalLabel)),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildStatCard('12,6', 'media mensual')),
+                  Expanded(child: _buildStatCard(avgValue, avgLabel)),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildStatCard('18', 'pico (septiembre)')),
+                  Expanded(child: _buildStatCard(peakValue, peakLabel)),
                 ],
               );
             },
@@ -210,7 +390,7 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
     );
   }
 
-  Widget _buildHeaderTitles() {
+  Widget _buildHeaderTitles(String subtitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -224,7 +404,7 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
         ),
         const SizedBox(height: 4),
         Text(
-          'Inscripciones nuevas por mes',
+          subtitle,
           style: GoogleFonts.outfit(
             fontSize: 12,
             fontWeight: FontWeight.normal,
@@ -273,6 +453,96 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
           );
         }).toList(),
       ),
+    );
+  }
+
+  Widget _buildDateStepper(DateTime now, int minYear) {
+    String label = '';
+    bool canPrev = false;
+    bool canNext = false;
+    VoidCallback onPrev = () {};
+    VoidCallback onNext = () {};
+
+    if (_selectedPeriod == 'Año') {
+      label = '$_selectedYear';
+      canPrev = _selectedYear > minYear;
+      canNext = _selectedYear < now.year;
+      onPrev = () => setState(() => _selectedYear--);
+      onNext = () => setState(() => _selectedYear++);
+    } else if (_selectedPeriod == 'Mes') {
+      label = '${_monthNames[_selectedMonth - 1]} $_selectedYear';
+      canPrev = _selectedYear > minYear || (_selectedYear == minYear && _selectedMonth > 1);
+      canNext = _selectedYear < now.year || (_selectedYear == now.year && _selectedMonth < now.month);
+      onPrev = () {
+        setState(() {
+          if (_selectedMonth == 1) {
+            _selectedYear--;
+            _selectedMonth = 12;
+          } else {
+            _selectedMonth--;
+          }
+        });
+      };
+      onNext = () {
+        setState(() {
+          if (_selectedMonth == 12) {
+            _selectedYear++;
+            _selectedMonth = 1;
+          } else {
+            _selectedMonth++;
+          }
+        });
+      };
+    } else {
+      // Semana
+      final weekEnd = _selectedWeekStart.add(const Duration(days: 6));
+      final startMonth = _monthAbbr[_selectedWeekStart.month - 1];
+      final endMonth = _monthAbbr[weekEnd.month - 1];
+      if (_selectedWeekStart.month == weekEnd.month) {
+        label = '${_selectedWeekStart.day} - ${weekEnd.day} $endMonth ${weekEnd.year}';
+      } else {
+        label = '${_selectedWeekStart.day} $startMonth - ${weekEnd.day} $endMonth ${weekEnd.year}';
+      }
+
+      canPrev = _selectedWeekStart.year >= minYear - 1;
+      canNext = _selectedWeekStart.isBefore(_getMonday(now));
+      onPrev = () {
+        setState(() {
+          _selectedWeekStart = _selectedWeekStart.subtract(const Duration(days: 7));
+        });
+      };
+      onNext = () {
+        setState(() {
+          _selectedWeekStart = _selectedWeekStart.add(const Duration(days: 7));
+        });
+      };
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildArrowButton(
+          icon: Icons.chevron_left,
+          isEnabled: canPrev,
+          onTap: onPrev,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+            label,
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: KpiColors.primaryDark,
+            ),
+          ),
+        ),
+        _buildArrowButton(
+          icon: Icons.chevron_right,
+          isEnabled: canNext,
+          onTap: onNext,
+        ),
+      ],
     );
   }
 

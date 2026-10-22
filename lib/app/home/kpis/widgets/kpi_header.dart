@@ -8,6 +8,7 @@ class KpiHeader extends StatelessWidget {
   final ValueChanged<String> onFilterChanged;
   final TextEditingController searchController;
   final VoidCallback onDownloadReport;
+  final List<FilterChipItem>? filterItems;
 
   const KpiHeader({
     Key? key,
@@ -15,6 +16,7 @@ class KpiHeader extends StatelessWidget {
     required this.onFilterChanged,
     required this.searchController,
     required this.onDownloadReport,
+    this.filterItems,
   }) : super(key: key);
 
   @override
@@ -123,7 +125,7 @@ class KpiHeader extends StatelessWidget {
                       color: KpiColors.primaryDark,
                     ),
                   ),
-                  ...KpiFakeData.filterOrganizations.map((item) {
+                  ...(filterItems ?? KpiFakeData.filterOrganizations).map((item) {
                     final isSelected = item.id == selectedFilterId;
                     return InkWell(
                       borderRadius: BorderRadius.circular(999),

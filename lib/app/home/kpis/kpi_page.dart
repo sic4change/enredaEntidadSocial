@@ -11,6 +11,11 @@ import 'widgets/categorias_especiales_section.dart';
 import 'widgets/indicadores_resultados_section.dart';
 import 'widgets/recursos_section.dart';
 
+import 'package:provider/provider.dart';
+import '../../services/database.dart';
+import 'kpi_models.dart';
+import 'kpi_service.dart';
+
 class KpiPage extends StatefulWidget {
   final SocialEntity socialEntity;
   final UserEnreda? user;
@@ -29,13 +34,118 @@ class _KpiPageState extends State<KpiPage> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
 
-  String _selectedFilterId = 'sic4change';
+  late String _selectedFilterId;
+  late List<FilterChipItem> _filterItems;
+
+  ParticipantesKpiData? _participantesData;
+  bool _isLoadingParticipantes = false;
+  KpiService? _kpiService;
 
   bool _isResumenExpanded = true;
   bool _isDemograficoExpanded = true;
   bool _isEspecialesExpanded = true;
   bool _isResultadosExpanded = true;
   bool _isRecursosExpanded = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initFilters();
+  }
+
+  void _initFilters() {
+    final entityName = widget.socialEntity.name.trim();
+    final isAllowedGlobal = entityName.toLowerCase() == 'entidad prueba' ||
+        entityName.toLowerCase() == 'sic4change';
+
+    final List<FilterChipItem> items = [];
+
+    // 1. Global (solo visible para "Entidad Prueba" y "SIC4Change")
+    if (isAllowedGlobal) {
+      items.add(const FilterChipItem(id: 'global', label: 'Global'));
+    }
+
+    // 2. Nombre de la entidad actual
+    items.add(
+      FilterChipItem(
+        id: widget.socialEntity.socialEntityId ?? 'entity',
+        label: entityName.isNotEmpty ? entityName : 'Mi Entidad',
+      ),
+    );
+
+    // 3. Subsidios
+    items.add(
+      const FilterChipItem(
+        id: '529775',
+        label: 'Acompañamiento y tecnología',
+        prefix: '529775_',
+      ),
+    );
+    items.add(
+      const FilterChipItem(
+        id: 'seimlab',
+        label: 'SEIMLAB',
+        prefix: '1/MAC/4/7.2/0080_',
+      ),
+    );
+    items.add(
+      const FilterChipItem(
+        id: '529760',
+        label: 'Empleando sueños',
+        prefix: '529760_',
+      ),
+    );
+
+    _filterItems = items;
+    // Si la entidad es SIC4Change o Entidad Prueba, preseleccionamos la primera opción o la entidad
+    _selectedFilterId = items.first.id;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_kpiService == null) {
+      final database = Provider.of<Database>(context, listen: false);
+      _kpiService = KpiService(database);
+      _loadData();
+    }
+  }
+
+  Future<void> _loadData() async {
+    if (_kpiService == null) return;
+    setState(() {
+      _isLoadingParticipantes = true;
+    });
+
+    try {
+      final data = await _kpiService!.loadParticipantesKpi(
+        filterId: _selectedFilterId,
+        currentSocialEntityId: widget.socialEntity.socialEntityId ?? '',
+      );
+      if (mounted) {
+        setState(() {
+          _participantesData = data;
+          _isLoadingParticipantes = false;
+        });
+      }
+    } catch (e, stack) {
+      print('Error cargando KPIs: $e\n$stack');
+      if (mounted) {
+        setState(() {
+          _isLoadingParticipantes = false;
+        });
+      }
+    }
+  }
+
+  void _onFilterChanged(String id) {
+    if (_selectedFilterId != id) {
+      setState(() {
+        _selectedFilterId = id;
+      });
+      _loadData();
+    }
+  }
 
   bool get _allExpanded =>
       _isResumenExpanded &&
@@ -101,11 +211,8 @@ class _KpiPageState extends State<KpiPage> {
                   // Cabecera y Filtros
                   KpiHeader(
                     selectedFilterId: _selectedFilterId,
-                    onFilterChanged: (id) {
-                      setState(() {
-                        _selectedFilterId = id;
-                      });
-                    },
+                    onFilterChanged: _onFilterChanged,
+                    filterItems: _filterItems,
                     searchController: _searchController,
                     onDownloadReport: _downloadReport,
                   ),
@@ -127,6 +234,8 @@ class _KpiPageState extends State<KpiPage> {
                         _isResumenExpanded = !_isResumenExpanded;
                       });
                     },
+                    participantesData: _participantesData,
+                    isLoadingParticipantes: _isLoadingParticipantes,
                   ),
                   const SizedBox(height: 36),
 
@@ -138,6 +247,8 @@ class _KpiPageState extends State<KpiPage> {
                         _isDemograficoExpanded = !_isDemograficoExpanded;
                       });
                     },
+                    users: _participantesData?.users,
+                    isLoading: _isLoadingParticipantes,
                   ),
                   const SizedBox(height: 36),
 

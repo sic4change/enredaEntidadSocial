@@ -61,7 +61,7 @@ class UserEnreda {
   });
 
   factory UserEnreda.fromMap(Map<String, dynamic> data, String documentId) {
-    final String email = data['email'];
+    final String email = data['email'] ?? '';
     final String? organization = data['organization'];
     final String? socialEntityId = data['socialEntityId']?? "";
     final String? role = data['role'];

@@ -3,11 +3,25 @@ import 'package:google_fonts/google_fonts.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
+import '../kpi_service.dart';
+
 class CardParticipantesInscritos extends StatelessWidget {
-  const CardParticipantesInscritos({Key? key}) : super(key: key);
+  final ParticipantesKpiData? data;
+  final bool isLoading;
+
+  const CardParticipantesInscritos({
+    Key? key,
+    this.data,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final total = data != null ? data!.total : KpiFakeData.totalParticipantes;
+    final estadoItems = data != null ? data!.porEstado : KpiFakeData.estadoParticipantes;
+    final generoItems = data != null ? data!.porGenero : KpiFakeData.generoParticipantes;
+    final nacionalidadItems = data != null ? data!.porNacionalidad : KpiFakeData.nacionalidadParticipantes;
+
     return Container(
       decoration: BoxDecoration(
         color: KpiColors.cardBackground,
@@ -19,22 +33,43 @@ class CardParticipantesInscritos extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text(
-            'Participantes inscritos',
-            style: GoogleFonts.outfit(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: KpiColors.primaryDark,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Total acumulado desde el inicio, en la vista seleccionada',
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.normal,
-              color: KpiColors.secondaryText,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Participantes inscritos',
+                      style: GoogleFonts.outfit(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: KpiColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Total acumulado desde el inicio, en la vista seleccionada',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
+                        color: KpiColors.secondaryText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isLoading)
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 20),
 
@@ -44,7 +79,7 @@ class CardParticipantesInscritos extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                '${KpiFakeData.totalParticipantes}',
+                '$total',
                 style: GoogleFonts.outfit(
                   fontSize: 54,
                   fontWeight: FontWeight.w600,
@@ -68,7 +103,7 @@ class CardParticipantesInscritos extends StatelessWidget {
           // Sub-block: Por estado
           _buildSegmentGroup(
             title: 'Por estado',
-            items: KpiFakeData.estadoParticipantes,
+            items: estadoItems,
           ),
           const SizedBox(height: 20),
           const Divider(height: 1, color: KpiColors.divider),
@@ -77,7 +112,7 @@ class CardParticipantesInscritos extends StatelessWidget {
           // Sub-block: Por género
           _buildSegmentGroup(
             title: 'Por género',
-            items: KpiFakeData.generoParticipantes,
+            items: generoItems,
           ),
           const SizedBox(height: 20),
           const Divider(height: 1, color: KpiColors.divider),
@@ -86,7 +121,7 @@ class CardParticipantesInscritos extends StatelessWidget {
           // Sub-block: Por nacionalidad
           _buildSegmentGroup(
             title: 'Por nacionalidad',
-            items: KpiFakeData.nacionalidadParticipantes,
+            items: nacionalidadItems,
           ),
         ],
       ),
