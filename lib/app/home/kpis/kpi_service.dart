@@ -1,6 +1,7 @@
 import '../../models/userEnreda.dart';
 import '../../models/initialReport.dart';
 import '../../models/closureReport.dart';
+import '../../models/followReport.dart';
 import '../../models/derivationReport.dart';
 import '../../services/database.dart';
 import '../../services/api_path.dart';
@@ -124,6 +125,7 @@ class KpiService {
       firestore.collection(APIPath.initialReports()).get(),
       firestore.collection(APIPath.closureReports()).get(),
       firestore.collection(APIPath.derivationReports()).get(),
+      firestore.collection(APIPath.followReports()).get(),
     ]);
 
     final Map<String, InitialReport> initialReportsByUser = {};
@@ -161,6 +163,17 @@ class KpiService {
           derivationReportsByUser[report.userId!] = report;
         }
         derivationReportsByUser[doc.id] = report;
+      } catch (_) {}
+    }
+
+    final Map<String, FollowReport> followReportsByUser = {};
+    for (final doc in results[3].docs) {
+      try {
+        final report = FollowReport.fromMap(doc.data(), doc.id);
+        if (report.userId != null && report.userId!.isNotEmpty) {
+          followReportsByUser[report.userId!] = report;
+        }
+        followReportsByUser[doc.id] = report;
       } catch (_) {}
     }
 
@@ -257,17 +270,31 @@ class KpiService {
 
     double pct(int count) => total > 0 ? ((count / total) * 100) : 0.0;
 
+    // Situación inicial: participantes con informe inicial completado
     final situacionInicial = _calculateSituacionEmpleo(
       users: filteredUsers,
-      initialReportsByUser: initialReportsByUser,
-      isActual: false,
+      laborSituationOf: (u) {
+        final uId = u.userId ?? '';
+        final initReport = (u.initialReportId != null && initialReportsByUser.containsKey(u.initialReportId))
+            ? initialReportsByUser[u.initialReportId]
+            : (initialReportsByUser[uId] ?? initialReportsByUser[u.email]);
+        final bool isInitFinished = initReport != null && _isFilled(initReport.finished, initReport.completedDate);
+        if (!isInitFinished) return null;
+        return (initReport.laborSituation ?? '').trim();
+      },
     );
 
+    // Situación actual: participantes con informe de seguimiento o de cierre;
+    // se toma la situación laboral del último informe rellenado (cierre > seguimiento,
+    // y en caso de reapertura, el último informe del ciclo más reciente)
     final situacionActual = _calculateSituacionEmpleo(
       users: filteredUsers,
-      initialReportsByUser: initialReportsByUser,
-      closureReportsByUser: closureReportsByUser,
-      isActual: true,
+      laborSituationOf: (u) => _resolveCurrentLaborSituation(
+        user: u,
+        initialReports: initialReportsByUser,
+        followReports: followReportsByUser,
+        closureReports: closureReportsByUser,
+      ),
     );
 
     int totalConInformeInicialCompleto = 0;
@@ -344,13 +371,92 @@ class KpiService {
     );
   }
 
-  /// Calcula el desglose de situación de empleo por género
-  /// teniendo en cuenta únicamente los participantes con informe inicial completado
+  bool _isFilled(bool? finished, DateTime? completedDate) =>
+      finished == true || completedDate != null;
+
+  /// Devuelve la situación laboral "actual" del participante, o `null` si no
+  /// tiene ningún informe de seguimiento ni de cierre rellenado (no computa).
+  ///
+  /// Se recorren los ciclos del itinerario en orden cronológico
+  /// (ciclos archivados en `socialItineraryHistory` + ciclo vigente) y, dentro
+  /// de cada ciclo, los informes en orden: reapertura → seguimiento → cierre.
+  /// Se queda con la situación laboral del último informe rellenado, de forma
+  /// que si hay seguimiento y cierre prevalece el cierre, y si hubo reapertura
+  /// prevalecen los informes del nuevo ciclo.
+  String? _resolveCurrentLaborSituation({
+    required UserEnreda user,
+    required Map<String, InitialReport> initialReports,
+    required Map<String, FollowReport> followReports,
+    required Map<String, ClosureReport> closureReports,
+  }) {
+    bool hasFollowOrClosure = false;
+    String? latest;
+
+    void consider(String? laborSituation) {
+      final ls = (laborSituation ?? '').trim();
+      if (ls.isNotEmpty) latest = ls;
+    }
+
+    void processCycle({
+      required String? reopeningReportId,
+      required FollowReport? follow,
+      required ClosureReport? closure,
+    }) {
+      // Informe de reapertura (solo existe en ciclos posteriores al primero)
+      if (reopeningReportId != null) {
+        final reopening = initialReports[reopeningReportId];
+        if (reopening != null && _isFilled(reopening.finished, reopening.completedDate)) {
+          consider(reopening.laborSituation);
+        }
+      }
+      if (follow != null && _isFilled(follow.finished, follow.completedDate)) {
+        hasFollowOrClosure = true;
+        consider(follow.laborSituation);
+      }
+      if (closure != null && _isFilled(closure.finished, closure.completedDate)) {
+        hasFollowOrClosure = true;
+        consider(closure.laborSituation);
+      }
+    }
+
+    // 1. Ciclos archivados (se añaden en orden cronológico con arrayUnion)
+    final history = user.socialItineraryHistory;
+    for (int i = 0; i < history.length; i++) {
+      final cycle = history[i];
+      processCycle(
+        reopeningReportId: i > 0 ? cycle.initialReportId : null,
+        follow: cycle.followReportId != null ? followReports[cycle.followReportId] : null,
+        closure: cycle.closureReportId != null ? closureReports[cycle.closureReportId] : null,
+      );
+    }
+
+    // 2. Ciclo vigente. Si no hay histórico (sin reaperturas) se permite el
+    // fallback por userId/email para usuarios antiguos sin punteros.
+    final uId = user.userId ?? '';
+    final bool allowLegacyLookup = history.isEmpty;
+    final FollowReport? currentFollow = user.followReportId != null
+        ? followReports[user.followReportId]
+        : (allowLegacyLookup ? (followReports[uId] ?? followReports[user.email]) : null);
+    final ClosureReport? currentClosure = user.closureReportId != null
+        ? closureReports[user.closureReportId]
+        : (allowLegacyLookup ? (closureReports[uId] ?? closureReports[user.email]) : null);
+
+    processCycle(
+      reopeningReportId: history.isNotEmpty ? user.initialReportId : null,
+      follow: currentFollow,
+      closure: currentClosure,
+    );
+
+    if (!hasFollowOrClosure) return null;
+    return latest ?? '';
+  }
+
+  /// Calcula el desglose de situación de empleo por género.
+  /// [laborSituationOf] devuelve la situación laboral a computar para cada
+  /// participante, o `null` si el participante no debe computarse.
   List<SituacionEmpleoRow> _calculateSituacionEmpleo({
     required List<UserEnreda> users,
-    required Map<String, InitialReport> initialReportsByUser,
-    Map<String, ClosureReport>? closureReportsByUser,
-    bool isActual = false,
+    required String? Function(UserEnreda u) laborSituationOf,
   }) {
     int cortaM = 0, cortaH = 0, cortaNB = 0;
     int largaM = 0, largaH = 0, largaNB = 0;
@@ -360,26 +466,8 @@ class KpiService {
     int unspecM = 0, unspecH = 0, unspecNB = 0;
 
     for (final u in users) {
-      final uId = u.userId ?? '';
-      final initReport = (u.initialReportId != null && initialReportsByUser.containsKey(u.initialReportId))
-          ? initialReportsByUser[u.initialReportId]
-          : (initialReportsByUser[uId] ?? initialReportsByUser[u.email]);
-
-      // Solo tener en cuenta los participantes con informe inicial completo
-      final bool isInitFinished = initReport != null && (initReport.finished == true || initReport.completedDate != null);
-      if (!isInitFinished) continue;
-
-      String laborSituation = (initReport.laborSituation ?? '').trim();
-
-      // Si es situación actual y tiene informe de cierre con situación laboral, se toma la más reciente
-      if (isActual && closureReportsByUser != null) {
-        final closureReport = (u.closureReportId != null && closureReportsByUser.containsKey(u.closureReportId))
-            ? closureReportsByUser[u.closureReportId]
-            : (closureReportsByUser[uId] ?? closureReportsByUser[u.email]);
-        if (closureReport != null && (closureReport.laborSituation ?? '').trim().isNotEmpty) {
-          laborSituation = closureReport.laborSituation!.trim();
-        }
-      }
+      final String? laborSituation = laborSituationOf(u);
+      if (laborSituation == null) continue;
 
       final gStr = (u.gender ?? '').trim().toLowerCase();
       final bool isMujer = (gStr == 'mujer' || gStr == 'femenino' || gStr == 'f');
