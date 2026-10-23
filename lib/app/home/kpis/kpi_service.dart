@@ -14,6 +14,9 @@ class ParticipantesKpiData {
   final List<StackedBarRow> porGenero;
   final List<StackedBarRow> porNacionalidad;
   final List<UserEnreda> users;
+  final List<SituacionEmpleoRow> situacionEmpleoInicial;
+  final List<SituacionEmpleoRow> situacionEmpleoActual;
+  final int totalConInformeInicialCompleto;
 
   const ParticipantesKpiData({
     required this.total,
@@ -21,6 +24,9 @@ class ParticipantesKpiData {
     required this.porGenero,
     required this.porNacionalidad,
     this.users = const [],
+    this.situacionEmpleoInicial = const [],
+    this.situacionEmpleoActual = const [],
+    this.totalConInformeInicialCompleto = 0,
   });
 
   static ParticipantesKpiData empty() {
@@ -40,6 +46,9 @@ class ParticipantesKpiData {
         StackedBarRow(label: 'Nacional', count: 0, percentage: 0, color: KpiColors.primaryDark),
         StackedBarRow(label: 'Extranjera', count: 0, percentage: 0, color: KpiColors.turquoise),
       ],
+      situacionEmpleoInicial: [],
+      situacionEmpleoActual: [],
+      totalConInformeInicialCompleto: 0,
     );
   }
 }
@@ -248,6 +257,30 @@ class KpiService {
 
     double pct(int count) => total > 0 ? ((count / total) * 100) : 0.0;
 
+    final situacionInicial = _calculateSituacionEmpleo(
+      users: filteredUsers,
+      initialReportsByUser: initialReportsByUser,
+      isActual: false,
+    );
+
+    final situacionActual = _calculateSituacionEmpleo(
+      users: filteredUsers,
+      initialReportsByUser: initialReportsByUser,
+      closureReportsByUser: closureReportsByUser,
+      isActual: true,
+    );
+
+    int totalConInformeInicialCompleto = 0;
+    for (final u in filteredUsers) {
+      final uId = u.userId ?? '';
+      final initReport = (u.initialReportId != null && initialReportsByUser.containsKey(u.initialReportId))
+          ? initialReportsByUser[u.initialReportId]
+          : (initialReportsByUser[uId] ?? initialReportsByUser[u.email]);
+      if (initReport != null && (initReport.finished == true || initReport.completedDate != null)) {
+        totalConInformeInicialCompleto++;
+      }
+    }
+
     return ParticipantesKpiData(
       total: total,
       porEstado: [
@@ -305,6 +338,149 @@ class KpiService {
         ),
       ],
       users: filteredUsers,
+      situacionEmpleoInicial: situacionInicial,
+      situacionEmpleoActual: situacionActual,
+      totalConInformeInicialCompleto: totalConInformeInicialCompleto,
     );
+  }
+
+  /// Calcula el desglose de situación de empleo por género
+  /// teniendo en cuenta únicamente los participantes con informe inicial completado
+  List<SituacionEmpleoRow> _calculateSituacionEmpleo({
+    required List<UserEnreda> users,
+    required Map<String, InitialReport> initialReportsByUser,
+    Map<String, ClosureReport>? closureReportsByUser,
+    bool isActual = false,
+  }) {
+    int cortaM = 0, cortaH = 0, cortaNB = 0;
+    int largaM = 0, largaH = 0, largaNB = 0;
+    int otherDesempM = 0, otherDesempH = 0, otherDesempNB = 0;
+    int inactM = 0, inactH = 0, inactNB = 0;
+    int empM = 0, empH = 0, empNB = 0;
+    int unspecM = 0, unspecH = 0, unspecNB = 0;
+
+    for (final u in users) {
+      final uId = u.userId ?? '';
+      final initReport = (u.initialReportId != null && initialReportsByUser.containsKey(u.initialReportId))
+          ? initialReportsByUser[u.initialReportId]
+          : (initialReportsByUser[uId] ?? initialReportsByUser[u.email]);
+
+      // Solo tener en cuenta los participantes con informe inicial completo
+      final bool isInitFinished = initReport != null && (initReport.finished == true || initReport.completedDate != null);
+      if (!isInitFinished) continue;
+
+      String laborSituation = (initReport.laborSituation ?? '').trim();
+
+      // Si es situación actual y tiene informe de cierre con situación laboral, se toma la más reciente
+      if (isActual && closureReportsByUser != null) {
+        final closureReport = (u.closureReportId != null && closureReportsByUser.containsKey(u.closureReportId))
+            ? closureReportsByUser[u.closureReportId]
+            : (closureReportsByUser[uId] ?? closureReportsByUser[u.email]);
+        if (closureReport != null && (closureReport.laborSituation ?? '').trim().isNotEmpty) {
+          laborSituation = closureReport.laborSituation!.trim();
+        }
+      }
+
+      final gStr = (u.gender ?? '').trim().toLowerCase();
+      final bool isMujer = (gStr == 'mujer' || gStr == 'femenino' || gStr == 'f');
+      final bool isHombre = (gStr == 'hombre' || gStr == 'masculino' || gStr == 'm');
+
+      final ls = laborSituation.toLowerCase();
+
+      if (ls.contains('corta')) {
+        if (isMujer) cortaM++; else if (isHombre) cortaH++; else cortaNB++;
+      } else if (ls.contains('larga')) {
+        if (isMujer) largaM++; else if (isHombre) largaH++; else largaNB++;
+      } else if (ls.contains('desemplead')) {
+        if (isMujer) otherDesempM++; else if (isHombre) otherDesempH++; else otherDesempNB++;
+      } else if (ls.contains('inactiv')) {
+        if (isMujer) inactM++; else if (isHombre) inactH++; else inactNB++;
+      } else if (ls.contains('ocupada') || ls.contains('emplead')) {
+        if (isMujer) empM++; else if (isHombre) empH++; else empNB++;
+      } else {
+        if (isMujer) unspecM++; else if (isHombre) unspecH++; else unspecNB++;
+      }
+    }
+
+    final desempM = cortaM + largaM + otherDesempM;
+    final desempH = cortaH + largaH + otherDesempH;
+    final desempNB = cortaNB + largaNB + otherDesempNB;
+    final desempTotal = desempM + desempH + desempNB;
+
+    final cortaTotal = cortaM + cortaH + cortaNB;
+    final largaTotal = largaM + largaH + largaNB;
+    final inactTotal = inactM + inactH + inactNB;
+    final empTotal = empM + empH + empNB;
+    final unspecTotal = unspecM + unspecH + unspecNB;
+
+    final totalM = desempM + inactM + empM + unspecM;
+    final totalH = desempH + inactH + empH + unspecH;
+    final totalNB = desempNB + inactNB + empNB + unspecNB;
+    final grandTotal = totalM + totalH + totalNB;
+
+    final rows = <SituacionEmpleoRow>[
+      SituacionEmpleoRow(
+        label: 'Desempleadas/os',
+        mujeres: desempM,
+        hombres: desempH,
+        noBinario: desempNB,
+        total: desempTotal,
+      ),
+      SituacionEmpleoRow(
+        label: '↳ Corta duración',
+        mujeres: cortaM,
+        hombres: cortaH,
+        noBinario: cortaNB,
+        total: cortaTotal,
+        isIndented: true,
+      ),
+      SituacionEmpleoRow(
+        label: '↳ Larga duración',
+        mujeres: largaM,
+        hombres: largaH,
+        noBinario: largaNB,
+        total: largaTotal,
+        isIndented: true,
+      ),
+      SituacionEmpleoRow(
+        label: 'Inactivas/os',
+        mujeres: inactM,
+        hombres: inactH,
+        noBinario: inactNB,
+        total: inactTotal,
+      ),
+      SituacionEmpleoRow(
+        label: 'Empleadas/os',
+        mujeres: empM,
+        hombres: empH,
+        noBinario: empNB,
+        total: empTotal,
+      ),
+    ];
+
+    if (unspecTotal > 0) {
+      rows.add(
+        SituacionEmpleoRow(
+          label: 'Sin especificar',
+          mujeres: unspecM,
+          hombres: unspecH,
+          noBinario: unspecNB,
+          total: unspecTotal,
+        ),
+      );
+    }
+
+    rows.add(
+      SituacionEmpleoRow(
+        label: 'Total',
+        mujeres: totalM,
+        hombres: totalH,
+        noBinario: totalNB,
+        total: grandTotal,
+        isTotal: true,
+      ),
+    );
+
+    return rows;
   }
 }

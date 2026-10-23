@@ -73,7 +73,11 @@ class ResumenGeneralSection extends StatelessWidget {
             },
           ),
           const SizedBox(height: 20),
-          const CardSituacionEmpleo(),
+          CardSituacionEmpleo(
+            situacionInicialRows: participantesData?.situacionEmpleoInicial,
+            situacionActualRows: participantesData?.situacionEmpleoActual,
+            isLoading: isLoadingParticipantes,
+          ),
         ],
       ],
     );

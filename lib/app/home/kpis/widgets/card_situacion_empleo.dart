@@ -4,7 +4,16 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardSituacionEmpleo extends StatefulWidget {
-  const CardSituacionEmpleo({Key? key}) : super(key: key);
+  final List<SituacionEmpleoRow>? situacionInicialRows;
+  final List<SituacionEmpleoRow>? situacionActualRows;
+  final bool isLoading;
+
+  const CardSituacionEmpleo({
+    Key? key,
+    this.situacionInicialRows,
+    this.situacionActualRows,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   State<CardSituacionEmpleo> createState() => _CardSituacionEmpleoState();
@@ -13,8 +22,29 @@ class CardSituacionEmpleo extends StatefulWidget {
 class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
   String _selectedTab = 'Situación inicial';
 
+  List<SituacionEmpleoRow> get _currentRows {
+    if (_selectedTab == 'Situación inicial') {
+      return widget.situacionInicialRows ?? KpiFakeData.situacionEmpleoRows;
+    } else {
+      return widget.situacionActualRows ?? widget.situacionInicialRows ?? KpiFakeData.situacionEmpleoRows;
+    }
+  }
+
+  double get _maxVal {
+    final rows = _currentRows;
+    for (final r in rows) {
+      if (r.isTotal && r.total > 0) {
+        return r.total.toDouble();
+      }
+    }
+    return 1.0;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentRows = _currentRows;
+    final maxVal = _maxVal;
+
     return Container(
       decoration: BoxDecoration(
         color: KpiColors.cardBackground,
@@ -53,6 +83,18 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (widget.isLoading) ...[
+                        const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                KpiColors.turquoise),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
                       _buildSituacionTabs(),
                       const SizedBox(width: 12),
                       _buildDisaggregateChip(),
@@ -85,18 +127,18 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
                   const SizedBox(height: 12),
 
                   // Data rows
-                  ...KpiFakeData.situacionEmpleoRows.map((row) {
+                  ...currentRows.map((row) {
                     if (row.isTotal) {
                       return Column(
                         children: [
                           const Divider(height: 24, color: KpiColors.divider),
-                          _buildRow(row),
+                          _buildRow(row, maxVal),
                         ],
                       );
                     }
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: _buildRow(row),
+                      child: _buildRow(row, maxVal),
                     );
                   }).toList(),
                 ],
@@ -109,6 +151,10 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
   }
 
   Widget _buildHeaderTitles() {
+    final subtitle = _selectedTab == 'Situación inicial'
+        ? 'Cómo empiezan las personas · Fuente: informe inicial'
+        : 'Situación en el último informe registrado · Fuente: informe de seguimiento / cierre';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -122,7 +168,7 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Cómo empiezan las personas · Fuente: informe inicial',
+          subtitle,
           style: GoogleFonts.outfit(
             fontSize: 12,
             fontWeight: FontWeight.normal,
@@ -234,10 +280,10 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
     );
   }
 
-  Widget _buildRow(SituacionEmpleoRow row) {
+  Widget _buildRow(SituacionEmpleoRow row, double maxVal) {
     const double maxBarWidth = 280;
-    const double maxVal = 142; // base total
-    final double barWidth = (row.total / maxVal) * maxBarWidth;
+    final double safeMax = maxVal > 0 ? maxVal : 1.0;
+    final double barWidth = safeMax > 0 ? (row.total / safeMax) * maxBarWidth : 0.0;
 
     return Row(
       children: [
@@ -259,30 +305,32 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
           child: Align(
             alignment: Alignment.centerLeft,
             child: SizedBox(
-              width: barWidth.clamp(10, maxBarWidth),
+              width: row.total > 0 ? barWidth.clamp(6.0, maxBarWidth) : 0.0,
               height: 16,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Row(
-                  children: [
-                    if (row.mujeres > 0)
-                      Expanded(
-                        flex: row.mujeres,
-                        child: Container(color: KpiColors.yellow),
+              child: row.total > 0
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Row(
+                        children: [
+                          if (row.mujeres > 0)
+                            Expanded(
+                              flex: row.mujeres,
+                              child: Container(color: KpiColors.yellow),
+                            ),
+                          if (row.hombres > 0)
+                            Expanded(
+                              flex: row.hombres,
+                              child: Container(color: KpiColors.primaryDark),
+                            ),
+                          if (row.noBinario > 0)
+                            Expanded(
+                              flex: row.noBinario,
+                              child: Container(color: KpiColors.slate),
+                            ),
+                        ],
                       ),
-                    if (row.hombres > 0)
-                      Expanded(
-                        flex: row.hombres,
-                        child: Container(color: KpiColors.primaryDark),
-                      ),
-                    if (row.noBinario > 0)
-                      Expanded(
-                        flex: row.noBinario,
-                        child: Container(color: KpiColors.slate),
-                      ),
-                  ],
-                ),
-              ),
+                    )
+                  : const SizedBox(),
             ),
           ),
         ),
