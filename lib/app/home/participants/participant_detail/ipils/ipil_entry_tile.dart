@@ -22,7 +22,7 @@ class IpilEntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
-    String dateEntry = formatter.format(ipilEntry.lastUpdateDate!);
+    String dateEntry = formatter.format(ipilEntry.lastUpdateDate ?? ipilEntry.date);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -79,7 +79,7 @@ class _IpilEntry extends pw.StatelessWidget {
           pw.Row(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: <pw.Widget>[
-                BlockText(title: StringConst.DATE, text: formatter.format(ipil.lastUpdateDate!.toLocal())),
+                BlockText(title: StringConst.DATE, text: formatter.format((ipil.lastUpdateDate ?? ipil.date).toLocal())),
                 pw.SizedBox(width: 50,),
                 BlockText(title: StringConst.TECHNICAL_NAME, text: '$techName'),
               ]

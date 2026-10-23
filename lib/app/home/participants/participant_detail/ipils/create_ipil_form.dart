@@ -171,7 +171,7 @@ void initState() {
   content = ipil?.content ?? '';
   postWorkSupport = ipil?.postWorkSupport ?? [];
   other = ipil?.other ?? '';
-  lastUpdateDate = ipil?.lastUpdateDate ?? DateTime.now();
+  lastUpdateDate = ipil?.lastUpdateDate ?? ipil?.date ?? DateTime.now();
   final currentUser = globals.currentSocialEntityUser;
   techId = ipil?.techId ?? currentUser?.userId ?? widget.participantUser.assignedById;
   techName.value = ipil?.techName ?? (currentUser != null ? '${currentUser.firstName} ${currentUser.lastName}' : '');
