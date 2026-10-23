@@ -129,18 +129,16 @@ class _CreateIpilFormState extends State<CreateIpilForm> {
       if (entityId != null && entityId.isNotEmpty) {
         _socialUsersStream = database.getSocialUsersByEntityId(entityId);
       }
-      String? closureReportId = widget.participantUser.closureReportId;
-      if ((closureReportId == null || closureReportId.isEmpty) &&
-          widget.participantUser.socialItineraryHistory.isNotEmpty) {
-        for (final cycle in widget.participantUser.socialItineraryHistory.reversed) {
-          if (cycle.closureReportId != null && cycle.closureReportId!.isNotEmpty) {
-            closureReportId = cycle.closureReportId;
-            break;
-          }
-        }
-      }
+      final String? closureReportId = widget.participantUser.closureReportId;
+      // Caso con reapertura: los cierres archivados en el historial pertenecen
+      // a ciclos anteriores y no deben usarse para el seguimiento de 4 semanas /
+      // 6 meses. Solo cuenta el informe de cierre del ciclo actual.
+      final bool isReopened =
+          widget.participantUser.socialItineraryHistory.isNotEmpty;
       if (closureReportId != null && closureReportId.isNotEmpty) {
         _closureReportStream = database.closureReportStreamById(closureReportId);
+      } else if (isReopened) {
+        _closureReportStream = Stream<ClosureReport?>.value(null);
       } else if (widget.participantUser.userId != null) {
         _closureReportStream = database
             .closureReportsStreamByUserId(widget.participantUser.userId)
@@ -740,18 +738,12 @@ void initState() {
             // 2. Si no viene ya marcado por edición, evaluamos el tiempo transcurrido
             // desde la fecha de completado del Informe de Cierre hasta la fecha del selector del IPIL
             if (!showFourWeeks && !showSixMonths) {
-              DateTime? completedDate = closureReport?.completedDate;
-              bool isFinished = closureReport?.finished ?? false;
-
-              if (completedDate == null && widget.participantUser.socialItineraryHistory.isNotEmpty) {
-                for (final cycle in widget.participantUser.socialItineraryHistory.reversed) {
-                  if (cycle.closureDate != null) {
-                    completedDate = cycle.closureDate;
-                    isFinished = true;
-                    break;
-                  }
-                }
-              }
+              final DateTime? completedDate = closureReport?.completedDate;
+              final bool isFinished = closureReport?.finished ?? false;
+              // Caso con reapertura: solo se usa el último informe de cierre
+              // terminado del ciclo actual (nunca los cierres archivados).
+              final bool isReopened =
+                  widget.participantUser.socialItineraryHistory.isNotEmpty;
 
               if (isFinished && completedDate != null) {
                 final completedDateVal = completedDate;
@@ -768,10 +760,18 @@ void initState() {
                     diffDays >= 182;
                 final isAtLeastFourWeeks = diffDays >= 28;
 
-                final hasFourWeeksDone = ipilsFromUser.any((e) =>
-                    e.ipilId != widget.selectedIpil?.ipilId && e.fourWeeksCheck == true);
-                final hasSixMonthsDone = ipilsFromUser.any((e) =>
-                    e.ipilId != widget.selectedIpil?.ipilId && e.sixMonthsCheck == true);
+                // En reaperturas, solo cuentan los IPIL de seguimiento
+                // realizados después del último cierre terminado.
+                final relevantIpils = ipilsFromUser.where((e) {
+                  if (e.ipilId == widget.selectedIpil?.ipilId) return false;
+                  if (!isReopened) return true;
+                  final ipilDate = e.lastUpdateDate ?? e.date;
+                  return !ipilDate.isBefore(completedDateVal);
+                });
+                final hasFourWeeksDone =
+                    relevantIpils.any((e) => e.fourWeeksCheck == true);
+                final hasSixMonthsDone =
+                    relevantIpils.any((e) => e.sixMonthsCheck == true);
 
                 if (!hasFourWeeksDone) {
                   // Si no se ha completado el de 4 semanas, solo se evalúa y muestra ese
