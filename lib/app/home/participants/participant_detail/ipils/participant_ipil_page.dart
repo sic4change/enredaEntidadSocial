@@ -195,6 +195,16 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
               child: Center(child: CircularProgressIndicator()),
             );
           }
+          if (snapshot.hasError) {
+            debugPrint(
+                'IPIL stream error: ${snapshot.error}\n${snapshot.stackTrace}');
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: SelectableText(
+                  'Error al cargar los IPILs: ${snapshot.error}',
+                  style: TextStyle(color: Colors.red)),
+            );
+          }
           if (!snapshot.hasData) return const SizedBox.shrink();
           List<IpilEntry> ipilEntries = snapshot.data!;
           return followPageDetail(ipilEntries);

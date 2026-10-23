@@ -140,87 +140,32 @@ class IpilEntry {
   final int? sixMonthsImpact;
   final String? sixMonthsImprovement;
 
+  /// Firestore list fields may hold legacy values like "" instead of an
+  /// array, so accept any shape and fall back to an empty list.
+  static List<String> _toStringList(dynamic value) {
+    if (value is Iterable) return value.map((e) => e.toString()).toList();
+    if (value is String && value.isNotEmpty) return [value];
+    return [];
+  }
+
   factory IpilEntry.fromMap(Map<String, dynamic> data, String documentId) {
 
-    List<String> reinforcements = [];
-    if (data['reinforcement'] != null) {
-      data['reinforcement'].forEach((reinforcement) {reinforcements.add(reinforcement.toString());});
-    }
-
-    List<String> contextualizations = [];
-    if (data['contextualization'] != null) {
-      data['contextualization'].forEach((contextualization) {contextualizations.add(contextualization.toString());});
-    }
-
-    List<String> connectionTerritories = [];
-    if (data['connectionTerritory'] != null) {
-      data['connectionTerritory'].forEach((connectionTerritory) {connectionTerritories.add(connectionTerritory.toString());});
-    }
-
-    List<String> interviews = [];
-    if (data['interviews'] != null) {
-      data['interviews'].forEach((interview) {interviews.add(interview.toString());});
-    }
-
-    List<String> intermediations = [];
-    if (data['intermediations'] != null) {
-      data['intermediations'].forEach((intermediation) {intermediations.add(intermediation.toString());});
-    }
-
-    List<String> obtainingEmployment = [];
-    if (data['obtainingEmployment'] != null) {
-      data['obtainingEmployment'].forEach((obtainedEmployment) {obtainingEmployment.add(obtainedEmployment.toString());});
-    }
-
-    List<String> improvingEmployment = [];
-    if (data['improvingEmployment'] != null) {
-      data['improvingEmployment'].forEach((improvedEmployment) {improvingEmployment.add(improvedEmployment.toString());});
-    }
-
-    List<String> coordination = [];
-    if (data['coordination'] != null) {
-      data['coordination'].forEach((singleCoordination) {coordination.add(singleCoordination.toString());});
-    }
-
-    List<String> legal = [];
-    if (data['legal'] != null) {
-      data['legal'].forEach((singleLegal) {legal.add(singleLegal.toString());});
-    }
-
-    List<String> postWorkSupport = [];
-    if (data['postWorkSupport'] != null) {
-      data['postWorkSupport'].forEach((singlePostWorkSupport) {postWorkSupport.add(singlePostWorkSupport.toString());});
-    }
-
-    List<String> economicBag = [];
-    if (data['economicBag'] != null) {
-      data['economicBag'].forEach((singleEconomicBag) {economicBag.add(singleEconomicBag.toString());});
-    }
-
-    List<String> specificSkills = [];
-    if (data['specificSkills'] != null) {
-      data['specificSkills'].forEach((specificSkill) {specificSkills.add(specificSkill.toString());});
-    }
-
-    List<String> softSkills = [];
-    if (data['softSkills'] != null) {
-      data['softSkills'].forEach((softSkill) {softSkills.add(softSkill.toString());});
-    }
-
-    List<String> digitalSkills = [];
-    if (data['digitalSkills'] != null) {
-      data['digitalSkills'].forEach((digitalSkill) {digitalSkills.add(digitalSkill.toString());});
-    }
-
-    List<String> laborSkills = [];
-    if (data['laborSkills'] != null) {
-      data['laborSkills'].forEach((laborSkill) {laborSkills.add(laborSkill.toString());});
-    }
-
-    List<String> results = [];
-    if (data['results'] != null) {
-      data['results'].forEach((result) {results.add(result.toString());});
-    }
+    final reinforcements = _toStringList(data['reinforcement']);
+    final contextualizations = _toStringList(data['contextualization']);
+    final connectionTerritories = _toStringList(data['connectionTerritory']);
+    final interviews = _toStringList(data['interviews']);
+    final intermediations = _toStringList(data['intermediations']);
+    final obtainingEmployment = _toStringList(data['obtainingEmployment']);
+    final improvingEmployment = _toStringList(data['improvingEmployment']);
+    final coordination = _toStringList(data['coordination']);
+    final legal = _toStringList(data['legal']);
+    final postWorkSupport = _toStringList(data['postWorkSupport']);
+    final economicBag = _toStringList(data['economicBag']);
+    final specificSkills = _toStringList(data['specificSkills']);
+    final softSkills = _toStringList(data['softSkills']);
+    final digitalSkills = _toStringList(data['digitalSkills']);
+    final laborSkills = _toStringList(data['laborSkills']);
+    final results = _toStringList(data['results']);
 
     return IpilEntry(
       ipilId: data['ipilId']?.toString() ?? documentId,
