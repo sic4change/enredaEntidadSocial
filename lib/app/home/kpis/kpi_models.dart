@@ -108,6 +108,22 @@ class RankedBarItem {
   });
 }
 
+class NacionalidadItem {
+  final String label;
+  final int mujeres;
+  final int hombres;
+  final int noBinario;
+
+  const NacionalidadItem({
+    required this.label,
+    required this.mujeres,
+    required this.hombres,
+    required this.noBinario,
+  });
+
+  int get total => mujeres + hombres + noBinario;
+}
+
 class DonutSegment {
   final String label;
   final int count;
@@ -290,206 +306,6 @@ class KpiFakeData {
     AgePyramidRow(label: '25 – 29', mujeres: 20, hombres: 14, total: 34),
     AgePyramidRow(label: '30 – 54', mujeres: 22, hombres: 14, total: 36),
     AgePyramidRow(label: 'Más de 54', mujeres: 5, hombres: 3, total: 8),
-  ];
-
-  // Niveles formativos
-  static const List<FormatLevelItem> formatLevels = [
-    FormatLevelItem(
-      cineLabel: 'CINE 0 – 2',
-      title: 'Educación básica o sin estudios',
-      total: 68,
-      percentage: 48,
-      mujeres: 39,
-      hombres: 28,
-      noBinario: 1,
-      description: 'Sin formación, Educación Primaria, ESO, Competencias clave y Certificados profesionales (niveles 1 – 3). 39 mujeres · 28 hombres · 1 no binario',
-    ),
-    FormatLevelItem(
-      cineLabel: 'CINE 3 – 4',
-      title: 'Educación secundaria postobligatoria',
-      total: 46,
-      percentage: 32,
-      mujeres: 26,
-      hombres: 19,
-      noBinario: 1,
-      description: 'FP básica, FP de grado medio y Bachillerato. 26 mujeres · 19 hombres · 1 no binario',
-    ),
-    FormatLevelItem(
-      cineLabel: 'CINE 5 – 8',
-      title: 'Educación superior',
-      total: 28,
-      percentage: 20,
-      mujeres: 16,
-      hombres: 11,
-      noBinario: 1,
-      description: 'FP de grado superior, formación universitaria y postgrado. 16 mujeres · 11 hombres · 1 no binario',
-    ),
-  ];
-
-  // Discapacidad
-  static const List<DonutSegment> discapacidadSegments = [
-    DonutSegment(label: 'Reconocida', count: 21, percentage: 15, color: KpiColors.turquoise),
-    DonutSegment(label: 'En trámite', count: 7, percentage: 5, color: KpiColors.lightTurquoise),
-    DonutSegment(label: 'Sin discapacidad declarada', count: 114, percentage: 80, color: KpiColors.borderLight),
-  ];
-
-  // Condiciones sobrevenidas
-  static const List<RankedBarItem> condicionesSobrevenidas = [
-    RankedBarItem(label: 'Barrera idiomática', count: 31, percentage: 22),
-    RankedBarItem(label: 'Falta de red de apoyo', count: 27, percentage: 19),
-    RankedBarItem(label: 'Responsabilidades familiares', count: 22, percentage: 15),
-    RankedBarItem(label: 'Ruralidad', count: 18, percentage: 13),
-    RankedBarItem(label: 'Joven tutelado/a o ex tutelado/a', count: 14, percentage: 10),
-    RankedBarItem(label: 'Familia monoparental-monomarental', count: 11, percentage: 8),
-    RankedBarItem(label: 'Minoría', count: 9, percentage: 6),
-    RankedBarItem(label: 'Colectivo LGBTI', count: 7, percentage: 5),
-    RankedBarItem(label: 'Situación de sinhogarismo', count: 6, percentage: 4),
-    RankedBarItem(label: 'Salud mental grave', count: 5, percentage: 4),
-    RankedBarItem(label: 'Violencia de género', count: 4, percentage: 3),
-    RankedBarItem(label: 'Adicciones', count: 3, percentage: 2),
-  ];
-
-  // Nacionalidades
-  static const List<RankedBarItem> nacionalidades = [
-    RankedBarItem(
-      label: 'España',
-      count: 74,
-      detail: '42 mujeres · 31 hombres · 1 no binario',
-    ),
-    RankedBarItem(
-      label: 'Marruecos',
-      count: 18,
-      detail: '8 mujeres · 10 hombres',
-    ),
-    RankedBarItem(
-      label: 'Venezuela',
-      count: 14,
-      detail: '9 mujeres · 5 hombres',
-    ),
-    RankedBarItem(
-      label: 'Colombia',
-      count: 11,
-      detail: '7 mujeres · 4 hombres',
-    ),
-    RankedBarItem(
-      label: 'Senegal',
-      count: 8,
-      detail: '2 mujeres · 6 hombres',
-    ),
-    RankedBarItem(
-      label: 'Argentina',
-      count: 6,
-      detail: '4 mujeres · 2 hombres',
-    ),
-    RankedBarItem(
-      label: 'Rumanía',
-      count: 5,
-      detail: '4 mujeres · 1 no binario',
-    ),
-    RankedBarItem(
-      label: 'Otras (6)',
-      count: 6,
-      detail: '5 mujeres · 1 no binario',
-    ),
-  ];
-
-  // Situación administrativa
-  static const List<DonutSegment> situacionAdministrativa = [
-    DonutSegment(label: 'Nacional', count: 74, percentage: 52, color: KpiColors.primaryDark),
-    DonutSegment(label: 'Regular', count: 38, percentage: 27, color: KpiColors.turquoise),
-    DonutSegment(label: 'Irregular', count: 14, percentage: 10, color: KpiColors.yellow),
-    DonutSegment(label: 'Protección internacional', count: 9, percentage: 6, color: KpiColors.lightTurquoise),
-    DonutSegment(label: 'En trámite', count: 5, percentage: 4, color: KpiColors.slate),
-    DonutSegment(label: 'No lo tengo claro', count: 2, percentage: 1, color: KpiColors.borderLight),
-  ];
-
-  // Competencias más reconocidas
-  static const List<RankedBarItem> competenciasReconocidas = [
-    RankedBarItem(
-      label: 'Empatía',
-      category: 'Trabajo en equipo',
-      count: 64,
-      percentage: 45,
-      color: KpiColors.primaryDark,
-    ),
-    RankedBarItem(
-      label: 'Responsabilidad',
-      category: 'Liderazgo positivo',
-      count: 58,
-      percentage: 41,
-      color: KpiColors.turquoise,
-    ),
-    RankedBarItem(
-      label: 'Comunicación oral',
-      category: 'Comunicación',
-      count: 55,
-      percentage: 39,
-      color: KpiColors.primaryDark,
-    ),
-    RankedBarItem(
-      label: 'Integración en el grupo',
-      category: 'Trabajo en equipo',
-      count: 51,
-      percentage: 36,
-      color: KpiColors.primaryDark,
-    ),
-    RankedBarItem(
-      label: 'Escucha activa',
-      category: 'Gestión de conflictos',
-      count: 47,
-      percentage: 33,
-      color: KpiColors.primaryDark,
-    ),
-    RankedBarItem(
-      label: 'Comunicación digital',
-      category: 'Comunicación',
-      count: 44,
-      percentage: 31,
-      color: KpiColors.primaryDark,
-    ),
-    RankedBarItem(
-      label: 'Autonomía',
-      category: 'Liderazgo positivo',
-      count: 41,
-      percentage: 29,
-      color: KpiColors.turquoise,
-    ),
-    RankedBarItem(
-      label: 'Perseverancia',
-      category: 'Negociación',
-      count: 39,
-      percentage: 27,
-      color: KpiColors.primaryDark,
-    ),
-    RankedBarItem(
-      label: 'Gestión del tiempo',
-      category: 'Resolución de problemas',
-      count: 36,
-      percentage: 25,
-      color: KpiColors.yellow,
-    ),
-    RankedBarItem(
-      label: 'Apertura sociocultural',
-      category: 'Aprender a aprender',
-      count: 33,
-      percentage: 23,
-      color: KpiColors.yellow,
-    ),
-  ];
-
-  // Áreas de competencia
-  static const List<CompetenciaArea> areasCompetencia = [
-    CompetenciaArea(name: 'Comunicación', percentage: 14, color: KpiColors.primaryDark, group: 'Sociales'),
-    CompetenciaArea(name: 'Trabajo en equipo', percentage: 16, color: KpiColors.primaryDark, group: 'Sociales'),
-    CompetenciaArea(name: 'Gestión de conflictos', percentage: 6, color: KpiColors.primaryDark, group: 'Sociales'),
-    CompetenciaArea(name: 'Negociación', percentage: 5, color: KpiColors.primaryDark, group: 'Sociales'),
-    CompetenciaArea(name: 'Liderazgo positivo', percentage: 16, color: KpiColors.turquoise, group: 'Personales'),
-    CompetenciaArea(name: 'Autoevaluación', percentage: 8, color: KpiColors.turquoise, group: 'Personales'),
-    CompetenciaArea(name: 'Adaptabilidad', percentage: 5, color: KpiColors.turquoise, group: 'Personales'),
-    CompetenciaArea(name: 'Aprender a aprender', percentage: 9, color: KpiColors.yellow, group: 'Metodológicas'),
-    CompetenciaArea(name: 'Competencias analíticas', percentage: 5, color: KpiColors.yellow, group: 'Metodológicas'),
-    CompetenciaArea(name: 'Creatividad', percentage: 7, color: KpiColors.yellow, group: 'Metodológicas'),
-    CompetenciaArea(name: 'Resolución de problemas', percentage: 10, color: KpiColors.yellow, group: 'Metodológicas'),
   ];
 
   // Indicadores Clave

@@ -248,6 +248,9 @@ class _KpiPageState extends State<KpiPage> {
                       });
                     },
                     users: _participantesData?.users,
+                    nivelesCine: _participantesData?.nivelesCine ?? const [],
+                    nivelesEstudios: _participantesData?.nivelesEstudios ?? const [],
+                    nivelesSinEspecificar: _participantesData?.nivelesSinEspecificar ?? 0,
                     isLoading: _isLoadingParticipantes,
                   ),
                   const SizedBox(height: 36),
@@ -260,6 +263,16 @@ class _KpiPageState extends State<KpiPage> {
                         _isEspecialesExpanded = !_isEspecialesExpanded;
                       });
                     },
+                    discapacidad: _participantesData?.discapacidad ?? const [],
+                    condicionesSobrevenidas: _participantesData?.condicionesSobrevenidas ?? const [],
+                    situacionAdministrativa: _participantesData?.situacionAdministrativa ?? const [],
+                    totalConInformeInicialCompleto: _participantesData?.totalConInformeInicialCompleto ?? 0,
+                    competenciasReconocidas: _participantesData?.competenciasReconocidas ?? const [],
+                    competenciasPorArea: _participantesData?.competenciasPorArea ?? const [],
+                    competenciasPorCategoria: _participantesData?.competenciasPorCategoria ?? const [],
+                    nacionalidades: _participantesData?.nacionalidades ?? const [],
+                    nacionalidadSinEspecificar: _participantesData?.nacionalidadSinEspecificar ?? 0,
+                    isLoading: _isLoadingParticipantes,
                   ),
                   const SizedBox(height: 36),
 

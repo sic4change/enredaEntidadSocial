@@ -5,7 +5,16 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardSituacionAdministrativa extends StatelessWidget {
-  const CardSituacionAdministrativa({Key? key}) : super(key: key);
+  final List<DonutSegment> segments;
+  final int total;
+  final bool isLoading;
+
+  const CardSituacionAdministrativa({
+    Key? key,
+    this.segments = const [],
+    this.total = 0,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,17 +29,32 @@ class CardSituacionAdministrativa extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text(
-            'Situación administrativa',
-            style: GoogleFonts.outfit(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: KpiColors.primaryDark,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Situación administrativa',
+                  style: GoogleFonts.outfit(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: KpiColors.primaryDark,
+                  ),
+                ),
+              ),
+              if (isLoading)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
-            'Recogida en la inscripción y en el informe inicial',
+            'Según el informe inicial · Nacional: participantes con nacionalidad española',
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.normal,
@@ -78,7 +102,7 @@ class CardSituacionAdministrativa extends StatelessWidget {
             margin: EdgeInsets.zero,
             series: <CircularSeries<DonutSegment, String>>[
               DoughnutSeries<DonutSegment, String>(
-                dataSource: KpiFakeData.situacionAdministrativa,
+                dataSource: segments.where((s) => s.count > 0).toList(),
                 xValueMapper: (DonutSegment data, _) => data.label,
                 yValueMapper: (DonutSegment data, _) => data.count,
                 pointColorMapper: (DonutSegment data, _) => data.color,
@@ -93,7 +117,7 @@ class CardSituacionAdministrativa extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '142',
+                '$total',
                 style: GoogleFonts.outfit(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -119,7 +143,7 @@ class CardSituacionAdministrativa extends StatelessWidget {
   Widget _buildLegend() {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: KpiFakeData.situacionAdministrativa.map((item) {
+      children: segments.map((item) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.5),
           child: Row(

@@ -4,7 +4,18 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardNivelesFormativos extends StatefulWidget {
-  const CardNivelesFormativos({Key? key}) : super(key: key);
+  final List<FormatLevelItem> nivelesCine;
+  final List<FormatLevelItem> nivelesEstudios;
+  final int sinEspecificar;
+  final bool isLoading;
+
+  const CardNivelesFormativos({
+    Key? key,
+    this.nivelesCine = const [],
+    this.nivelesEstudios = const [],
+    this.sinEspecificar = 0,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   State<CardNivelesFormativos> createState() => _CardNivelesFormativosState();
@@ -12,6 +23,8 @@ class CardNivelesFormativos extends StatefulWidget {
 
 class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
   String _selectedMode = 'Nivel CINE';
+
+  bool get _isCineMode => _selectedMode == 'Nivel CINE';
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +48,7 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
                   children: [
                     _buildHeaderTitles(),
                     const SizedBox(height: 12),
-                    _buildModeToggle(),
+                    _buildHeaderActions(),
                   ],
                 );
               }
@@ -44,7 +57,7 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(child: _buildHeaderTitles()),
-                  _buildModeToggle(),
+                  _buildHeaderActions(),
                 ],
               );
             },
@@ -76,41 +89,81 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
           ),
           const SizedBox(height: 24),
 
-          // Vertical stacked bar chart
-          _buildVerticalStackedBars(),
-          const SizedBox(height: 24),
+          if (_isCineMode) ...[
+            // Vertical stacked bar chart
+            _buildVerticalStackedBars(),
+            const SizedBox(height: 24),
 
-          // Descriptions for each CINE level
-          ...KpiFakeData.formatLevels.map((lvl) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${lvl.cineLabel}: ',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: KpiColors.primaryDark,
-                      ),
-                    ),
-                    TextSpan(
-                      text: '${lvl.description}\n',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                        color: KpiColors.secondaryText,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
+            // Descriptions for each CINE level
+            ..._buildCineDescriptions(),
+          ] else
+            _buildHorizontalStackedBars(),
+
+          if (widget.sinEspecificar > 0) ...[
+            const SizedBox(height: 8),
+            Text(
+              widget.sinEspecificar == 1
+                  ? '1 participante sin nivel formativo registrado.'
+                  : '${widget.sinEspecificar} participantes sin nivel formativo registrado.',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: KpiColors.secondaryText,
               ),
-            );
-          }).toList(),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  List<Widget> _buildCineDescriptions() {
+    return widget.nivelesCine.map((lvl) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12.0),
+        child: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: '${lvl.cineLabel}: ',
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: KpiColors.primaryDark,
+                ),
+              ),
+              TextSpan(
+                text: '${lvl.description}\n',
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                  color: KpiColors.secondaryText,
+                  height: 1.35,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  Widget _buildHeaderActions() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (widget.isLoading) ...[
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
+        _buildModeToggle(),
+      ],
     );
   }
 
@@ -170,7 +223,9 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? KpiColors.primaryDark : KpiColors.secondaryText,
+                  color: isSelected
+                      ? KpiColors.primaryDark
+                      : KpiColors.secondaryText,
                 ),
               ),
             ),
@@ -250,7 +305,9 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
 
   Widget _buildVerticalStackedBars() {
     const double maxBarHeight = 160.0;
-    const double maxCount = 75.0;
+    final levels = widget.nivelesCine;
+    final double maxCount =
+        levels.fold<int>(1, (m, l) => l.total > m ? l.total : m).toDouble();
 
     return Column(
       children: [
@@ -259,11 +316,12 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: KpiFakeData.formatLevels.map((item) {
+            children: levels.map((item) {
               final barTotalHeight = (item.total / maxCount) * maxBarHeight;
-              final hMujeres = (item.mujeres / item.total) * barTotalHeight;
-              final hHombres = (item.hombres / item.total) * barTotalHeight;
-              final hNoBinario = (item.noBinario / item.total) * barTotalHeight;
+              final safeTotal = item.total > 0 ? item.total : 1;
+              final hMujeres = (item.mujeres / safeTotal) * barTotalHeight;
+              final hHombres = (item.hombres / safeTotal) * barTotalHeight;
+              final hNoBinario = (item.noBinario / safeTotal) * barTotalHeight;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -297,7 +355,8 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
                     width: 54,
                     height: barTotalHeight,
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(4)),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -336,7 +395,7 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
         // X-Axis labels
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: KpiFakeData.formatLevels.map((item) {
+          children: levels.map((item) {
             return SizedBox(
               width: 80,
               child: Text(
@@ -352,6 +411,112 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
           }).toList(),
         ),
       ],
+    );
+  }
+
+  Widget _buildHorizontalStackedBars() {
+    final levels = widget.nivelesEstudios;
+    if (levels.isEmpty) {
+      return Text(
+        'Sin datos de nivel de estudios.',
+        style: GoogleFonts.outfit(
+          fontSize: 12,
+          color: KpiColors.secondaryText,
+        ),
+      );
+    }
+    final int maxCount =
+        levels.fold<int>(1, (m, l) => l.total > m ? l.total : m);
+
+    return Column(
+      children: levels.map((item) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 150,
+                child: Text(
+                  item.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: KpiColors.secondaryText,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final barWidth =
+                        (item.total / maxCount) * constraints.maxWidth;
+                    final safeTotal = item.total > 0 ? item.total : 1;
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: SizedBox(
+                          width: barWidth,
+                          height: 16,
+                          child: Row(
+                            children: [
+                              if (item.mujeres > 0)
+                                Container(
+                                  width: (item.mujeres / safeTotal) * barWidth,
+                                  color: KpiColors.yellow,
+                                ),
+                              if (item.hombres > 0)
+                                Container(
+                                  width: (item.hombres / safeTotal) * barWidth,
+                                  color: KpiColors.primaryDark,
+                                ),
+                              if (item.noBinario > 0)
+                                Container(
+                                  width:
+                                      (item.noBinario / safeTotal) * barWidth,
+                                  color: KpiColors.slate,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 64,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${item.total}',
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: KpiColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${item.percentage.round()}%',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: KpiColors.secondaryText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

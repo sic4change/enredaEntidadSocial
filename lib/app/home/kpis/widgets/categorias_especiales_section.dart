@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../kpi_models.dart';
 import 'section_header.dart';
 import 'card_discapacidad.dart';
 import 'card_condiciones_sobrevenidas.dart';
@@ -10,12 +11,67 @@ import 'card_competencias_por_area.dart';
 class CategoriasEspecialesSection extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onToggle;
+  final List<DonutSegment> discapacidad;
+  final List<RankedBarItem> condicionesSobrevenidas;
+  final List<DonutSegment> situacionAdministrativa;
+  final int totalConInformeInicialCompleto;
+  final List<RankedBarItem> competenciasReconocidas;
+  final List<CompetenciaArea> competenciasPorArea;
+  final List<DonutSegment> competenciasPorCategoria;
+  final List<NacionalidadItem> nacionalidades;
+  final int nacionalidadSinEspecificar;
+  final bool isLoading;
 
   const CategoriasEspecialesSection({
     Key? key,
     required this.isExpanded,
     required this.onToggle,
+    this.discapacidad = const [],
+    this.condicionesSobrevenidas = const [],
+    this.situacionAdministrativa = const [],
+    this.totalConInformeInicialCompleto = 0,
+    this.competenciasReconocidas = const [],
+    this.competenciasPorArea = const [],
+    this.competenciasPorCategoria = const [],
+    this.nacionalidades = const [],
+    this.nacionalidadSinEspecificar = 0,
+    this.isLoading = false,
   }) : super(key: key);
+
+  Widget _buildDiscapacidad() => CardDiscapacidad(
+        segments: discapacidad,
+        total: totalConInformeInicialCompleto,
+        isLoading: isLoading,
+      );
+
+  Widget _buildCondiciones() => CardCondicionesSobrevenidas(
+        items: condicionesSobrevenidas,
+        isLoading: isLoading,
+      );
+
+  Widget _buildCompetenciasReconocidas() => CardCompetenciasReconocidas(
+        items: competenciasReconocidas,
+        categories: competenciasPorCategoria,
+        isLoading: isLoading,
+      );
+
+  Widget _buildCompetenciasPorArea() => CardCompetenciasPorArea(
+        areas: competenciasPorArea,
+        categories: competenciasPorCategoria,
+        isLoading: isLoading,
+      );
+
+  Widget _buildNacionalidades() => CardNacionalidades(
+        items: nacionalidades,
+        sinEspecificar: nacionalidadSinEspecificar,
+        isLoading: isLoading,
+      );
+
+  Widget _buildSituacionAdministrativa() => CardSituacionAdministrativa(
+        segments: situacionAdministrativa,
+        total: totalConInformeInicialCompleto,
+        isLoading: isLoading,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +92,14 @@ class CategoriasEspecialesSection extends StatelessWidget {
               final isSmall = constraints.maxWidth < 920;
               if (isSmall) {
                 return Column(
-                  children: const [
-                    CardDiscapacidad(),
-                    SizedBox(height: 20),
-                    CardCondicionesSobrevenidas(),
-                    SizedBox(height: 20),
-                    CardNacionalidades(),
-                    SizedBox(height: 20),
-                    CardSituacionAdministrativa(),
+                  children: [
+                    _buildDiscapacidad(),
+                    const SizedBox(height: 20),
+                    _buildCondiciones(),
+                    const SizedBox(height: 20),
+                    _buildNacionalidades(),
+                    const SizedBox(height: 20),
+                    _buildSituacionAdministrativa(),
                   ],
                 );
               }
@@ -52,20 +108,20 @@ class CategoriasEspecialesSection extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Column(
-                      children: const [
-                        CardDiscapacidad(),
-                        SizedBox(height: 20),
-                        CardCondicionesSobrevenidas(),
+                      children: [
+                        _buildDiscapacidad(),
+                        const SizedBox(height: 20),
+                        _buildCondiciones(),
                       ],
                     ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
                     child: Column(
-                      children: const [
-                        CardNacionalidades(),
-                        SizedBox(height: 20),
-                        CardSituacionAdministrativa(),
+                      children: [
+                        _buildNacionalidades(),
+                        const SizedBox(height: 20),
+                        _buildSituacionAdministrativa(),
                       ],
                     ),
                   ),
@@ -81,19 +137,19 @@ class CategoriasEspecialesSection extends StatelessWidget {
               final isSmall = constraints.maxWidth < 920;
               if (isSmall) {
                 return Column(
-                  children: const [
-                    CardCompetenciasReconocidas(),
-                    SizedBox(height: 20),
-                    CardCompetenciasPorArea(),
+                  children: [
+                    _buildCompetenciasReconocidas(),
+                    const SizedBox(height: 20),
+                    _buildCompetenciasPorArea(),
                   ],
                 );
               }
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Expanded(child: CardCompetenciasReconocidas()),
-                  SizedBox(width: 20),
-                  Expanded(child: CardCompetenciasPorArea()),
+                children: [
+                  Expanded(child: _buildCompetenciasReconocidas()),
+                  const SizedBox(width: 20),
+                  Expanded(child: _buildCompetenciasPorArea()),
                 ],
               );
             },

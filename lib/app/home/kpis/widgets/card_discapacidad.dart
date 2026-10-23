@@ -5,7 +5,16 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardDiscapacidad extends StatelessWidget {
-  const CardDiscapacidad({Key? key}) : super(key: key);
+  final List<DonutSegment> segments;
+  final int total;
+  final bool isLoading;
+
+  const CardDiscapacidad({
+    Key? key,
+    this.segments = const [],
+    this.total = 0,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +47,7 @@ class CardDiscapacidad extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Según el certificado declarado en la inscripción',
+                      'Según el informe inicial · $total participantes con informe completo',
                       style: GoogleFonts.outfit(
                         fontSize: 12,
                         fontWeight: FontWeight.normal,
@@ -48,7 +57,23 @@ class CardDiscapacidad extends StatelessWidget {
                   ],
                 ),
               ),
-              _buildDropdown(),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isLoading) ...[
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  _buildDropdown(),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -112,6 +137,11 @@ class CardDiscapacidad extends StatelessWidget {
   }
 
   Widget _buildSemiCircleGauge() {
+    final declared = segments
+        .where((s) => s.label != 'Sin discapacidad declarada')
+        .fold<int>(0, (sum, s) => sum + s.count);
+    final declaredPct = total > 0 ? (declared / total * 100).round() : 0;
+
     return SizedBox(
       width: 190,
       height: 125,
@@ -121,11 +151,21 @@ class CardDiscapacidad extends StatelessWidget {
           CustomPaint(
             size: const Size(190, 110),
             painter: _SemiCircleGaugePainter(
-              segments: [
-                _GaugeSlice(color: KpiColors.turquoise, percentage: 0.15),
-                _GaugeSlice(color: KpiColors.lightTurquoise, percentage: 0.05),
-                _GaugeSlice(color: KpiColors.borderLight.withValues(alpha: 0.4), percentage: 0.80),
-              ],
+              segments: total > 0
+                  ? segments
+                      .map((s) => _GaugeSlice(
+                            color: s.label == 'Sin discapacidad declarada'
+                                ? KpiColors.borderLight.withValues(alpha: 0.4)
+                                : s.color,
+                            percentage: s.count / total,
+                          ))
+                      .toList()
+                  : [
+                      _GaugeSlice(
+                        color: KpiColors.borderLight.withValues(alpha: 0.4),
+                        percentage: 1.0,
+                      ),
+                    ],
             ),
           ),
           Positioned(
@@ -134,7 +174,7 @@ class CardDiscapacidad extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '20%',
+                  '$declaredPct%',
                   style: GoogleFonts.outfit(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -165,7 +205,7 @@ class CardDiscapacidad extends StatelessWidget {
   Widget _buildLegend() {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: KpiFakeData.discapacidadSegments.map((item) {
+      children: segments.map((item) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6.0),
           child: Row(
@@ -263,5 +303,6 @@ class _SemiCircleGaugePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _SemiCircleGaugePainter oldDelegate) =>
+      oldDelegate.segments != segments;
 }

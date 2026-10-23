@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/userEnreda.dart';
+import '../kpi_models.dart';
 import 'section_header.dart';
 import 'card_grupos_edad.dart';
 import 'card_niveles_formativos.dart';
@@ -8,6 +9,9 @@ class DesgloseDemograficoSection extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onToggle;
   final List<UserEnreda>? users;
+  final List<FormatLevelItem> nivelesCine;
+  final List<FormatLevelItem> nivelesEstudios;
+  final int nivelesSinEspecificar;
   final bool isLoading;
 
   const DesgloseDemograficoSection({
@@ -15,6 +19,9 @@ class DesgloseDemograficoSection extends StatelessWidget {
     required this.isExpanded,
     required this.onToggle,
     this.users,
+    this.nivelesCine = const [],
+    this.nivelesEstudios = const [],
+    this.nivelesSinEspecificar = 0,
     this.isLoading = false,
   }) : super(key: key);
 
@@ -39,7 +46,7 @@ class DesgloseDemograficoSection extends StatelessWidget {
                   children: [
                     CardGruposEdad(users: users, isLoading: isLoading),
                     const SizedBox(height: 20),
-                    const CardNivelesFormativos(),
+                    _buildNivelesFormativos(),
                   ],
                 );
               }
@@ -50,13 +57,22 @@ class DesgloseDemograficoSection extends StatelessWidget {
                     child: CardGruposEdad(users: users, isLoading: isLoading),
                   ),
                   const SizedBox(width: 20),
-                  const Expanded(child: CardNivelesFormativos()),
+                  Expanded(child: _buildNivelesFormativos()),
                 ],
               );
             },
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildNivelesFormativos() {
+    return CardNivelesFormativos(
+      nivelesCine: nivelesCine,
+      nivelesEstudios: nivelesEstudios,
+      sinEspecificar: nivelesSinEspecificar,
+      isLoading: isLoading,
     );
   }
 }

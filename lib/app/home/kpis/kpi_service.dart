@@ -3,9 +3,12 @@ import '../../models/initialReport.dart';
 import '../../models/closureReport.dart';
 import '../../models/followReport.dart';
 import '../../models/derivationReport.dart';
+import '../../models/education.dart';
 import '../../services/database.dart';
 import '../../services/api_path.dart';
+import '../../values/strings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart' show Color;
 import 'kpi_colors.dart';
 import 'kpi_models.dart';
 
@@ -18,6 +21,17 @@ class ParticipantesKpiData {
   final List<SituacionEmpleoRow> situacionEmpleoInicial;
   final List<SituacionEmpleoRow> situacionEmpleoActual;
   final int totalConInformeInicialCompleto;
+  final List<FormatLevelItem> nivelesCine;
+  final List<FormatLevelItem> nivelesEstudios;
+  final int nivelesSinEspecificar;
+  final List<DonutSegment> discapacidad;
+  final List<RankedBarItem> condicionesSobrevenidas;
+  final List<DonutSegment> situacionAdministrativa;
+  final List<RankedBarItem> competenciasReconocidas;
+  final List<CompetenciaArea> competenciasPorArea;
+  final List<DonutSegment> competenciasPorCategoria;
+  final List<NacionalidadItem> nacionalidades;
+  final int nacionalidadSinEspecificar;
 
   const ParticipantesKpiData({
     required this.total,
@@ -28,6 +42,17 @@ class ParticipantesKpiData {
     this.situacionEmpleoInicial = const [],
     this.situacionEmpleoActual = const [],
     this.totalConInformeInicialCompleto = 0,
+    this.nivelesCine = const [],
+    this.nivelesEstudios = const [],
+    this.nivelesSinEspecificar = 0,
+    this.discapacidad = const [],
+    this.condicionesSobrevenidas = const [],
+    this.situacionAdministrativa = const [],
+    this.competenciasReconocidas = const [],
+    this.competenciasPorArea = const [],
+    this.competenciasPorCategoria = const [],
+    this.nacionalidades = const [],
+    this.nacionalidadSinEspecificar = 0,
   });
 
   static ParticipantesKpiData empty() {
@@ -126,6 +151,10 @@ class KpiService {
       firestore.collection(APIPath.closureReports()).get(),
       firestore.collection(APIPath.derivationReports()).get(),
       firestore.collection(APIPath.followReports()).get(),
+      firestore.collection(APIPath.education()).get(),
+      firestore.collection(APIPath.competencies()).get(),
+      firestore.collection(APIPath.competenciesCategories()).get(),
+      firestore.collection(APIPath.competenciesSubCategories()).get(),
     ]);
 
     final Map<String, InitialReport> initialReportsByUser = {};
@@ -176,6 +205,15 @@ class KpiService {
         followReportsByUser[doc.id] = report;
       } catch (_) {}
     }
+
+    final List<Education> educations = [];
+    for (final doc in results[4].docs) {
+      try {
+        if (doc.data()['label'] == null) continue;
+        educations.add(Education.fromMap(doc.data(), doc.id));
+      } catch (_) {}
+    }
+    educations.sort((a, b) => a.order.compareTo(b.order));
 
     // 2. Filtrar lista de usuarios según el filterId seleccionado
     final List<UserEnreda> filteredUsers = users.where((u) {
@@ -298,6 +336,7 @@ class KpiService {
     );
 
     int totalConInformeInicialCompleto = 0;
+    final List<(UserEnreda, InitialReport)> conInformeInicialCompleto = [];
     for (final u in filteredUsers) {
       final uId = u.userId ?? '';
       final initReport = (u.initialReportId != null && initialReportsByUser.containsKey(u.initialReportId))
@@ -305,8 +344,25 @@ class KpiService {
           : (initialReportsByUser[uId] ?? initialReportsByUser[u.email]);
       if (initReport != null && (initReport.finished == true || initReport.completedDate != null)) {
         totalConInformeInicialCompleto++;
+        conInformeInicialCompleto.add((u, initReport));
       }
     }
+
+    final categorias = _calculateCategoriasEspeciales(conInformeInicialCompleto);
+
+    final nacionalidades = _calculateNacionalidades(filteredUsers);
+
+    final competencias = _calculateCompetencias(
+      users: filteredUsers,
+      competencyDocs: results[5].docs,
+      categoryDocs: results[6].docs,
+      subCategoryDocs: results[7].docs,
+    );
+
+    final niveles = _calculateNivelesFormativos(
+      users: filteredUsers,
+      educations: educations,
+    );
 
     return ParticipantesKpiData(
       total: total,
@@ -368,6 +424,17 @@ class KpiService {
       situacionEmpleoInicial: situacionInicial,
       situacionEmpleoActual: situacionActual,
       totalConInformeInicialCompleto: totalConInformeInicialCompleto,
+      nivelesCine: niveles.cine,
+      nivelesEstudios: niveles.estudios,
+      nivelesSinEspecificar: niveles.sinEspecificar,
+      discapacidad: categorias.discapacidad,
+      condicionesSobrevenidas: categorias.condiciones,
+      situacionAdministrativa: categorias.situacionAdministrativa,
+      competenciasReconocidas: competencias.reconocidas,
+      competenciasPorArea: competencias.porArea,
+      competenciasPorCategoria: competencias.porCategoria,
+      nacionalidades: nacionalidades.items,
+      nacionalidadSinEspecificar: nacionalidades.sinEspecificar,
     );
   }
 
@@ -570,5 +637,406 @@ class KpiService {
     );
 
     return rows;
+  }
+
+  static const List<String> _cineLabels = ['CINE 0 – 2', 'CINE 3 – 4', 'CINE 5 – 8'];
+  static const List<String> _cineTitles = [
+    'Educación básica o sin estudios',
+    'Educación secundaria postobligatoria',
+    'Educación superior',
+  ];
+  static const List<String> _cineDescriptions = [
+    'Sin formación, Educación Primaria, ESO, Competencias clave y Certificados profesionales (niveles 1 – 3)',
+    'FP básica, FP de grado medio y Bachillerato',
+    'FP de grado superior, formación universitaria y postgrado',
+  ];
+
+  String _normalizeText(String raw) {
+    const from = 'áàäâéèëêíìïîóòöôúùüûñ';
+    const to = 'aaaaeeeeiiiioooouuuun';
+    final buffer = StringBuffer();
+    for (final ch in raw.trim().toLowerCase().split('')) {
+      final idx = from.indexOf(ch);
+      buffer.write(idx >= 0 ? to[idx] : ch);
+    }
+    return buffer.toString();
+  }
+
+  /// Devuelve el grupo CINE (0: CINE 0–2, 1: CINE 3–4, 2: CINE 5–8) de una
+  /// opción de nivel educativo, o `null` si no se reconoce.
+  int? _cineGroupOf(String label) {
+    final l = _normalizeText(label);
+    if (l.contains('no tengo formaci') ||
+        l.contains('sin formaci') ||
+        l.contains('sin estudios') ||
+        l.contains('primari') ||
+        RegExp(r'\beso\b').hasMatch(l) ||
+        l.contains('secundaria obligatoria') ||
+        l.contains('competencias clave') ||
+        l.contains('certificado')) {
+      return 0;
+    }
+    if (l.contains('fp basica') ||
+        l.contains('profesional basica') ||
+        l.contains('grado medio') ||
+        l.contains('bachiller')) {
+      return 1;
+    }
+    if (l.contains('postgrado') ||
+        l.contains('posgrado') ||
+        l.contains('master') ||
+        l.contains('doctor') ||
+        l.contains('universit') ||
+        l.contains('grado superior') ||
+        l.contains('licenciatura') ||
+        l.contains('diplomatura') ||
+        l.contains('grado')) {
+      return 2;
+    }
+    return null;
+  }
+
+  /// Calcula los niveles formativos (agrupados por CINE y por opción del
+  /// desplegable de nivel educativo del alta) desagregados por género.
+  ({List<FormatLevelItem> cine, List<FormatLevelItem> estudios, int sinEspecificar})
+      _calculateNivelesFormativos({
+    required List<UserEnreda> users,
+    required List<Education> educations,
+  }) {
+    // Opciones del alta: las de order 1 – 10 ("No tengo formación" … "Postgrado")
+    final List<Education> options =
+        educations.where((e) => e.order >= 1 && e.order <= 10).toList();
+
+    final Map<String, Education> byId = {
+      for (final e in options)
+        if (e.educationId != null) e.educationId!: e,
+    };
+    final Map<String, Education> byLabel = {
+      for (final e in options) _normalizeText(e.label): e,
+    };
+
+    final optM = List<int>.filled(options.length, 0);
+    final optH = List<int>.filled(options.length, 0);
+    final optNB = List<int>.filled(options.length, 0);
+    final cineM = List<int>.filled(3, 0);
+    final cineH = List<int>.filled(3, 0);
+    final cineNB = List<int>.filled(3, 0);
+    int sinEspecificar = 0;
+
+    for (final u in users) {
+      Education? edu = (u.educationId != null && u.educationId!.isNotEmpty) ? byId[u.educationId] : null;
+      edu ??= byLabel[_normalizeText(u.educationName ?? '')];
+      if (edu == null) {
+        sinEspecificar++;
+        continue;
+      }
+
+      final gStr = (u.gender ?? '').trim().toLowerCase();
+      final bool isMujer = (gStr == 'mujer' || gStr == 'femenino' || gStr == 'f');
+      final bool isHombre = (gStr == 'hombre' || gStr == 'masculino' || gStr == 'm');
+
+      final optIdx = options.indexOf(edu);
+      if (isMujer) optM[optIdx]++; else if (isHombre) optH[optIdx]++; else optNB[optIdx]++;
+
+      final cineIdx = _cineGroupOf(edu.label);
+      if (cineIdx == null) continue;
+      if (isMujer) cineM[cineIdx]++; else if (isHombre) cineH[cineIdx]++; else cineNB[cineIdx]++;
+    }
+
+    final int totalCine = [for (int i = 0; i < 3; i++) cineM[i] + cineH[i] + cineNB[i]].fold(0, (a, b) => a + b);
+    final int totalEstudios =
+        [for (int i = 0; i < options.length; i++) optM[i] + optH[i] + optNB[i]].fold(0, (a, b) => a + b);
+
+    String genderDetail(int m, int h, int nb) =>
+        '$m ${m == 1 ? 'mujer' : 'mujeres'} · $h ${h == 1 ? 'hombre' : 'hombres'} · $nb no binario';
+
+    final cine = <FormatLevelItem>[
+      for (int i = 0; i < 3; i++)
+        FormatLevelItem(
+          cineLabel: _cineLabels[i],
+          title: _cineTitles[i],
+          total: cineM[i] + cineH[i] + cineNB[i],
+          percentage: totalCine > 0 ? (cineM[i] + cineH[i] + cineNB[i]) / totalCine * 100 : 0.0,
+          mujeres: cineM[i],
+          hombres: cineH[i],
+          noBinario: cineNB[i],
+          description: '${_cineDescriptions[i]}. ${genderDetail(cineM[i], cineH[i], cineNB[i])}',
+        ),
+    ];
+
+    final estudios = <FormatLevelItem>[
+      for (int i = 0; i < options.length; i++)
+        FormatLevelItem(
+          cineLabel: _cineGroupOf(options[i].label) != null ? _cineLabels[_cineGroupOf(options[i].label)!] : '',
+          title: options[i].label,
+          total: optM[i] + optH[i] + optNB[i],
+          percentage: totalEstudios > 0 ? (optM[i] + optH[i] + optNB[i]) / totalEstudios * 100 : 0.0,
+          mujeres: optM[i],
+          hombres: optH[i],
+          noBinario: optNB[i],
+          description: genderDetail(optM[i], optH[i], optNB[i]),
+        ),
+    ];
+
+    return (cine: cine, estudios: estudios, sinEspecificar: sinEspecificar);
+  }
+
+  /// Calcula discapacidad, condiciones sobrevenidas y situación administrativa
+  /// a partir del informe inicial. Solo computan participantes con el informe
+  /// inicial completo.
+  ({List<DonutSegment> discapacidad, List<RankedBarItem> condiciones, List<DonutSegment> situacionAdministrativa})
+      _calculateCategoriasEspeciales(List<(UserEnreda, InitialReport)> entries) {
+    final int total = entries.length;
+    double pct(int count) => total > 0 ? ((count / total) * 100) : 0.0;
+
+    // Discapacidad (estado del certificado: En trámite / Concedida / No aplica)
+    int reconocida = 0, enTramiteDisc = 0, sinDiscapacidad = 0;
+
+    // Condiciones sobrevenidas (sección 8 del informe inicial, multiselección)
+    final Map<String, int> condicionesCount = {
+      for (final option in StringConst.OPTIONS_SECTION_12) option: 0,
+    };
+
+    // Situación administrativa (Nacional + estado del informe inicial)
+    int nacional = 0, concedida = 0, enTramiteAdmin = 0, sinTramitar = 0, sinEspecificar = 0;
+
+    for (final (u, report) in entries) {
+      final disability = _normalizeText(report.disabilityState ?? '');
+      if (disability == 'concedida') {
+        reconocida++;
+      } else if (disability == 'en tramite') {
+        enTramiteDisc++;
+      } else {
+        sinDiscapacidad++;
+      }
+
+      for (final option in (report.vulnerabilityOptions ?? const <String>[]).toSet()) {
+        if (condicionesCount.containsKey(option)) {
+          condicionesCount[option] = condicionesCount[option]! + 1;
+        }
+      }
+
+      final natStr = (u.nationality ?? '').trim().toLowerCase();
+      final adminState = _normalizeText(report.adminState ?? '');
+      if (natStr == 'españa' || natStr == 'espana' || natStr == 'española' || natStr == 'espanola') {
+        nacional++;
+      } else if (adminState == 'concedida') {
+        concedida++;
+      } else if (adminState == 'en tramite') {
+        enTramiteAdmin++;
+      } else if (adminState == 'sin tramitar') {
+        sinTramitar++;
+      } else {
+        sinEspecificar++;
+      }
+    }
+
+    final discapacidad = <DonutSegment>[
+      DonutSegment(label: 'Reconocida', count: reconocida, percentage: pct(reconocida), color: KpiColors.turquoise),
+      DonutSegment(label: 'En trámite', count: enTramiteDisc, percentage: pct(enTramiteDisc), color: KpiColors.lightTurquoise),
+      DonutSegment(label: 'Sin discapacidad declarada', count: sinDiscapacidad, percentage: pct(sinDiscapacidad), color: KpiColors.borderLight),
+    ];
+
+    final condiciones = condicionesCount.entries
+        .map((e) => RankedBarItem(label: e.key, count: e.value, percentage: pct(e.value)))
+        .toList()
+      ..sort((a, b) => b.count.compareTo(a.count));
+
+    final situacionAdministrativa = <DonutSegment>[
+      DonutSegment(label: 'Nacional', count: nacional, percentage: pct(nacional), color: KpiColors.primaryDark),
+      DonutSegment(label: 'Concedida', count: concedida, percentage: pct(concedida), color: KpiColors.turquoise),
+      DonutSegment(label: 'En trámite', count: enTramiteAdmin, percentage: pct(enTramiteAdmin), color: KpiColors.lightTurquoise),
+      DonutSegment(label: 'Sin tramitar', count: sinTramitar, percentage: pct(sinTramitar), color: KpiColors.yellow),
+      DonutSegment(label: 'Sin especificar', count: sinEspecificar, percentage: pct(sinEspecificar), color: KpiColors.borderLight),
+    ];
+
+    return (discapacidad: discapacidad, condiciones: condiciones, situacionAdministrativa: situacionAdministrativa);
+  }
+
+  static const List<Color> _competencyCategoryColors = [
+    KpiColors.primaryDark,
+    KpiColors.turquoise,
+    KpiColors.yellow,
+  ];
+
+  /// Calcula las competencias reconocidas por los participantes. Una competencia
+  /// cuenta como reconocida si su id aparece en el map `competencies` del
+  /// usuario, sea cual sea el valor asociado.
+  ({List<RankedBarItem> reconocidas, List<CompetenciaArea> porArea, List<DonutSegment> porCategoria})
+      _calculateCompetencias({
+    required List<UserEnreda> users,
+    required List<QueryDocumentSnapshot<Map<String, dynamic>>> competencyDocs,
+    required List<QueryDocumentSnapshot<Map<String, dynamic>>> categoryDocs,
+    required List<QueryDocumentSnapshot<Map<String, dynamic>>> subCategoryDocs,
+  }) {
+    // Categorías (las 3 grandes), ordenadas por `order`
+    final categories = <({String id, String name, int order})>[];
+    for (final doc in categoryDocs) {
+      final data = doc.data();
+      final name = (data['name'] ?? '').toString().trim();
+      if (name.isEmpty) continue;
+      categories.add((
+        id: (data['competencyCategoryId'] ?? doc.id).toString(),
+        name: name,
+        order: data['order'] is int ? data['order'] as int : 0,
+      ));
+    }
+    categories.sort((a, b) => a.order.compareTo(b.order));
+    final Map<String, int> categoryIndexById = {
+      for (int i = 0; i < categories.length; i++) categories[i].id: i,
+    };
+    Color colorOf(int? categoryIdx) => categoryIdx != null
+        ? _competencyCategoryColors[categoryIdx % _competencyCategoryColors.length]
+        : KpiColors.slate;
+
+    // Subcategorías (áreas de competencia), ordenadas por categoría y `order`
+    final subCategories = <({String id, String name, int order, int? categoryIdx})>[];
+    for (final doc in subCategoryDocs) {
+      final data = doc.data();
+      final name = (data['name'] ?? '').toString().trim();
+      if (name.isEmpty) continue;
+      subCategories.add((
+        id: (data['competencySubCategoryId'] ?? doc.id).toString(),
+        name: name,
+        order: data['order'] is int ? data['order'] as int : 0,
+        categoryIdx: categoryIndexById[(data['competencyCategoryId'] ?? '').toString()],
+      ));
+    }
+    subCategories.sort((a, b) {
+      final ca = a.categoryIdx ?? categories.length;
+      final cb = b.categoryIdx ?? categories.length;
+      return ca != cb ? ca.compareTo(cb) : a.order.compareTo(b.order);
+    });
+    final Map<String, int> subCategoryIndexById = {
+      for (int i = 0; i < subCategories.length; i++) subCategories[i].id: i,
+    };
+
+    // Competencias: se indexan por el campo `id` y por el id del documento
+    final competencies = <({String name, int? categoryIdx, int? subCategoryIdx})>[];
+    final Map<String, int> competencyIndexByKey = {};
+    for (final doc in competencyDocs) {
+      final data = doc.data();
+      final name = (data['name'] ?? '').toString().trim();
+      if (name.isEmpty) continue;
+      final idx = competencies.length;
+      competencies.add((
+        name: name,
+        categoryIdx: categoryIndexById[(data['competencyCategoryId'] ?? '').toString()],
+        subCategoryIdx: subCategoryIndexById[(data['competencySubCategoryId'] ?? '').toString()],
+      ));
+      competencyIndexByKey[doc.id] = idx;
+      if (data['id'] != null) competencyIndexByKey[data['id'].toString()] = idx;
+    }
+
+    final counts = List<int>.filled(competencies.length, 0);
+    for (final u in users) {
+      final recognized = <int>{};
+      for (final key in u.competencies.keys) {
+        final idx = competencyIndexByKey[key];
+        if (idx != null) recognized.add(idx);
+      }
+      for (final idx in recognized) {
+        counts[idx]++;
+      }
+    }
+
+    final int totalUsers = users.length;
+
+    // Top 10 competencias por número de participantes que la tienen reconocida
+    final ranked = [for (int i = 0; i < competencies.length; i++) i]
+        .where((i) => counts[i] > 0)
+        .toList()
+      ..sort((a, b) => counts[b].compareTo(counts[a]));
+    final reconocidas = ranked.take(10).map((i) {
+      final c = competencies[i];
+      return RankedBarItem(
+        label: c.name,
+        category: c.categoryIdx != null ? categories[c.categoryIdx!].name : null,
+        count: counts[i],
+        percentage: totalUsers > 0 ? counts[i] / totalUsers * 100 : 0.0,
+        color: colorOf(c.categoryIdx),
+      );
+    }).toList();
+
+    // Reparto de reconocimientos por área (subcategoría). Se muestran todas
+    // las áreas, aunque no tengan reconocimientos.
+    final subCounts = List<int>.filled(subCategories.length, 0);
+    for (int i = 0; i < competencies.length; i++) {
+      final si = competencies[i].subCategoryIdx;
+      if (si != null) subCounts[si] += counts[i];
+    }
+    final int totalAreaRecognitions = subCounts.fold(0, (a, b) => a + b);
+    double areaPct(int count) =>
+        totalAreaRecognitions > 0 ? count / totalAreaRecognitions * 100 : 0.0;
+
+    final porArea = [
+      for (int si = 0; si < subCategories.length; si++)
+        CompetenciaArea(
+          name: subCategories[si].name,
+          percentage: areaPct(subCounts[si]),
+          color: colorOf(subCategories[si].categoryIdx),
+          group: subCategories[si].categoryIdx != null
+              ? categories[subCategories[si].categoryIdx!].name
+              : 'Sin categoría',
+        ),
+    ];
+
+    final porCategoria = [
+      for (int ci = 0; ci < categories.length; ci++)
+        () {
+          int count = 0;
+          for (int si = 0; si < subCategories.length; si++) {
+            if (subCategories[si].categoryIdx == ci) count += subCounts[si];
+          }
+          return DonutSegment(
+            label: categories[ci].name,
+            count: count,
+            percentage: areaPct(count),
+            color: colorOf(ci),
+          );
+        }(),
+    ];
+
+    return (reconocidas: reconocidas, porArea: porArea, porCategoria: porCategoria);
+  }
+
+  /// Agrupa a los participantes por nacionalidad (sin distinguir mayúsculas ni
+  /// tildes), desagregados por género y ordenados de más a menos participantes.
+  ({List<NacionalidadItem> items, int sinEspecificar}) _calculateNacionalidades(List<UserEnreda> users) {
+    final Map<String, String> labels = {};
+    final Map<String, List<int>> counts = {};
+    int sinEspecificar = 0;
+
+    for (final u in users) {
+      final raw = (u.nationality ?? '').trim();
+      if (raw.isEmpty) {
+        sinEspecificar++;
+        continue;
+      }
+      final key = _normalizeText(raw);
+      labels.putIfAbsent(key, () => raw);
+      final c = counts.putIfAbsent(key, () => [0, 0, 0]);
+
+      final gStr = (u.gender ?? '').trim().toLowerCase();
+      if (gStr == 'mujer' || gStr == 'femenino' || gStr == 'f') {
+        c[0]++;
+      } else if (gStr == 'hombre' || gStr == 'masculino' || gStr == 'm') {
+        c[1]++;
+      } else {
+        c[2]++;
+      }
+    }
+
+    final items = counts.entries
+        .map((e) => NacionalidadItem(
+              label: labels[e.key]!,
+              mujeres: e.value[0],
+              hombres: e.value[1],
+              noBinario: e.value[2],
+            ))
+        .toList()
+      ..sort((a, b) => b.total != a.total ? b.total.compareTo(a.total) : a.label.compareTo(b.label));
+
+    return (items: items, sinEspecificar: sinEspecificar);
   }
 }

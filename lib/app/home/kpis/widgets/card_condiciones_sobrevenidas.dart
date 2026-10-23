@@ -4,10 +4,20 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardCondicionesSobrevenidas extends StatelessWidget {
-  const CardCondicionesSobrevenidas({Key? key}) : super(key: key);
+  final List<RankedBarItem> items;
+  final bool isLoading;
+
+  const CardCondicionesSobrevenidas({
+    Key? key,
+    this.items = const [],
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final double maxVal =
+        items.fold<int>(1, (m, i) => i.count > m ? i.count : m).toDouble();
+
     return Container(
       decoration: BoxDecoration(
         color: KpiColors.cardBackground,
@@ -19,13 +29,28 @@ class CardCondicionesSobrevenidas extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text(
-            'Condiciones sobrevenidas',
-            style: GoogleFonts.outfit(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: KpiColors.primaryDark,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Condiciones sobrevenidas',
+                  style: GoogleFonts.outfit(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: KpiColors.primaryDark,
+                  ),
+                ),
+              ),
+              if (isLoading)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -38,11 +63,11 @@ class CardCondicionesSobrevenidas extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // 12 Ranked bars
-          ...KpiFakeData.condicionesSobrevenidas.map((item) {
+          // Ranked bars
+          ...items.map((item) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 5.0),
-              child: _buildProgressRow(item),
+              child: _buildProgressRow(item, maxVal),
             );
           }).toList(),
         ],
@@ -50,8 +75,7 @@ class CardCondicionesSobrevenidas extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressRow(RankedBarItem item) {
-    const double maxVal = 40.0;
+  Widget _buildProgressRow(RankedBarItem item, double maxVal) {
     final double pct = item.count / maxVal;
 
     return Row(
@@ -88,7 +112,7 @@ class CardCondicionesSobrevenidas extends StatelessWidget {
                   ),
                   Container(
                     height: 12,
-                    width: constraints.maxWidth * pct.clamp(0.05, 1.0),
+                    width: item.count > 0 ? constraints.maxWidth * pct.clamp(0.05, 1.0) : 0,
                     decoration: BoxDecoration(
                       color: KpiColors.turquoise,
                       borderRadius: BorderRadius.circular(6),
@@ -117,7 +141,7 @@ class CardCondicionesSobrevenidas extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                '${item.percentage?.round()}%',
+                '${(item.percentage ?? 0).round()}%',
                 style: GoogleFonts.outfit(
                   fontSize: 11,
                   color: KpiColors.secondaryText,

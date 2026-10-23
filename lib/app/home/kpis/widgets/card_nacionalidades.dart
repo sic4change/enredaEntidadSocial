@@ -3,11 +3,51 @@ import 'package:google_fonts/google_fonts.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
-class CardNacionalidades extends StatelessWidget {
-  const CardNacionalidades({Key? key}) : super(key: key);
+class CardNacionalidades extends StatefulWidget {
+  final List<NacionalidadItem> items;
+  final int sinEspecificar;
+  final bool isLoading;
+
+  const CardNacionalidades({
+    Key? key,
+    this.items = const [],
+    this.sinEspecificar = 0,
+    this.isLoading = false,
+  }) : super(key: key);
+
+  @override
+  State<CardNacionalidades> createState() => _CardNacionalidadesState();
+}
+
+class _CardNacionalidadesState extends State<CardNacionalidades> {
+  static const int _topCount = 7;
+
+  bool _showAll = false;
+
+  /// Top 7 + "Otras (N)" agrupando el resto, o la lista completa si se ha
+  /// pulsado "Ver todas".
+  List<NacionalidadItem> get _visibleItems {
+    final items = widget.items;
+    if (_showAll || items.length <= _topCount + 1) return items;
+
+    final rest = items.sublist(_topCount);
+    return [
+      ...items.take(_topCount),
+      NacionalidadItem(
+        label: 'Otras (${rest.length})',
+        mujeres: rest.fold(0, (sum, i) => sum + i.mujeres),
+        hombres: rest.fold(0, (sum, i) => sum + i.hombres),
+        noBinario: rest.fold(0, (sum, i) => sum + i.noBinario),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final visibleItems = _visibleItems;
+    final int maxVal =
+        visibleItems.fold<int>(1, (m, i) => i.total > m ? i.total : m);
+
     return Container(
       decoration: BoxDecoration(
         color: KpiColors.cardBackground,
@@ -47,7 +87,25 @@ class CardNacionalidades extends StatelessWidget {
                   ],
                 ),
               ),
-              _buildVerTodasButton(),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.isLoading) ...[
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  if (widget.items.length > _topCount + 1)
+                    _buildVerTodasButton(),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -65,45 +123,70 @@ class CardNacionalidades extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Ranked List
-          ...KpiFakeData.nacionalidades.asMap().entries.map((entry) {
+          if (visibleItems.isEmpty)
+            Text(
+              'Sin nacionalidades registradas en esta selección.',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: KpiColors.secondaryText,
+              ),
+            ),
+          ...visibleItems.asMap().entries.map((entry) {
             final index = entry.key + 1;
             final item = entry.value;
             return Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
-              child: _buildNationalityRow(index, item),
+              child: _buildNationalityRow(index, item, maxVal),
             );
           }).toList(),
+
+          if (widget.sinEspecificar > 0)
+            Text(
+              widget.sinEspecificar == 1
+                  ? '1 participante sin nacionalidad registrada.'
+                  : '${widget.sinEspecificar} participantes sin nacionalidad registrada.',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: KpiColors.secondaryText,
+              ),
+            ),
         ],
       ),
     );
   }
 
   Widget _buildVerTodasButton() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: KpiColors.primaryDark),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Ver todas',
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: () => setState(() => _showAll = !_showAll),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: KpiColors.primaryDark),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _showAll ? 'Ver menos' : 'Ver todas',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: KpiColors.primaryDark,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              _showAll
+                  ? Icons.keyboard_arrow_up_rounded
+                  : Icons.arrow_forward_rounded,
+              size: 14,
               color: KpiColors.primaryDark,
             ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.arrow_forward_rounded,
-            size: 14,
-            color: KpiColors.primaryDark,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -133,10 +216,20 @@ class CardNacionalidades extends StatelessWidget {
     );
   }
 
-  Widget _buildNationalityRow(int rank, RankedBarItem item) {
-    const double maxVal = 74.0;
+  String _genderDetail(NacionalidadItem item) {
+    final parts = <String>[
+      if (item.mujeres > 0)
+        '${item.mujeres} ${item.mujeres == 1 ? 'mujer' : 'mujeres'}',
+      if (item.hombres > 0)
+        '${item.hombres} ${item.hombres == 1 ? 'hombre' : 'hombres'}',
+      if (item.noBinario > 0) '${item.noBinario} no binario',
+    ];
+    return parts.join(' · ');
+  }
+
+  Widget _buildNationalityRow(int rank, NacionalidadItem item, int maxVal) {
     const double maxBarWidth = 240.0;
-    final double barWidth = (item.count / maxVal) * maxBarWidth;
+    final double barWidth = (item.total / maxVal) * maxBarWidth;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,17 +271,19 @@ class CardNacionalidades extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  SizedBox(
-                    width: barWidth.clamp(14, maxBarWidth),
-                    height: 16,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: _buildStackedSegments(item.label),
+                  Flexible(
+                    child: SizedBox(
+                      width: barWidth.clamp(14, maxBarWidth),
+                      height: 16,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: _buildStackedSegments(item),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${item.count}',
+                    '${item.total}',
                     style: GoogleFonts.outfit(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -197,16 +292,14 @@ class CardNacionalidades extends StatelessWidget {
                   ),
                 ],
               ),
-              if (item.detail != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  item.detail!,
-                  style: GoogleFonts.outfit(
-                    fontSize: 11,
-                    color: KpiColors.secondaryText,
-                  ),
+              const SizedBox(height: 2),
+              Text(
+                _genderDetail(item),
+                style: GoogleFonts.outfit(
+                  fontSize: 11,
+                  color: KpiColors.secondaryText,
                 ),
-              ],
+              ),
             ],
           ),
         ),
@@ -214,66 +307,17 @@ class CardNacionalidades extends StatelessWidget {
     );
   }
 
-  Widget _buildStackedSegments(String country) {
-    switch (country) {
-      case 'España':
-        return Row(
-          children: [
-            Expanded(flex: 42, child: Container(color: KpiColors.yellow)),
-            Expanded(flex: 31, child: Container(color: KpiColors.primaryDark)),
-            Expanded(flex: 1, child: Container(color: KpiColors.slate)),
-          ],
-        );
-      case 'Marruecos':
-        return Row(
-          children: [
-            Expanded(flex: 8, child: Container(color: KpiColors.yellow)),
-            Expanded(flex: 10, child: Container(color: KpiColors.primaryDark)),
-          ],
-        );
-      case 'Venezuela':
-        return Row(
-          children: [
-            Expanded(flex: 9, child: Container(color: KpiColors.yellow)),
-            Expanded(flex: 5, child: Container(color: KpiColors.primaryDark)),
-          ],
-        );
-      case 'Colombia':
-        return Row(
-          children: [
-            Expanded(flex: 7, child: Container(color: KpiColors.yellow)),
-            Expanded(flex: 4, child: Container(color: KpiColors.primaryDark)),
-          ],
-        );
-      case 'Senegal':
-        return Row(
-          children: [
-            Expanded(flex: 2, child: Container(color: KpiColors.yellow)),
-            Expanded(flex: 6, child: Container(color: KpiColors.primaryDark)),
-          ],
-        );
-      case 'Argentina':
-        return Row(
-          children: [
-            Expanded(flex: 4, child: Container(color: KpiColors.yellow)),
-            Expanded(flex: 2, child: Container(color: KpiColors.primaryDark)),
-          ],
-        );
-      case 'Rumanía':
-        return Row(
-          children: [
-            Expanded(flex: 4, child: Container(color: KpiColors.yellow)),
-            Expanded(flex: 1, child: Container(color: KpiColors.slate)),
-          ],
-        );
-      case 'Otras (6)':
-      default:
-        return Row(
-          children: [
-            Expanded(flex: 5, child: Container(color: KpiColors.yellow)),
-            Expanded(flex: 1, child: Container(color: KpiColors.slate)),
-          ],
-        );
-    }
+  Widget _buildStackedSegments(NacionalidadItem item) {
+    return Row(
+      children: [
+        if (item.mujeres > 0)
+          Expanded(flex: item.mujeres, child: Container(color: KpiColors.yellow)),
+        if (item.hombres > 0)
+          Expanded(
+              flex: item.hombres, child: Container(color: KpiColors.primaryDark)),
+        if (item.noBinario > 0)
+          Expanded(flex: item.noBinario, child: Container(color: KpiColors.slate)),
+      ],
+    );
   }
 }

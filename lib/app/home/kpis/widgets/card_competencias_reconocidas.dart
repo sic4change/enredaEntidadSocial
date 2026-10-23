@@ -4,10 +4,22 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardCompetenciasReconocidas extends StatelessWidget {
-  const CardCompetenciasReconocidas({Key? key}) : super(key: key);
+  final List<RankedBarItem> items;
+  final List<DonutSegment> categories;
+  final bool isLoading;
+
+  const CardCompetenciasReconocidas({
+    Key? key,
+    this.items = const [],
+    this.categories = const [],
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final double maxVal =
+        items.fold<int>(1, (m, i) => i.count > m ? i.count : m).toDouble();
+
     return Container(
       decoration: BoxDecoration(
         color: KpiColors.cardBackground,
@@ -19,13 +31,28 @@ class CardCompetenciasReconocidas extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text(
-            'Competencias más reconocidas',
-            style: GoogleFonts.outfit(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: KpiColors.primaryDark,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Competencias más reconocidas',
+                  style: GoogleFonts.outfit(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: KpiColors.primaryDark,
+                  ),
+                ),
+              ),
+              if (isLoading)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -42,21 +69,25 @@ class CardCompetenciasReconocidas extends StatelessWidget {
           Wrap(
             spacing: 16,
             runSpacing: 8,
-            children: [
-              _buildLegend('Sociales / interpersonales', KpiColors.primaryDark),
-              _buildLegend('Personales / intrapersonales', KpiColors.turquoise),
-              _buildLegend('Metodológicas', KpiColors.yellow),
-            ],
+            children: categories.map((c) => _buildLegend(c.label, c.color)).toList(),
           ),
           const SizedBox(height: 20),
 
-          // 10 Ranked Competencies
-          ...KpiFakeData.competenciasReconocidas.asMap().entries.map((entry) {
+          // Top 10 Ranked Competencies
+          if (items.isEmpty)
+            Text(
+              'Sin competencias reconocidas en esta selección.',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: KpiColors.secondaryText,
+              ),
+            ),
+          ...items.asMap().entries.map((entry) {
             final rank = entry.key + 1;
             final item = entry.value;
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6.0),
-              child: _buildCompetencyRow(rank, item),
+              child: _buildCompetencyRow(rank, item, maxVal),
             );
           }).toList(),
         ],
@@ -89,8 +120,7 @@ class CardCompetenciasReconocidas extends StatelessWidget {
     );
   }
 
-  Widget _buildCompetencyRow(int rank, RankedBarItem item) {
-    const double maxVal = 70.0;
+  Widget _buildCompetencyRow(int rank, RankedBarItem item, double maxVal) {
     final double pct = item.count / maxVal;
 
     return Row(
@@ -169,7 +199,7 @@ class CardCompetenciasReconocidas extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                '${item.percentage?.round()}%',
+                '${(item.percentage ?? 0).round()}%',
                 style: GoogleFonts.outfit(
                   fontSize: 11,
                   color: KpiColors.secondaryText,
