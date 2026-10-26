@@ -39,6 +39,8 @@ class _KpiPageState extends State<KpiPage> {
 
   ParticipantesKpiData? _participantesData;
   bool _isLoadingParticipantes = false;
+  RecursosKpiData? _recursosData;
+  bool _isLoadingRecursos = false;
   KpiService? _kpiService;
 
   bool _isResumenExpanded = true;
@@ -108,6 +110,32 @@ class _KpiPageState extends State<KpiPage> {
       final database = Provider.of<Database>(context, listen: false);
       _kpiService = KpiService(database);
       _loadData();
+      _loadRecursos();
+    }
+  }
+
+  /// Los recursos no dependen del filtro seleccionado: se cargan una vez.
+  Future<void> _loadRecursos() async {
+    if (_kpiService == null) return;
+    setState(() {
+      _isLoadingRecursos = true;
+    });
+
+    try {
+      final data = await _kpiService!.loadRecursosKpi();
+      if (mounted) {
+        setState(() {
+          _recursosData = data;
+          _isLoadingRecursos = false;
+        });
+      }
+    } catch (e, stack) {
+      print('Error cargando KPIs de recursos: $e\n$stack');
+      if (mounted) {
+        setState(() {
+          _isLoadingRecursos = false;
+        });
+      }
     }
   }
 
@@ -297,6 +325,8 @@ class _KpiPageState extends State<KpiPage> {
                         _isRecursosExpanded = !_isRecursosExpanded;
                       });
                     },
+                    data: _recursosData,
+                    isLoading: _isLoadingRecursos,
                   ),
                   const SizedBox(height: 60),
                 ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../kpi_service.dart';
 import 'section_header.dart';
 import 'card_recursos_subidos.dart';
 import 'card_linea_temporal_recursos.dart';
@@ -7,12 +8,28 @@ import 'card_recursos_categoria.dart';
 class RecursosSection extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onToggle;
+  final RecursosKpiData? data;
+  final bool isLoading;
 
   const RecursosSection({
     Key? key,
     required this.isExpanded,
     required this.onToggle,
+    this.data,
+    this.isLoading = false,
   }) : super(key: key);
+
+  Widget _buildRecursosSubidos() => CardRecursosSubidos(
+        total: data?.total ?? 0,
+        esteMes: data?.esteMes ?? 0,
+        porCategoria: data?.porCategoria ?? const [],
+        isLoading: isLoading,
+      );
+
+  Widget _buildLineaTemporal() => CardLineaTemporalRecursos(
+        fechas: data?.fechas ?? const [],
+        isLoading: isLoading,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -32,25 +49,30 @@ class RecursosSection extends StatelessWidget {
               final isSmall = constraints.maxWidth < 920;
               if (isSmall) {
                 return Column(
-                  children: const [
-                    CardRecursosSubidos(),
-                    SizedBox(height: 20),
-                    CardLineaTemporalRecursos(),
+                  children: [
+                    _buildRecursosSubidos(),
+                    const SizedBox(height: 20),
+                    _buildLineaTemporal(),
                   ],
                 );
               }
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Expanded(child: CardRecursosSubidos()),
-                  SizedBox(width: 20),
-                  Expanded(child: CardLineaTemporalRecursos()),
+                children: [
+                  Expanded(child: _buildRecursosSubidos()),
+                  const SizedBox(width: 20),
+                  Expanded(child: _buildLineaTemporal()),
                 ],
               );
             },
           ),
           const SizedBox(height: 20),
-          const CardRecursosCategoria(),
+          CardRecursosCategoria(
+            items: data?.porInteres ?? const [],
+            conInteres: data?.conInteres ?? 0,
+            total: data?.total ?? 0,
+            isLoading: isLoading,
+          ),
         ],
       ],
     );

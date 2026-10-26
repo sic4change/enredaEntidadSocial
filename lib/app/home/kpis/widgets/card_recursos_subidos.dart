@@ -5,7 +5,18 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardRecursosSubidos extends StatelessWidget {
-  const CardRecursosSubidos({Key? key}) : super(key: key);
+  final int total;
+  final int esteMes;
+  final List<DonutSegment> porCategoria;
+  final bool isLoading;
+
+  const CardRecursosSubidos({
+    Key? key,
+    this.total = 0,
+    this.esteMes = 0,
+    this.porCategoria = const [],
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,17 +31,33 @@ class CardRecursosSubidos extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text(
-            'Recursos subidos',
-            style: GoogleFonts.outfit(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: KpiColors.primaryDark,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Recursos subidos',
+                  style: GoogleFonts.outfit(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: KpiColors.primaryDark,
+                  ),
+                ),
+              ),
+              if (isLoading)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
-            'Total acumulado desde el inicio, en la vista seleccionada',
+            'Total acumulado desde el inicio',
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.normal,
@@ -44,7 +71,7 @@ class CardRecursosSubidos extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                '212',
+                '$total',
                 style: GoogleFonts.outfit(
                   fontSize: 54,
                   fontWeight: FontWeight.w600,
@@ -54,28 +81,30 @@ class CardRecursosSubidos extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'recursos',
+                total == 1 ? 'recurso' : 'recursos',
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   color: KpiColors.secondaryText,
                 ),
               ),
               const SizedBox(width: 14),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: KpiColors.lightTurquoise,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '▲ 18 este mes',
-                  style: GoogleFonts.outfit(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: KpiColors.primaryDark,
+              if (esteMes > 0)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: KpiColors.lightTurquoise,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '▲ $esteMes este mes',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: KpiColors.primaryDark,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -84,7 +113,7 @@ class CardRecursosSubidos extends StatelessWidget {
 
           // Por tipología
           Text(
-            'Por tipología',
+            'Por categoría',
             style: GoogleFonts.outfit(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -94,34 +123,45 @@ class CardRecursosSubidos extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Donut + Legend
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isSmall = constraints.maxWidth < 460;
-              if (isSmall) {
-                return Column(
+          if (porCategoria.isEmpty)
+            Text(
+              'Sin recursos registrados.',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: KpiColors.secondaryText,
+              ),
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isSmall = constraints.maxWidth < 460;
+                if (isSmall) {
+                  return Column(
+                    children: [
+                      _buildDonutChart(),
+                      const SizedBox(height: 16),
+                      _buildLegend(),
+                    ],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _buildDonutChart(),
-                    const SizedBox(height: 16),
-                    _buildLegend(),
+                    const SizedBox(width: 20),
+                    Expanded(child: _buildLegend()),
                   ],
                 );
-              }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _buildDonutChart(),
-                  const SizedBox(width: 20),
-                  Expanded(child: _buildLegend()),
-                ],
-              );
-            },
-          ),
+              },
+            ),
         ],
       ),
     );
   }
 
   Widget _buildDonutChart() {
+    final top = porCategoria.reduce((a, b) => b.count > a.count ? b : a);
+
     return SizedBox(
       width: 170,
       height: 170,
@@ -132,7 +172,7 @@ class CardRecursosSubidos extends StatelessWidget {
             margin: EdgeInsets.zero,
             series: <CircularSeries<DonutSegment, String>>[
               DoughnutSeries<DonutSegment, String>(
-                dataSource: KpiFakeData.recursosTipologia,
+                dataSource: porCategoria,
                 xValueMapper: (DonutSegment data, _) => data.label,
                 yValueMapper: (DonutSegment data, _) => data.count,
                 pointColorMapper: (DonutSegment data, _) => data.color,
@@ -147,7 +187,7 @@ class CardRecursosSubidos extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '30%',
+                '${top.percentage.round()}%',
                 style: GoogleFonts.outfit(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -156,12 +196,18 @@ class CardRecursosSubidos extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                'Empleo',
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: KpiColors.primaryDark,
+              SizedBox(
+                width: 100,
+                child: Text(
+                  top.label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: KpiColors.primaryDark,
+                  ),
                 ),
               ),
             ],
@@ -174,34 +220,38 @@ class CardRecursosSubidos extends StatelessWidget {
   Widget _buildLegend() {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: KpiFakeData.recursosTipologia.map((item) {
+      children: porCategoria.map((item) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.5),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 9,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      color: item.color,
-                      shape: BoxShape.circle,
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: item.color,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    item.label,
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      color: KpiColors.primaryDark,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        item.label,
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          color: KpiColors.primaryDark,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

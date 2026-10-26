@@ -327,46 +327,4 @@ class KpiFakeData {
     RankedBarItem(label: 'Otros sectores', count: 2),
   ];
 
-  // Recursos: Por tipología
-  static const List<DonutSegment> recursosTipologia = [
-    DonutSegment(label: 'Empleo', count: 64, percentage: 30, color: KpiColors.primaryDark),
-    DonutSegment(label: 'Prácticas', count: 38, percentage: 18, color: KpiColors.turquoise),
-    DonutSegment(label: 'Formación', count: 52, percentage: 25, color: KpiColors.lightTurquoise),
-    DonutSegment(label: 'Voluntariado', count: 24, percentage: 11, color: KpiColors.yellow),
-    DonutSegment(label: 'Ocio y tiempo libre', count: 21, percentage: 10, color: KpiColors.slate),
-    DonutSegment(label: 'Otros', count: 13, percentage: 6, color: KpiColors.borderLight),
-  ];
-
-  // Recursos: Línea temporal mensual
-  static const List<MonthDataPoint> evolucionRecursos = [
-    MonthDataPoint('Ene', 14),
-    MonthDataPoint('Feb', 18),
-    MonthDataPoint('Mar', 12),
-    MonthDataPoint('Abr', 21),
-    MonthDataPoint('May', 17),
-    MonthDataPoint('Jun', 24),
-    MonthDataPoint('Jul', 15),
-    MonthDataPoint('Ago', 20),
-    MonthDataPoint('Sep', 27),
-    MonthDataPoint('Oct', 23),
-    MonthDataPoint('Nov', null),
-    MonthDataPoint('Dic', null),
-  ];
-
-  // Recursos: Por categoría
-  static const List<RankedBarItem> recursosPorCategoria = [
-    RankedBarItem(label: 'Social', count: 34, percentage: 16),
-    RankedBarItem(label: 'Hostelería', count: 29, percentage: 14),
-    RankedBarItem(label: 'Tecnológico', count: 26, percentage: 12),
-    RankedBarItem(label: 'Servicios de salud', count: 22, percentage: 10),
-    RankedBarItem(label: 'Oficios y artesanías', count: 19, percentage: 9),
-    RankedBarItem(label: 'Turismo', count: 17, percentage: 8),
-    RankedBarItem(label: 'Industria', count: 15, percentage: 7),
-    RankedBarItem(label: 'Agricultura, silvicultura, pesca y ganadería', count: 12, percentage: 6),
-    RankedBarItem(label: 'Artístico', count: 11, percentage: 5),
-    RankedBarItem(label: 'Físico deportivo', count: 9, percentage: 4),
-    RankedBarItem(label: 'Científico', count: 7, percentage: 3),
-    RankedBarItem(label: 'Militar y FFCCS', count: 4, percentage: 2),
-    RankedBarItem(label: 'Otros', count: 7, percentage: 3),
-  ];
 }

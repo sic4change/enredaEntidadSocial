@@ -82,6 +82,27 @@ class ParticipantesKpiData {
   }
 }
 
+class RecursosKpiData {
+  final int total;
+  final int esteMes;
+  final List<DonutSegment> porCategoria;
+  final List<DateTime> fechas;
+  /// Recursos por ámbito de actuación (`interests`). Un recurso puede tener
+  /// varios, así que los porcentajes (sobre [conInteres]) no suman 100.
+  final List<RankedBarItem> porInteres;
+  /// Recursos con al menos un `interest` informado.
+  final int conInteres;
+
+  const RecursosKpiData({
+    required this.total,
+    required this.esteMes,
+    required this.porCategoria,
+    required this.fechas,
+    this.porInteres = const [],
+    this.conInteres = 0,
+  });
+}
+
 class KpiService {
   final Database database;
 
@@ -1271,5 +1292,132 @@ class KpiService {
         icon: Icons.description_outlined,
       ),
     ];
+  }
+
+  static const List<Color> _resourceCategoryColors = [
+    KpiColors.primaryDark,
+    KpiColors.turquoise,
+    KpiColors.lightTurquoise,
+    KpiColors.yellow,
+    KpiColors.slate,
+    KpiColors.borderLight,
+  ];
+
+  /// Carga los KPIs de recursos. Se cuentan todos los recursos de la
+  /// colección, independientemente del filtro seleccionado.
+  Future<RecursosKpiData> loadRecursosKpi() async {
+    final firestore = FirebaseFirestore.instance;
+    final results = await Future.wait([
+      firestore.collection(APIPath.resources()).get(),
+      firestore.collection(APIPath.resourcesCategories()).get(),
+      firestore.collection(APIPath.interests()).get(),
+    ]);
+
+    // Ámbitos de actuación: se indexan por `interestId` y por el id del documento
+    final interestNames = <String>[];
+    final Map<String, int> interestIndexByKey = {};
+    for (final doc in results[2].docs) {
+      final data = doc.data();
+      final name = (data['name'] ?? '').toString().trim();
+      if (name.isEmpty) continue;
+      final idx = interestNames.length;
+      interestNames.add(name);
+      interestIndexByKey[doc.id] = idx;
+      if (data['interestId'] != null) interestIndexByKey[data['interestId'].toString()] = idx;
+    }
+    final interestCounts = List<int>.filled(interestNames.length, 0);
+    int conInteres = 0;
+
+    final categories = <({String id, String name, int order})>[];
+    for (final doc in results[1].docs) {
+      final data = doc.data();
+      final name = (data['name'] ?? '').toString().trim();
+      if (name.isEmpty) continue;
+      categories.add((
+        id: doc.id,
+        name: name,
+        order: data['order'] is int ? data['order'] as int : 0,
+      ));
+    }
+    categories.sort((a, b) => a.order.compareTo(b.order));
+    final Map<String, int> categoryIndexById = {
+      for (int i = 0; i < categories.length; i++) categories[i].id: i,
+    };
+    final Map<String, int> categoryIndexByName = {
+      for (int i = 0; i < categories.length; i++) _normalizeText(categories[i].name): i,
+    };
+
+    final counts = List<int>.filled(categories.length, 0);
+    int otros = 0;
+    final List<DateTime> fechas = [];
+    final now = DateTime.now();
+    int esteMes = 0;
+
+    for (final doc in results[0].docs) {
+      final data = doc.data();
+
+      final rawDate = data['createdate'];
+      final DateTime? created = rawDate is Timestamp ? rawDate.toDate() : (rawDate is DateTime ? rawDate : null);
+      if (created != null) {
+        fechas.add(created);
+        if (created.year == now.year && created.month == now.month) esteMes++;
+      }
+
+      final idx = categoryIndexById[(data['resourceCategory'] ?? '').toString()] ??
+          categoryIndexByName[_normalizeText((data['resourceCategoryName'] ?? '').toString())];
+      if (idx != null) {
+        counts[idx]++;
+      } else {
+        otros++;
+      }
+
+      final rawInterests = data['interests'];
+      if (rawInterests is List && rawInterests.isNotEmpty) {
+        conInteres++;
+        final matched = <int>{};
+        for (final key in rawInterests) {
+          final i = interestIndexByKey[key?.toString()];
+          if (i != null) matched.add(i);
+        }
+        for (final i in matched) {
+          interestCounts[i]++;
+        }
+      }
+    }
+
+    final int total = results[0].docs.length;
+    double pct(int count) => total > 0 ? count / total * 100 : 0.0;
+
+    final porCategoria = <DonutSegment>[
+      for (int i = 0; i < categories.length; i++)
+        if (counts[i] > 0)
+          DonutSegment(
+            label: categories[i].name,
+            count: counts[i],
+            percentage: pct(counts[i]),
+            color: _resourceCategoryColors[i % _resourceCategoryColors.length],
+          ),
+      if (otros > 0)
+        DonutSegment(label: 'Otros', count: otros, percentage: pct(otros), color: KpiColors.divider),
+    ];
+
+    final porInteres = [
+      for (int i = 0; i < interestNames.length; i++)
+        if (interestCounts[i] > 0)
+          RankedBarItem(
+            label: interestNames[i],
+            count: interestCounts[i],
+            percentage: conInteres > 0 ? interestCounts[i] / conInteres * 100 : 0.0,
+          ),
+    ]..sort((a, b) => b.count.compareTo(a.count));
+
+    return RecursosKpiData(
+      total: total,
+      esteMes: esteMes,
+      porCategoria: porCategoria,
+      fechas: fechas,
+      porInteres: porInteres,
+      conInteres: conInteres,
+    );
   }
 }
