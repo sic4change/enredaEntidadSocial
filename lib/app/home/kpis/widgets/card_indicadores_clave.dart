@@ -4,10 +4,46 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardIndicadoresClave extends StatelessWidget {
-  const CardIndicadoresClave({Key? key}) : super(key: key);
+  final List<KeyIndicatorMetric> indicators;
+  final bool isLoading;
+
+  const CardIndicadoresClave({
+    Key? key,
+    this.indicators = const [],
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    if (indicators.isEmpty) {
+      return Container(
+        height: 120,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: KpiColors.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: KpiColors.cardShadow,
+        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                ),
+              )
+            : Text(
+                'Sin datos de indicadores en esta selección.',
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  color: KpiColors.secondaryText,
+                ),
+              ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: KpiColors.cardBackground,
@@ -23,7 +59,7 @@ class CardIndicadoresClave extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: KpiFakeData.keyIndicators.asMap().entries.map((entry) {
+                children: indicators.asMap().entries.map((entry) {
                   final index = entry.key;
                   final item = entry.value;
                   return Row(
@@ -32,7 +68,7 @@ class CardIndicadoresClave extends StatelessWidget {
                         width: 200,
                         child: _buildIndicatorColumn(item),
                       ),
-                      if (index < KpiFakeData.keyIndicators.length - 1)
+                      if (index < indicators.length - 1)
                         Container(
                           height: 240,
                           width: 1,
@@ -47,7 +83,7 @@ class CardIndicadoresClave extends StatelessWidget {
           }
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: KpiFakeData.keyIndicators.asMap().entries.map((entry) {
+            children: indicators.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
               return Expanded(
@@ -55,7 +91,7 @@ class CardIndicadoresClave extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(child: _buildIndicatorColumn(item)),
-                    if (index < KpiFakeData.keyIndicators.length - 1)
+                    if (index < indicators.length - 1)
                       Container(
                         height: 240,
                         width: 1,
@@ -190,36 +226,37 @@ class CardIndicadoresClave extends StatelessWidget {
         const SizedBox(height: 12),
 
         // Variation badge
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: KpiColors.lightTurquoise,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                item.variation,
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: KpiColors.primaryDark,
+        if (item.variation.isNotEmpty)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: KpiColors.lightTurquoise,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  item.variation,
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: KpiColors.primaryDark,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                'vs. año anterior',
-                style: GoogleFonts.outfit(
-                  fontSize: 11,
-                  color: KpiColors.secondaryText,
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  'vs. año anterior',
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    color: KpiColors.secondaryText,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         const SizedBox(height: 8),
 
         // Previous year info

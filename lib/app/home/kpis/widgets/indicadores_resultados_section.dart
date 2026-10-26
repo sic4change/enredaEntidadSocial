@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../kpi_models.dart';
 import 'section_header.dart';
 import 'card_indicadores_clave.dart';
 import 'card_recorrido_resultados.dart';
@@ -7,11 +8,15 @@ import 'card_resultados_sector.dart';
 class IndicadoresResultadosSection extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onToggle;
+  final List<KeyIndicatorMetric> indicadoresClave;
+  final bool isLoading;
 
   const IndicadoresResultadosSection({
     Key? key,
     required this.isExpanded,
     required this.onToggle,
+    this.indicadoresClave = const [],
+    this.isLoading = false,
   }) : super(key: key);
 
   @override
@@ -27,7 +32,7 @@ class IndicadoresResultadosSection extends StatelessWidget {
         ),
         if (isExpanded) ...[
           const SizedBox(height: 16),
-          const CardIndicadoresClave(),
+          CardIndicadoresClave(indicators: indicadoresClave, isLoading: isLoading),
           const SizedBox(height: 20),
           LayoutBuilder(
             builder: (context, constraints) {

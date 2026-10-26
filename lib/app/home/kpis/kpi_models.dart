@@ -308,62 +308,6 @@ class KpiFakeData {
     AgePyramidRow(label: 'Más de 54', mujeres: 5, hombres: 3, total: 8),
   ];
 
-  // Indicadores Clave
-  static const List<KeyIndicatorMetric> keyIndicators = [
-    KeyIndicatorMetric(
-      title: 'Ingreso a formación',
-      mainValue: '64',
-      unit: 'personas',
-      variation: '▲ 33%',
-      isPositive: true,
-      previousYearText: 'En 2025: 48 personas',
-      source: 'Fuente: IPIL › Inscripción formación',
-      icon: Icons.school_outlined,
-    ),
-    KeyIndicatorMetric(
-      title: 'Cualificaciones obtenidas',
-      mainValue: '32',
-      unit: 'personas',
-      variation: '▼ 26%',
-      isPositive: false,
-      previousYearText: 'En 2025: 43 personas',
-      source: 'Fuente: IPIL › Certificación formación',
-      icon: Icons.star_outline_rounded,
-    ),
-    KeyIndicatorMetric(
-      title: 'Empleos conseguidos',
-      mainValue: '21',
-      unit: 'personas',
-      variation: '▲ 31%',
-      isPositive: true,
-      previousYearText: 'En 2025: 16 personas',
-      source: 'Fuente: Informe de cierre',
-      icon: Icons.work_outline,
-    ),
-    KeyIndicatorMetric(
-      title: 'Mantenimiento del empleo',
-      mainValue: '17',
-      unit: 'personas a las 4 semanas',
-      secondValue: '12',
-      secondUnit: 'personas a los 6 meses',
-      variation: '▲ 9%',
-      isPositive: true,
-      previousYearText: 'A los 6 meses en 2025: 11 personas',
-      source: 'Fuente: IPIL › Seguimiento',
-      icon: Icons.shield_outlined,
-    ),
-    KeyIndicatorMetric(
-      title: 'CV realizado en Enreda',
-      mainValue: '58',
-      unit: 'personas',
-      variation: '▲ 21%',
-      isPositive: true,
-      previousYearText: 'En 2025: 48 personas',
-      source: 'Fuente: Enreda › Currículum',
-      icon: Icons.description_outlined,
-    ),
-  ];
-
   // Recorrido de resultados (Funnel)
   static const List<FunnelStep> funnelSteps = [
     FunnelStep(percentage: 100, count: 142, label: 'Participantes inscritos', ringColor: KpiColors.primaryDark),

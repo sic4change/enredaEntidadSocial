@@ -284,6 +284,8 @@ class _KpiPageState extends State<KpiPage> {
                         _isResultadosExpanded = !_isResultadosExpanded;
                       });
                     },
+                    indicadoresClave: _participantesData?.indicadoresClave ?? const [],
+                    isLoading: _isLoadingParticipantes,
                   ),
                   const SizedBox(height: 36),
 

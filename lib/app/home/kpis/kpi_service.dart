@@ -4,11 +4,12 @@ import '../../models/closureReport.dart';
 import '../../models/followReport.dart';
 import '../../models/derivationReport.dart';
 import '../../models/education.dart';
+import '../../models/ipilEntry.dart';
 import '../../services/database.dart';
 import '../../services/api_path.dart';
 import '../../values/strings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart' show Color;
+import 'package:flutter/material.dart' show Color, IconData, Icons;
 import 'kpi_colors.dart';
 import 'kpi_models.dart';
 
@@ -32,6 +33,7 @@ class ParticipantesKpiData {
   final List<DonutSegment> competenciasPorCategoria;
   final List<NacionalidadItem> nacionalidades;
   final int nacionalidadSinEspecificar;
+  final List<KeyIndicatorMetric> indicadoresClave;
 
   const ParticipantesKpiData({
     required this.total,
@@ -53,6 +55,7 @@ class ParticipantesKpiData {
     this.competenciasPorCategoria = const [],
     this.nacionalidades = const [],
     this.nacionalidadSinEspecificar = 0,
+    this.indicadoresClave = const [],
   });
 
   static ParticipantesKpiData empty() {
@@ -352,6 +355,11 @@ class KpiService {
 
     final nacionalidades = _calculateNacionalidades(filteredUsers);
 
+    final indicadoresClave = await _loadIndicadoresClave(
+      users: filteredUsers,
+      closureReportDocs: results[1].docs,
+    );
+
     final competencias = _calculateCompetencias(
       users: filteredUsers,
       competencyDocs: results[5].docs,
@@ -435,6 +443,7 @@ class KpiService {
       competenciasPorCategoria: competencias.porCategoria,
       nacionalidades: nacionalidades.items,
       nacionalidadSinEspecificar: nacionalidades.sinEspecificar,
+      indicadoresClave: indicadoresClave,
     );
   }
 
@@ -1038,5 +1047,229 @@ class KpiService {
       ..sort((a, b) => b.total != a.total ? b.total.compareTo(a.total) : a.label.compareTo(b.label));
 
     return (items: items, sinEspecificar: sinEspecificar);
+  }
+
+  /// Calcula los indicadores clave de resultados. Cada indicador cuenta
+  /// participantes distintos; el valor principal es el del año en curso y se
+  /// compara con el año anterior (salvo el CV, que no tiene fecha).
+  Future<List<KeyIndicatorMetric>> _loadIndicadoresClave({
+    required List<UserEnreda> users,
+    required List<QueryDocumentSnapshot<Map<String, dynamic>>> closureReportDocs,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+    final userIds = {
+      for (final u in users)
+        if (u.userId != null && u.userId!.isNotEmpty) u.userId!,
+    };
+
+    // Opciones de los checklists del IPIL: se buscan las de
+    // "Inscripción formación" y "Certificación formación" por su label.
+    final optionCollections = [
+      APIPath.ipilReinforcement(),
+      APIPath.ipilContextualization(),
+      APIPath.ipilConnectionTerritory(),
+      APIPath.ipilInterviews(),
+      APIPath.ipilIntermediations(),
+      APIPath.ipilObtainingEmployment(),
+      APIPath.ipilImprovingEmployment(),
+      APIPath.ipilPostWorkSupport(),
+      APIPath.ipilCoordination(),
+      APIPath.ipilLegal(),
+      APIPath.ipilEconomicBag(),
+      APIPath.ipilSpecificSkills(),
+      APIPath.ipilSoftSkills(),
+      APIPath.ipilDigitalSkills(),
+      APIPath.ipilLaborSkills(),
+      APIPath.ipilResults(),
+    ];
+    final snapshots = await Future.wait([
+      firestore.collection(APIPath.ipilEntry()).get(),
+      ...optionCollections.map((c) => firestore.collection(c).get()),
+    ]);
+
+    final Set<String> inscripcionKeys = {};
+    final Set<String> certificacionKeys = {};
+    for (final snap in snapshots.skip(1)) {
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final label = _normalizeText((data['label'] ?? '').toString());
+        if (!label.contains('formaci')) continue;
+        final Set<String>? target = label.contains('inscripci')
+            ? inscripcionKeys
+            : (label.contains('certificaci') ? certificacionKeys : null);
+        if (target == null) continue;
+        target.add(doc.id);
+        target.add((data['label'] ?? '').toString());
+        data.forEach((key, value) {
+          if (key.endsWith('Id') && value != null) target.add(value.toString());
+        });
+      }
+    }
+
+    final int currentYear = DateTime.now().year;
+    final int previousYear = currentYear - 1;
+
+    // Participantes distintos por año para cada indicador
+    final Map<int, Set<String>> inscripcion = {currentYear: {}, previousYear: {}};
+    final Map<int, Set<String>> certificacion = {currentYear: {}, previousYear: {}};
+    final Map<int, Set<String>> empleo = {currentYear: {}, previousYear: {}};
+    final Map<int, Set<String>> mantiene4Semanas = {currentYear: {}, previousYear: {}};
+    final Map<int, Set<String>> mantiene6Meses = {currentYear: {}, previousYear: {}};
+
+    void add(Map<int, Set<String>> target, DateTime? date, String userId) {
+      if (date == null) return;
+      target[date.year]?.add(userId);
+    }
+
+    for (final doc in snapshots[0].docs) {
+      final IpilEntry ipil;
+      try {
+        ipil = IpilEntry.fromMap(doc.data(), doc.id);
+      } catch (_) {
+        continue;
+      }
+      if (!userIds.contains(ipil.userId)) continue;
+
+      final checked = <String>{
+        ...?ipil.reinforcement,
+        ...?ipil.contextualization,
+        ...?ipil.connectionTerritory,
+        ...?ipil.interviews,
+        ...?ipil.intermediations,
+        ...?ipil.obtainingEmployment,
+        ...?ipil.improvingEmployment,
+        ...?ipil.coordination,
+        ...?ipil.postWorkSupport,
+        ...?ipil.legal,
+        ...?ipil.economicBag,
+        ...?ipil.specificSkills,
+        ...?ipil.softSkills,
+        ...?ipil.digitalSkills,
+        ...?ipil.laborSkills,
+        ...?ipil.results,
+      };
+      if (checked.any(inscripcionKeys.contains)) add(inscripcion, ipil.date, ipil.userId);
+      if (checked.any(certificacionKeys.contains)) add(certificacion, ipil.date, ipil.userId);
+
+      if (ipil.fourWeeksCheck == true) {
+        if (ipil.fourWeeksSituation == StringConst.IPIL_SITUATION_EMPLOYMENT) {
+          add(empleo, ipil.date, ipil.userId);
+        } else if (ipil.fourWeeksSituation == StringConst.IPIL_SITUATION_KEEPS_EMPLOYMENT) {
+          add(mantiene4Semanas, ipil.date, ipil.userId);
+        }
+      }
+      if (ipil.sixMonthsCheck == true) {
+        if (ipil.sixMonthsSituation == StringConst.IPIL_SITUATION_EMPLOYMENT) {
+          add(empleo, ipil.date, ipil.userId);
+        } else if (ipil.sixMonthsSituation == StringConst.IPIL_SITUATION_KEEPS_EMPLOYMENT) {
+          add(mantiene6Meses, ipil.date, ipil.userId);
+        }
+      }
+    }
+
+    // Empleos conseguidos en el informe de cierre ("Consecución de empleo: Si")
+    for (final doc in closureReportDocs) {
+      try {
+        final report = ClosureReport.fromMap(doc.data(), doc.id);
+        final uId = report.userId ?? '';
+        if (!userIds.contains(uId)) continue;
+        if (_normalizeText(report.jobObtaining ?? '') != 'si') continue;
+        add(empleo, report.jobObtainDate ?? report.completedDate ?? report.closeDate, uId);
+      } catch (_) {}
+    }
+
+    // CV realizado en Enreda: participantes con alguna experiencia o formación
+    final idList = userIds.toList();
+    final Set<String> conCv = {};
+    final cvSnapshots = await Future.wait([
+      for (int i = 0; i < idList.length; i += 30)
+        firestore
+            .collection(APIPath.experiences())
+            .where('userId', whereIn: idList.sublist(i, i + 30 > idList.length ? idList.length : i + 30))
+            .get(),
+    ]);
+    for (final snap in cvSnapshots) {
+      for (final doc in snap.docs) {
+        final uId = doc.data()['userId']?.toString();
+        if (uId != null) conCv.add(uId);
+      }
+    }
+
+    String variation(int current, int previous) {
+      if (previous == 0) return current > 0 ? '▲ nuevo' : '= 0%';
+      final pct = ((current - previous) / previous * 100).round();
+      if (pct > 0) return '▲ $pct%';
+      if (pct < 0) return '▼ ${pct.abs()}%';
+      return '= 0%';
+    }
+
+    String personas(int n) => n == 1 ? 'persona' : 'personas';
+
+    KeyIndicatorMetric yearly({
+      required String title,
+      required Map<int, Set<String>> data,
+      required String source,
+      required IconData icon,
+    }) {
+      final current = data[currentYear]!.length;
+      final previous = data[previousYear]!.length;
+      return KeyIndicatorMetric(
+        title: title,
+        mainValue: '$current',
+        unit: personas(current),
+        variation: variation(current, previous),
+        isPositive: current >= previous,
+        previousYearText: 'En $previousYear: $previous ${personas(previous)}',
+        source: source,
+        icon: icon,
+      );
+    }
+
+    final m4Current = mantiene4Semanas[currentYear]!.length;
+    final m6Current = mantiene6Meses[currentYear]!.length;
+    final m6Previous = mantiene6Meses[previousYear]!.length;
+
+    return [
+      yearly(
+        title: 'Ingreso a formación',
+        data: inscripcion,
+        source: 'Fuente: IPIL › Inscripción formación',
+        icon: Icons.school_outlined,
+      ),
+      yearly(
+        title: 'Cualificaciones obtenidas',
+        data: certificacion,
+        source: 'Fuente: IPIL › Certificación formación',
+        icon: Icons.star_outline_rounded,
+      ),
+      yearly(
+        title: 'Empleos conseguidos',
+        data: empleo,
+        source: 'Fuente: Informe de cierre e IPIL › Seguimiento',
+        icon: Icons.work_outline,
+      ),
+      KeyIndicatorMetric(
+        title: 'Mantenimiento del empleo',
+        mainValue: '$m4Current',
+        unit: '${personas(m4Current)} a las 4 semanas',
+        secondValue: '$m6Current',
+        secondUnit: '${personas(m6Current)} a los 6 meses',
+        variation: variation(m6Current, m6Previous),
+        isPositive: m6Current >= m6Previous,
+        previousYearText: 'A los 6 meses en $previousYear: $m6Previous ${personas(m6Previous)}',
+        source: 'Fuente: IPIL › Seguimiento',
+        icon: Icons.shield_outlined,
+      ),
+      KeyIndicatorMetric(
+        title: 'CV realizado en Enreda',
+        mainValue: '${conCv.length}',
+        unit: personas(conCv.length),
+        variation: '',
+        isPositive: true,
+        previousYearText: 'Total acumulado (sin fecha de realización)',
+        source: 'Fuente: Enreda › Currículum',
+        icon: Icons.description_outlined,
+      ),
+    ];
   }
 }
