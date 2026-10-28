@@ -1,17 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../models/userEnreda.dart';
+import '../kpi_breakdown.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
+
+/// Fila de la tabla ya desagregada: un valor por grupo.
+class _BreakdownRow {
+  final String label;
+  final List<int> values;
+  final bool isIndented;
+  final bool isTotal;
+
+  const _BreakdownRow(this.label, this.values,
+      {this.isIndented = false, this.isTotal = false});
+
+  int get total => values.fold(0, (a, b) => a + b);
+}
 
 class CardSituacionEmpleo extends StatefulWidget {
   final List<SituacionEmpleoRow>? situacionInicialRows;
   final List<SituacionEmpleoRow>? situacionActualRows;
+  final List<UserEnreda> users;
+
+  /// Categoría (ver `KpiService.situacionEmpleoCategories`) por userId.
+  final Map<String, int> situacionInicialPorUsuario;
+  final Map<String, int> situacionActualPorUsuario;
   final bool isLoading;
 
   const CardSituacionEmpleo({
     Key? key,
     this.situacionInicialRows,
     this.situacionActualRows,
+    this.users = const [],
+    this.situacionInicialPorUsuario = const {},
+    this.situacionActualPorUsuario = const {},
     this.isLoading = false,
   }) : super(key: key);
 
@@ -21,29 +44,59 @@ class CardSituacionEmpleo extends StatefulWidget {
 
 class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
   String _selectedTab = 'Situación inicial';
+  KpiBreakdown _breakdown = KpiBreakdown.genero;
+
+  KpiGroups get _groups => KpiGroups.of(_breakdown, widget.users);
+
+  /// Filas de la tabla según el desglose elegido.
+  List<_BreakdownRow> get _rows {
+    if (_breakdown == KpiBreakdown.genero) {
+      return _currentRows
+          .map((r) => _BreakdownRow(
+              r.label, [r.mujeres, r.hombres, r.noBinario],
+              isIndented: r.isIndented, isTotal: r.isTotal))
+          .toList();
+    }
+
+    final categories = _selectedTab == 'Situación inicial'
+        ? widget.situacionInicialPorUsuario
+        : widget.situacionActualPorUsuario;
+    // Categorías: 0 corta, 1 larga, 2 otro desempleo, 3 inactiva, 4 empleada, 5 sin especificar
+    final c = _groups.countByRow(widget.users, 6, (u) => categories[u.userId]);
+    List<int> sum(List<int> idx) => List.generate(
+        _groups.length, (g) => idx.fold(0, (a, i) => a + c[i][g]));
+
+    final rows = [
+      _BreakdownRow('Desempleadas/os', sum([0, 1, 2])),
+      _BreakdownRow('Corta duración', c[0], isIndented: true),
+      _BreakdownRow('Larga duración', c[1], isIndented: true),
+      _BreakdownRow('Inactivas/os', c[3]),
+      _BreakdownRow('Empleadas/os', c[4]),
+      if (c[5].any((v) => v > 0)) _BreakdownRow('Sin especificar', c[5]),
+    ];
+    return [
+      ...rows,
+      _BreakdownRow('Total', sum([0, 1, 2, 3, 4, 5]), isTotal: true)
+    ];
+  }
 
   List<SituacionEmpleoRow> get _currentRows {
     if (_selectedTab == 'Situación inicial') {
       return widget.situacionInicialRows ?? KpiFakeData.situacionEmpleoRows;
     } else {
-      return widget.situacionActualRows ?? widget.situacionInicialRows ?? KpiFakeData.situacionEmpleoRows;
+      return widget.situacionActualRows ??
+          widget.situacionInicialRows ??
+          KpiFakeData.situacionEmpleoRows;
     }
-  }
-
-  double get _maxVal {
-    final rows = _currentRows;
-    for (final r in rows) {
-      if (r.isTotal && r.total > 0) {
-        return r.total.toDouble();
-      }
-    }
-    return 1.0;
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentRows = _currentRows;
-    final maxVal = _maxVal;
+    final groups = _groups;
+    final currentRows = _rows;
+    final totalRow = currentRows.where((r) => r.isTotal && r.total > 0);
+    final double maxVal =
+        totalRow.isNotEmpty ? totalRow.first.total.toDouble() : 1.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -110,7 +163,7 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
-              width: 820,
+              width: 900,
               child: Column(
                 children: [
                   // Table Legend Header
@@ -118,9 +171,8 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
                     children: [
                       const SizedBox(width: 180), // Label space
                       const Expanded(child: SizedBox()), // Bars space
-                      _buildHeaderCol('Mujeres', KpiColors.yellow),
-                      _buildHeaderCol('Hombres', KpiColors.primaryDark),
-                      _buildHeaderCol('No binario', KpiColors.slate),
+                      for (int g = 0; g < groups.length; g++)
+                        _buildHeaderCol(groups.labels[g], groups.colors[g]),
                       _buildHeaderCol('Total', null),
                     ],
                   ),
@@ -132,13 +184,13 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
                       return Column(
                         children: [
                           const Divider(height: 24, color: KpiColors.divider),
-                          _buildRow(row, maxVal),
+                          _buildRow(row, maxVal, groups),
                         ],
                       );
                     }
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: _buildRow(row, maxVal),
+                      child: _buildRow(row, maxVal, groups),
                     );
                   }).toList(),
                 ],
@@ -210,7 +262,9 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? KpiColors.primaryDark : KpiColors.secondaryText,
+                  color: isSelected
+                      ? KpiColors.primaryDark
+                      : KpiColors.secondaryText,
                 ),
               ),
             ),
@@ -221,38 +275,15 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
   }
 
   Widget _buildDisaggregateChip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: KpiColors.borderLight),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Desagregar por: Género',
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: KpiColors.primaryDark,
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: KpiColors.primaryDark,
-          ),
-        ],
-      ),
+    return KpiBreakdownChip(
+      value: _breakdown,
+      onChanged: (value) => setState(() => _breakdown = value),
     );
   }
 
   Widget _buildHeaderCol(String label, Color? dotColor) {
     return SizedBox(
-      width: 75,
+      width: 90,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -267,12 +298,15 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
             ),
             const SizedBox(width: 4),
           ],
-          Text(
-            label,
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: KpiColors.secondaryText,
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: KpiColors.secondaryText,
+              ),
             ),
           ),
         ],
@@ -280,16 +314,18 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
     );
   }
 
-  Widget _buildRow(SituacionEmpleoRow row, double maxVal) {
+  Widget _buildRow(_BreakdownRow row, double maxVal, KpiGroups groups) {
     const double maxBarWidth = 280;
     final double safeMax = maxVal > 0 ? maxVal : 1.0;
-    final double barWidth = safeMax > 0 ? (row.total / safeMax) * maxBarWidth : 0.0;
+    final double barWidth =
+        safeMax > 0 ? (row.total / safeMax) * maxBarWidth : 0.0;
 
     return Row(
       children: [
         // Label
-        SizedBox(
+        Container(
           width: 180,
+          padding: EdgeInsets.only(left: row.isIndented ? 16 : 0),
           child: Text(
             row.label,
             style: GoogleFonts.outfit(
@@ -312,21 +348,12 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
                       borderRadius: BorderRadius.circular(4),
                       child: Row(
                         children: [
-                          if (row.mujeres > 0)
-                            Expanded(
-                              flex: row.mujeres,
-                              child: Container(color: KpiColors.yellow),
-                            ),
-                          if (row.hombres > 0)
-                            Expanded(
-                              flex: row.hombres,
-                              child: Container(color: KpiColors.primaryDark),
-                            ),
-                          if (row.noBinario > 0)
-                            Expanded(
-                              flex: row.noBinario,
-                              child: Container(color: KpiColors.slate),
-                            ),
+                          for (int g = 0; g < row.values.length; g++)
+                            if (row.values[g] > 0)
+                              Expanded(
+                                flex: row.values[g],
+                                child: Container(color: groups.colors[g]),
+                              ),
                         ],
                       ),
                     )
@@ -335,10 +362,9 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
           ),
         ),
 
-        // 4 Columns: Mujeres, Hombres, No binario, Total
-        _buildValueCol(row.mujeres.toString(), isTotal: row.isTotal),
-        _buildValueCol(row.hombres.toString(), isTotal: row.isTotal),
-        _buildValueCol(row.noBinario.toString(), isTotal: row.isTotal),
+        // Una columna por grupo + Total
+        for (final v in row.values)
+          _buildValueCol(v.toString(), isTotal: row.isTotal),
         _buildValueCol(row.total.toString(), isTotal: true),
       ],
     );
@@ -346,7 +372,7 @@ class _CardSituacionEmpleoState extends State<CardSituacionEmpleo> {
 
   Widget _buildValueCol(String val, {bool isTotal = false}) {
     return SizedBox(
-      width: 75,
+      width: 90,
       child: Text(
         val,
         textAlign: TextAlign.right,

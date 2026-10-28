@@ -47,7 +47,8 @@ class CardCondicionesSobrevenidas extends StatelessWidget {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
                   ),
                 ),
             ],
@@ -112,7 +113,9 @@ class CardCondicionesSobrevenidas extends StatelessWidget {
                   ),
                   Container(
                     height: 12,
-                    width: item.count > 0 ? constraints.maxWidth * pct.clamp(0.05, 1.0) : 0,
+                    width: item.count > 0
+                        ? constraints.maxWidth * pct.clamp(0.05, 1.0)
+                        : 0,
                     decoration: BoxDecoration(
                       color: KpiColors.turquoise,
                       borderRadius: BorderRadius.circular(6),

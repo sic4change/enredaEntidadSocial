@@ -40,7 +40,8 @@ class SectionHeader extends StatelessWidget {
               decoration: BoxDecoration(
                 color: KpiColors.cardBackground,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: KpiColors.borderLight.withValues(alpha: 0.5)),
+                border: Border.all(
+                    color: KpiColors.borderLight.withValues(alpha: 0.5)),
               ),
               child: Text(
                 '$cardCount ${cardCount == 1 ? "tarjeta" : "tarjetas"}',
@@ -57,11 +58,13 @@ class SectionHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           onTap: onToggle,
           child: Container(
-            padding: const EdgeInsets.only(left: 12, right: 10, top: 5, bottom: 5),
+            padding:
+                const EdgeInsets.only(left: 12, right: 10, top: 5, bottom: 5),
             decoration: BoxDecoration(
               color: KpiColors.cardBackground,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: KpiColors.borderLight.withValues(alpha: 0.5)),
+              border: Border.all(
+                  color: KpiColors.borderLight.withValues(alpha: 0.5)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

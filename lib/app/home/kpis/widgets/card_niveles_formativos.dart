@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../models/userEnreda.dart';
+import '../kpi_breakdown.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
@@ -7,6 +9,11 @@ class CardNivelesFormativos extends StatefulWidget {
   final List<FormatLevelItem> nivelesCine;
   final List<FormatLevelItem> nivelesEstudios;
   final int sinEspecificar;
+  final List<UserEnreda> users;
+
+  /// Índice en [nivelesCine] / [nivelesEstudios] de cada participante (por userId).
+  final Map<String, int> cinePorUsuario;
+  final Map<String, int> estudiosPorUsuario;
   final bool isLoading;
 
   const CardNivelesFormativos({
@@ -14,6 +21,9 @@ class CardNivelesFormativos extends StatefulWidget {
     this.nivelesCine = const [],
     this.nivelesEstudios = const [],
     this.sinEspecificar = 0,
+    this.users = const [],
+    this.cinePorUsuario = const {},
+    this.estudiosPorUsuario = const {},
     this.isLoading = false,
   }) : super(key: key);
 
@@ -25,6 +35,19 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
   String _selectedMode = 'Nivel CINE';
 
   bool get _isCineMode => _selectedMode == 'Nivel CINE';
+  KpiBreakdown _breakdown = KpiBreakdown.genero;
+
+  KpiGroups get _groups => KpiGroups.of(_breakdown, widget.users);
+
+  /// Valores por grupo (género o nacionalidad) de cada nivel.
+  List<List<int>> _segments(
+      List<FormatLevelItem> levels, Map<String, int> porUsuario) {
+    if (_breakdown == KpiBreakdown.genero) {
+      return levels.map((l) => [l.mujeres, l.hombres, l.noBinario]).toList();
+    }
+    return _groups.countByRow(
+        widget.users, levels.length, (u) => porUsuario[u.userId]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +140,18 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
   }
 
   List<Widget> _buildCineDescriptions() {
-    return widget.nivelesCine.map((lvl) {
+    final groups = _groups;
+    final segments = _segments(widget.nivelesCine, widget.cinePorUsuario);
+    return widget.nivelesCine.asMap().entries.map((entry) {
+      final lvl = entry.value;
+      // La descripción trae el detalle por género tras el último ". "
+      final cut = lvl.description.lastIndexOf('. ');
+      final base =
+          cut >= 0 ? lvl.description.substring(0, cut) : lvl.description;
+      final detail = groups.detail(segments[entry.key]);
+      final description = _breakdown == KpiBreakdown.genero
+          ? lvl.description
+          : (detail.isEmpty ? base : '$base. $detail');
       return Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
         child: RichText(
@@ -132,7 +166,7 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
                 ),
               ),
               TextSpan(
-                text: '${lvl.description}\n',
+                text: '$description\n',
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.normal,
@@ -236,78 +270,21 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
   }
 
   Widget _buildDisaggregateChip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: KpiColors.borderLight),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Desagregar por: Género',
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: KpiColors.primaryDark,
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: KpiColors.primaryDark,
-          ),
-        ],
-      ),
+    return KpiBreakdownChip(
+      value: _breakdown,
+      onChanged: (value) => setState(() => _breakdown = value),
     );
   }
 
-  Widget _buildLegend() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildLegendItem('Mujeres', KpiColors.yellow),
-        const SizedBox(width: 12),
-        _buildLegendItem('Hombres', KpiColors.primaryDark),
-        const SizedBox(width: 12),
-        _buildLegendItem('No binario', KpiColors.slate),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: GoogleFonts.outfit(
-            fontSize: 12,
-            fontWeight: FontWeight.normal,
-            color: KpiColors.secondaryText,
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildLegend() => KpiGroupsLegend(groups: _groups);
 
   Widget _buildVerticalStackedBars() {
     const double maxBarHeight = 160.0;
     final levels = widget.nivelesCine;
     final double maxCount =
         levels.fold<int>(1, (m, l) => l.total > m ? l.total : m).toDouble();
+    final groups = _groups;
+    final segments = _segments(levels, widget.cinePorUsuario);
 
     return Column(
       children: [
@@ -316,12 +293,10 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: levels.map((item) {
+            children: levels.asMap().entries.map((entry) {
+              final item = entry.value;
+              final values = segments[entry.key];
               final barTotalHeight = (item.total / maxCount) * maxBarHeight;
-              final safeTotal = item.total > 0 ? item.total : 1;
-              final hMujeres = (item.mujeres / safeTotal) * barTotalHeight;
-              final hHombres = (item.hombres / safeTotal) * barTotalHeight;
-              final hNoBinario = (item.noBinario / safeTotal) * barTotalHeight;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -360,21 +335,13 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          if (item.noBinario > 0)
-                            Container(
-                              height: hNoBinario.clamp(2, maxBarHeight),
-                              color: KpiColors.slate,
-                            ),
-                          if (item.hombres > 0)
-                            Container(
-                              height: hHombres.clamp(4, maxBarHeight),
-                              color: KpiColors.primaryDark,
-                            ),
-                          if (item.mujeres > 0)
-                            Container(
-                              height: hMujeres.clamp(4, maxBarHeight),
-                              color: KpiColors.yellow,
-                            ),
+                          // El primer grupo queda abajo
+                          for (int g = values.length - 1; g >= 0; g--)
+                            if (values[g] > 0)
+                              Expanded(
+                                flex: values[g],
+                                child: Container(color: groups.colors[g]),
+                              ),
                         ],
                       ),
                     ),
@@ -427,9 +394,13 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
     }
     final int maxCount =
         levels.fold<int>(1, (m, l) => l.total > m ? l.total : m);
+    final groups = _groups;
+    final segments = _segments(levels, widget.estudiosPorUsuario);
 
     return Column(
-      children: levels.map((item) {
+      children: levels.asMap().entries.map((entry) {
+        final item = entry.value;
+        final values = segments[entry.key];
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6.0),
           child: Row(
@@ -454,7 +425,6 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
                   builder: (context, constraints) {
                     final barWidth =
                         (item.total / maxCount) * constraints.maxWidth;
-                    final safeTotal = item.total > 0 ? item.total : 1;
                     return Align(
                       alignment: Alignment.centerLeft,
                       child: ClipRRect(
@@ -464,22 +434,12 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
                           height: 16,
                           child: Row(
                             children: [
-                              if (item.mujeres > 0)
-                                Container(
-                                  width: (item.mujeres / safeTotal) * barWidth,
-                                  color: KpiColors.yellow,
-                                ),
-                              if (item.hombres > 0)
-                                Container(
-                                  width: (item.hombres / safeTotal) * barWidth,
-                                  color: KpiColors.primaryDark,
-                                ),
-                              if (item.noBinario > 0)
-                                Container(
-                                  width:
-                                      (item.noBinario / safeTotal) * barWidth,
-                                  color: KpiColors.slate,
-                                ),
+                              for (int g = 0; g < values.length; g++)
+                                if (values[g] > 0)
+                                  Expanded(
+                                    flex: values[g],
+                                    child: Container(color: groups.colors[g]),
+                                  ),
                             ],
                           ),
                         ),

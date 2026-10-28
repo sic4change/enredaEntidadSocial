@@ -17,35 +17,70 @@ class CardEvolucionInscripciones extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CardEvolucionInscripciones> createState() => _CardEvolucionInscripcionesState();
+  State<CardEvolucionInscripciones> createState() =>
+      _CardEvolucionInscripcionesState();
 }
 
-class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones> {
+class _CardEvolucionInscripcionesState
+    extends State<CardEvolucionInscripciones> {
   String _selectedPeriod = 'Año'; // 'Semana', 'Mes', 'Año'
   late int _selectedYear;
   late int _selectedMonth;
   late DateTime _selectedWeekStart;
 
   static const List<String> _monthNames = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre'
   ];
 
   static const List<String> _monthAbbr = [
-    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+    'Ene',
+    'Feb',
+    'Mar',
+    'Abr',
+    'May',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dic'
   ];
 
   static const List<String> _weekDays = [
-    'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'
+    'Lun',
+    'Mar',
+    'Mié',
+    'Jue',
+    'Vie',
+    'Sáb',
+    'Dom'
   ];
 
   static const List<String> _weekDayFullNames = [
-    'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+    'Sábado',
+    'Domingo'
   ];
 
   DateTime _getMonday(DateTime date) {
-    return DateTime(date.year, date.month, date.day).subtract(Duration(days: date.weekday - 1));
+    return DateTime(date.year, date.month, date.day)
+        .subtract(Duration(days: date.weekday - 1));
   }
 
   @override
@@ -99,7 +134,8 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
       int peakMonthCount = 0;
 
       for (int m = 1; m <= 12; m++) {
-        final count = dates.where((d) => d.year == _selectedYear && d.month == m).length;
+        final count =
+            dates.where((d) => d.year == _selectedYear && d.month == m).length;
         final bool isFuture = _selectedYear == now.year && m > now.month;
 
         if (isFuture) {
@@ -131,15 +167,18 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
       totalLabel = 'inscripciones en $monthName';
       avgLabel = 'media diaria';
 
-      final totalDaysInMonth = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
+      final totalDaysInMonth =
+          DateTime(_selectedYear, _selectedMonth + 1, 0).day;
       int peakDay = 1;
       int peakDayCount = 0;
 
       for (int day = 1; day <= totalDaysInMonth; day++) {
-        final count = dates.where((d) =>
-            d.year == _selectedYear &&
-            d.month == _selectedMonth &&
-            d.day == day).length;
+        final count = dates
+            .where((d) =>
+                d.year == _selectedYear &&
+                d.month == _selectedMonth &&
+                d.day == day)
+            .length;
         final bool isFuture = _selectedYear == now.year &&
             _selectedMonth == now.month &&
             day > now.day;
@@ -156,11 +195,13 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
         }
       }
 
-      final int daysElapsed = (_selectedYear == now.year && _selectedMonth == now.month)
-          ? now.day
-          : (_selectedYear < now.year || (_selectedYear == now.year && _selectedMonth < now.month)
-              ? totalDaysInMonth
-              : 1);
+      final int daysElapsed =
+          (_selectedYear == now.year && _selectedMonth == now.month)
+              ? now.day
+              : (_selectedYear < now.year ||
+                      (_selectedYear == now.year && _selectedMonth < now.month)
+                  ? totalDaysInMonth
+                  : 1);
       final double avg = daysElapsed > 0 ? totalCount / daysElapsed : 0.0;
       avgValue = avg.toStringAsFixed(1).replaceAll('.', ',');
 
@@ -181,11 +222,14 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
 
       for (int i = 0; i < 7; i++) {
         final dayDate = _selectedWeekStart.add(Duration(days: i));
-        final bool isFuture = dayDate.isAfter(DateTime(now.year, now.month, now.day));
-        final count = dates.where((d) =>
-            d.year == dayDate.year &&
-            d.month == dayDate.month &&
-            d.day == dayDate.day).length;
+        final bool isFuture =
+            dayDate.isAfter(DateTime(now.year, now.month, now.day));
+        final count = dates
+            .where((d) =>
+                d.year == dayDate.year &&
+                d.month == dayDate.month &&
+                d.day == dayDate.day)
+            .length;
 
         if (isFuture) {
           points.add(MonthDataPoint(_weekDays[i], null));
@@ -279,7 +323,8 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
             child: widget.isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
                     ),
                   )
                 : SfCartesianChart(
@@ -302,8 +347,10 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
                     margin: EdgeInsets.zero,
                     primaryXAxis: CategoryAxis(
                       majorGridLines: const MajorGridLines(width: 0),
-                      axisLine: const AxisLine(color: KpiColors.borderLight, width: 1),
-                      majorTickLines: const MajorTickLines(size: 6, color: KpiColors.borderLight),
+                      axisLine: const AxisLine(
+                          color: KpiColors.borderLight, width: 1),
+                      majorTickLines: const MajorTickLines(
+                          size: 6, color: KpiColors.borderLight),
                       labelStyle: GoogleFonts.outfit(
                         fontSize: 12,
                         color: KpiColors.secondaryText,
@@ -446,7 +493,9 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? KpiColors.primaryDark : KpiColors.secondaryText,
+                  color: isSelected
+                      ? KpiColors.primaryDark
+                      : KpiColors.secondaryText,
                 ),
               ),
             ),
@@ -471,8 +520,10 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
       onNext = () => setState(() => _selectedYear++);
     } else if (_selectedPeriod == 'Mes') {
       label = '${_monthNames[_selectedMonth - 1]} $_selectedYear';
-      canPrev = _selectedYear > minYear || (_selectedYear == minYear && _selectedMonth > 1);
-      canNext = _selectedYear < now.year || (_selectedYear == now.year && _selectedMonth < now.month);
+      canPrev = _selectedYear > minYear ||
+          (_selectedYear == minYear && _selectedMonth > 1);
+      canNext = _selectedYear < now.year ||
+          (_selectedYear == now.year && _selectedMonth < now.month);
       onPrev = () {
         setState(() {
           if (_selectedMonth == 1) {
@@ -499,16 +550,19 @@ class _CardEvolucionInscripcionesState extends State<CardEvolucionInscripciones>
       final startMonth = _monthAbbr[_selectedWeekStart.month - 1];
       final endMonth = _monthAbbr[weekEnd.month - 1];
       if (_selectedWeekStart.month == weekEnd.month) {
-        label = '${_selectedWeekStart.day} - ${weekEnd.day} $endMonth ${weekEnd.year}';
+        label =
+            '${_selectedWeekStart.day} - ${weekEnd.day} $endMonth ${weekEnd.year}';
       } else {
-        label = '${_selectedWeekStart.day} $startMonth - ${weekEnd.day} $endMonth ${weekEnd.year}';
+        label =
+            '${_selectedWeekStart.day} $startMonth - ${weekEnd.day} $endMonth ${weekEnd.year}';
       }
 
       canPrev = _selectedWeekStart.year >= minYear - 1;
       canNext = _selectedWeekStart.isBefore(_getMonday(now));
       onPrev = () {
         setState(() {
-          _selectedWeekStart = _selectedWeekStart.subtract(const Duration(days: 7));
+          _selectedWeekStart =
+              _selectedWeekStart.subtract(const Duration(days: 7));
         });
       };
       onNext = () {

@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import '../kpi_service.dart';
+import '../kpi_search.dart';
 import 'section_header.dart';
 import 'card_recursos_subidos.dart';
 import 'card_linea_temporal_recursos.dart';
 import 'card_recursos_categoria.dart';
 
 class RecursosSection extends StatelessWidget {
+  static const String sectionTitle = 'Recursos';
+  static const List<String> cardTitles = [
+    'Recursos subidos',
+    'Línea temporal de recursos',
+    'Recursos por categoría',
+  ];
+
+  /// Si alguna tarjeta de la sección coincide con [query].
+  static bool hasMatches(String query) =>
+      kpiMatchingCards(query, sectionTitle, cardTitles).isNotEmpty;
+
+  final String searchQuery;
   final bool isExpanded;
   final VoidCallback onToggle;
   final RecursosKpiData? data;
@@ -17,6 +30,7 @@ class RecursosSection extends StatelessWidget {
     required this.onToggle,
     this.data,
     this.isLoading = false,
+    this.searchQuery = '',
   }) : super(key: key);
 
   Widget _buildRecursosSubidos() => CardRecursosSubidos(
@@ -33,6 +47,25 @@ class RecursosSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (searchQuery.trim().isNotEmpty) {
+      final builders = <String, Widget Function()>{
+        'Recursos subidos': () => _buildRecursosSubidos(),
+        'Línea temporal de recursos': () => _buildLineaTemporal(),
+        'Recursos por categoría': () => CardRecursosCategoria(
+            items: data?.porInteres ?? const [],
+            conInteres: data?.conInteres ?? 0,
+            total: data?.total ?? 0,
+            isLoading: isLoading),
+      };
+      return KpiSearchResults(
+        sectionTitle: sectionTitle,
+        onToggle: onToggle,
+        cards: kpiMatchingCards(searchQuery, sectionTitle, cardTitles)
+            .map((t) => builders[t]!())
+            .toList(),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

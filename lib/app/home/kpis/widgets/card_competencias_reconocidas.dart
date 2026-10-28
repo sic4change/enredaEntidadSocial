@@ -49,7 +49,8 @@ class CardCompetenciasReconocidas extends StatelessWidget {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
                   ),
                 ),
             ],
@@ -69,7 +70,8 @@ class CardCompetenciasReconocidas extends StatelessWidget {
           Wrap(
             spacing: 16,
             runSpacing: 8,
-            children: categories.map((c) => _buildLegend(c.label, c.color)).toList(),
+            children:
+                categories.map((c) => _buildLegend(c.label, c.color)).toList(),
           ),
           const SizedBox(height: 20),
 

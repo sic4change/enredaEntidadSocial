@@ -16,20 +16,48 @@ class CardLineaTemporalRecursos extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CardLineaTemporalRecursos> createState() => _CardLineaTemporalRecursosState();
+  State<CardLineaTemporalRecursos> createState() =>
+      _CardLineaTemporalRecursosState();
 }
 
 class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
   static const List<String> _monthShort = [
-    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    'Ene',
+    'Feb',
+    'Mar',
+    'Abr',
+    'May',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dic',
   ];
   static const List<String> _monthLong = [
-    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto',
-    'septiembre', 'octubre', 'noviembre', 'diciembre',
+    'enero',
+    'febrero',
+    'marzo',
+    'abril',
+    'mayo',
+    'junio',
+    'julio',
+    'agosto',
+    'septiembre',
+    'octubre',
+    'noviembre',
+    'diciembre',
   ];
   static const List<String> _weekdayShort = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
   static const List<String> _weekdayLong = [
-    'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo',
+    'lunes',
+    'martes',
+    'miércoles',
+    'jueves',
+    'viernes',
+    'sábado',
+    'domingo',
   ];
 
   String _selectedPeriod = 'Año';
@@ -156,7 +184,8 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
           if (f.year == year) counts[f.month - 1]++;
         }
         for (int m = 1; m <= 12; m++) {
-          final isFuture = year > today.year || (year == today.year && m > today.month);
+          final isFuture =
+              year > today.year || (year == today.year && m > today.month);
           points.add(MonthDataPoint(
             _monthShort[m - 1],
             isFuture ? null : counts[m - 1].toDouble(),
@@ -185,15 +214,21 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
     int peakIdx = -1;
     for (int i = 0; i < points.length; i++) {
       final v = points[i].value;
-      if (v != null && v > 0 && (peakIdx < 0 || v > points[peakIdx].value!)) peakIdx = i;
+      if (v != null && v > 0 && (peakIdx < 0 || v > points[peakIdx].value!))
+        peakIdx = i;
     }
-    final String peakValue = peakIdx >= 0 ? '${points[peakIdx].value!.toInt()}' : '0';
-    final String peakLabel = peakIdx >= 0 ? 'pico (${data.longLabels[peakIdx]})' : 'pico';
+    final String peakValue =
+        peakIdx >= 0 ? '${points[peakIdx].value!.toInt()}' : '0';
+    final String peakLabel =
+        peakIdx >= 0 ? 'pico (${data.longLabels[peakIdx]})' : 'pico';
 
-    final String averageLabel = _selectedPeriod == 'Año' ? 'media mensual' : 'media diaria';
-    final String totalLabel = 'recursos subidos ${_selectedPeriod == 'Año' ? _periodLabel : 'en el periodo'}';
+    final String averageLabel =
+        _selectedPeriod == 'Año' ? 'media mensual' : 'media diaria';
+    final String totalLabel =
+        'recursos subidos ${_selectedPeriod == 'Año' ? _periodLabel : 'en el periodo'}';
 
-    final double maxVal = points.fold<double>(1, (m, p) => (p.value ?? 0) > m ? p.value! : m);
+    final double maxVal =
+        points.fold<double>(1, (m, p) => (p.value ?? 0) > m ? p.value! : m);
     final double interval = (maxVal / 4).ceilToDouble();
 
     final statCards = [
@@ -276,8 +311,10 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
               margin: EdgeInsets.zero,
               primaryXAxis: CategoryAxis(
                 majorGridLines: const MajorGridLines(width: 0),
-                axisLine: const AxisLine(color: KpiColors.borderLight, width: 1),
-                majorTickLines: const MajorTickLines(size: 6, color: KpiColors.borderLight),
+                axisLine:
+                    const AxisLine(color: KpiColors.borderLight, width: 1),
+                majorTickLines:
+                    const MajorTickLines(size: 6, color: KpiColors.borderLight),
                 labelIntersectAction: AxisLabelIntersectAction.hide,
                 labelStyle: GoogleFonts.outfit(
                   fontSize: 12,
@@ -366,7 +403,9 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
   }
 
   Widget _buildHeaderTitles() {
-    final subtitle = _selectedPeriod == 'Año' ? 'Recursos subidos por mes' : 'Recursos subidos por día';
+    final subtitle = _selectedPeriod == 'Año'
+        ? 'Recursos subidos por mes'
+        : 'Recursos subidos por día';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -389,7 +428,8 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
                 ),
               ),
             ],
@@ -440,7 +480,9 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? KpiColors.primaryDark : KpiColors.secondaryText,
+                  color: isSelected
+                      ? KpiColors.primaryDark
+                      : KpiColors.secondaryText,
                 ),
               ),
             ),

@@ -34,7 +34,8 @@ class SectionNavigation extends StatelessWidget {
           decoration: BoxDecoration(
             color: KpiColors.cardBackground,
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: KpiColors.borderLight.withValues(alpha: 0.4)),
+            border:
+                Border.all(color: KpiColors.borderLight.withValues(alpha: 0.4)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

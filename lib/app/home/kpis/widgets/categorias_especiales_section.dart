@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../models/userEnreda.dart';
 import '../kpi_models.dart';
+import '../kpi_search.dart';
 import 'section_header.dart';
 import 'card_discapacidad.dart';
 import 'card_condiciones_sobrevenidas.dart';
@@ -9,6 +11,21 @@ import 'card_competencias_reconocidas.dart';
 import 'card_competencias_por_area.dart';
 
 class CategoriasEspecialesSection extends StatelessWidget {
+  static const String sectionTitle = 'Categorías especiales';
+  static const List<String> cardTitles = [
+    'Participantes con discapacidad',
+    'Condiciones sobrevenidas',
+    'Nacionalidades',
+    'Situación administrativa',
+    'Competencias más reconocidas',
+    'Por área de competencia',
+  ];
+
+  /// Si alguna tarjeta de la sección coincide con [query].
+  static bool hasMatches(String query) =>
+      kpiMatchingCards(query, sectionTitle, cardTitles).isNotEmpty;
+
+  final String searchQuery;
   final bool isExpanded;
   final VoidCallback onToggle;
   final List<DonutSegment> discapacidad;
@@ -20,6 +37,8 @@ class CategoriasEspecialesSection extends StatelessWidget {
   final List<DonutSegment> competenciasPorCategoria;
   final List<NacionalidadItem> nacionalidades;
   final int nacionalidadSinEspecificar;
+  final List<UserEnreda> users;
+  final Map<String, int> discapacidadPorUsuario;
   final bool isLoading;
 
   const CategoriasEspecialesSection({
@@ -35,12 +54,17 @@ class CategoriasEspecialesSection extends StatelessWidget {
     this.competenciasPorCategoria = const [],
     this.nacionalidades = const [],
     this.nacionalidadSinEspecificar = 0,
+    this.users = const [],
+    this.discapacidadPorUsuario = const {},
     this.isLoading = false,
+    this.searchQuery = '',
   }) : super(key: key);
 
   Widget _buildDiscapacidad() => CardDiscapacidad(
         segments: discapacidad,
         total: totalConInformeInicialCompleto,
+        users: users,
+        discapacidadPorUsuario: discapacidadPorUsuario,
         isLoading: isLoading,
       );
 
@@ -75,6 +99,24 @@ class CategoriasEspecialesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (searchQuery.trim().isNotEmpty) {
+      final builders = <String, Widget Function()>{
+        'Participantes con discapacidad': () => _buildDiscapacidad(),
+        'Condiciones sobrevenidas': () => _buildCondiciones(),
+        'Nacionalidades': () => _buildNacionalidades(),
+        'Situación administrativa': () => _buildSituacionAdministrativa(),
+        'Competencias más reconocidas': () => _buildCompetenciasReconocidas(),
+        'Por área de competencia': () => _buildCompetenciasPorArea(),
+      };
+      return KpiSearchResults(
+        sectionTitle: sectionTitle,
+        onToggle: onToggle,
+        cards: kpiMatchingCards(searchQuery, sectionTitle, cardTitles)
+            .map((t) => builders[t]!())
+            .toList(),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

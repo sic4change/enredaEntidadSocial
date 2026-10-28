@@ -18,9 +18,13 @@ class CardParticipantesInscritos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = data != null ? data!.total : KpiFakeData.totalParticipantes;
-    final estadoItems = data != null ? data!.porEstado : KpiFakeData.estadoParticipantes;
-    final generoItems = data != null ? data!.porGenero : KpiFakeData.generoParticipantes;
-    final nacionalidadItems = data != null ? data!.porNacionalidad : KpiFakeData.nacionalidadParticipantes;
+    final estadoItems =
+        data != null ? data!.porEstado : KpiFakeData.estadoParticipantes;
+    final generoItems =
+        data != null ? data!.porGenero : KpiFakeData.generoParticipantes;
+    final nacionalidadItems = data != null
+        ? data!.porNacionalidad
+        : KpiFakeData.nacionalidadParticipantes;
 
     return Container(
       decoration: BoxDecoration(
@@ -66,7 +70,8 @@ class CardParticipantesInscritos extends StatelessWidget {
                   height: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
                   ),
                 ),
             ],

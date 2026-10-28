@@ -88,7 +88,8 @@ class KpiHeader extends StatelessWidget {
               ),
               if (searchController.text.isNotEmpty)
                 IconButton(
-                  icon: const Icon(Icons.close, size: 16, color: KpiColors.secondaryText),
+                  icon: const Icon(Icons.close,
+                      size: 16, color: KpiColors.secondaryText),
                   onPressed: () {
                     searchController.clear();
                   },
@@ -125,7 +126,8 @@ class KpiHeader extends StatelessWidget {
                       color: KpiColors.primaryDark,
                     ),
                   ),
-                  ...(filterItems ?? KpiFakeData.filterOrganizations).map((item) {
+                  ...(filterItems ?? KpiFakeData.filterOrganizations)
+                      .map((item) {
                     final isSelected = item.id == selectedFilterId;
                     return InkWell(
                       borderRadius: BorderRadius.circular(999),
@@ -159,7 +161,8 @@ class KpiHeader extends StatelessWidget {
                                     fontWeight: FontWeight.w400,
                                     color: isSelected
                                         ? Colors.white.withValues(alpha: 0.8)
-                                        : KpiColors.primaryDark.withValues(alpha: 0.7),
+                                        : KpiColors.primaryDark
+                                            .withValues(alpha: 0.7),
                                   ),
                                 ),
                               TextSpan(

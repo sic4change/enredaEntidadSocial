@@ -47,7 +47,8 @@ class CardSituacionAdministrativa extends StatelessWidget {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
                   ),
                 ),
             ],

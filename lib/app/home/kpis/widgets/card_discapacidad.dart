@@ -1,20 +1,39 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../models/userEnreda.dart';
+import '../kpi_breakdown.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
-class CardDiscapacidad extends StatelessWidget {
+class CardDiscapacidad extends StatefulWidget {
   final List<DonutSegment> segments;
   final int total;
+  final List<UserEnreda> users;
+
+  /// Índice en [segments] de cada participante con informe inicial completo.
+  final Map<String, int> discapacidadPorUsuario;
   final bool isLoading;
 
   const CardDiscapacidad({
     Key? key,
     this.segments = const [],
     this.total = 0,
+    this.users = const [],
+    this.discapacidadPorUsuario = const {},
     this.isLoading = false,
   }) : super(key: key);
+
+  @override
+  State<CardDiscapacidad> createState() => _CardDiscapacidadState();
+}
+
+class _CardDiscapacidadState extends State<CardDiscapacidad> {
+  KpiBreakdown _breakdown = KpiBreakdown.ninguno;
+
+  List<DonutSegment> get segments => widget.segments;
+  int get total => widget.total;
+  bool get isLoading => widget.isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +85,8 @@ class CardDiscapacidad extends StatelessWidget {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -107,32 +127,15 @@ class CardDiscapacidad extends StatelessWidget {
   }
 
   Widget _buildDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: KpiColors.borderLight),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Desagregar: Ninguno',
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: KpiColors.primaryDark,
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: KpiColors.primaryDark,
-          ),
-        ],
-      ),
+    return KpiBreakdownChip(
+      prefix: 'Desagregar',
+      value: _breakdown,
+      options: const [
+        KpiBreakdown.ninguno,
+        KpiBreakdown.genero,
+        KpiBreakdown.nacionalidad
+      ],
+      onChanged: (value) => setState(() => _breakdown = value),
     );
   }
 
@@ -203,57 +206,86 @@ class CardDiscapacidad extends StatelessWidget {
   }
 
   Widget _buildLegend() {
+    KpiGroups? groups;
+    List<List<int>> counts = const [];
+    if (_breakdown != KpiBreakdown.ninguno) {
+      groups = KpiGroups.of(_breakdown, widget.users);
+      final withReport = widget.users
+          .where((u) => widget.discapacidadPorUsuario.containsKey(u.userId))
+          .toList();
+      counts = groups.countByRow(withReport, segments.length,
+          (u) => widget.discapacidadPorUsuario[u.userId]);
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: segments.map((item) {
+      children: segments.asMap().entries.map((entry) {
+        final item = entry.value;
+        final detail = groups != null ? groups.detail(counts[entry.key]) : '';
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: item.color,
-                      shape: BoxShape.circle,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: item.color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        item.label,
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          color: KpiColors.primaryDark,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    item.label,
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      color: KpiColors.primaryDark,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${item.count}',
+                        style: GoogleFonts.outfit(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: KpiColors.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${item.percentage.round()}%',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          color: KpiColors.secondaryText,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${item.count}',
+              if (detail.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 18, top: 2),
+                  child: Text(
+                    detail,
                     style: GoogleFonts.outfit(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: KpiColors.primaryDark,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${item.percentage.round()}%',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: KpiColors.secondaryText,
                     ),
                   ),
-                ],
-              ),
+                ),
             ],
           ),
         );

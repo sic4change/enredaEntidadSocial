@@ -311,12 +311,15 @@ class _CardNacionalidadesState extends State<CardNacionalidades> {
     return Row(
       children: [
         if (item.mujeres > 0)
-          Expanded(flex: item.mujeres, child: Container(color: KpiColors.yellow)),
+          Expanded(
+              flex: item.mujeres, child: Container(color: KpiColors.yellow)),
         if (item.hombres > 0)
           Expanded(
-              flex: item.hombres, child: Container(color: KpiColors.primaryDark)),
+              flex: item.hombres,
+              child: Container(color: KpiColors.primaryDark)),
         if (item.noBinario > 0)
-          Expanded(flex: item.noBinario, child: Container(color: KpiColors.slate)),
+          Expanded(
+              flex: item.noBinario, child: Container(color: KpiColors.slate)),
       ],
     );
   }

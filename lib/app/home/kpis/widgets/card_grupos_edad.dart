@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../models/userEnreda.dart';
+import '../kpi_breakdown.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
-class CardGruposEdad extends StatelessWidget {
+class CardGruposEdad extends StatefulWidget {
   final List<UserEnreda>? users;
   final bool isLoading;
 
@@ -13,6 +14,53 @@ class CardGruposEdad extends StatelessWidget {
     this.users,
     this.isLoading = false,
   }) : super(key: key);
+
+  @override
+  State<CardGruposEdad> createState() => _CardGruposEdadState();
+}
+
+class _CardGruposEdadState extends State<CardGruposEdad> {
+  KpiBreakdown _breakdown = KpiBreakdown.genero;
+
+  @override
+  Widget build(BuildContext context) => _CardGruposEdadView(
+        users: widget.users,
+        isLoading: widget.isLoading,
+        breakdown: _breakdown,
+        onBreakdownChanged: (value) => setState(() => _breakdown = value),
+      );
+}
+
+class _CardGruposEdadView extends StatelessWidget {
+  final List<UserEnreda>? users;
+  final bool isLoading;
+  final KpiBreakdown breakdown;
+  final ValueChanged<KpiBreakdown> onBreakdownChanged;
+
+  const _CardGruposEdadView({
+    this.users,
+    this.isLoading = false,
+    required this.breakdown,
+    required this.onBreakdownChanged,
+  });
+
+  static const List<String> _groupLabels = [
+    'Menos de 18',
+    '18 – 24',
+    '25 – 29',
+    '30 – 54',
+    'Más de 54'
+  ];
+
+  int? _ageGroupOf(UserEnreda u) {
+    final age = _calculateAge(u.birthday);
+    if (age == null) return null;
+    if (age < 18) return 0;
+    if (age <= 24) return 1;
+    if (age <= 29) return 2;
+    if (age <= 54) return 3;
+    return 4;
+  }
 
   int? _calculateAge(DateTime? birthday) {
     if (birthday == null) return null;
@@ -233,93 +281,100 @@ class CardGruposEdad extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                   ],
-                  _buildCompareChip(),
+                  KpiBreakdownChip(
+                    prefix: 'Comparar',
+                    value: breakdown,
+                    onChanged: onBreakdownChanged,
+                  ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 24),
 
-          // Total column label
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'Total',
+          if (breakdown == KpiBreakdown.nacionalidad)
+            ..._buildNationalityBreakdown(userList)
+          else ...[
+            // Total column label
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Total',
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: KpiColors.secondaryText,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Population Pyramid rows
+            ...rows.map((row) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: _buildPyramidRow(row, maxVal),
+              );
+            }).toList(),
+            const SizedBox(height: 16),
+
+            // Legend
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildLegendItem('Mujeres', KpiColors.yellow),
+                const SizedBox(width: 24),
+                _buildLegendItem('Hombres', KpiColors.primaryDark),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Summary row banner
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: KpiColors.tileBackground.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total mujeres y hombres',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: KpiColors.primaryDark,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      '$totalMujeres mujeres · $totalHombres hombres · $sumMujeresHombres',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: KpiColors.primaryDark,
+                      ),
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Footnote non-binary
+            Text(
+              footnote,
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                fontWeight: FontWeight.w500,
                 color: KpiColors.secondaryText,
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-
-          // Population Pyramid rows
-          ...rows.map((row) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6.0),
-              child: _buildPyramidRow(row, maxVal),
-            );
-          }).toList(),
-          const SizedBox(height: 16),
-
-          // Legend
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildLegendItem('Mujeres', KpiColors.yellow),
-              const SizedBox(width: 24),
-              _buildLegendItem('Hombres', KpiColors.primaryDark),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Summary row banner
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: KpiColors.tileBackground.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Total mujeres y hombres',
-                  style: GoogleFonts.outfit(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: KpiColors.primaryDark,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    '$totalMujeres mujeres · $totalHombres hombres · $sumMujeresHombres',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: KpiColors.primaryDark,
-                    ),
-                    textAlign: TextAlign.right,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Footnote non-binary
-          Text(
-            footnote,
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              color: KpiColors.secondaryText,
-            ),
-          ),
-          const SizedBox(height: 20),
-
+            const SizedBox(height: 20),
+          ],
           // 4 Tramos FSE Stat Cards
           LayoutBuilder(
             builder: (context, constraints) {
@@ -342,13 +397,19 @@ class CardGruposEdad extends StatelessWidget {
               }
               return Row(
                 children: [
-                  Expanded(child: _buildSmallStat('$menores18', 'Menores de 18')),
+                  Expanded(
+                      child: _buildSmallStat('$menores18', 'Menores de 18')),
                   const SizedBox(width: 8),
-                  Expanded(child: _buildSmallStat('$jovenes1829', 'Jóvenes 18 – 29')),
+                  Expanded(
+                      child:
+                          _buildSmallStat('$jovenes1829', 'Jóvenes 18 – 29')),
                   const SizedBox(width: 8),
-                  Expanded(child: _buildSmallStat('$mayores54', 'Mayores de 54')),
+                  Expanded(
+                      child: _buildSmallStat('$mayores54', 'Mayores de 54')),
                   const SizedBox(width: 8),
-                  Expanded(child: _buildSmallStat('$origenExtranjero', 'Origen extranjero')),
+                  Expanded(
+                      child: _buildSmallStat(
+                          '$origenExtranjero', 'Origen extranjero')),
                 ],
               );
             },
@@ -358,34 +419,85 @@ class CardGruposEdad extends StatelessWidget {
     );
   }
 
-  Widget _buildCompareChip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: KpiColors.borderLight),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Comparar: Género',
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: KpiColors.primaryDark,
-            ),
+  /// Barras apiladas por tramo de edad, un segmento por nacionalidad.
+  List<Widget> _buildNationalityBreakdown(List<UserEnreda> userList) {
+    final groups = KpiGroups.nationality(userList);
+    final counts = groups.countByRow(userList, 5, _ageGroupOf);
+    final totals = counts.map((c) => c.fold<int>(0, (a, b) => a + b)).toList();
+    final int maxTotal = totals.fold<int>(1, (m, t) => t > m ? t : m);
+
+    return [
+      Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          'Total',
+          style: GoogleFonts.outfit(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: KpiColors.secondaryText,
           ),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: KpiColors.primaryDark,
-          ),
-        ],
+        ),
       ),
-    );
+      const SizedBox(height: 8),
+      for (int i = 0; i < 5; i++)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 80,
+                child: Text(
+                  _groupLabels[i],
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: KpiColors.secondaryText,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) => Align(
+                    alignment: Alignment.centerLeft,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: SizedBox(
+                        width: totals[i] / maxTotal * constraints.maxWidth,
+                        height: 16,
+                        child: Row(
+                          children: [
+                            for (int g = 0; g < groups.length; g++)
+                              if (counts[i][g] > 0)
+                                Expanded(
+                                  flex: counts[i][g],
+                                  child: Container(color: groups.colors[g]),
+                                ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 42,
+                child: Text(
+                  '${totals[i]}',
+                  textAlign: TextAlign.right,
+                  style: GoogleFonts.outfit(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: KpiColors.primaryDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      const SizedBox(height: 16),
+      Center(child: KpiGroupsLegend(groups: groups)),
+      const SizedBox(height: 20),
+    ];
   }
 
   Widget _buildPyramidRow(AgePyramidRow row, double maxVal) {

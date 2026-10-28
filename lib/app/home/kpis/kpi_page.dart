@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../models/socialEntity.dart';
 import '../../models/userEnreda.dart';
 import 'kpi_colors.dart';
@@ -15,6 +16,8 @@ import 'package:provider/provider.dart';
 import '../../services/database.dart';
 import 'kpi_models.dart';
 import 'kpi_service.dart';
+import 'pdf/kpi_report_pdf.dart';
+import 'pdf/kpi_report_preview.dart';
 
 class KpiPage extends StatefulWidget {
   final SocialEntity socialEntity;
@@ -49,10 +52,21 @@ class _KpiPageState extends State<KpiPage> {
   bool _isResultadosExpanded = true;
   bool _isRecursosExpanded = true;
 
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
     _initFilters();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    if (_searchController.text != _searchQuery) {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    }
   }
 
   void _initFilters() {
@@ -175,6 +189,13 @@ class _KpiPageState extends State<KpiPage> {
     }
   }
 
+  bool get _hasSearchResults =>
+      ResumenGeneralSection.hasMatches(_searchQuery) ||
+      DesgloseDemograficoSection.hasMatches(_searchQuery) ||
+      CategoriasEspecialesSection.hasMatches(_searchQuery) ||
+      IndicadoresResultadosSection.hasMatches(_searchQuery) ||
+      RecursosSection.hasMatches(_searchQuery);
+
   bool get _allExpanded =>
       _isResumenExpanded &&
       _isDemograficoExpanded &&
@@ -202,20 +223,47 @@ class _KpiPageState extends State<KpiPage> {
     });
   }
 
+  /// Abre la previsualización en PDF con los datos de la vista seleccionada
+  /// en el momento de pulsar el botón.
   void _downloadReport() {
-    Fluttertoast.showToast(
-      msg: 'Generando informe de indicadores en PDF...',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: KpiColors.primaryDark,
-      textColor: Colors.white,
-      fontSize: 14.0,
+    if (_isLoadingParticipantes || _isLoadingRecursos) {
+      Fluttertoast.showToast(
+        msg: 'Espera a que terminen de cargarse los indicadores',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: KpiColors.primaryDark,
+        textColor: Colors.white,
+        fontSize: 14.0,
+      );
+      return;
+    }
+
+    final filterLabel = _filterItems
+            .where((f) => f.id == _selectedFilterId)
+            .map((f) => f.label)
+            .firstOrNull ??
+        '';
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => KpiReportPreview(
+          data: KpiReportData(
+            filterId: _selectedFilterId,
+            filterLabel: filterLabel,
+            generatedAt: DateTime.now(),
+            participantes: _participantesData,
+            recursos: _recursosData,
+          ),
+        ),
+      ),
     );
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -255,82 +303,140 @@ class _KpiPageState extends State<KpiPage> {
                   const SizedBox(height: 24),
 
                   // Sección 1: Resumen General
-                  ResumenGeneralSection(
-                    isExpanded: _isResumenExpanded,
-                    onToggle: () {
-                      setState(() {
-                        _isResumenExpanded = !_isResumenExpanded;
-                      });
-                    },
-                    participantesData: _participantesData,
-                    isLoadingParticipantes: _isLoadingParticipantes,
-                  ),
-                  const SizedBox(height: 36),
+                  if (ResumenGeneralSection.hasMatches(_searchQuery)) ...[
+                    ResumenGeneralSection(
+                      searchQuery: _searchQuery,
+                      isExpanded: _isResumenExpanded,
+                      onToggle: () {
+                        setState(() {
+                          _isResumenExpanded = !_isResumenExpanded;
+                        });
+                      },
+                      participantesData: _participantesData,
+                      isLoadingParticipantes: _isLoadingParticipantes,
+                    ),
+                    const SizedBox(height: 36),
+                  ],
 
                   // Sección 2: Desglose Demográfico
-                  DesgloseDemograficoSection(
-                    isExpanded: _isDemograficoExpanded,
-                    onToggle: () {
-                      setState(() {
-                        _isDemograficoExpanded = !_isDemograficoExpanded;
-                      });
-                    },
-                    users: _participantesData?.users,
-                    nivelesCine: _participantesData?.nivelesCine ?? const [],
-                    nivelesEstudios: _participantesData?.nivelesEstudios ?? const [],
-                    nivelesSinEspecificar: _participantesData?.nivelesSinEspecificar ?? 0,
-                    isLoading: _isLoadingParticipantes,
-                  ),
-                  const SizedBox(height: 36),
+                  if (DesgloseDemograficoSection.hasMatches(_searchQuery)) ...[
+                    DesgloseDemograficoSection(
+                      searchQuery: _searchQuery,
+                      isExpanded: _isDemograficoExpanded,
+                      onToggle: () {
+                        setState(() {
+                          _isDemograficoExpanded = !_isDemograficoExpanded;
+                        });
+                      },
+                      users: _participantesData?.users,
+                      nivelesCine: _participantesData?.nivelesCine ?? const [],
+                      nivelesEstudios:
+                          _participantesData?.nivelesEstudios ?? const [],
+                      nivelesSinEspecificar:
+                          _participantesData?.nivelesSinEspecificar ?? 0,
+                      nivelCinePorUsuario:
+                          _participantesData?.nivelCinePorUsuario ?? const {},
+                      nivelEstudiosPorUsuario:
+                          _participantesData?.nivelEstudiosPorUsuario ??
+                              const {},
+                      isLoading: _isLoadingParticipantes,
+                    ),
+                    const SizedBox(height: 36),
+                  ],
 
                   // Sección 3: Categorías Especiales
-                  CategoriasEspecialesSection(
-                    isExpanded: _isEspecialesExpanded,
-                    onToggle: () {
-                      setState(() {
-                        _isEspecialesExpanded = !_isEspecialesExpanded;
-                      });
-                    },
-                    discapacidad: _participantesData?.discapacidad ?? const [],
-                    condicionesSobrevenidas: _participantesData?.condicionesSobrevenidas ?? const [],
-                    situacionAdministrativa: _participantesData?.situacionAdministrativa ?? const [],
-                    totalConInformeInicialCompleto: _participantesData?.totalConInformeInicialCompleto ?? 0,
-                    competenciasReconocidas: _participantesData?.competenciasReconocidas ?? const [],
-                    competenciasPorArea: _participantesData?.competenciasPorArea ?? const [],
-                    competenciasPorCategoria: _participantesData?.competenciasPorCategoria ?? const [],
-                    nacionalidades: _participantesData?.nacionalidades ?? const [],
-                    nacionalidadSinEspecificar: _participantesData?.nacionalidadSinEspecificar ?? 0,
-                    isLoading: _isLoadingParticipantes,
-                  ),
-                  const SizedBox(height: 36),
+                  if (CategoriasEspecialesSection.hasMatches(_searchQuery)) ...[
+                    CategoriasEspecialesSection(
+                      searchQuery: _searchQuery,
+                      isExpanded: _isEspecialesExpanded,
+                      onToggle: () {
+                        setState(() {
+                          _isEspecialesExpanded = !_isEspecialesExpanded;
+                        });
+                      },
+                      discapacidad:
+                          _participantesData?.discapacidad ?? const [],
+                      condicionesSobrevenidas:
+                          _participantesData?.condicionesSobrevenidas ??
+                              const [],
+                      situacionAdministrativa:
+                          _participantesData?.situacionAdministrativa ??
+                              const [],
+                      totalConInformeInicialCompleto:
+                          _participantesData?.totalConInformeInicialCompleto ??
+                              0,
+                      competenciasReconocidas:
+                          _participantesData?.competenciasReconocidas ??
+                              const [],
+                      competenciasPorArea:
+                          _participantesData?.competenciasPorArea ?? const [],
+                      competenciasPorCategoria:
+                          _participantesData?.competenciasPorCategoria ??
+                              const [],
+                      nacionalidades:
+                          _participantesData?.nacionalidades ?? const [],
+                      nacionalidadSinEspecificar:
+                          _participantesData?.nacionalidadSinEspecificar ?? 0,
+                      users: _participantesData?.users ?? const [],
+                      discapacidadPorUsuario:
+                          _participantesData?.discapacidadPorUsuario ??
+                              const {},
+                      isLoading: _isLoadingParticipantes,
+                    ),
+                    const SizedBox(height: 36),
+                  ],
 
                   // Sección 4: Indicadores de Resultados
-                  IndicadoresResultadosSection(
-                    isExpanded: _isResultadosExpanded,
-                    onToggle: () {
-                      setState(() {
-                        _isResultadosExpanded = !_isResultadosExpanded;
-                      });
-                    },
-                    indicadoresClave: _participantesData?.indicadoresClave ?? const [],
-                    recorridoResultados: _participantesData?.recorridoResultados ?? const [],
-                    resultadosPorSector: _participantesData?.resultadosPorSector ?? const [],
-                    isLoading: _isLoadingParticipantes,
-                  ),
-                  const SizedBox(height: 36),
+                  if (IndicadoresResultadosSection.hasMatches(
+                      _searchQuery)) ...[
+                    IndicadoresResultadosSection(
+                      searchQuery: _searchQuery,
+                      isExpanded: _isResultadosExpanded,
+                      onToggle: () {
+                        setState(() {
+                          _isResultadosExpanded = !_isResultadosExpanded;
+                        });
+                      },
+                      indicadoresClave:
+                          _participantesData?.indicadoresClave ?? const [],
+                      recorridoResultados:
+                          _participantesData?.recorridoResultados ?? const [],
+                      resultadosPorSector:
+                          _participantesData?.resultadosPorSector ?? const [],
+                      isLoading: _isLoadingParticipantes,
+                    ),
+                    const SizedBox(height: 36),
+                  ],
 
                   // Sección 5: Recursos
-                  RecursosSection(
-                    isExpanded: _isRecursosExpanded,
-                    onToggle: () {
-                      setState(() {
-                        _isRecursosExpanded = !_isRecursosExpanded;
-                      });
-                    },
-                    data: _recursosData,
-                    isLoading: _isLoadingRecursos,
-                  ),
-                  const SizedBox(height: 60),
+                  if (RecursosSection.hasMatches(_searchQuery)) ...[
+                    RecursosSection(
+                      searchQuery: _searchQuery,
+                      isExpanded: _isRecursosExpanded,
+                      onToggle: () {
+                        setState(() {
+                          _isRecursosExpanded = !_isRecursosExpanded;
+                        });
+                      },
+                      data: _recursosData,
+                      isLoading: _isLoadingRecursos,
+                    ),
+                    const SizedBox(height: 36),
+                  ],
+                  if (!_hasSearchResults)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text(
+                          'No hay indicadores que coincidan con "${_searchQuery.trim()}"',
+                          style: GoogleFonts.outfit(
+                            fontSize: 14,
+                            color: KpiColors.secondaryText,
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),

@@ -218,20 +218,46 @@ class KpiFakeData {
   static const int totalParticipantes = 142;
 
   static const List<StackedBarRow> estadoParticipantes = [
-    StackedBarRow(label: 'Activos', count: 95, percentage: 67, color: KpiColors.turquoise),
-    StackedBarRow(label: 'En espera', count: 28, percentage: 20, color: KpiColors.lightTurquoise),
-    StackedBarRow(label: 'Inactivos', count: 19, percentage: 13, color: KpiColors.borderLight),
+    StackedBarRow(
+        label: 'Activos',
+        count: 95,
+        percentage: 67,
+        color: KpiColors.turquoise),
+    StackedBarRow(
+        label: 'En espera',
+        count: 28,
+        percentage: 20,
+        color: KpiColors.lightTurquoise),
+    StackedBarRow(
+        label: 'Inactivos',
+        count: 19,
+        percentage: 13,
+        color: KpiColors.borderLight),
   ];
 
   static const List<StackedBarRow> generoParticipantes = [
-    StackedBarRow(label: 'Mujeres', count: 81, percentage: 57, color: KpiColors.yellow),
-    StackedBarRow(label: 'Hombres', count: 58, percentage: 41, color: KpiColors.primaryDark),
-    StackedBarRow(label: 'No binario', count: 3, percentage: 2, color: KpiColors.slate),
+    StackedBarRow(
+        label: 'Mujeres', count: 81, percentage: 57, color: KpiColors.yellow),
+    StackedBarRow(
+        label: 'Hombres',
+        count: 58,
+        percentage: 41,
+        color: KpiColors.primaryDark),
+    StackedBarRow(
+        label: 'No binario', count: 3, percentage: 2, color: KpiColors.slate),
   ];
 
   static const List<StackedBarRow> nacionalidadParticipantes = [
-    StackedBarRow(label: 'Nacional', count: 74, percentage: 52, color: KpiColors.primaryDark),
-    StackedBarRow(label: 'Extranjera', count: 68, percentage: 48, color: KpiColors.turquoise),
+    StackedBarRow(
+        label: 'Nacional',
+        count: 74,
+        percentage: 52,
+        color: KpiColors.primaryDark),
+    StackedBarRow(
+        label: 'Extranjera',
+        count: 68,
+        percentage: 48,
+        color: KpiColors.turquoise),
   ];
 
   // Evolución de inscripciones
@@ -260,7 +286,7 @@ class KpiFakeData {
       total: 100,
     ),
     SituacionEmpleoRow(
-      label: '↳ Corta duración',
+      label: 'Corta duración',
       mujeres: 28,
       hombres: 23,
       noBinario: 1,
@@ -268,7 +294,7 @@ class KpiFakeData {
       isIndented: true,
     ),
     SituacionEmpleoRow(
-      label: '↳ Larga duración',
+      label: 'Larga duración',
       mujeres: 30,
       hombres: 17,
       noBinario: 1,
@@ -307,7 +333,4 @@ class KpiFakeData {
     AgePyramidRow(label: '30 – 54', mujeres: 22, hombres: 14, total: 36),
     AgePyramidRow(label: 'Más de 54', mujeres: 5, hombres: 3, total: 8),
   ];
-
-
-
 }
