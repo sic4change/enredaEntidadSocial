@@ -5,7 +5,23 @@ import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
 class CardRecorridoResultados extends StatelessWidget {
-  const CardRecorridoResultados({Key? key}) : super(key: key);
+  final List<FunnelStep> steps;
+  final bool isLoading;
+
+  const CardRecorridoResultados({
+    Key? key,
+    this.steps = const [],
+    this.isLoading = false,
+  }) : super(key: key);
+
+  String get _calloutText {
+    if (steps.isEmpty || steps.first.count == 0) {
+      return 'Sin personas inscritas en esta selección.';
+    }
+    final last = steps.last;
+    final per100 = (last.count / steps.first.count * 100).round();
+    return 'De cada 100 personas inscritas, $per100 ${per100 == 1 ? 'mantiene' : 'mantienen'} el empleo a los 6 meses.';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,17 +36,32 @@ class CardRecorridoResultados extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text(
-            'Recorrido de resultados',
-            style: GoogleFonts.outfit(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: KpiColors.primaryDark,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Recorrido de resultados',
+                  style: GoogleFonts.outfit(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: KpiColors.primaryDark,
+                  ),
+                ),
+              ),
+              if (isLoading)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
-            'Cuántas personas inscritas llegan a cada resultado',
+            'Cuántas personas inscritas llegan a cada resultado (acumulado)',
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.normal,
@@ -79,7 +110,7 @@ class CardRecorridoResultados extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              'De cada 100 personas inscritas, 8 mantienen el empleo a los 6 meses.',
+              _calloutText,
               style: GoogleFonts.outfit(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -94,10 +125,10 @@ class CardRecorridoResultados extends StatelessWidget {
 
   List<Widget> _buildStepList() {
     final list = <Widget>[];
-    for (int i = 0; i < KpiFakeData.funnelSteps.length; i++) {
-      final step = KpiFakeData.funnelSteps[i];
+    for (int i = 0; i < steps.length; i++) {
+      final step = steps[i];
       list.add(_buildStepItem(step));
-      if (i < KpiFakeData.funnelSteps.length - 1) {
+      if (i < steps.length - 1) {
         list.add(
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 20),
@@ -132,7 +163,7 @@ class CardRecorridoResultados extends StatelessWidget {
                 CustomPaint(
                   size: const Size(64, 64),
                   painter: _RingProgressPainter(
-                    pct: step.percentage / 100.0,
+                    pct: (step.percentage / 100.0).clamp(0.0, 1.0),
                     activeColor: step.ringColor,
                     trackColor: KpiColors.tileBackground,
                   ),
@@ -220,5 +251,6 @@ class _RingProgressPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _RingProgressPainter oldDelegate) =>
+      oldDelegate.pct != pct || oldDelegate.activeColor != activeColor;
 }

@@ -308,23 +308,6 @@ class KpiFakeData {
     AgePyramidRow(label: 'Más de 54', mujeres: 5, hombres: 3, total: 8),
   ];
 
-  // Recorrido de resultados (Funnel)
-  static const List<FunnelStep> funnelSteps = [
-    FunnelStep(percentage: 100, count: 142, label: 'Participantes inscritos', ringColor: KpiColors.primaryDark),
-    FunnelStep(percentage: 45, count: 64, label: 'Ingreso a formación', ringColor: KpiColors.turquoise),
-    FunnelStep(percentage: 23, count: 32, label: 'Cualificaciones obtenidas', ringColor: KpiColors.turquoise),
-    FunnelStep(percentage: 15, count: 21, label: 'Empleos conseguidos', ringColor: KpiColors.turquoise),
-    FunnelStep(percentage: 8, count: 12, label: 'Empleo mantenido a 6 meses', ringColor: KpiColors.turquoise),
-  ];
 
-  // Resultados por sector
-  static const List<RankedBarItem> resultadosPorSector = [
-    RankedBarItem(label: 'Hostelería y turismo', count: 9),
-    RankedBarItem(label: 'Comercio y marketing', count: 7),
-    RankedBarItem(label: 'Servicios socioculturales', count: 6),
-    RankedBarItem(label: 'Informática y comunicaciones', count: 5),
-    RankedBarItem(label: 'Administración y gestión', count: 3),
-    RankedBarItem(label: 'Otros sectores', count: 2),
-  ];
 
 }

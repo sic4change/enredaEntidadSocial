@@ -34,6 +34,8 @@ class ParticipantesKpiData {
   final List<NacionalidadItem> nacionalidades;
   final int nacionalidadSinEspecificar;
   final List<KeyIndicatorMetric> indicadoresClave;
+  final List<FunnelStep> recorridoResultados;
+  final List<RankedBarItem> resultadosPorSector;
 
   const ParticipantesKpiData({
     required this.total,
@@ -56,6 +58,8 @@ class ParticipantesKpiData {
     this.nacionalidades = const [],
     this.nacionalidadSinEspecificar = 0,
     this.indicadoresClave = const [],
+    this.recorridoResultados = const [],
+    this.resultadosPorSector = const [],
   });
 
   static ParticipantesKpiData empty() {
@@ -376,7 +380,7 @@ class KpiService {
 
     final nacionalidades = _calculateNacionalidades(filteredUsers);
 
-    final indicadoresClave = await _loadIndicadoresClave(
+    final resultados = await _loadIndicadoresClave(
       users: filteredUsers,
       closureReportDocs: results[1].docs,
     );
@@ -464,7 +468,9 @@ class KpiService {
       competenciasPorCategoria: competencias.porCategoria,
       nacionalidades: nacionalidades.items,
       nacionalidadSinEspecificar: nacionalidades.sinEspecificar,
-      indicadoresClave: indicadoresClave,
+      indicadoresClave: resultados.indicadores,
+      recorridoResultados: resultados.recorrido,
+      resultadosPorSector: resultados.porSector,
     );
   }
 
@@ -1070,10 +1076,12 @@ class KpiService {
     return (items: items, sinEspecificar: sinEspecificar);
   }
 
-  /// Calcula los indicadores clave de resultados. Cada indicador cuenta
-  /// participantes distintos; el valor principal es el del año en curso y se
-  /// compara con el año anterior (salvo el CV, que no tiene fecha).
-  Future<List<KeyIndicatorMetric>> _loadIndicadoresClave({
+  /// Calcula los indicadores clave de resultados y el recorrido de resultados.
+  /// Cada indicador cuenta participantes distintos. En los indicadores clave
+  /// el valor principal es el del año en curso y se compara con el año
+  /// anterior (salvo el CV, que no tiene fecha); el recorrido es acumulado.
+  Future<({List<KeyIndicatorMetric> indicadores, List<FunnelStep> recorrido, List<RankedBarItem> porSector})>
+      _loadIndicadoresClave({
     required List<UserEnreda> users,
     required List<QueryDocumentSnapshot<Map<String, dynamic>>> closureReportDocs,
   }) async {
@@ -1103,6 +1111,7 @@ class KpiService {
       APIPath.ipilLaborSkills(),
       APIPath.ipilResults(),
     ];
+    final interestsFuture = firestore.collection(APIPath.interests()).get();
     final snapshots = await Future.wait([
       firestore.collection(APIPath.ipilEntry()).get(),
       ...optionCollections.map((c) => firestore.collection(c).get()),
@@ -1130,14 +1139,26 @@ class KpiService {
     final int currentYear = DateTime.now().year;
     final int previousYear = currentYear - 1;
 
-    // Participantes distintos por año para cada indicador
-    final Map<int, Set<String>> inscripcion = {currentYear: {}, previousYear: {}};
-    final Map<int, Set<String>> certificacion = {currentYear: {}, previousYear: {}};
-    final Map<int, Set<String>> empleo = {currentYear: {}, previousYear: {}};
-    final Map<int, Set<String>> mantiene4Semanas = {currentYear: {}, previousYear: {}};
-    final Map<int, Set<String>> mantiene6Meses = {currentYear: {}, previousYear: {}};
+    // Participantes distintos por año para cada indicador; la clave
+    // [acumulado] guarda todos, independientemente de la fecha.
+    const int acumulado = 0;
+    Map<int, Set<String>> newCounter() => {currentYear: {}, previousYear: {}, acumulado: {}};
+    final inscripcion = newCounter();
+    final certificacion = newCounter();
+    final empleo = newCounter();
+    final mantiene4Semanas = newCounter();
+    final mantiene6Meses = newCounter();
+
+    // Resultados por sector: "Tipo de empleo" (interest) elegido en el
+    // seguimiento IPIL al marcar "Obtienen empleo" → participantes distintos
+    final Map<String, Set<String>> empleoUsersByType = {};
+    void addEmploymentType(String? typeId, String userId) {
+      if (typeId == null || typeId.isEmpty) return;
+      empleoUsersByType.putIfAbsent(typeId, () => {}).add(userId);
+    }
 
     void add(Map<int, Set<String>> target, DateTime? date, String userId) {
+      target[acumulado]!.add(userId);
       if (date == null) return;
       target[date.year]?.add(userId);
     }
@@ -1175,6 +1196,7 @@ class KpiService {
       if (ipil.fourWeeksCheck == true) {
         if (ipil.fourWeeksSituation == StringConst.IPIL_SITUATION_EMPLOYMENT) {
           add(empleo, ipil.date, ipil.userId);
+          addEmploymentType(ipil.fourWeeksEmploymentTypeId, ipil.userId);
         } else if (ipil.fourWeeksSituation == StringConst.IPIL_SITUATION_KEEPS_EMPLOYMENT) {
           add(mantiene4Semanas, ipil.date, ipil.userId);
         }
@@ -1182,6 +1204,7 @@ class KpiService {
       if (ipil.sixMonthsCheck == true) {
         if (ipil.sixMonthsSituation == StringConst.IPIL_SITUATION_EMPLOYMENT) {
           add(empleo, ipil.date, ipil.userId);
+          addEmploymentType(ipil.sixMonthsEmploymentTypeId, ipil.userId);
         } else if (ipil.sixMonthsSituation == StringConst.IPIL_SITUATION_KEEPS_EMPLOYMENT) {
           add(mantiene6Meses, ipil.date, ipil.userId);
         }
@@ -1250,7 +1273,22 @@ class KpiService {
     final m6Current = mantiene6Meses[currentYear]!.length;
     final m6Previous = mantiene6Meses[previousYear]!.length;
 
-    return [
+    final int totalInscritos = users.length;
+    FunnelStep step(String label, int count, Color ringColor) => FunnelStep(
+          percentage: totalInscritos > 0 ? (count / totalInscritos * 100).round() : 0,
+          count: count,
+          label: label,
+          ringColor: ringColor,
+        );
+    final recorrido = [
+      step('Participantes inscritos', totalInscritos, KpiColors.primaryDark),
+      step('Ingreso a formación', inscripcion[acumulado]!.length, KpiColors.turquoise),
+      step('Cualificaciones obtenidas', certificacion[acumulado]!.length, KpiColors.turquoise),
+      step('Empleos conseguidos', empleo[acumulado]!.length, KpiColors.turquoise),
+      step('Empleo mantenido a 6 meses', mantiene6Meses[acumulado]!.length, KpiColors.turquoise),
+    ];
+
+    final indicadores = [
       yearly(
         title: 'Ingreso a formación',
         data: inscripcion,
@@ -1292,6 +1330,33 @@ class KpiService {
         icon: Icons.description_outlined,
       ),
     ];
+
+    // El tipo de empleo se guarda como `interestId` (o el nombre si no lo hay)
+    final Map<String, String> interestNameByKey = {};
+    for (final doc in (await interestsFuture).docs) {
+      final data = doc.data();
+      final name = (data['name'] ?? '').toString().trim();
+      if (name.isEmpty) continue;
+      interestNameByKey[doc.id] = name;
+      if (data['interestId'] != null) interestNameByKey[data['interestId'].toString()] = name;
+      interestNameByKey[name] = name;
+    }
+    final Map<String, Set<String>> empleoUsersBySector = {};
+    for (final entry in empleoUsersByType.entries) {
+      final sector = interestNameByKey[entry.key] ?? 'Otros sectores';
+      empleoUsersBySector.putIfAbsent(sector, () => {}).addAll(entry.value);
+    }
+    final int totalConSector = empleoUsersByType.values.expand((u) => u).toSet().length;
+    final porSector = empleoUsersBySector.entries
+        .map((e) => RankedBarItem(
+              label: e.key,
+              count: e.value.length,
+              percentage: totalConSector > 0 ? e.value.length / totalConSector * 100 : 0.0,
+            ))
+        .toList()
+      ..sort((a, b) => b.count.compareTo(a.count));
+
+    return (indicadores: indicadores, recorrido: recorrido, porSector: porSector);
   }
 
   static const List<Color> _resourceCategoryColors = [

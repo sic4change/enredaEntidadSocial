@@ -3,18 +3,21 @@ import 'package:google_fonts/google_fonts.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
 
-class CardResultadosSector extends StatefulWidget {
-  const CardResultadosSector({Key? key}) : super(key: key);
+class CardResultadosSector extends StatelessWidget {
+  final List<RankedBarItem> items;
+  final bool isLoading;
 
-  @override
-  State<CardResultadosSector> createState() => _CardResultadosSectorState();
-}
-
-class _CardResultadosSectorState extends State<CardResultadosSector> {
-  String _selectedIndicator = 'Cualificaciones';
+  const CardResultadosSector({
+    Key? key,
+    this.items = const [],
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final double maxVal =
+        items.fold<int>(1, (m, i) => i.count > m ? i.count : m).toDouble();
+
     return Container(
       decoration: BoxDecoration(
         color: KpiColors.cardBackground,
@@ -44,7 +47,7 @@ class _CardResultadosSectorState extends State<CardResultadosSector> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Cualificaciones obtenidas por familia profesional',
+                      'Empleos conseguidos por tipo de empleo',
                       style: GoogleFonts.outfit(
                         fontSize: 12,
                         fontWeight: FontWeight.normal,
@@ -54,23 +57,39 @@ class _CardResultadosSectorState extends State<CardResultadosSector> {
                   ],
                 ),
               ),
-              _buildIndicatorDropdown(),
+              if (isLoading)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(KpiColors.turquoise),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 20),
 
           // Horizontal Bars
-          ...KpiFakeData.resultadosPorSector.map((item) {
+          if (items.isEmpty)
+            Text(
+              'Sin empleos con tipo de empleo registrado en esta selección.',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: KpiColors.secondaryText,
+              ),
+            ),
+          ...items.map((item) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6.0),
-              child: _buildSectorRow(item),
+              child: _buildSectorRow(item, maxVal),
             );
           }).toList(),
           const SizedBox(height: 20),
 
           // Informational note
           Text(
-            'Cambia el indicador para ver el reparto por sector del ingreso a formación o de los empleos conseguidos.',
+            'Fuente: IPIL › Seguimiento a las 4 semanas y 6 meses › "Obtienen empleo" › Tipo de empleo. Participantes distintos; una persona puede contar en varios sectores.',
             style: GoogleFonts.outfit(
               fontSize: 12,
               color: KpiColors.secondaryText,
@@ -82,38 +101,7 @@ class _CardResultadosSectorState extends State<CardResultadosSector> {
     );
   }
 
-  Widget _buildIndicatorDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: KpiColors.borderLight),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Indicador: $_selectedIndicator',
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: KpiColors.primaryDark,
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: KpiColors.primaryDark,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectorRow(RankedBarItem item) {
-    const double maxVal = 10.0;
+  Widget _buildSectorRow(RankedBarItem item, double maxVal) {
     final double pct = item.count / maxVal;
 
     return Row(

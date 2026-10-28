@@ -313,6 +313,8 @@ class _KpiPageState extends State<KpiPage> {
                       });
                     },
                     indicadoresClave: _participantesData?.indicadoresClave ?? const [],
+                    recorridoResultados: _participantesData?.recorridoResultados ?? const [],
+                    resultadosPorSector: _participantesData?.resultadosPorSector ?? const [],
                     isLoading: _isLoadingParticipantes,
                   ),
                   const SizedBox(height: 36),
