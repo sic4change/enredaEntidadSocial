@@ -1251,7 +1251,9 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               ),
               childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.DATE,
-                enabled: !_finished,
+                // La fecha es el único campo editable tras finalizar el informe,
+                // también en los itinerarios anteriores (viewOnly).
+                enabled: true,
                 color: AppColors.primary900,
                 initialValue: _dateValues['completedDate'],
                 onChanged: (value){
@@ -1263,6 +1265,16 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                     return;
                   }else{
                     _dateValues['completedDate'] = value;
+                    // Finalizado: no hay botón de guardar, se guarda solo la fecha.
+                    if (_finished && report.closureReportId != null) {
+                      database.updateClosureReportCompletedDate(report.closureReportId!, value);
+                      if (widget.viewOnly) {
+                        database.updateHistoryCycleDate(widget.user.userId!,
+                            closureReportId: report.closureReportId, closureDate: value);
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text(StringConst.REPORT_DATE_UPDATED)));
+                    }
                   }
                 },
               ),

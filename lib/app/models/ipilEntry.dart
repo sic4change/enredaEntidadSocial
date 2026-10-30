@@ -111,9 +111,9 @@ class IpilEntry {
   late bool? initialJobValorationQuestionary;
   late bool? finalInterview;
   late bool? finalJobValorationQuestionary;
-  /// New option under "Inicio de itinerario": Persona contactada - En evaluación.
+  /// New option under "Inicio de itinerario": Persona contactada - En valoración.
   late bool? contactedPersonEvaluation;
-  /// New option under "Cierre de itinerario": Persona contactada - No corresponde intervención.
+  /// New option under "Cierre de itinerario": Persona contactada - No corresponde acompañamiento.
   late bool? contactedPersonNoIntervention;
   late String? other;
   late List<String>? results;

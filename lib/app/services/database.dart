@@ -224,6 +224,17 @@ abstract class Database {
      Stream<InitialReport> initialReportsStreamByUserId(String? userId);
      Stream<InitialReport?> initialReportStreamById(String? initialReportId);
      Future<void> setInitialReport(InitialReport initialReport);
+     /// Updates only `completedDate` of a report: the only field that can still
+     /// be edited once the report is finished.
+     Future<void> updateInitialReportCompletedDate(String initialReportId, DateTime date);
+     Future<void> updateFollowReportCompletedDate(String followReportId, DateTime date);
+     Future<void> updateDerivationReportCompletedDate(String derivationReportId, DateTime date);
+     Future<void> updateClosureReportCompletedDate(String closureReportId, DateTime date);
+     /// Updates the start or closure date of an archived cycle in the user's
+     /// `socialItineraryHistory`, matching it by its initial or closure report.
+     Future<void> updateHistoryCycleDate(String userId,
+         {String? initialReportId, DateTime? startDate,
+          String? closureReportId, DateTime? closureDate});
      Future<String> addInitialReport(InitialReport initialReport);
      Stream<List<String>> languagesStream();
      Stream<List<String>> nationsSpanishStream();
@@ -1681,6 +1692,60 @@ class FirestoreDatabase implements Database {
   Future<void> setInitialReport(InitialReport initialReport) {
     return _service.updateData(
         path: APIPath.initialReport(initialReport.initialReportId!), data: initialReport.toMap());
+  }
+
+  @override
+  Future<void> updateInitialReportCompletedDate(String initialReportId, DateTime date) {
+    return _service.updateData(
+        path: APIPath.initialReport(initialReportId), data: {'completedDate': date});
+  }
+
+  @override
+  Future<void> updateFollowReportCompletedDate(String followReportId, DateTime date) {
+    return _service.updateData(
+        path: APIPath.followReport(followReportId), data: {'completedDate': date});
+  }
+
+  @override
+  Future<void> updateDerivationReportCompletedDate(String derivationReportId, DateTime date) {
+    return _service.updateData(
+        path: APIPath.derivationReport(derivationReportId), data: {'completedDate': date});
+  }
+
+  @override
+  Future<void> updateClosureReportCompletedDate(String closureReportId, DateTime date) {
+    return _service.updateData(
+        path: APIPath.closureReport(closureReportId), data: {'completedDate': date});
+  }
+
+  @override
+  Future<void> updateHistoryCycleDate(String userId,
+      {String? initialReportId, DateTime? startDate,
+       String? closureReportId, DateTime? closureDate}) async {
+    // Read the fresh doc: the in-memory user may hold a stale history.
+    final user = await getUser(userId);
+    if (user == null) return;
+    final history = user.socialItineraryHistory.map((cycle) {
+      final matchesStart = initialReportId != null &&
+          cycle.initialReportId == initialReportId;
+      final matchesClosure = closureReportId != null &&
+          cycle.closureReportId == closureReportId;
+      if (!matchesStart && !matchesClosure) return cycle;
+      return SocialItineraryCycle(
+        initialReportId: cycle.initialReportId,
+        followReportId: cycle.followReportId,
+        derivationReportId: cycle.derivationReportId,
+        closureReportId: cycle.closureReportId,
+        startDate: matchesStart ? startDate : cycle.startDate,
+        closureDate: matchesClosure ? closureDate : cycle.closureDate,
+        programId: cycle.programId,
+        archivedAt: cycle.archivedAt,
+      );
+    }).toList();
+    await _service.updateData(
+      path: APIPath.user(userId),
+      data: {'socialItineraryHistory': history.map((c) => c.toMap()).toList()},
+    );
   }
 
   @override

@@ -985,8 +985,8 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
 ///   1. Closure report attached → "Cierre"
 ///   2. startDateItinerary set  → "Iniciado (dd/mm/aaaa)"
 ///   3. initialReportId set     → "En evaluación"
-///   4. Any IPIL with contactedPersonEvaluation=true → "Persona contactada - En evaluación"
-///   5. Any IPIL with contactedPersonNoIntervention=true → "Persona contactada - No corresponde intervención"
+///   4. Any IPIL with contactedPersonNoIntervention=true → "Persona contactada - No corresponde acompañamiento"
+///   5. Any IPIL with contactedPersonEvaluation=true → "Persona contactada - En valoración"
 ///   6. Fallback → "*No iniciado"
 class _ItineraryStateCell extends StatelessWidget {
   const _ItineraryStateCell({
@@ -1015,13 +1015,13 @@ class _ItineraryStateCell extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return _cell(staticState);
         final ipils = snapshot.data!;
-        for (final entry in ipils) {
-          if (entry.contactedPersonEvaluation == true) {
-            return _cell(StringConst.IPIL_INITIAL_CONTACTED);
-          }
-          if (entry.contactedPersonNoIntervention == true) {
-            return _cell(StringConst.IPIL_CLOSE_CONTACTED_NO_INTERVENTION);
-          }
+        // "No corresponde acompañamiento" always wins over "En valoración",
+        // regardless of which IPIL holds each option or its date.
+        if (ipils.any((e) => e.contactedPersonNoIntervention == true)) {
+          return _cell(StringConst.IPIL_CLOSE_CONTACTED_NO_INTERVENTION);
+        }
+        if (ipils.any((e) => e.contactedPersonEvaluation == true)) {
+          return _cell(StringConst.IPIL_INITIAL_CONTACTED);
         }
         return _cell(staticState);
       },

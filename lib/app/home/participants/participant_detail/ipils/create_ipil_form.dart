@@ -176,6 +176,10 @@ void initState() {
   techId = ipil?.techId ?? currentUser?.userId ?? widget.participantUser.assignedById;
   techName.value = ipil?.techName ?? (currentUser != null ? '${currentUser.firstName} ${currentUser.lastName}' : '');
 
+  initialInterview = ipil?.initialInterview ?? false;
+  initialQuestionary = ipil?.initialJobValorationQuestionary ?? false;
+  closeInterview = ipil?.finalInterview ?? false;
+  closeQuestionary = ipil?.finalJobValorationQuestionary ?? false;
   contactedPersonEvaluation = ipil?.contactedPersonEvaluation ?? false;
   contactedPersonNoIntervention = ipil?.contactedPersonNoIntervention ?? false;
 
@@ -393,12 +397,15 @@ void initState() {
               child: StreamBuilder(
                 stream: database.getIpilEntriesByUserStream(widget.participantUser.userId ?? ''), 
                 builder: (context, snapshot){
-                  bool initialInterviewSelectable = true;
-                  bool initialQuestionarySelectable = true;
-                  bool closeInterviewSelectable = true;
-                  bool closeQuestionarySelectable = true;
-                  bool contactedPersonEvaluationSelectable = true;
-                  bool contactedPersonNoInterventionSelectable = true;
+                  // Cada opción de inicio/cierre de itinerario solo puede marcarse
+                  // una vez por participante: si ya está en otro IPIL se muestra
+                  // marcada y deshabilitada, pero no se guarda en este.
+                  bool initialInterviewTaken = false;
+                  bool initialQuestionaryTaken = false;
+                  bool closeInterviewTaken = false;
+                  bool closeQuestionaryTaken = false;
+                  bool contactedPersonEvaluationTaken = false;
+                  bool contactedPersonNoInterventionTaken = false;
                   if(snapshot.hasData){
                     List<IpilEntry> ipilsFromUser = snapshot.data!;
                     for(IpilEntry entry in ipilsFromUser){
@@ -406,40 +413,12 @@ void initState() {
                       // block itself.
                       if (widget.selectedIpil != null &&
                           entry.ipilId == widget.selectedIpil!.ipilId) continue;
-                      if(entry.initialInterview == true){
-                        initialInterview = true;
-                        initialInterviewSelectable = false;
-                        // Entrevista inicial already taken → block new option
-                        contactedPersonEvaluationSelectable = false;
-                      }
-                      if(entry.initialJobValorationQuestionary == true){
-                        initialQuestionary = true;
-                        initialQuestionarySelectable = false;
-                        contactedPersonEvaluationSelectable = false;
-                      }
-                      if(entry.contactedPersonEvaluation == true){
-                        contactedPersonEvaluation = true;
-                        contactedPersonEvaluationSelectable = false;
-                        // "En evaluación" already taken → block the other initial options
-                        initialInterviewSelectable = false;
-                        initialQuestionarySelectable = false;
-                      }
-                      if(entry.finalInterview == true){
-                        closeInterview = true;
-                        closeInterviewSelectable = false;
-                        contactedPersonNoInterventionSelectable = false;
-                      }
-                      if(entry.finalJobValorationQuestionary == true){
-                        closeQuestionary = true;
-                        closeQuestionarySelectable = false;
-                        contactedPersonNoInterventionSelectable = false;
-                      }
-                      if(entry.contactedPersonNoIntervention == true){
-                        contactedPersonNoIntervention = true;
-                        contactedPersonNoInterventionSelectable = false;
-                        closeInterviewSelectable = false;
-                        closeQuestionarySelectable = false;
-                      }
+                      if (entry.initialInterview == true) initialInterviewTaken = true;
+                      if (entry.initialJobValorationQuestionary == true) initialQuestionaryTaken = true;
+                      if (entry.contactedPersonEvaluation == true) contactedPersonEvaluationTaken = true;
+                      if (entry.finalInterview == true) closeInterviewTaken = true;
+                      if (entry.finalJobValorationQuestionary == true) closeQuestionaryTaken = true;
+                      if (entry.contactedPersonNoIntervention == true) contactedPersonNoInterventionTaken = true;
                     }
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,41 +430,21 @@ void initState() {
                         ),
                         CustomCheckBoxSelectable(
                           title: StringConst.IPIL_INITIAL_CONTACTED,
-                          isSelected: contactedPersonEvaluation,
-                          onTapItem: (value){
-                            setState(() {
-                              contactedPersonEvaluation = value;
-                              // Mutually exclusive with Entrevista inicial
-                              // and Cuestionario inicial
-                              if (value) {
-                                initialInterview = false;
-                                initialQuestionary = false;
-                              }
-                            });
-                          },
-                          selectable: contactedPersonEvaluationSelectable,
+                          isSelected: contactedPersonEvaluation || contactedPersonEvaluationTaken,
+                          onTapItem: (value) => setState(() => contactedPersonEvaluation = value),
+                          selectable: !contactedPersonEvaluationTaken,
                         ),
                         CustomCheckBoxSelectable(
-                          title:StringConst.IPIL_INITIAL_INTERVIEW, 
-                          isSelected: initialInterview, 
-                          onTapItem: (value){
-                            setState(() {
-                              initialInterview = value;
-                              if (value) contactedPersonEvaluation = false;
-                            });
-                          }, 
-                          selectable: initialInterviewSelectable,
+                          title: StringConst.IPIL_INITIAL_INTERVIEW,
+                          isSelected: initialInterview || initialInterviewTaken,
+                          onTapItem: (value) => setState(() => initialInterview = value),
+                          selectable: !initialInterviewTaken,
                         ),
                         CustomCheckBoxSelectable(
-                          title:StringConst.IPIL_INITIAL_QUESTIONARY, 
-                          isSelected: initialQuestionary, 
-                          onTapItem: (value){
-                            setState(() {
-                              initialQuestionary = value;
-                              if (value) contactedPersonEvaluation = false;
-                            });
-                          }, 
-                          selectable: initialQuestionarySelectable,
+                          title: StringConst.IPIL_INITIAL_QUESTIONARY,
+                          isSelected: initialQuestionary || initialQuestionaryTaken,
+                          onTapItem: (value) => setState(() => initialQuestionary = value),
+                          selectable: !initialQuestionaryTaken,
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: Sizes.kDefaultPaddingDouble / 2),
@@ -493,39 +452,21 @@ void initState() {
                         ),
                         CustomCheckBoxSelectable(
                           title: StringConst.IPIL_CLOSE_CONTACTED_NO_INTERVENTION,
-                          isSelected: contactedPersonNoIntervention,
-                          onTapItem: (value){
-                            setState(() {
-                              contactedPersonNoIntervention = value;
-                              if (value) {
-                                closeInterview = false;
-                                closeQuestionary = false;
-                              }
-                            });
-                          },
-                          selectable: contactedPersonNoInterventionSelectable,
+                          isSelected: contactedPersonNoIntervention || contactedPersonNoInterventionTaken,
+                          onTapItem: (value) => setState(() => contactedPersonNoIntervention = value),
+                          selectable: !contactedPersonNoInterventionTaken,
                         ),
                         CustomCheckBoxSelectable(
-                          title:StringConst.IPIL_CLOSE_INTERVIEW, 
-                          isSelected: closeInterview, 
-                          onTapItem: (value){
-                            setState(() {
-                              closeInterview = value;
-                              if (value) contactedPersonNoIntervention = false;
-                            });
-                          }, 
-                          selectable: closeInterviewSelectable,
+                          title: StringConst.IPIL_CLOSE_INTERVIEW,
+                          isSelected: closeInterview || closeInterviewTaken,
+                          onTapItem: (value) => setState(() => closeInterview = value),
+                          selectable: !closeInterviewTaken,
                         ),
                         CustomCheckBoxSelectable(
-                          title:StringConst.IPIL_CLOSE_QUESTIONARY, 
-                          isSelected: closeQuestionary, 
-                          onTapItem: (value){
-                            setState(() {
-                              closeQuestionary = value;
-                              if (value) contactedPersonNoIntervention = false;
-                            });
-                          }, 
-                          selectable: closeQuestionarySelectable,
+                          title: StringConst.IPIL_CLOSE_QUESTIONARY,
+                          isSelected: closeQuestionary || closeQuestionaryTaken,
+                          onTapItem: (value) => setState(() => closeQuestionary = value),
+                          selectable: !closeQuestionaryTaken,
                         ),
                       ]
                     );

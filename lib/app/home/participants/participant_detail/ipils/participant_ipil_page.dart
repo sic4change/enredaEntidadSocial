@@ -1,6 +1,7 @@
 import 'package:enreda_empresas/app/common_widgets/custom_text.dart';
 import 'package:enreda_empresas/app/common_widgets/custom_text_form_field_title.dart';
 import 'package:enreda_empresas/app/common_widgets/spaces.dart';
+import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/home/participants/pdf_generator/ipils_print/pdf_ipil_preview.dart';
 import 'package:enreda_empresas/app/models/initialReport.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
@@ -72,6 +73,18 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
     }
 
     super.initState();
+  }
+
+  // Se puede crear un IPIL si el participante tiene técnica asignada o, sin
+  // ella, si pertenece a la misma entidad que el usuario que lo rellena.
+  bool _canCreateIpil() {
+    final assignedById = widget.participantUser.assignedById;
+    if (assignedById != null && assignedById.isNotEmpty) return true;
+    final participantEntityId = widget.participantUser.assignedEntityId;
+    final currentEntityId = globals.currentSocialEntityUser?.socialEntityId;
+    return participantEntityId != null &&
+        participantEntityId.isNotEmpty &&
+        participantEntityId == currentEntityId;
   }
 
   Widget _buildPageByIndex(int selectedIndex) {
@@ -251,8 +264,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                         size: 22,
                       ),
                       onPressed: () {
-                        if (widget.participantUser.assignedById == null ||
-                            widget.participantUser.assignedById == '') {
+                        if (!_canCreateIpil()) {
                           showAlertDialog(
                             context,
                             title: StringConst.FORM_WARNING,
@@ -319,8 +331,7 @@ class _ParticipantIPILPageState extends State<ParticipantIPILPage> {
                       subtitle: StringConst.ADD_IPIL_ENTRY,
                       imagePath: ImagePath.EMPTY_LiST_ICON,
                       onPressed: () {
-                        if (widget.participantUser.assignedById == null ||
-                            widget.participantUser.assignedById == '') {
+                        if (!_canCreateIpil()) {
                           showAlertDialog(
                             context,
                             title: StringConst.FORM_WARNING,

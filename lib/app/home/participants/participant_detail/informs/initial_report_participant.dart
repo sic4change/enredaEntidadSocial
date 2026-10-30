@@ -877,7 +877,9 @@ class _InitialReportFormState extends State<InitialReportForm> {
               ),
               childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.DATE,
-                enabled: !_finished,
+                // La fecha es el único campo editable tras finalizar el informe,
+                // también en los itinerarios anteriores (viewOnly).
+                enabled: true,
                 color: AppColors.primary900,
                 initialValue: _dateValues['completedDate'],
                 onChanged: (value) {
@@ -891,6 +893,23 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   setState(() {
                     _dateValues['completedDate'] = value ?? DateTime.now();
                   });
+                  // Finalizado: no hay botón de guardar, se guarda solo la fecha
+                  // y, con ella, la fecha de inicio de itinerario.
+                  final reportId = report.initialReportId;
+                  if (_finished && reportId != null) {
+                    final date = _dateValues['completedDate']!;
+                    database.updateInitialReportCompletedDate(reportId, date);
+                    if (widget.viewOnly) {
+                      database.updateHistoryCycleDate(widget.user.userId!,
+                          initialReportId: reportId, startDate: date);
+                    } else {
+                      widget.user.startDateItinerary = date;
+                      database.updateUserEnredaFields(
+                          widget.user.userId!, {'startDateItinerary': date});
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text(StringConst.REPORT_DATE_UPDATED)));
+                  }
                 },
               ),
             ),

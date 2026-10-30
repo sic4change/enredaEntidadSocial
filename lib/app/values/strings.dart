@@ -650,8 +650,8 @@ class StringConst {
   static const String IPIL_CLOSE_ITINERARY = "Cierre de itinerario";
   static const String IPIL_CLOSE_INTERVIEW = "Entrevista de cierre";
   static const String IPIL_CLOSE_QUESTIONARY = "Cuestionario de Valoración de la Empleabilidad Final";
-  static const String IPIL_INITIAL_CONTACTED = "Persona contactada - En evaluación";
-  static const String IPIL_CLOSE_CONTACTED_NO_INTERVENTION = "Persona contactada - No corresponde intervención";
+  static const String IPIL_INITIAL_CONTACTED = "Persona contactada - En valoración";
+  static const String IPIL_CLOSE_CONTACTED_NO_INTERVENTION = "Persona contactada - No corresponde acompañamiento";
   static const String IPIL_OTHERS = "Otros";
 
   // Seguimiento a las 4 semanas / 6 meses tras el Informe Inicial
@@ -689,7 +689,8 @@ class StringConst {
 
 
   static const String IPIL_CREATE = "Crear nuevo IPIL";
-  static const String IPIL_WARNING_TECHNICAL = "Este participante no tiene técnica asignada, para crear un IPIL asigne una técnica.";
+  static const String IPIL_WARNING_TECHNICAL = "Este participante no tiene técnica asignada ni pertenece a tu entidad. Para crear un IPIL asigne una técnica.";
+  static const String REPORT_DATE_UPDATED = "Fecha del informe actualizada";
   static const String IPIL_WARNING_INITIAL_REPORT = "Este participante no tiene finalizado el informe inicial, para crear un IPIL finalice el informe inicial.";
   static const String REPORT_WARNING_TECHNICAL = "Este participante no tiene técnica asignada, para crear el Informe Inicial asigne una técnica.";
   static const String IPIL_GOALS_MONITORING_PLACEHOLDER = 'Por favor, utiliza este espacio para documentar los detalles de la entrevista. Incluye las impresiones generales, avances del participante, y una descripción de los eventos y cambios ocurridos desde la última entrevista. Anota también cualquier objetivo o plan de acción acordado para las próximas semanas.';

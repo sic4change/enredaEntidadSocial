@@ -1460,7 +1460,9 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               ),
               childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.DATE,
-                enabled: !_finished,
+                // La fecha es el único campo editable tras finalizar el informe,
+                // también en los itinerarios anteriores (viewOnly).
+                enabled: true,
                 color: AppColors.primary900,
                 initialValue: _dateValues['completedDate'],
                 onChanged: (value){
@@ -1472,6 +1474,12 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                     return;
                   }else{
                     _dateValues['completedDate'] = value;
+                    // Finalizado: no hay botón de guardar, se guarda solo la fecha.
+                    if (_finished && report.derivationReportId != null) {
+                      database.updateDerivationReportCompletedDate(report.derivationReportId!, value);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text(StringConst.REPORT_DATE_UPDATED)));
+                    }
                   }
                 },
               ),

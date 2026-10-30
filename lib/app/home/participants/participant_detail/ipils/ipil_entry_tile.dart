@@ -86,6 +86,16 @@ class IpilEntryTile extends StatelessWidget {
           ],
         ),
         _labelSection(StringConst.IPIL_FOLLOW, ipilEntry.content),
+        _labelSection(StringConst.IPIL_INITIAL_ITINERARY, _checkedOptions({
+          StringConst.IPIL_INITIAL_CONTACTED: ipilEntry.contactedPersonEvaluation,
+          StringConst.IPIL_INITIAL_INTERVIEW: ipilEntry.initialInterview,
+          StringConst.IPIL_INITIAL_QUESTIONARY: ipilEntry.initialJobValorationQuestionary,
+        })),
+        _labelSection(StringConst.IPIL_CLOSE_ITINERARY, _checkedOptions({
+          StringConst.IPIL_CLOSE_CONTACTED_NO_INTERVENTION: ipilEntry.contactedPersonNoIntervention,
+          StringConst.IPIL_CLOSE_INTERVIEW: ipilEntry.finalInterview,
+          StringConst.IPIL_CLOSE_QUESTIONARY: ipilEntry.finalJobValorationQuestionary,
+        })),
         if (ipilEntry.fourWeeksCheck == true || ipilEntry.sixMonthsCheck == true)
           _buildFollowUpDetail(context, ipilEntry),
         _labelSection(StringConst.IPIL_SPECIFIC_SKILLS, ipilEntry.specificSkillsText),
@@ -104,6 +114,7 @@ class IpilEntryTile extends StatelessWidget {
         _labelSection(StringConst.IPIL_ECONOMIC_BAG, ipilEntry.economicBagText),
         if (ipilEntry.reinforcement?.isNotEmpty == true)
           _labelSection('Refuerzo', ipilEntry.reinforcementsText),
+        _labelSection(StringConst.IPIL_OTHERS, ipilEntry.other),
         const SizedBox(height: 20),
       ],
     );
@@ -170,6 +181,14 @@ class IpilEntryTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Joins the labels of the checked options, one per line.
+  String _checkedOptions(Map<String, bool?> options) {
+    return options.entries
+        .where((e) => e.value == true)
+        .map((e) => e.key)
+        .join('\n');
   }
 
   Widget _labelSection(String title, String? text) {

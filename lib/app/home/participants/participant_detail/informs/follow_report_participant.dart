@@ -1109,7 +1109,9 @@ class _FollowReportFormState extends State<FollowReportForm> {
               ),
               childLeft: CustomDatePickerTitleOpen(
                 labelText: StringConst.DATE,
-                enabled: !_finished,
+                // La fecha es el único campo editable tras finalizar el informe,
+                // también en los itinerarios anteriores (viewOnly).
+                enabled: true,
                 color: AppColors.primary900,
                 initialValue: _dateValues['completedDate'],
                 onChanged: (value){
@@ -1121,6 +1123,12 @@ class _FollowReportFormState extends State<FollowReportForm> {
                     return;
                   }else{
                     _dateValues['completedDate'] = value;
+                    // Finalizado: no hay botón de guardar, se guarda solo la fecha.
+                    if (_finished && report.followReportId != null) {
+                      database.updateFollowReportCompletedDate(report.followReportId!, value);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text(StringConst.REPORT_DATE_UPDATED)));
+                    }
                   }
                 },
               ),

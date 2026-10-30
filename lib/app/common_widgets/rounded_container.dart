@@ -33,6 +33,8 @@ class RoundedContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(Sizes.kDefaultPaddingDouble),
           border: Border.all(color: borderColor, width: borderWith!,),
         ),
-        child: child);
+        // Transparent Material so ListTiles inside can paint their background
+        // and ink splashes above this container's color.
+        child: Material(type: MaterialType.transparency, child: child));
   }
 }
