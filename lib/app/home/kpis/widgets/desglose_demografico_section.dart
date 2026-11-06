@@ -53,9 +53,8 @@ class DesgloseDemograficoSection extends StatelessWidget {
       return KpiSearchResults(
         sectionTitle: sectionTitle,
         onToggle: onToggle,
-        cards: kpiMatchingCards(searchQuery, sectionTitle, cardTitles)
-            .map((t) => builders[t]!())
-            .toList(),
+        cardTitles: kpiMatchingCards(searchQuery, sectionTitle, cardTitles),
+        buildCard: (t) => builders[t]!(),
       );
     }
 
@@ -64,7 +63,7 @@ class DesgloseDemograficoSection extends StatelessWidget {
       children: [
         SectionHeader(
           title: 'Desglose demográfico',
-          cardCount: 2,
+          cardTitles: cardTitles,
           isExpanded: isExpanded,
           onToggle: onToggle,
         ),

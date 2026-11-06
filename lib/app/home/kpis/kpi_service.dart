@@ -160,6 +160,73 @@ class RecursosKpiData {
   });
 }
 
+/// Fila del informe "Participantes": un participante de la vista seleccionada.
+/// Los campos sin fuente de datos (Nº Part., País de origen, ¿Qué minoría?,
+/// RCP) se dejan vacíos en el informe.
+class ParticipanteListadoRow {
+  final String userId;
+  final String? programa;
+  final String? ipfse1;
+  final String? tecnicaReferencia;
+  final DateTime? fechaInicioPrograma;
+  final String? numIdentificacion;
+  final String nombreApellidos;
+  final DateTime? fechaNacimiento;
+  final int? edadInicial;
+  final String? rangoEdad;
+  final String? genero;
+  final String? nacionalTpue;
+  final String? nacionalidad;
+  final String? nivelEducativoInicial;
+  final String? cineFse;
+  final String? situacionLaboral;
+  final String? condicionLaboral;
+  final String? estadoLaboral;
+  final String? hogarFse;
+  final String? alojamiento;
+  final String? discapacidad;
+  final String? grado;
+  final String? minorias;
+  final String? ruralidad;
+  final String? municipio;
+  final String? idInformeInicial;
+  final String estadoPrograma;
+  final DateTime? fechaSalidaOperacion;
+  final String? motivoCierre;
+
+  const ParticipanteListadoRow({
+    required this.userId,
+    this.programa,
+    this.ipfse1,
+    this.tecnicaReferencia,
+    this.fechaInicioPrograma,
+    this.numIdentificacion,
+    required this.nombreApellidos,
+    this.fechaNacimiento,
+    this.edadInicial,
+    this.rangoEdad,
+    this.genero,
+    this.nacionalTpue,
+    this.nacionalidad,
+    this.nivelEducativoInicial,
+    this.cineFse,
+    this.situacionLaboral,
+    this.condicionLaboral,
+    this.estadoLaboral,
+    this.hogarFse,
+    this.alojamiento,
+    this.discapacidad,
+    this.grado,
+    this.minorias,
+    this.ruralidad,
+    this.municipio,
+    this.idInformeInicial,
+    required this.estadoPrograma,
+    this.fechaSalidaOperacion,
+    this.motivoCierre,
+  });
+}
+
 class KpiService {
   final Database database;
 
@@ -233,6 +300,248 @@ class KpiService {
       } catch (_) {}
     }
     return users;
+  }
+
+  InitialReport? _initialReportOf(
+      UserEnreda u, Map<String, InitialReport> initialReportsByUser) {
+    final uId = u.userId ?? '';
+    return (u.initialReportId != null &&
+            initialReportsByUser.containsKey(u.initialReportId))
+        ? initialReportsByUser[u.initialReportId]
+        : (initialReportsByUser[uId] ?? initialReportsByUser[u.email]);
+  }
+
+  /// Indica si el participante pertenece a la vista seleccionada (global,
+  /// entidad actual o subvención según el informe inicial).
+  bool _matchesFilter({
+    required UserEnreda user,
+    required InitialReport? initReport,
+    required String filterId,
+    required String currentSocialEntityId,
+  }) {
+    final sub = (initReport?.subsidy ?? '').trim();
+
+    // Si el filtro es por subsidio
+    if (filterId == '529760' || filterId.contains('529760')) {
+      return sub.contains('529760') ||
+          sub.toUpperCase().contains('MEDICOS DEL MUNDO');
+    } else if (filterId == '529775' || filterId.contains('529775')) {
+      return sub.contains('529775') || sub.toUpperCase().contains('SICFCH');
+    } else if (filterId == 'seimlab' || filterId.contains('0080')) {
+      return sub.toUpperCase().contains('SEIMLAB') || sub.contains('0080');
+    } else if (filterId == 'global') {
+      return true;
+    } else {
+      // Por entidad (currentSocialEntityId)
+      return (user.assignedEntityId == currentSocialEntityId ||
+          user.socialEntityId == currentSocialEntityId);
+    }
+  }
+
+  /// Carga el listado de participantes de la vista seleccionada, con una fila
+  /// por participante para el informe "Participantes".
+  Future<List<ParticipanteListadoRow>> loadParticipantesListado({
+    required String filterId,
+    required String currentSocialEntityId,
+  }) async {
+    final users = await _fetchCandidateUsers(
+      filterId: filterId,
+      currentSocialEntityId: currentSocialEntityId,
+    );
+    if (users.isEmpty) return [];
+
+    final firestore = FirebaseFirestore.instance;
+    final results = await Future.wait([
+      _getDocs(
+          firestore.collection(APIPath.initialReports()), 'initialReports'),
+      _getDocs(
+          firestore.collection(APIPath.closureReports()), 'closureReports'),
+      _getDocs(firestore.collection(APIPath.education()), 'education'),
+    ]);
+
+    final Map<String, InitialReport> initialReportsByUser = {};
+    for (final doc in results[0]) {
+      try {
+        final report = InitialReport.fromMap(doc.data(), doc.id);
+        if (report.userId != null && report.userId!.isNotEmpty) {
+          final existing = initialReportsByUser[report.userId!];
+          if (existing == null ||
+              ((existing.subsidy == null || existing.subsidy!.isEmpty) &&
+                  (report.subsidy != null && report.subsidy!.isNotEmpty))) {
+            initialReportsByUser[report.userId!] = report;
+          }
+        }
+        initialReportsByUser[doc.id] = report;
+      } catch (_) {}
+    }
+
+    final Map<String, ClosureReport> closureReportsByUser = {};
+    for (final doc in results[1]) {
+      try {
+        final report = ClosureReport.fromMap(doc.data(), doc.id);
+        if (report.userId != null && report.userId!.isNotEmpty) {
+          closureReportsByUser[report.userId!] = report;
+        }
+        closureReportsByUser[doc.id] = report;
+      } catch (_) {}
+    }
+
+    final Map<String, String> educationLabelById = {};
+    for (final doc in results[2]) {
+      final label = doc.data()['label'];
+      if (label is String) educationLabelById[doc.id] = label;
+    }
+
+    final filteredUsers = users
+        .where((u) => _matchesFilter(
+              user: u,
+              initReport: _initialReportOf(u, initialReportsByUser),
+              filterId: filterId,
+              currentSocialEntityId: currentSocialEntityId,
+            ))
+        .toList();
+
+    // Municipios: solo los de los participantes filtrados (cities/{cityId})
+    final cityIds = filteredUsers
+        .map((u) => u.city)
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    final Map<String, String> cityNameById = {};
+    await Future.wait(cityIds.map((id) async {
+      try {
+        final snap = await firestore.doc(APIPath.city(id)).get();
+        final name = snap.data()?['name'];
+        if (name is String) cityNameById[id] = name;
+      } catch (e) {
+        print('KPIs: error leyendo municipio "$id": $e');
+      }
+    }));
+
+    final rows = filteredUsers.map((u) {
+      final uId = u.userId ?? '';
+      final init = _initialReportOf(u, initialReportsByUser);
+      final closure = (u.closureReportId != null &&
+              closureReportsByUser.containsKey(u.closureReportId))
+          ? closureReportsByUser[u.closureReportId]
+          : (closureReportsByUser[uId] ?? closureReportsByUser[u.email]);
+      final bool isClosed = closure != null &&
+          (closure.finished == true || closure.completedDate != null);
+
+      final educationLabel = (u.educationId != null
+              ? educationLabelById[u.educationId]
+              : null) ??
+          u.educationName;
+      final cineIdx =
+          educationLabel != null ? _cineGroupOf(educationLabel) : null;
+
+      final tempLabor = init?.tempLabor;
+      String? estadoLaboral;
+      if (tempLabor == 'Contrato temporal') {
+        estadoLaboral = 'Precariedad';
+      } else if (tempLabor == 'Contrato indefinido' &&
+          init?.workingDayLabor == 'Parcial/Involuntaria') {
+        estadoLaboral = 'Subempleo';
+      }
+
+      final vulnerabilities = init?.vulnerabilityOptions ?? const <String>[];
+      final initialAge = (u.birthday != null && u.createDate != null)
+          ? _ageAt(u.birthday!, u.createDate!)
+          : null;
+      final currentAge =
+          u.birthday != null ? _ageAt(u.birthday!, DateTime.now()) : null;
+
+      return ParticipanteListadoRow(
+        userId: uId,
+        programa: init?.subsidy,
+        ipfse1: _ipfse1(u.firstName, u.lastName, u.startDateItinerary),
+        tecnicaReferencia: init?.techPersonName,
+        fechaInicioPrograma: u.startDateItinerary,
+        numIdentificacion: init?.dniParticipant,
+        nombreApellidos:
+            '${u.firstName ?? ''} ${u.lastName ?? ''}'.trim(),
+        fechaNacimiento: u.birthday,
+        edadInicial: initialAge,
+        rangoEdad: _ageRange(currentAge),
+        genero: u.gender,
+        nacionalTpue: _nationalityTpue(u.nationality),
+        nacionalidad: u.nationality,
+        nivelEducativoInicial: educationLabel,
+        cineFse: cineIdx != null ? _cineLabels[cineIdx] : null,
+        situacionLaboral: init?.laborSituation,
+        condicionLaboral: tempLabor,
+        estadoLaboral: estadoLaboral,
+        hogarFse: init?.ownershipType,
+        alojamiento: init?.ownershipTypeConcrete,
+        discapacidad: init?.disabilityState,
+        grado: init?.disabilityGrade,
+        minorias: init == null
+            ? null
+            : (vulnerabilities.contains('Minoría') ? 'Sí' : 'No'),
+        ruralidad: init == null
+            ? null
+            : (vulnerabilities.contains('Ruralidad') ? 'Sí' : 'No'),
+        municipio: u.city != null ? cityNameById[u.city] : null,
+        idInformeInicial: init?.initialReportId,
+        estadoPrograma: isClosed ? 'Cierre' : 'Activo',
+        fechaSalidaOperacion: isClosed ? closure.closeDate : null,
+        motivoCierre: isClosed ? closure.motiveClose : null,
+      );
+    }).toList()
+      ..sort((a, b) => a.nombreApellidos
+          .toLowerCase()
+          .compareTo(b.nombreApellidos.toLowerCase()));
+
+    return rows;
+  }
+
+  static int? _ageAt(DateTime birthday, DateTime at) {
+    var age = at.year - birthday.year;
+    if (at.month < birthday.month ||
+        (at.month == birthday.month && at.day < birthday.day)) age--;
+    return age < 0 ? null : age;
+  }
+
+  static String? _ageRange(int? age) {
+    if (age == null) return null;
+    if (age < 18) return 'Menor de 18';
+    if (age <= 29) return '18 a 29';
+    if (age <= 35) return '29 a 35';
+    if (age <= 54) return '35 a 54';
+    return 'Mayor de 54';
+  }
+
+  static const List<String> _euNationalities = [
+    'alemana', 'austriaca', 'belga', 'bulgara', 'chipriota', 'croata',
+    'danesa', 'eslovaca', 'eslovena', 'estonia', 'finlandesa', 'francesa',
+    'griega', 'hungara', 'irlandesa', 'italiana', 'letona', 'lituana',
+    'luxemburguesa', 'maltesa', 'neerlandesa', 'polaca', 'portuguesa',
+    'checa', 'rumana', 'sueca',
+    // Por si la nacionalidad está guardada como país
+    'alemania', 'austria', 'belgica', 'bulgaria', 'chipre', 'croacia',
+    'dinamarca', 'eslovaquia', 'eslovenia', 'finlandia', 'francia',
+    'grecia', 'hungria', 'irlanda', 'italia', 'letonia', 'lituania',
+    'luxemburgo', 'malta', 'paises bajos', 'holanda', 'polonia', 'portugal',
+    'republica checa', 'chequia', 'rumania', 'suecia',
+  ];
+
+  String? _nationalityTpue(String? nationality) {
+    if (nationality == null || nationality.trim().isEmpty) return null;
+    final n = _normalizeText(nationality);
+    if (n == 'espanola' || n == 'espana') return 'Nacional';
+    if (_euNationalities.contains(n)) return 'Nacional UE';
+    return 'Nacional Terceros Países';
+  }
+
+  /// Iniciales de nombre y apellido + mes y año (MMAA) de inicio del programa.
+  static String? _ipfse1(
+      String? firstName, String? lastName, DateTime? startDate) {
+    final f = (firstName ?? '').trim();
+    final l = (lastName ?? '').trim();
+    if (f.isEmpty || l.isEmpty || startDate == null) return null;
+    final month = startDate.month.toString().padLeft(2, '0');
+    final year = (startDate.year % 100).toString().padLeft(2, '0');
+    return '${f[0]}${l[0]}$month$year'.toUpperCase();
   }
 
   /// Carga los datos de participantes y calcula los KPIs según el filtro seleccionado
@@ -328,30 +637,14 @@ class KpiService {
     educations.sort((a, b) => a.order.compareTo(b.order));
 
     // 2. Filtrar lista de usuarios según el filterId seleccionado
-    final List<UserEnreda> filteredUsers = users.where((u) {
-      final uId = u.userId ?? '';
-      final initReport = (u.initialReportId != null &&
-              initialReportsByUser.containsKey(u.initialReportId))
-          ? initialReportsByUser[u.initialReportId]
-          : (initialReportsByUser[uId] ?? initialReportsByUser[u.email]);
-      final sub = (initReport?.subsidy ?? '').trim();
-
-      // Si el filtro es por subsidio
-      if (filterId == '529760' || filterId.contains('529760')) {
-        return sub.contains('529760') ||
-            sub.toUpperCase().contains('MEDICOS DEL MUNDO');
-      } else if (filterId == '529775' || filterId.contains('529775')) {
-        return sub.contains('529775') || sub.toUpperCase().contains('SICFCH');
-      } else if (filterId == 'seimlab' || filterId.contains('0080')) {
-        return sub.toUpperCase().contains('SEIMLAB') || sub.contains('0080');
-      } else if (filterId == 'global') {
-        return true;
-      } else {
-        // Por entidad (currentSocialEntityId)
-        return (u.assignedEntityId == currentSocialEntityId ||
-            u.socialEntityId == currentSocialEntityId);
-      }
-    }).toList();
+    final List<UserEnreda> filteredUsers = users
+        .where((u) => _matchesFilter(
+              user: u,
+              initReport: _initialReportOf(u, initialReportsByUser),
+              filterId: filterId,
+              currentSocialEntityId: currentSocialEntityId,
+            ))
+        .toList();
 
     final int total = filteredUsers.length;
     if (total == 0) {

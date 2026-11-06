@@ -62,10 +62,9 @@ class IndicadoresResultadosSection extends StatelessWidget {
       return KpiSearchResults(
         sectionTitle: sectionTitle,
         onToggle: onToggle,
-        cards: kpiMatchingCards(searchQuery, sectionTitle, cardTitles,
-                aliases: searchAliases)
-            .map((t) => builders[t]!())
-            .toList(),
+        cardTitles: kpiMatchingCards(searchQuery, sectionTitle, cardTitles,
+            aliases: searchAliases),
+        buildCard: (t) => builders[t]!(),
       );
     }
 
@@ -74,7 +73,7 @@ class IndicadoresResultadosSection extends StatelessWidget {
       children: [
         SectionHeader(
           title: 'Indicadores de resultados',
-          cardCount: 3,
+          cardTitles: cardTitles,
           isExpanded: isExpanded,
           onToggle: onToggle,
         ),

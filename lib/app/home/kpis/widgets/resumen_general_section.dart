@@ -55,9 +55,8 @@ class ResumenGeneralSection extends StatelessWidget {
       return KpiSearchResults(
         sectionTitle: sectionTitle,
         onToggle: onToggle,
-        cards: kpiMatchingCards(searchQuery, sectionTitle, cardTitles)
-            .map((t) => builders[t]!())
-            .toList(),
+        cardTitles: kpiMatchingCards(searchQuery, sectionTitle, cardTitles),
+        buildCard: (t) => builders[t]!(),
       );
     }
 
@@ -66,7 +65,7 @@ class ResumenGeneralSection extends StatelessWidget {
       children: [
         SectionHeader(
           title: 'Resumen general',
-          cardCount: 3,
+          cardTitles: cardTitles,
           isExpanded: isExpanded,
           onToggle: onToggle,
         ),

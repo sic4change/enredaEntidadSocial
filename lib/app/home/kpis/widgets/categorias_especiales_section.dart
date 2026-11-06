@@ -111,9 +111,8 @@ class CategoriasEspecialesSection extends StatelessWidget {
       return KpiSearchResults(
         sectionTitle: sectionTitle,
         onToggle: onToggle,
-        cards: kpiMatchingCards(searchQuery, sectionTitle, cardTitles)
-            .map((t) => builders[t]!())
-            .toList(),
+        cardTitles: kpiMatchingCards(searchQuery, sectionTitle, cardTitles),
+        buildCard: (t) => builders[t]!(),
       );
     }
 
@@ -122,7 +121,7 @@ class CategoriasEspecialesSection extends StatelessWidget {
       children: [
         SectionHeader(
           title: 'Categorías especiales',
-          cardCount: 6,
+          cardTitles: cardTitles,
           isExpanded: isExpanded,
           onToggle: onToggle,
         ),

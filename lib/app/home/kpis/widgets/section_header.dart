@@ -4,14 +4,17 @@ import '../kpi_colors.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
-  final int cardCount;
+
+  /// Títulos de las tarjetas de la sección, para saber qué contiene aunque
+  /// esté plegada.
+  final List<String> cardTitles;
   final bool isExpanded;
   final VoidCallback onToggle;
 
   const SectionHeader({
     Key? key,
     required this.title,
-    required this.cardCount,
+    required this.cardTitles,
     required this.isExpanded,
     required this.onToggle,
   }) : super(key: key);
@@ -22,38 +25,36 @@ class SectionHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.outfit(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: KpiColors.primaryDark,
-                letterSpacing: -0.3,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: KpiColors.cardBackground,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                    color: KpiColors.borderLight.withValues(alpha: 0.5)),
-              ),
-              child: Text(
-                '$cardCount ${cardCount == 1 ? "tarjeta" : "tarjetas"}',
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
                 style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: KpiColors.secondaryText,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: KpiColors.primaryDark,
+                  letterSpacing: -0.3,
                 ),
               ),
-            ),
-          ],
+              if (cardTitles.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  cardTitles.join(' / '),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.outfit(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: KpiColors.secondaryText,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
+        const SizedBox(width: 16),
         InkWell(
           borderRadius: BorderRadius.circular(999),
           onTap: onToggle,

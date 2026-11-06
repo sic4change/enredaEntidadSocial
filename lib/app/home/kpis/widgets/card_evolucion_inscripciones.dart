@@ -21,6 +21,14 @@ class CardEvolucionInscripciones extends StatefulWidget {
       _CardEvolucionInscripcionesState();
 }
 
+/// Un 0 junto a otro 0 forma un tramo plano: su marcador no se muestra.
+bool _isFlatZero(List<MonthDataPoint> points, int index) {
+  if (points[index].value != 0) return false;
+  final prev = index > 0 ? points[index - 1].value : null;
+  final next = index < points.length - 1 ? points[index + 1].value : null;
+  return prev == 0 || next == 0;
+}
+
 class _CardEvolucionInscripcionesState
     extends State<CardEvolucionInscripciones> {
   String _selectedPeriod = 'Año'; // 'Semana', 'Mes', 'Año'
@@ -372,35 +380,53 @@ class _CardEvolucionInscripcionesState
                         color: KpiColors.secondaryText,
                       ),
                     ),
+                    // Sin inscripciones en el periodo no se dibuja la serie:
+                    // la línea en 0 solo cubriría los días ya transcurridos
                     series: <CartesianSeries<MonthDataPoint, String>>[
-                      SplineAreaSeries<MonthDataPoint, String>(
-                        dataSource: points,
-                        xValueMapper: (MonthDataPoint data, _) => data.month,
-                        yValueMapper: (MonthDataPoint data, _) => data.value,
-                        splineType: SplineType.natural,
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            KpiColors.turquoise.withValues(alpha: 0.32),
-                            KpiColors.turquoise.withValues(alpha: 0.02),
-                          ],
-                        ),
-                        borderColor: KpiColors.turquoise,
-                        borderWidth: 2.2,
-                        markerSettings: const MarkerSettings(
-                          isVisible: true,
-                          shape: DataMarkerType.circle,
-                          color: Colors.white,
+                      if (maxVal > 0)
+                        SplineAreaSeries<MonthDataPoint, String>(
+                          dataSource: points,
+                          xValueMapper: (MonthDataPoint data, _) => data.month,
+                          yValueMapper: (MonthDataPoint data, _) => data.value,
+                          splineType: SplineType.natural,
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              KpiColors.turquoise.withValues(alpha: 0.32),
+                              KpiColors.turquoise.withValues(alpha: 0.02),
+                            ],
+                          ),
                           borderColor: KpiColors.turquoise,
-                          borderWidth: 2,
-                          width: 7,
-                          height: 7,
+                          borderWidth: 2.2,
+                          emptyPointSettings: EmptyPointSettings(
+                            mode: EmptyPointMode.drop,
+                          ),
                         ),
-                        emptyPointSettings: EmptyPointSettings(
-                          mode: EmptyPointMode.drop,
+                      // Marcadores en una serie aparte para poder ocultar los
+                      // ceros que están junto a otro cero (tramos planos)
+                      if (maxVal > 0)
+                        LineSeries<MonthDataPoint, String>(
+                          dataSource: points,
+                          color: Colors.transparent,
+                          width: 0,
+                          xValueMapper: (MonthDataPoint data, _) => data.month,
+                          yValueMapper: (MonthDataPoint data, int index) =>
+                              _isFlatZero(points, index) ? null : data.value,
+                          enableTooltip: false,
+                          markerSettings: const MarkerSettings(
+                            isVisible: true,
+                            shape: DataMarkerType.circle,
+                            color: Colors.white,
+                            borderColor: KpiColors.turquoise,
+                            borderWidth: 2,
+                            width: 7,
+                            height: 7,
+                          ),
+                          emptyPointSettings: EmptyPointSettings(
+                            mode: EmptyPointMode.drop,
+                          ),
                         ),
-                      ),
                     ],
                   ),
           ),

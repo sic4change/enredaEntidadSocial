@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../kpi_colors.dart';
 import '../kpi_service.dart';
 import '../kpi_search.dart';
 import 'section_header.dart';
@@ -60,9 +62,8 @@ class RecursosSection extends StatelessWidget {
       return KpiSearchResults(
         sectionTitle: sectionTitle,
         onToggle: onToggle,
-        cards: kpiMatchingCards(searchQuery, sectionTitle, cardTitles)
-            .map((t) => builders[t]!())
-            .toList(),
+        cardTitles: kpiMatchingCards(searchQuery, sectionTitle, cardTitles),
+        buildCard: (t) => builders[t]!(),
       );
     }
 
@@ -71,11 +72,33 @@ class RecursosSection extends StatelessWidget {
       children: [
         SectionHeader(
           title: 'Recursos',
-          cardCount: 3,
+          cardTitles: cardTitles,
           isExpanded: isExpanded,
           onToggle: onToggle,
         ),
         if (isExpanded) ...[
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.info_outline,
+                size: 16,
+                color: KpiColors.secondaryText,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Los recursos no se categorizan por programa, de manera que estos datos son representativos del total de recursos de la plataforma.',
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    color: KpiColors.secondaryText,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           LayoutBuilder(
             builder: (context, constraints) {

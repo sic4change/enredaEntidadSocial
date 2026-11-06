@@ -82,9 +82,10 @@ class _KpiPageState extends State<KpiPage> {
     }
 
     // 2. Nombre de la entidad actual
+    final entityFilterId = widget.socialEntity.socialEntityId ?? 'entity';
     items.add(
       FilterChipItem(
-        id: widget.socialEntity.socialEntityId ?? 'entity',
+        id: entityFilterId,
         label: entityName.isNotEmpty ? entityName : 'Mi Entidad',
       ),
     );
@@ -113,8 +114,8 @@ class _KpiPageState extends State<KpiPage> {
     );
 
     _filterItems = items;
-    // Si la entidad es SIC4Change o Entidad Prueba, preseleccionamos la primera opción o la entidad
-    _selectedFilterId = items.first.id;
+    // Por defecto se muestra la entidad actual, aunque "Global" esté disponible
+    _selectedFilterId = entityFilterId;
   }
 
   @override
@@ -244,10 +245,16 @@ class _KpiPageState extends State<KpiPage> {
             .firstOrNull ??
         '';
 
+    final filterId = _selectedFilterId;
+    final kpiService = _kpiService!;
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => KpiReportPreview(
+          loadParticipantes: () => kpiService.loadParticipantesListado(
+            filterId: filterId,
+            currentSocialEntityId: widget.socialEntity.socialEntityId ?? '',
+          ),
           data: KpiReportData(
             filterId: _selectedFilterId,
             filterLabel: filterLabel,

@@ -9,6 +9,7 @@ import 'package:printing/printing.dart';
 import '../../../models/userEnreda.dart';
 import '../kpi_models.dart';
 import '../kpi_service.dart';
+import '../report/report_document.dart';
 
 const PdfColor _primary900 = PdfColor.fromInt(0xFF054D5E);
 const PdfColor _secondaryText = PdfColor.fromInt(0xFF3F6672);
@@ -99,8 +100,7 @@ Future<Uint8List> generateKpiReportPdf(
             ),
   );
 
-  final p = data.participantes;
-  final r = data.recursos;
+  final report = buildKpiReportDocument(data);
 
   doc.addPage(
     pw.MultiPage(
@@ -112,23 +112,14 @@ Future<Uint8List> generateKpiReportPdf(
       ),
       build: (context) => [
         pw.Text(
-          'Informe de indicadores (KPIs)',
+          report.title,
           style: pw.TextStyle(
               fontSize: 18, fontWeight: pw.FontWeight.bold, color: _primary900),
         ),
         pw.SizedBox(height: 4),
-        _small('Vista: ${data.filterLabel}'),
-        _small(
-            'Generado el ${DateFormat('dd/MM/yyyy HH:mm').format(data.generatedAt)}'),
+        ...report.subtitleLines.map(_small),
         pw.SizedBox(height: 12),
-        if (p != null) ..._participantesSections(p, data.generatedAt),
-        if (p == null)
-          _note('No hay datos de participantes cargados para esta vista.'),
-        _sectionTitle('Recursos'),
-        _note(
-            'Los recursos se cuentan siempre sobre el total, independientemente del filtro.'),
-        if (r != null) ..._recursosSection(r, data.generatedAt),
-        if (r == null) _note('No hay datos de recursos cargados.'),
+        ..._renderBlocks(report.blocks),
       ],
     ),
   );
@@ -136,10 +127,56 @@ Future<Uint8List> generateKpiReportPdf(
   return doc.save();
 }
 
+/// Contenido del informe de KPIs, común a PDF, Word y Excel.
+ReportDocument buildKpiReportDocument(KpiReportData data) {
+  final p = data.participantes;
+  final r = data.recursos;
+  return ReportDocument(
+    title: 'Informe de indicadores (KPIs)',
+    subtitleLines: [
+      'Vista: ${data.filterLabel}',
+      'Generado el ${DateFormat('dd/MM/yyyy HH:mm').format(data.generatedAt)}',
+    ],
+    blocks: [
+      if (p != null) ..._participantesSections(p, data.generatedAt),
+      if (p == null)
+        const ReportNote(
+            'No hay datos de participantes cargados para esta vista.'),
+      const ReportSectionTitle('Recursos'),
+      const ReportNote(
+          'Los recursos se cuentan siempre sobre el total, independientemente del filtro.'),
+      if (r != null) ..._recursosSection(r, data.generatedAt),
+      if (r == null) const ReportNote('No hay datos de recursos cargados.'),
+    ],
+  );
+}
+
+List<pw.Widget> _renderBlocks(List<ReportBlock> blocks) {
+  final widgets = <pw.Widget>[];
+  ReportBlock? previous;
+  for (final block in blocks) {
+    switch (block) {
+      case ReportSectionTitle(:final text):
+        widgets.add(_sectionTitle(text));
+      case ReportSubTitle(:final text):
+        widgets.add(_subTitle(text));
+      case ReportNote(:final text):
+        widgets.add(_note(text));
+      case ReportKeyValue(:final label, :final value):
+        widgets.add(_kv(label, value));
+      case ReportTable(:final headers, :final rows):
+        if (previous is ReportTable) widgets.add(pw.SizedBox(height: 6));
+        widgets.add(_table(headers, rows));
+    }
+    previous = block;
+  }
+  return widgets;
+}
+
 // ---------------------------------------------------------------------------
 // Participantes
 
-List<pw.Widget> _participantesSections(ParticipantesKpiData p, DateTime now) {
+List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
   String pct(double v) => '${v.round()}%';
   List<String> barRow(StackedBarRow row) =>
       [row.label, '${row.count}', pct(row.percentage)];
@@ -168,74 +205,74 @@ List<pw.Widget> _participantesSections(ParticipantesKpiData p, DateTime now) {
 
   return [
     // Resumen general
-    _sectionTitle('Resumen general'),
-    _kv('Participantes inscritos', '${p.total}'),
-    _kv('Con informe inicial completo', '${p.totalConInformeInicialCompleto}'),
-    _subTitle('Estado'),
-    _table(['Estado', 'Personas', '%'], p.porEstado.map(barRow).toList()),
-    _subTitle('Género'),
-    _table(['Género', 'Personas', '%'], p.porGenero.map(barRow).toList()),
-    _subTitle('Nacionalidad'),
-    _table(['Nacionalidad', 'Personas', '%'],
+    ReportSectionTitle('Resumen general'),
+    ReportKeyValue('Participantes inscritos', '${p.total}'),
+    ReportKeyValue('Con informe inicial completo', '${p.totalConInformeInicialCompleto}'),
+    ReportSubTitle('Estado'),
+    ReportTable(['Estado', 'Personas', '%'], p.porEstado.map(barRow).toList()),
+    ReportSubTitle('Género'),
+    ReportTable(['Género', 'Personas', '%'], p.porGenero.map(barRow).toList()),
+    ReportSubTitle('Nacionalidad'),
+    ReportTable(['Nacionalidad', 'Personas', '%'],
         p.porNacionalidad.map(barRow).toList()),
-    _subTitle('Inscripciones por mes (${now.year})'),
-    _table(
+    ReportSubTitle('Inscripciones por mes (${now.year})'),
+    ReportTable(
       ['Mes', 'Inscripciones'],
       [
         for (int m = 0; m < 12; m++)
           if (m < now.month) [_monthShort[m], '${inscripciones[m]}'],
       ],
     ),
-    _subTitle('Situación de empleo inicial'),
-    _table(['Situación', 'Mujeres', 'Hombres', 'No binario', 'Total'],
+    ReportSubTitle('Situación de empleo inicial'),
+    ReportTable(['Situación', 'Mujeres', 'Hombres', 'No binario', 'Total'],
         p.situacionEmpleoInicial.map(empleoRow).toList()),
-    _subTitle('Situación de empleo actual'),
-    _table(['Situación', 'Mujeres', 'Hombres', 'No binario', 'Total'],
+    ReportSubTitle('Situación de empleo actual'),
+    ReportTable(['Situación', 'Mujeres', 'Hombres', 'No binario', 'Total'],
         p.situacionEmpleoActual.map(empleoRow).toList()),
 
     // Desglose demográfico
-    _sectionTitle('Desglose demográfico'),
-    _subTitle('Grupos de edad'),
-    _table(['Grupo', 'Mujeres', 'Hombres', 'No binario', 'Total'],
+    ReportSectionTitle('Desglose demográfico'),
+    ReportSubTitle('Grupos de edad'),
+    ReportTable(['Grupo', 'Mujeres', 'Hombres', 'No binario', 'Total'],
         _ageRows(p.users, now)),
-    _subTitle('Niveles formativos · Nivel CINE'),
-    _table(
+    ReportSubTitle('Niveles formativos · Nivel CINE'),
+    ReportTable(
         ['Nivel', 'Mujeres', 'Hombres', 'No binario', 'Total', '%'],
         p.nivelesCine
             .map((i) => levelRow(i)..[0] = '${i.cineLabel} · ${i.title}')
             .toList()),
-    _subTitle('Niveles formativos · Nivel de estudios'),
-    _table(
+    ReportSubTitle('Niveles formativos · Nivel de estudios'),
+    ReportTable(
         ['Nivel de estudios', 'Mujeres', 'Hombres', 'No binario', 'Total', '%'],
         p.nivelesEstudios.map(levelRow).toList()),
     if (p.nivelesSinEspecificar > 0)
-      _note(
+      ReportNote(
           '${p.nivelesSinEspecificar} participantes sin nivel formativo registrado.'),
 
     // Categorías especiales
-    _sectionTitle('Categorías especiales'),
-    _note('Discapacidad, condiciones sobrevenidas y situación administrativa: '
+    ReportSectionTitle('Categorías especiales'),
+    ReportNote('Discapacidad, condiciones sobrevenidas y situación administrativa: '
         'sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
-    _subTitle('Participantes con discapacidad'),
-    _table(
+    ReportSubTitle('Participantes con discapacidad'),
+    ReportTable(
         ['Estado', 'Personas', '%'],
         p.discapacidad
             .map((s) => [s.label, '${s.count}', pct(s.percentage)])
             .toList()),
-    _subTitle('Condiciones sobrevenidas'),
-    _table(
+    ReportSubTitle('Condiciones sobrevenidas'),
+    ReportTable(
         ['Condición', 'Personas', '%'],
         p.condicionesSobrevenidas
             .map((i) => [i.label, '${i.count}', pct(i.percentage ?? 0)])
             .toList()),
-    _subTitle('Situación administrativa'),
-    _table(
+    ReportSubTitle('Situación administrativa'),
+    ReportTable(
         ['Situación', 'Personas', '%'],
         p.situacionAdministrativa
             .map((s) => [s.label, '${s.count}', pct(s.percentage)])
             .toList()),
-    _subTitle('Nacionalidades'),
-    _table(
+    ReportSubTitle('Nacionalidades'),
+    ReportTable(
       ['Nacionalidad', 'Mujeres', 'Hombres', 'No binario', 'Total'],
       p.nacionalidades
           .map((n) => [
@@ -248,10 +285,10 @@ List<pw.Widget> _participantesSections(ParticipantesKpiData p, DateTime now) {
           .toList(),
     ),
     if (p.nacionalidadSinEspecificar > 0)
-      _note(
+      ReportNote(
           '${p.nacionalidadSinEspecificar} participantes sin nacionalidad registrada.'),
-    _subTitle('Competencias más reconocidas (top 10)'),
-    _table(
+    ReportSubTitle('Competencias más reconocidas (top 10)'),
+    ReportTable(
         ['Competencia', 'Categoría', 'Personas', '%'],
         p.competenciasReconocidas
             .map((i) => [
@@ -261,23 +298,22 @@ List<pw.Widget> _participantesSections(ParticipantesKpiData p, DateTime now) {
                   pct(i.percentage ?? 0)
                 ])
             .toList()),
-    _subTitle('Por área de competencia'),
-    _table(
+    ReportSubTitle('Por área de competencia'),
+    ReportTable(
         ['Categoría', 'Reconocimientos', '%'],
         p.competenciasPorCategoria
             .map((c) => [c.label, '${c.count}', pct(c.percentage)])
             .toList()),
-    pw.SizedBox(height: 6),
-    _table(
+    ReportTable(
         ['Área', 'Categoría', '%'],
         p.competenciasPorArea
             .map((a) => [a.name, a.group, pct(a.percentage)])
             .toList()),
 
     // Indicadores de resultados
-    _sectionTitle('Indicadores de resultados'),
-    _subTitle('Indicadores clave'),
-    _table(
+    ReportSectionTitle('Indicadores de resultados'),
+    ReportSubTitle('Indicadores clave'),
+    ReportTable(
       ['Indicador', 'Valor', 'Variación', 'Año anterior'],
       p.indicadoresClave
           .map((k) => [
@@ -292,14 +328,14 @@ List<pw.Widget> _participantesSections(ParticipantesKpiData p, DateTime now) {
               ])
           .toList(),
     ),
-    _subTitle('Recorrido de resultados (acumulado)'),
-    _table(
+    ReportSubTitle('Recorrido de resultados (acumulado)'),
+    ReportTable(
         ['Paso', 'Personas', '% sobre inscritos'],
         p.recorridoResultados
             .map((s) => [s.label, '${s.count}', '${s.percentage}%'])
             .toList()),
-    _subTitle('Resultados por sector (empleos por tipo de empleo)'),
-    _table(['Sector', 'Personas'],
+    ReportSubTitle('Resultados por sector (empleos por tipo de empleo)'),
+    ReportTable(['Sector', 'Personas'],
         p.resultadosPorSector.map((i) => [i.label, '${i.count}']).toList()),
   ];
 }
@@ -343,7 +379,7 @@ List<List<String>> _ageRows(List<UserEnreda> users, DateTime now) {
 // ---------------------------------------------------------------------------
 // Recursos
 
-List<pw.Widget> _recursosSection(RecursosKpiData r, DateTime now) {
+List<ReportBlock> _recursosSection(RecursosKpiData r, DateTime now) {
   final porMes = List<int>.filled(12, 0);
   for (final f in r.fechas) {
     if (f.year == now.year) porMes[f.month - 1]++;
@@ -352,27 +388,27 @@ List<pw.Widget> _recursosSection(RecursosKpiData r, DateTime now) {
       r.total > 0 ? (r.conInteres / r.total * 100).round() : 0;
 
   return [
-    _kv('Recursos subidos (total)', '${r.total}'),
-    _kv('Subidos este mes', '${r.esteMes}'),
-    _subTitle('Por categoría'),
-    _table(
+    ReportKeyValue('Recursos subidos (total)', '${r.total}'),
+    ReportKeyValue('Subidos este mes', '${r.esteMes}'),
+    ReportSubTitle('Por categoría'),
+    ReportTable(
         ['Categoría', 'Recursos', '%'],
         r.porCategoria
             .map((s) => [s.label, '${s.count}', '${s.percentage.round()}%'])
             .toList()),
-    _subTitle('Recursos subidos por mes (${now.year})'),
-    _table(
+    ReportSubTitle('Recursos subidos por mes (${now.year})'),
+    ReportTable(
       ['Mes', 'Recursos'],
       [
         for (int m = 0; m < 12; m++)
           if (m < now.month) [_monthShort[m], '${porMes[m]}'],
       ],
     ),
-    _subTitle('Recursos por ámbito de actuación'),
-    _note(
+    ReportSubTitle('Recursos por ámbito de actuación'),
+    ReportNote(
         '${r.conInteres} de ${r.total} recursos tienen ámbito informado ($pctConInteres%). '
         'Un recurso puede tener varios.'),
-    _table(
+    ReportTable(
         ['Ámbito', 'Recursos', '%'],
         r.porInteres
             .map((i) =>

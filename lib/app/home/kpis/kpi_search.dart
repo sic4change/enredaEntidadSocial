@@ -36,24 +36,29 @@ List<String> kpiMatchingCards(
 /// apiladas a ancho completo.
 class KpiSearchResults extends StatelessWidget {
   final String sectionTitle;
-  final List<Widget> cards;
+
+  /// Títulos de las tarjetas que coinciden con la búsqueda.
+  final List<String> cardTitles;
+  final Widget Function(String title) buildCard;
   final VoidCallback onToggle;
 
   const KpiSearchResults({
     Key? key,
     required this.sectionTitle,
-    required this.cards,
+    required this.cardTitles,
+    required this.buildCard,
     required this.onToggle,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final cards = cardTitles.map(buildCard).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
           title: sectionTitle,
-          cardCount: cards.length,
+          cardTitles: cardTitles,
           isExpanded: true,
           onToggle: onToggle,
         ),
