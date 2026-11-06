@@ -148,32 +148,40 @@ class _CardNivelesFormativosState extends State<CardNivelesFormativos> {
       final cut = lvl.description.lastIndexOf('. ');
       final base =
           cut >= 0 ? lvl.description.substring(0, cut) : lvl.description;
-      final detail = groups.detail(segments[entry.key]);
-      final description = _breakdown == KpiBreakdown.genero
-          ? lvl.description
-          : (detail.isEmpty ? base : '$base. $detail');
+      // Desglose de participantes en una línea propia bajo la descripción
+      final String detail = switch (_breakdown) {
+        KpiBreakdown.genero =>
+          cut >= 0 ? lvl.description.substring(cut + 2) : '',
+        KpiBreakdown.ninguno =>
+          '${lvl.total} ${lvl.total == 1 ? 'participante' : 'participantes'}',
+        _ => groups.detail(segments[entry.key]),
+      };
       return Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
         child: RichText(
           text: TextSpan(
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.normal,
+              height: 1.35,
+            ),
             children: [
               TextSpan(
                 text: '${lvl.cineLabel}: ',
                 style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   color: KpiColors.primaryDark,
                 ),
               ),
               TextSpan(
-                text: '$description\n',
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                  color: KpiColors.secondaryText,
-                  height: 1.35,
-                ),
+                text: '$base.',
+                style: const TextStyle(color: KpiColors.secondaryText),
               ),
+              if (detail.isNotEmpty)
+                TextSpan(
+                  text: '\n$detail',
+                  style: const TextStyle(color: KpiColors.mutedText),
+                ),
             ],
           ),
         ),

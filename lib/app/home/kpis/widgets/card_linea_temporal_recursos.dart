@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
+import 'kpi_chart_trackball.dart';
 
 class CardLineaTemporalRecursos extends StatefulWidget {
   /// Fechas de creación de todos los recursos.
@@ -64,27 +65,10 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
 
   /// Fecha de referencia dentro del periodo mostrado.
   DateTime _anchor = DateTime.now();
-  late TooltipBehavior _tooltipBehavior;
-
-  @override
-  void initState() {
-    super.initState();
-    _tooltipBehavior = TooltipBehavior(
-      enable: true,
-      header: '',
-      canShowMarker: true,
-      format: 'point.x\nRecursos : point.y',
-      textStyle: GoogleFonts.outfit(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: KpiColors.primaryDark,
-      ),
-      color: Colors.white,
-      borderColor: KpiColors.borderLight,
-      borderWidth: 1,
-      elevation: 4,
-    );
-  }
+  final TrackballBehavior _trackballBehavior = kpiTrackball(
+    title: (x) => x,
+    label: 'Recursos',
+  );
 
   DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -306,7 +290,7 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
           SizedBox(
             height: 220,
             child: SfCartesianChart(
-              tooltipBehavior: _tooltipBehavior,
+              trackballBehavior: _trackballBehavior,
               plotAreaBorderWidth: 0,
               margin: EdgeInsets.zero,
               primaryXAxis: CategoryAxis(
@@ -343,16 +327,9 @@ class _CardLineaTemporalRecursosState extends State<CardLineaTemporalRecursos> {
                   xValueMapper: (MonthDataPoint data, _) => data.month,
                   yValueMapper: (MonthDataPoint data, _) => data.value,
                   splineType: SplineType.monotonic,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      KpiColors.turquoise.withValues(alpha: 0.32),
-                      KpiColors.turquoise.withValues(alpha: 0.02),
-                    ],
-                  ),
+                  color: KpiColors.turquoise.withValues(alpha: 0.2),
                   borderColor: KpiColors.turquoise,
-                  borderWidth: 2.2,
+                  borderWidth: 2,
                   markerSettings: MarkerSettings(
                     isVisible: _selectedPeriod != 'Mes',
                     shape: DataMarkerType.circle,

@@ -5,6 +5,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../models/userEnreda.dart';
 import '../kpi_colors.dart';
 import '../kpi_models.dart';
+import 'kpi_chart_trackball.dart';
 
 class CardEvolucionInscripciones extends StatefulWidget {
   final List<UserEnreda>? users;
@@ -130,11 +131,14 @@ class _CardEvolucionInscripcionesState
     String peakValue = '0';
     String peakLabel = 'sin inscripciones';
     String subtitle = 'Inscripciones nuevas por mes';
-    String tooltipFormat = 'point.x\nInscripciones : point.y';
+    String Function(String x) tooltipTitle = (x) => x;
 
     if (_selectedPeriod == 'Año') {
       subtitle = 'Inscripciones nuevas por mes en $_selectedYear';
-      tooltipFormat = 'point.x $_selectedYear\nInscripciones : point.y';
+      tooltipTitle = (x) {
+        final i = _monthAbbr.indexOf(x);
+        return '${i >= 0 ? _monthNames[i] : x} $_selectedYear';
+      };
       totalLabel = 'inscripciones en $_selectedYear';
       avgLabel = 'media mensual';
 
@@ -171,7 +175,7 @@ class _CardEvolucionInscripcionesState
     } else if (_selectedPeriod == 'Mes') {
       final monthName = _monthNames[_selectedMonth - 1];
       subtitle = 'Inscripciones nuevas por día en $monthName $_selectedYear';
-      tooltipFormat = 'Día point.x de $monthName\nInscripciones : point.y';
+      tooltipTitle = (x) => 'Día $x de $monthName';
       totalLabel = 'inscripciones en $monthName';
       avgLabel = 'media diaria';
 
@@ -220,7 +224,6 @@ class _CardEvolucionInscripcionesState
     } else {
       // Semana
       subtitle = 'Inscripciones diarias de la semana';
-      tooltipFormat = 'point.x\nInscripciones : point.y';
       totalLabel = 'inscripciones en la semana';
       avgLabel = 'media diaria';
 
@@ -336,20 +339,9 @@ class _CardEvolucionInscripcionesState
                     ),
                   )
                 : SfCartesianChart(
-                    tooltipBehavior: TooltipBehavior(
-                      enable: true,
-                      header: '',
-                      canShowMarker: true,
-                      format: tooltipFormat,
-                      textStyle: GoogleFonts.outfit(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: KpiColors.primaryDark,
-                      ),
-                      color: Colors.white,
-                      borderColor: KpiColors.borderLight,
-                      borderWidth: 1,
-                      elevation: 4,
+                    trackballBehavior: kpiTrackball(
+                      title: tooltipTitle,
+                      label: 'Inscripciones',
                     ),
                     plotAreaBorderWidth: 0,
                     margin: EdgeInsets.zero,
@@ -389,16 +381,9 @@ class _CardEvolucionInscripcionesState
                           xValueMapper: (MonthDataPoint data, _) => data.month,
                           yValueMapper: (MonthDataPoint data, _) => data.value,
                           splineType: SplineType.natural,
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              KpiColors.turquoise.withValues(alpha: 0.32),
-                              KpiColors.turquoise.withValues(alpha: 0.02),
-                            ],
-                          ),
+                          color: KpiColors.turquoise.withValues(alpha: 0.2),
                           borderColor: KpiColors.turquoise,
-                          borderWidth: 2.2,
+                          borderWidth: 2,
                           emptyPointSettings: EmptyPointSettings(
                             mode: EmptyPointMode.drop,
                           ),

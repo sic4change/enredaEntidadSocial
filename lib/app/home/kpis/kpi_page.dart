@@ -277,174 +277,183 @@ class _KpiPageState extends State<KpiPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: KpiColors.pageBackground,
-      body: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        child: SingleChildScrollView(
+    // Contenedor general con esquinas redondeadas, como en el diseño
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(15),
+      child: Scaffold(
+        backgroundColor: KpiColors.pageBackground,
+        body: Scrollbar(
           controller: _scrollController,
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 28),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1180),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Cabecera y Filtros
-                  KpiHeader(
-                    selectedFilterId: _selectedFilterId,
-                    onFilterChanged: _onFilterChanged,
-                    filterItems: _filterItems,
-                    searchController: _searchController,
-                    onDownloadReport: _downloadReport,
-                  ),
-                  const SizedBox(height: 28),
-
-                  // Navegación de secciones (Desplegar / Plegar todo)
-                  SectionNavigation(
-                    allExpanded: _allExpanded,
-                    onExpandAll: _expandAll,
-                    onCollapseAll: _collapseAll,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Sección 1: Resumen General
-                  if (ResumenGeneralSection.hasMatches(_searchQuery)) ...[
-                    ResumenGeneralSection(
-                      searchQuery: _searchQuery,
-                      isExpanded: _isResumenExpanded,
-                      onToggle: () {
-                        setState(() {
-                          _isResumenExpanded = !_isResumenExpanded;
-                        });
-                      },
-                      participantesData: _participantesData,
-                      isLoadingParticipantes: _isLoadingParticipantes,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 28),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1180),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Cabecera y Filtros
+                    KpiHeader(
+                      selectedFilterId: _selectedFilterId,
+                      onFilterChanged: _onFilterChanged,
+                      filterItems: _filterItems,
+                      searchController: _searchController,
+                      onDownloadReport: _downloadReport,
                     ),
-                    const SizedBox(height: 36),
-                  ],
+                    const SizedBox(height: 28),
 
-                  // Sección 2: Desglose Demográfico
-                  if (DesgloseDemograficoSection.hasMatches(_searchQuery)) ...[
-                    DesgloseDemograficoSection(
-                      searchQuery: _searchQuery,
-                      isExpanded: _isDemograficoExpanded,
-                      onToggle: () {
-                        setState(() {
-                          _isDemograficoExpanded = !_isDemograficoExpanded;
-                        });
-                      },
-                      users: _participantesData?.users,
-                      nivelesCine: _participantesData?.nivelesCine ?? const [],
-                      nivelesEstudios:
-                          _participantesData?.nivelesEstudios ?? const [],
-                      nivelesSinEspecificar:
-                          _participantesData?.nivelesSinEspecificar ?? 0,
-                      nivelCinePorUsuario:
-                          _participantesData?.nivelCinePorUsuario ?? const {},
-                      nivelEstudiosPorUsuario:
-                          _participantesData?.nivelEstudiosPorUsuario ??
-                              const {},
-                      isLoading: _isLoadingParticipantes,
+                    // Navegación de secciones (Desplegar / Plegar todo)
+                    SectionNavigation(
+                      allExpanded: _allExpanded,
+                      onExpandAll: _expandAll,
+                      onCollapseAll: _collapseAll,
                     ),
-                    const SizedBox(height: 36),
-                  ],
+                    const SizedBox(height: 24),
 
-                  // Sección 3: Categorías Especiales
-                  if (CategoriasEspecialesSection.hasMatches(_searchQuery)) ...[
-                    CategoriasEspecialesSection(
-                      searchQuery: _searchQuery,
-                      isExpanded: _isEspecialesExpanded,
-                      onToggle: () {
-                        setState(() {
-                          _isEspecialesExpanded = !_isEspecialesExpanded;
-                        });
-                      },
-                      discapacidad:
-                          _participantesData?.discapacidad ?? const [],
-                      condicionesSobrevenidas:
-                          _participantesData?.condicionesSobrevenidas ??
-                              const [],
-                      situacionAdministrativa:
-                          _participantesData?.situacionAdministrativa ??
-                              const [],
-                      totalConInformeInicialCompleto:
-                          _participantesData?.totalConInformeInicialCompleto ??
-                              0,
-                      competenciasReconocidas:
-                          _participantesData?.competenciasReconocidas ??
-                              const [],
-                      competenciasPorArea:
-                          _participantesData?.competenciasPorArea ?? const [],
-                      competenciasPorCategoria:
-                          _participantesData?.competenciasPorCategoria ??
-                              const [],
-                      nacionalidades:
-                          _participantesData?.nacionalidades ?? const [],
-                      nacionalidadSinEspecificar:
-                          _participantesData?.nacionalidadSinEspecificar ?? 0,
-                      users: _participantesData?.users ?? const [],
-                      discapacidadPorUsuario:
-                          _participantesData?.discapacidadPorUsuario ??
-                              const {},
-                      isLoading: _isLoadingParticipantes,
-                    ),
-                    const SizedBox(height: 36),
-                  ],
+                    // Sección 1: Resumen General
+                    if (ResumenGeneralSection.hasMatches(_searchQuery)) ...[
+                      ResumenGeneralSection(
+                        searchQuery: _searchQuery,
+                        isExpanded: _isResumenExpanded,
+                        onToggle: () {
+                          setState(() {
+                            _isResumenExpanded = !_isResumenExpanded;
+                          });
+                        },
+                        participantesData: _participantesData,
+                        isLoadingParticipantes: _isLoadingParticipantes,
+                      ),
+                      const SizedBox(height: 36),
+                    ],
 
-                  // Sección 4: Indicadores de Resultados
-                  if (IndicadoresResultadosSection.hasMatches(
-                      _searchQuery)) ...[
-                    IndicadoresResultadosSection(
-                      searchQuery: _searchQuery,
-                      isExpanded: _isResultadosExpanded,
-                      onToggle: () {
-                        setState(() {
-                          _isResultadosExpanded = !_isResultadosExpanded;
-                        });
-                      },
-                      indicadoresClave:
-                          _participantesData?.indicadoresClave ?? const [],
-                      recorridoResultados:
-                          _participantesData?.recorridoResultados ?? const [],
-                      resultadosPorSector:
-                          _participantesData?.resultadosPorSector ?? const [],
-                      isLoading: _isLoadingParticipantes,
-                    ),
-                    const SizedBox(height: 36),
-                  ],
+                    // Sección 2: Desglose Demográfico
+                    if (DesgloseDemograficoSection.hasMatches(
+                        _searchQuery)) ...[
+                      DesgloseDemograficoSection(
+                        searchQuery: _searchQuery,
+                        isExpanded: _isDemograficoExpanded,
+                        onToggle: () {
+                          setState(() {
+                            _isDemograficoExpanded = !_isDemograficoExpanded;
+                          });
+                        },
+                        users: _participantesData?.users,
+                        nivelesCine:
+                            _participantesData?.nivelesCine ?? const [],
+                        nivelesEstudios:
+                            _participantesData?.nivelesEstudios ?? const [],
+                        nivelesSinEspecificar:
+                            _participantesData?.nivelesSinEspecificar ?? 0,
+                        nivelCinePorUsuario:
+                            _participantesData?.nivelCinePorUsuario ?? const {},
+                        nivelEstudiosPorUsuario:
+                            _participantesData?.nivelEstudiosPorUsuario ??
+                                const {},
+                        nacionalidades:
+                            _participantesData?.nacionalidades ?? const [],
+                        nacionalidadSinEspecificar:
+                            _participantesData?.nacionalidadSinEspecificar ?? 0,
+                        discapacidad:
+                            _participantesData?.discapacidad ?? const [],
+                        totalConInformeInicialCompleto: _participantesData
+                                ?.totalConInformeInicialCompleto ??
+                            0,
+                        discapacidadPorUsuario:
+                            _participantesData?.discapacidadPorUsuario ??
+                                const {},
+                        isLoading: _isLoadingParticipantes,
+                      ),
+                      const SizedBox(height: 36),
+                    ],
 
-                  // Sección 5: Recursos
-                  if (RecursosSection.hasMatches(_searchQuery)) ...[
-                    RecursosSection(
-                      searchQuery: _searchQuery,
-                      isExpanded: _isRecursosExpanded,
-                      onToggle: () {
-                        setState(() {
-                          _isRecursosExpanded = !_isRecursosExpanded;
-                        });
-                      },
-                      data: _recursosData,
-                      isLoading: _isLoadingRecursos,
-                    ),
-                    const SizedBox(height: 36),
-                  ],
-                  if (!_hasSearchResults)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Center(
-                        child: Text(
-                          'No hay indicadores que coincidan con "${_searchQuery.trim()}"',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            color: KpiColors.secondaryText,
+                    // Sección 3: Categorías Especiales
+                    if (CategoriasEspecialesSection.hasMatches(
+                        _searchQuery)) ...[
+                      CategoriasEspecialesSection(
+                        searchQuery: _searchQuery,
+                        isExpanded: _isEspecialesExpanded,
+                        onToggle: () {
+                          setState(() {
+                            _isEspecialesExpanded = !_isEspecialesExpanded;
+                          });
+                        },
+                        condicionesSobrevenidas:
+                            _participantesData?.condicionesSobrevenidas ??
+                                const [],
+                        situacionAdministrativa:
+                            _participantesData?.situacionAdministrativa ??
+                                const [],
+                        totalConInformeInicialCompleto: _participantesData
+                                ?.totalConInformeInicialCompleto ??
+                            0,
+                        competenciasReconocidas:
+                            _participantesData?.competenciasReconocidas ??
+                                const [],
+                        competenciasPorArea:
+                            _participantesData?.competenciasPorArea ?? const [],
+                        competenciasPorCategoria:
+                            _participantesData?.competenciasPorCategoria ??
+                                const [],
+                        isLoading: _isLoadingParticipantes,
+                      ),
+                      const SizedBox(height: 36),
+                    ],
+
+                    // Sección 4: Indicadores de Resultados
+                    if (IndicadoresResultadosSection.hasMatches(
+                        _searchQuery)) ...[
+                      IndicadoresResultadosSection(
+                        searchQuery: _searchQuery,
+                        isExpanded: _isResultadosExpanded,
+                        onToggle: () {
+                          setState(() {
+                            _isResultadosExpanded = !_isResultadosExpanded;
+                          });
+                        },
+                        indicadoresClave:
+                            _participantesData?.indicadoresClave ?? const [],
+                        recorridoResultados:
+                            _participantesData?.recorridoResultados ?? const [],
+                        resultadosPorSector:
+                            _participantesData?.resultadosPorSector ?? const [],
+                        isLoading: _isLoadingParticipantes,
+                      ),
+                      const SizedBox(height: 36),
+                    ],
+
+                    // Sección 5: Recursos
+                    if (RecursosSection.hasMatches(_searchQuery)) ...[
+                      RecursosSection(
+                        searchQuery: _searchQuery,
+                        isExpanded: _isRecursosExpanded,
+                        onToggle: () {
+                          setState(() {
+                            _isRecursosExpanded = !_isRecursosExpanded;
+                          });
+                        },
+                        data: _recursosData,
+                        isLoading: _isLoadingRecursos,
+                      ),
+                      const SizedBox(height: 36),
+                    ],
+                    if (!_hasSearchResults)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                          child: Text(
+                            'No hay indicadores que coincidan con "${_searchQuery.trim()}"',
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              color: KpiColors.secondaryText,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  const SizedBox(height: 24),
-                ],
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ),

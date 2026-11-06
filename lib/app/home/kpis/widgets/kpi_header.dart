@@ -197,7 +197,7 @@ class KpiHeader extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'La vista de SIC4Change incluye el sumatorio de todos los proyectos de la organización. “Global” reúne los datos de todas las entidades y de otras organizaciones que colaboran o participan en Enreda.',
+                      'La vista de SIC4Change incluye el sumatorio de todos los proyectos de la organización. “Global” reúne los datos de todas las entidades\ny de otras organizaciones que colaboran o participan en Enreda.',
                       style: GoogleFonts.outfit(
                         fontSize: 12,
                         color: KpiColors.secondaryText,

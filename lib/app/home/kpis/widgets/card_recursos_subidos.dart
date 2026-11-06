@@ -221,8 +221,17 @@ class CardRecursosSubidos extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: porCategoria.map((item) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.5),
+        // Separador entre categorías (no tras la última)
+        final isLast = identical(item, porCategoria.last);
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          decoration: BoxDecoration(
+            border: isLast
+                ? null
+                : const Border(
+                    bottom: BorderSide(color: KpiColors.divider),
+                  ),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

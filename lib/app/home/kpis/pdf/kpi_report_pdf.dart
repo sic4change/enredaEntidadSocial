@@ -248,29 +248,6 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
     if (p.nivelesSinEspecificar > 0)
       ReportNote(
           '${p.nivelesSinEspecificar} participantes sin nivel formativo registrado.'),
-
-    // Categorías especiales
-    ReportSectionTitle('Categorías especiales'),
-    ReportNote('Discapacidad, condiciones sobrevenidas y situación administrativa: '
-        'sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
-    ReportSubTitle('Participantes con discapacidad'),
-    ReportTable(
-        ['Estado', 'Personas', '%'],
-        p.discapacidad
-            .map((s) => [s.label, '${s.count}', pct(s.percentage)])
-            .toList()),
-    ReportSubTitle('Condiciones sobrevenidas'),
-    ReportTable(
-        ['Condición', 'Personas', '%'],
-        p.condicionesSobrevenidas
-            .map((i) => [i.label, '${i.count}', pct(i.percentage ?? 0)])
-            .toList()),
-    ReportSubTitle('Situación administrativa'),
-    ReportTable(
-        ['Situación', 'Personas', '%'],
-        p.situacionAdministrativa
-            .map((s) => [s.label, '${s.count}', pct(s.percentage)])
-            .toList()),
     ReportSubTitle('Nacionalidades'),
     ReportTable(
       ['Nacionalidad', 'Mujeres', 'Hombres', 'No binario', 'Total'],
@@ -287,6 +264,30 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
     if (p.nacionalidadSinEspecificar > 0)
       ReportNote(
           '${p.nacionalidadSinEspecificar} participantes sin nacionalidad registrada.'),
+    ReportSubTitle('Participantes con discapacidad'),
+    ReportNote('Sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
+    ReportTable(
+        ['Estado', 'Personas', '%'],
+        p.discapacidad
+            .map((s) => [s.label, '${s.count}', pct(s.percentage)])
+            .toList()),
+
+    // Categorías especiales
+    ReportSectionTitle('Categorías especiales'),
+    ReportNote('Condiciones sobrevenidas y situación administrativa: '
+        'sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
+    ReportSubTitle('Condiciones sobrevenidas'),
+    ReportTable(
+        ['Condición', 'Personas', '%'],
+        p.condicionesSobrevenidas
+            .map((i) => [i.label, '${i.count}', pct(i.percentage ?? 0)])
+            .toList()),
+    ReportSubTitle('Situación administrativa'),
+    ReportTable(
+        ['Situación', 'Personas', '%'],
+        p.situacionAdministrativa
+            .map((s) => [s.label, '${s.count}', pct(s.percentage)])
+            .toList()),
     ReportSubTitle('Competencias más reconocidas (top 10)'),
     ReportTable(
         ['Competencia', 'Categoría', 'Personas', '%'],

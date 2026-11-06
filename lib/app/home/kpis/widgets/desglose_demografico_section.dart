@@ -5,12 +5,16 @@ import '../kpi_search.dart';
 import 'section_header.dart';
 import 'card_grupos_edad.dart';
 import 'card_niveles_formativos.dart';
+import 'card_nacionalidades.dart';
+import 'card_discapacidad.dart';
 
 class DesgloseDemograficoSection extends StatelessWidget {
   static const String sectionTitle = 'Desglose demográfico';
   static const List<String> cardTitles = [
     'Grupos de edad',
     'Niveles formativos',
+    'Nacionalidades',
+    'Participantes con discapacidad',
   ];
 
   /// Si alguna tarjeta de la sección coincide con [query].
@@ -26,6 +30,11 @@ class DesgloseDemograficoSection extends StatelessWidget {
   final int nivelesSinEspecificar;
   final Map<String, int> nivelCinePorUsuario;
   final Map<String, int> nivelEstudiosPorUsuario;
+  final List<NacionalidadItem> nacionalidades;
+  final int nacionalidadSinEspecificar;
+  final List<DonutSegment> discapacidad;
+  final int totalConInformeInicialCompleto;
+  final Map<String, int> discapacidadPorUsuario;
   final bool isLoading;
 
   const DesgloseDemograficoSection({
@@ -38,17 +47,69 @@ class DesgloseDemograficoSection extends StatelessWidget {
     this.nivelesSinEspecificar = 0,
     this.nivelCinePorUsuario = const {},
     this.nivelEstudiosPorUsuario = const {},
+    this.nacionalidades = const [],
+    this.nacionalidadSinEspecificar = 0,
+    this.discapacidad = const [],
+    this.totalConInformeInicialCompleto = 0,
+    this.discapacidadPorUsuario = const {},
     this.isLoading = false,
     this.searchQuery = '',
   }) : super(key: key);
+
+  Widget _buildGruposEdad() =>
+      CardGruposEdad(users: users, isLoading: isLoading);
+
+  Widget _buildNivelesFormativos() => CardNivelesFormativos(
+        nivelesCine: nivelesCine,
+        nivelesEstudios: nivelesEstudios,
+        sinEspecificar: nivelesSinEspecificar,
+        users: users ?? const [],
+        cinePorUsuario: nivelCinePorUsuario,
+        estudiosPorUsuario: nivelEstudiosPorUsuario,
+        isLoading: isLoading,
+      );
+
+  Widget _buildNacionalidades() => CardNacionalidades(
+        items: nacionalidades,
+        sinEspecificar: nacionalidadSinEspecificar,
+        isLoading: isLoading,
+      );
+
+  Widget _buildDiscapacidad() => CardDiscapacidad(
+        segments: discapacidad,
+        total: totalConInformeInicialCompleto,
+        users: users ?? const [],
+        discapacidadPorUsuario: discapacidadPorUsuario,
+        isLoading: isLoading,
+      );
+
+  /// Dos tarjetas lado a lado, o apiladas en pantallas estrechas.
+  Widget _pair(Widget left, Widget right) => LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 920) {
+            return Column(
+              children: [left, const SizedBox(height: 20), right],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: left),
+              const SizedBox(width: 20),
+              Expanded(child: right),
+            ],
+          );
+        },
+      );
 
   @override
   Widget build(BuildContext context) {
     if (searchQuery.trim().isNotEmpty) {
       final builders = <String, Widget Function()>{
-        'Grupos de edad': () =>
-            CardGruposEdad(users: users, isLoading: isLoading),
+        'Grupos de edad': () => _buildGruposEdad(),
         'Niveles formativos': () => _buildNivelesFormativos(),
+        'Nacionalidades': () => _buildNacionalidades(),
+        'Participantes con discapacidad': () => _buildDiscapacidad(),
       };
       return KpiSearchResults(
         sectionTitle: sectionTitle,
@@ -69,44 +130,11 @@ class DesgloseDemograficoSection extends StatelessWidget {
         ),
         if (isExpanded) ...[
           const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isSmall = constraints.maxWidth < 920;
-              if (isSmall) {
-                return Column(
-                  children: [
-                    CardGruposEdad(users: users, isLoading: isLoading),
-                    const SizedBox(height: 20),
-                    _buildNivelesFormativos(),
-                  ],
-                );
-              }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: CardGruposEdad(users: users, isLoading: isLoading),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(child: _buildNivelesFormativos()),
-                ],
-              );
-            },
-          ),
+          _pair(_buildGruposEdad(), _buildNivelesFormativos()),
+          const SizedBox(height: 20),
+          _pair(_buildNacionalidades(), _buildDiscapacidad()),
         ],
       ],
-    );
-  }
-
-  Widget _buildNivelesFormativos() {
-    return CardNivelesFormativos(
-      nivelesCine: nivelesCine,
-      nivelesEstudios: nivelesEstudios,
-      sinEspecificar: nivelesSinEspecificar,
-      users: users ?? const [],
-      cinePorUsuario: nivelCinePorUsuario,
-      estudiosPorUsuario: nivelEstudiosPorUsuario,
-      isLoading: isLoading,
     );
   }
 }

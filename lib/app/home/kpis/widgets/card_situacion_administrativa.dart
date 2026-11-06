@@ -55,7 +55,7 @@ class CardSituacionAdministrativa extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Según el informe inicial · Nacional: participantes con nacionalidad española',
+            'Recogida en la inscripción y en el informe inicial',
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.normal,

@@ -66,7 +66,7 @@ class _CardDiscapacidadState extends State<CardDiscapacidad> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Según el informe inicial · $total participantes con informe completo',
+                      'Según el certificado declarado en la inscripción',
                       style: GoogleFonts.outfit(
                         fontSize: 12,
                         fontWeight: FontWeight.normal,

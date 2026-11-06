@@ -310,12 +310,8 @@ class _CardGruposEdadView extends StatelessWidget {
             const SizedBox(height: 8),
 
             // Population Pyramid rows
-            ...rows.map((row) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
-                child: _buildPyramidRow(row, maxVal),
-              );
-            }).toList(),
+            // Sin separación entre filas para que la línea central sea continua
+            ...rows.map((row) => _buildPyramidRow(row, maxVal)),
             const SizedBox(height: 16),
 
             // Legend
@@ -556,10 +552,12 @@ class _CardGruposEdadView extends StatelessWidget {
                 ),
               ),
 
-              // Center vertical axis line
+              // Center vertical axis line: ocupa toda la altura de la fila
+              // (16 px de barra + 6 px arriba y abajo) para unirse con las
+              // filas vecinas
               Container(
                 width: 2,
-                height: 24,
+                height: 28,
                 margin: const EdgeInsets.symmetric(horizontal: 8),
                 color: KpiColors.borderLight,
               ),
