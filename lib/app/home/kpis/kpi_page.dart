@@ -488,15 +488,6 @@ class _KpiPageState extends State<KpiPage> {
                         _participantesData?.nivelCinePorUsuario ?? const {},
                     nivelEstudiosPorUsuario:
                         _participantesData?.nivelEstudiosPorUsuario ?? const {},
-                    nacionalidades:
-                        _participantesData?.nacionalidades ?? const [],
-                    nacionalidadSinEspecificar:
-                        _participantesData?.nacionalidadSinEspecificar ?? 0,
-                    discapacidad: _participantesData?.discapacidad ?? const [],
-                    totalConInformeInicialCompleto:
-                        _participantesData?.totalConInformeInicialCompleto ?? 0,
-                    discapacidadPorUsuario:
-                        _participantesData?.discapacidadPorUsuario ?? const {},
                     isLoading: _isLoadingParticipantes,
                   ),
                   const SizedBox(height: 36),
@@ -512,6 +503,14 @@ class _KpiPageState extends State<KpiPage> {
                         _isEspecialesExpanded = !_isEspecialesExpanded;
                       });
                     },
+                    users: _participantesData?.users,
+                    nacionalidades:
+                        _participantesData?.nacionalidades ?? const [],
+                    nacionalidadSinEspecificar:
+                        _participantesData?.nacionalidadSinEspecificar ?? 0,
+                    discapacidad: _participantesData?.discapacidad ?? const [],
+                    discapacidadPorUsuario:
+                        _participantesData?.discapacidadPorUsuario ?? const {},
                     condicionesSobrevenidas:
                         _participantesData?.condicionesSobrevenidas ?? const [],
                     situacionAdministrativa:

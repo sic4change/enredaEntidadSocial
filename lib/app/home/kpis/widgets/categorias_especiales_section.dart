@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../models/userEnreda.dart';
 import '../kpi_models.dart';
 import '../kpi_capture.dart';
 import '../kpi_search.dart';
+import 'kpi_card_row.dart';
 import 'section_header.dart';
+import 'card_discapacidad.dart';
+import 'card_nacionalidades.dart';
 import 'card_condiciones_sobrevenidas.dart';
 import 'card_situacion_administrativa.dart';
 import 'card_competencias_reconocidas.dart';
@@ -11,6 +15,8 @@ import 'card_competencias_por_area.dart';
 class CategoriasEspecialesSection extends StatelessWidget {
   static const String sectionTitle = 'Categorías especiales';
   static const List<String> cardTitles = [
+    'Participantes con discapacidad',
+    'Nacionalidades',
     'Condiciones sobrevenidas',
     'Situación administrativa',
     'Competencias más reconocidas',
@@ -24,6 +30,11 @@ class CategoriasEspecialesSection extends StatelessWidget {
   final String searchQuery;
   final bool isExpanded;
   final VoidCallback onToggle;
+  final List<UserEnreda>? users;
+  final List<NacionalidadItem> nacionalidades;
+  final int nacionalidadSinEspecificar;
+  final List<DonutSegment> discapacidad;
+  final Map<String, int> discapacidadPorUsuario;
   final List<RankedBarItem> condicionesSobrevenidas;
   final List<DonutSegment> situacionAdministrativa;
   final int totalConInformeInicialCompleto;
@@ -36,6 +47,11 @@ class CategoriasEspecialesSection extends StatelessWidget {
     Key? key,
     required this.isExpanded,
     required this.onToggle,
+    this.users,
+    this.nacionalidades = const [],
+    this.nacionalidadSinEspecificar = 0,
+    this.discapacidad = const [],
+    this.discapacidadPorUsuario = const {},
     this.condicionesSobrevenidas = const [],
     this.situacionAdministrativa = const [],
     this.totalConInformeInicialCompleto = 0,
@@ -45,6 +61,26 @@ class CategoriasEspecialesSection extends StatelessWidget {
     this.isLoading = false,
     this.searchQuery = '',
   }) : super(key: key);
+
+  Widget _buildNacionalidades() => KpiCapture(
+        id: 'Nacionalidades',
+        child: CardNacionalidades(
+          items: nacionalidades,
+          sinEspecificar: nacionalidadSinEspecificar,
+          isLoading: isLoading,
+        ),
+      );
+
+  Widget _buildDiscapacidad() => KpiCapture(
+        id: 'Participantes con discapacidad',
+        child: CardDiscapacidad(
+          segments: discapacidad,
+          total: totalConInformeInicialCompleto,
+          users: users ?? const [],
+          discapacidadPorUsuario: discapacidadPorUsuario,
+          isLoading: isLoading,
+        ),
+      );
 
   Widget _buildCondiciones() => KpiCapture(
         id: 'Condiciones sobrevenidas',
@@ -85,6 +121,8 @@ class CategoriasEspecialesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (searchQuery.trim().isNotEmpty) {
       final builders = <String, Widget Function()>{
+        'Participantes con discapacidad': () => _buildDiscapacidad(),
+        'Nacionalidades': () => _buildNacionalidades(),
         'Condiciones sobrevenidas': () => _buildCondiciones(),
         'Situación administrativa': () => _buildSituacionAdministrativa(),
         'Competencias más reconocidas': () => _buildCompetenciasReconocidas(),
@@ -109,50 +147,43 @@ class CategoriasEspecialesSection extends StatelessWidget {
         ),
         if (isExpanded) ...[
           const SizedBox(height: 16),
-          // Condiciones sobrevenidas + Situación administrativa
+          // Dos columnas con las tarjetas intercaladas (como en el diseño) y
+          // la misma altura total; debajo, las competencias en una fila
           LayoutBuilder(
             builder: (context, constraints) {
-              final isSmall = constraints.maxWidth < 920;
-              if (isSmall) {
+              if (constraints.maxWidth < 920) {
                 return Column(
                   children: [
+                    _buildDiscapacidad(),
+                    const SizedBox(height: 20),
+                    _buildNacionalidades(),
+                    const SizedBox(height: 20),
                     _buildCondiciones(),
                     const SizedBox(height: 20),
                     _buildSituacionAdministrativa(),
-                  ],
-                );
-              }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _buildCondiciones()),
-                  const SizedBox(width: 20),
-                  Expanded(child: _buildSituacionAdministrativa()),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 20),
-
-          // Bottom pair: Competencias reconocidas + Competencias por área
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isSmall = constraints.maxWidth < 920;
-              if (isSmall) {
-                return Column(
-                  children: [
+                    const SizedBox(height: 20),
                     _buildCompetenciasReconocidas(),
                     const SizedBox(height: 20),
                     _buildCompetenciasPorArea(),
                   ],
                 );
               }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              return Column(
                 children: [
-                  Expanded(child: _buildCompetenciasReconocidas()),
-                  const SizedBox(width: 20),
-                  Expanded(child: _buildCompetenciasPorArea()),
+                  KpiCardColumns(
+                    left: [_buildDiscapacidad(), _buildCondiciones()],
+                    right: [
+                      _buildNacionalidades(),
+                      _buildSituacionAdministrativa(),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  KpiCardRow(
+                    items: [
+                      KpiCardRowItem(_buildCompetenciasReconocidas()),
+                      KpiCardRowItem(_buildCompetenciasPorArea()),
+                    ],
+                  ),
                 ],
               );
             },

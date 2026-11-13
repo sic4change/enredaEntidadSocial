@@ -4,6 +4,7 @@ import '../kpi_colors.dart';
 import '../kpi_service.dart';
 import '../kpi_capture.dart';
 import '../kpi_search.dart';
+import 'kpi_card_row.dart';
 import 'section_header.dart';
 import 'card_recursos_subidos.dart';
 import 'card_linea_temporal_recursos.dart';
@@ -125,12 +126,10 @@ class RecursosSection extends StatelessWidget {
                   ],
                 );
               }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _buildRecursosSubidos()),
-                  const SizedBox(width: 20),
-                  Expanded(child: _buildLineaTemporal()),
+              return KpiCardRow(
+                items: [
+                  KpiCardRowItem(_buildRecursosSubidos()),
+                  KpiCardRowItem(_buildLineaTemporal()),
                 ],
               );
             },

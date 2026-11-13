@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../kpi_models.dart';
 import '../kpi_capture.dart';
 import '../kpi_search.dart';
+import 'kpi_card_row.dart';
 import 'section_header.dart';
 import 'card_indicadores_clave.dart';
 import 'card_recorrido_resultados.dart';
@@ -109,12 +110,10 @@ class IndicadoresResultadosSection extends StatelessWidget {
                   ],
                 );
               }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _buildRecorrido()),
-                  const SizedBox(width: 20),
-                  Expanded(child: _buildSector()),
+              return KpiCardRow(
+                items: [
+                  KpiCardRowItem(_buildRecorrido()),
+                  KpiCardRowItem(_buildSector()),
                 ],
               );
             },

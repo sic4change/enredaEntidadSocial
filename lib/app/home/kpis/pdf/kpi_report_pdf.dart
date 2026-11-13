@@ -155,7 +155,8 @@ ReportDocument buildKpiReportDocument(KpiReportData data) {
       'Generado el ${DateFormat('dd/MM/yyyy HH:mm').format(data.generatedAt)}',
     ],
     blocks: [
-      if (p != null) ..._participantesSections(p, data.generatedAt, data.charts),
+      if (p != null)
+        ..._participantesSections(p, data.generatedAt, data.charts),
       if (p == null)
         const ReportNote(
             'No hay datos de participantes cargados para esta vista.'),
@@ -328,6 +329,17 @@ List<ReportBlock> _participantesSections(
     if (p.nivelesSinEspecificar > 0)
       ReportNote(
           '${p.nivelesSinEspecificar} participantes sin nivel formativo registrado.'),
+
+    // Categorías especiales
+    ReportSectionTitle('Categorías especiales'),
+    ..._card('Participantes con discapacidad', charts),
+    ReportNote(
+        'Sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
+    ReportTable(
+        ['Estado', 'Personas', '%'],
+        p.discapacidad
+            .map((s) => [s.label, '${s.count}', pct(s.percentage)])
+            .toList()),
     ..._card('Nacionalidades', charts),
     ReportTable(
       ['Nacionalidad', 'Mujeres', 'Hombres', 'No binario', 'Total'],
@@ -344,17 +356,6 @@ List<ReportBlock> _participantesSections(
     if (p.nacionalidadSinEspecificar > 0)
       ReportNote(
           '${p.nacionalidadSinEspecificar} participantes sin nacionalidad registrada.'),
-    ..._card('Participantes con discapacidad', charts),
-    ReportNote(
-        'Sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
-    ReportTable(
-        ['Estado', 'Personas', '%'],
-        p.discapacidad
-            .map((s) => [s.label, '${s.count}', pct(s.percentage)])
-            .toList()),
-
-    // Categorías especiales
-    ReportSectionTitle('Categorías especiales'),
     ..._card('Condiciones sobrevenidas', charts),
     ReportTable(
         ['Condición', 'Personas', '%'],

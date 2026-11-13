@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../kpi_capture.dart';
 import '../kpi_search.dart';
+import 'kpi_card_row.dart';
 import 'section_header.dart';
 import 'card_participantes_inscritos.dart';
 import 'card_evolucion_inscripciones.dart';
@@ -99,17 +100,10 @@ class ResumenGeneralSection extends StatelessWidget {
                   ],
                 );
               }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 360,
-                    child: _buildInscritos(),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: _buildEvolucion(),
-                  ),
+              return KpiCardRow(
+                items: [
+                  KpiCardRowItem(_buildInscritos(), width: 360),
+                  KpiCardRowItem(_buildEvolucion()),
                 ],
               );
             },
