@@ -1213,8 +1213,8 @@ class KpiService {
     'Educación superior',
   ];
   static const List<String> _cineDescriptions = [
-    'Sin formación, Educación Primaria, ESO, Competencias clave y Certificados profesionales (niveles 1 – 3)',
-    'FP básica, FP de grado medio y Bachillerato',
+    'Sin formación, Educación preescolar y primaria, ESO, Competencias clave y Certificación profesional de niveles 1 y 2',
+    'FP básica, FP de grado medio, Bachillerato y Certificación profesional de nivel 3',
     'FP de grado superior, formación universitaria y postgrado',
   ];
 
@@ -1231,16 +1231,29 @@ class KpiService {
 
   /// Devuelve el grupo CINE (0: CINE 0–2, 1: CINE 3–4, 2: CINE 5–8) de una
   /// opción de nivel educativo, o `null` si no se reconoce.
+  ///
+  /// Sigue la CNED-2014 del INE (niveles de formación alcanzados), que
+  /// corresponde uno a uno con la CINE-2011: los certificados de
+  /// profesionalidad de nivel 1 y 2 son nivel 2 (grupos 23 y 24) y los de
+  /// nivel 3, nivel 4 (grupo 41). Las competencias clave no son una titulación
+  /// y la CNED no las recoge, así que se dejan en CINE 0–2.
   int? _cineGroupOf(String label) {
     final l = _normalizeText(label);
+    final isCertificadoProfesional =
+        l.contains('certificado') || l.contains('certificacion');
+    if (isCertificadoProfesional && RegExp(r'nivel\s*3\b').hasMatch(l)) {
+      return 1;
+    }
     if (l.contains('no tengo formaci') ||
         l.contains('sin formaci') ||
         l.contains('sin estudios') ||
+        l.contains('preescolar') ||
+        l.contains('infantil') ||
         l.contains('primari') ||
         RegExp(r'\beso\b').hasMatch(l) ||
         l.contains('secundaria obligatoria') ||
         l.contains('competencias clave') ||
-        l.contains('certificado')) {
+        isCertificadoProfesional) {
       return 0;
     }
     if (l.contains('fp basica') ||
@@ -1275,9 +1288,11 @@ class KpiService {
     required List<UserEnreda> users,
     required List<Education> educations,
   }) {
-    // Opciones del alta: las de order 1 – 10 ("No tengo formación" … "Postgrado")
+    // Todas las opciones del desplegable del alta (order ≥ 1), en su orden:
+    // "No tengo formación" … "Postgrado", y después las de Competencias clave
+    // y Certificación profesional (niveles 1 – 3)
     final List<Education> options =
-        educations.where((e) => e.order >= 1 && e.order <= 10).toList();
+        educations.where((e) => e.order >= 1).toList();
 
     final Map<String, Education> byId = {
       for (final e in options)
