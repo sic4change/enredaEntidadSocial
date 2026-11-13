@@ -238,12 +238,49 @@ class KpiService {
     Query<Map<String, dynamic>> query,
     String label,
   ) async {
-    try {
-      return (await query.get()).docs;
-    } catch (e) {
-      print('KPIs: error leyendo "$label": $e');
-      return [];
+    // Un fallo puntual de red dejaría vacía la colección (p. ej. todos los
+    // participantes sin informe de cierre): se reintenta una vez
+    for (int attempt = 1;; attempt++) {
+      try {
+        return (await query.get()).docs;
+      } catch (e) {
+        print('KPIs: error leyendo "$label" (intento $attempt): $e');
+        if (attempt >= 2) return [];
+        await Future<void>.delayed(const Duration(milliseconds: 600));
+      }
     }
+  }
+
+  /// Guarda [report] en [map] con la clave [key] salvo que ya haya uno
+  /// terminado: si un participante tiene varios informes del mismo tipo
+  /// (borradores duplicados, ciclos anteriores), gana el terminado y el
+  /// resultado no depende del orden en que lleguen los documentos.
+  void _putPreferFinished<T>(
+    Map<String, T> map,
+    String key,
+    T report,
+    bool Function(T) isFinished,
+  ) {
+    final existing = map[key];
+    if (existing == null || (!isFinished(existing) && isFinished(report))) {
+      map[key] = report;
+    }
+  }
+
+  /// Informe del ciclo de itinerario actual del participante:
+  /// - el enlazado en su ficha ([linkedId]), si lo hay;
+  /// - ninguno si ya reabrió el itinerario (al reabrir, los punteros pasan
+  ///   al historial y se vacían) y aún no tiene uno nuevo;
+  /// - para participantes sin enlace ni historial (datos antiguos), el suyo
+  ///   por userId o email.
+  T? _currentCycleReport<T>(
+    Map<String, T> reports,
+    String? linkedId,
+    UserEnreda user,
+  ) {
+    if (linkedId != null && linkedId.isNotEmpty) return reports[linkedId];
+    if (user.socialItineraryHistory.isNotEmpty) return null;
+    return reports[user.userId ?? ''] ?? reports[user.email];
   }
 
   /// Ejecuta un cálculo de KPIs; si falla, lo registra y devuelve [fallback]
@@ -380,7 +417,8 @@ class KpiService {
       try {
         final report = ClosureReport.fromMap(doc.data(), doc.id);
         if (report.userId != null && report.userId!.isNotEmpty) {
-          closureReportsByUser[report.userId!] = report;
+          _putPreferFinished(closureReportsByUser, report.userId!, report,
+              (r) => r.finished == true || r.completedDate != null);
         }
         closureReportsByUser[doc.id] = report;
       } catch (_) {}
@@ -421,10 +459,8 @@ class KpiService {
     final rows = filteredUsers.map((u) {
       final uId = u.userId ?? '';
       final init = _initialReportOf(u, initialReportsByUser);
-      final closure = (u.closureReportId != null &&
-              closureReportsByUser.containsKey(u.closureReportId))
-          ? closureReportsByUser[u.closureReportId]
-          : (closureReportsByUser[uId] ?? closureReportsByUser[u.email]);
+      final closure =
+          _currentCycleReport(closureReportsByUser, u.closureReportId, u);
       final bool isClosed = closure != null &&
           (closure.finished == true || closure.completedDate != null);
 
@@ -599,7 +635,8 @@ class KpiService {
       try {
         final report = ClosureReport.fromMap(doc.data(), doc.id);
         if (report.userId != null && report.userId!.isNotEmpty) {
-          closureReportsByUser[report.userId!] = report;
+          _putPreferFinished(closureReportsByUser, report.userId!, report,
+              (r) => r.finished == true || r.completedDate != null);
         }
         closureReportsByUser[doc.id] = report;
       } catch (_) {}
@@ -610,7 +647,8 @@ class KpiService {
       try {
         final report = DerivationReport.fromMap(doc.data(), doc.id);
         if (report.userId != null && report.userId!.isNotEmpty) {
-          derivationReportsByUser[report.userId!] = report;
+          _putPreferFinished(derivationReportsByUser, report.userId!, report,
+              (r) => r.finished == true || r.completedDate != null);
         }
         derivationReportsByUser[doc.id] = report;
       } catch (_) {}
@@ -664,22 +702,18 @@ class KpiService {
     int countExtranjera = 0;
 
     for (final u in filteredUsers) {
-      final uId = u.userId ?? '';
-      final initReport = (u.initialReportId != null &&
-              initialReportsByUser.containsKey(u.initialReportId))
-          ? initialReportsByUser[u.initialReportId]
-          : (initialReportsByUser[uId] ?? initialReportsByUser[u.email]);
-      final closureReport = (u.closureReportId != null &&
-              closureReportsByUser.containsKey(u.closureReportId))
-          ? closureReportsByUser[u.closureReportId]
-          : (closureReportsByUser[uId] ?? closureReportsByUser[u.email]);
-      final derivationReport = (u.derivationReportId != null &&
-              derivationReportsByUser.containsKey(u.derivationReportId))
-          ? derivationReportsByUser[u.derivationReportId]
-          : (derivationReportsByUser[uId] ?? derivationReportsByUser[u.email]);
+      final closureReport =
+          _currentCycleReport(closureReportsByUser, u.closureReportId, u);
+      final derivationReport =
+          _currentCycleReport(derivationReportsByUser, u.derivationReportId, u);
 
-      final bool isInitFinished = initReport != null &&
-          (initReport.finished == true || initReport.completedDate != null);
+      // Para el estado solo cuentan los informes del ciclo actual (ver
+      // [_currentCycleReport])
+      final cycleInitReport =
+          _currentCycleReport(initialReportsByUser, u.initialReportId, u);
+      final bool isInitFinished = cycleInitReport != null &&
+          (cycleInitReport.finished == true ||
+              cycleInitReport.completedDate != null);
       final bool isClosureFinished = closureReport != null &&
           (closureReport.finished == true ||
               closureReport.completedDate != null);
@@ -687,21 +721,16 @@ class KpiService {
           (derivationReport.finished == true ||
               derivationReport.completedDate != null);
 
-      // Estado:
-      // "Inactivos": informe de cierre completado y sin informe de reapertura
-      // (si tiene socialItineraryHistory, comprobamos si tiene un nuevo ciclo activo reabierto)
-      final bool hasReopening =
-          u.initialReportId != null && u.socialItineraryHistory.isNotEmpty;
-
-      if (isClosureFinished && !hasReopening) {
+      if (isClosureFinished) {
+        // "Inactivos": informe de cierre del ciclo actual completado. Al
+        // reabrir, el ciclo pasa al historial y deja de contar como cerrado
         countInactivos++;
-      } else if (isInitFinished &&
-          !isClosureFinished &&
-          !isDerivationFinished) {
-        // "Activos": informe inicial completo pero sin informe de cierre o derivación
+      } else if (isInitFinished && !isDerivationFinished) {
+        // "Activos": informe inicial completo sin cierre ni derivación
         countActivos++;
       } else {
-        // "En espera": sin informe de cierre completado (y sin cumplir condición de activo o inactivo)
+        // "En espera": el resto (sin informe inicial completo, derivados o
+        // recién reabiertos sin informe nuevo)
         countEnEspera++;
       }
 

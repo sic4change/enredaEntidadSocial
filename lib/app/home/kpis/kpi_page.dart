@@ -168,8 +168,15 @@ class _KpiPageState extends State<KpiPage> {
     }
   }
 
+  /// Número de la última carga de participantes lanzada. Al cambiar de
+  /// filtro antes de que termine la anterior, la respuesta antigua puede
+  /// llegar después: se descarta para no pisar los datos del filtro actual
+  /// ni quitar la animación de carga antes de tiempo.
+  int _participantesRequest = 0;
+
   Future<void> _loadData() async {
     if (_kpiService == null) return;
+    final request = ++_participantesRequest;
     setState(() {
       _isLoadingParticipantes = true;
     });
@@ -179,7 +186,7 @@ class _KpiPageState extends State<KpiPage> {
         filterId: _selectedFilterId,
         currentSocialEntityId: widget.socialEntity.socialEntityId ?? '',
       );
-      if (mounted) {
+      if (mounted && request == _participantesRequest) {
         setState(() {
           _participantesData = data;
           _isLoadingParticipantes = false;
@@ -187,7 +194,7 @@ class _KpiPageState extends State<KpiPage> {
       }
     } catch (e, stack) {
       print('Error cargando KPIs: $e\n$stack');
-      if (mounted) {
+      if (mounted && request == _participantesRequest) {
         setState(() {
           _isLoadingParticipantes = false;
         });

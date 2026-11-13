@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/models/companionData.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/home/participants/participants_view_state.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
 import 'package:enreda_empresas/app/services/location_cache.dart';
@@ -71,24 +74,33 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
 
   final _horizontalController = ScrollController();
   final ValueNotifier<String?> _hoveredUserId = ValueNotifier(null);
-  int _sortCol = 0;
-  bool _asc = true;
-  int _page = 0;
-  late int _pageSize;
+  // Orden, página y tamaño de página se guardan en [ParticipantsViewState]
+  // para que la tabla aparezca igual al volver de la ficha de un
+  // participante o de otra sección.
+  int get _sortCol => ParticipantsViewState.sortColumn;
+  set _sortCol(int v) => ParticipantsViewState.sortColumn = v;
+  bool get _asc => ParticipantsViewState.sortAscending;
+  set _asc(bool v) => ParticipantsViewState.sortAscending = v;
+  int get _page => ParticipantsViewState.page;
+  set _page(int v) => ParticipantsViewState.page = v;
+  int get _pageSize => ParticipantsViewState.pageSize;
+  set _pageSize(int v) => ParticipantsViewState.pageSize = v;
   String? _selectedUserId;
 
   @override
   void initState() {
     super.initState();
-    _pageSize =
-        const [5, 10, 20, 50].contains(widget.pageSize) ? widget.pageSize : 10;
+    if (!const [5, 10, 20, 50].contains(_pageSize)) _pageSize = 10;
     _selectedUserId = _identity(globals.currentParticipant);
   }
 
   @override
   void didUpdateWidget(covariant ParticipantsDetailTable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.users.length != widget.users.length) _page = 0;
+    // La página no se reinicia aquí: el número de filas también cambia al
+    // refrescar los datos. Se vuelve a la primera al cambiar de pestaña,
+    // búsqueda o activos/inactivos (ver participants_page.dart); si la página
+    // queda fuera de rango, build() la ajusta.
     _selectedUserId ??= _identity(globals.currentParticipant);
   }
 
@@ -301,6 +313,7 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
           ),
           for (final user in users)
             _rowCell(
+              key: ValueKey(_identity(user)),
               user: user,
               selected: _isSelected(user),
               onTap: () => _openParticipant(user),
@@ -361,8 +374,12 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
                     ],
                   ),
                 ),
+                // Clave por participante: al reordenar o filtrar, cada fila
+                // conserva su estado (datos cargados, suscripciones) y no
+                // se reutiliza para otro participante
                 for (final user in users)
                   _CompanionDataRow(
+                    key: ValueKey(_identity(user)),
                     user: user,
                     selected: _isSelected(user),
                     hoveredUserIdNotifier: _hoveredUserId,
@@ -382,6 +399,7 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
 
 
   Widget _rowCell({
+    Key? key,
     required UserEnreda user,
     required Widget child,
     required bool selected,
@@ -390,6 +408,7 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
   }) {
     final userId = _identity(user);
     return ValueListenableBuilder<String?>(
+      key: key,
       valueListenable: _hoveredUserId,
       builder: (context, hoveredId, _) {
         final isHovered = hoveredId == userId;
@@ -595,6 +614,7 @@ class _ParticipantsDetailTableState extends State<ParticipantsDetailTable> {
 /// falling back to the user's own data for any missing values.
 class _CompanionDataRow extends StatefulWidget {
   const _CompanionDataRow({
+    super.key,
     required this.user,
     required this.selected,
     required this.hoveredUserIdNotifier,
@@ -623,6 +643,14 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
   Stream<List<IpilEntry>>? _ipilStream;
   String? _loadedUserId;
 
+  /// Ficha del participante en tiempo real: el listado sale de una caché de
+  /// sesión, así que el estado del itinerario y los recursos solicitados se
+  /// toman de aquí para que estén siempre al día.
+  StreamSubscription<UserEnreda>? _userSubscription;
+  UserEnreda? _liveUser;
+  UserEnreda get _user =>
+      _liveUser?.userId == widget.user.userId ? _liveUser! : widget.user;
+
   bool _isEditingObs = false;
   bool _isSavingObs = false;
   late final TextEditingController _obsController = TextEditingController();
@@ -631,17 +659,48 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _bindUser();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CompanionDataRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user.userId != widget.user.userId) _bindUser();
+  }
+
+  /// Carga los datos de [widget.user] (acompañamiento, IPIL y ficha en
+  /// tiempo real) si aún no son los suyos.
+  void _bindUser() {
     final userId = widget.user.userId;
-    if (userId != null && userId.isNotEmpty && userId != _loadedUserId) {
-      _loadedUserId = userId;
+    if (userId == _loadedUserId) return;
+    _userSubscription?.cancel();
+    _userSubscription = null;
+    _liveUser = null;
+    _companionFuture = null;
+    _ipilStream = null;
+    _isEditingObs = false;
+    _loadedUserId = userId;
+    if (userId != null && userId.isNotEmpty) {
       final db = Provider.of<Database>(context, listen: false);
       _companionFuture = db.getCompanionData(userId);
       _ipilStream = db.getIpilEntriesByUserStream(userId);
+      _userSubscription =
+          db.userEnredaStreamByUserId(userId).listen((user) {
+        LocationCache.instance.updateParticipant(user);
+        // Por si llega tarde un dato de un participante anterior
+        if (mounted && user.userId == widget.user.userId) {
+          setState(() => _liveUser = user);
+        }
+      }, onError: (Object e) {
+        // Si falla la suscripción se siguen mostrando los datos de la caché
+        print('Participantes: no se pudo escuchar la ficha de $userId: $e');
+      });
     }
   }
 
   @override
   void dispose() {
+    _userSubscription?.cancel();
     _obsController.dispose();
     _obsFocusNode.dispose();
     super.dispose();
@@ -710,8 +769,9 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
   }
 
   Widget _rowContainer({required Widget child}) {
-    final user = widget.user;
-    final userId = _ParticipantsDetailTableState._identity(user);
+    // Misma identidad que la celda del nombre, para que el resaltado de
+    // ambas mitades de la fila coincida siempre
+    final userId = _ParticipantsDetailTableState._identity(widget.user);
 
     return ValueListenableBuilder<String?>(
       valueListenable: widget.hoveredUserIdNotifier,
@@ -905,7 +965,7 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
   }
 
   Widget _buildRow(CompanionData? companion) {
-    final user = widget.user;
+    final user = _user;
 
     // --- Nº Documento personal ---
     final dniDisplay = _withFallback(
@@ -928,7 +988,7 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
         children: [
           // ESTADO ITINERARIO — first check user-level fields, then fall back
           // to IPIL data for the two new "Persona contactada" options.
-          _ItineraryStateCell(user: widget.user, ipilStream: _ipilStream),
+          _ItineraryStateCell(user: user, ipilStream: _ipilStream),
           _dataCell(_ParticipantsDetailTableState._date(user.createDate), 175),
           _dataCell(dniDisplay, 205),
           _dataCell(_ParticipantsDetailTableState._orDash(user.gender), 125),

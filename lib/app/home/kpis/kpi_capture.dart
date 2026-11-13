@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -23,8 +25,13 @@ class KpiCaptureRegistry {
     if (renderObject is! RenderRepaintBoundary || !renderObject.hasSize) {
       return null;
     }
+    // Ningún lado por encima de 2048 px: texturas más grandes pueden agotar
+    // la memoria de la GPU en el navegador y perder el contexto WebGL
+    final longest = renderObject.size.longestSide;
+    final ratio =
+        longest > 0 ? math.min(pixelRatio, 2048 / longest) : pixelRatio;
     try {
-      final image = await renderObject.toImage(pixelRatio: pixelRatio);
+      final image = await renderObject.toImage(pixelRatio: ratio);
       final bytes = await encodeReportImage(image);
       image.dispose();
       if (bytes == null) return null;
@@ -51,7 +58,7 @@ class KpiCaptureRegistry {
       final image = await capture(ids[i]);
       if (image != null) result[ids[i]] = image;
       onProgress?.call(i + 1, ids.length);
-      await Future<void>.delayed(const Duration(milliseconds: 16));
+      await Future<void>.delayed(const Duration(milliseconds: 30));
     }
     return result;
   }
@@ -67,9 +74,8 @@ class KpiCaptureScope extends InheritedWidget {
     required Widget child,
   }) : super(key: key, child: child);
 
-  static KpiCaptureRegistry? of(BuildContext context) => context
-      .dependOnInheritedWidgetOfExactType<KpiCaptureScope>()
-      ?.registry;
+  static KpiCaptureRegistry? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<KpiCaptureScope>()?.registry;
 
   @override
   bool updateShouldNotify(KpiCaptureScope oldWidget) =>
