@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 import 'package:enreda_empresas/app/models/companionData.dart';
 import 'package:enreda_empresas/app/models/ipilEntry.dart';
+import 'package:enreda_empresas/app/models/technicianObservation.dart';
+import 'package:enreda_empresas/app/services/auth.dart';
 import 'package:enreda_empresas/app/home/participants/participants_view_state.dart';
 import 'package:enreda_empresas/app/models/userEnreda.dart';
 import 'package:enreda_empresas/app/services/database.dart';
@@ -648,6 +650,11 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
   /// toman de aquí para que estén siempre al día.
   StreamSubscription<UserEnreda>? _userSubscription;
   UserEnreda? _liveUser;
+
+  /// Observaciones internas de los técnicos (colección
+  /// `technicianObservations`, nunca visible para los participantes).
+  StreamSubscription<TechnicianObservations?>? _obsSubscription;
+  TechnicianObservations? _observations;
   UserEnreda get _user =>
       _liveUser?.userId == widget.user.userId ? _liveUser! : widget.user;
 
@@ -676,6 +683,9 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
     _userSubscription?.cancel();
     _userSubscription = null;
     _liveUser = null;
+    _obsSubscription?.cancel();
+    _obsSubscription = null;
+    _observations = null;
     _companionFuture = null;
     _ipilStream = null;
     _isEditingObs = false;
@@ -695,45 +705,58 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
         // Si falla la suscripción se siguen mostrando los datos de la caché
         print('Participantes: no se pudo escuchar la ficha de $userId: $e');
       });
+      _obsSubscription =
+          db.technicianObservationsStream(userId).listen((obs) {
+        if (mounted && userId == widget.user.userId) {
+          setState(() => _observations = obs);
+        }
+      }, onError: (Object e) {
+        print('Participantes: no se pudieron leer las observaciones de '
+            '$userId: $e');
+      });
     }
   }
 
   @override
   void dispose() {
     _userSubscription?.cancel();
+    _obsSubscription?.cancel();
     _obsController.dispose();
     _obsFocusNode.dispose();
     super.dispose();
   }
 
-  Future<void> _saveObservaciones(CompanionData? companion) async {
+  /// Guarda la observación como una entrada nueva (mensaje, fecha y técnico)
+  /// en `technicianObservations`. Ya no se escribe en `companionData`, que
+  /// son datos del propio participante.
+  Future<void> _saveObservaciones() async {
     final userId = widget.user.userId;
     if (userId == null || userId.isEmpty) return;
+    final text = _obsController.text.trim();
+    if (text.isEmpty || text == (_observations?.message ?? '').trim()) {
+      setState(() => _isEditingObs = false);
+      return;
+    }
+    final technicianId =
+        Provider.of<AuthBase>(context, listen: false).currentUser?.uid;
+    if (technicianId == null) return;
     setState(() => _isSavingObs = true);
 
     final db = Provider.of<Database>(context, listen: false);
-    final text = _obsController.text.trim();
-
-    final updatedCompanion = CompanionData(
-      companionDataId: companion?.companionDataId,
-      userId: userId,
-      companionFamilyStatus: companion?.companionFamilyStatus,
-      companionArrivalDateInSpain: companion?.companionArrivalDateInSpain,
-      companionAdministrativeStatus: companion?.companionAdministrativeStatus,
-      companionWorkPermit: companion?.companionWorkPermit,
-      companionDocumentType: companion?.companionDocumentType,
-      companionDocumentNumber: companion?.companionDocumentNumber,
-      companionHelpNeeds: companion?.companionHelpNeeds,
-      companionContactSchedule: companion?.companionContactSchedule,
-      companionFormHelp: companion?.companionFormHelp,
-      companionOtherRelevantData: text,
-    );
-
     try {
-      await db.setCompanionData(updatedCompanion);
-      _companionFuture = db.getCompanionData(userId);
+      await db.addTechnicianObservation(
+        userId: userId,
+        technicianId: technicianId,
+        message: text,
+        socialEntityId: globals.currentSocialEntityUser?.socialEntityId,
+      );
     } catch (e) {
-      print('Error saving observations: $e');
+      print('Error guardando observaciones: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('No se pudo guardar la observación'),
+        ));
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -904,7 +927,7 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
                   fontSize: 12,
                 ),
               ),
-              onSubmitted: (_) => _saveObservaciones(companion),
+              onSubmitted: (_) => _saveObservaciones(),
             ),
           ),
           const SizedBox(width: 4),
@@ -914,7 +937,7 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
             tooltip: 'Guardar',
-            onPressed: () => _saveObservaciones(companion),
+            onPressed: () => _saveObservaciones(),
           ),
           IconButton(
             icon: const Icon(Icons.cancel_outlined,
@@ -928,8 +951,13 @@ class _CompanionDataRowState extends State<_CompanionDataRow> {
       );
     }
 
-    final obsCompanion = companion?.companionOtherRelevantData;
-    final hasObs = obsCompanion != null && obsCompanion.trim().isNotEmpty;
+    // Última observación de los técnicos; si aún no hay ninguna, se muestra
+    // la que se guardaba antes en companionData (solo lectura, no se toca)
+    final latest = _observations?.message?.trim();
+    final obsCompanion = (latest != null && latest.isNotEmpty)
+        ? latest
+        : companion?.companionOtherRelevantData?.trim();
+    final hasObs = obsCompanion != null && obsCompanion.isNotEmpty;
 
     return InkWell(
       borderRadius: BorderRadius.circular(4),
