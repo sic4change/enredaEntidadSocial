@@ -15,6 +15,7 @@ import '../report/docx_writer.dart';
 import '../report/file_download.dart';
 import '../report/report_document.dart';
 import '../report/xlsx_writer.dart';
+import '../widgets/kpi_report_loading.dart';
 import 'kpi_report_pdf.dart';
 import 'participantes_report_pdf.dart';
 
@@ -90,6 +91,10 @@ class _KpiReportPreviewState extends State<KpiReportPreview> {
   _ReportType _selected = _ReportType.kpi;
   Future<List<ParticipanteListadoRow>>? _participantes;
 
+  /// PDF de KPIs ya generado por formato de página, para no repetir el
+  /// trabajo al redibujar la previsualización o al descargarlo.
+  final Map<PdfPageFormat, Future<Uint8List>> _kpiPdf = {};
+
   void _showPrintedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -134,7 +139,14 @@ class _KpiReportPreviewState extends State<KpiReportPreview> {
   Future<Uint8List> _generatePdf(PdfPageFormat format) async {
     switch (_selected) {
       case _ReportType.kpi:
-        return generateKpiReportPdf(format, widget.data);
+        final pdf = _kpiPdf.putIfAbsent(
+            format, () => generateKpiReportPdf(format, widget.data));
+        try {
+          return await pdf;
+        } catch (_) {
+          _kpiPdf.remove(format);
+          rethrow;
+        }
       case _ReportType.participantes:
         return generateParticipantesReportPdf(
           format,
@@ -297,6 +309,14 @@ class _KpiReportPreviewState extends State<KpiReportPreview> {
       pdfFileName: _selected.fileName,
       onPrinted: _showPrintedToast,
       onShared: _showSharedToast,
+      loadingWidget: Center(
+        child: KpiReportLoading(
+          title: 'Generando el documento',
+          message: _selected == _ReportType.kpi
+              ? 'Colocando las gráficas y las tablas…'
+              : 'Cargando los participantes…',
+        ),
+      ),
     );
   }
 

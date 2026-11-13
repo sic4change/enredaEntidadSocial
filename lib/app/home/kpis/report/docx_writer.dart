@@ -20,6 +20,7 @@ Uint8List buildDocx(ReportDocument doc) {
   final margin = doc.landscape ? 567 : 1134;
   final contentW = pageW - 2 * margin;
 
+  final images = <ReportImage>[];
   final body = StringBuffer()
     ..write(_paragraph(doc.title, size: 36, bold: true, color: _primary900));
   for (final line in doc.subtitleLines) {
@@ -50,6 +51,12 @@ Uint8List buildDocx(ReportDocument doc) {
       case ReportTable(:final headers, :final rows):
         if (previous is ReportTable) body.write(_paragraph(''));
         body.write(_table(headers, rows, contentW));
+      case ReportImage():
+        images.add(block);
+        final size = block.fit(contentW / 20, (pageH - 2 * margin) / 20 - 120);
+        body.write(_image(images.length, size.width, size.height));
+      case ReportSource(:final text):
+        body.write(_paragraph(text, size: 14, color: _secondaryText));
     }
     previous = block;
   }
@@ -64,6 +71,8 @@ Uint8List buildDocx(ReportDocument doc) {
         '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
         '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
         '<Default Extension="xml" ContentType="application/xml"/>'
+        '<Default Extension="png" ContentType="image/png"/>'
+        '<Default Extension="jpeg" ContentType="image/jpeg"/>'
         '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
         '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'
         '</Types>',
@@ -74,11 +83,18 @@ Uint8List buildDocx(ReportDocument doc) {
     'word/_rels/document.xml.rels': '$xmlHeader'
         '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
         '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+        '${[for (int i = 1; i <= images.length; i++) '<Relationship Id="rIdImg$i" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image$i.${images[i - 1].extension}"/>'].join()}'
         '</Relationships>',
     'word/document.xml': '$xmlHeader'
-        '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+        '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '
+        'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" '
+        'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
+        'xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">'
         '<w:body>$body</w:body></w:document>',
     'word/styles.xml': _styles,
+    for (int i = 0; i < images.length; i++)
+      'word/media/image${i + 1}.${images[i].extension}': images[i].bytes,
   });
 }
 
@@ -93,6 +109,22 @@ String _run(String text,
   final parts = text.split('\n').map(
       (p) => '<w:t xml:space="preserve">${xmlEscape(p)}</w:t>');
   return '<w:r>$rPr${parts.join('<w:br/>')}</w:r>';
+}
+
+/// Párrafo con la imagen [index] (word/media/image[index].png) en línea.
+String _image(int index, double widthPt, double heightPt) {
+  final cx = ptToEmu(widthPt);
+  final cy = ptToEmu(heightPt);
+  return '<w:p><w:pPr><w:spacing w:before="80" w:after="40"/></w:pPr><w:r><w:drawing>'
+      '<wp:inline distT="0" distB="0" distL="0" distR="0">'
+      '<wp:extent cx="$cx" cy="$cy"/>'
+      '<wp:docPr id="$index" name="Gráfica $index"/>'
+      '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">'
+      '<pic:pic><pic:nvPicPr><pic:cNvPr id="$index" name="Gráfica $index"/><pic:cNvPicPr/></pic:nvPicPr>'
+      '<pic:blipFill><a:blip r:embed="rIdImg$index"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
+      '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="$cx" cy="$cy"/></a:xfrm>'
+      '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic>'
+      '</a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
 }
 
 String _paragraph(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../kpi_capture.dart';
 import '../kpi_search.dart';
 import 'section_header.dart';
 import 'card_participantes_inscritos.dart';
@@ -34,15 +35,21 @@ class ResumenGeneralSection extends StatelessWidget {
     this.searchQuery = '',
   }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    if (searchQuery.trim().isNotEmpty) {
-      final builders = <String, Widget Function()>{
-        'Participantes inscritos': () => CardParticipantesInscritos(
+  Widget _buildInscritos() => KpiCapture(
+        id: 'Participantes inscritos',
+        child: CardParticipantesInscritos(
             data: participantesData, isLoading: isLoadingParticipantes),
-        'Evolución de inscripciones': () => CardEvolucionInscripciones(
+      );
+
+  Widget _buildEvolucion() => KpiCapture(
+        id: 'Evolución de inscripciones',
+        child: CardEvolucionInscripciones(
             users: participantesData?.users, isLoading: isLoadingParticipantes),
-        'Situación de empleo': () => CardSituacionEmpleo(
+      );
+
+  Widget _buildSituacionEmpleo() => KpiCapture(
+        id: 'Situación de empleo',
+        child: CardSituacionEmpleo(
             situacionInicialRows: participantesData?.situacionEmpleoInicial,
             situacionActualRows: participantesData?.situacionEmpleoActual,
             users: participantesData?.users ?? const [],
@@ -51,6 +58,15 @@ class ResumenGeneralSection extends StatelessWidget {
             situacionActualPorUsuario:
                 participantesData?.situacionActualPorUsuario ?? const {},
             isLoading: isLoadingParticipantes),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    if (searchQuery.trim().isNotEmpty) {
+      final builders = <String, Widget Function()>{
+        'Participantes inscritos': _buildInscritos,
+        'Evolución de inscripciones': _buildEvolucion,
+        'Situación de empleo': _buildSituacionEmpleo,
       };
       return KpiSearchResults(
         sectionTitle: sectionTitle,
@@ -77,15 +93,9 @@ class ResumenGeneralSection extends StatelessWidget {
               if (isSmall) {
                 return Column(
                   children: [
-                    CardParticipantesInscritos(
-                      data: participantesData,
-                      isLoading: isLoadingParticipantes,
-                    ),
+                    _buildInscritos(),
                     const SizedBox(height: 20),
-                    CardEvolucionInscripciones(
-                      users: participantesData?.users,
-                      isLoading: isLoadingParticipantes,
-                    ),
+                    _buildEvolucion(),
                   ],
                 );
               }
@@ -94,33 +104,18 @@ class ResumenGeneralSection extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: 360,
-                    child: CardParticipantesInscritos(
-                      data: participantesData,
-                      isLoading: isLoadingParticipantes,
-                    ),
+                    child: _buildInscritos(),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: CardEvolucionInscripciones(
-                      users: participantesData?.users,
-                      isLoading: isLoadingParticipantes,
-                    ),
+                    child: _buildEvolucion(),
                   ),
                 ],
               );
             },
           ),
           const SizedBox(height: 20),
-          CardSituacionEmpleo(
-            situacionInicialRows: participantesData?.situacionEmpleoInicial,
-            situacionActualRows: participantesData?.situacionEmpleoActual,
-            users: participantesData?.users ?? const [],
-            situacionInicialPorUsuario:
-                participantesData?.situacionInicialPorUsuario ?? const {},
-            situacionActualPorUsuario:
-                participantesData?.situacionActualPorUsuario ?? const {},
-            isLoading: isLoadingParticipantes,
-          ),
+          _buildSituacionEmpleo(),
         ],
       ],
     );

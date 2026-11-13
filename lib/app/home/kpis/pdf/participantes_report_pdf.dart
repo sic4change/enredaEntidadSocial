@@ -68,7 +68,7 @@ String _programa(String? subsidy) {
     return '529775 · Acompañamiento y tecnología';
   }
   if (upper.contains('SEIMLAB') || s.contains('0080')) {
-    return '0080 · SEIMLAB';
+    return '1/MAC/4/7.2/0080 · SEIMLAB';
   }
   return s;
 }

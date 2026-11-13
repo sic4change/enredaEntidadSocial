@@ -244,15 +244,6 @@ class KpiHeader extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'Actualizado el 06/10/2026',
-          style: GoogleFonts.outfit(
-            fontSize: 12,
-            fontWeight: FontWeight.normal,
-            color: KpiColors.secondaryText,
-          ),
-        ),
-        const SizedBox(width: 16),
         InkWell(
           borderRadius: BorderRadius.circular(999),
           onTap: onDownloadReport,

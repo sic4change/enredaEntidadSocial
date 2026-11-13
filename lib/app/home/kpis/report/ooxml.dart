@@ -16,11 +16,12 @@ String xmlEscape(String text) => text
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
 
-/// Empaqueta los ficheros ([ruta] → contenido XML) en un zip.
-Uint8List zipOoxml(Map<String, String> files) {
+/// Empaqueta los ficheros ([ruta] → contenido XML como [String], o bytes
+/// como [List<int>] para las imágenes) en un zip.
+Uint8List zipOoxml(Map<String, Object> files) {
   final archive = Archive();
   files.forEach((path, content) {
-    final bytes = utf8.encode(content);
+    final bytes = content is String ? utf8.encode(content) : content as List<int>;
     archive.addFile(ArchiveFile(path, bytes.length, bytes));
   });
   return Uint8List.fromList(ZipEncoder().encode(archive)!);
@@ -28,3 +29,6 @@ Uint8List zipOoxml(Map<String, String> files) {
 
 const String xmlHeader =
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+
+/// Puntos tipográficos a EMU (unidad de las imágenes en Office Open XML).
+int ptToEmu(double pt) => (pt * 12700).round();

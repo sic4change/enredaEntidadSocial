@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../kpi_colors.dart';
 import '../kpi_service.dart';
+import '../kpi_capture.dart';
 import '../kpi_search.dart';
 import 'section_header.dart';
 import 'card_recursos_subidos.dart';
@@ -35,16 +36,32 @@ class RecursosSection extends StatelessWidget {
     this.searchQuery = '',
   }) : super(key: key);
 
-  Widget _buildRecursosSubidos() => CardRecursosSubidos(
-        total: data?.total ?? 0,
-        esteMes: data?.esteMes ?? 0,
-        porCategoria: data?.porCategoria ?? const [],
-        isLoading: isLoading,
+  Widget _buildRecursosSubidos() => KpiCapture(
+        id: 'Recursos subidos',
+        child: CardRecursosSubidos(
+          total: data?.total ?? 0,
+          esteMes: data?.esteMes ?? 0,
+          porCategoria: data?.porCategoria ?? const [],
+          isLoading: isLoading,
+        ),
       );
 
-  Widget _buildLineaTemporal() => CardLineaTemporalRecursos(
-        fechas: data?.fechas ?? const [],
-        isLoading: isLoading,
+  Widget _buildLineaTemporal() => KpiCapture(
+        id: 'Línea temporal de recursos',
+        child: CardLineaTemporalRecursos(
+          fechas: data?.fechas ?? const [],
+          isLoading: isLoading,
+        ),
+      );
+
+  Widget _buildRecursosCategoria() => KpiCapture(
+        id: 'Recursos por categoría',
+        child: CardRecursosCategoria(
+          items: data?.porInteres ?? const [],
+          conInteres: data?.conInteres ?? 0,
+          total: data?.total ?? 0,
+          isLoading: isLoading,
+        ),
       );
 
   @override
@@ -53,11 +70,7 @@ class RecursosSection extends StatelessWidget {
       final builders = <String, Widget Function()>{
         'Recursos subidos': () => _buildRecursosSubidos(),
         'Línea temporal de recursos': () => _buildLineaTemporal(),
-        'Recursos por categoría': () => CardRecursosCategoria(
-            items: data?.porInteres ?? const [],
-            conInteres: data?.conInteres ?? 0,
-            total: data?.total ?? 0,
-            isLoading: isLoading),
+        'Recursos por categoría': () => _buildRecursosCategoria(),
       };
       return KpiSearchResults(
         sectionTitle: sectionTitle,
@@ -123,12 +136,7 @@ class RecursosSection extends StatelessWidget {
             },
           ),
           const SizedBox(height: 20),
-          CardRecursosCategoria(
-            items: data?.porInteres ?? const [],
-            conInteres: data?.conInteres ?? 0,
-            total: data?.total ?? 0,
-            isLoading: isLoading,
-          ),
+          _buildRecursosCategoria(),
         ],
       ],
     );

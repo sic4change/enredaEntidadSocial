@@ -166,7 +166,8 @@ class _CardEvolucionInscripcionesState
           ? now.month
           : (_selectedYear < now.year ? 12 : 1);
       final double avg = monthsElapsed > 0 ? totalCount / monthsElapsed : 0.0;
-      avgValue = avg.toStringAsFixed(1).replaceAll('.', ',');
+      // Media mensual redondeada a participantes enteros
+      avgValue = '${avg.round()}';
 
       if (totalCount > 0) {
         peakValue = '$peakMonthCount';

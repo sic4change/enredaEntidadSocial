@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../kpi_models.dart';
+import '../kpi_capture.dart';
 import '../kpi_search.dart';
 import 'section_header.dart';
 import 'card_condiciones_sobrevenidas.dart';
@@ -45,27 +46,39 @@ class CategoriasEspecialesSection extends StatelessWidget {
     this.searchQuery = '',
   }) : super(key: key);
 
-  Widget _buildCondiciones() => CardCondicionesSobrevenidas(
-        items: condicionesSobrevenidas,
-        isLoading: isLoading,
+  Widget _buildCondiciones() => KpiCapture(
+        id: 'Condiciones sobrevenidas',
+        child: CardCondicionesSobrevenidas(
+          items: condicionesSobrevenidas,
+          isLoading: isLoading,
+        ),
       );
 
-  Widget _buildCompetenciasReconocidas() => CardCompetenciasReconocidas(
-        items: competenciasReconocidas,
-        categories: competenciasPorCategoria,
-        isLoading: isLoading,
+  Widget _buildCompetenciasReconocidas() => KpiCapture(
+        id: 'Competencias más reconocidas',
+        child: CardCompetenciasReconocidas(
+          items: competenciasReconocidas,
+          categories: competenciasPorCategoria,
+          isLoading: isLoading,
+        ),
       );
 
-  Widget _buildCompetenciasPorArea() => CardCompetenciasPorArea(
-        areas: competenciasPorArea,
-        categories: competenciasPorCategoria,
-        isLoading: isLoading,
+  Widget _buildCompetenciasPorArea() => KpiCapture(
+        id: 'Por área de competencia',
+        child: CardCompetenciasPorArea(
+          areas: competenciasPorArea,
+          categories: competenciasPorCategoria,
+          isLoading: isLoading,
+        ),
       );
 
-  Widget _buildSituacionAdministrativa() => CardSituacionAdministrativa(
-        segments: situacionAdministrativa,
-        total: totalConInformeInicialCompleto,
-        isLoading: isLoading,
+  Widget _buildSituacionAdministrativa() => KpiCapture(
+        id: 'Situación administrativa',
+        child: CardSituacionAdministrativa(
+          segments: situacionAdministrativa,
+          total: totalConInformeInicialCompleto,
+          isLoading: isLoading,
+        ),
       );
 
   @override

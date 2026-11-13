@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/userEnreda.dart';
 import '../kpi_models.dart';
+import '../kpi_capture.dart';
 import '../kpi_search.dart';
 import 'section_header.dart';
 import 'card_grupos_edad.dart';
@@ -56,31 +57,42 @@ class DesgloseDemograficoSection extends StatelessWidget {
     this.searchQuery = '',
   }) : super(key: key);
 
-  Widget _buildGruposEdad() =>
-      CardGruposEdad(users: users, isLoading: isLoading);
-
-  Widget _buildNivelesFormativos() => CardNivelesFormativos(
-        nivelesCine: nivelesCine,
-        nivelesEstudios: nivelesEstudios,
-        sinEspecificar: nivelesSinEspecificar,
-        users: users ?? const [],
-        cinePorUsuario: nivelCinePorUsuario,
-        estudiosPorUsuario: nivelEstudiosPorUsuario,
-        isLoading: isLoading,
+  Widget _buildGruposEdad() => KpiCapture(
+        id: 'Grupos de edad',
+        child: CardGruposEdad(users: users, isLoading: isLoading),
       );
 
-  Widget _buildNacionalidades() => CardNacionalidades(
-        items: nacionalidades,
-        sinEspecificar: nacionalidadSinEspecificar,
-        isLoading: isLoading,
+  Widget _buildNivelesFormativos() => KpiCapture(
+        id: 'Niveles formativos',
+        child: CardNivelesFormativos(
+          nivelesCine: nivelesCine,
+          nivelesEstudios: nivelesEstudios,
+          sinEspecificar: nivelesSinEspecificar,
+          users: users ?? const [],
+          cinePorUsuario: nivelCinePorUsuario,
+          estudiosPorUsuario: nivelEstudiosPorUsuario,
+          isLoading: isLoading,
+        ),
       );
 
-  Widget _buildDiscapacidad() => CardDiscapacidad(
-        segments: discapacidad,
-        total: totalConInformeInicialCompleto,
-        users: users ?? const [],
-        discapacidadPorUsuario: discapacidadPorUsuario,
-        isLoading: isLoading,
+  Widget _buildNacionalidades() => KpiCapture(
+        id: 'Nacionalidades',
+        child: CardNacionalidades(
+          items: nacionalidades,
+          sinEspecificar: nacionalidadSinEspecificar,
+          isLoading: isLoading,
+        ),
+      );
+
+  Widget _buildDiscapacidad() => KpiCapture(
+        id: 'Participantes con discapacidad',
+        child: CardDiscapacidad(
+          segments: discapacidad,
+          total: totalConInformeInicialCompleto,
+          users: users ?? const [],
+          discapacidadPorUsuario: discapacidadPorUsuario,
+          isLoading: isLoading,
+        ),
       );
 
   /// Dos tarjetas lado a lado, o apiladas en pantallas estrechas.

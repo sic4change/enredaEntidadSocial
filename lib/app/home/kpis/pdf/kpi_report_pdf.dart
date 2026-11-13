@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
@@ -39,12 +40,17 @@ class KpiReportData {
   final ParticipantesKpiData? participantes;
   final RecursosKpiData? recursos;
 
+  /// Capturas de las tarjetas de la página tal y como estaban (periodo,
+  /// desagregación…), por título de tarjeta.
+  final Map<String, ReportImage> charts;
+
   const KpiReportData({
     required this.filterId,
     required this.filterLabel,
     required this.generatedAt,
     this.participantes,
     this.recursos,
+    this.charts = const {},
   });
 }
 
@@ -58,6 +64,9 @@ String? _logoAssetFor(String filterId) {
   return null;
 }
 
+const double _logoTop = 30;
+const double _logoWidth = 550;
+
 Future<Uint8List> generateKpiReportPdf(
     PdfPageFormat format, KpiReportData data) async {
   final doc =
@@ -68,9 +77,17 @@ Future<Uint8List> generateKpiReportPdf(
       ? pw.MemoryImage((await rootBundle.load(logoAsset)).buffer.asUint8List())
       : null;
 
+  // Los logos se dibujan a [_logoTop] del borde con [_logoWidth] de ancho; el
+  // contenido empieza 1 cm por debajo de ellos
+  double top = 2.0 * PdfPageFormat.cm;
+  if (logo != null && logo.width != null && logo.height != null) {
+    final logoHeight = _logoWidth * logo.height! / logo.width!;
+    top = math.max(top, _logoTop + logoHeight + 1.0 * PdfPageFormat.cm);
+  }
+
   format = format.applyMargin(
     left: 2.0 * PdfPageFormat.cm,
-    top: (logo != null ? 3.0 : 2.0) * PdfPageFormat.cm,
+    top: top,
     right: 2.0 * PdfPageFormat.cm,
     bottom: 2.0 * PdfPageFormat.cm,
   );
@@ -90,11 +107,11 @@ Future<Uint8List> generateKpiReportPdf(
               child: pw.Stack(children: [
                 pw.Positioned(
                   left: 10,
-                  top: 30,
+                  top: _logoTop,
                   right: 10,
                   child: pw.Center(
-                      child:
-                          pw.Image(logo, width: 550, fit: pw.BoxFit.contain)),
+                      child: pw.Image(logo,
+                          width: _logoWidth, fit: pw.BoxFit.contain)),
                 ),
               ]),
             ),
@@ -119,7 +136,7 @@ Future<Uint8List> generateKpiReportPdf(
         pw.SizedBox(height: 4),
         ...report.subtitleLines.map(_small),
         pw.SizedBox(height: 12),
-        ..._renderBlocks(report.blocks),
+        ..._renderBlocks(report.blocks, format),
       ],
     ),
   );
@@ -138,20 +155,20 @@ ReportDocument buildKpiReportDocument(KpiReportData data) {
       'Generado el ${DateFormat('dd/MM/yyyy HH:mm').format(data.generatedAt)}',
     ],
     blocks: [
-      if (p != null) ..._participantesSections(p, data.generatedAt),
+      if (p != null) ..._participantesSections(p, data.generatedAt, data.charts),
       if (p == null)
         const ReportNote(
             'No hay datos de participantes cargados para esta vista.'),
       const ReportSectionTitle('Recursos'),
       const ReportNote(
           'Los recursos se cuentan siempre sobre el total, independientemente del filtro.'),
-      if (r != null) ..._recursosSection(r, data.generatedAt),
+      if (r != null) ..._recursosSection(r, data.generatedAt, data.charts),
       if (r == null) const ReportNote('No hay datos de recursos cargados.'),
     ],
   );
 }
 
-List<pw.Widget> _renderBlocks(List<ReportBlock> blocks) {
+List<pw.Widget> _renderBlocks(List<ReportBlock> blocks, PdfPageFormat format) {
   final widgets = <pw.Widget>[];
   ReportBlock? previous;
   for (final block in blocks) {
@@ -167,6 +184,20 @@ List<pw.Widget> _renderBlocks(List<ReportBlock> blocks) {
       case ReportTable(:final headers, :final rows):
         if (previous is ReportTable) widgets.add(pw.SizedBox(height: 6));
         widgets.add(_table(headers, rows));
+      case ReportImage():
+        final size = block.fit(format.availableWidth,
+            format.availableHeight - 4 * PdfPageFormat.cm);
+        widgets.add(pw.Padding(
+          padding: const pw.EdgeInsets.only(top: 4),
+          child: pw.Image(pw.MemoryImage(block.bytes),
+              width: size.width, height: size.height),
+        ));
+      case ReportSource(:final text):
+        widgets.add(pw.Padding(
+          padding: const pw.EdgeInsets.only(top: 3, bottom: 6),
+          child: pw.Text(text,
+              style: const pw.TextStyle(fontSize: 7, color: _secondaryText)),
+        ));
     }
     previous = block;
   }
@@ -176,7 +207,51 @@ List<pw.Widget> _renderBlocks(List<ReportBlock> blocks) {
 // ---------------------------------------------------------------------------
 // Participantes
 
-List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
+/// Origen de los datos de cada tarjeta, para la nota bajo su gráfica.
+const Map<String, String> _cardSources = {
+  'Participantes inscritos':
+      'Perfiles de los participantes de la vista seleccionada. El estado sale de los informes inicial, de derivación y de cierre.',
+  'Evolución de inscripciones':
+      'Fecha de alta del participante en Enreda (o, si falta, fecha de inicio del itinerario).',
+  'Situación de empleo':
+      'Informe inicial › Situación laboral (inicial) y último informe de seguimiento o de cierre (actual).',
+  'Grupos de edad': 'Fecha de nacimiento del perfil del participante.',
+  'Niveles formativos':
+      'Nivel educativo indicado en el alta del participante, agrupado por niveles CINE.',
+  'Nacionalidades': 'Nacionalidad del perfil del participante.',
+  'Participantes con discapacidad':
+      'Informe inicial › Discapacidad (participantes con informe inicial completo).',
+  'Condiciones sobrevenidas':
+      'Informe inicial › Situaciones de vulnerabilidad (participantes con informe inicial completo).',
+  'Situación administrativa':
+      'Nacionalidad del perfil e informe inicial › Situación administrativa (participantes con informe inicial completo).',
+  'Competencias más reconocidas':
+      'Competencias reconocidas en el perfil de Enreda de cada participante.',
+  'Por área de competencia':
+      'Competencias reconocidas en el perfil de Enreda, agrupadas por área y categoría.',
+  'Indicadores clave':
+      'IPIL (inscripción y certificación de formación, seguimiento a 4 semanas y 6 meses), informe de cierre (consecución de empleo) y currículum de Enreda.',
+  'Recorrido de resultados':
+      'Participantes inscritos, IPIL e informe de cierre (acumulado desde el inicio).',
+  'Resultados por sector':
+      'IPIL › Seguimiento a las 4 semanas y 6 meses › "Obtienen empleo" › Tipo de empleo.',
+  'Recursos subidos': 'Recursos publicados en la plataforma y su categoría.',
+  'Línea temporal de recursos': 'Fecha de creación de cada recurso.',
+  'Recursos por categoría':
+      'Ámbitos de actuación asignados a cada recurso (un recurso puede tener varios).',
+};
+
+/// Cabecera de una tarjeta: título, su gráfica capturada (si estaba en
+/// pantalla) y la fuente de los datos en letra pequeña.
+List<ReportBlock> _card(String title, Map<String, ReportImage> charts) => [
+      ReportSubTitle(title),
+      if (charts[title] != null) charts[title]!,
+      if (_cardSources[title] != null)
+        ReportSource('Fuente: ${_cardSources[title]}'),
+    ];
+
+List<ReportBlock> _participantesSections(
+    ParticipantesKpiData p, DateTime now, Map<String, ReportImage> charts) {
   String pct(double v) => '${v.round()}%';
   List<String> barRow(StackedBarRow row) =>
       [row.label, '${row.count}', pct(row.percentage)];
@@ -206,16 +281,19 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
   return [
     // Resumen general
     ReportSectionTitle('Resumen general'),
+    ..._card('Participantes inscritos', charts),
     ReportKeyValue('Participantes inscritos', '${p.total}'),
-    ReportKeyValue('Con informe inicial completo', '${p.totalConInformeInicialCompleto}'),
-    ReportSubTitle('Estado'),
+    ReportKeyValue(
+        'Con informe inicial completo', '${p.totalConInformeInicialCompleto}'),
+    ReportNote('Estado'),
     ReportTable(['Estado', 'Personas', '%'], p.porEstado.map(barRow).toList()),
-    ReportSubTitle('Género'),
+    ReportNote('Género'),
     ReportTable(['Género', 'Personas', '%'], p.porGenero.map(barRow).toList()),
-    ReportSubTitle('Nacionalidad'),
+    ReportNote('Nacionalidad'),
     ReportTable(['Nacionalidad', 'Personas', '%'],
         p.porNacionalidad.map(barRow).toList()),
-    ReportSubTitle('Inscripciones por mes (${now.year})'),
+    ..._card('Evolución de inscripciones', charts),
+    ReportNote('Inscripciones por mes (${now.year})'),
     ReportTable(
       ['Mes', 'Inscripciones'],
       [
@@ -223,32 +301,34 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
           if (m < now.month) [_monthShort[m], '${inscripciones[m]}'],
       ],
     ),
-    ReportSubTitle('Situación de empleo inicial'),
+    ..._card('Situación de empleo', charts),
+    ReportNote('Situación inicial'),
     ReportTable(['Situación', 'Mujeres', 'Hombres', 'No binario', 'Total'],
         p.situacionEmpleoInicial.map(empleoRow).toList()),
-    ReportSubTitle('Situación de empleo actual'),
+    ReportNote('Situación actual'),
     ReportTable(['Situación', 'Mujeres', 'Hombres', 'No binario', 'Total'],
         p.situacionEmpleoActual.map(empleoRow).toList()),
 
     // Desglose demográfico
     ReportSectionTitle('Desglose demográfico'),
-    ReportSubTitle('Grupos de edad'),
+    ..._card('Grupos de edad', charts),
     ReportTable(['Grupo', 'Mujeres', 'Hombres', 'No binario', 'Total'],
         _ageRows(p.users, now)),
-    ReportSubTitle('Niveles formativos · Nivel CINE'),
+    ..._card('Niveles formativos', charts),
+    ReportNote('Nivel CINE'),
     ReportTable(
         ['Nivel', 'Mujeres', 'Hombres', 'No binario', 'Total', '%'],
         p.nivelesCine
             .map((i) => levelRow(i)..[0] = '${i.cineLabel} · ${i.title}')
             .toList()),
-    ReportSubTitle('Niveles formativos · Nivel de estudios'),
+    ReportNote('Nivel de estudios'),
     ReportTable(
         ['Nivel de estudios', 'Mujeres', 'Hombres', 'No binario', 'Total', '%'],
         p.nivelesEstudios.map(levelRow).toList()),
     if (p.nivelesSinEspecificar > 0)
       ReportNote(
           '${p.nivelesSinEspecificar} participantes sin nivel formativo registrado.'),
-    ReportSubTitle('Nacionalidades'),
+    ..._card('Nacionalidades', charts),
     ReportTable(
       ['Nacionalidad', 'Mujeres', 'Hombres', 'No binario', 'Total'],
       p.nacionalidades
@@ -264,8 +344,9 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
     if (p.nacionalidadSinEspecificar > 0)
       ReportNote(
           '${p.nacionalidadSinEspecificar} participantes sin nacionalidad registrada.'),
-    ReportSubTitle('Participantes con discapacidad'),
-    ReportNote('Sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
+    ..._card('Participantes con discapacidad', charts),
+    ReportNote(
+        'Sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
     ReportTable(
         ['Estado', 'Personas', '%'],
         p.discapacidad
@@ -274,21 +355,20 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
 
     // Categorías especiales
     ReportSectionTitle('Categorías especiales'),
-    ReportNote('Condiciones sobrevenidas y situación administrativa: '
-        'sobre ${p.totalConInformeInicialCompleto} participantes con informe inicial completo.'),
-    ReportSubTitle('Condiciones sobrevenidas'),
+    ..._card('Condiciones sobrevenidas', charts),
     ReportTable(
         ['Condición', 'Personas', '%'],
         p.condicionesSobrevenidas
             .map((i) => [i.label, '${i.count}', pct(i.percentage ?? 0)])
             .toList()),
-    ReportSubTitle('Situación administrativa'),
+    ..._card('Situación administrativa', charts),
     ReportTable(
         ['Situación', 'Personas', '%'],
         p.situacionAdministrativa
             .map((s) => [s.label, '${s.count}', pct(s.percentage)])
             .toList()),
-    ReportSubTitle('Competencias más reconocidas (top 10)'),
+    ..._card('Competencias más reconocidas', charts),
+    ReportNote('Top 10'),
     ReportTable(
         ['Competencia', 'Categoría', 'Personas', '%'],
         p.competenciasReconocidas
@@ -299,7 +379,7 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
                   pct(i.percentage ?? 0)
                 ])
             .toList()),
-    ReportSubTitle('Por área de competencia'),
+    ..._card('Por área de competencia', charts),
     ReportTable(
         ['Categoría', 'Reconocimientos', '%'],
         p.competenciasPorCategoria
@@ -313,7 +393,7 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
 
     // Indicadores de resultados
     ReportSectionTitle('Indicadores de resultados'),
-    ReportSubTitle('Indicadores clave'),
+    ..._card('Indicadores clave', charts),
     ReportTable(
       ['Indicador', 'Valor', 'Variación', 'Año anterior'],
       p.indicadoresClave
@@ -329,13 +409,13 @@ List<ReportBlock> _participantesSections(ParticipantesKpiData p, DateTime now) {
               ])
           .toList(),
     ),
-    ReportSubTitle('Recorrido de resultados (acumulado)'),
+    ..._card('Recorrido de resultados', charts),
     ReportTable(
         ['Paso', 'Personas', '% sobre inscritos'],
         p.recorridoResultados
             .map((s) => [s.label, '${s.count}', '${s.percentage}%'])
             .toList()),
-    ReportSubTitle('Resultados por sector (empleos por tipo de empleo)'),
+    ..._card('Resultados por sector', charts),
     ReportTable(['Sector', 'Personas'],
         p.resultadosPorSector.map((i) => [i.label, '${i.count}']).toList()),
   ];
@@ -380,7 +460,8 @@ List<List<String>> _ageRows(List<UserEnreda> users, DateTime now) {
 // ---------------------------------------------------------------------------
 // Recursos
 
-List<ReportBlock> _recursosSection(RecursosKpiData r, DateTime now) {
+List<ReportBlock> _recursosSection(
+    RecursosKpiData r, DateTime now, Map<String, ReportImage> charts) {
   final porMes = List<int>.filled(12, 0);
   for (final f in r.fechas) {
     if (f.year == now.year) porMes[f.month - 1]++;
@@ -389,15 +470,16 @@ List<ReportBlock> _recursosSection(RecursosKpiData r, DateTime now) {
       r.total > 0 ? (r.conInteres / r.total * 100).round() : 0;
 
   return [
+    ..._card('Recursos subidos', charts),
     ReportKeyValue('Recursos subidos (total)', '${r.total}'),
     ReportKeyValue('Subidos este mes', '${r.esteMes}'),
-    ReportSubTitle('Por categoría'),
     ReportTable(
         ['Categoría', 'Recursos', '%'],
         r.porCategoria
             .map((s) => [s.label, '${s.count}', '${s.percentage.round()}%'])
             .toList()),
-    ReportSubTitle('Recursos subidos por mes (${now.year})'),
+    ..._card('Línea temporal de recursos', charts),
+    ReportNote('Recursos subidos por mes (${now.year})'),
     ReportTable(
       ['Mes', 'Recursos'],
       [
@@ -405,7 +487,7 @@ List<ReportBlock> _recursosSection(RecursosKpiData r, DateTime now) {
           if (m < now.month) [_monthShort[m], '${porMes[m]}'],
       ],
     ),
-    ReportSubTitle('Recursos por ámbito de actuación'),
+    ..._card('Recursos por categoría', charts),
     ReportNote(
         '${r.conInteres} de ${r.total} recursos tienen ámbito informado ($pctConInteres%). '
         'Un recurso puede tener varios.'),

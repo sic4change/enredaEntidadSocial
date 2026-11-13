@@ -88,6 +88,11 @@ Uint8List buildXlsx(ReportDocument doc) {
         for (final r in rows) {
           addRow(r, _sDefault, detectNumbers: true);
         }
+      case ReportImage():
+        // Las gráficas solo van en PDF y Word; en Excel quedan los datos
+        break;
+      case ReportSource(:final text):
+        addRow([text], _sNote, trackWidth: false);
     }
     previous = block;
   }

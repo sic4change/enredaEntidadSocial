@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../kpi_models.dart';
+import '../kpi_capture.dart';
 import '../kpi_search.dart';
 import 'section_header.dart';
 import 'card_indicadores_clave.dart';
@@ -48,16 +49,31 @@ class IndicadoresResultadosSection extends StatelessWidget {
     this.searchQuery = '',
   }) : super(key: key);
 
+  Widget _buildIndicadores() => KpiCapture(
+        id: 'Indicadores clave',
+        child: CardIndicadoresClave(
+            indicators: indicadoresClave, isLoading: isLoading),
+      );
+
+  Widget _buildRecorrido() => KpiCapture(
+        id: 'Recorrido de resultados',
+        child: CardRecorridoResultados(
+            steps: recorridoResultados, isLoading: isLoading),
+      );
+
+  Widget _buildSector() => KpiCapture(
+        id: 'Resultados por sector',
+        child: CardResultadosSector(
+            items: resultadosPorSector, isLoading: isLoading),
+      );
+
   @override
   Widget build(BuildContext context) {
     if (searchQuery.trim().isNotEmpty) {
       final builders = <String, Widget Function()>{
-        'Indicadores clave': () => CardIndicadoresClave(
-            indicators: indicadoresClave, isLoading: isLoading),
-        'Recorrido de resultados': () => CardRecorridoResultados(
-            steps: recorridoResultados, isLoading: isLoading),
-        'Resultados por sector': () => CardResultadosSector(
-            items: resultadosPorSector, isLoading: isLoading),
+        'Indicadores clave': _buildIndicadores,
+        'Recorrido de resultados': _buildRecorrido,
+        'Resultados por sector': _buildSector,
       };
       return KpiSearchResults(
         sectionTitle: sectionTitle,
@@ -79,8 +95,7 @@ class IndicadoresResultadosSection extends StatelessWidget {
         ),
         if (isExpanded) ...[
           const SizedBox(height: 16),
-          CardIndicadoresClave(
-              indicators: indicadoresClave, isLoading: isLoading),
+          _buildIndicadores(),
           const SizedBox(height: 20),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -88,24 +103,18 @@ class IndicadoresResultadosSection extends StatelessWidget {
               if (isSmall) {
                 return Column(
                   children: [
-                    CardRecorridoResultados(
-                        steps: recorridoResultados, isLoading: isLoading),
+                    _buildRecorrido(),
                     const SizedBox(height: 20),
-                    CardResultadosSector(
-                        items: resultadosPorSector, isLoading: isLoading),
+                    _buildSector(),
                   ],
                 );
               }
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                      child: CardRecorridoResultados(
-                          steps: recorridoResultados, isLoading: isLoading)),
+                  Expanded(child: _buildRecorrido()),
                   const SizedBox(width: 20),
-                  Expanded(
-                      child: CardResultadosSector(
-                          items: resultadosPorSector, isLoading: isLoading)),
+                  Expanded(child: _buildSector()),
                 ],
               );
             },
