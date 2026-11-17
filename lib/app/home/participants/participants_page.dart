@@ -5,6 +5,7 @@ import 'package:enreda_empresas/app/common_widgets/alert_dialog.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_detail_page.dart';
 import 'package:enreda_empresas/app/home/participants/participant_detail/participant_social_reports_page.dart';
 import 'package:enreda_empresas/app/home/participants/participants_detail_table.dart';
+import 'package:enreda_empresas/app/home/participants/participants_view_state.dart';
 import 'package:enreda_empresas/app/home/participants/participants_item_builder.dart';
 import 'package:enreda_empresas/app/home/participants/participants_tile.dart';
 import 'package:enreda_empresas/app/models/socialEntity.dart';
@@ -17,6 +18,7 @@ import 'package:enreda_empresas/app/utils/responsive.dart';
 import 'package:enreda_empresas/app/values/strings.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:enreda_empresas/app/home/resources/global.dart' as globals;
 
@@ -31,16 +33,22 @@ class ParticipantsListPage extends StatefulWidget {
 
 class _ParticipantsListPageState extends State<ParticipantsListPage> {
   late UserEnreda socialEntityUser;
-  final _searchTextController = TextEditingController();
+  // Arranca con la búsqueda que ya estuviera aplicada (se conserva en
+  // [searchText] al navegar)
+  final _searchTextController =
+      TextEditingController(text: _ParticipantsListPageState.searchText.value);
   static ValueNotifier<String> searchText = ValueNotifier('');
 
   bool _isLoading = true;
   // View toggle: false = card grid ("Vista general"), true = wide table.
-  bool _detailView = false;
+  bool get _detailView => ParticipantsViewState.detailView;
+  set _detailView(bool v) => ParticipantsViewState.detailView = v;
   // Selected tab (Figma 10919:8496): 0 = Mis participantes, 1 = entity.
-  int _selectedTab = 0;
+  int get _selectedTab => ParticipantsViewState.selectedTab;
+  set _selectedTab(int v) => ParticipantsViewState.selectedTab = v;
   // General view chips (Figma 7950:6029): activos / inactivos.
-  bool _showInactive = false;
+  bool get _showInactive => ParticipantsViewState.showInactive;
+  set _showInactive(bool v) => ParticipantsViewState.showInactive = v;
   SocialEntity? _socialEntity;
   String _errorMessage = '';
   // Set of userIds whose closure report has finished == true.
@@ -49,9 +57,31 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
   @override
   void initState() {
     super.initState();
+    ParticipantsListPage.selectedIndex.addListener(_onSectionChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initData();
     });
+  }
+
+  /// Al volver al listado desde la ficha de un participante, se recalcula
+  /// quién está inactivo (puede haberse cerrado o reabierto su itinerario).
+  Future<void> _onSectionChanged() async {
+    if (ParticipantsListPage.selectedIndex.value != 0 || _isLoading) return;
+    final database = Provider.of<Database>(context, listen: false);
+    // El participante que se acaba de consultar es el que ha podido cambiar:
+    // se relee su ficha antes de recalcular
+    final current = globals.currentParticipant;
+    if (current?.userId != null) {
+      try {
+        final fresh = await database
+            .userEnredaStreamByUserId(current!.userId)
+            .first
+            .timeout(const Duration(seconds: 10));
+        LocationCache.instance.updateParticipant(fresh);
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    await _resolveInactiveUsers(database);
   }
 
   Future<void> _initData() async {
@@ -124,6 +154,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
 
   @override
   void dispose() {
+    ParticipantsListPage.selectedIndex.removeListener(_onSectionChanged);
     _searchTextController.dispose();
     super.dispose();
   }
@@ -372,7 +403,10 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                     child: _ParticipantSearchAutocomplete(
                       searchTextController: _searchTextController,
                       participants: LocationCache.instance.allParticipants,
-                      onChanged: (value) => searchText.value = value,
+                      onChanged: (value) {
+                        ParticipantsViewState.page = 0;
+                        searchText.value = value;
+                      },
                       onSubmitted: _setState,
                       onClear: _clearFilter,
                     ),
@@ -385,7 +419,10 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                           _socialEntity?.name ?? ''),
                     ],
                     selected: _selectedTab,
-                    onSelect: (i) => setState(() => _selectedTab = i),
+                    onSelect: (i) => setState(() {
+                      _selectedTab = i;
+                      ParticipantsViewState.page = 0;
+                    }),
                   ),
                   SpaceH20(),
                   Row(
@@ -413,14 +450,20 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
                         label: StringConst.PARTICIPANTS_ACTIVE,
                         count: activeCount,
                         selected: !_showInactive,
-                        onTap: () => setState(() => _showInactive = false),
+                        onTap: () => setState(() {
+                          _showInactive = false;
+                          ParticipantsViewState.page = 0;
+                        }),
                       ),
                       const SizedBox(width: 12),
                       _CountChip(
                         label: StringConst.PARTICIPANTS_INACTIVE,
                         count: inactiveCount,
                         selected: _showInactive,
-                        onTap: () => setState(() => _showInactive = true),
+                        onTap: () => setState(() {
+                          _showInactive = true;
+                          ParticipantsViewState.page = 0;
+                        }),
                       ),
                     ],
                   ),
@@ -459,6 +502,7 @@ class _ParticipantsListPageState extends State<ParticipantsListPage> {
     setStateIfMounted(() {
       _searchTextController.clear();
       _searchTextController.text = '';
+      ParticipantsViewState.page = 0;
       searchText.value = '';
     });
   }
@@ -509,7 +553,7 @@ class _ParticipantSearchAutocompleteState
 
   @override
   Widget build(BuildContext context) {
-    final fieldHeight = Responsive.isMobile(context) ? 40.0 : 44.0;
+    final fieldHeight = Responsive.isMobile(context) ? 44.0 : 50.0;
 
     return LayoutBuilder(builder: (context, constraints) {
       return RawAutocomplete<UserEnreda>(
@@ -538,82 +582,61 @@ class _ParticipantSearchAutocompleteState
             valueListenable: controller,
             builder: (context, value, _) {
               final hasText = value.text.isNotEmpty;
+              // Diseño: píldora de fondo primary050, texto a la izquierda y
+              // lupa a la derecha (que pasa a "limpiar" al escribir)
               return SizedBox(
                 height: fieldHeight,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: AnimatedBuilder(
-                        animation: _focusNode,
-                        builder: (context, _) => DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: AppColors.primary030,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: _focusNode.hasFocus
-                                  ? AppColors.primary100
-                                  : Colors.transparent,
-                            ),
-                          ),
-                        ),
+                child: AnimatedBuilder(
+                  animation: _focusNode,
+                  builder: (context, child) => DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.primary050,
+                      borderRadius: BorderRadius.circular(fieldHeight / 2),
+                      border: Border.all(
+                        color: _focusNode.hasFocus
+                            ? AppColors.primary100
+                            : Colors.transparent,
                       ),
                     ),
-                    Positioned.fill(
-                      child: TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        onChanged: widget.onChanged,
-                        onSubmitted: (text) {
-                          onFieldSubmitted();
-                          widget.onSubmitted(text);
-                        },
-                        textAlign: TextAlign.center,
-                        textAlignVertical: TextAlignVertical.center,
-                        textInputAction: TextInputAction.search,
-                        style: const TextStyle(
-                          color: AppColors.primary900,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        decoration: InputDecoration(
-                          isCollapsed: true,
-                          hintText:
-                              'Busca por nombre, apellidos, correo electrónico...',
-                          hintStyle: const TextStyle(
+                    child: child,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          onChanged: widget.onChanged,
+                          onSubmitted: (text) {
+                            onFieldSubmitted();
+                            widget.onSubmitted(text);
+                          },
+                          textAlignVertical: TextAlignVertical.center,
+                          textInputAction: TextInputAction.search,
+                          style: const TextStyle(
                             color: AppColors.primary900,
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 52),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 2,
-                      top: 0,
-                      bottom: 0,
-                      child: SizedBox(
-                        width: 40,
-                        child: const Center(
-                          child: Icon(
-                            Icons.search,
-                            color: AppColors.primary900,
-                            size: 20,
+                          decoration: const InputDecoration(
+                            isCollapsed: true,
+                            hintText:
+                                'Busca por nombre, apellidos, correo electrónico...',
+                            hintStyle: TextStyle(
+                              color: AppColors.blue050,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            contentPadding: EdgeInsets.only(left: 23),
+                            border: InputBorder.none,
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      right: 2,
-                      top: 0,
-                      bottom: 0,
-                      child: hasText
-                          ? SizedBox(
-                              width: 40,
-                              child: Center(
-                                child: IconButton(
+                      SizedBox(
+                        width: 56,
+                        child: Center(
+                          child: hasText
+                              ? IconButton(
                                   constraints: const BoxConstraints.tightFor(
                                     width: 36,
                                     height: 36,
@@ -622,16 +645,20 @@ class _ParticipantSearchAutocompleteState
                                   tooltip: 'Limpiar búsqueda',
                                   icon: const Icon(
                                     Icons.close,
-                                    color: AppColors.primary900,
+                                    color: AppColors.blue050,
                                     size: 20,
                                   ),
                                   onPressed: widget.onClear,
+                                )
+                              : SvgPicture.asset(
+                                  'assets/images/ic_search_participants.svg',
+                                  width: 17,
+                                  height: 17,
                                 ),
-                              ),
-                            )
-                          : const SizedBox(width: 40),
-                    ),
-                  ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

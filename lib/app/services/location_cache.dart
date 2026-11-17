@@ -247,6 +247,19 @@ class LocationCache {
     });
   }
 
+  /// Sustituye en la caché la versión de [user] por la recibida en tiempo
+  /// real (estado del itinerario, recursos…), sin notificar a los oyentes:
+  /// quien la recibe ya se redibuja con ella y el resto la verá en su
+  /// siguiente construcción.
+  void updateParticipant(UserEnreda user) {
+    final key = user.userId ?? user.email;
+    if (!_participantCache.containsKey(key)) return;
+    _participantCache[key] = user;
+    final index =
+        allParticipants.indexWhere((u) => (u.userId ?? u.email) == key);
+    if (index >= 0) allParticipants[index] = user;
+  }
+
   /// Reset cached participants (e.g., when navigating away or force refresh)
   void resetParticipants() {
     _initialLoadDone = false;

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enreda_empresas/app/models/ability.dart';
+import 'package:enreda_empresas/app/models/technicianObservation.dart';
 import 'package:enreda_empresas/app/models/certificationRequest.dart';
 import 'package:enreda_empresas/app/models/activity.dart';
 import 'package:enreda_empresas/app/models/choice.dart';
@@ -326,6 +327,16 @@ abstract class Database {
 
      /// Creates or updates a companion-data document.
      Future<void> setCompanionData(CompanionData companionData);
+     /// Observaciones internas de los técnicos sobre [userId] (null si aún
+     /// no hay ninguna).
+     Stream<TechnicianObservations?> technicianObservationsStream(String userId);
+     /// Añade una observación de [technicianId] sobre [userId].
+     Future<void> addTechnicianObservation({
+       required String userId,
+       required String technicianId,
+       required String message,
+       String? socialEntityId,
+     });
 }
 
 class FirestoreDatabase implements Database {
@@ -2775,6 +2786,45 @@ class FirestoreDatabase implements Database {
     globals.currentFollowReportUser = FollowReport();
     globals.currentDerivationReportUser = DerivationReport();
     globals.currentClosureReportUser = ClosureReport();
+  }
+
+  @override
+  Stream<TechnicianObservations?> technicianObservationsStream(String userId) {
+    return FirebaseFirestore.instance
+        .doc(APIPath.technicianObservation(userId))
+        .snapshots()
+        .map((snapshot) {
+      final data = snapshot.data();
+      return data == null
+          ? null
+          : TechnicianObservations.fromMap(data, snapshot.id);
+    });
+  }
+
+  @override
+  Future<void> addTechnicianObservation({
+    required String userId,
+    required String technicianId,
+    required String message,
+    String? socialEntityId,
+  }) async {
+    final entry = TechnicianObservationEntry(
+      message: message,
+      technicianId: technicianId,
+      createdAt: DateTime.now(),
+    );
+    await _service.updateData(
+      path: APIPath.technicianObservation(userId),
+      data: {
+        'userId': userId,
+        if (socialEntityId != null && socialEntityId.isNotEmpty)
+          'socialEntityId': socialEntityId,
+        'message': message,
+        'updatedAt': FieldValue.serverTimestamp(),
+        'updatedBy': technicianId,
+        'entries': FieldValue.arrayUnion([entry.toMap()]),
+      },
+    );
   }
 
   @override

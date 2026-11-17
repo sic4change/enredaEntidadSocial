@@ -110,4 +110,9 @@ class APIPath {
 
   // Companion data — override fields for participants enrolled via a companion
   static String companionDataCollection() => 'companionData';
+
+  // Observaciones internas de los técnicos (un documento por participante)
+  static String technicianObservations() => 'technicianObservations';
+  static String technicianObservation(String userId) =>
+      'technicianObservations/$userId';
 }

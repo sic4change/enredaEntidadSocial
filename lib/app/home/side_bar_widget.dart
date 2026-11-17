@@ -6,6 +6,7 @@ import 'package:enreda_empresas/app/home/web_home.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 import '../common_widgets/precached_avatar.dart';
@@ -64,6 +65,12 @@ class _SideBarWidgetState extends State<SideBarWidget> {
   void _setSelectedIndexTools() {
     setState(() {
       WebHome.goToolBox();
+    });
+  }
+
+  void _setSelectedIndexKpis() {
+    setState(() {
+      WebHome.goToKpis();
     });
   }
 
@@ -268,6 +275,22 @@ class _SideBarWidgetState extends State<SideBarWidget> {
           ),
           label: StringConst.DRAWER_ENTITIES,
           onTap: _setSelectedIndexEntities,
+        ),
+        // index 6 — KPI’S
+        SidebarXItem(
+          iconWidget: SizedBox(
+            width: 20,
+            height: 20,
+            child: SvgPicture.asset(
+              ImagePath.ICON_KPIS,
+              colorFilter: const ColorFilter.mode(
+                AppColors.turquoiseBlue,
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
+          label: StringConst.DRAWER_KPIS,
+          onTap: _setSelectedIndexKpis,
         ),
       ],
     );

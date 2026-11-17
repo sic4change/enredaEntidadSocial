@@ -670,6 +670,7 @@ class StringConst {
   static const String IPIL_SITUATION_QUALIFICATION = "Obtienen una cualificación";
   static const String IPIL_SITUATION_EMPLOYMENT = "Obtienen empleo";
   static const String IPIL_SITUATION_IMPROVE_EMPLOYMENT = "Mejora empleo";
+  static const String IPIL_SITUATION_KEEPS_EMPLOYMENT = "Mantiene empleo";
   static const String IPIL_SITUATION_NO_RESULT = "No obtiene un resultado, se desconoce o no responde";
 
   static const List<String> IPIL_FOUR_WEEKS_SITUATIONS = [
@@ -677,12 +678,14 @@ class StringConst {
     IPIL_SITUATION_EDUCATION,
     IPIL_SITUATION_QUALIFICATION,
     IPIL_SITUATION_EMPLOYMENT,
+    IPIL_SITUATION_KEEPS_EMPLOYMENT,
     IPIL_SITUATION_NO_RESULT,
   ];
 
   static const List<String> IPIL_SIX_MONTHS_SITUATIONS = [
     IPIL_SITUATION_IMPROVE_EMPLOYMENT,
     IPIL_SITUATION_EMPLOYMENT,
+    IPIL_SITUATION_KEEPS_EMPLOYMENT,
     IPIL_SITUATION_NO_RESULT,
   ];
 
@@ -711,6 +714,7 @@ class StringConst {
   static const String DRAWER_ENTITIES = 'Agenda de contactos ';
   static const String DRAWER_SESIONES = 'Sesiones';
   static const String DRAWER_CALENDARIO = 'Mi calendario';
+  static const String DRAWER_KPIS = "KPI'S";
   static const String SEE_MORE = 'Ver más';
 
   // Sesiones (admin dashboard) ─ list view + detail
