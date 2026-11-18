@@ -501,7 +501,6 @@ class StringConst {
   static const String NEW_LANGUAGE = 'Introduce un nuevo idioma:';
   static const String NEW_CAREER = 'Introduce una nueva carrera:';
   static const String NEW_REFERENCE = 'Introduce nuevos datos:';
-  static const String ADD_MORE_EXPERIENCES = 'Añade 2 experiencias y evalúa o certifica 3 competencias para descargar tu CV ';
   static const String EXPERIENCE_ADDED = '¡Hemos terminado! Esta experiencia ha sido añadida a tu perfil';
   static const List<String> EXPERIENCE_WORK_TYPES = ['Individual', 'Equipo', 'Ambos'];
   static const List<String> EXPERIENCE_CONTEXT = [
@@ -526,7 +525,6 @@ class StringConst {
   static const String NO_EDUCATION = 'Todavía no has añadido ninguna formación. ¡Chatea con nuestro asistente para añadir una!';
   static const String NO_EXPERIENCE = 'Todavía no has añadido ninguna experiencia. ¡Chatea con nuestro asistente para añadir una!';
   static const String NO_REFERENCES = 'Todavía no cuentas con ninguna referencia personal. ¡Certifica tus competencias!';
-  static const String ADD_MORE_EXPERIENCES_SUGGESTION = 'Te recomendamos añadir al menos 2 experiencias profesionales y evalúar o certificar 3 competencias para que tu CV quede más enriquecido';
 
   // Profile
   static const String MY_PROFILE = 'Mi perfil';

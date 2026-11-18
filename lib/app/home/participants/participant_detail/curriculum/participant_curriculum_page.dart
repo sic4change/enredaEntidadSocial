@@ -248,8 +248,9 @@ class _ParticipantCurriculumPageState extends State<ParticipantCurriculumPage> {
   }
 
   Widget _buildStepIndicator(int step) {
-    final steps = ['Currículum', 'Seleccionar datos'];
-    return Row(
+    final steps = ['Currículum', 'Seleccionar datos', 'Descarga'];
+    final indicator = Row(
+      mainAxisSize: MainAxisSize.min,
       children: List.generate(steps.length, (i) {
         final isActive = i == step;
         final isDone = i < step;
@@ -284,6 +285,12 @@ class _ParticipantCurriculumPageState extends State<ParticipantCurriculumPage> {
           ],
         );
       }),
+    );
+    // En pantallas estrechas, las 3 burbujas se desplazan horizontalmente
+    // en lugar de desbordar.
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: indicator,
     );
   }
 

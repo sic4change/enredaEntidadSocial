@@ -479,7 +479,6 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
           );
           return;
         }
-        await _hasEnoughExperiences(context);
         if (widget.onPreview != null) {
           widget.onPreview!();
         }
@@ -1711,17 +1710,6 @@ class _MyCurriculumPageState extends State<MyCurriculumPage> {
         )
       ],
     );
-  }
-
-  Future<void> _hasEnoughExperiences(BuildContext context) async {
-    if ((myExperiences?.length ?? 0) < 2) {
-      await showCustomDialog(
-        context,
-        content: CustomTextBody(text: StringConst.ADD_MORE_EXPERIENCES_SUGGESTION),
-        defaultActionText: StringConst.FORM_ACCEPT,
-        onDefaultActionPressed: (dialogContext) => Navigator.of(dialogContext).pop(true),
-      );
-    }
   }
 
   Widget _addButton(Function() onPress) {
