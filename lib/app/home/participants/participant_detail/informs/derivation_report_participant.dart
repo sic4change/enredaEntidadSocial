@@ -1433,6 +1433,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.DERIVATION_OBJECTIVE,
+              richText: true,
               controller: _controllers['objectiveDerivation'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1508,6 +1509,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
 
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               //initialValue: _orientation1,
               controller: _controllers['orientation1'],
             
@@ -1532,6 +1534,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_RECEPTION_RESOURCES,
+                richText: true,
                 //initialValue: _receptionResources,
                 controller: _controllers['receptionResources'],
                 
@@ -1544,6 +1547,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_EXTERNAL_RESOURCES,
+              richText: true,
               //initialValue: _administrativeExternalResources,
               controller: _controllers['administrativeExternalResources'],
               
@@ -1606,6 +1610,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                     return _adminStateNotifier.value == 'Sin tramitar' ?
                     CustomTextFormFieldTitle(
                       labelText: 'Sin tramitar',
+                      richText: true,
                       controller: _controllers['adminNoThrough'],
                       
                       // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1773,6 +1778,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.INITIAL_OTHERS,
+                        richText: true,
                         controller: _controllers['adminOther'],
                         
                         // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1799,6 +1805,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1848,6 +1855,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MEDICATION,
+              richText: true,
               controller: _controllers['medication'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1874,6 +1882,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_1'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1887,6 +1896,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_REST,
+                richText: true,
                 initialValue: _rest,
                 onChanged: (value) {
                   _rest = value;
@@ -1927,6 +1937,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_TREATMENT,
+                richText: true,
                 initialValue: _treatment,
                 onChanged: (value) {
                   _treatment = value;
@@ -1938,6 +1949,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_TRACKING,
+                richText: true,
                 initialValue: _tracking,
                 onChanged: (value) {
                   _tracking = value;
@@ -1985,6 +1997,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['psychosocialDerivationMotive'],
               
               enabled: !_finished,
@@ -2008,6 +2021,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_2'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2197,6 +2211,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_3'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2286,6 +2301,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_4'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2323,6 +2339,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_MOTIVE,
+                richText: true,
                 controller: _controllers['motive'],
                 
                 // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2345,6 +2362,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation3'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2395,6 +2413,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['internalDerivationMotive'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2439,6 +2458,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(), //TODO check values saved
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['externalDerivationMotive'],
               
               enabled: !_finished,
@@ -2446,6 +2466,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LEGAL_REPRESENTATION,
+              richText: true,
               hintText: StringConst.INITIAL_HINT_LEGAL,
               controller: _controllers['legalRepresentation'],
               
@@ -2508,6 +2529,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation4'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2610,6 +2632,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.INITIAL_OTHERS,
+                        richText: true,
                         controller: _controllers['ownershipTypeOpen'],
                         
                         // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2631,6 +2654,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.INITIAL_OTHERS,
+                        richText: true,
                         controller: _controllers['homelessnessSituationOpen'],
                         
                         // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2649,6 +2673,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               contentPadding: EdgeInsets.zero,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_LIVING_UNIT,
+                richText: true,
                 hintText: StringConst.INITIAL_LIVING_UNIT_HINT,
                 controller: _controllers['livingUnit'],
                 
@@ -2670,6 +2695,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LOCATION,
+              richText: true,
               controller: _controllers['location'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2698,6 +2724,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation5'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2708,6 +2735,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_INFORMATION_NETWORKS,
+              richText: true,
               controller: _controllers['informationNetworks'],
               hintText: StringConst.INITIAL_INFORMATION_NETWORKS_HINT,
               
@@ -2722,6 +2750,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               contentPadding: EdgeInsets.zero,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_INSTITUTION_NETWORKS,
+                richText: true,
                 controller: _controllers['institutionNetworks'],
                 
                 // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2731,6 +2760,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_FAMILY_CONCILIATION,
+                richText: true,
                 controller: _controllers['familyConciliation'],
                 
                 // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2753,6 +2783,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation7'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2849,6 +2880,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation9'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2964,6 +2996,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                         ),
                         childLeft: CustomTextFormFieldTitle(
                           labelText: StringConst.INITIAL_SOCIAL_EXCLUSION_OBSERVATIONS,
+                          richText: true,
                           controller: _controllers['socialExclusionCertificateObservations'],
                           
                           // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2991,6 +3024,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation12'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3017,6 +3051,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation13'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3149,6 +3184,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.LABOR_OTHER_CONSIDERATIONS,
+                        richText: true,
                         controller: _controllers['laborOtherConsiderations'],
                         onChanged: (value) {
                           _controllers['laborOtherConsiderations']!.text = value;
@@ -3179,6 +3215,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation13_2'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3190,6 +3227,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             CustomTextFormFieldTitle(
               labelText:
               StringConst.INITIAL_COMPETENCIES,
+              richText: true,
               controller: _controllers['competencies'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3200,6 +3238,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_CONTEXTUALIZATION,
+              richText: true,
               controller: _controllers['contextualization'],
              
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3210,6 +3249,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_CONNEXION,
+              richText: true,
               controller: _controllers['connexion'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3235,6 +3275,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             ),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_SHORT_TERM,
+              richText: true,
               controller: _controllers['shortTerm'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3245,6 +3286,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MEDIUM_TERM,
+              richText: true,
               controller: _controllers['mediumTerm'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3255,6 +3297,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LONG_TERM,
+              richText: true,
               controller: _controllers['longTerm'],
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3283,6 +3326,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                 ),
                 CustomTextFormFieldTitle(
                   labelText: StringConst.INITIAL_OBSERVATIONS,
+                  richText: true,
                   controller: _controllers['orientation9_5'],
                   
                   // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3394,6 +3438,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                 SpaceH12(),
                 CustomTextFormFieldTitle(
                   labelText: StringConst.INITIAL_MOTIVE,
+                  richText: true,
                   controller: _controllers['formationBagMotive'],
                  
                   // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3504,6 +3549,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                 SpaceH12(),
                 CustomTextFormFieldTitle(
                   labelText: StringConst.FOLLOW_JOB_UPGRADE_MOTIVE,
+                  richText: true,
                   controller: _controllers['upgradeMotive'],
                   
                   // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3529,6 +3575,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                 ),
                 CustomTextFormFieldTitle(
                   labelText: StringConst.INITIAL_OBSERVATIONS,
+                  richText: true,
                   controller: _controllers['orientation9_6'],
                   
                   // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3571,6 +3618,7 @@ class _DerivationReportFormState extends State<DerivationReportForm> {
                         children: [
                           CustomTextFormFieldTitle(
                             labelText: StringConst.INITIAL_MOTIVE,
+                            richText: true,
                             controller: _controllers['postLaborAccompanimentMotive'],
                             
                             // validator: (value) => (value!.isNotEmpty || value != '')

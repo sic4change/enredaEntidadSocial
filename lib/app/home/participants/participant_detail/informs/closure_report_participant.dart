@@ -1292,6 +1292,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE1_ITINERARY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               initialValue: _controllers['orientation1']!.text,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1315,6 +1316,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_RECEPTION_RESOURCES,
+                richText: true,
                 controller: _controllers['receptionResources']!,
                 
                 // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1326,6 +1328,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_EXTERNAL_RESOURCES,
+              richText: true,
               controller: _controllers['administrativeExternalResources']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1372,6 +1375,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                     return _adminStateNotifier.value == 'Sin tramitar' ?
                     CustomTextFormFieldTitle(
                       labelText: 'Sin tramitar',
+                      richText: true,
                       controller: _controllers['adminNoThrough']!,
                       
                       // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1539,6 +1543,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.INITIAL_OTHERS,
+                        richText: true,
                         controller: _controllers['adminOther']!,
                         
                         // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1556,6 +1561,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE2_SANITARY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               initialValue: _controllers['orientation2']!.text,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1605,6 +1611,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MEDICATION,
+              richText: true,
               controller: _controllers['medication']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1616,6 +1623,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_2_1_MENTAL_HEALTH),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_1']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1629,6 +1637,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_REST,
+                richText: true,
                 initialValue: _rest,
                 onChanged: (value) {
                   _rest = value;
@@ -1669,6 +1678,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_TREATMENT,
+                richText: true,
                 initialValue: _treatment,
                 onChanged: (value) {
                   _treatment = value;
@@ -1680,6 +1690,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_TRACKING,
+                richText: true,
                 initialValue: _tracking,
                 onChanged: (value) {
                   _tracking = value;
@@ -1726,6 +1737,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['psychosocialDerivationMotive']!,
               
               enabled: !_finished,
@@ -1735,6 +1747,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_2_2_DISABILITY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_2']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1910,6 +1923,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_2_3_DEPENDENCE),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_3']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -1985,6 +1999,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_2_4_ADDICTIONS),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_4']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2022,6 +2037,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_MOTIVE,
+                richText: true,
                 controller: _controllers['motive']!,
                 
                 // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2035,6 +2051,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_3_LEGAL_SITUATION),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation3']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2085,6 +2102,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['internalDerivationMotive']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2129,6 +2147,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(), //TODO check values saved
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['externalDerivationMotive']!,
               
               enabled: !_finished,
@@ -2136,6 +2155,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LEGAL_REPRESENTATION,
+              richText: true,
               hintText: StringConst.INITIAL_HINT_LEGAL,
               controller: _controllers['legalRepresentation']!,
               
@@ -2183,6 +2203,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_4_HOUSE_SITUATION),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation4']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2285,6 +2306,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.INITIAL_OTHERS,
+                        richText: true,
                         controller: _controllers['ownershipTypeOpen']!,
                         
                         // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2306,6 +2328,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.INITIAL_OTHERS,
+                        richText: true,
                         controller: _controllers['homelessnessSituationOpen']!,
                         
                         // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2324,6 +2347,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               contentPadding: EdgeInsets.zero,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_LIVING_UNIT,
+                richText: true,
                 hintText: StringConst.INITIAL_LIVING_UNIT_HINT,
                 controller: _controllers['livingUnit']!,
                 
@@ -2345,6 +2369,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LOCATION,
+              richText: true,
               controller: _controllers['location']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2364,6 +2389,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_5_SUPPORT),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation5']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2374,6 +2400,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_INFORMATION_NETWORKS,
+              richText: true,
               controller: _controllers['informationNetworks']!,
               hintText: StringConst.INITIAL_INFORMATION_NETWORKS_HINT,
               
@@ -2388,6 +2415,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               contentPadding: EdgeInsets.zero,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_INSTITUTION_NETWORKS,
+                richText: true,
                 controller: _controllers['institutionNetworks']!,
                 
                 // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2397,6 +2425,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_FAMILY_CONCILIATION,
+                richText: true,
                 controller: _controllers['familyConciliation']!,
                 
                 // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2410,6 +2439,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_6_LANGUAGES),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation7']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2503,6 +2533,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_7_SOCIAL_ATTENTION),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation9']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2618,6 +2649,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                         ),
                         childLeft: CustomTextFormFieldTitle(
                           labelText: StringConst.INITIAL_SOCIAL_EXCLUSION_OBSERVATIONS,
+                          richText: true,
                           controller: _controllers['socialExclusionCertificateObservations']!,
                           
                           // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2635,6 +2667,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_8_VULNERABILITY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation12']!,
              
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2652,6 +2685,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_9_WORK),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation13']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2785,6 +2819,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.LABOR_OTHER_CONSIDERATIONS,
+                        richText: true,
                         controller: _controllers['laborOtherConsiderations']!,
                         
                         enabled: !_finished,
@@ -2798,6 +2833,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation13_2']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2809,6 +2845,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             CustomTextFormFieldTitle(
               labelText:
               StringConst.INITIAL_COMPETENCIES,
+              richText: true,
               controller: _controllers['competencies']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2819,6 +2856,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_CONTEXTUALIZATION,
+              richText: true,
               controller: _controllers['contextualization']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2829,6 +2867,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_CONNEXION,
+              richText: true,
               controller: _controllers['connexion']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2840,6 +2879,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_SHORT_TERM,
+              richText: true,
               controller: _controllers['shortTerm']!,
              
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2850,6 +2890,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MEDIUM_TERM,
+              richText: true,
               controller: _controllers['mediumTerm']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2860,6 +2901,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LONG_TERM,
+              richText: true,
               controller: _controllers['longTerm']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2871,6 +2913,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSubSectionTitle(StringConst.FOLLOW_TITLE_9_5_DEVELOP),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation9_5']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -2981,6 +3024,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['formationBagMotive']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3091,6 +3135,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.FOLLOW_JOB_UPGRADE_MOTIVE,
+              richText: true,
               controller: _controllers['upgradeMotive']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3102,6 +3147,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSubSectionTitle(StringConst.FOLLOW_TITLE_9_6_POST_LABOR_ACCOMPANIMENT),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation9_6']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3144,6 +3190,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
                     children: [
                       CustomTextFormFieldTitle(
                         labelText: StringConst.INITIAL_MOTIVE,
+                        richText: true,
                         controller: _controllers['postLaborAccompanimentMotive']!,
                         
                         // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3230,6 +3277,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
             informSectionTitle(StringConst.CLOSURE_TITLE_10),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation10']!,
               
               // validator: (value) => (value!.isNotEmpty || value != '')
@@ -3270,6 +3318,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.CLOSURE_CLOSE_MOTIVE_DETAIL,
+                richText: true,
                 controller: _controllers['motiveCloseDetail']!,
                 
                 // validator: (value) => (value!.isNotEmpty || value != '')

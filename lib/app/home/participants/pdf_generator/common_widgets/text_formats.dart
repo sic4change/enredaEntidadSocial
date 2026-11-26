@@ -1,11 +1,128 @@
 import 'package:flutter/rendering.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:enreda_empresas/app/utils/markup_text.dart';
+import 'doc_theme.dart' show markupStrongFont, markupStrongItalicFont;
 
 const PdfColor grey = PdfColor.fromInt(0xFF535A5F);
 const PdfColor black = PdfColor.fromInt(0xF44494B);
 const PdfColor white = PdfColor.fromInt(0xFFFFFFFF);
 const PdfColor primary900 = PdfColor.fromInt(0xFF054D5E);
+
+// ---------------------------------------------------------------------------
+// Inline formatting (**bold**, *italic*) support
+// ---------------------------------------------------------------------------
+
+pw.TextStyle _markupRunStyle(pw.TextStyle base, MarkupStyle m) {
+  pw.TextStyle s = base;
+  if (m.italic) s = s.copyWith(fontStyle: pw.FontStyle.italic);
+  if (m.bold) {
+    if (base.fontWeight == pw.FontWeight.bold && markupStrongFont != null) {
+      // Content is already drawn with the theme's bold font: use a heavier one.
+      s = s.copyWith(
+        fontBold: markupStrongFont,
+        fontBoldItalic: markupStrongItalicFont ?? markupStrongFont,
+      );
+    } else {
+      s = s.copyWith(fontWeight: pw.FontWeight.bold);
+    }
+  }
+  return s;
+}
+
+pw.Widget _markupRichText(
+  List<StyledChar> chars, {
+  required pw.TextStyle style,
+  pw.TextAlign? textAlign,
+  double textScaleFactor = 0.8,
+  pw.TextOverflow? overflow,
+}) {
+  return pw.RichText(
+    textAlign: textAlign,
+    textScaleFactor: textScaleFactor,
+    overflow: overflow,
+    text: pw.TextSpan(
+      style: style,
+      children: [
+        for (final run in buildRuns(chars))
+          pw.TextSpan(text: run.text, style: _markupRunStyle(style, run.style)),
+      ],
+    ),
+  );
+}
+
+/// Drop-in replacement for `pw.Text(content, ...)` that renders inline
+/// formatting. Texts without formatting (all reports written before this
+/// feature) take exactly the same `pw.Text` path as before.
+pw.Widget markupText(
+  String content, {
+  required pw.TextStyle style,
+  pw.TextAlign? textAlign,
+  double textScaleFactor = 0.8,
+  pw.TextOverflow? overflow,
+}) {
+  if (mightContainMarkup(content)) {
+    final parsed = parseMarkup(content);
+    if (parsed.hasFormatting) {
+      return _markupRichText(parsed.chars,
+          style: style,
+          textAlign: textAlign,
+          textScaleFactor: textScaleFactor,
+          overflow: overflow);
+    }
+    content = parsed.visibleText;
+  }
+  return pw.Text(content,
+      textScaleFactor: textScaleFactor,
+      textAlign: textAlign,
+      overflow: overflow,
+      style: style);
+}
+
+/// Formatted counterpart of the chunking done in [customItemPageSafe].
+List<pw.Widget> _markupChunks(
+  ParsedMarkup parsed, {
+  required pw.TextStyle style,
+  required int maxChars,
+}) {
+  final List<pw.Widget> widgets = [];
+  final List<List<StyledChar>> lines = [[]];
+  for (final c in parsed.chars) {
+    if (c.char == '\n') {
+      lines.add([]);
+    } else {
+      lines.last.add(c);
+    }
+  }
+  for (var line in lines) {
+    int a = 0, b = line.length;
+    while (a < b && line[a].isWhitespace) a++;
+    while (b > a && line[b - 1].isWhitespace) b--;
+    var remaining = line.sublist(a, b);
+    while (remaining.isNotEmpty) {
+      if (remaining.length <= maxChars) {
+        widgets.add(_markupRichText(remaining,
+            style: style, textAlign: pw.TextAlign.justify));
+        break;
+      }
+      int breakPoint = -1;
+      for (int i = maxChars; i > 0; i--) {
+        if (remaining[i].char == ' ') {
+          breakPoint = i;
+          break;
+        }
+      }
+      if (breakPoint <= 0) breakPoint = maxChars;
+      widgets.add(_markupRichText(remaining.sublist(0, breakPoint),
+          style: style, textAlign: pw.TextAlign.justify));
+      remaining = remaining.sublist(breakPoint);
+      int k = 0;
+      while (k < remaining.length && remaining[k].isWhitespace) k++;
+      remaining = remaining.sublist(k);
+    }
+  }
+  return widgets;
+}
 
 /// Page-safe replacement for [CustomItem].
 ///
@@ -38,6 +155,15 @@ List<pw.Widget> customItemPageSafe(
   if (content.isEmpty) {
     widgets.add(pw.SizedBox(height: 2));
     return widgets;
+  }
+
+  if (mightContainMarkup(content)) {
+    final parsed = parseMarkup(content);
+    if (parsed.hasFormatting) {
+      widgets.addAll(_markupChunks(parsed,
+          style: contentStyle, maxChars: _maxCharsPerChunk));
+      return widgets;
+    }
   }
 
   // Split on newlines first so paragraph breaks are preserved.
@@ -109,7 +235,7 @@ class CustomRow extends pw.StatelessWidget {
                       pw.SizedBox(width: 170),
                       pw.Container(
                         width: 220,
-                        child: pw.Text(content1,
+                        child: markupText(content1,
                           textAlign: pw.TextAlign.justify,
                           textScaleFactor: 0.8,
                           overflow: pw.TextOverflow.span,
@@ -134,7 +260,7 @@ class CustomRow extends pw.StatelessWidget {
                               .copyWith(fontWeight: pw.FontWeight.normal, color: black)),
                       pw.Container(
                         width: 220,
-                        child: pw.Text(content2,
+                        child: markupText(content2,
                           textAlign: pw.TextAlign.justify,
                           textScaleFactor: 0.8,
                           overflow: pw.TextOverflow.span,
@@ -171,7 +297,7 @@ class CustomItem extends pw.StatelessWidget {
                   .defaultTextStyle
                   .copyWith(fontWeight: pw.FontWeight.normal, color: black)
           ),
-          pw.Text(content,
+          markupText(content,
               textScaleFactor: 0.8,
               textAlign: pw.TextAlign.justify,
               style: pw.Theme.of(context)
@@ -202,7 +328,7 @@ class CustomItemSameLine extends pw.StatelessWidget {
                   .defaultTextStyle
                   .copyWith(fontWeight: pw.FontWeight.normal, color: black)
           ),
-          pw.Text(content,
+          markupText(content,
               textScaleFactor: 0.8,
               textAlign: pw.TextAlign.justify,
               style: pw.Theme.of(context)

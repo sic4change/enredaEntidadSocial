@@ -926,6 +926,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE1_ITINERARY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation1']!,
               
               enabled: !_finished,
@@ -944,6 +945,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_RECEPTION_RESOURCES,
+                richText: true,
                 controller: _controllers['receptionResources']!,
                 
                 enabled: !_finished,
@@ -952,6 +954,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_EXTERNAL_RESOURCES,
+              richText: true,
               controller: _controllers['administrativeExternalResources']!,
               
               enabled: !_finished,
@@ -990,6 +993,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                   return _adminStateNotifier.value == 'Sin tramitar' ?
                   CustomTextFormFieldTitle(
                     labelText: 'Motivo',
+                    richText: true,
                     controller: _controllers['adminNoThrough']!,
                     
                     enabled: !_finished,
@@ -1133,6 +1137,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                     SpaceH12(),
                     CustomTextFormFieldTitle(
                       labelText: StringConst.INITIAL_OTHERS,
+                      richText: true,
                       controller: _controllers['adminOther']!,
                       
                       enabled: !_finished,
@@ -1147,6 +1152,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE2_SANITARY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2']!,
               
               enabled: !_finished,
@@ -1187,6 +1193,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MEDICATION,
+              richText: true,
               controller: _controllers['medication']!,
               
               enabled: !_finished,
@@ -1195,6 +1202,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_2_1_MENTAL_HEALTH),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_1']!,
               
               enabled: !_finished,
@@ -1205,6 +1213,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_REST,
+                richText: true,
                 initialValue: _rest,
                 onChanged: (value) {
                   _rest = value;
@@ -1238,6 +1247,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
               separatorSize: 20,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_TREATMENT,
+                richText: true,
                 initialValue: _treatment,
                 onChanged: (value) {
                   _treatment = value;
@@ -1246,6 +1256,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_TRACKING,
+                richText: true,
                 initialValue: _tracking,
                 onChanged: (value) {
                   _tracking = value;
@@ -1293,6 +1304,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['psychosocialDerivationMotive']!,
               onChanged: (value) {
                 _controllers['psychosocialDerivationMotive']!.text = value;
@@ -1304,6 +1316,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_2_2_DISABILITY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_2']!,
               
             /*  validator: (value) => (value!.isNotEmpty || value != '')
@@ -1469,6 +1482,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_2_3_DEPENDENCE),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_3']!,
               
               enabled: !_finished,
@@ -1530,6 +1544,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_2_4_ADDICTIONS),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation2_4']!,
               
               enabled: !_finished,
@@ -1560,6 +1575,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_MOTIVE,
+                richText: true,
                 controller: _controllers['motive']!,
                 
                 enabled: !_finished,
@@ -1570,6 +1586,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_3_LEGAL_SITUATION),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation3']!,
               
               enabled: !_finished,
@@ -1611,6 +1628,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['internalDerivationMotive']!,
               
               enabled: !_finished,
@@ -1652,6 +1670,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(), //TODO check values saved
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MOTIVE,
+              richText: true,
               controller: _controllers['externalDerivationMotive']!,
               
               enabled: !_finished,
@@ -1659,6 +1678,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LEGAL_REPRESENTATION,
+              richText: true,
               hintText: StringConst.INITIAL_HINT_LEGAL,
               controller: _controllers['legalRepresentation']!,
               
@@ -1669,6 +1689,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_4_HOUSE_SITUATION),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation4']!,
               
               enabled: !_finished,
@@ -1758,6 +1779,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                         SpaceH12(),
                         CustomTextFormFieldTitle(
                           labelText: StringConst.INITIAL_OTHERS,
+                          richText: true,
                           controller: _controllers['ownershipTypeOpen']!,
                           
                           enabled: !_finished,
@@ -1776,6 +1798,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                       SpaceH12(),
                       CustomTextFormFieldTitle(
                         labelText: StringConst.INITIAL_OTHERS,
+                        richText: true,
                         controller: _controllers['homelessnessSituationOpen']!,
                         
                         enabled: !_finished,
@@ -1791,6 +1814,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
               contentPadding: EdgeInsets.zero,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_LIVING_UNIT,
+                richText: true,
                 hintText: StringConst.INITIAL_LIVING_UNIT_HINT,
                 controller: _controllers['livingUnit']!,
                 
@@ -1808,6 +1832,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LOCATION,
+              richText: true,
               controller: _controllers['location']!,
               
               enabled: !_finished,
@@ -1824,6 +1849,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_5_SUPPORT),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation5']!,
               
               enabled: !_finished,
@@ -1831,6 +1857,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_INFORMATION_NETWORKS,
+              richText: true,
               controller: _controllers['informationNetworks']!,
               hintText: StringConst.INITIAL_INFORMATION_NETWORKS_HINT,
               
@@ -1842,12 +1869,14 @@ class _InitialReportFormState extends State<InitialReportForm> {
               contentPadding: EdgeInsets.zero,
               childLeft: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_INSTITUTION_NETWORKS,
+                richText: true,
                 controller: _controllers['institutionNetworks']!,
                 
                 enabled: !_finished,
               ),
               childRight: CustomTextFormFieldTitle(
                 labelText: StringConst.INITIAL_FAMILY_CONCILIATION,
+                richText: true,
                 controller: _controllers['familyConciliation']!,
                 
                 enabled: !_finished,
@@ -1858,6 +1887,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_6_LANGUAGES),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation7']!,
               
               enabled: !_finished,
@@ -1953,6 +1983,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_7_SOCIAL_ATTENTION),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation9']!,
               
               enabled: !_finished,
@@ -2048,6 +2079,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                           ),
                           childLeft: CustomTextFormFieldTitle(
                             labelText: StringConst.INITIAL_SOCIAL_EXCLUSION_OBSERVATIONS,
+                            richText: true,
                             controller: _controllers['socialExclusionCertificateObservations']!,
                             
                             enabled: !_finished,
@@ -2062,6 +2094,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_8_VULNERABILITY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation12']!,
               
               enabled: !_finished,
@@ -2076,6 +2109,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSectionTitle(StringConst.INITIAL_TITLE_9_WORK),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation13']!,
               
               enabled: !_finished,
@@ -2201,6 +2235,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
                     SpaceH12(),
                     CustomTextFormFieldTitle(
                       labelText: StringConst.LABOR_OTHER_CONSIDERATIONS,
+                      richText: true,
                       controller: _controllers['laborOtherConsiderations']!,
                       
                       enabled: !_finished,
@@ -2214,6 +2249,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_9_3_TRAJECTORY),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_OBSERVATIONS,
+              richText: true,
               controller: _controllers['orientation13_2']!,
               
               enabled: !_finished,
@@ -2222,6 +2258,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             CustomTextFormFieldTitle(
               labelText:
                   StringConst.INITIAL_COMPETENCIES,
+              richText: true,
               controller: _controllers['competencies']!,
               
               enabled: !_finished,
@@ -2229,6 +2266,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_CONTEXTUALIZATION,
+              richText: true,
               controller: _controllers['contextualization']!,
               
               enabled: !_finished,
@@ -2236,6 +2274,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_CONNEXION,
+              richText: true,
               controller: _controllers['connexion']!,
               
               enabled: !_finished,
@@ -2244,6 +2283,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             informSubSectionTitle(StringConst.INITIAL_TITLE_9_4_EXPECTATIONS),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_SHORT_TERM,
+              richText: true,
               controller: _controllers['shortTerm']!,
               
               enabled: !_finished,
@@ -2251,6 +2291,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_MEDIUM_TERM,
+              richText: true,
               controller: _controllers['mediumTerm']!,
               
               enabled: !_finished,
@@ -2258,6 +2299,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceH12(),
             CustomTextFormFieldTitle(
               labelText: StringConst.INITIAL_LONG_TERM,
+              richText: true,
               controller: _controllers['longTerm']!,
               
               enabled: !_finished,

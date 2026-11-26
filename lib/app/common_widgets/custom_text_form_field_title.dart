@@ -1,3 +1,4 @@
+import 'package:enreda_empresas/app/common_widgets/rich_markup_text_field.dart';
 import 'package:enreda_empresas/app/values/values.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
     this.color = AppColors.greyDark,
     this.onTap,
     this.readOnly = false,
+    this.richText = false,
   });
 
   final String labelText;
@@ -33,6 +35,11 @@ class CustomTextFormFieldTitle extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
   final bool readOnly;
+
+  /// Enables bold/italic formatting with a floating toolbar. The value is
+  /// stored with inline markup (`**bold**`, `*italic*`) and rendered by the
+  /// PDF helpers. Use only on free-text (multi-word) fields.
+  final bool richText;
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +71,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
   
   Widget textField(BuildContext context){
     final textTheme = Theme.of(context).textTheme;
-    return TextFormField(
-      decoration: InputDecoration(
+    final decoration = InputDecoration(
         filled: true,
         fillColor: Colors.white,
         contentPadding: EdgeInsets.all(5),
@@ -93,7 +99,30 @@ class CustomTextFormFieldTitle extends StatelessWidget {
             width: 1.0,
           ),
         ),
-      ),
+      );
+    final style = textTheme.bodySmall?.copyWith(
+      height: 1.5,
+      color: AppColors.greyDark,
+      fontWeight: FontWeight.w400,
+      fontSize: fontSize,
+    );
+    if (richText) {
+      return RichMarkupTextField(
+        controller: controller,
+        initialValue: initialValue,
+        decoration: decoration,
+        style: style,
+        validator: validator,
+        onSaved: onSaved,
+        keyboardType: keyboardType,
+        onChanged: onChanged,
+        enabled: enabled,
+        onTap: onTap,
+        readOnly: readOnly,
+      );
+    }
+    return TextFormField(
+      decoration: decoration,
       maxLines: null,
       controller: controller,
       initialValue: initialValue,
@@ -104,12 +133,7 @@ class CustomTextFormFieldTitle extends StatelessWidget {
       enabled: enabled,
       onTap: onTap,
       readOnly: readOnly,
-      style: textTheme.bodySmall?.copyWith(
-        height: 1.5,
-        color: AppColors.greyDark,
-        fontWeight: FontWeight.w400,
-        fontSize: fontSize,
-      ),
+      style: style,
     );
   }
 }
