@@ -50,6 +50,8 @@ Future<Uint8List> generateFollowReportFile(
         return days~/365;
   }
 
+  final String? techLocation = await resolveTechLocation(followReport.techPerson);
+
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
@@ -309,7 +311,7 @@ Future<Uint8List> generateFollowReportFile(
           ),
         ]),
         SpaceH12(),
-        BottomSignatures(),
+        BottomSignatures(location: techLocation),
         ];
       }
     )

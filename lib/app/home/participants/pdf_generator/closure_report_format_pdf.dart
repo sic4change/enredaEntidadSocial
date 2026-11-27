@@ -47,6 +47,8 @@ Future<Uint8List> generateClosureReportFile(
     return days~/365;
   }
 
+  final String? techLocation = await resolveTechLocation(closureReport.techPerson);
+
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
@@ -314,7 +316,7 @@ Future<Uint8List> generateClosureReportFile(
           ),
         ]),
         SpaceH12(),
-        BottomSignatures(),
+        BottomSignatures(location: techLocation),
         ];
       }
     )

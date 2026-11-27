@@ -47,6 +47,8 @@ Future<Uint8List> generateDerivationReportFile(
     return days~/365;
   }
 
+  final String? techLocation = await resolveTechLocation(derivationReport.techPerson);
+
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
@@ -326,7 +328,7 @@ Future<Uint8List> generateDerivationReportFile(
           ),
         ]),
         SpaceH12(),
-        BottomSignatures(),
+        BottomSignatures(location: techLocation),
         ];
       }
     )

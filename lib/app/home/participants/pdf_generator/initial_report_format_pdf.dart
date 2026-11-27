@@ -48,6 +48,8 @@ Future<Uint8List> generateInitialReportFile(
     return days~/365;
   }
 
+  final String? techLocation = await resolveTechLocation(initialReport.techPerson);
+
   doc.addPage(
     pw.MultiPage(
       pageTheme: pageTheme,
@@ -287,7 +289,7 @@ Future<Uint8List> generateInitialReportFile(
           ),
         ]),
         pw.SizedBox(height: 12),
-        BottomSignatures(),
+        BottomSignatures(location: techLocation),
         ];
       }
     )

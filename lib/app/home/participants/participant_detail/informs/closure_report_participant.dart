@@ -50,6 +50,10 @@ class ClosureReportForm extends StatefulWidget {
 }
 
 class _ClosureReportFormState extends State<ClosureReportForm> {
+  /// True when the report being shown is finished: no unsaved changes are
+  /// possible, so leaving doesn't need a confirmation.
+  bool _reportFinished = false;
+
 
   late Widget currentPage;
   final ValueNotifier<String> _techNameNotifier =
@@ -513,7 +517,7 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
               children: [
                 IconButton(
                   onPressed: () async {
-                    if (widget.viewOnly) {
+                    if (widget.viewOnly || _reportFinished) {
                       setState(() {
                         ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                       });
@@ -764,6 +768,8 @@ class _ClosureReportFormState extends State<ClosureReportForm> {
     final _formKey = GlobalKey<FormState>();
 
     bool _finished = widget.viewOnly || (report.finished ?? false);
+    _reportFinished = report.finished ?? false;
+    if (_reportFinished) ParticipantSocialReportPage.isEditingReport = false;
 
     //Pre-Selection
     if (_controllers['subsidy']!.text.trim().isEmpty) {

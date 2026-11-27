@@ -49,6 +49,10 @@ class FollowReportForm extends StatefulWidget {
 }
 
 class _FollowReportFormState extends State<FollowReportForm> {
+  /// True when the report being shown is finished: no unsaved changes are
+  /// possible, so leaving doesn't need a confirmation.
+  bool _reportFinished = false;
+
 
   late Widget currentPage;
   final ValueNotifier<String> _techNameNotifier =
@@ -418,7 +422,7 @@ class _FollowReportFormState extends State<FollowReportForm> {
                 SpaceW8(),
                 IconButton(
                   onPressed: () async {
-                    if (widget.viewOnly) {
+                    if (widget.viewOnly || _reportFinished) {
                       setState(() {
                         ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                       });
@@ -640,6 +644,8 @@ class _FollowReportFormState extends State<FollowReportForm> {
     double fontSize = responsiveSize(context, 13, 20, md: 16);
     double fontSizeSubTitle = responsiveSize(context, 14, 18, md: 15);
     bool _finished = widget.viewOnly || (report.finished ?? false);
+    _reportFinished = report.finished ?? false;
+    if (_reportFinished) ParticipantSocialReportPage.isEditingReport = false;
     print('Entra en el completeFollowForm');
 
     //Pre-Selection

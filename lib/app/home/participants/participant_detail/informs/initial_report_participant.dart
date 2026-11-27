@@ -49,6 +49,10 @@ class InitialReportForm extends StatefulWidget {
 }
 
 class _InitialReportFormState extends State<InitialReportForm> {
+  /// True when the report being shown is finished: no unsaved changes are
+  /// possible, so leaving doesn't need a confirmation.
+  bool _reportFinished = false;
+
   late Widget currentPage;
   final ValueNotifier<String> _techNameNotifier =
     ValueNotifier<String>('');
@@ -227,7 +231,7 @@ class _InitialReportFormState extends State<InitialReportForm> {
             SpaceW8(),
             IconButton(
               onPressed: () async {
-                if (widget.viewOnly) {
+                if (widget.viewOnly || _reportFinished) {
                   setState(() {
                     ParticipantSocialReportPage.selectedIndexInforms.value = 0;
                   });
@@ -468,6 +472,8 @@ class _InitialReportFormState extends State<InitialReportForm> {
     double fontSize = responsiveSize(context, 13, 20, md: 16);
     double fontSizeSubTitle = responsiveSize(context, 14, 18, md: 15);
     bool _finished = widget.viewOnly || (report.finished ?? false);
+    _reportFinished = report.finished ?? false;
+    if (_reportFinished) ParticipantSocialReportPage.isEditingReport = false;
 
     //Pre-Selection
     if (_controllers['subsidy']!.text.trim().isEmpty) {
